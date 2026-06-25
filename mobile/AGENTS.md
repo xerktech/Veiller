@@ -1,0 +1,167 @@
+# MentraOS Manager Guidelines
+
+RULES:
+READ: ../mintlify-docs/os-devs/contributing/mentraos-manager-guidelines.mdx
+
+## Overview
+
+MentraOS Manager is a React Native app built with Expo and expo-router for file-based routing. The app was recently migrated from vanilla React Native to Expo.
+
+## Build and Test Commands
+
+### Development
+
+- Start dev server: `bun start` (expo start --dev-client)
+- Run on Android: `bun android` (expo run:android)
+- Run on iOS: `bun ios` (expo run:ios)
+- Setup ADB port forwarding: `bun adb`
+
+### Building
+
+- Build Android release APK: `bun build:android:release`
+- Build AAB for Google Play: `bun build:google:play` (generates signed AAB only)
+- Upload to Google Play: `bun upload:google:play` (builds AAB and uploads to Play Store)
+- Build iOS archive: `bun build:ios:archive`
+
+### Versioning
+
+The user-facing app version (`CFBundleShortVersionString` on iOS,
+`versionName` on Android) comes from `EXPO_PUBLIC_MENTRAOS_VERSION` in
+`.env`. **The CI staging-builds workflow uses `.env.example`** (it does
+`cp .env.example .env` on each runner), so:
+
+- Bump `EXPO_PUBLIC_MENTRAOS_VERSION` in **both `.env` and `.env.example`**
+  whenever starting work on a new version (e.g. 2.10 → 2.11). Otherwise
+  CI keeps building the old train and TestFlight will reject with
+  "train is closed for new build submissions" once that train is approved.
+- The build number (`CFBundleVersion` / `versionCode`) is derived at
+  build time from wall-clock seconds — see `mobile/scripts/build-number.mjs`.
+  Nothing to bump manually; just don't downgrade `EXPO_PUBLIC_MENTRAOS_VERSION`.
+
+### Testing
+
+- Run tests: `bun test`
+- Run tests in watch mode: `bun test:watch`
+- Run single test: `bun test -- -t "test name"`
+- Run Maestro E2E tests: `bun test:maestro`
+- Lint code: `bun lint`
+- Type check: `bun compile`
+- Bluetooth SDK Android compile check: `../scripts/check-android-compile.sh bluetooth-sdk`
+
+`modules/bluetooth-sdk/android` contains the SDK Android sources, but local
+Gradle checks should run through the generated `mobile/android` project via the
+repo script above. The script installs mobile dependencies when needed, runs
+`bun expo prebuild --platform android`, uses the generated Gradle wrapper, and
+passes `-PmentraPublicSdk=true` for the SDK module check.
+
+## Project Setup
+
+### From Scratch (Android)
+
+```bash
+bun install
+bun android
+```
+
+### From Scratch (iOS)
+
+```bash
+bun install
+bun ios
+```
+
+## Architecture Changes (Expo Migration)
+
+### Key Changes
+
+- **Routing**: File-based routing with expo-router (no more src/screens folder)
+- **Imports**: Absolute paths instead of relative paths
+- **Components**: Categorized into folders or misc/ folder
+- **Theming**: Components use theme/themed from useAppTheme() hook, but strongly prefer to use tailwindcss
+- **Entry Point**: expo-router/entry instead of traditional App.js
+
+### File Structure
+
+- `src/app/` - File-based routes (expo-router)
+- `src/components/` - Reusable components (categorized by feature)
+- `src/contexts/` - React Context providers
+- `src/utils/` - Utility functions and helpers, always put new utilities into an existing folder or make one
+- `src/theme/` - Theme configuration and styling
+
+## Code Style
+
+- TypeScript with React Native and Expo
+- Imports: Absolute paths, group by external/internal, alphabetize within groups
+- Formatting: Prettier with single quotes, no bracket spacing, trailing commas
+- Components: Functional components with React hooks
+- Naming: PascalCase for components, camelCase for functions/variables
+- Navigation: File-based routing with expo-router (React Navigation under the hood)
+- State management: Context API for app-wide state
+- Error handling: use typesafe-ts (see RestComms.ts for examples)
+
+## Working with MentraOS
+
+- Backend server required for local testing
+- Port forwarding: `bun adb` (sets up tcp:9090, tcp:3000, tcp:9001, tcp:8081)
+- Bluetooth functionality for glasses pairing
+
+## Sentry Configuration (iOS)
+
+Sentry source map and debug symbol uploads are **disabled by default** to prevent build failures when the `SENTRY_AUTH_TOKEN` is not configured.
+
+### Enabling Sentry Uploads
+
+To enable Sentry uploads for production builds:
+
+1. Obtain your Sentry auth token from https://sentry.io/settings/account/api/auth-tokens/
+2. Add the token to your environment:
+   - **Option 1**: Add to `ios/.xcode.env.local` (recommended for local development):
+     ```bash
+     export SENTRY_AUTH_TOKEN=your_token_here
+     export SENTRY_DISABLE_AUTO_UPLOAD=false
+     ```
+   - **Option 2**: Set as environment variable in your CI/CD pipeline:
+     ```bash
+     export SENTRY_AUTH_TOKEN=your_token_here
+     export SENTRY_DISABLE_AUTO_UPLOAD=false
+     ```
+
+### Disabling Sentry Uploads
+
+Sentry uploads are disabled by default. To explicitly disable them:
+
+```bash
+export SENTRY_DISABLE_AUTO_UPLOAD=true
+```
+
+This is already set in `ios/.xcode.env`, so builds will work without Sentry credentials.
+
+## Development Environment Setup
+
+### Recommended Platform
+
+- **macOS or Linux** (recommended) - Windows has known issues with this project
+- Use **nvm** (Node Version Manager) to manage Node.js versions
+- **Node.js 20.x** (recommended version)
+
+### Prerequisites
+
+- Node.js ^18.18.0 || >=20.0.0 (20.x recommended)
+- nvm (Node Version Manager - highly recommended)
+- bun (preferred package manager)
+- Android Studio (for Android development)
+- Xcode (for iOS development on macOS)
+- EAS CLI for building
+
+### For nvm Users (Node.js version manager)
+
+If you're using nvm and getting "command 'node' not found" errors during Android builds:
+
+1. Run the fix script: `./scripts/old/fix-react-native-symlinks.sh`
+2. This creates symlinks that prevent React Native libraries from executing node commands during build
+
+This is needed because:
+
+- Android Studio doesn't inherit shell PATH from nvm
+- Some React Native libraries try to execute `node` commands during Gradle configuration
+- The symlinks provide the React Native path directly, avoiding node command execution

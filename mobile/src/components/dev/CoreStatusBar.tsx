@@ -1,0 +1,152 @@
+import {View} from "react-native"
+import {useRef, useEffect, useState} from "react"
+
+import {Icon, IconTypes, Text} from "@/components/ignite"
+import {useAppTheme} from "@/contexts/ThemeContext"
+import {useConnectionStore} from "@/stores/connection"
+import {useCoreStore} from "@/stores/core"
+import {useCloudClientStatusStore} from "@/stores/cloudClientStatus"
+import {useDebugStore} from "@/stores/debug"
+import {selectGlassesConnected, selectGlassesReady, useGlassesStore} from "@/stores/glasses"
+import {SETTINGS, useSetting} from "@/stores/settings"
+import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
+import BluetoothSdk, {TouchEvent} from "@mentra/bluetooth-sdk"
+import {BgTimer} from "@mentra/island"
+
+function Tag({icon, label, bg}: {icon: IconTypes; label: string; bg: string}) {
+  const {theme} = useAppTheme()
+  return (
+    <View className={`flex-row items-center px-1.5 rounded-full ${bg} mx-0.5`}>
+      <Icon name={icon} size={10} color={theme.colors.secondary_foreground} />
+      <Text className="text-secondary-foreground font-medium ml-0.5" style={{fontSize: 9, lineHeight: 12}}>
+        {label}
+      </Text>
+    </View>
+  )
+}
+
+function cloudClientTransportLabel(audioTransport: string, localFallbackActive: boolean): string {
+  if (localFallbackActive) return "Offline"
+  if (audioTransport === "udp") return "UDP"
+  if (audioTransport === "ws") return "WS"
+  return "None"
+}
+
+function cloudClientStatusBg(status: string): string {
+  if (status === "connected") return "bg-primary"
+  if (status === "connecting" || status === "reconnecting") return "bg-chart-3"
+  return "bg-destructive"
+}
+
+export default function CoreStatusBar() {
+  const searching = useCoreStore((state) => state.searching)
+  const micRanking = useCoreStore((state) => state.micRanking)
+  const currentMic = useCoreStore((state) => state.currentMic)
+  const systemMicUnavailable = useCoreStore((state) => state.systemMicUnavailable)
+  const micDataRecvd = useDebugStore((state) => state.micDataRecvd)
+  const bluetoothClassicConnected = useGlassesStore((state) => state.bluetoothClassicConnected)
+  const glassesConnected = useGlassesStore(selectGlassesConnected)
+  const glassesFullyBooted = useGlassesStore(selectGlassesReady)
+  const cloudStatus = useConnectionStore((state) => state.status)
+  const cloudClientStatus = useCloudClientStatusStore((state) => state.status)
+  const cloudClientAudioTransport = useCloudClientStatusStore((state) => state.audioTransport)
+  const [localFallbackActive] = useSetting<boolean>(SETTINGS.local_stt_fallback_active.key)
+  const insets = useSaferAreaInsets()
+  const [touchEvent, setTouchEvent] = useState<TouchEvent | null>(null)
+  const cloudClientTransport = cloudClientTransportLabel(cloudClientAudioTransport, localFallbackActive)
+
+  const touchEventTimer = useRef<number | null>(null)
+  useEffect(() => {
+    let sub = BluetoothSdk.addListener("touch_event", (event: TouchEvent) => {
+      setTouchEvent(event)
+      BgTimer.clearTimeout(touchEventTimer.current ?? 0)
+      touchEventTimer.current = BgTimer.setTimeout(() => {
+        setTouchEvent(null)
+      }, 1000)
+      // console.log("touch_event", event)
+    })
+    return () => {
+      sub.remove()
+    }
+  }, [])
+
+  return (
+    <>
+      {/* <View
+        style={{top: insets.top - 24}}
+        className="absolute z-11 bg-primary-transparent rounded-lg items-center self-center w-full px-1.5">
+        <View className="flex-row justify-between">
+          <View className="flex-row flex-wrap items-center justify-center w-1/2 justify-start">
+            <Tag icon="bluetooth" label={searching ? "Searching" : "Not searching"} bg="bg-chart-4" />
+            <Tag icon="microphone" label={currentMic || "None"} bg="bg-chart-3" />
+            <Tag icon="microphone" label={micRanking.join(", ")} bg="bg-primary" />
+            {systemMicUnavailable && <Tag icon="unplug" label="SMIC unavailable!" bg="bg-destructive" />}
+          </View>
+          <View className="flex-row flex-wrap items-center justify-center w-1/2 justify-end">
+            <Tag icon="bluetooth" label={glassesFullyBooted ? "Booted" : "Not booted"} bg="bg-primary" />
+            <Tag
+              icon="bluetooth"
+              label={bluetoothClassicConnected ? "BTC" : "BTC Off"}
+              bg={bluetoothClassicConnected ? "bg-primary" : "bg-destructive"}
+            />
+            <Tag icon="bluetooth" label={glassesConnected ? "Connected" : "Disconnected"} bg="bg-primary" />
+            <Tag
+              icon={micDataRecvd ? "microphone" : "unplug"}
+              label={micDataRecvd ? "PCM" : "No PCM"}
+              bg={micDataRecvd ? "bg-primary" : "bg-destructive"}
+            />
+          </View>
+        </View>
+      </View> */}
+      <View
+        style={{top: 0, height: insets.top}}
+        className="absolute z-11 bg-transparent rounded-lg items-center self-center w-full px-1.5">
+        <View className="flex-col justify-between gap-10">
+          <View className="flex-row flex-wrap items-center justify-center justify-start">
+            <Tag icon="bluetooth" label={searching ? "Searching" : "Not searching"} bg="bg-chart-4" />
+            <Tag icon="microphone" label={currentMic || "None"} bg="bg-chart-3" />
+            <Tag icon="microphone" label={micRanking.join(", ")} bg="bg-primary" />
+            {systemMicUnavailable && <Tag icon="unplug" label="SMIC unavailable!" bg="bg-destructive" />}
+          </View>
+          <View className="flex-row flex-wrap items-center justify-center justify-end">
+            <Tag icon="pointer" label={touchEvent ? (touchEvent.gestureName ?? "None") : "None"} bg="bg-primary" />
+            <Tag icon="bluetooth" label={glassesFullyBooted ? "Booted" : "Not booted"} bg="bg-primary" />
+            <Tag
+              icon="bluetooth"
+              label={bluetoothClassicConnected ? "BTC" : "BTC Off"}
+              bg={bluetoothClassicConnected ? "bg-primary" : "bg-destructive"}
+            />
+            <Tag icon="bluetooth" label={glassesConnected ? "Connected" : "Disconnected"} bg="bg-primary" />
+            <Tag
+              icon={micDataRecvd ? "microphone" : "unplug"}
+              label={micDataRecvd ? "PCM" : "No PCM"}
+              bg={micDataRecvd ? "bg-primary" : "bg-destructive"}
+            />
+          </View>
+          <View className="flex-row flex-wrap items-center justify-center justify-start -mt-10">
+            <Tag
+              icon="wifi"
+              label={
+                cloudStatus === "connected"
+                  ? "Core"
+                  : cloudStatus === "connecting"
+                    ? "Core Conn"
+                    : cloudStatus === "error"
+                      ? "Core Err"
+                      : "Core Off"
+              }
+              bg={
+                cloudStatus === "connected"
+                  ? "bg-primary"
+                  : cloudStatus === "connecting"
+                    ? "bg-chart-3"
+                    : "bg-destructive"
+              }
+            />
+            <Tag icon="wifi" label={`Cloud V2: ${cloudClientTransport}`} bg={cloudClientStatusBg(cloudClientStatus)} />
+          </View>
+        </View>
+      </View>
+    </>
+  )
+}
