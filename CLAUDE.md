@@ -38,27 +38,44 @@ keep rebasing on MentraOS upstream, not about large rewrites.
 
 ## 3. Goals (in priority order)
 
-1. **Custom dashboard / UX.** Replace MentraOS's default dashboard/home experience
+> **Priority override (2026-06-25):** the **R1 ring is now goal #1 and is
+> make-or-break** — if we can't get the ring working (health metrics + ring
+> button-press control of the G2), the whole project is a wash, so it is proven
+> out *before* anything else. This deliberately supersedes the earlier framing
+> (and §9) where the ring was a deferred sub-project. See
+> `docs/r1-ring-research.md` for the feasibility analysis and the de-risk plan.
+> The ring requires original BLE reverse-engineering; MentraOS does **not**
+> support it, so the fork gives us nothing to inherit here.
+
+1. **R1 ring (make-or-break, do first).** Decode the ring's BLE protocol enough to
+   (a) receive ring button/gesture events and use them to control the G2, and
+   (b) read health metrics (route on-device into Health Connect, see goal #5).
+   The ring pairs directly to the phone over BLE, so we sniff the real Even app's
+   traffic and decode it. If this can't be made to work, stop the project.
+2. **Glasses baseline (enabling step for the ring milestone and everything else).**
+   Connect to the G2, verify microphone input and screen/text output. This is the
+   foundation the ring control loop renders onto; it comes from the MentraOS fork.
+3. **Custom dashboard / UX.** Replace MentraOS's default dashboard/home experience
    with my own glanceable layout and widget system on the glasses.
-2. **Native phone integrations** that the Even Hub sandbox blocked:
+4. **Native phone integrations** that the Even Hub sandbox blocked:
    - **Calendar** via Android `CalendarContract` (local device calendar, which
      already includes synced Google calendars) — no OAuth, no per-user API keys.
    - **Fitness** via **Health Connect** (on-device). Note the cloud path is dead:
      the Google Fit REST API is deprecated and shutting down end of 2026 with no
-     replacement, so local Health Connect is the only real option.
+     replacement, so local Health Connect is the only real option. This is also
+     where ring health metrics (goal #1b) land.
    - **Messaging** via Android default-SMS-handler APIs (see constraints below).
-3. **Self-hosted backend.** Run our own MentraOS backend rather than MentraOS
+5. **Self-hosted backend.** Run our own MentraOS backend rather than MentraOS
    Cloud, both for privacy and to fit my existing self-hosting setup (home lab,
    reverse proxy via Cloudflare Tunnel / `cloudflared`; no Tailscale).
-4. **Android first.** iOS is explicitly later.
+6. **Android first.** iOS is explicitly later.
 
 ## 4. Non-goals / out of scope (for now)
 
 - **iOS support.** Deferred. Do not let iOS constraints shape Android decisions.
-- **R1 ring support.** MentraOS does not support the Even R1 ring. Adding it is a
-  separate future BLE reverse-engineering sub-project (see §9), not part of the
-  initial build.
 - **Rewriting MentraOS's BLE / protobuf / audio / ASR layers.** Inherit them.
+  (Note: this applies to the *G2 glasses* stack we inherit. The *R1 ring* has no
+  MentraOS support and is in scope as original RE — now goal #1, see §3/§9.)
 - **Publishing to the Mentra or Even app stores.** This is a private host app.
 
 ## 5. Architecture (inherited from MentraOS)
@@ -132,16 +149,28 @@ These are hard realities; don't plan around them as if they're solvable in code:
 - **Self-hosted backend** means don't hardcode MentraOS Cloud endpoints; everything
   cloud-facing must be configurable to point at my own host.
 
-## 9. R1 ring (future sub-project — context only)
+## 9. R1 ring (HIGHEST-PRIORITY workstream — make-or-break, see §3 and `docs/r1-ring-research.md`)
 
-Not in scope yet, but for planning awareness: the Even R1 ring controls the G2
-(tap/scroll/long-press) and tracks HR, SpO₂, HRV, sleep, steps, skin temp. MentraOS
-does not support it, and there is no public reverse-engineering of its protocol. Its
-protocol exists only inside the decompiled Even app (a `ring1/` layer, Nordic SMP
-for firmware). When we tackle it, it will be an independent BLE-sniffing /
-reverse-engineering effort, likely a separate package. Don't entangle initial
-architecture with ring assumptions, but don't actively preclude adding a ring input
-source later.
+The Even R1 ring controls the G2 (tap/scroll/long-press) and tracks HR, SpO₂, HRV,
+sleep, steps, skin temp. **This is now goal #1: if the ring can't be made to work,
+the project is a wash, so we prove it out first.** MentraOS does not support the
+ring, so this is original BLE reverse-engineering — nothing to inherit from the fork.
+
+What we've established (full detail in `docs/r1-ring-research.md`):
+
+- **Topology:** the ring pairs **directly to the phone over BLE** (separate from the
+  ring↔glasses link), so we can talk to it *and* sniff the real Even app's traffic.
+  Service `BAE80001`, TX (phone→ring) `BAE80012`, RX (ring→phone notify) `BAE80013`,
+  protobuf payloads (`BleRing1CmdProto`), standard Nordic SMP for firmware.
+- **What's unknown (the work):** the gesture/button event packet format and the
+  health command byte format are both undecoded publicly; the openCFW `ring1/`
+  effort scraped method names (`getDailyData`, etc.) but not wire formats.
+- **Risks:** (1) confirm button events traverse ring↔phone (not only ring↔glasses);
+  (2) health metrics may be gated behind licensed **GoMore** algorithm keys — raw
+  HR/steps likely recoverable, HRV/sleep/SpO₂ may not be.
+- **Plan:** de-risk with a BLE sniffing spike (HCI snoop log → Wireshark) *before*
+  the full MentraOS fork; decode gestures first (the true make-or-break), then probe
+  health. Implement as an isolated native Android ring module, kept upstream-mergeable.
 
 ## 10. Reference material
 
