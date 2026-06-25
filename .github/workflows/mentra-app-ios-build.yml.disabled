@@ -1,0 +1,297 @@
+name: Mobile App iOS Build
+
+on:
+  pull_request:
+    paths:
+      - "mobile/**"
+      - ".github/workflows/mentra-app-ios-build.yml"
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+# Cancel a branch's in-flight build when a newer commit is pushed to it.
+# Scoped per-ref so branches never cancel each other; keeps the Mac runner
+# queue from filling with superseded builds.
+concurrency:
+  group: ios-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: [self-hosted, macOS, ARM64]
+
+    steps:
+      - name: Kill stale build processes (this runner's prior job only)
+        run: |
+          # This is a SHARED self-hosted macOS runner. A blanket `killall xcodebuild`
+          # would kill iOS builds for OTHER branches running concurrently here — that was
+          # the cause of the recurring fast, diagnostic-free build failures (xcodebuild
+          # SIGTERM'd mid-compile → exit 65 with no error). The self-hosted runner only
+          # ever executes ONE job at a time per runner process, but multiple runner
+          # processes share this Mac, so we must not touch other runners' xcodebuild.
+          #
+          # Scope the cleanup to xcodebuild processes whose RUNNER_WORKSPACE matches ours.
+          # xcodebuild invocations carry the workspace path in their args, so grep for it
+          # and SIGTERM only those. Anything from another branch lives under a different
+          # runner work dir and is left alone.
+          WS="${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}"
+          echo "Cleaning stale xcodebuild under: $WS"
+          # pgrep -f matches the full arg list; -- guards against paths starting with '-'.
+          pids="$(pgrep -f "xcodebuild.*${WS}" 2>/dev/null || true)"
+          if [ -n "$pids" ]; then
+            echo "Terminating stale xcodebuild pids: $pids"
+            # shellcheck disable=SC2086
+            kill -TERM $pids 2>/dev/null || true
+            sleep 2
+            # shellcheck disable=SC2086
+            kill -KILL $pids 2>/dev/null || true
+          else
+            echo "No stale xcodebuild for this workspace."
+          fi
+          # Simulators are per-job and safe to shut down for THIS runner only; but a
+          # machine-wide `killall Simulator` / `simctl shutdown all` would also disrupt
+          # other runners. Device builds (generic/platform=iOS) don't use a simulator at
+          # all, so we skip simulator teardown entirely here.
+
+      - name: Clean previous build outputs only
+        run: |
+          # Wipe build outputs from previous runs but preserve dependency caches
+          # (node_modules, Pods, DerivedData are kept and invalidated by lockfile keys below)
+          rm -rf mobile/ios/build mobile/ios/build-device
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Get cache week number
+        id: cache-week
+        run: echo "week=$(date +%Y-%U)" >> $GITHUB_OUTPUT
+
+      - name: Cache CocoaPods
+        id: pods-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            mobile/ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: pods-${{ runner.os }}-${{ steps.cache-week.outputs.week }}-${{ hashFiles('mobile/ios/Podfile.lock', 'mobile/package.json') }}
+          restore-keys: |
+            pods-${{ runner.os }}-${{ steps.cache-week.outputs.week }}-
+            pods-${{ runner.os }}-
+
+      - name: Cache Xcode DerivedData (device build)
+        uses: actions/cache@v4
+        with:
+          path: mobile/ios/build-device
+          key: xcode-derived-device-${{ runner.os }}-${{ steps.cache-week.outputs.week }}-${{ hashFiles('mobile/ios/Podfile.lock', 'mobile/package.json') }}
+          restore-keys: |
+            xcode-derived-device-${{ runner.os }}-${{ steps.cache-week.outputs.week }}-
+            xcode-derived-device-${{ runner.os }}-
+
+      - name: Install dependencies
+        id: bun-install
+        working-directory: ./mobile
+        run: bun install --no-frozen-lockfile
+        continue-on-error: true
+
+      - name: Retry bun install with clean node_modules (if first attempt failed)
+        if: steps.bun-install.outcome == 'failure'
+        working-directory: ./mobile
+        run: |
+          echo "First bun install failed, wiping node_modules and retrying..."
+          rm -rf node_modules
+          bun install --no-frozen-lockfile
+
+      - name: Setup environment
+        working-directory: ./mobile
+        # Copy the dummy .env, then overwrite the Mapbox runtime token line with
+        # the real public token (pk.…). app.config.ts bakes it into Info.plist
+        # (MBXAccessToken) for the Nav SDK.
+        env:
+          MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
+        run: |
+          cp .env.example .env
+          if [ -n "$MAPBOX_PUBLIC_TOKEN" ]; then
+            sed -i '' "s|^EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN=.*|EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN=$MAPBOX_PUBLIC_TOKEN|" .env
+          else
+            echo "::warning::MAPBOX_PUBLIC_TOKEN secret not set — iOS build will use the dummy token and on-device navigation will not work."
+          fi
+
+      - name: Configure Mapbox SPM credentials (~/.netrc)
+        # The Mapbox Navigation SDK (v3) is a Swift Package fetched from
+        # api.mapbox.com at prebuild / pod install / SPM resolve time. SPM
+        # authenticates via ~/.netrc with the Downloads:Read secret token (sk.…).
+        # Without this the package download returns 401. Build-time only — never
+        # written into the IPA.
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
+        run: |
+          if [ -z "$MAPBOX_DOWNLOADS_TOKEN" ]; then
+            echo "::error::MAPBOX_DOWNLOADS_TOKEN secret not set — SPM cannot fetch the Mapbox Nav SDK; iOS build will fail with 401."
+            exit 1
+          fi
+          # Remove any prior api.mapbox.com entry so re-runs on the persistent
+          # self-hosted runner don't stack duplicate machine lines.
+          if [ -f "$HOME/.netrc" ]; then
+            sed -i '' '/machine api.mapbox.com/,+2d' "$HOME/.netrc" || true
+          fi
+          printf 'machine api.mapbox.com\n  login mapbox\n  password %s\n' "$MAPBOX_DOWNLOADS_TOKEN" >> "$HOME/.netrc"
+          chmod 600 "$HOME/.netrc"
+
+      - name: Ensure a clean iOS prebuild (drop stale generated project, keep dep caches)
+        run: |
+          # mobile/ios is gitignored (generated by prebuild). The CocoaPods +
+          # DerivedData cache restores above recreate mobile/ios/ containing only
+          # Pods/ and build-device/. `expo prebuild` then sees mobile/ios/ already
+          # exists ("reusing /ios") and SKIPS regenerating the native project, so
+          # there's no AppDelegate — which makes the withIosIcons config plugin
+          # fail with "Could not locate a valid AppDelegate at root: .../mobile".
+          # That's the intermittent iOS prebuild failure (it depends on whether the
+          # Pods cache hits this run).
+          #
+          # Force a clean, deterministic prebuild: remove the (stale or partial)
+          # generated project while preserving the Pods/ and build-device/ caches,
+          # so prebuild regenerates AppDelegate + the Xcode project every run. We do
+          # NOT use `expo prebuild --clean` (disallowed in this repo, and it would
+          # also wipe the dep caches).
+          if [ -d mobile/ios ]; then
+            find mobile/ios -mindepth 1 -maxdepth 1 ! -name Pods ! -name build-device -exec rm -rf {} +
+          fi
+
+      - name: Run Expo prebuild
+        working-directory: ./mobile
+        run: bun expo prebuild --platform ios
+
+      - name: Setup Sherpa Onnx
+        working-directory: ./mobile
+        run: |
+          chmod +x scripts/setup-sherpa-onnx-optional.sh
+          ./scripts/setup-sherpa-onnx-optional.sh
+
+      - name: Install CocoaPods dependencies
+        working-directory: ./mobile/ios
+        run: pod install
+
+      - name: List available simulators
+        run: xcrun simctl list devices available
+
+      - name: Debug - List iOS directory contents
+        working-directory: ./mobile/ios
+        run: |
+          echo "Contents of mobile/ios:"
+          ls -la
+          echo "Workspace files:"
+          ls -la *.xcworkspace || echo "No workspace files found"
+
+      - name: Ensure iOS platform is installed
+        working-directory: ./mobile/ios
+        run: |
+          # Idempotent: no-op if already present, downloads if missing.
+          # Required because Xcode bundles SDK headers but device-build
+          # support files are downloaded separately (e.g. iOS 26.4).
+          xcodebuild -downloadPlatform iOS || true
+          echo "Available destinations:"
+          xcodebuild -workspace Mentra.xcworkspace -scheme Mentra -showdestinations 2>&1 | head -40 || true
+
+      # ----------------------------------------------------------------------
+      # Debug simulator build — disabled on PRs to keep Mac mini queue moving.
+      # Re-enable when Maestro E2E is added (Maestro needs simulator builds).
+      # ----------------------------------------------------------------------
+      # - name: Build iOS app for Simulator
+      #   working-directory: ./mobile/ios
+      #   run: |
+      #     xcodebuild \
+      #                -workspace Mentra.xcworkspace \
+      #                -scheme Mentra \
+      #                -configuration Debug \
+      #                -sdk iphonesimulator \
+      #                -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0' \
+      #                -derivedDataPath build
+
+      - name: Build iOS app for Device (cached attempt)
+        id: xcode-build
+        working-directory: ./mobile/ios
+        env:
+          SENTRY_DISABLE_AUTO_UPLOAD: "true"
+        continue-on-error: true
+        run: |
+          xcodebuild -workspace Mentra.xcworkspace \
+                     -scheme Mentra \
+                     -configuration Release \
+                     -destination 'generic/platform=iOS' \
+                     -derivedDataPath build-device \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGNING_ALLOWED=NO
+
+      - name: Retry build with clean caches (if first attempt failed)
+        if: steps.xcode-build.outcome == 'failure'
+        working-directory: ./mobile/ios
+        env:
+          SENTRY_DISABLE_AUTO_UPLOAD: "true"
+        run: |
+          echo "First build failed, nuking caches and retrying from scratch..."
+
+          # Kill any hung xcodebuild from THIS job's failed attempt only — scoped to our
+          # workspace so we don't SIGTERM other branches' builds on this shared runner
+          # (a machine-wide killall here was part of the recurring cross-build failures).
+          WS="${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}"
+          pids="$(pgrep -f "xcodebuild.*${WS}" 2>/dev/null || true)"
+          if [ -n "$pids" ]; then
+            echo "Terminating stale xcodebuild pids: $pids"
+            # shellcheck disable=SC2086
+            kill -TERM $pids 2>/dev/null || true
+            sleep 2
+            # shellcheck disable=SC2086
+            kill -KILL $pids 2>/dev/null || true
+          fi
+
+          # DerivedData wipe scoped to THIS workspace's build dir only (the global
+          # ~/Library/.../DerivedData/Mentra-* glob would clobber other branches' builds
+          # mid-flight on the shared runner). build-device is our -derivedDataPath.
+
+          # Wipe iOS caches for THIS workspace only. The build uses
+          # -derivedDataPath build-device, so that dir IS our DerivedData — removing it is
+          # sufficient. We intentionally do NOT `rm -rf ~/Library/.../DerivedData/Mentra-*`:
+          # that global glob would delete other branches' in-flight DerivedData on this
+          # shared runner, which was contributing to the cross-build failures.
+          rm -rf Pods Podfile.lock build-device
+
+          # Reinstall pods from scratch with fresh repo
+          pod install --repo-update
+
+          # Retry the build
+          xcodebuild -workspace Mentra.xcworkspace \
+                     -scheme Mentra \
+                     -configuration Release \
+                     -destination 'generic/platform=iOS' \
+                     -derivedDataPath build-device \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGNING_ALLOWED=NO
+
+      - name: Fail if both builds failed
+        if: steps.xcode-build.outcome == 'failure'
+        run: |
+          if [ ! -d "mobile/ios/build-device/Build/Products/Release-iphoneos/Mentra.app" ]; then
+            echo "Both build attempts failed"
+            exit 1
+          fi
+
+      - name: Upload Device Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-device-build
+          path: mobile/ios/build-device/Build/Products/Release-iphoneos/Mentra.app

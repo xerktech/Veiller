@@ -18,12 +18,13 @@ set -euo pipefail
 TIMELINE="${1:-r1-timeline.txt}"
 
 # Edit this list to match the gestures YOUR ring actually has.
+# R1 inputs (per owner): slide up, slide down, tap, double tap, long press.
 GESTURES=(
-  "single tap"
+  "tap"
   "double tap"
-  "long press / hold"
-  "scroll/swipe forward"
-  "scroll/swipe back"
+  "long press"
+  "slide up"
+  "slide down"
 )
 
 stamp() { date '+%Y-%m-%d %H:%M:%S'; }

@@ -52,13 +52,13 @@ data when not worn). Then, with the Even app open and connected:
 1. **Idle baseline** — sit still 30 s, do nothing. (Lets me see keep-alive/poll
    traffic so I can filter it out.) Note start/end time.
 2. **Gestures — the priority.** For EACH distinct gesture the ring supports, do it
-   **5 times with ~3 s between each**, and pause ~10 s between gesture *types*:
-   - single tap
+   **5 times with ~3 s between each**, and pause ~10 s between gesture *types*.
+   The R1's inputs are:
+   - tap
    - double tap
-   - long press / hold
-   - scroll/swipe forward (rotate finger forward)
-   - scroll/swipe back
-   - any other gesture your ring has (note what it is)
+   - long press
+   - slide up
+   - slide down
    For each, ideally make the G2 visibly react (scroll a menu, select, etc.) so we
    know the gesture "took". Record the time of each batch.
 3. **Health sync.** Trigger a manual health sync/refresh in the Even app if it has

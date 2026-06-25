@@ -101,9 +101,9 @@ It will have you:
    keep-alive/poll traffic.)
 2. **Gestures (the priority)** — for **each** gesture your ring supports, do it
    **5 times, ~3s apart**, with a pause between gesture *types*. Make the G2 visibly
-   react if you can, so we know the gesture registered. Defaults are single tap /
-   double tap / long-press / scroll forward / scroll back — **edit the `GESTURES`
-   list at the top of the script to match what your ring actually does.**
+   react if you can, so we know the gesture registered. For the R1 these are tap /
+   double tap / long press / slide up / slide down (already set in the script's
+   `GESTURES` list — edit it there if your inputs differ).
 3. **Health sync** — trigger a manual sync or open the health screen and wait ~30s.
    If a live heart rate shows on screen, type it in when prompted — a known value
    makes the encoding much easier to find.

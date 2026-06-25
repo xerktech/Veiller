@@ -1,0 +1,544 @@
+import AVKit
+import CoreLocation
+import ExpoModulesCore
+import Photos
+
+/// User-visible album in Apple Photos for glasses sync (matches dedicated-folder behavior on Android).
+private enum MentraSyncedMediaAlbum {
+    static let localizedTitle = "Mentra"
+}
+
+public class CrustModule: Module {
+    public func definition() -> ModuleDefinition {
+        Name("Crust")
+
+        Constant("PI") {
+            Double.pi
+        }
+
+        Events(
+            "onChange",
+            "phone_notification",
+            "phone_notification_dismissed",
+            "captions_tester_incident",
+            "onNavManeuver",
+            "onNavRerouting",
+            "onNavArrived",
+            "onNavError",
+            "onNavOffRoute",
+            "onNavLocation",
+            "onNavRoute",
+            "onHeading",
+            // MentraJS — fires whenever a per-miniapp JSContext calls
+            // __dispatch(iface, method, args). RN-side MentraJSRouter
+            // subscribes to route by packageName.
+            "mentrajs_message"
+        )
+
+        OnCreate {
+            // Wire the JSCRuntime's outbound event sink to the Expo
+            // event emitter. The JSCDispatcher fires `forwardToRn` for
+            // anything that isn't a built-in route (localStorage, fetch,
+            // crypto.getRandomBytes, __runtime.ready), and the runtime's
+            // exception/log/error handlers route through the same sink.
+            JSCRuntime.shared.onOutbound = { [weak self] message in
+                self?.sendEvent("mentrajs_message", message.payload)
+            }
+            // Install the polyfill bridge once, lazily on first module
+            // creation. JSCPolyfillBridge.install is idempotent.
+            JSCPolyfillBridge.install(into: JSCRuntime.shared.dispatcherTable)
+        }
+
+        Function("hello") {
+            "Hello world! 👋"
+        }
+
+        AsyncFunction("setValueAsync") { (value: String) in
+            self.sendEvent("onChange", [
+                "value": value,
+            ])
+        }
+
+        AsyncFunction("requestNavigationPermission") { () -> [String: Any] in
+            await withCheckedContinuation { continuation in
+                // NavigationManager is @MainActor-isolated; hop onto the main
+                // actor before touching it from this nonisolated AsyncFunction.
+                Task { @MainActor in
+                    NavigationManager.shared.requestPermission { accepted in
+                        continuation.resume(returning: ["ok": true, "accepted": accepted])
+                    }
+                }
+            }
+        }
+
+        // Mapbox has no Terms & Conditions dialog (that was Google-specific),
+        // so there's nothing to reset. No-op for parity with Android, whose
+        // resetTermsAccepted is also a Mapbox no-op. Returns ok:true since the
+        // "reset" is trivially satisfied (no accepted-terms state exists).
+        AsyncFunction("resetNavigationPermission") { () -> [String: Any] in
+            return ["ok": true]
+        }
+
+        AsyncFunction("startNavigation") { (lat: Double, lng: Double, options: [String: Any]?) -> [String: Any] in
+            let simulate = options?["simulate"] as? Bool ?? false
+            let speedMultiplier = options?["speedMultiplier"] as? Double ?? 1.0
+            let mode = options?["mode"] as? String ?? "driving"
+            // Opt-in: when > 0, the NavigationManager forces a reroute as
+            // soon as the user is this many meters past a pivot they
+            // didn't take. nil disables the check entirely.
+            let missedTurnRerouteMeters: Double? = {
+                if let d = options?["missedTurnRerouteMeters"] as? Double { return d > 0 ? d : nil }
+                if let i = options?["missedTurnRerouteMeters"] as? Int { return i > 0 ? Double(i) : nil }
+                return nil
+            }()
+
+            var stops: [(lat: Double, lng: Double)] = []
+            if let stopsArr = options?["stops"] as? [[String: Double]] {
+                stops = stopsArr.compactMap { s in
+                    guard let slat = s["lat"], let slng = s["lng"] else { return nil }
+                    return (lat: slat, lng: slng)
+                }
+            }
+            if stops.isEmpty { stops = [(lat: lat, lng: lng)] }
+
+            return await withCheckedContinuation { continuation in
+              // NavigationManager is @MainActor-isolated; hop onto the main actor
+              // before calling start() from this nonisolated AsyncFunction.
+              Task { @MainActor in
+                NavigationManager.shared.start(
+                    stops: stops,
+                    mode: mode,
+                    simulate: simulate,
+                    speedMultiplier: speedMultiplier,
+                    missedTurnRerouteMeters: missedTurnRerouteMeters,
+                    onEvent: { [weak self] payload in
+                        guard let self else { return }
+                        let kind = payload["kind"] as? String ?? ""
+                        switch kind {
+                        case "maneuver": self.sendEvent("onNavManeuver", payload)
+                        case "rerouting": self.sendEvent("onNavRerouting", payload)
+                        case "arrived": self.sendEvent("onNavArrived", payload)
+                        case "off_route": self.sendEvent("onNavOffRoute", payload)
+                        case "error": self.sendEvent("onNavError", payload)
+                        default: break
+                        }
+                    },
+                    onLocation: { [weak self] payload in
+                        self?.sendEvent("onNavLocation", payload)
+                    },
+                    onRoute: { [weak self] payload in
+                        self?.sendEvent("onNavRoute", payload)
+                    }
+                ) { ok, error in
+                    var result: [String: Any] = ["ok": ok]
+                    if let error { result["error"] = error }
+                    continuation.resume(returning: result)
+                }
+              }
+            }
+        }
+
+        AsyncFunction("stopNavigation") { () -> [String: Any] in
+            await MainActor.run { NavigationManager.shared.stop() }
+            return ["ok": true]
+        }
+
+        AsyncFunction("simulateDeviation") { (offsetMeters: Double?) -> [String: Any] in
+            await MainActor.run { NavigationManager.shared.simulateDeviation(offsetMeters: offsetMeters ?? 50) }
+            return ["ok": true]
+        }
+
+        // iOS doesn't implement the dev toggles yet. Return an explicit
+        // error so the JS side can surface "not supported" instead of
+        // silently believing the call succeeded.
+        AsyncFunction("setWrongSidewalkOffset") { (_: Bool) -> [String: Any] in
+            return ["ok": false, "error": "Not implemented on iOS"]
+        }
+        AsyncFunction("setSkipCrossings") { (_: Bool) -> [String: Any] in
+            return ["ok": false, "error": "Not implemented on iOS"]
+        }
+
+        AsyncFunction("startHeading") { () -> [String: Any] in
+            HeadingManager.shared.start { [weak self] degrees in
+                self?.sendEvent("onHeading", ["degrees": degrees])
+            }
+            return ["ok": true]
+        }
+
+        AsyncFunction("stopHeading") { () -> [String: Any] in
+            HeadingManager.shared.stop()
+            return ["ok": true]
+        }
+
+        // Location:
+
+        AsyncFunction("showLocationServicesDialog") { () -> Bool in
+            return false
+        }
+
+        AsyncFunction("openLocationSettings") { () -> Bool in
+            return false
+        }
+
+        AsyncFunction("openAppSettings") { () -> Bool in
+            return false
+        }
+
+        AsyncFunction("openBluetoothSettings") { () -> Bool in
+            return false
+        }
+
+        // MARK: - MentraOS Notification Commands
+
+        AsyncFunction("setNotificationConfig") { (_: Bool, _: [String]) in
+            // No-op on iOS
+        }
+
+        AsyncFunction("getInstalledApps") { () -> [[String: Any]] in
+            return []
+        }
+
+        AsyncFunction("getInstalledAppsForNotifications") { () -> [[String: Any]] in
+            return []
+        }
+
+        AsyncFunction("hasNotificationListenerPermission") { () -> Bool in
+            return false
+        }
+
+        AsyncFunction("openNotificationListenerSettings") { () -> Bool in
+            return false
+        }
+
+        // MARK: - MentraJS Runtime
+
+        /// Spawn a per-miniapp JS context. Re-spawn is allowed: a live
+        /// context with the same packageName is killed first.
+        /// Returns true if the polyfill + miniapp source evaluated without
+        /// throwing. On failure the context is torn down.
+        AsyncFunction("mentraJsSpawn") { (packageName: String, polyfillBundle: String, miniappJs: String) -> Bool in
+            return JSCRuntime.shared.spawn(
+                packageName: packageName,
+                polyfillBundle: polyfillBundle,
+                miniappJs: miniappJs
+            )
+        }
+
+        /// Evaluate an arbitrary script inside the named context. Returns
+        /// the JS return value bridged to a JSON-friendly Swift type, or
+        /// nil if the context is dead / eval threw. Mostly for dev tooling
+        /// + tests; production code paths use mentraJsDispatchToJs.
+        AsyncFunction("mentraJsEvaluate") { (packageName: String, source: String) -> Any? in
+            return JSCRuntime.shared.evaluate(packageName: packageName, source: source)
+        }
+
+        /// Tear down a JS context. Cancels timers, drops refs, forces GC.
+        AsyncFunction("mentraJsKill") { (packageName: String) -> Void in
+            JSCRuntime.shared.kill(packageName: packageName)
+        }
+
+        /// Push an event / response envelope into the named context's
+        /// globalThis.__deliver. Used by MentraJSRouter for
+        /// glasses-status broadcasts and request/response correlation.
+        AsyncFunction("mentraJsDispatchToJs") { (packageName: String, envelope: [String: Any]) -> Void in
+            JSCRuntime.shared.dispatchToJs(packageName: packageName, envelope: envelope)
+        }
+
+        /// Set the installed manifest for a miniapp so the dispatcher's
+        /// permission gate can authorize sensitive `__dispatch` calls.
+        AsyncFunction("mentraJsSetManifest") { (packageName: String, permissions: [String]) -> Void in
+            JSCRuntime.shared.dispatcherTable.setManifest(
+                packageName: packageName,
+                manifest: InstalledMiniappManifest(permissions: Set(permissions))
+            )
+        }
+
+        /// Diagnostic: list all live packageNames.
+        Function("mentraJsAlivePackages") { () -> [String] in
+            return JSCRuntime.shared.alivePackages()
+        }
+
+        /// Diagnostic: force a JSC garbage collection cycle on the named
+        /// context. Used by memory-leak hunts + tests. Returns false when
+        /// the context is dead.
+        AsyncFunction("mentraJsDebugForceGC") { (packageName: String) -> Bool in
+            return JSCRuntime.shared.debugForceGC(packageName: packageName)
+        }
+
+        /// Read the bundled MentraJS polyfill (startup.js) from the iOS
+        /// pod's resource bundle. The host calls this once on app boot,
+        /// caches the string, and passes it to every mentraJsSpawn so
+        /// every JSContext starts with the same polyfill ABI.
+        Function("mentraJsLoadPolyfillBundle") { () -> String in
+            return JSCRuntime.loadPolyfillBundle()
+        }
+
+        // MARK: - Build Environment
+
+        AsyncFunction("isBetaBuild") { () -> Bool in
+            #if targetEnvironment(simulator)
+                return false
+            #else
+                return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+            #endif
+        }
+
+        // Configure which screen edges defer iOS system gestures
+        // (Control Center, Notification Center, Home indicator). Edge
+        // strings: "top", "bottom", "left", "right", "all". An empty
+        // array restores default behavior. iOS-only; Android is a no-op.
+        AsyncFunction("setDeferredSystemGestures") { (edges: [String]) -> Void in
+            var rect: UIRectEdge = []
+            for edge in edges {
+                switch edge.lowercased() {
+                case "top": rect.insert(.top)
+                case "bottom": rect.insert(.bottom)
+                case "left": rect.insert(.left)
+                case "right": rect.insert(.right)
+                case "all": rect = .all
+                default: break
+                }
+            }
+            SystemGestures.setDeferredEdges(rect)
+        }
+
+        Function("showAVRoutePicker") { (tintColor: String?) in
+            DispatchQueue.main.async {
+                let picker = AVRoutePickerView()
+                picker.prioritizesVideoDevices = false
+
+                if let colorString = tintColor {
+                    picker.tintColor = UIColor(hexString: colorString)
+                } else {
+                    picker.tintColor = .label
+                }
+
+                if let button = picker.subviews.first(where: { $0 is UIButton }) as? UIButton {
+                    button.sendActions(for: .touchUpInside)
+                }
+            }
+        }
+
+        View(CrustView.self) {
+            Prop("url") { (view: CrustView, url: URL) in
+                if view.webView.url != url {
+                    view.webView.load(URLRequest(url: url))
+                }
+            }
+
+            Events("onLoad")
+        }
+
+        // MARK: - Image Processing Commands
+
+        AsyncFunction("processGalleryImage") {
+            (inputPath: String, outputPath: String, options: [String: Any]) -> [String: Any] in
+            let lensCorrection = options["lensCorrection"] as? Bool ?? true
+            let colorCorrection = options["colorCorrection"] as? Bool ?? true
+
+            guard FileManager.default.fileExists(atPath: inputPath) else {
+                return ["success": false, "error": "Input file does not exist"]
+            }
+
+            let processingTimeMs = ImageProcessor.process(
+                inputPath: inputPath,
+                outputPath: outputPath,
+                lensCorrection: lensCorrection,
+                colorCorrection: colorCorrection
+            )
+
+            if processingTimeMs >= 0 {
+                return [
+                    "success": true,
+                    "outputPath": outputPath,
+                    "processingTimeMs": processingTimeMs,
+                ]
+            } else {
+                return ["success": false, "error": "Processing failed"]
+            }
+        }
+
+        // MARK: - HDR Merge Commands
+
+        AsyncFunction("mergeHdrBrackets") {
+            (underPath: String, normalPath: String, overPath: String, outputPath: String)
+            -> [String: Any] in
+            let processingTimeMs = ImageProcessor.mergeHdr(
+                underPath: underPath,
+                normalPath: normalPath,
+                overPath: overPath,
+                outputPath: outputPath
+            )
+            if processingTimeMs >= 0 {
+                return [
+                    "success": true,
+                    "outputPath": outputPath,
+                    "processingTimeMs": processingTimeMs,
+                ]
+            } else {
+                return ["success": false, "error": "HDR merge failed"]
+            }
+        }
+
+        // MARK: - Video Stabilization Commands
+
+        AsyncFunction("stabilizeVideo") {
+            (inputPath: String, imuPath: String, outputPath: String) -> [String: Any] in
+            guard FileManager.default.fileExists(atPath: inputPath) else {
+                return ["success": false, "error": "Input video does not exist"]
+            }
+            guard FileManager.default.fileExists(atPath: imuPath) else {
+                return ["success": false, "error": "IMU sidecar does not exist"]
+            }
+
+            let processingTimeMs = VideoStabilizer.stabilize(
+                inputPath: inputPath,
+                imuPath: imuPath,
+                outputPath: outputPath
+            )
+
+            if processingTimeMs >= 0 {
+                return [
+                    "success": true,
+                    "outputPath": outputPath,
+                    "processingTimeMs": processingTimeMs,
+                ]
+            } else {
+                return ["success": false, "error": "Stabilization failed"]
+            }
+        }
+
+        // MARK: - Media Library Commands
+
+        AsyncFunction("saveToGalleryWithDate") {
+            (filePath: String, captureTimeMillis: Int64?, displayName: String?) -> [String: Any] in
+            let fileURL = URL(fileURLWithPath: filePath)
+
+            guard FileManager.default.fileExists(atPath: filePath) else {
+                return ["success": false, "error": "File does not exist"]
+            }
+
+            var assetIdentifier: String?
+            let semaphore = DispatchSemaphore(value: 0)
+            var resultError: Error?
+            var creationFailed = false
+
+            PHPhotoLibrary.shared().performChanges {
+                let pathExtension = fileURL.pathExtension.lowercased()
+
+                let creationRequest: PHAssetChangeRequest
+                if ["mp4", "mov", "avi", "m4v"].contains(pathExtension) {
+                    guard let req = PHAssetChangeRequest.creationRequestForAssetFromVideo(
+                        atFileURL: fileURL
+                    )
+                    else {
+                        NSLog("CrustModule: Failed to create video asset request for: \(filePath)")
+                        creationFailed = true
+                        return
+                    }
+                    creationRequest = req
+                } else {
+                    guard let req = PHAssetChangeRequest.creationRequestForAssetFromImage(
+                        atFileURL: fileURL
+                    )
+                    else {
+                        NSLog("CrustModule: Failed to create image asset request for: \(filePath)")
+                        creationFailed = true
+                        return
+                    }
+                    creationRequest = req
+                }
+
+                if let captureMillis = captureTimeMillis {
+                    let captureDate = Date(
+                        timeIntervalSince1970: TimeInterval(captureMillis) / 1000.0
+                    )
+                    creationRequest.creationDate = captureDate
+                    NSLog("CrustModule: Setting creation date to: \(captureDate)")
+                }
+
+                guard let assetPlaceholder = creationRequest.placeholderForCreatedAsset else {
+                    NSLog("CrustModule: Missing placeholder for created asset")
+                    creationFailed = true
+                    return
+                }
+
+                assetIdentifier = assetPlaceholder.localIdentifier
+
+                let albumFetch = PHFetchOptions()
+                albumFetch.predicate = NSPredicate(
+                    format: "localizedTitle == %@", MentraSyncedMediaAlbum.localizedTitle
+                )
+                albumFetch.fetchLimit = 1
+
+                let existingAlbums = PHAssetCollection.fetchAssetCollections(
+                    with: .album,
+                    subtype: .albumRegular,
+                    options: albumFetch
+                )
+
+                if let album = existingAlbums.firstObject,
+                   let albumChange = PHAssetCollectionChangeRequest(for: album)
+                {
+                    albumChange.addAssets([assetPlaceholder] as NSArray)
+                } else if existingAlbums.firstObject == nil {
+                    let newAlbumChange = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(
+                        withTitle: MentraSyncedMediaAlbum.localizedTitle
+                    )
+                    newAlbumChange.addAssets([assetPlaceholder] as NSArray)
+                } else {
+                    NSLog(
+                        "CrustModule: Mentra album exists but is not writable; asset saved to library only"
+                    )
+                }
+            } completionHandler: { _, error in
+                resultError = error
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+
+            if creationFailed {
+                return ["success": false, "error": "Failed to create asset request - file may be corrupted or unsupported"]
+            }
+
+            if let error = resultError {
+                NSLog("CrustModule: Error saving to gallery: \(error.localizedDescription)")
+                return ["success": false, "error": error.localizedDescription]
+            }
+
+            NSLog("CrustModule: Successfully saved to gallery with proper creation date")
+            return ["success": true, "identifier": assetIdentifier ?? ""]
+        }
+
+    }
+}
+
+extension UIColor {
+    convenience init?(hexString: String) {
+        var hex = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
+        hex = hex.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        guard Scanner(string: hex).scanHexInt64(&rgb) else { return nil }
+
+        let length = hex.count
+        let r, g, b, a: CGFloat
+
+        if length == 6 {
+            r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+            g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+            b = CGFloat(rgb & 0x0000FF) / 255.0
+            a = 1.0
+        } else if length == 8 {
+            r = CGFloat((rgb & 0xFF00_0000) >> 24) / 255.0
+            g = CGFloat((rgb & 0x00FF_0000) >> 16) / 255.0
+            b = CGFloat((rgb & 0x0000_FF00) >> 8) / 255.0
+            a = CGFloat(rgb & 0x0000_00FF) / 255.0
+        } else {
+            return nil
+        }
+
+        self.init(red: r, green: g, blue: b, alpha: a)
+    }
+}
