@@ -4,11 +4,11 @@ import {getBuildNumber} from "./scripts/build-number.mjs"
 
 const VARIANTS = {
   default: {
-    appName: "Mentra",
-    packageName: "com.mentra.mentra",
-    includeFirebase: true,
-    googleServicesFile: "./google-services.json",
-    googleServicesPlist: "./GoogleService-Info.plist",
+    appName: "Foverlay",
+    packageName: "com.foverlay.app",
+    includeFirebase: false,
+    googleServicesFile: null,
+    googleServicesPlist: null,
     icon: "./assets/app-icons/ic_launcher.png",
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground.png",
   },

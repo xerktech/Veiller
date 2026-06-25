@@ -3518,6 +3518,14 @@ class G2 : SGCManager() {
                         val address = gatt.device?.address
                         if (side == "LEFT") {
                             leftGlassAddress = address
+                            // Foverlay fix: persist the left-lens BLE MAC so the R1 ring's
+                            // advStart (connectToGlasses) can bind even when the G2 reconnects
+                            // by address and the scan callback (which normally sets this) never
+                            // runs. Without this, R1.kt logs "no glasses MAC" and drops the ring.
+                            if (address != null) {
+                                DeviceStore.apply("glasses", "leftMacAddress", address)
+                                DeviceStore.apply("glasses", "bluetoothMacAddress", address)
+                            }
                         } else {
                             rightGlassAddress = address
                         }

@@ -194,7 +194,7 @@ function DeviceSettings() {
           />
         )}
 
-        {superMode && (
+        {/* foverlay: ring pairing always shown */ true && (
           <RouteButton
             icon={<Icon name="bluetooth" size={24} color={theme.colors.secondary_foreground} />}
             label={translate("deviceSettings:pairController")}
