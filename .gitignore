@@ -1,0 +1,8 @@
+# Raw BLE capture artifacts — contain private device/system data, never commit.
+# (Android bug reports include account, message, and system info.)
+r1-capture.zip
+r1-btsnoop.log
+*.btsnoop
+btsnoop_hci.log
+bugreport*.zip
+dumpstate*.txt

@@ -38,20 +38,36 @@ keep rebasing on MentraOS upstream, not about large rewrites.
 
 ## 3. Goals (in priority order)
 
-> **Priority override (2026-06-25):** the **R1 ring is now goal #1 and is
-> make-or-break** — if we can't get the ring working (health metrics + ring
-> button-press control of the G2), the whole project is a wash, so it is proven
-> out *before* anything else. This deliberately supersedes the earlier framing
-> (and §9) where the ring was a deferred sub-project. See
-> `docs/r1-ring-research.md` for the feasibility analysis and the de-risk plan.
-> The ring requires original BLE reverse-engineering; MentraOS does **not**
-> support it, so the fork gives us nothing to inherit here.
+> **Priority override (2026-06-25):** the **R1 ring is goal #1**, proven out
+> *before* anything else. This supersedes the earlier framing (and §9) where the
+> ring was a deferred sub-project. See `docs/r1-ring-research.md` for the original
+> feasibility analysis and `docs/r1-ring-capture-findings.md` for the **capture #1
+> result that resolved the make-or-break question** — read the findings doc first;
+> it changes the shape of this goal.
+>
+> **Scope update (2026-06-25, after capture #1):** ring **control no longer needs
+> original RE.** Capture proved the ring sends button/gesture events *only* over
+> the ring↔glasses link (the ring↔phone link was silent through 25 presses), and
+> the glasses translate ring input into their own **native G2 input events** (a
+> ring double-tap arrived at the phone as the same `gesture_ctrl` event the G2
+> temple touchpad emits). So we get ring control "for free" off the MentraOS G2
+> baseline — just keep the ring **bound** to the glasses and consume the existing
+> G2 input stream; binding is a G2-protocol concern (`switchRingHand(mac)`,
+> `Ring bind status`), i.e. inherited-stack work, not ring RE. The **only original
+> ring BLE RE left is health** (#1b), and it is decodable (frames captured). The
+> revised make-or-break is therefore: health-decode + confirming MentraOS exposes
+> the G2 input events — **not** decoding ring gestures.
 
-1. **R1 ring (make-or-break, do first).** Decode the ring's BLE protocol enough to
-   (a) receive ring button/gesture events and use them to control the G2, and
-   (b) read health metrics (route on-device into Health Connect, see goal #5).
-   The ring pairs directly to the phone over BLE, so we sniff the real Even app's
-   traffic and decode it. If this can't be made to work, stop the project.
+1. **R1 ring (goal #1, do first).**
+   - **(a) Button/gesture control of the G2 — native, inherited.** Do **not**
+     decode the ring for this. Keep the ring bound to the glasses (G2-protocol
+     binding) and consume the G2's native input events via the MentraOS baseline
+     (goal #2). The firmware maps ring presses onto existing glasses controls.
+   - **(b) Health metrics — the one original ring-BLE RE task.** Decode the ring's
+     `BAE80012`→`BAE80013` health frames (the ring pairs directly to the phone, so
+     we sniff the real Even app and decode). Route results on-device into Health
+     Connect (see goal #5). Open risk: GoMore-key gating on derived metrics
+     (HRV/sleep/SpO₂); raw HR/steps likely recoverable.
 2. **Glasses baseline (enabling step for the ring milestone and everything else).**
    Connect to the G2, verify microphone input and screen/text output. This is the
    foundation the ring control loop renders onto; it comes from the MentraOS fork.
@@ -149,28 +165,42 @@ These are hard realities; don't plan around them as if they're solvable in code:
 - **Self-hosted backend** means don't hardcode MentraOS Cloud endpoints; everything
   cloud-facing must be configurable to point at my own host.
 
-## 9. R1 ring (HIGHEST-PRIORITY workstream — make-or-break, see §3 and `docs/r1-ring-research.md`)
+## 9. R1 ring (goal #1 — see §3, `docs/r1-ring-capture-findings.md`, `docs/r1-ring-research.md`)
 
-The Even R1 ring controls the G2 (tap/scroll/long-press) and tracks HR, SpO₂, HRV,
-sleep, steps, skin temp. **This is now goal #1: if the ring can't be made to work,
-the project is a wash, so we prove it out first.** MentraOS does not support the
-ring, so this is original BLE reverse-engineering — nothing to inherit from the fork.
+The Even R1 ring controls the G2 (tap/double-tap/long-press/slide up/down) and
+tracks HR, SpO₂, HRV, sleep, steps, skin temp. **Capture #1 (2026-06-25) resolved
+the make-or-break question and split this goal in two** — read
+`docs/r1-ring-capture-findings.md` before planning ring work.
 
-What we've established (full detail in `docs/r1-ring-research.md`):
+**(a) Control — native firmware, inherited, NO ring RE.** Capture proved ring
+button/gesture events do **not** traverse the ring↔phone link (it was silent
+through 25 deliberate presses); they go ring↔glasses only, and the glasses
+translate them into their **own native G2 input events** (a ring double-tap reached
+the phone as the same `gesture_ctrl` event the G2 temple touchpad emits). So we do
+not decode ring gestures. We get ring control off the MentraOS G2 baseline (§3
+goal #2): keep the ring **bound** to the glasses and consume the existing G2 input
+stream. Binding/config is a G2-protocol concern done over the inherited `…2760…`
+Nordic-UART link — observed: host→glasses `switchRingHand(isLeft, mac=DD:52:92…)`,
+glasses report `Ring bind status: hadBound`. Remaining work: confirm MentraOS
+surfaces these G2 input events + bind-status; add the bind command if needed.
 
-- **Topology:** the ring pairs **directly to the phone over BLE** (separate from the
-  ring↔glasses link), so we can talk to it *and* sniff the real Even app's traffic.
-  Service `BAE80001`, TX (phone→ring) `BAE80012`, RX (ring→phone notify) `BAE80013`,
-  protobuf payloads (`BleRing1CmdProto`), standard Nordic SMP for firmware.
-- **What's unknown (the work):** the gesture/button event packet format and the
-  health command byte format are both undecoded publicly; the openCFW `ring1/`
-  effort scraped method names (`getDailyData`, etc.) but not wire formats.
-- **Risks:** (1) confirm button events traverse ring↔phone (not only ring↔glasses);
-  (2) health metrics may be gated behind licensed **GoMore** algorithm keys — raw
-  HR/steps likely recoverable, HRV/sleep/SpO₂ may not be.
-- **Plan:** de-risk with a BLE sniffing spike (HCI snoop log → Wireshark) *before*
-  the full MentraOS fork; decode gestures first (the true make-or-break), then probe
-  health. Implement as an isolated native Android ring module, kept upstream-mergeable.
+**(b) Health — the only original ring-BLE RE.** The ring pairs directly to the
+phone, so we sniff + decode its `BAE80012`(write, GATT handle `0x0015`) →
+`BAE80013`(notify, handle `0x0017`) frames. Capture #1 already grabbed real frames:
+health sync issued command bytes `01/02/04/05/06` with 12-byte responses; device
+serials (e.g. `B290DHACE160024`) came in plaintext at connect; a `0x0f` status
+frame polls every ~1–2 min. Frame skeleton + decoder in
+`docs/r1-ring-capture-findings.md` / `tools/r1-decode-ring.py`. **Open risk:**
+GoMore-key gating on *derived* metrics (HRV/sleep/SpO₂) — raw HR/steps likely
+recoverable, derived may not be. Next step: a health-focused capture (manual sync,
+anchor to a visible HR/step value) to map each cmd→metric, then route to Health
+Connect (goal #5). Implement as an isolated native Android ring module, kept
+upstream-mergeable.
+
+**Capture method (reusable):** Android Bluetooth HCI snoop log in **Full** mode
+(payloads are plaintext below link-layer encryption; no root). Pull via
+`adb bugreport`; decode with `tools/r1-decode-ring.py`. Raw captures are
+git-ignored — they contain private device data.
 
 ## 10. Reference material
 

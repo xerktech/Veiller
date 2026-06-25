@@ -1,5 +1,11 @@
 # R1 Ring — Feasibility Research (the make-or-break item)
 
+> **Partially superseded (2026-06-25):** this is the *pre-capture* feasibility
+> analysis. Capture #1 has since answered the key open question — ring control is
+> native (no RE needed) and only health needs decoding. Read
+> `docs/r1-ring-capture-findings.md` for the current scope; the sections below
+> remain useful for the health-decode plan and the GoMore risk.
+
 > Status: research notes, 2026-06-25. This is the single highest-risk dependency
 > in Foverlay. Per the project owner: **if the R1 ring can't be made to work
 > (health metrics + button-press control of the G2), the whole project is a wash.**
