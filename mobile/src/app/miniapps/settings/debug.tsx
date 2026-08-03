@@ -41,7 +41,6 @@ export default function DebugSettingsScreen() {
   const [reconnectOnAppForeground, setReconnectOnAppForeground] = useSetting(SETTINGS.reconnect_on_app_foreground.key)
   const [enableSquircles, setEnableSquircles] = useSetting(SETTINGS.enable_squircles.key)
   const [appearanceMenuEnabled, setAppearanceMenuEnabled] = useSetting(SETTINGS.appearance_menu_enabled.key)
-  const [miniappDevMode, setMiniappDevMode] = useSetting(SETTINGS.miniapp_dev_mode.key)
   const [appBootExtraInfo, setAppBootExtraInfo] = useSetting(SETTINGS.app_boot_extra_info.key)
   const [debugConsole, setDebugConsole] = useSetting(SETTINGS.debug_console.key)
   const [_onboardingOsCompleted, setOnboardingOsCompleted] = useSetting(SETTINGS.onboarding_os_completed.key)
@@ -114,12 +113,7 @@ export default function DebugSettingsScreen() {
               onValueChange={(value) => setAppearanceMenuEnabled(value)}
             />
 
-            <ToggleSetting
-              label="Miniapp Developer Settings"
-              subtitle="Show the Miniapp Developer settings menu"
-              value={miniappDevMode}
-              onValueChange={(value) => setMiniappDevMode(value)}
-            />
+            {/* Foverlay: Miniapp Developer toggle removed — dedicated app. */}
 
             <ToggleSetting
               label="App Boot Extra Info"
@@ -180,8 +174,6 @@ export default function DebugSettingsScreen() {
           </Group>
 
           <Group title="Misc">
-            <RouteButton label="Test Mini App" subtitle="Test the Mini App" onPress={() => push("/test/mini-app")} />
-
             <RouteButton
               label={navRunning ? "Stop Test Nav" : "Start Test Nav"}
               subtitle={

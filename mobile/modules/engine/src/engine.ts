@@ -16,6 +16,7 @@ import {startGlassesStatusProjection, stopGlassesStatusProjection} from "./servi
 import {startOtaService, stopOtaService} from "./services/OtaService"
 import {startAudioCloudUplink, stopAudioCloudUplink} from "./services/AudioCloudUplink"
 import {startDeviceEventRouter, stopDeviceEventRouter} from "./services/DeviceEventRouter"
+import {startTapTypingEcho, stopTapTypingEcho} from "./services/TapTypingEchoService"
 import {startPhoneNotificationsSync, stopPhoneNotificationsSync} from "./services/PhoneNotificationsSync"
 import {startCaptionsTesterReportService, stopCaptionsTesterReportService} from "./services/CaptionsTesterReportService"
 import {
@@ -65,6 +66,8 @@ export const engine = {
     // store, miniapp_selected -> launcher) so a bare OEM gets device data, not just the
     // Mentra app's MantleManager.
     startDeviceEventRouter()
+    // Foverlay: Tap Strap 2 → glasses typing echo (host feature, no miniapp).
+    startTapTypingEcho()
     // Hydration contract: the native DeviceStore is in-memory and starts empty
     // every launch; seed it from the persisted settings BEFORE start() resolves
     // so every post-start getDefaultDevice() read is a trustworthy two-state
@@ -133,6 +136,7 @@ export const engine = {
     await safely("glasses settings sync", stopGlassesSettingsSync)
     await safely("glasses status projection", stopGlassesStatusProjection)
     await safely("device event router", stopDeviceEventRouter)
+    await safely("tap typing echo", stopTapTypingEcho)
     await safely("ota service", stopOtaService)
     await safely("audio cloud uplink", stopAudioCloudUplink)
     await safely("phone notifications sync", stopPhoneNotificationsSync)

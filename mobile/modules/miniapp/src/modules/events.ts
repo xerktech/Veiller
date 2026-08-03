@@ -67,24 +67,6 @@ export interface ButtonPressData {
   pressType: "short" | "long"
 }
 
-/**
- * Foverlay: one decoded Tap Strap 2 finger chord, delivered on the
- * "tap_input" stream by the phone-side TapInputService. Android only today.
- */
-export interface TapInputData {
-  /** Printable character (" " = space, "\n" = enter), or null for non-text actions. */
-  char: string | null
-  action: "char" | "backspace" | "shift" | "switch" | "unmapped"
-  /** Raw 5-bit finger bitmask, 1–31. LSB = thumb, MSB = pinky. */
-  tapcode: number
-  /** 1 = single tap, 2 = double, 3 = triple. */
-  repeat: number
-  /** Wall-clock ms at the native SDK callback — anchor for latency measurement. */
-  timestamp: number
-  /** "real" = Tap hardware via tap-android-sdk; "fake" = adb-driven FakeTapSource. */
-  source: "real" | "fake"
-}
-
 export interface HeadPositionData {
   position: "up" | "down"
 }

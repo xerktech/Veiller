@@ -6,16 +6,21 @@ codebase wins — but tell me about the drift so I can update this file.
 
 ---
 
-> **Status (2026-08-02): fork reset + new focus.** The fork was reset onto
-> MentraOS `upstream/dev` — upstream now ships native Even Realities G2 support
-> and the on-device miniapp SDK, which made the old fork's G2-era work dead
-> weight. The pre-reset history lives on the old `main`; only the R1 ring
-> RE docs/tools, CI disables, and app identity were carried over.
+> **Status (2026-08-03): dedicated app — miniapps stripped as a product.**
+> Foverlay is a dedicated app, NOT a platform others build plugins/miniapps
+> for. Every user-facing miniapp surface is removed (no bundled miniapps, no
+> cloud preinstall sync, no dev/QR install flows, no glasses-menu picker);
+> the internal miniapp runtime remains in the tree as **inert plumbing** so
+> we can keep rebasing on upstream. Foverlay features are host features —
+> native modules + engine services — never miniapps.
 >
-> **Current focus: the Tap Strap 2 → G2 text echo demo** (see
-> `docs/tap-strap-demo.md` and `miniapps/tap-typing-demo/README.md`). The R1
-> ring effort (previously goal #1) is **paused, not dead** — its findings remain
-> in `docs/r1-ring-*.md` and `tools/r1-*`.
+> Earlier context: the fork was reset onto MentraOS `upstream/dev` on
+> 2026-08-02 (upstream now ships native G2 support); pre-reset history lives
+> on the old `main`. **Current focus: the Tap Strap 2 → G2 text echo** (see
+> `docs/tap-strap-demo.md`), implemented as the engine service
+> `TapTypingEchoService`. The R1 ring effort is **paused, not dead** —
+> findings in `docs/r1-ring-*.md` and `tools/r1-*`. Mapbox is removed
+> (NavigationManager stubbed) so builds need no secrets.
 
 ## 1. What Foverlay is
 
@@ -38,31 +43,39 @@ reconsider.
 
 ## 2. Current status
 
-Fresh reset onto `upstream/dev` (Aug 2026) plus the Tap Strap 2 demo stack:
+Reset onto `upstream/dev` (Aug 2026) + Tap Strap 2 stack + the miniapp
+product-strip:
 
 - `mobile/modules/tap-input/` — **@foverlay/tap-input** Expo module (Android):
   `TapInputService` foreground service owning the Tap Strap 2 BLE connection via
   tap-android-sdk Controller Mode; `TapAlphabet` tapcode→char table (unit
   tested); `FakeTapSource` for adb-driven development without hardware.
-- `miniapps/tap-typing-demo/` — background-only miniapp that echoes tap chords
-  to a text box on the G2.
-- Upstream files touched (kept minimal for rebases): `engine/DeviceEventRouter.ts`
-  (tap_input forwarding), miniapp SDK typed stream additions (`protocol.ts`,
-  `events.ts`, `input.ts`, exports), `mobile/app.config.ts` (identity),
-  `package.json`/lockfiles.
+- `mobile/modules/engine/src/services/TapTypingEchoService.ts` — the echo as a
+  **host engine service**: subscribes to tap events, renders the typing buffer
+  through `LocalDisplayManager.request("system.tap-echo", …)`.
+- Miniapp strip (all `// Foverlay:`-commented): empty `bundledMiniapps` (zips
+  deleted from `mobile/assets/miniapps/`), `preinstalledMiniappSync` call
+  disabled in `MantleManager`, dev tools/toggles/entries removed
+  (`markMiniappDevMode` inert), glasses-menu picker entry removed,
+  `useAppsExtras` filters the app list to `SYSTEM_APPS` built-ins only
+  (Settings/Camera/Mirror/Feedback/Notify tiles — those are core UI, kept).
+- Upstream files touched (kept minimal for rebases): `engine/engine.ts` (2-line
+  service start/stop), the strip edits above, `crust` NavigationManager stub +
+  gradle (Mapbox removal), `mobile/app.config.ts` (identity),
+  `package.json`/lockfiles. The `@mentra/miniapp` SDK and `DeviceEventRouter`
+  are pristine upstream.
 
 ## 3. Goals (in priority order)
 
 1. **Tap Strap 2 → G2 text echo demo** — prove typing-in-pocket works and
    measure keystroke→display latency (~120ms budget). Milestones and definition
-   of done: `miniapps/tap-typing-demo/README.md`.
+   of done: `docs/tap-strap-demo.md`.
 2. **Custom dashboard / UX** on the glasses (replace MentraOS's default home).
 3. **Native phone integrations**: Calendar via `CalendarContract`, fitness via
    Health Connect (Google Fit REST is dead end-2026), messaging via Android
    default-SMS-handler APIs.
-4. **Self-hosted backend** (home lab, Cloudflare Tunnel; no Tailscale) — note
-   upstream is migrating miniapps *on-device* (WebView/JSContext, no server
-   round-trip), which shrinks what a backend even needs to do.
+4. **Self-hosted backend** (home lab, Cloudflare Tunnel; no Tailscale) — with
+   miniapps stripped and features on-device, the backend surface is small.
 5. **R1 ring** (paused): control comes free off the G2 input stream once the
    ring is bound to the glasses; health metrics need original BLE RE
    (`docs/r1-ring-capture-findings.md`).
@@ -70,11 +83,15 @@ Fresh reset onto `upstream/dev` (Aug 2026) plus the Tap Strap 2 demo stack:
 
 ## 4. Non-goals
 
+- **A miniapp/plugin platform.** Foverlay is a dedicated app. Do not implement
+  features as miniapps; do not resurrect install/store/dev surfaces. The
+  runtime under `mobile/modules/{miniapp,crust}` and the `miniapps/`+`sdk/`
+  trees are inherited upstream plumbing left inert for rebase-ability.
 - iOS support (deferred; don't let iOS constraints shape Android decisions).
 - Rewriting MentraOS's BLE / protobuf / audio / ASR layers.
 - Publishing to the Mentra or Even app stores.
 - For the tap demo specifically: mouse/cursor support, custom bitmap fonts,
-  chord remapping UI, persistence/backends. See the demo README's non-goals.
+  chord remapping UI, persistence/backends.
 
 ## 5. Architecture (verified against upstream dev, Aug 2026)
 
@@ -92,9 +109,12 @@ Key data paths:
   throttle by design) → `SceneRenderer` → native G2 driver, which owns pacing +
   last-wins coalescing (EvenHub queue). G2 canvas is 576×288, ~7 lines of text,
   and supports bitmaps (`{type:"image"}`) too.
-- Tap input: `TapInputService` → `TapInputModule.sendEvent("tap_input")` →
-  `DeviceEventRouter` → `forwardEvent("tap_input")` → miniapp
-  `session.input.onTapInput(...)`.
+- Tap input: `TapInputService` (native FGS) → `TapInputModule.sendEvent("tap_input")`
+  → engine `TapTypingEchoService` (subscribes via `@foverlay/tap-input`) →
+  `LocalDisplayManager.request("system.tap-echo", {view:"main", scene:[…]})`.
+  Host features render through LocalDisplayManager with a reserved
+  `system.*` packageName — never via `SceneRenderer`/`displayEvent` directly
+  (that bypasses arbitration and reconnect replay).
 
 ## 6. Repo layout (verified)
 

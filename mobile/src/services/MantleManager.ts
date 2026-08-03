@@ -5,7 +5,8 @@ import * as Calendar from "expo-calendar"
 import {router} from "expo-router"
 
 import {bootstrapMentraJS} from "@/services/mentraJsBootstrap"
-import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
+// Foverlay: preinstalledMiniappSync unused — no cloud-driven miniapp installs.
+// import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
 import builtInMiniappCatalog from "@/services/miniapps/BuiltInMiniappCatalog"
 import {BUNDLED_MINIAPPS} from "@/generated/bundledMiniapps"
 import {CHINA_HIDDEN_APPS, isChinaBuild, notifyPackageName} from "@/constants/miniapps"
@@ -553,10 +554,10 @@ class MantleManager {
     // already-installed check below sees the real on-disk state.
     await this.installBundledMiniapps()
 
-    // Then reconcile the admin-managed preinstall registry from Cloud V2. This
-    // lets Core move users to newer bundled miniapp releases without shipping a
-    // new mobile binary.
-    await preinstalledMiniappSync.sync()
+    // Foverlay: no cloud-driven miniapp installs — this is a dedicated app,
+    // not a miniapp platform. (Upstream reconciled the admin-managed
+    // preinstall registry from Cloud V2 here via preinstalledMiniappSync.)
+    // await preinstalledMiniappSync.sync()
 
     // Re-spawn local miniapps that were running when the app was last killed.
     // Cloud apps get resurrected by the cloud on reconnect; local (phone-hosted)

@@ -2,6 +2,13 @@ import {useMemo} from "react"
 import {useActiveApps, useApps} from "@mentra/engine"
 
 import {SETTINGS, useSetting} from "@mentra/engine"
+import {SYSTEM_APPS} from "@/constants/miniapps"
+
+// Foverlay: dedicated app — only the built-in system tiles (Settings, Camera,
+// Mirror, …) may surface. No install path exists anymore (bundled list empty,
+// cloud preinstall sync off, dev tools removed); this filter is defense in
+// depth against anything residually installed showing up in the UI.
+const isFoverlayVisibleApp = (app: {packageName: string}) => SYSTEM_APPS.includes(app.packageName)
 
 /**
  * Foreground tray: standard + background apps. Filtered to offline-only when
@@ -11,10 +18,11 @@ export const useForegroundApps = () => {
   const apps = useApps()
   const [isOffline] = useSetting(SETTINGS.offline_mode.key)
   return useMemo(() => {
+    const visible = apps.filter(isFoverlayVisibleApp)
     if (isOffline) {
-      return apps.filter((app) => (app.type === "standard" || app.type === "background" || !app.type) && app.offline)
+      return visible.filter((app) => (app.type === "standard" || app.type === "background" || !app.type) && app.offline)
     }
-    return apps.filter((app) => app.type === "standard" || app.type === "background" || !app.type)
+    return visible.filter((app) => app.type === "standard" || app.type === "background" || !app.type)
   }, [apps, isOffline])
 }
 
@@ -26,10 +34,13 @@ export const useInactiveForegroundApps = () => {
   const apps = useApps()
   const [isOffline] = useSetting(SETTINGS.offline_mode.key)
   return useMemo(() => {
+    const visible = apps.filter(isFoverlayVisibleApp)
     if (isOffline) {
-      return apps.filter((app) => (app.type === "standard" || app.type === "background") && !app.running && app.offline)
+      return visible.filter(
+        (app) => (app.type === "standard" || app.type === "background") && !app.running && app.offline,
+      )
     }
-    return apps.filter((app) => (app.type === "standard" || app.type === "background" || !app.type) && !app.running)
+    return visible.filter((app) => (app.type === "standard" || app.type === "background" || !app.type) && !app.running)
   }, [apps, isOffline])
 }
 
