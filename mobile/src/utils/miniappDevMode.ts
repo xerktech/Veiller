@@ -1,5 +1,3 @@
-import {SETTINGS, engine} from "@mentra/engine"
-
 /**
  * Flip the latent per-account "this user is a developer" signal.
  *
@@ -9,6 +7,7 @@ import {SETTINGS, engine} from "@mentra/engine"
  * it skips the write (and the server push) entirely.
  */
 export function markMiniappDevMode(): void {
-  if (engine.settings.get(SETTINGS.miniapp_dev_mode.key)) return
-  void engine.settings.set(SETTINGS.miniapp_dev_mode.key, true)
+  // Foverlay: intentionally inert. This is a dedicated app — the miniapp
+  // developer tools are removed, so nothing may re-latch dev mode (e.g. via
+  // a scanned QR). Upstream set SETTINGS.miniapp_dev_mode here.
 }

@@ -1,17 +1,8 @@
-import {createElement} from "react"
 import {Platform} from "react-native"
 
-import {
-  decideDevLaunchRoute,
-  HardwareRequirementLevel,
-  HardwareType,
-  engine,
-  type ClientApp,
-  type StartOptions,
-} from "@mentra/engine"
+import {decideDevLaunchRoute, HardwareRequirementLevel, HardwareType, engine, type ClientApp} from "@mentra/engine"
 import {appRegistry, installAppStoreHooks} from "@mentra/engine/internal"
 
-import {DevIcon} from "@/components/miniapps/DevIcons"
 import {isOfflineHosted} from "@/components/miniapp/offlineHostedPackages"
 import {showAlert} from "@/contexts/ModalContext"
 import {translate} from "@/i18n"
@@ -281,27 +272,8 @@ class BuiltInMiniappCatalog {
       })
     }
 
-    if (
-      engine.settings.get(SETTINGS.miniapp_dev_mode.key)
-    ) {
-      apps.push({
-        packageName: "com.mentra.miniappdev",
-        name: translate("miniApps:lmaLoader"),
-        type: "standard",
-        offline: true,
-        offlineRoute: "/miniapps/settings/miniapp-dev",
-        local: false,
-        webviewUrl: "",
-        permissions: [],
-        running: false,
-        loading: false,
-        healthy: true,
-        hidden: false,
-        hardwareRequirements: [],
-        logoUrl: require("@assets/applet-icons/store.png"),
-        iconComponent: createElement(DevIcon),
-      })
-    }
+    // Foverlay: the dev "LMA Loader" tile (miniapp_dev_mode) is removed —
+    // dedicated app, no miniapp dev tooling.
 
     return isChinaBuild() ? apps.filter((app) => !CHINA_HIDDEN_APPS.includes(app.packageName)) : apps
   }

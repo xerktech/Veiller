@@ -1,0 +1,2 @@
+# Foverlay: intentionally empty — no bundled miniapps (dedicated app).
+# The generate-bundled-miniapps script readdir()s this directory; keep it present.
