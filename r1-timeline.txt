@@ -1,0 +1,21 @@
+# R1 ring capture timeline
+# device: samsung SM-S938U (Galaxy S25 Ultra), Android 16
+# snoop mode: FULL; stamps from phone clock
+# gestures: tap, double tap, long press, slide up, slide down
+2026-06-25_10:18:33  SESSION START
+2026-06-25_10:18:55  idle baseline START
+2026-06-25_10:21:49  idle baseline END
+2026-06-25_10:21:52  gesture 'tap' START (x5)
+2026-06-25_10:22:29  gesture 'tap' END
+2026-06-25_10:22:37  gesture 'double tap' START (x5)
+2026-06-25_10:23:27  gesture 'double tap' END
+2026-06-25_10:23:35  gesture 'long press' START (x5)
+2026-06-25_10:24:24  gesture 'long press' END
+2026-06-25_10:24:32  gesture 'slide up' START (x5)
+2026-06-25_10:25:21  gesture 'slide up' END
+2026-06-25_10:25:30  gesture 'slide down' START (x5)
+2026-06-25_10:26:11  gesture 'slide down' END
+2026-06-25_10:26:14  health sync START
+2026-06-25_10:27:37  health sync END (on-screen HR=none)
+2026-06-25_10:28:47  wear off/on (single cycle) END
+2026-06-25_10:28:49  SESSION END
