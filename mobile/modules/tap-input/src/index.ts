@@ -30,6 +30,10 @@ export interface TapStatusEvent {
 
 export interface TapStatusSnapshot {
   serviceRunning: boolean
+  /** "stopped" | "running" | "no_permission" | "failed" — the SDK source's state. */
+  realSource: string
+  /** OS-bonded Tap devices by name, connected or not — "" pairing visibility. */
+  bondedTaps: string[]
   /** Currently connected straps and their last known mode. */
   taps: Array<{tapIdentifier: string; mode: string}>
   /** Total chords received since service start (all sources). */

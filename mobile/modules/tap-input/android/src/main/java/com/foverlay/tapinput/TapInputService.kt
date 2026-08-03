@@ -6,6 +6,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.bluetooth.BluetoothManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
@@ -45,6 +46,32 @@ class TapInputService : Service() {
 
         @Volatile
         private var activeInstance: TapInputService? = null
+
+        /** "stopped" | "running" | "no_permission" | "failed" — for the status card. */
+        @Volatile
+        var realSourceState = "stopped"
+            private set
+
+        /**
+         * Names of OS-bonded Tap devices ("Tap_..."), whether or not the SDK
+         * has connected them — lets the UI distinguish "not paired at all"
+         * from "paired but not attaching". Empty when the service is down or
+         * BLUETOOTH_CONNECT is missing.
+         */
+        fun bondedTapNames(): List<String> {
+            val service = activeInstance ?: return emptyList()
+            if (!service.hasBluetoothConnectPermission()) return emptyList()
+            return try {
+                val adapter = service.getSystemService(BluetoothManager::class.java)?.adapter
+                adapter?.bondedDevices
+                    ?.mapNotNull { it.name }
+                    ?.filter { it.startsWith("Tap", ignoreCase = true) }
+                    ?: emptyList()
+            } catch (e: SecurityException) {
+                Log.w(TAG, "bondedDevices denied", e)
+                emptyList()
+            }
+        }
 
         /**
          * Inject one character through the live sink (UI "send test tap"
@@ -95,12 +122,15 @@ class TapInputService : Service() {
                 realSource = RealTapSource(this, sink) { status, tapId, mode ->
                     TapInputModule.emitStatus(status, tapId, mode)
                 }.also { it.start() }
+                realSourceState = "running"
             } catch (e: Exception) {
                 // Defensive: a missing/odd BT stack shouldn't take down the service.
                 Log.e(TAG, "Failed to start RealTapSource — continuing fake-only", e)
+                realSourceState = "failed"
             }
         } else {
             Log.w(TAG, "BLUETOOTH_CONNECT not granted — RealTapSource disabled, fake-only")
+            realSourceState = "no_permission"
         }
         isRunning = true
     }
@@ -113,6 +143,7 @@ class TapInputService : Service() {
         Log.i(TAG, "onDestroy")
         if (activeInstance === this) activeInstance = null
         isRunning = false
+        realSourceState = "stopped"
         realSource?.stop()
         realSource = null
         fakeSource?.stop()

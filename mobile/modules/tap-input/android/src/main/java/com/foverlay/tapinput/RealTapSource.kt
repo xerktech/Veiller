@@ -1,6 +1,8 @@
 package com.foverlay.tapinput
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.tapwithus.sdk.TapListener
 import com.tapwithus.sdk.TapSdk
@@ -39,6 +41,7 @@ class RealTapSource(
 
     companion object {
         private const val TAG = "FoverlayTapReal"
+        private const val NUDGE_INTERVAL_MS = 20_000L
 
         /**
          * Human name for the state int onTapChangedState reports. The SDK
@@ -56,23 +59,54 @@ class RealTapSource(
     }
 
     private var sdk: TapSdk? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val connectedTaps = mutableSetOf<String>()
+
+    /**
+     * Periodic connection nudge. TapSdk only enumerates bonded straps at a few
+     * fixed moments, so a strap paired AFTER the service starts (or one that
+     * drops without a clean disconnect callback) never attaches on its own.
+     * While nothing is connected, poke refreshConnections() — unconditional in
+     * the 0.3.6 binary — every NUDGE_INTERVAL_MS. No-ops once connected.
+     */
+    private val reconnectNudge = object : Runnable {
+        override fun run() {
+            val s = sdk ?: return
+            if (connectedTaps.isEmpty()) {
+                Log.i(TAG, "No strap connected — nudging refreshConnections()")
+                try {
+                    s.refreshConnections()
+                } catch (e: Exception) {
+                    Log.w(TAG, "refreshConnections nudge failed", e)
+                }
+            }
+            handler.postDelayed(this, NUDGE_INTERVAL_MS)
+        }
+    }
 
     override fun start() {
         if (sdk != null) return
         Log.i(TAG, "Starting tap-android-sdk (Controller Mode, background handling disabled)")
         val s = TapSdkFactory.getDefault(context.applicationContext)
-        // Keep Controller Mode when the app backgrounds / screen turns off —
-        // the whole point of this demo. Without this the SDK restores Text
-        // Mode (HID) on background and input stops reaching us.
-        s.disablePauseResumeHandling()
         s.registerTapListener(this)
+        // ORDER MATTERS (verified against the 0.3.6 bytecode): resume() is the
+        // call that re-establishes connections to bonded straps, and it
+        // EARLY-RETURNS when pauseResumeHandling is false. So resume first,
+        // kick an explicit refresh, and only then disable pause/resume
+        // handling — which we still want off so backgrounding never flips the
+        // strap back to Text Mode (HID) and kills screen-off input.
         s.resume()
+        s.refreshConnections()
+        s.disablePauseResumeHandling()
         sdk = s
+        handler.postDelayed(reconnectNudge, NUDGE_INTERVAL_MS)
     }
 
     override fun stop() {
         val s = sdk ?: return
         sdk = null
+        handler.removeCallbacksAndMessages(null)
+        connectedTaps.clear()
         try {
             s.unregisterTapListener(this)
             // Hand the Tap back to normal keyboard behavior when the service stops.
@@ -98,6 +132,7 @@ class RealTapSource(
 
     override fun onTapConnected(tapIdentifier: String) {
         Log.i(TAG, "Tap connected: $tapIdentifier — pinning Controller Mode")
+        connectedTaps.add(tapIdentifier)
         // The SDK switches to Controller Mode on connect by default, but pin it
         // explicitly so a stray mode change can't silently break input.
         sdk?.startControllerMode(tapIdentifier)
@@ -106,6 +141,7 @@ class RealTapSource(
 
     override fun onTapDisconnected(tapIdentifier: String) {
         Log.i(TAG, "Tap disconnected: $tapIdentifier")
+        connectedTaps.remove(tapIdentifier)
         onStatus("disconnected", tapIdentifier, null)
         // Recovery must be automatic, not user-initiated. The SDK reconnects
         // bonded devices on its own; refreshConnections() nudges it in case
@@ -123,6 +159,7 @@ class RealTapSource(
 
     override fun onTapResumed(tapIdentifier: String) {
         Log.i(TAG, "Tap resumed: $tapIdentifier — pinning Controller Mode")
+        connectedTaps.add(tapIdentifier)
         sdk?.startControllerMode(tapIdentifier)
         onStatus("connected", tapIdentifier, null)
     }

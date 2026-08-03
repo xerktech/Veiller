@@ -97,6 +97,8 @@ class TapInputModule : Module() {
 
         fun snapshot(): Map<String, Any?> = mapOf(
             "serviceRunning" to TapInputService.isRunning,
+            "realSource" to TapInputService.realSourceState,
+            "bondedTaps" to TapInputService.bondedTapNames(),
             "taps" to tapModes.map { (id, mode) -> mapOf("tapIdentifier" to id, "mode" to mode) },
             "tapCount" to tapCount,
             "lastChord" to lastChord,
