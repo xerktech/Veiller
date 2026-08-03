@@ -6,258 +6,133 @@ codebase wins — but tell me about the drift so I can update this file.
 
 ---
 
+> **Status (2026-08-02): fork reset + new focus.** The fork was reset onto
+> MentraOS `upstream/dev` — upstream now ships native Even Realities G2 support
+> and the on-device miniapp SDK, which made the old fork's G2-era work dead
+> weight. The pre-reset history lives on the old `main`; only the R1 ring
+> RE docs/tools, CI disables, and app identity were carried over.
+>
+> **Current focus: the Tap Strap 2 → G2 text echo demo** (see
+> `docs/tap-strap-demo.md` and `miniapps/tap-typing-demo/README.md`). The R1
+> ring effort (previously goal #1) is **paused, not dead** — its findings remain
+> in `docs/r1-ring-*.md` and `tools/r1-*`.
+
 ## 1. What Foverlay is
 
-Foverlay is a custom Android companion app for **Even Realities G2 smart glasses**.
-It replaces the stock Even Realities app as the *host* / connection point for the
-glasses, giving me a fully custom dashboard and UX plus deep native phone
-integration the stock app and the Even Hub plugin sandbox can't provide.
+Foverlay is a custom Android companion app for **Even Realities G2 smart glasses**,
+forked from **MentraOS** (`Mentra-Community/MentraOS`, MIT-licensed). It replaces
+the stock Even Realities app as the host / connection point for the glasses.
 
 The name: **fovea** (the sharp-focus center of vision) + **overlay** (what a HUD
-draws). It is not affiliated with Even Realities or Mentra — keep both trademarks
-out of the product identity, package names, and user-facing strings.
+draws). It is not affiliated with Even Realities, Mentra, or Tap Systems — keep
+those trademarks out of the product identity, package names, and user-facing
+strings.
 
 ### The core decision: fork MentraOS, do not build BLE from scratch
 
-We are building Foverlay as a **fork of MentraOS** (`Mentra-Community/MentraOS`,
-MIT-licensed), NOT a from-scratch BLE host. MentraOS already implements the hard
-parts on Android: G2 pairing, connection management, display, microphone, touch
-gestures, battery, and brightness. Re-deriving the BLE/protobuf/audio stack
-ourselves would be months of work for no benefit. The plan is to inherit
-MentraOS's glasses plumbing and replace the parts above it (dashboard, UX,
-permissions, backend hosting).
-
-If an approach starts to look like "reimplement what MentraOS already does," stop
-and reconsider — that's almost always the wrong path here.
+MentraOS implements the hard parts on Android: G2 pairing (dual-GATT, one radio
+per temple arm), display (EvenHub scene renderer with native pacing/coalescing),
+microphone, touch gestures, battery. We inherit that and build above it. If an
+approach starts to look like "reimplement what MentraOS already does," stop and
+reconsider.
 
 ## 2. Current status
 
-Greenfield. Treat the repo as a fresh fork of MentraOS that has not yet been
-customized. Early tasks are about **planning and isolating** our changes so we can
-keep rebasing on MentraOS upstream, not about large rewrites.
+Fresh reset onto `upstream/dev` (Aug 2026) plus the Tap Strap 2 demo stack:
+
+- `mobile/modules/tap-input/` — **@foverlay/tap-input** Expo module (Android):
+  `TapInputService` foreground service owning the Tap Strap 2 BLE connection via
+  tap-android-sdk Controller Mode; `TapAlphabet` tapcode→char table (unit
+  tested); `FakeTapSource` for adb-driven development without hardware.
+- `miniapps/tap-typing-demo/` — background-only miniapp that echoes tap chords
+  to a text box on the G2.
+- Upstream files touched (kept minimal for rebases): `engine/DeviceEventRouter.ts`
+  (tap_input forwarding), miniapp SDK typed stream additions (`protocol.ts`,
+  `events.ts`, `input.ts`, exports), `mobile/app.config.ts` (identity),
+  `package.json`/lockfiles.
 
 ## 3. Goals (in priority order)
 
-> **Priority override (2026-06-25):** the **R1 ring is goal #1**, proven out
-> *before* anything else. This supersedes the earlier framing (and §9) where the
-> ring was a deferred sub-project. See `docs/r1-ring-research.md` for the original
-> feasibility analysis and `docs/r1-ring-capture-findings.md` for the **capture #1
-> result that resolved the make-or-break question** — read the findings doc first;
-> it changes the shape of this goal.
->
-> **Scope update (2026-06-25, after capture #1):** ring **control no longer needs
-> original RE.** Capture proved the ring sends button/gesture events *only* over
-> the ring↔glasses link (the ring↔phone link was silent through 25 presses), and
-> the glasses translate ring input into their own **native G2 input events** (a
-> ring double-tap arrived at the phone as the same `gesture_ctrl` event the G2
-> temple touchpad emits). So we get ring control "for free" off the MentraOS G2
-> baseline — just keep the ring **bound** to the glasses and consume the existing
-> G2 input stream; binding is a G2-protocol concern (`switchRingHand(mac)`,
-> `Ring bind status`), i.e. inherited-stack work, not ring RE. The **only original
-> ring BLE RE left is health** (#1b), and it is decodable (frames captured). The
-> revised make-or-break is therefore: health-decode + confirming MentraOS exposes
-> the G2 input events — **not** decoding ring gestures.
-
-1. **R1 ring (goal #1, do first).**
-   - **(a) Button/gesture control of the G2 — native, inherited.** Do **not**
-     decode the ring for this. Keep the ring bound to the glasses (G2-protocol
-     binding) and consume the G2's native input events via the MentraOS baseline
-     (goal #2). The firmware maps ring presses onto existing glasses controls.
-   - **(b) Health metrics — the one original ring-BLE RE task.** Decode the ring's
-     `BAE80012`→`BAE80013` health frames (the ring pairs directly to the phone, so
-     we sniff the real Even app and decode). Route results on-device into Health
-     Connect (see goal #5). Open risk: GoMore-key gating on derived metrics
-     (HRV/sleep/SpO₂); raw HR/steps likely recoverable.
-2. **Glasses baseline (enabling step for the ring milestone and everything else).**
-   Connect to the G2, verify microphone input and screen/text output. This is the
-   foundation the ring control loop renders onto; it comes from the MentraOS fork.
-3. **Custom dashboard / UX.** Replace MentraOS's default dashboard/home experience
-   with my own glanceable layout and widget system on the glasses.
-4. **Native phone integrations** that the Even Hub sandbox blocked:
-   - **Calendar** via Android `CalendarContract` (local device calendar, which
-     already includes synced Google calendars) — no OAuth, no per-user API keys.
-   - **Fitness** via **Health Connect** (on-device). Note the cloud path is dead:
-     the Google Fit REST API is deprecated and shutting down end of 2026 with no
-     replacement, so local Health Connect is the only real option. This is also
-     where ring health metrics (goal #1b) land.
-   - **Messaging** via Android default-SMS-handler APIs (see constraints below).
-5. **Self-hosted backend.** Run our own MentraOS backend rather than MentraOS
-   Cloud, both for privacy and to fit my existing self-hosting setup (home lab,
-   reverse proxy via Cloudflare Tunnel / `cloudflared`; no Tailscale).
+1. **Tap Strap 2 → G2 text echo demo** — prove typing-in-pocket works and
+   measure keystroke→display latency (~120ms budget). Milestones and definition
+   of done: `miniapps/tap-typing-demo/README.md`.
+2. **Custom dashboard / UX** on the glasses (replace MentraOS's default home).
+3. **Native phone integrations**: Calendar via `CalendarContract`, fitness via
+   Health Connect (Google Fit REST is dead end-2026), messaging via Android
+   default-SMS-handler APIs.
+4. **Self-hosted backend** (home lab, Cloudflare Tunnel; no Tailscale) — note
+   upstream is migrating miniapps *on-device* (WebView/JSContext, no server
+   round-trip), which shrinks what a backend even needs to do.
+5. **R1 ring** (paused): control comes free off the G2 input stream once the
+   ring is bound to the glasses; health metrics need original BLE RE
+   (`docs/r1-ring-capture-findings.md`).
 6. **Android first.** iOS is explicitly later.
 
-## 4. Non-goals / out of scope (for now)
+## 4. Non-goals
 
-- **iOS support.** Deferred. Do not let iOS constraints shape Android decisions.
-- **Rewriting MentraOS's BLE / protobuf / audio / ASR layers.** Inherit them.
-  (Note: this applies to the *G2 glasses* stack we inherit. The *R1 ring* has no
-  MentraOS support and is in scope as original RE — now goal #1, see §3/§9.)
-- **Publishing to the Mentra or Even app stores.** This is a private host app.
+- iOS support (deferred; don't let iOS constraints shape Android decisions).
+- Rewriting MentraOS's BLE / protobuf / audio / ASR layers.
+- Publishing to the Mentra or Even app stores.
+- For the tap demo specifically: mouse/cursor support, custom bitmap fonts,
+  chord remapping UI, persistence/backends. See the demo README's non-goals.
 
-## 5. Architecture (inherited from MentraOS)
+## 5. Architecture (verified against upstream dev, Aug 2026)
 
-The MentraOS data path:
+Miniapps run **on-device**, not through the cloud: a background JS bundle in a
+native JSContext (QuickJS on Android, JSC on iOS, via the `crust` module) plus
+an optional UI bundle in a WebView. The Cloud SDK path is legacy.
 
-```
-G2 glasses  <--BLE-->  phone (host app)  <-->  backend  <-->  app servers (MentraOS SDK)
-```
+Key data paths:
 
-- **Phone host app**: React Native (Expo) with native Android/iOS modules. This is
-  where our custom dashboard and native-permission bridges live.
-- **Backend**: TypeScript services. We self-host this.
-- **App servers / mini-apps**: MentraOS uses a mini-app model — apps run as servers
-  speaking the MentraOS SDK, and multiple mini-apps share one glasses connection
-  through the on-phone runtime. Foverlay features can be implemented either as
-  native host features or as mini-apps; decide per feature during planning.
+- Native device events → RN: Expo module `sendEvent` (e.g. `BluetoothSdkModule`)
+  → `@mentra/engine` `DeviceEventRouter` → `LocalMiniappRuntime.forwardEvent`
+  → per-app Crust dispatch → miniapp SDK `session.events` / typed modules.
+- Display: `session.display.render([...])` scene API (the old
+  `layouts.showTextWall` **no longer exists**) → `LocalDisplayManager` (no JS
+  throttle by design) → `SceneRenderer` → native G2 driver, which owns pacing +
+  last-wins coalescing (EvenHub queue). G2 canvas is 576×288, ~7 lines of text,
+  and supports bitmaps (`{type:"image"}`) too.
+- Tap input: `TapInputService` → `TapInputModule.sendEvent("tap_input")` →
+  `DeviceEventRouter` → `forwardEvent("tap_input")` → miniapp
+  `session.input.onTapInput(...)`.
 
-SDK shape (for orientation, verify against the installed version):
+## 6. Repo layout (verified)
 
-```ts
-import { AppServer } from '@mentra/sdk'
-class MyApp extends AppServer {
-  protected async onSession(session, sessionId, userId) {
-    session.layouts.showTextWall("Hello")
-    session.events.onTranscription((data) => { /* ... */ })
-  }
-}
-```
+- `mobile/` — Expo RN host app. Native modules in `mobile/modules/`:
+  `bluetooth-sdk` (glasses BLE, incl. `sgcs/G2.kt`), `crust` (JS contexts, nav),
+  `engine` (runtime/stores/routers), `miniapp` (**the @mentra/miniapp SDK
+  source**), `jspolyfill`, and our `tap-input`.
+- `miniapps/` — local (island-runtime) miniapps; `captions/` is the best
+  reference implementation; `tap-typing-demo/` is ours.
+- `sdk/` — `miniapp-cli` (`mentra-miniapp dev|pack|release`),
+  `create-mentra-miniapp`, docs in `sdk/docs/*.md`.
+- `cloud-v2/` — backend packages (legacy cloud path lives here).
+- `docs/` — Foverlay docs (tap demo, R1 ring RE), `tools/` — R1 capture tools.
 
-## 6. Tech stack
+## 7. Platform constraints (hard realities)
 
-- **Mobile host**: React Native + Expo (TypeScript) with native modules in Kotlin
-  (Android) — Android is where calendar / Health Connect / SMS bridges get written.
-- **Backend**: TypeScript (self-hosted).
-- **Glasses transport**: BLE, handled by MentraOS — we should not need to touch raw
-  GATT for G2 unless we hit a MentraOS gap.
+- **Tap in HID mode is useless for this app**: Android routes HID keys to the
+  focused window; screen-off has none. Controller Mode via tap-android-sdk only.
+  The Tap must be OS-paired first; the SDK attaches to bonded devices.
+- **iOS SMS is impossible**; Android SMS is Play-review-gated (default-handler
+  use case). Plan graceful degradation.
+- **Calendar and fitness are local** (`CalendarContract`, Health Connect) — no
+  OAuth flows.
+- **Nothing hardcoded to MentraOS Cloud** — every cloud-facing endpoint must be
+  configurable.
 
-## 7. Repo layout (from MentraOS — VERIFY against the real tree)
+## 8. Conventions
 
-MentraOS's own `AGENTS.md` describes roughly this structure. Do not trust it
-blindly; run a directory listing and read the real `AGENTS.md` / module-level docs
-before planning against it:
-
-- `mobile/` — Expo React Native host app (our dashboard + native bridges)
-- `cloud/packages/` — backend services, TS SDK, store frontend
-- `cloud/tests/` — integration tests
-- `android_core/`, `android_library/`, `sdk_ios/` — platform SDKs / native code
-- `mcu_client/` — hardware/MCU tooling
-- `agents/`, `docs/` — notes and design docs
-
-Before editing, locate the **dashboard/home** module in `mobile/` — that's the
-primary surface we're replacing.
-
-## 8. Platform constraints the agent MUST respect
-
-These are hard realities; don't plan around them as if they're solvable in code:
-
-- **iOS SMS is impossible.** iOS does not allow third-party apps to send SMS
-  silently, read the inbox, or become the default messaging app. The most iOS ever
-  allows is a pre-filled compose sheet the user taps. This is one reason messaging
-  is Android-first.
-- **Android SMS is permission-gated by Google Play.** We can become the default SMS
-  handler and read/send, but the `SMS`/`CALL_LOG` permission group requires
-  qualifying for a permitted use case (default handler is one) and passing Play
-  review. Plan messaging so the app degrades gracefully if SMS permission isn't
-  granted.
-- **Calendar and fitness are local, not cloud.** Use `CalendarContract` and Health
-  Connect. Do not introduce OAuth flows or require users to generate API keys for
-  these — avoiding exactly that friction is a core reason this app exists.
-- **Self-hosted backend** means don't hardcode MentraOS Cloud endpoints; everything
-  cloud-facing must be configurable to point at my own host.
-
-## 9. R1 ring (goal #1 — see §3, `docs/r1-ring-capture-findings.md`, `docs/r1-ring-research.md`)
-
-The Even R1 ring controls the G2 (tap/double-tap/long-press/slide up/down) and
-tracks HR, SpO₂, HRV, sleep, steps, skin temp. **Capture #1 (2026-06-25) resolved
-the make-or-break question and split this goal in two** — read
-`docs/r1-ring-capture-findings.md` before planning ring work.
-
-**(a) Control — native firmware, inherited, NO ring RE.** Capture proved ring
-button/gesture events do **not** traverse the ring↔phone link (it was silent
-through 25 deliberate presses); they go ring↔glasses only, and the glasses
-translate them into their **own native G2 input events** (a ring double-tap reached
-the phone as the same `gesture_ctrl` event the G2 temple touchpad emits). So we do
-not decode ring gestures. We get ring control off the MentraOS G2 baseline (§3
-goal #2): keep the ring **bound** to the glasses and consume the existing G2 input
-stream. Binding/config is a G2-protocol concern done over the inherited `…2760…`
-Nordic-UART link — observed: host→glasses `switchRingHand(isLeft, mac=DD:52:92…)`,
-glasses report `Ring bind status: hadBound`. Remaining work: confirm MentraOS
-surfaces these G2 input events + bind-status; add the bind command if needed.
-
-**(b) Health — the only original ring-BLE RE.** The ring pairs directly to the
-phone, so we sniff + decode its `BAE80012`(write, GATT handle `0x0015`) →
-`BAE80013`(notify, handle `0x0017`) frames. Capture #1 already grabbed real frames:
-health sync issued command bytes `01/02/04/05/06` with 12-byte responses; device
-serials (e.g. `B290DHACE160024`) came in plaintext at connect; a `0x0f` status
-frame polls every ~1–2 min. Frame skeleton + decoder in
-`docs/r1-ring-capture-findings.md` / `tools/r1-decode-ring.py`. **Open risk:**
-GoMore-key gating on *derived* metrics (HRV/sleep/SpO₂) — raw HR/steps likely
-recoverable, derived may not be. Next step: a health-focused capture (manual sync,
-anchor to a visible HR/step value) to map each cmd→metric, then route to Health
-Connect (goal #5). Implement as an isolated native Android ring module, kept
-upstream-mergeable.
-
-**Capture method (reusable):** Android Bluetooth HCI snoop log in **Full** mode
-(payloads are plaintext below link-layer encryption; no root). Pull via
-`adb bugreport`; decode with `tools/r1-decode-ring.py`. Raw captures are
-git-ignored — they contain private device data.
-
-## 10. Reference material
-
-- **`Mentra-Community/MentraOS`** — our fork base. Source of truth for architecture,
-  module layout, SDK, and how G2 is driven. Read its `AGENTS.md` and module docs.
-- **`i-soxi/even-g2-protocol`** — community G2 BLE reverse engineering. Useful if we
-  ever hit a MentraOS gap. Has: 7-packet auth handshake, teleprompter text, calendar
-  widget; notifications partial; AI/navigation still research. Details: CRC-16/CCITT
-  (init `0xFFFF`, poly `0x1021`, little-endian, computed over payload only); packet
-  `[AA][21][seq][len][01][01][svc_hi][svc_lo][payload][crc_lo][crc_hi]`; dual channel
-  — content `0x5401`, rendering `0x6402`; protobuf payloads.
-- **`AGiXT/mobile`** — documents the related G1 BLE protocol (dual BLE radios, one per
-  arm, Nordic UART). Good background for the Even protocol family.
-- **`kalanihelekunihi/evenRealities-openCFW`** — decompile/RE notes on the Even iOS
-  app internals (incl. the `ring1/` ring layer reference).
-- **even-g2-notes** (community) — G2 architecture, BLE/session, display, input, page
-  lifecycle, device API, packaging docs, plus example apps.
-
-## 11. Conventions / how to work in this repo
-
-- **Read the real MentraOS code before planning against it.** It moves fast; this
-  file is a map, not the territory.
-- **Keep changes upstream-mergeable.** Maintain a clean `upstream` remote pointing at
-  `Mentra-Community/MentraOS`. Isolate Foverlay-specific code so we can rebase on
-  upstream without painful conflicts. Prefer additive modules over rewriting MentraOS
-  internals in place; when we must modify upstream files, keep edits minimal and
-  well-commented.
-- **No Even / Mentra trademarks** in product name, package IDs, or user-facing copy.
-- **Respect MentraOS's MIT license** (retain notices) in anything we redistribute.
-- **Android first**: when a design choice trades Android quality for iOS readiness,
-  favor Android.
-
-## 12. How to approach planning (what I usually want from you)
-
-When asked to plan, produce a written plan **before** writing code:
-
-1. State your understanding of the task and how it fits the goals in §3.
-2. Identify which MentraOS module(s) are involved and what you actually found when
-   you inspected them (don't assume from §7).
-3. Decide: native host feature vs. mini-app, and why.
-4. Call out platform constraints (§8) and how the design handles them, including the
-   graceful-degradation path when a permission is denied.
-5. List concrete steps / file changes, the upstream-mergeability impact, and how it
-   gets tested.
-6. Flag open questions and anything you couldn't verify rather than guessing.
-
-Ask before large refactors of inherited MentraOS code. Small, isolated, reversible
-changes are preferred.
-
-## 13. Open questions to verify (not assume)
-
-- Exact current MentraOS module layout and where the dashboard/home surface lives.
-- Whether the installed MentraOS version exposes the hooks we need for a fully custom
-  dashboard, or whether we need to patch upstream.
-- Current `@mentra/sdk` surface and the supported way to render custom widgets/layouts
-  on the G2.
-- The precise self-hosting steps for the MentraOS backend and which endpoints the
-  mobile app must be repointed to.
-- Health Connect + `CalendarContract` integration points within the Expo/native-module
-  boundary.
+- **Keep changes upstream-mergeable**: `upstream` remote → `Mentra-Community/MentraOS`,
+  base on `upstream/dev`. Prefer additive modules (like `tap-input`) over
+  editing upstream files; when upstream files must change, keep edits minimal
+  and commented (`// Foverlay:`).
+- **Build tooling**: bun everywhere. Note: bun 1.3.x fails to resolve the
+  `file:` miniapp-cli dep when (re)installing `mobile/`; bun 1.2.x works.
+- **No Even / Mentra / Tap trademarks** in product identity.
+- **Respect the MIT license** (retain notices).
+- Read the real MentraOS code before planning against it; it moves fast.
+- When asked to plan: state understanding, cite what you actually found in the
+  modules, decide native-vs-miniapp per feature, list steps + upstream-merge
+  impact, flag unverified assumptions. Ask before large refactors of inherited
+  code.

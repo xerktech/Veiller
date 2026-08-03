@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+
+group = 'com.foverlay.tapinput'
+version = '0.1.0'
+
+def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+apply from: expoModulesCorePlugin
+applyKotlinExpoModulesCorePlugin()
+useCoreDependencies()
+useExpoPublishing()
+
+buildscript {
+  // Simple helper that allows the root project to override versions declared by this library.
+  ext.safeExtGet = { prop, fallback ->
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+  }
+}
+project.android {
+  compileSdkVersion safeExtGet("compileSdkVersion", 36)
+  defaultConfig {
+    minSdkVersion safeExtGet("minSdkVersion", 24)
+    targetSdkVersion safeExtGet("targetSdkVersion", 36)
+  }
+}
+
+android {
+  namespace "com.foverlay.tapinput"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  buildTypes {
+    internal {
+      initWith release
+      matchingFallbacks = ['release']
+    }
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  // Tap Strap 2 SDK (Controller Mode tapcodes over the SDK's own BLE GATT
+  // connection). Published on Maven Central — NOT JitPack; the JitPack
+  // com.github.TapWithUs coordinates stop at a failed 0.3.3 build.
+  // 0.3.6 verified against repo1.maven.org metadata (latest, 2021-12).
+  implementation 'io.github.tapwithus:tap-android-sdk:0.3.6'
+
+  implementation 'androidx.core:core-ktx:1.13.1'
+
+  testImplementation 'junit:junit:4.13.2'
+}

@@ -1,6 +1,13 @@
 package com.mentra.bluetoothsdk
 
 import org.json.JSONObject
+import java.util.UUID
+
+internal fun generatedCameraRequestId(prefix: String): String =
+    "$prefix-${System.currentTimeMillis()}-${UUID.randomUUID().toString().take(8)}"
+
+internal fun nonBlankRequestId(requestId: String?): String? =
+    requestId?.trim()?.takeIf { it.isNotEmpty() }
 
 enum class PhotoSize(val value: String) {
     LOW("low"),
@@ -103,14 +110,15 @@ class CameraFov @JvmOverloads constructor(
     companion object {
         const val MIN_FOV = 62
         const val MAX_FOV = 118
-        const val DEFAULT_FOV = 102
+        const val DEFAULT_FOV = 118
         const val NARROW_FOV = 82
+        const val STANDARD_FOV = 102
         @JvmField
         val DEFAULT_ROI_POSITION = CameraRoiPosition.CENTER
         @JvmField
         val NARROW = CameraFov(NARROW_FOV, DEFAULT_ROI_POSITION)
         @JvmField
-        val STANDARD = CameraFov(DEFAULT_FOV, DEFAULT_ROI_POSITION)
+        val STANDARD = CameraFov(STANDARD_FOV, DEFAULT_ROI_POSITION)
         @JvmField
         val WIDE = CameraFov(MAX_FOV, DEFAULT_ROI_POSITION)
     }
@@ -160,9 +168,19 @@ data class CameraFovResult(
     }
 }
 
+enum class PhotoMode(val value: String) {
+    PHOTO("photo"),
+    TEXT("text");
+
+    companion object {
+        @JvmStatic
+        fun fromValue(value: String?): PhotoMode =
+            values().firstOrNull { it.value == value } ?: PHOTO
+    }
+}
+
 data class PhotoRequest @JvmOverloads constructor(
-    val requestId: String,
-    val appId: String,
+    val requestId: String = generatedCameraRequestId("photo"),
     val size: PhotoSize,
     val webhookUrl: String,
     val authToken: String? = null,
@@ -182,8 +200,23 @@ data class PhotoRequest @JvmOverloads constructor(
     val ispDigitalGain: Int? = null,
     val ispAnalogGain: String? = null,
     val resetCaptureTuning: Boolean? = null,
+    val mode: PhotoMode = PhotoMode.PHOTO,
+    /** `direct` disables BLE fallback; `ble` skips direct upload; `auto` tries both. */
+    val transferMethod: String = "auto",
 ) {
     companion object {
+        private fun transferMethodFromValue(value: Any?): String {
+            if (value == null) return "auto"
+            val raw = value as? String
+                ?: throw IllegalArgumentException(
+                    "Invalid transferMethod ${value::class.java.simpleName}. Expected auto, direct, or ble."
+                )
+            return raw.takeIf { it == "auto" || it == "direct" || it == "ble" }
+                ?: throw IllegalArgumentException(
+                    "Invalid transferMethod \"$raw\". Expected auto, direct, or ble."
+                )
+        }
+
         /** Mirrors iOS `BluetoothSdkModule` defaults for keys omitted from the JS bridge. */
         @JvmStatic
         fun fromMap(values: Map<String, Any>): PhotoRequest {
@@ -211,14 +244,16 @@ data class PhotoRequest @JvmOverloads constructor(
             val ispAnalogGain = stringValue(values, "ispAnalogGain")
 
             return PhotoRequest(
-                requestId = stringValue(values, "requestId", "request_id").orEmpty(),
-                appId = stringValue(values, "appId", "app_id").orEmpty(),
+                requestId = nonBlankRequestId(stringValue(values, "requestId", "request_id"))
+                    ?: generatedCameraRequestId("photo"),
                 size = PhotoSize.fromValue(stringValue(values, "size") ?: "medium"),
                 webhookUrl = stringValue(values, "webhookUrl", "webhook_url").orEmpty(),
                 authToken = stringValue(values, "authToken", "auth_token")?.takeIf { it.isNotBlank() },
                 compress = PhotoCompression.fromValue(stringValue(values, "compress") ?: "none"),
                 save = boolValue(values, "save", "saveToGallery") ?: false,
                 sound = boolValue(values, "sound") ?: true,
+                mode = PhotoMode.fromValue(stringValue(values, "mode")),
+                transferMethod = transferMethodFromValue(values["transferMethod"]),
                 exposureTimeNs = exposureTimeNs,
                 iso = iso,
                 aeExposureDivisor = aeDivisor,
@@ -436,6 +471,16 @@ data class PhotoStatusEvent(
     val requestedCaptureConfig: Map<String, Any>? get() = stringMapValue(values["requestedCaptureConfig"])
     val meteredPreview: Map<String, Any>? get() = stringMapValue(values["meteredPreview"])
     val captureMetadata: Map<String, Any>? get() = stringMapValue(values["captureMetadata"])
+    val errorCode: String? get() = stringValue(values, "errorCode")
+    val errorMessage: String? get() = stringValue(values, "errorMessage")
+}
+
+data class CameraStatusEvent(
+    val values: Map<String, Any>,
+) {
+    val requestId: String get() = stringValue(values, "requestId").orEmpty()
+    val state: String get() = stringValue(values, "state").orEmpty()
+    val timestamp: Long get() = longValue(values, "timestamp") ?: System.currentTimeMillis()
     val errorCode: String? get() = stringValue(values, "errorCode")
     val errorMessage: String? get() = stringValue(values, "errorMessage")
 }

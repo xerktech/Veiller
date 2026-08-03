@@ -8,6 +8,16 @@ import { startDevSidecar } from './dev-server.js';
 const DEFAULT_DEV_PORT = 3000;
 const DEV_PORT_SCAN_LIMIT = 50;
 
+export interface DevAttestationInput {
+  packageName: string;
+  devServerUrl: string;
+}
+
+export interface DevOptions {
+  cwd?: string;
+  signDevAttestation?: (input: DevAttestationInput) => string | Promise<string | null | undefined> | null | undefined;
+}
+
 function getLanIp(): string | null {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
@@ -88,8 +98,8 @@ async function runBuild(cwd: string): Promise<void> {
   }
 }
 
-export async function dev(): Promise<void> {
-  const cwd = process.cwd();
+export async function dev(options: DevOptions = {}): Promise<void> {
+  const cwd = resolve(options.cwd ?? process.cwd());
   const manifestPath = resolve(cwd, 'miniapp.json');
   if (!existsSync(manifestPath)) {
     console.error('Error: miniapp.json not found in current directory');
@@ -217,38 +227,57 @@ export async function dev(): Promise<void> {
     );
   }
 
-  const buildDevUrl = (ip: string) => {
-    const base = `miniapp://dev?url=${encodeURIComponent(`http://${ip}:${port}`)}&name=${encodeURIComponent(name)}&package=${encodeURIComponent(packageName)}`;
-    return sidecarPort ? `${base}&dev=${sidecarPort}` : base;
+  const buildDevUrl = async (ip: string): Promise<string> => {
+    const devServerUrl = `http://${ip}:${port}`;
+    const base = `miniapp://dev?url=${encodeURIComponent(devServerUrl)}&name=${encodeURIComponent(name)}&package=${encodeURIComponent(packageName)}`;
+    const withDevPort = sidecarPort ? `${base}&dev=${sidecarPort}` : base;
+    if (!options.signDevAttestation) return withDevPort;
+
+    try {
+      const attestation = await options.signDevAttestation({ packageName, devServerUrl });
+      if (!attestation) return withDevPort;
+      return `${withDevPort}&attestation=${encodeURIComponent(attestation)}`;
+    } catch (error) {
+      console.warn(`Warning: could not sign dev URL (${(error as Error).message}). Miniapp auto-auth will be unavailable.`);
+      return withDevPort;
+    }
   };
 
   const printBanner = (): void => {
     console.log('\n╔══════════════════════════════════════════════════════════════╗');
-    console.log('║  To test your mini app on glasses:                           ║');
+    console.log('║  To test your miniapp on glasses:                            ║');
     console.log('║                                                              ║');
-    console.log('║    1. Open the Mentra app on your phone                      ║');
+    console.log('║    1. Open the Mentra App on your phone                      ║');
     console.log('║    2. Settings → Developer settings                          ║');
     console.log('║    3. Under "Mini App Development", tap                      ║');
     console.log('║       "Scan Mini App QR Code" and scan the QR below          ║');
     console.log('║                                                              ║');
     console.log('║  Your phone must be on the same Wi-Fi as this computer.      ║');
+    console.log('║                                                              ║');
+    console.log('║  Dev mode is live and temporary:                             ║');
+    console.log('║    • Keep this process and computer running.                 ║');
+    console.log('║    • Each package gets its own dev entry, so you can scan    ║');
+    console.log('║      and test multiple dev miniapps side by side.            ║');
+    console.log('║    • The Mentra App caches each miniapp name and icon.       ║');
+    console.log('║                                                              ║');
+    console.log('║  For a persistent install, run: bun run release              ║');
     console.log('╚══════════════════════════════════════════════════════════════╝\n');
   };
 
   printBanner();
-  const devUrl = buildDevUrl(lanIp);
-  printQR(devUrl);
+  const devUrl = await buildDevUrl(lanIp);
+  await printQR(devUrl);
   console.log(`\n${devUrl}\n`);
 
   // Monitor for LAN IP changes (e.g., WiFi switch).
-  const ipCheckInterval = setInterval(() => {
+  const ipCheckInterval = setInterval(async () => {
     const newIp = getLanIp();
     if (newIp && newIp !== lanIp) {
       lanIp = newIp;
       console.log(`\nLAN IP changed to ${newIp}. New QR:`);
       printBanner();
-      const newDevUrl = buildDevUrl(newIp);
-      printQR(newDevUrl);
+      const newDevUrl = await buildDevUrl(newIp);
+      await printQR(newDevUrl);
       console.log(`\n${newDevUrl}\n`);
     }
   }, 10_000);

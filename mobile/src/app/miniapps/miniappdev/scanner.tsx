@@ -8,17 +8,11 @@ import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import showAlert from "@/utils/AlertUtils"
-import {
-  appRegistry,
-  decideDevLaunchRoute,
-  registerDevApp,
-  useAppStatusStore,
-  DEV_APP_PACKAGE_NAME,
-  type DevAppRecord,
-} from "@mentra/island"
+import {decideDevLaunchRoute, engine} from "@mentra/engine"
+import {appRegistry, registerDevApp, type DevAppRecord} from "@mentra/engine/internal"
 import {askPermissionsUI, checkPermissionsUI, PERMISSION_CONFIG} from "@/utils/PermissionsUtils"
+import {markMiniappDevMode} from "@/utils/miniappDevMode"
 import type {AppletInterface, AppletPermission} from "@/../../cloud/packages/types/src"
-import {DEV_APP_NAME} from "@mentra/island/src/services/AppRegistry"
 
 export default function MiniappDeveloperScannerScreen() {
   const {theme} = useAppTheme()
@@ -54,6 +48,7 @@ export default function MiniappDeveloperScannerScreen() {
           ])
           return
         }
+        markMiniappDevMode()
         showAlert("Installed", `${res.value.name} v${res.value.version} is on your home screen.`, [
           {text: "OK", onPress: () => goBack()},
         ])
@@ -68,6 +63,7 @@ export default function MiniappDeveloperScannerScreen() {
       let packageName: string | undefined
       let name: string | undefined
       let devPort: string | undefined
+      let devAttestation: string | undefined
 
       if (data.startsWith("miniapp://dev")) {
         const url = new URL(data)
@@ -75,6 +71,7 @@ export default function MiniappDeveloperScannerScreen() {
         name = url.searchParams.get("name") || undefined
         packageName = url.searchParams.get("package") || undefined
         devPort = url.searchParams.get("dev") || undefined
+        devAttestation = url.searchParams.get("attestation") || undefined
       } else if (data.startsWith("http://") || data.startsWith("https://")) {
         devUrl = data
       } else {
@@ -98,8 +95,8 @@ export default function MiniappDeveloperScannerScreen() {
       const launchResult = await decideDevLaunchRoute(packageName ?? "", devUrl)
 
       const manifest = launchResult.manifest
-      packageName = packageName || manifest?.packageName || "com.dev.unknown"
-      name = name || manifest?.name || "Dev Miniapp"
+      packageName = manifest?.packageName || packageName || "com.dev.unknown"
+      name = manifest?.name || name || "Dev Miniapp"
       const iconPath = manifest?.icon as string | undefined
       const manifestPermissions: AppletPermission[] = Array.isArray(manifest?.permissions)
         ? (manifest!.permissions as AppletPermission[])
@@ -112,22 +109,26 @@ export default function MiniappDeveloperScannerScreen() {
           : `${devUrl.replace(/\/$/, "")}/${iconPath.replace(/^\//, "")}`
       }
 
-      // Persist a home-tile record so the dev miniapp is re-launchable
-      // without re-scanning. Dev apps load over HTTP and aren't installed
-      // to disk, so the lmas/ scan can't surface them. registerDevApp owns
-      // the dev_url/dev_port keys (under DEV_APP_PACKAGE_NAME) and renames
-      // the tile to DEV_APP_NAME — pass the manifest's REAL packageName so
-      // it survives as sourcePackageName (clearDevArtifacts needs it to drop
-      // the dev slot when the released package is installed/uninstalled).
+      // Persist a package-keyed home tile and routing record so this dev
+      // miniapp remains independently launchable without rescanning. Its icon
+      // is copied locally while the server is reachable.
       if (manifest) {
+        // A fetched manifest means a real dev app loaded — latch the per-account
+        // "this user is a developer" signal (idempotent). Gated on the manifest
+        // so a failed/unreachable scan (decision "offline", no manifest) can't
+        // flip the flag, matching the URL loader's behavior.
+        markMiniappDevMode()
+
         const portNum = devPort ? parseInt(devPort, 10) : NaN
-        registerDevApp({
-          packageName: DEV_APP_PACKAGE_NAME,
-          name: DEV_APP_NAME,
-          // name: name ?? packageName,
+        const existing = engine.miniapps.list().find((app) => app.packageName === packageName)
+        if (existing?.running) await engine.miniapps.stop(packageName)
+        await registerDevApp({
+          packageName,
+          name: name ?? packageName,
           iconUrl: iconUrl ?? `${devUrl.replace(/\/$/, "")}/icon.png`,
           devUrl: devUrl,
           devPort: Number.isFinite(portNum) ? portNum : undefined,
+          devAttestation,
           type: manifest.type as DevAppRecord["type"],
           permissions: manifest.permissions as DevAppRecord["permissions"],
           hardwareRequirements: manifest.hardwareRequirements as DevAppRecord["hardwareRequirements"],
@@ -166,11 +167,8 @@ export default function MiniappDeveloperScannerScreen() {
       }
 
       clearHistoryAndGoHome()
-      await useAppStatusStore.getState().refresh()
-      // Foreground the single dev slot, NOT the manifest's real package name —
-      // the projected tile + JSContext are registered under DEV_APP_PACKAGE_NAME,
-      // so setForeground(realName) would no-op (the store has no such app).
-      await useAppStatusStore.getState().setForeground(DEV_APP_PACKAGE_NAME)
+      await engine.miniapps.refresh()
+      await engine.miniapps.setForeground(packageName)
     } catch (error) {
       showAlert("Error", String(error), [{text: "OK", onPress: () => setScanned(false)}])
     }

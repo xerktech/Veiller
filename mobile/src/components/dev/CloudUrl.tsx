@@ -4,7 +4,7 @@ import {TextInput, TouchableOpacity, View} from "react-native"
 import {Button, Text} from "@/components/ignite"
 import GlassView from "@/components/ui/GlassView"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {SETTINGS, useSetting} from "@/stores/settings"
+import {SETTINGS, useSetting} from "@mentra/engine"
 import {cloudClient, resolvedEndpoints} from "@/services/cloudClient"
 import {devServerHost, METRO_AUTO} from "@/utils/cloudClient/devHost"
 import showAlert from "@/utils/AlertUtils"
@@ -15,6 +15,8 @@ const CLOUD_DEBUG_CORE_URL = "https://core.debug.us-west-2.mentraglass.com"
 const CLOUD_DEBUG_RUNTIME_URL = "https://runtime.debug.us-west-2.mentraglass.com"
 const CLOUD_STAGING_CORE_URL = "https://core.staging.us-west-2.mentraglass.com"
 const CLOUD_STAGING_RUNTIME_URL = "https://runtime.staging.us-west-2.mentraglass.com"
+const CLOUD_PROD_CORE_URL = "https://core.mentraglass.com"
+const CLOUD_PROD_RUNTIME_URL = "https://runtime.mentraglass.com"
 
 const LOCAL_CORE_PORT = 3000
 const LOCAL_RUNTIME_PORT = 3001
@@ -323,6 +325,15 @@ export default function CloudUrl() {
               flexContainer={false}
               flex
             />
+            <Button
+              compact
+              text="Cloud Prod"
+              onPress={() => applyPreset(CLOUD_PROD_CORE_URL, CLOUD_PROD_RUNTIME_URL)}
+              flexContainer={false}
+              flex
+            />
+          </View>
+          <View className="flex-row gap-3">
             {/* Only offered when a Metro dev server is actually detectable.
                 Fills both fields with the metro-auto sentinel: the SAVED value
                 is "my laptop", resolved live on every connect, so it follows

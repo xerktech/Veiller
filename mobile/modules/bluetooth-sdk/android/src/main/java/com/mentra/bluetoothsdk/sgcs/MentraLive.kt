@@ -25,6 +25,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -32,6 +33,8 @@ import com.mentra.bluetoothsdk.BluetoothSdkDefaults
 import com.mentra.bluetoothsdk.Bridge
 import com.mentra.bluetoothsdk.DeviceManager
 import com.mentra.bluetoothsdk.PhotoRequest
+import com.mentra.bluetoothsdk.PhotoSize
+import com.mentra.bluetoothsdk.PhotoMode
 import com.mentra.bluetoothsdk.DeviceStore
 import com.mentra.bluetoothsdk.ObservableStore
 import com.mentra.bluetoothsdk.debug.BleTraceLogger
@@ -40,6 +43,9 @@ import com.mentra.bluetoothsdk.utils.ConnTypes
 import com.mentra.bluetoothsdk.utils.DeviceTypes
 import com.mentra.bluetoothsdk.utils.IncidentLogBleRelayNaming
 import com.mentra.bluetoothsdk.utils.IncidentLogBleUploadService
+import com.mentra.bluetoothsdk.utils.BleJsonCompact
+import com.mentra.bluetoothsdk.utils.BleWireProtocol
+import com.mentra.bluetoothsdk.utils.K900LengthCodec
 import com.mentra.bluetoothsdk.utils.K900ProtocolUtils
 import com.mentra.bluetoothsdk.utils.MessageChunkReassembler
 import com.mentra.bluetoothsdk.utils.MessageChunker
@@ -89,6 +95,14 @@ class MentraLive : SGCManager() {
         // LC3 frame size for Mentra Live
         private const val LC3_FRAME_SIZE = 40
         private const val VOICE_ACTIVITY_DETECTION_SWITCH_TYPE = 8
+        private const val LOUDNESS_GATE_SWITCH_TYPE = 10
+        private const val BES2700_MTU_LIMIT = 509
+
+        // L2CAP CoC fast path: new BES2700 firmware registers an LE L2CAP CoC server on this
+        // PSM. When the phone opens the channel, the glasses send file packets over it instead
+        // of GATT FILE_READ notifications. Phone→glasses traffic stays on GATT.
+        private const val L2CAP_FILE_PSM = 0x00C9
+        private const val FILE_PACKET_LOG_INTERVAL = 32
 
         // BLE UUIDs - updated to match K900 BES2800 MCU UUIDs for compatibility with both glass
         // types
@@ -134,6 +148,10 @@ class MentraLive : SGCManager() {
 
         // Heartbeat parameters
         private const val HEARTBEAT_INTERVAL_MS = 30000 // 30 seconds
+        // Grace period before an unanswered BLE wire v2 handshake is re-armed for retry,
+        // and the per-session cap on automatic retries (see sendWireHandshake).
+        private const val WIRE_HANDSHAKE_RETRY_GRACE_MS = 5000L
+        private const val WIRE_HANDSHAKE_MAX_ATTEMPTS = 3
         private const val BATTERY_REQUEST_EVERY_N_HEARTBEATS = 10 // Every 10 heartbeats (5 minutes)
         private const val RSSI_READ_INTERVAL_MS = 10000L // 10 seconds
 
@@ -157,6 +175,8 @@ class MentraLive : SGCManager() {
 
         // Rate limiting - minimum delay between BLE characteristic writes
         private const val MIN_SEND_DELAY_MS = 160L // 160ms minimum delay (increased from 100ms)
+        private const val SIGNIFICANT_BLE_TRACE_DELAY_MS = 250L
+        private const val SIGNIFICANT_BLE_TRACE_QUEUE_SIZE = 5
 
         // File transfer management
         private const val FILE_SAVE_DIR = "MentraLive_Images"
@@ -196,6 +216,33 @@ class MentraLive : SGCManager() {
 
     // Local-only fields (not in parent SGCManager)
     private var buildNumberInt = 0 // Build number as integer for version checks
+    private var peerWireProtocolVersion = 0
+    private var useBinaryWireProtocol = false
+    private var wireHandshakeQueued = false
+    private var wireHandshakeAttempts = 0
+    // Session generation in which the LAST outgoing v2 handshake was sent. A handshake
+    // reply only activates v2 when it answers a handshake from the CURRENT epoch - a
+    // stale handshake that survived in flight across an epoch reset must not flip the
+    // new session to v2 before it negotiated its own build and capabilities.
+    private var wireHandshakeSentGeneration = -1
+    // Bumped on every BLE session reset; scheduled handshake-retry callbacks capture it
+    // and no-op if the session changed, so a timer from a dead session can't poke a new one.
+    private var wireSessionGeneration = 0
+    // Negotiated K900 STRING length endianness for the phone<->glasses BLE link. Defaults to
+    // legacy big-endian; upgraded to little-endian only when the glasses advertise wire_caps.k900_le
+    // (or a v2 binary handshake succeeds, which implies wire-v2 LE).
+    private var peerK900Le = false
+    private var peerWireCapsBinary = false
+    private var peerFilePayloadV2 = false
+    // Last observed glasses process session id (`sid` in glasses_ready / version_info_1).
+    // The BES keeps the BLE link alive across asg_client restarts, so transport state
+    // cannot signal a restart - a CHANGED (or newly appearing) sid is the restart signal.
+    // Null = no sid observed this BLE session (legacy glasses, or none seen yet).
+    private var glassesSessionId: String? = null
+    // True once a glasses_ready completed on THIS physical BLE session; resets only with
+    // the physical connection (never on heartbeat readiness flaps), so a first-seen sid
+    // after an upgrade OTA is always detected as a restart.
+    private var readinessCompletedThisBleSession = false
     // Note: appVersion, buildNumber, deviceModel, androidVersion
     // are inherited from SGCManager parent class
 
@@ -222,6 +269,9 @@ class MentraLive : SGCManager() {
     private var lc3ReadCharacteristic: BluetoothGattCharacteristic? = null
     private var lc3WriteCharacteristic: BluetoothGattCharacteristic? = null
     private var handler = Handler(Looper.getMainLooper())
+    private val fileProcessingThread =
+            HandlerThread("MentraLive-FileProcessing").apply { start() }
+    private val fileProcessingHandler = Handler(fileProcessingThread.looper)
     private var scheduler: ScheduledExecutorService? = null
     private var isScanning = false
     private var isConnecting = false
@@ -237,7 +287,35 @@ class MentraLive : SGCManager() {
     private var a2dpProfile: BluetoothA2dp? = null
     private var isA2dpProxyRegistered = false
 
-    private var sendQueue = ConcurrentLinkedQueue<ByteArray>()
+    private data class OutgoingBleCommandTraceInfo(
+            val commandType: String,
+            val requestId: String?,
+            val appId: String?,
+            val messageId: Long?
+    )
+
+    private data class BleWriteTrace(
+            val sequence: Long,
+            val commandType: String,
+            val requestId: String?,
+            val appId: String?,
+            val messageId: Long?,
+            val chunkId: String?,
+            val chunkIndex: Int?,
+            val totalChunks: Int?,
+            val payloadBytes: Int?,
+            val packedBytes: Int,
+            val wakeup: Boolean,
+            val chunked: Boolean,
+            val queuedAtMs: Long
+    )
+
+    private data class QueuedBleWrite(val data: ByteArray, val trace: BleWriteTrace?)
+
+    private var sendQueue = ConcurrentLinkedQueue<QueuedBleWrite>()
+    private val bleWriteTraceSequence = AtomicLong(1)
+    private var inFlightBleWriteTrace: BleWriteTrace? = null
+    private var inFlightBleWriteStartedAtMs = 0L
     // Queue for serializing BLE descriptor writes (only one GATT operation at a time)
     private val pendingDescriptorWrites = ConcurrentLinkedQueue<BluetoothGattDescriptor>()
     private var isDescriptorWriteInProgress = false
@@ -259,6 +337,8 @@ class MentraLive : SGCManager() {
     // So we temporarily suspend the LC3 mic during phone audio playback
     private var micIntentEnabled = false // User/system WANTS mic enabled
     private var micSuspendedForAudio = false // Mic temporarily suspended due to phone audio
+    override val isMicSuspendedForAudio: Boolean
+        get() = micSuspendedForAudio
     private var phoneAudioMonitor: PhoneAudioMonitor? = null
     private var micOnCount = 0
     private var micOffCount = 0
@@ -273,7 +353,7 @@ class MentraLive : SGCManager() {
     private var activeFileTransfers = ConcurrentHashMap<String, FileTransferSession>()
 
     // BLE photo transfer tracking
-    private var blePhotoTransfers: MutableMap<String, BlePhotoTransfer> = HashMap()
+    private var blePhotoTransfers: MutableMap<String, BlePhotoTransfer> = ConcurrentHashMap()
 
     /** Expected incident log relay files from glasses (B… firmware, L… logcat). */
     private val bleIncidentLogRelays = ConcurrentHashMap<String, BleIncidentLogRelay>()
@@ -287,6 +367,12 @@ class MentraLive : SGCManager() {
     private val filePacketBufferLock = Any()
     private var fileReadNotificationCount = 0 // Debug counter for FILE_READ notifications
     private val incomingChunkReassembler = MessageChunkReassembler()
+
+    // L2CAP CoC fast path for incoming file transfers (see L2CAP_FILE_PSM).
+    // The channel is read-only; all outgoing messages remain on GATT. When it can't be
+    // opened (older firmware, Android < 10), GATT notifications remain the file path.
+    private val enableL2capFilePath = true
+    private var l2capFileChannel: MentraLiveL2capChannel? = null
 
     private val connectionLock = Any()
 
@@ -720,9 +806,24 @@ class MentraLive : SGCManager() {
         val isEqual = state == connectionState
         if (isEqual) {
             if (state == ConnTypes.DISCONNECTED) {
-                incomingChunkReassembler.clear()
+                resetWireNegotiationState()
+                // Queued writes are session-bound: transmitting them into the NEXT session
+                // (e.g. a stale handshake whose reply activates v2 before the new session
+                // negotiated) is the bug class this clear removes. Higher layers re-send
+                // what still matters via their own ACK/retry tracking.
+                sendQueue.clear()
             }
             return
+        }
+
+        if (state == ConnTypes.DISCONNECTED) {
+            // Device identity is session-bound. Clear it on disconnect so a previous pair's
+            // identifiers can never be associated with the next connection. Connect must NOT
+            // clear them: DeviceManager.disconnect already wipes them before any new connection,
+            // and clearing on CONNECTED would wipe still-valid identity mid-session when a
+            // same-link glasses_ready (e.g. ASG restart) re-publishes CONNECTED.
+            DeviceStore.apply("glasses", "serialNumber", "")
+            DeviceStore.apply("glasses", "bluetoothMacAddress", "")
         }
 
         // Actually update the connection state!
@@ -740,6 +841,10 @@ class MentraLive : SGCManager() {
             DeviceStore.apply("glasses", "appVersion", "")
             DeviceStore.apply("glasses", "besFirmwareVersion", "")
             DeviceStore.apply("glasses", "mtkFirmwareVersion", "")
+            // Modern ASG builds omit ota_version_url entirely (the phone owns manifest
+            // selection), and the chunked parser only writes present fields — clear it here so
+            // a URL reported by a previous build cannot leak into this session.
+            DeviceStore.apply("glasses", "otaVersionUrl", "")
             Bridge.log("LIVE: Cleared cached version_info fields for fresh session")
         }
 
@@ -748,7 +853,9 @@ class MentraLive : SGCManager() {
             DeviceStore.apply("glasses", "connected", false)
             DeviceStore.apply("glasses", "signalStrength", -1)
             DeviceStore.apply("glasses", "signalStrengthUpdatedAt", 0L)
-            incomingChunkReassembler.clear()
+            resetWireNegotiationState()
+            sendQueue.clear() // see the disconnect reset above: stale writes die with the session
+
             // Drop OTA caches when fully disconnected — avoids leaking session/step state
             // from a previous pairing into the next one.
             resetOtaCache()
@@ -1374,6 +1481,15 @@ class MentraLive : SGCManager() {
         )
     }
 
+    private fun phyLabel(phy: Int): String {
+        return when (phy) {
+            BluetoothDevice.PHY_LE_1M -> "1M"
+            BluetoothDevice.PHY_LE_2M -> "2M"
+            BluetoothDevice.PHY_LE_CODED -> "coded"
+            else -> "unknown($phy)"
+        }
+    }
+
     /** GATT callback for BLE operations */
     private val gattCallback: BluetoothGattCallback =
             object : BluetoothGattCallback() {
@@ -1396,6 +1512,7 @@ class MentraLive : SGCManager() {
                             isConnecting = false
                             isConnected = true
                             connectedDevice = gatt.device
+
                             DeviceStore.apply("glasses", "bluetoothName", connectedDevice!!.name)
                             // Persist MAC so reconnection can use direct GATT instead of scanning
                             if (connectedDevice!!.address != null) {
@@ -1468,6 +1585,8 @@ class MentraLive : SGCManager() {
 
                             connectedDevice = null
                             glassesReady = false // Reset ready state on disconnect
+                            glassesSessionId = null // Fresh BLE session starts with no sid known
+                            readinessCompletedThisBleSession = false
 
                             // Reset audio pairing flags
                             glassesReadyReceived = false
@@ -1491,6 +1610,11 @@ class MentraLive : SGCManager() {
 
                             // Stop micbeat mechanism
                             stopMicBeat()
+
+                            // Close the L2CAP file channel (if the fast path was open)
+                            closeL2capFileChannel()
+                            fileProcessingHandler.removeCallbacksAndMessages(null)
+                            clearFilePacketBuffer()
 
                             // Clean up GATT resources
                             closeGattQuietly(false)
@@ -1527,6 +1651,8 @@ class MentraLive : SGCManager() {
                         isConnected = false
                         isConnecting = false
                         glassesReady = false
+                        glassesSessionId = null
+                        readinessCompletedThisBleSession = false
                         glassesReadyReceived = false
                         audioConnected = false
 
@@ -1544,6 +1670,11 @@ class MentraLive : SGCManager() {
                         // Stop micbeat mechanism
                         stopMicBeat()
 
+                        // Close the L2CAP file channel (if the fast path was open)
+                        closeL2capFileChannel()
+                        fileProcessingHandler.removeCallbacksAndMessages(null)
+                        clearFilePacketBuffer()
+
                         // Clean up resources
                         closeGattQuietly(false)
 
@@ -1553,6 +1684,38 @@ class MentraLive : SGCManager() {
                             handleReconnection()
                         }
                     }
+                }
+
+                override fun onPhyUpdate(
+                        gatt: BluetoothGatt,
+                        txPhy: Int,
+                        rxPhy: Int,
+                        status: Int
+                ) {
+                    Bridge.log(
+                            "LIVE: PHY update tx=" +
+                                    phyLabel(txPhy) +
+                                    ", rx=" +
+                                    phyLabel(rxPhy) +
+                                    ", status=" +
+                                    status
+                    )
+                }
+
+                override fun onPhyRead(
+                        gatt: BluetoothGatt,
+                        txPhy: Int,
+                        rxPhy: Int,
+                        status: Int
+                ) {
+                    Bridge.log(
+                            "LIVE: PHY read tx=" +
+                                    phyLabel(txPhy) +
+                                    ", rx=" +
+                                    phyLabel(rxPhy) +
+                                    ", status=" +
+                                    status
+                    )
                 }
 
                 override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
@@ -1671,11 +1834,20 @@ class MentraLive : SGCManager() {
                         characteristic: BluetoothGattCharacteristic,
                         status: Int
                 ) {
+                    val trace = inFlightBleWriteTrace
+                    val callbackAtMs = System.currentTimeMillis()
+                    val callbackDelayMs =
+                            if (inFlightBleWriteStartedAtMs > 0L)
+                                    callbackAtMs - inFlightBleWriteStartedAtMs
+                            else null
+                    inFlightBleWriteTrace = null
+                    inFlightBleWriteStartedAtMs = 0L
+
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         // Bridge.log("LIVE: Characteristic write successful");
 
                         // Calculate time since last send to enforce rate limiting
-                        val currentTimeMs = System.currentTimeMillis()
+                        val currentTimeMs = callbackAtMs
                         val timeSinceLastSendMs = currentTimeMs - lastSendTimeMs
                         val nextProcessDelayMs: Long
 
@@ -1690,9 +1862,34 @@ class MentraLive : SGCManager() {
                         }
 
                         // Schedule the next queue processing with appropriate delay
+                        logBleWriteTrace(
+                                "write_callback",
+                                trace,
+                                mapOf(
+                                        "status" to status,
+                                        "success" to true,
+                                        "callbackDelayMs" to callbackDelayMs,
+                                        "timeSinceLastSendMs" to timeSinceLastSendMs,
+                                        "nextProcessDelayMs" to nextProcessDelayMs,
+                                        "queueSize" to sendQueue.size,
+                                        "characteristicUuid" to characteristic.uuid.toString()
+                                )
+                        )
                         handler.postDelayed(processSendQueueRunnable!!, nextProcessDelayMs)
                     } else {
                         Log.e(TAG, "Characteristic write failed with status: " + status)
+                        logBleWriteTrace(
+                                "write_callback",
+                                trace,
+                                mapOf(
+                                        "status" to status,
+                                        "success" to false,
+                                        "callbackDelayMs" to callbackDelayMs,
+                                        "retryDelayMs" to 500L,
+                                        "queueSize" to sendQueue.size,
+                                        "characteristicUuid" to characteristic.uuid.toString()
+                                )
+                        )
                         // If write fails, try again with a longer delay
                         handler.postDelayed(processSendQueueRunnable!!, 500L)
                     }
@@ -2100,13 +2297,22 @@ class MentraLive : SGCManager() {
             Bridge.log(
                     "LIVE: Rate limiting: Waiting " + remainingDelayMs + "ms before next BLE send"
             )
+            logBleWriteTrace(
+                    "rate_limited",
+                    sendQueue.peek()?.trace,
+                    mapOf(
+                            "remainingDelayMs" to remainingDelayMs,
+                            "timeSinceLastSendMs" to timeSinceLastSendMs,
+                            "queueSize" to sendQueue.size
+                    )
+            )
             handler.postDelayed(processSendQueueRunnable!!, remainingDelayMs)
             return
         }
 
         // Send the next item from the queue
-        val data = sendQueue.poll()
-        if (data != null) {
+        val queuedWrite = sendQueue.poll()
+        if (queuedWrite != null) {
             // Update last send time before sending
             lastSendTimeMs = currentTimeMs
             Bridge.log(
@@ -2116,28 +2322,78 @@ class MentraLive : SGCManager() {
                             timeSinceLastSendMs +
                             "ms"
             )
-            sendDataInternal(data)
+            logBleWriteTrace(
+                    "dequeued",
+                    queuedWrite.trace,
+                    mapOf(
+                            "queueDelayMs" to
+                                    (queuedWrite.trace?.let { currentTimeMs - it.queuedAtMs }),
+                            "timeSinceLastSendMs" to timeSinceLastSendMs,
+                            "queueSizeAfterPoll" to sendQueue.size
+                    )
+            )
+            sendDataInternal(queuedWrite)
         }
     }
 
     /** Send data through BLE */
-    private fun sendDataInternal(data: ByteArray?) {
-        if (!isConnected || bluetoothGatt == null || txCharacteristic == null || data == null) {
+    private fun sendDataInternal(write: QueuedBleWrite?) {
+        if (!isConnected || bluetoothGatt == null || txCharacteristic == null || write == null) {
             return
         }
 
         try {
-            txCharacteristic!!.value = data
-            bluetoothGatt!!.writeCharacteristic(txCharacteristic)
+            val writeStartedAtMs = System.currentTimeMillis()
+            txCharacteristic!!.value = write.data
+            inFlightBleWriteTrace = write.trace
+            inFlightBleWriteStartedAtMs = writeStartedAtMs
+            val writeAccepted = bluetoothGatt!!.writeCharacteristic(txCharacteristic)
+            logBleWriteTrace(
+                    "write_call",
+                    write.trace,
+                    mapOf(
+                            "writeAccepted" to writeAccepted,
+                            "currentMtu" to currentMtu,
+                            "writeType" to txCharacteristic!!.writeType,
+                            "queueSize" to sendQueue.size,
+                            "characteristicUuid" to txCharacteristic!!.uuid.toString()
+                    )
+            )
+            if (!writeAccepted) {
+                inFlightBleWriteTrace = null
+                inFlightBleWriteStartedAtMs = 0L
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error sending data via BLE", e)
+            logBleWriteTrace(
+                    "write_exception",
+                    write.trace,
+                    mapOf(
+                            "errorClass" to e.javaClass.simpleName,
+                            "errorMessage" to (e.message ?: "unknown")
+                    )
+            )
+            inFlightBleWriteTrace = null
+            inFlightBleWriteStartedAtMs = 0L
         }
     }
 
     /** Queue data to be sent */
-    private fun queueData(data: ByteArray?) {
+    private fun queueData(data: ByteArray?, trace: BleWriteTrace? = null) {
         if (data != null) {
-            sendQueue.add(data)
+            val queuedTrace =
+                    trace?.copy(
+                            queuedAtMs =
+                                    if (trace.queuedAtMs > 0L)
+                                            trace.queuedAtMs
+                                    else System.currentTimeMillis()
+                    )
+            sendQueue.add(QueuedBleWrite(data, queuedTrace))
+            logBleChunkTrace(
+                    "queued",
+                    queuedTrace,
+                    mapOf("queueSizeAfterAdd" to sendQueue.size)
+            )
             // Bridge.log("LIVE: 📋 Added " + data.length + " to send queue - New queue size: " +
             // sendQueue.size());
 
@@ -2446,18 +2702,6 @@ class MentraLive : SGCManager() {
         var iterations = 0
         val MAX_ITERATIONS = 100
 
-        // Debug: Log hex dump of first 40 bytes
-        val hexFirst = StringBuilder()
-        for (i in 0 until Math.min(40, filePacketBufferSize)) {
-            hexFirst.append(String.format("%02X ", filePacketBuffer[i]))
-        }
-        Bridge.log(
-                "LIVE: 📦 extractCompleteFilePackets: buffer has " +
-                        filePacketBufferSize +
-                        " bytes, first 40: " +
-                        hexFirst.toString()
-        )
-
         while (pos < filePacketBufferSize && iterations++ < MAX_ITERATIONS) {
             // Find start marker ## (0x23 0x23)
             var startPos = -1
@@ -2492,11 +2736,6 @@ class MentraLive : SGCManager() {
 
             // Need at least 5 bytes to read type and packSize: ## (2) + type (1) + packSize (2)
             if (filePacketBufferSize - pos < 5) {
-                Bridge.log(
-                        "LIVE: 📦 Not enough data for header, have " +
-                                (filePacketBufferSize - pos) +
-                                " bytes, need 5"
-                )
                 break
             }
 
@@ -2506,33 +2745,9 @@ class MentraLive : SGCManager() {
                     ((filePacketBuffer[packSizeOffset].toInt() and 0xFF) shl 8) or
                             (filePacketBuffer[packSizeOffset + 1].toInt() and 0xFF)
 
-            // Also try little-endian for comparison
-            val packSizeLE =
-                    (filePacketBuffer[packSizeOffset].toInt() and 0xFF) or
-                            ((filePacketBuffer[packSizeOffset + 1].toInt() and 0xFF) shl 8)
-            Bridge.log(
-                    "LIVE: 📦 Header bytes 3-4: 0x" +
-                            String.format(
-                                    "%02X%02X",
-                                    filePacketBuffer[packSizeOffset],
-                                    filePacketBuffer[packSizeOffset + 1]
-                            ) +
-                            " -> packSize BE=" +
-                            packSize +
-                            ", LE=" +
-                            packSizeLE
-            )
-
             // Validate packSize
             if (packSize < 0 || packSize > K900ProtocolUtils.FILE_PACK_SIZE) {
-                Log.w(
-                        TAG,
-                        "Invalid packSize " +
-                                packSize +
-                                " (LE would be " +
-                                packSizeLE +
-                                "), skipping start marker"
-                )
+                Log.w(TAG, "Invalid packSize $packSize, skipping start marker")
                 pos = startPos + 1
                 continue
             }
@@ -2545,42 +2760,13 @@ class MentraLive : SGCManager() {
             // Check if we have the complete packet
             val availableBytes = filePacketBufferSize - pos
             if (availableBytes < expectedPacketSize) {
-                // Not enough data yet, wait for more fragments
-                Bridge.log(
-                        "LIVE: 📦 Waiting for more data: have " +
-                                availableBytes +
-                                " of " +
-                                expectedPacketSize +
-                                " bytes (packSize=" +
-                                packSize +
-                                ")"
-                )
-                break // IMPORTANT: break here, don't continue looking for end marker
+                break
             }
 
             // Verify end marker $$ at expected position
             val endMarkerPos = pos + expectedPacketSize - 2
             val endByte1 = filePacketBuffer[endMarkerPos]
             val endByte2 = filePacketBuffer[endMarkerPos + 1]
-
-            // Debug: Show bytes around expected end marker position
-            val endContext = StringBuilder()
-            for (i in
-                    Math.max(0, endMarkerPos - 5)..Math.min(
-                                    filePacketBufferSize - 1,
-                                    endMarkerPos + 5
-                            )) {
-                if (i == endMarkerPos) endContext.append("[")
-                endContext.append(String.format("%02X", filePacketBuffer[i]))
-                if (i == endMarkerPos + 1) endContext.append("]")
-                endContext.append(" ")
-            }
-            Bridge.log(
-                    "LIVE: 📦 End marker check at pos " +
-                            endMarkerPos +
-                            ": " +
-                            endContext.toString()
-            )
 
             if (endByte1 != 0x24.toByte() || endByte2 != 0x24.toByte()) {
                 // End marker not found - could be corrupted packet or wrong packSize interpretation
@@ -2606,22 +2792,10 @@ class MentraLive : SGCManager() {
             val completePacket = ByteArray(expectedPacketSize)
             System.arraycopy(filePacketBuffer, pos, completePacket, 0, expectedPacketSize)
 
-            Bridge.log(
-                    "LIVE: 📦 ✅ Complete file packet reassembled: " + expectedPacketSize + " bytes"
-            )
-
             // Process the complete packet
             val packetInfo = K900ProtocolUtils.extractFilePacket(completePacket)
             if (packetInfo != null && packetInfo.isValid) {
-                Bridge.log(
-                        "LIVE: 📦 ✅ Packet validated: index=" +
-                                packetInfo.packIndex +
-                                ", fileName=" +
-                                packetInfo.fileName
-                )
-                // Post to handler to process outside the lock
-                val finalPacketInfo = packetInfo
-                handler.post { processFilePacket(finalPacketInfo) }
+                enqueueFilePacket(packetInfo)
             } else {
                 Log.e(TAG, "Failed to extract/validate reassembled file packet")
             }
@@ -2634,13 +2808,6 @@ class MentraLive : SGCManager() {
             val remaining = filePacketBufferSize - pos
             System.arraycopy(filePacketBuffer, pos, filePacketBuffer, 0, remaining)
             filePacketBufferSize = remaining
-            Bridge.log(
-                    "LIVE: 📦 Removed " +
-                            pos +
-                            " bytes, " +
-                            remaining +
-                            " bytes remaining in buffer"
-            )
         } else if (pos >= filePacketBufferSize) {
             filePacketBufferSize = 0
         }
@@ -2654,6 +2821,49 @@ class MentraLive : SGCManager() {
     /** Clear the file packet reassembly buffer (call on disconnect) */
     private fun clearFilePacketBuffer() {
         synchronized(filePacketBufferLock) { filePacketBufferSize = 0 }
+    }
+
+    /**
+     * Open the L2CAP CoC fast path for incoming file transfers (PSM 0x00C9).
+     *
+     * New BES2700 firmware registers an LE L2CAP CoC server; when the phone opens the channel,
+     * the glasses send K900 file packets over it instead of GATT FILE_READ notifications.
+     * Complete frames from the channel are fed into processFilePacketData — the exact same entry
+     * point used by GATT FILE_READ notifications — so downstream reassembly (FileTransferSession,
+     * transfer_complete) is unchanged. On any failure to open we stay on GATT notifications.
+     */
+    private fun openL2capFileChannel() {
+        if (!enableL2capFilePath) {
+            return
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            // createInsecureL2capChannel requires API 29
+            Bridge.log("LIVE: L2CAP: unavailable, staying on GATT (requires Android 10+)")
+            return
+        }
+        if (l2capFileChannel != null) {
+            // Already open (or connecting) for this connection — e.g. repeated glasses_ready
+            return
+        }
+        val device = connectedDevice
+        if (device == null) {
+            Log.w(TAG, "L2CAP: no connected device, staying on GATT")
+            return
+        }
+        val channel =
+                MentraLiveL2capChannel(L2CAP_FILE_PSM) { frame ->
+                    // Same code path as a GATT FILE_READ notification carrying this frame
+                    processFilePacketData(frame)
+                }
+        l2capFileChannel = channel
+        channel.open(device)
+    }
+
+    /** Close the L2CAP file channel if open (call on disconnect). */
+    private fun closeL2capFileChannel() {
+        val channel = l2capFileChannel ?: return
+        l2capFileChannel = null
+        channel.close()
     }
 
     /** Process data received from the glasses */
@@ -2714,7 +2924,7 @@ class MentraLive : SGCManager() {
                 // structure
                 val packetInfo = K900ProtocolUtils.extractFilePacket(data)
                 if (packetInfo != null && packetInfo.isValid) {
-                    processFilePacket(packetInfo)
+                    enqueueFilePacket(packetInfo)
                 } else {
                     Log.e(TAG, "Thread-" + threadId + ": Failed to extract or validate file packet")
                     // BES chip handles ACKs automatically
@@ -2723,10 +2933,26 @@ class MentraLive : SGCManager() {
                 return // Exit after processing file packet
             }
 
+            if (cmdType == K900ProtocolUtils.CMD_TYPE_BINARY_MSG) {
+                processBinaryWireFrame(data)
+                return
+            }
+
+            // Learn the glasses' K900 length endianness from the frame we just received so future
+            // outbound frames match. Guards against a peer that never advertises wire_caps.
+            K900LengthCodec.detectLength(data)?.let { detected ->
+                peerK900Le = detected.endian == K900LengthCodec.Endian.LE
+            }
+
             // Otherwise it's a normal JSON message
             val json = K900ProtocolUtils.processReceivedBytesToJson(data)
             if (json != null) {
-                processJsonMessage(json)
+                val expanded = expandCompactWireJson(json)
+                if (expanded == null) {
+                    Log.w(TAG, "Thread-$threadId: Rejected unsupported compact wire form")
+                    return
+                }
+                processJsonMessage(expanded)
             } else {
                 Log.w(TAG, "Thread-" + threadId + ": Failed to parse K900 protocol data")
                 // #region agent log [810da2] Hypothesis A+B: log header-declared length vs actual
@@ -2835,6 +3061,12 @@ class MentraLive : SGCManager() {
                     } catch (e: JSONException) {
                         Log.e(TAG, "Error converting photo status to Map", e)
                     }
+            "camera_status" ->
+                    try {
+                        Bridge.sendCameraStatus(jsonObjectToMap(json))
+                    } catch (e: JSONException) {
+                        Log.e(TAG, "Error converting camera status to Map", e)
+                    }
             "stream_status" -> {
                 // Process streaming status update from ASG client
                 Bridge.log("LIVE: Received stream status update from glasses: " + json.toString())
@@ -2905,10 +3137,12 @@ class MentraLive : SGCManager() {
                     )
             "speaking_status" -> handleSpeakingStatus(json.optBoolean("speaking", false))
             "battery_status" -> {
-                // Process battery status
+                // Percent only. battery_status derives from hm_batv, which carries no charge
+                // bit — older glasses fabricate `charging` from a voltage threshold (>3.9V)
+                // that reads "charging" for most of a discharging pack's range. Charging
+                // state comes exclusively from the PMU charg bit in the sr_hrt heartbeat.
                 val percent = json.optInt("percent", batteryLevel)
-                val charging = json.optBoolean("charging", isCharging)
-                updateBatteryStatus(percent, charging)
+                updateBatteryStatus(percent, isCharging)
             }
             "pong" ->
                     // Process heartbeat pong response
@@ -2927,7 +3161,24 @@ class MentraLive : SGCManager() {
                 val ssid = json.optString("ssid", "")
                 val localIp = json.optString("local_ip", "")
 
-                updateWifiStatus(wifiConnectedStatus, ssid, localIp)
+                // Provisioning failure reason (e.g. connect_timeout). Sticky: routine
+                // error-less status updates (link-state debounce, request_wifi_status)
+                // must not clear a failure nothing recovered from — only a newer error
+                // or a successful connection overwrites it.
+                val wifiError = json.optString("error", "")
+                if (wifiError.isNotEmpty()) {
+                    Bridge.log("LIVE: 🌐 WiFi provisioning error from glasses: $wifiError")
+                    DeviceStore.apply("glasses", "wifiError", wifiError)
+                } else if (wifiConnectedStatus) {
+                    DeviceStore.apply("glasses", "wifiError", "")
+                }
+
+                updateWifiStatus(
+                        wifiConnectedStatus,
+                        ssid,
+                        localIp,
+                        wifiError.takeIf { it.isNotEmpty() }
+                )
             }
             "hotspot_status_update" -> {
                 // Process hotspot status information (same pattern as "wifi_status")
@@ -3030,7 +3281,8 @@ class MentraLive : SGCManager() {
 
                 val scanComplete =
                         json.optBoolean("scan_complete", json.optBoolean("scanComplete", false))
-                Bridge.updateWifiScanResults(networks, scanComplete)
+                val scanId = json.optString("scanId", "").ifEmpty { null }
+                Bridge.updateWifiScanResults(networks, scanComplete, scanId)
             }
             "token_status" -> {
                 // Process coreToken acknowledgment
@@ -3283,6 +3535,20 @@ class MentraLive : SGCManager() {
                 // Glasses SOC has booted and is ready for communication
                 Bridge.log("LIVE: 🎉 Received glasses_ready message - SOC is booted and ready!")
 
+                // glasses_ready is a REMOTE wire-session reset: the glasses ran
+                // onTransportReset() before sending it, so their side is back on legacy
+                // framing regardless of what this side negotiated earlier. Start a fresh
+                // wire epoch (clears v2-active state that would otherwise gate the
+                // handshake off), then negotiate from the caps this message advertises.
+                resetWireNegotiationState()
+                parsePeerWireCaps(json)
+                maybeSendWireHandshake()
+                // Record the session id BEFORE marking ready: an unsolicited glasses_ready
+                // already runs this full remote-reset flow, so recording (not re-triggering)
+                // is correct here; version_info detection covers the restart case.
+                json.optString("sid", "").takeIf { it.isNotEmpty() }?.let { glassesSessionId = it }
+                readinessCompletedThisBleSession = true
+
                 // Set the ready flag to stop any future readiness checks
                 glassesReady = true
                 glassesReadyReceived = true
@@ -3292,12 +3558,18 @@ class MentraLive : SGCManager() {
 
                 // Stop the readiness check loop since we got confirmation
                 stopReadinessCheckLoop()
+                advertiseFilePayloadCapabilityToBes()
+
+                // Try to open the L2CAP CoC fast path for file transfers. No-op when the
+                // firmware doesn't support it — GATT notifications remain the default path.
+                try {
+                    openL2capFileChannel()
+                } catch (t: Throwable) {
+                    Bridge.log("LIVE: ⚠️ glasses_ready: openL2capFileChannel threw: " + t)
+                }
 
                 // Send BLE MTU config to glasses so they can adjust file packet sizes.
-                // Use the minimum of negotiated MTU and BES2700's known limit (256).
-                // BES2700 chip often ignores higher negotiated MTUs and truncates to 253 bytes,
-                // but we should respect the actual negotiated value if it's lower.
-                val BES2700_MTU_LIMIT = 256 // BES2700's known notification size limit
+            // Use the minimum of negotiated MTU and BES2700's datapath limit (509).
                 val effectiveMtu = Math.min(currentMtu, BES2700_MTU_LIMIT)
                 Bridge.log(
                         "LIVE: 📦 Sending BLE MTU config: negotiated=" +
@@ -3435,7 +3707,7 @@ class MentraLive : SGCManager() {
 
             "version_info" -> {
                 // Process version information from ASG client (legacy single-message format)
-                Bridge.log("LIVE: Received version info from ASG client: " + json.toString())
+                Bridge.log("LIVE: Received version info from ASG client")
 
                 // Extract version information
                 val appVersionLegacy = json.optString("app_version", "")
@@ -3445,6 +3717,7 @@ class MentraLive : SGCManager() {
                 val otaVersionUrlLegacy: String? = json.optString("ota_version_url", null)
                 val firmwareVersionLegacy = json.optString("firmware_version", "")
                 val btMacAddressLegacy = json.optString("bt_mac_address", "")
+                val serialNumberLegacy = json.optString("serial_number", "")
 
                 // Update parent SGCManager fields
                 DeviceStore.apply("glasses", "appVersion", appVersionLegacy)
@@ -3457,7 +3730,12 @@ class MentraLive : SGCManager() {
                         if (otaVersionUrlLegacy != null) otaVersionUrlLegacy else ""
                 )
                 DeviceStore.apply("glasses", "firmwareVersion", firmwareVersionLegacy)
-                DeviceStore.apply("glasses", "bluetoothMacAddress", btMacAddressLegacy)
+                btMacAddressLegacy.trim().takeIf { it.isNotEmpty() }?.let {
+                    DeviceStore.apply("glasses", "bluetoothMacAddress", it)
+                }
+                serialNumberLegacy.trim().takeIf { it.isNotEmpty() }?.let {
+                    DeviceStore.apply("glasses", "serialNumber", it)
+                }
 
                 val versionInfoLegacy = HashMap<String, Any>()
                 versionInfoLegacy["appVersion"] = appVersionLegacy
@@ -3477,6 +3755,8 @@ class MentraLive : SGCManager() {
                     buildNumberInt = 0
                     Log.e(TAG, "Failed to parse build number as integer: " + buildNumberLegacy)
                 }
+                parsePeerWireCaps(json)
+                maybeSendWireHandshake()
             }
             "ota_download_progress" -> {
                 // Process OTA download progress from ASG client
@@ -3637,7 +3917,7 @@ class MentraLive : SGCManager() {
             else -> {
                 // Flexible version_info parsing - handle any version_info* message
                 if (type.startsWith("version_info")) {
-                    Bridge.log("LIVE: Received " + type + ": " + json.toString())
+                    Bridge.log("LIVE: Received " + type)
 
                     // Extract all fields from JSON (except "type")
                     val fields = HashMap<String, Any>()
@@ -3662,8 +3942,10 @@ class MentraLive : SGCManager() {
                         // Parse build number as integer for version checks
                         try {
                             val buildNumInt = Integer.parseInt(buildNum)
+                            buildNumberInt = buildNumInt
                             Bridge.log("LIVE: Parsed build number as integer: " + buildNumInt)
                         } catch (e: NumberFormatException) {
+                            buildNumberInt = 0
                             Log.e(TAG, "Failed to parse build number as integer: " + buildNum)
                         }
                     }
@@ -3715,12 +3997,11 @@ class MentraLive : SGCManager() {
                                 fields["mtk_fw_version"] as String
                         )
                     }
-                    if (fields.containsKey("bt_mac_address")) {
-                        DeviceStore.apply(
-                                "glasses",
-                                "bluetoothMacAddress",
-                                fields["bt_mac_address"] as String
-                        )
+                    (fields["bt_mac_address"] as? String)?.trim()?.takeIf { it.isNotEmpty() }?.let {
+                        DeviceStore.apply("glasses", "bluetoothMacAddress", it)
+                    }
+                    (fields["serial_number"] as? String)?.trim()?.takeIf { it.isNotEmpty() }?.let {
+                        DeviceStore.apply("glasses", "serialNumber", it)
                     }
                     if (fields.containsKey("system_time_ms")) {
                         val v = fields["system_time_ms"]
@@ -3728,6 +4009,17 @@ class MentraLive : SGCManager() {
                             DeviceStore.apply("glasses", "systemTimeMs", v.toLong())
                         }
                     }
+
+                    // Negotiate wire caps from ANY version_info chunk, not only the one
+                    // carrying build_number: the glasses put wire_caps in version_info_3
+                    // (firmware chunk) while build_number travels in version_info_1, so
+                    // gating negotiation on build_number silently discards the caps.
+                    // parsePeerWireCaps no-ops without a wire_caps key and
+                    // maybeSendWireHandshake gates on caps + build + not-yet-queued, so
+                    // running them per chunk is safe.
+                    parsePeerWireCaps(json)
+                    maybeSendWireHandshake()
+                    handleGlassesSessionId(json)
 
                     Bridge.log("LIVE: Processed version_info fields and sent to RN")
                     Bridge.sendVersionInfo(fields)
@@ -4079,15 +4371,7 @@ class MentraLive : SGCManager() {
                             // The glassesReady flag is reset on disconnect/reconnect, so this won't
                             // prevent proper reconnection
                             if (!glassesReady) {
-                                Bridge.log(
-                                        "LIVE: 📱 Sending phone_ready to glasses - waiting for glasses_ready response"
-                                )
-                                val readyMsg = JSONObject()
-                                readyMsg.put("type", "phone_ready")
-                                readyMsg.put("timestamp", System.currentTimeMillis())
-
-                                // Send it through our data channel
-                                sendJson(readyMsg, true)
+                                sendPhoneReady("SOC ready")
                             } else {
                                 Bridge.log(
                                         "LIVE: ✅ Glasses already marked as ready, skipping phone_ready"
@@ -4123,11 +4407,10 @@ class MentraLive : SGCManager() {
                                         "%"
                         )
 
-                        // Determine charging status based on voltage (K900 typical charging voltage
-                        // is >4.0V)
-                        val isCharging = voltageMillivolts > 4000
-
-                        // Update battery status using the existing method
+                        // Percent only. sr_batv carries just voltage+percent; inferring
+                        // charging from voltage (>4.0V) reads "not charging" for most of a
+                        // genuinely-charging pack's range. Charging state comes exclusively
+                        // from the PMU charg bit in the sr_hrt heartbeat.
                         updateBatteryStatus(batteryPercentage, isCharging)
                     }
                 } catch (e: Exception) {
@@ -4169,6 +4452,8 @@ class MentraLive : SGCManager() {
                 updateConnectionState(ConnTypes.DISCONNECTED)
                 glassesReady = false
                 glassesReadyReceived = false
+                glassesSessionId = null
+                readinessCompletedThisBleSession = false
             }
             "sr_adota" -> {
                 // BES chip OTA progress — K900 path (serial busy during BES flash). Emit ota_status
@@ -4234,7 +4519,20 @@ class MentraLive : SGCManager() {
 
                         val syntheticStatus: String
                         if ("FINISHED" == besOtaStatus) {
-                            syntheticStatus = "step_complete"
+                            // The glasses power-cycle right after the final BES tick, so a
+                            // session whose BES step is the LAST step never gets a follow-up
+                            // ota_status from the glasses — consumers mapping on this synthetic
+                            // status would otherwise never see a terminal state. Emit "complete"
+                            // for the final step; mid-session BES steps keep "step_complete" so
+                            // session-level trackers advance normally. Unknown sessions
+                            // (cachedOtaTotalSteps == 0, e.g. legacy glasses that never sent an
+                            // ota_status) conservatively keep "step_complete".
+                            syntheticStatus =
+                                    if (cachedOtaTotalSteps > 0 &&
+                                                    cachedOtaCurrentStep >= cachedOtaTotalSteps
+                                    )
+                                            "complete"
+                                    else "step_complete"
                         } else if ("FAILED" == besOtaStatus) {
                             syntheticStatus = "failed"
                         } else {
@@ -4431,6 +4729,11 @@ class MentraLive : SGCManager() {
      * pattern
      */
     private fun updateBatteryStatus(level: Int, isCharging: Boolean) {
+        // Keep the field in sync: percent-only messages (battery_status/sr_batv) re-pass
+        // it as the last-known charging state, so a stale field would clobber the value
+        // the sr_hrt PMU charg bit established.
+        this.isCharging = isCharging
+
         // Update parent SGCManager fields
         DeviceStore.apply("glasses", "batteryLevel", level)
         DeviceStore.apply("glasses", "charging", isCharging)
@@ -4473,7 +4776,12 @@ class MentraLive : SGCManager() {
     /**
      * Update WiFi status and notify listeners Matches iOS MentraLive.swift updateWifiStatus pattern
      */
-    private fun updateWifiStatus(connected: Boolean, ssid: String, localIp: String) {
+    private fun updateWifiStatus(
+            connected: Boolean,
+            ssid: String,
+            localIp: String,
+            error: String? = null
+    ) {
         Bridge.log("LIVE: 🌐 Updating WiFi status - connected: " + connected + ", SSID: " + ssid)
 
         // Update parent SGCManager fields
@@ -4482,7 +4790,7 @@ class MentraLive : SGCManager() {
         DeviceStore.apply("glasses", "wifiLocalIp", localIp)
 
         // Send event to bridge for cloud communication
-        Bridge.sendWifiStatusChange(connected, ssid, localIp)
+        Bridge.sendWifiStatusChange(connected, ssid, localIp, error)
     }
 
     /**
@@ -4556,10 +4864,13 @@ class MentraLive : SGCManager() {
     /**
      * Request WiFi scan from the glasses This will ask the glasses to scan for available networks
      */
-    override fun requestWifiScan() {
+    override fun requestWifiScan(scanId: String?) {
         try {
             val json = JSONObject()
             json.put("type", "request_wifi_scan")
+            if (!scanId.isNullOrEmpty()) {
+                json.put("scanId", scanId)
+            }
             sendJson(json, true)
             Bridge.log("LIVE: Sending WiFi scan request to glasses")
         } catch (e: JSONException) {
@@ -5148,8 +5459,8 @@ class MentraLive : SGCManager() {
 
     override fun requestPhoto(request: PhotoRequest) {
         val requestId = request.requestId
-        val appId = request.appId
         val size = request.size.value
+        val mode = request.mode.value
         val webhookUrl = request.webhookUrl
         val authToken = request.authToken
         val compress = request.compress.value
@@ -5161,10 +5472,10 @@ class MentraLive : SGCManager() {
         Bridge.log(
                 "LIVE: Requesting photo: " +
                         requestId +
-                        " for app: " +
-                        appId +
                         " with size: " +
                         size +
+                        ", mode=" +
+                        mode +
                         ", webhookUrl: " +
                         webhookUrl +
                         ", authToken: " +
@@ -5186,16 +5497,13 @@ class MentraLive : SGCManager() {
         )
         Bridge.log(
                 "LIVE: PHOTO PIPELINE [5/6] requestPhoto() entry — requestId=" +
-                        requestId +
-                        ", appId=" +
-                        appId
+                        requestId
         )
 
         try {
             val json = JSONObject()
             json.put("type", "take_photo")
             json.put("requestId", requestId)
-            json.put("appId", appId)
             if (webhookUrl != null && !webhookUrl.isEmpty()) {
                 json.put("webhookUrl", webhookUrl)
             }
@@ -5205,6 +5513,7 @@ class MentraLive : SGCManager() {
             if (size != null && !size.isEmpty()) {
                 json.put("size", size)
             }
+            json.put("mode", mode)
             if (compress != null && !compress.isEmpty()) {
                 json.put("compress", compress)
             } else {
@@ -5232,8 +5541,9 @@ class MentraLive : SGCManager() {
             val bleImgId = "I" + String.format("%09d", System.currentTimeMillis() % 1000000000)
             json.put("bleImgId", bleImgId)
 
-            // Use auto mode by default - glasses will decide based on connectivity
-            json.put("transferMethod", "auto")
+            // Miniapps may explicitly skip direct Wi-Fi upload and force the
+            // phone-relayed BLE path. Auto remains the default.
+            json.put("transferMethod", request.transferMethod)
 
             // Always prepare for potential BLE transfer
             if (webhookUrl != null && !webhookUrl.isEmpty()) {
@@ -5243,9 +5553,11 @@ class MentraLive : SGCManager() {
                 blePhotoTransfers[bleImgId] = transfer
             }
 
-            Bridge.log("LIVE: Using auto transfer mode with BLE fallback ID: " + bleImgId)
+            Bridge.log("LIVE: Using " + request.transferMethod + " transfer mode with BLE fallback ID: " + bleImgId)
             Bridge.log(
-                    "LIVE: PHOTO PIPELINE [5b/6] JSON ready — " +
+                    "LIVE: PHOTO PIPELINE [5b/6] JSON ready mode=" +
+                            mode +
+                            " — " +
                             summarizeOutgoingMessage(json.toString()) +
                             ", wakeup=true"
             )
@@ -5255,6 +5567,59 @@ class MentraLive : SGCManager() {
         } catch (e: JSONException) {
             Log.e(TAG, "Error creating photo request JSON", e)
         }
+    }
+
+    fun warmUpCamera(
+        requestId: String,
+        size: PhotoSize,
+        mode: PhotoMode = PhotoMode.PHOTO,
+        exposureTimeNs: Long?,
+        durationMs: Int,
+        zsl: Boolean? = null,
+        mfnr: Boolean? = null,
+    ) {
+        Bridge.log(
+                "LIVE: warmUpCamera() entry — requestId=" +
+                        requestId +
+                        ", size=" +
+                        size.value +
+                        ", mode=" +
+                        mode.value +
+                        ", durationMs=" +
+                        durationMs
+        )
+
+        try {
+            val json = JSONObject()
+            json.put("type", "camera_warm_up")
+            json.put("requestId", requestId)
+            val sizeValue = size.value
+            json.put("size", if (sizeValue.isNotEmpty()) sizeValue else "medium")
+            json.put("mode", mode.value)
+            if (exposureTimeNs != null && exposureTimeNs > 0L) {
+                json.put("exposureTimeNs", exposureTimeNs)
+            }
+            if (mfnr != null) {
+                json.put("mfnr", mfnr)
+            }
+            if (zsl != null) {
+                json.put("zsl", zsl)
+            }
+            json.put("durationMs", if (durationMs > 0) durationMs else 15000)
+            sendJson(json, true)
+        } catch (e: JSONException) {
+            Log.e(TAG, "Error creating camera warm up JSON", e)
+        }
+    }
+
+    fun stopCameraWarmUp(requestId: String) {
+        if (!isConnected) {
+            throw IllegalStateException("not_connected")
+        }
+        val json = JSONObject()
+        json.put("type", "camera_warm_up_stop")
+        json.put("requestId", requestId)
+        sendJson(json, true)
     }
 
     override fun startStream(message: MutableMap<String, Any>) {
@@ -5871,6 +6236,7 @@ class MentraLive : SGCManager() {
 
         // Cancel any pending handlers
         handler.removeCallbacksAndMessages(null)
+        fileProcessingHandler.removeCallbacksAndMessages(null)
         heartbeatHandler.removeCallbacksAndMessages(null)
         rssiReadHandler.removeCallbacksAndMessages(null)
         micBeatHandler.removeCallbacksAndMessages(null)
@@ -5888,6 +6254,9 @@ class MentraLive : SGCManager() {
         //     sendRgbLedControlAuthority(false);
         // }
 
+        // Close the L2CAP file channel (if the fast path was open)
+        closeL2capFileChannel()
+
         // Disconnect from GATT if connected
         closeGattQuietly(true)
 
@@ -5899,6 +6268,7 @@ class MentraLive : SGCManager() {
 
         // Clear file packet reassembly buffer
         clearFilePacketBuffer()
+        fileProcessingThread.quitSafely()
 
         // Reset state variables
         reconnectAttempts = 0
@@ -6211,7 +6581,8 @@ class MentraLive : SGCManager() {
             val packedData =
                     K900ProtocolUtils.packDataToK900(
                             jsonStr.toByteArray(StandardCharsets.UTF_8),
-                            K900ProtocolUtils.CMD_TYPE_STRING
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
                     )
 
             queueData(packedData)
@@ -6395,7 +6766,8 @@ class MentraLive : SGCManager() {
             val packedData =
                     K900ProtocolUtils.packDataToK900(
                             jsonStr.toByteArray(StandardCharsets.UTF_8),
-                            K900ProtocolUtils.CMD_TYPE_STRING
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
                     )
             queueData(packedData)
         } catch (e: JSONException) {
@@ -6424,7 +6796,8 @@ class MentraLive : SGCManager() {
             val packedData =
                     K900ProtocolUtils.packDataToK900(
                             jsonStr.toByteArray(StandardCharsets.UTF_8),
-                            K900ProtocolUtils.CMD_TYPE_STRING
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
                     )
             queueData(packedData)
         } catch (e: JSONException) {
@@ -6498,7 +6871,8 @@ class MentraLive : SGCManager() {
             val packedData =
                     K900ProtocolUtils.packDataToK900(
                             jsonStr.toByteArray(StandardCharsets.UTF_8),
-                            K900ProtocolUtils.CMD_TYPE_STRING
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
                     )
             Bridge.log("LIVE: AUDIO: Sending cs_getvol command: " + jsonStr)
             queueData(packedData)
@@ -6522,7 +6896,8 @@ class MentraLive : SGCManager() {
             val packedData =
                     K900ProtocolUtils.packDataToK900(
                             jsonStr.toByteArray(StandardCharsets.UTF_8),
-                            K900ProtocolUtils.CMD_TYPE_STRING
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
                     )
             queueData(packedData)
             return true
@@ -6884,6 +7259,309 @@ class MentraLive : SGCManager() {
         }
     }
 
+    /** Negotiated K900 STRING length endianness for outbound frames to the glasses. */
+    private fun k900LengthEndian(): K900LengthCodec.Endian =
+            if (peerK900Le) K900LengthCodec.Endian.LE else K900LengthCodec.Endian.BE
+
+    /**
+     * Parse a {@code wire_caps} object from a version_info/glasses_ready message and update the
+     * negotiated per-link endianness and binary support. Missing wire_caps leaves the legacy
+     * defaults (BE, no binary) untouched so older glasses keep working.
+     */
+    /**
+     * Drop every negotiated wire-session artifact and bump the session generation so
+     * scheduled callbacks from the old session stand down. Called on BLE disconnect and on
+     * glasses_ready: the glasses run onTransportReset() before sending glasses_ready, so a
+     * mid-link ASG restart (no BLE disconnect) resets THEIR side to legacy framing - the
+     * phone must treat every glasses_ready as a new wire epoch and renegotiate (bounded by
+     * the per-session handshake attempt cap) instead of trusting stale v2-active state.
+     */
+    private fun resetWireNegotiationState() {
+        incomingChunkReassembler.clear()
+        peerWireProtocolVersion = 0
+        useBinaryWireProtocol = false
+        wireHandshakeQueued = false
+        wireHandshakeAttempts = 0
+        wireSessionGeneration++
+        peerK900Le = false
+        peerWireCapsBinary = false
+        peerFilePayloadV2 = false
+        BleJsonCompact.resetSession()
+        wireHandshakeSentGeneration = -1
+    }
+
+    /** Sends phone_ready to (re)start the glasses-driven readiness flow. */
+    private fun sendPhoneReady(reason: String) {
+        Bridge.log("LIVE: 📱 Sending phone_ready to glasses ($reason) - waiting for glasses_ready response")
+        val readyMsg = JSONObject()
+        readyMsg.put("type", "phone_ready")
+        readyMsg.put("timestamp", System.currentTimeMillis())
+        sendJson(readyMsg, true)
+    }
+
+    /**
+     * Tracks the glasses process session id (`sid`) and re-runs the phone-driven readiness
+     * flow when it changes under a live BLE link. The BES holds the link across asg_client
+     * restarts (APK OTA, crash recovery), so a restarted glasses process is invisible to
+     * transport state; the sid is the explicit protocol signal.
+     *
+     * Tri-state by design (retro-compat with pre-sid glasses builds):
+     * - no `sid` key: legacy glasses - do nothing, today's behavior;
+     * - sid appears where none was known on an ESTABLISHED session: the glasses just
+     *   updated from a pre-sid build and restarted - treat as a restart (this is the
+     *   upgrade OTA itself);
+     * - sid differs from the recorded one: the glasses restarted - treat as a restart;
+     * - same sid: same process, no action.
+     *
+     * A restart is handled as a LOGICAL session reset: send phone_ready immediately
+     * (instead of waiting for the next sr_hrt heartbeat, and bypassing its stale
+     * glassesReady suppression); the returning glasses_ready runs the full existing
+     * remote-wire-reset flow. glassesReady/fullyBooted are deliberately left untouched -
+     * the physical link never dropped, so the connection UI must not flap. The RN layer
+     * is notified so the OTA coordinator can treat it as its reconnect edge.
+     */
+    private fun handleGlassesSessionId(json: JSONObject) {
+        val sid = json.optString("sid", "")
+        if (sid.isEmpty()) return
+        val previous = glassesSessionId
+        if (sid == previous) return
+        glassesSessionId = sid
+        if (previous == null && !readinessCompletedThisBleSession) {
+            // First sid of a fresh BLE session before readiness completes: the normal
+            // pairing/readiness flow is already running - just record it.
+            return
+        }
+        Bridge.log(
+                "LIVE: 🔁 Glasses session changed (${previous ?: "<pre-sid build>"} -> $sid) - " +
+                        "asg restarted under a live link, re-running readiness"
+        )
+        sendPhoneReady("glasses session changed")
+        try {
+            val payload = HashMap<String, Any>()
+            payload["previous_sid"] = previous ?: ""
+            payload["sid"] = sid
+            Bridge.sendTypedMessage("glasses_session_changed", payload)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error emitting glasses_session_changed", e)
+        }
+    }
+
+    private fun parsePeerWireCaps(json: JSONObject) {
+        val caps = json.optJSONObject("wire_caps") ?: return
+        if (caps.optBoolean("k900_le", false)) {
+            if (!peerK900Le) {
+                peerK900Le = true
+                Bridge.log("LIVE: wire_caps negotiated k900 endian=LE")
+            }
+        }
+        if (caps.has("binary")) {
+            peerWireCapsBinary = caps.optBoolean("binary", false)
+        }
+        if (caps.has("file_payload_v2")) {
+            peerFilePayloadV2 = caps.optBoolean("file_payload_v2", false)
+        }
+    }
+
+    private fun advertiseFilePayloadCapabilityToBes() {
+        if (!peerFilePayloadV2) return
+        try {
+            val command = JSONObject()
+            command.put("C", "cs_file_payload")
+            command.put("B", "{\"max\":" + K900ProtocolUtils.FILE_PACK_SIZE + "}")
+            val packed =
+                    K900ProtocolUtils.packDataToK900(
+                            command.toString().toByteArray(StandardCharsets.UTF_8),
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
+                    )
+            queueData(packed)
+            Bridge.log(
+                    "LIVE: 📦 Advertised file payload ceiling " +
+                            K900ProtocolUtils.FILE_PACK_SIZE +
+                            " to BES"
+            )
+        } catch (e: JSONException) {
+            Log.e(TAG, "Failed to advertise file payload capability", e)
+        }
+    }
+
+    private fun maybeSendWireHandshake() {
+        // Only attempt the v2 binary handshake once the glasses have advertised binary support via
+        // wire_caps. Older builds that report build>=5 but lack wire_caps stay on the legacy path.
+        if (buildNumberInt < 5 ||
+                        !peerWireCapsBinary ||
+                        wireHandshakeQueued ||
+                        peerWireProtocolVersion >= BleWireProtocol.PROTOCOL_V2
+        ) {
+            return
+        }
+        sendWireHandshake()
+    }
+
+    private fun sendWireHandshake() {
+        if (buildNumberInt < 5) {
+            return
+        }
+        try {
+            val payload = BleWireProtocol.HANDSHAKE_PAYLOAD_V2.toByteArray(StandardCharsets.UTF_8)
+            var flags = BleWireProtocol.BLE_WIRE_FLAG_HANDSHAKE.toInt()
+            flags = flags or BleWireProtocol.BLE_WIRE_FLAG_FIRST_FRAG.toInt()
+            flags = flags or BleWireProtocol.BLE_WIRE_FLAG_LAST_FRAG.toInt()
+            val packed =
+                    K900ProtocolUtils.packBinaryFragment(
+                            flags.toByte(),
+                            0,
+                            0,
+                            1,
+                            payload
+                    )
+            Bridge.log("LIVE: Sending BLE wire v2 handshake")
+            wireHandshakeQueued = true
+            wireHandshakeSentGeneration = wireSessionGeneration
+            queueData(packed, null)
+            // The handshake and its reply are fire-and-forget binary frames with no ACK
+            // tracking; if either is lost, wireHandshakeQueued would block every future
+            // attempt and the session would silently stay on the legacy string wire.
+            // Re-arm after a grace period so negotiation can retry, bounded per session
+            // so a peer that advertises binary but never answers doesn't get pinged
+            // forever (later caps/version triggers may still retry explicitly).
+            wireHandshakeAttempts++
+            val scheduledGeneration = wireSessionGeneration
+            handler.postDelayed(
+                    {
+                        if (scheduledGeneration == wireSessionGeneration &&
+                                        wireHandshakeQueued &&
+                                        peerWireProtocolVersion < BleWireProtocol.PROTOCOL_V2
+                        ) {
+                            Bridge.log(
+                                    "LIVE: BLE wire v2 handshake unanswered after " +
+                                            WIRE_HANDSHAKE_RETRY_GRACE_MS +
+                                            "ms (attempt " +
+                                            wireHandshakeAttempts +
+                                            "/" +
+                                            WIRE_HANDSHAKE_MAX_ATTEMPTS +
+                                            ") - re-arming"
+                            )
+                            wireHandshakeQueued = false
+                            if (wireHandshakeAttempts < WIRE_HANDSHAKE_MAX_ATTEMPTS) {
+                                maybeSendWireHandshake()
+                            }
+                        }
+                    },
+                    WIRE_HANDSHAKE_RETRY_GRACE_MS
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send wire handshake", e)
+        }
+    }
+
+    private fun activateBinaryWireV2Session(logMessage: String) {
+        peerWireProtocolVersion = BleWireProtocol.PROTOCOL_V2
+        useBinaryWireProtocol = true
+        wireHandshakeQueued = false
+        wireHandshakeAttempts = 0
+        peerK900Le = true
+        BleJsonCompact.markSessionConnected(System.currentTimeMillis())
+        Bridge.log(logMessage)
+    }
+
+    private fun handlePeerWireHandshake() {
+        if (wireHandshakeSentGeneration != wireSessionGeneration) {
+            Bridge.log("LIVE: Ignoring wire v2 handshake reply from a previous session epoch")
+            return
+        }
+        activateBinaryWireV2Session("LIVE: Peer confirmed BLE wire protocol v2")
+    }
+
+    private fun processBinaryWireFrame(data: ByteArray) {
+        val info = K900ProtocolUtils.extractBinaryFragmentInfo(data) ?: run {
+            Log.w(TAG, "Failed to parse binary wire frame")
+            return
+        }
+
+        if (BleWireProtocol.isHandshakeV2(info)) {
+            handlePeerWireHandshake()
+            return
+        }
+
+        if (!useBinaryWireProtocol && buildNumberInt >= 5) {
+            activateBinaryWireV2Session(
+                    "LIVE: Auto-enabled BLE wire v2 from incoming binary frame"
+            )
+        }
+
+        val reassembled =
+                incomingChunkReassembler.addBinaryFragment(
+                        info.msgId,
+                        info.fragIdx,
+                        info.fragCount,
+                        info.payload
+                )
+                ?: return
+
+        try {
+            val jsonStr = String(reassembled, StandardCharsets.UTF_8)
+            val json = expandCompactWireJson(JSONObject(jsonStr))
+            if (json == null) {
+                Log.w(TAG, "Rejected unsupported compact reassembled wire form")
+                return
+            }
+            logWireMetrics(
+                    reassembled.size,
+                    data.size,
+                    info.fragCount,
+                    BleWireProtocol.PROTOCOL_V2,
+                    "glasses_to_phone"
+            )
+            processJsonMessage(json)
+        } catch (e: JSONException) {
+            Log.e(TAG, "Failed to parse reassembled binary wire JSON", e)
+        }
+    }
+
+    private fun compactWireJson(json: JSONObject): JSONObject {
+        if (!useBinaryWireProtocol || buildNumberInt < 5) {
+            return json
+        }
+        return try {
+            BleJsonCompact.encode(json)
+        } catch (_: JSONException) {
+            json
+        }
+    }
+
+    private fun expandCompactWireJson(json: JSONObject): JSONObject? {
+        if (!useBinaryWireProtocol || buildNumberInt < 5) {
+            return json
+        }
+        return try {
+            BleJsonCompact.decodeIfSupported(json)
+        } catch (_: JSONException) {
+            json
+        }
+    }
+
+    private fun logWireMetrics(
+            payloadBytes: Int,
+            wireBytes: Int,
+            packetCount: Int,
+            protocolVersion: Int,
+            direction: String
+    ) {
+        Bridge.log(
+                "BLE_TRACE direction=" +
+                        direction +
+                        " proto=v" +
+                        protocolVersion +
+                        " payload=" +
+                        payloadBytes +
+                        " wire=" +
+                        wireBytes +
+                        " packets=" +
+                        packetCount
+        )
+    }
+
     /**
      * Send data directly to the glasses using the K900 protocol utility. This method uses
      * K900ProtocolUtils.packJsonToK900 to handle C-wrapping and protocol formatting. Large messages
@@ -6897,8 +7575,20 @@ class MentraLive : SGCManager() {
             return
         }
 
+        val wireData =
+                try {
+                    if (useBinaryWireProtocol && buildNumberInt >= 5) {
+                        compactWireJson(JSONObject(data)).toString()
+                    } else {
+                        data
+                    }
+                } catch (_: JSONException) {
+                    data
+                }
+
         try {
-            val outgoingSummary = summarizeOutgoingMessage(data)
+            val outgoingSummary = summarizeOutgoingMessage(wireData)
+            val commandTraceInfo = parseOutgoingBleCommandTraceInfo(data)
             val isPhotoRequest = outgoingSummary.contains("type=take_photo")
             if (isPhotoRequest) {
                 Bridge.log(
@@ -6909,10 +7599,15 @@ class MentraLive : SGCManager() {
                 )
             }
 
+            if (useBinaryWireProtocol && buildNumberInt >= 5) {
+                sendDataToGlassesBinary(wireData, wakeup, commandTraceInfo, isPhotoRequest)
+                return
+            }
+
             // First check if the message needs chunking
             // Create a test C-wrapped version to check size
             val testWrapper = JSONObject()
-            testWrapper.put("C", data)
+            testWrapper.put("C", wireData)
             if (wakeup) {
                 testWrapper.put("W", 1)
             }
@@ -6930,14 +7625,14 @@ class MentraLive : SGCManager() {
                 // Extract message ID if present for ACK tracking
                 var messageId = -1L
                 try {
-                    val originalJson = JSONObject(data)
+                    val originalJson = JSONObject(wireData)
                     messageId = originalJson.optLong("mId", -1)
                 } catch (e: JSONException) {
                     // Not a JSON message or no mId, that's okay
                 }
 
                 // Create chunks
-                val chunks = MessageChunker.createChunks(data, messageId, wakeup)
+                val chunks = MessageChunker.createChunks(wireData, messageId, wakeup)
                 Bridge.log("LIVE: Sending " + chunks.size + " chunks")
                 if (isPhotoRequest) {
                     Bridge.log(
@@ -6952,15 +7647,39 @@ class MentraLive : SGCManager() {
                     val chunk = chunks[i]
                     val chunkStr = chunk.toString()
 
-                    // Pack each chunk using the normal K900 protocol
+                    // Pack each chunk using the normal K900 protocol with the negotiated endianness
                     val packedData =
                             K900ProtocolUtils.packJsonToK900(
                                     chunkStr,
-                                    wakeup && i == 0
-                            ) // Only wakeup on first chunk
+                                            wakeup && i == 0,
+                                            k900LengthEndian()
+                                    ) // Only wakeup on first chunk
+
+                    val trace =
+                            createBleWriteTrace(
+                                    commandTraceInfo,
+                                    chunk.optString("id", "").takeIf { it.isNotBlank() },
+                                    chunk.optInt("c", i),
+                                    chunk.optInt("n", chunks.size),
+                                    chunk.optString("d", "")
+                                            .toByteArray(StandardCharsets.UTF_8)
+                                            .size,
+                                    packedData.size,
+                                    wakeup && i == 0,
+                                    true
+                            )
+                    logBleChunkTrace(
+                            "created",
+                            trace,
+                            mapOf(
+                                    "chunkJsonBytes" to
+                                            chunkStr.toByteArray(StandardCharsets.UTF_8).size,
+                                    "messageBytes" to wireData.toByteArray(StandardCharsets.UTF_8).size
+                            )
+                    )
 
                     // Queue the chunk for sending
-                    queueData(packedData)
+                    queueData(packedData, trace)
 
                     // Add small delay between chunks to avoid overwhelming the connection
                     if (i < chunks.size - 1) {
@@ -6978,13 +7697,30 @@ class MentraLive : SGCManager() {
                 }
             } else {
                 // Normal single message transmission
-                Bridge.log("LIVE: Sending data to glasses: " + data)
+                Bridge.log("LIVE: Sending data to glasses: " + wireData)
 
-                // Pack the data using the centralized utility
-                val packedData = K900ProtocolUtils.packJsonToK900(data, wakeup)
+                // Pack the data using the centralized utility with the negotiated endianness
+                val packedData =
+                        K900ProtocolUtils.packJsonToK900(wireData, wakeup, k900LengthEndian())
+                val trace =
+                        createBleWriteTrace(
+                                commandTraceInfo,
+                                null,
+                                null,
+                                null,
+                                wireData.toByteArray(StandardCharsets.UTF_8).size,
+                                packedData.size,
+                                wakeup,
+                                false
+                        )
+                logBleChunkTrace(
+                        "created",
+                        trace,
+                        mapOf("messageBytes" to wireData.toByteArray(StandardCharsets.UTF_8).size)
+                )
 
                 // Queue the data for sending
-                queueData(packedData)
+                queueData(packedData, trace)
                 if (isPhotoRequest) {
                     Bridge.log(
                             "LIVE: PHOTO PIPELINE BLE handoff — packedLen=" +
@@ -6998,9 +7734,267 @@ class MentraLive : SGCManager() {
         }
     }
 
+    private fun sendDataToGlassesBinary(
+            data: String,
+            wakeup: Boolean,
+            commandTraceInfo: OutgoingBleCommandTraceInfo,
+            isPhotoRequest: Boolean
+    ) {
+        val payloadBytes = data.toByteArray(StandardCharsets.UTF_8)
+        var messageId = 0
+        var ackRequested = false
+        try {
+            val originalJson = JSONObject(data)
+            messageId = (originalJson.optLong("mId", 0L) and 0xFFFFL).toInt()
+            ackRequested = originalJson.has("mId")
+        } catch (_: JSONException) {
+            // Raw non-JSON payloads are still sent as a single binary fragment.
+        }
+
+        val fragments =
+                MessageChunker.createBinaryFragments(
+                        payloadBytes,
+                        messageId,
+                        wakeup,
+                        ackRequested
+                )
+        var totalWireBytes = 0
+        for (i in fragments.indices) {
+            val fragment = fragments[i]
+            val packedData =
+                    K900ProtocolUtils.packBinaryFragment(
+                            fragment.flags,
+                            fragment.msgId,
+                            fragment.fragIdx,
+                            fragment.fragCount,
+                            fragment.payload
+                    )
+            totalWireBytes += packedData.size
+
+            val trace =
+                    createBleWriteTrace(
+                            commandTraceInfo,
+                            null,
+                            fragment.fragIdx,
+                            fragment.fragCount,
+                            fragment.payload.size,
+                            packedData.size,
+                            wakeup && i == 0,
+                            fragments.size > 1
+                    )
+            logBleChunkTrace(
+                    "created",
+                    trace,
+                    mapOf(
+                            "messageBytes" to payloadBytes.size,
+                            "wireProtocol" to "v2"
+                    )
+            )
+            queueData(packedData, trace)
+
+            if (i < fragments.size - 1) {
+                try {
+                    Thread.sleep(50)
+                } catch (e: InterruptedException) {
+                    Log.w(TAG, "Interrupted during binary fragment delay")
+                }
+            }
+        }
+
+        logWireMetrics(
+                payloadBytes.size,
+                totalWireBytes,
+                fragments.size,
+                BleWireProtocol.PROTOCOL_V2,
+                "phone_to_glasses"
+        )
+
+        if (isPhotoRequest) {
+            Bridge.log(
+                    "LIVE: PHOTO PIPELINE BLE handoff — binary v2 queued " +
+                            fragments.size +
+                            " fragments, wireBytes=" +
+                            totalWireBytes
+            )
+        }
+    }
+
+    private fun parseOutgoingBleCommandTraceInfo(payload: String): OutgoingBleCommandTraceInfo {
+        return try {
+            val obj = JSONObject(payload)
+            OutgoingBleCommandTraceInfo(
+                    commandType = obj.optString("type", "unknown"),
+                    requestId = optNonBlankString(obj, "requestId"),
+                    appId = optNonBlankString(obj, "appId"),
+                    messageId = if (obj.has("mId")) obj.optLong("mId") else null
+            )
+        } catch (_: Exception) {
+            OutgoingBleCommandTraceInfo(
+                    commandType = "unknown",
+                    requestId = null,
+                    appId = null,
+                    messageId = null
+            )
+        }
+    }
+
+    private fun createBleWriteTrace(
+            commandInfo: OutgoingBleCommandTraceInfo,
+            chunkId: String?,
+            chunkIndex: Int?,
+            totalChunks: Int?,
+            payloadBytes: Int?,
+            packedBytes: Int,
+            wakeup: Boolean,
+            chunked: Boolean
+    ): BleWriteTrace {
+        return BleWriteTrace(
+                sequence = bleWriteTraceSequence.getAndIncrement(),
+                commandType = commandInfo.commandType,
+                requestId = commandInfo.requestId,
+                appId = commandInfo.appId,
+                messageId = commandInfo.messageId,
+                chunkId = chunkId,
+                chunkIndex = chunkIndex,
+                totalChunks = totalChunks,
+                payloadBytes = payloadBytes,
+                packedBytes = packedBytes,
+                wakeup = wakeup,
+                chunked = chunked,
+                queuedAtMs = System.currentTimeMillis()
+        )
+    }
+
+    private fun optNonBlankString(obj: JSONObject, key: String): String? {
+        return obj.optString(key, "").takeIf { it.isNotBlank() }
+    }
+
+    private fun logBleChunkTrace(
+            stage: String,
+            trace: BleWriteTrace?,
+            extra: Map<String, Any?> = emptyMap()
+    ) {
+        logBleTrace("sdk_ble_chunk", stage, trace, extra)
+    }
+
+    private fun logBleWriteTrace(
+            stage: String,
+            trace: BleWriteTrace?,
+            extra: Map<String, Any?> = emptyMap()
+    ) {
+        logBleTrace("sdk_ble_write", stage, trace, extra)
+    }
+
+    private fun logBleTrace(
+            layer: String,
+            stage: String,
+            trace: BleWriteTrace?,
+            extra: Map<String, Any?> = emptyMap()
+    ) {
+        if (trace == null) {
+            return
+        }
+
+        val warningReason = bleTraceWarningReason(stage, extra)
+        if (warningReason == null) {
+            return
+        }
+
+        try {
+            val payload = mutableMapOf<String, Any>(
+                    "level" to "warning",
+                    "warningReason" to warningReason,
+                    "stage" to stage,
+                    "sequence" to trace.sequence,
+                    "commandType" to trace.commandType,
+                    "packedBytes" to trace.packedBytes,
+                    "wakeup" to trace.wakeup,
+                    "chunked" to trace.chunked,
+                    "queuedAtMs" to trace.queuedAtMs
+            )
+            trace.requestId?.let { payload["requestId"] = it }
+            trace.appId?.let { payload["appId"] = it }
+            trace.messageId?.let { payload["messageId"] = it }
+            trace.chunkId?.let { payload["chunkId"] = it }
+            trace.chunkIndex?.let {
+                payload["chunkIndex"] = it
+                payload["chunkNumber"] = it + 1
+            }
+            trace.totalChunks?.let { payload["totalChunks"] = it }
+            trace.payloadBytes?.let { payload["payloadBytes"] = it }
+            extra.forEach { (key, value) ->
+                if (value != null) {
+                    payload[key] = value
+                }
+            }
+
+            BleTraceLogger.logMap("phone_to_glasses", layer, trace.commandType, payload)
+        } catch (e: Exception) {
+            Log.d(TAG, "BLE trace logging failed for $layer/$stage", e)
+        }
+    }
+
+    private fun bleTraceWarningReason(stage: String, extra: Map<String, Any?>): String? {
+        if (extra["errorClass"] != null || extra["errorMessage"] != null) {
+            return "ble_write_error"
+        }
+        if (extra["success"] == false) {
+            return "ble_write_failed"
+        }
+        if (extra["writeAccepted"] == false) {
+            return "ble_write_rejected"
+        }
+
+        if (traceLongAtLeast(extra["queueDelayMs"], SIGNIFICANT_BLE_TRACE_DELAY_MS)) {
+            return "queue_delay"
+        }
+        if (traceLongAtLeast(extra["callbackDelayMs"], SIGNIFICANT_BLE_TRACE_DELAY_MS)) {
+            return "write_callback_delay"
+        }
+        if (traceLongAtLeast(extra["remainingDelayMs"], SIGNIFICANT_BLE_TRACE_DELAY_MS)) {
+            return "rate_limit_delay"
+        }
+        if (traceLongAtLeast(extra["nextProcessDelayMs"], SIGNIFICANT_BLE_TRACE_DELAY_MS)) {
+            return "next_process_delay"
+        }
+        if (extra["retryDelayMs"].asTraceLong() != null) {
+            return "write_retry"
+        }
+        if (stage == "queued" &&
+                        traceIntAtLeast(extra["queueSizeAfterAdd"], SIGNIFICANT_BLE_TRACE_QUEUE_SIZE)
+        ) {
+            return "queue_depth"
+        }
+        return null
+    }
+
+    private fun traceLongAtLeast(value: Any?, threshold: Long): Boolean {
+        return (value.asTraceLong() ?: Long.MIN_VALUE) >= threshold
+    }
+
+    private fun traceIntAtLeast(value: Any?, threshold: Int): Boolean {
+        return (value.asTraceInt() ?: Int.MIN_VALUE) >= threshold
+    }
+
+    private fun Any?.asTraceLong(): Long? {
+        return when (this) {
+            is Number -> this.toLong()
+            is String -> this.toLongOrNull()
+            else -> null
+        }
+    }
+
+    private fun Any?.asTraceInt(): Int? {
+        return when (this) {
+            is Number -> this.toInt()
+            is String -> this.toIntOrNull()
+            else -> null
+        }
+    }
+
     private fun summarizeOutgoingMessage(payload: String?): String {
         if (payload == null || payload.isEmpty()) {
-            return "type=unknown, requestId=none, appId=none, transferMethod=none, bleImgId=none, exposureTimeNs=none, iso=none, mId=none"
+            return "type=unknown, requestId=none, appId=none, mode=none, transferMethod=none, bleImgId=none, exposureTimeNs=none, iso=none, mId=none"
         }
         try {
             val obj = JSONObject(payload)
@@ -7009,6 +8003,7 @@ class MentraLive : SGCManager() {
             val appId = obj.optString("appId", "none")
             val transferMethod = obj.optString("transferMethod", "none")
             val bleImgId = obj.optString("bleImgId", "none")
+            val mode = if (obj.has("mode")) obj.optString("mode", "photo") else "none"
             val exposure =
                     if (obj.has("exposureTimeNs")) obj.optLong("exposureTimeNs").toString()
                     else "none"
@@ -7024,6 +8019,8 @@ class MentraLive : SGCManager() {
                     transferMethod +
                     ", bleImgId=" +
                     bleImgId +
+                    ", mode=" +
+                    mode +
                     ", exposureTimeNs=" +
                     exposure +
                     ", iso=" +
@@ -7171,7 +8168,7 @@ class MentraLive : SGCManager() {
             val type = json.optString("type", "")
 
             when (type) {
-                "request_wifi_scan" -> requestWifiScan()
+                "request_wifi_scan" -> requestWifiScan(null)
                 "rgb_led_control_on", "rgb_led_control_off" -> {
                     // Forward LED control commands directly to glasses via BLE
                     Log.d(TAG, "💡 Forwarding LED control command to glasses: " + type)
@@ -7333,6 +8330,11 @@ class MentraLive : SGCManager() {
     // File Transfer Methods
     // ---------------------------------------
 
+    /** Keep file assembly ordered without blocking BLE callbacks or the Android main looper. */
+    private fun enqueueFilePacket(packetInfo: K900ProtocolUtils.FilePacketInfo) {
+        fileProcessingHandler.post { processFilePacket(packetInfo) }
+    }
+
     /** Process a received file packet */
     private fun processFilePacket(packetInfo: K900ProtocolUtils.FilePacketInfo) {
         // Calculate total packets based on actual pack size (not hardcoded FILE_PACK_SIZE)
@@ -7340,18 +8342,15 @@ class MentraLive : SGCManager() {
                 if (packetInfo.packSize > 0)
                         (packetInfo.fileSize + packetInfo.packSize - 1) / packetInfo.packSize
                 else 1
-        Bridge.log(
-                "LIVE: 📦 Processing file packet: " +
-                        packetInfo.fileName +
-                        " [" +
-                        packetInfo.packIndex +
-                        "/" +
-                        (totalPackets - 1) +
-                        "]" +
-                        " (" +
-                        packetInfo.packSize +
-                        " bytes)"
-        )
+        if (packetInfo.packIndex % FILE_PACKET_LOG_INTERVAL == 0 ||
+                        packetInfo.packIndex == totalPackets - 1
+        ) {
+            Log.d(
+                    TAG,
+                    "File transfer ${packetInfo.fileName}: " +
+                            "${packetInfo.packIndex + 1}/$totalPackets packets"
+            )
+        }
 
         // Check if this is a BLE photo transfer we're tracking
         // The filename might have an extension (.avif or .jpg), but we track by ID only
@@ -7360,8 +8359,6 @@ class MentraLive : SGCManager() {
         if (dotIndex > 0) {
             bleImgId = bleImgId.substring(0, dotIndex)
         }
-
-        Bridge.log("LIVE: 📦 BLE photo transfer packet for requestId: " + bleImgId)
 
         val incidentRelay = bleIncidentLogRelays[bleImgId]
         if (incidentRelay != null) {
@@ -7416,18 +8413,8 @@ class MentraLive : SGCManager() {
         }
 
         val photoTransfer = blePhotoTransfers[bleImgId]
-        Bridge.log(
-                "LIVE: 📦 BLE photo transfer for requestId: " +
-                        bleImgId +
-                        " found: " +
-                        (photoTransfer != null)
-        )
         if (photoTransfer != null) {
             // This is a BLE photo transfer
-            Bridge.log(
-                    "LIVE: 📦 BLE photo transfer packet for requestId: " + photoTransfer.requestId
-            )
-
             // Get or create session for this transfer
             if (photoTransfer.session == null) {
                 photoTransfer.session =
@@ -7539,13 +8526,6 @@ class MentraLive : SGCManager() {
         val added = session.addPacket(packetInfo.packIndex, packetInfo.data)
 
         if (added) {
-            // BES chip handles ACKs automatically
-            Bridge.log(
-                    "LIVE: 📦 Packet " +
-                            packetInfo.packIndex +
-                            " received successfully (BES will auto-ACK)"
-            )
-
             // Check completion when final packet arrives or transfer is complete
             if (session.shouldCheckCompletion(packetInfo.packIndex)) {
                 if (session.isComplete) {
@@ -8004,6 +8984,9 @@ class MentraLive : SGCManager() {
 
         // Send glasses-side Voice Activity Detection setting.
         sendVoiceActivityDetectionSetting()
+
+        // Send glasses-side loudness / Barrier gate setting.
+        sendLoudnessGateSetting()
     }
 
     override fun sendVoiceActivityDetectionSetting() {
@@ -8032,7 +9015,8 @@ class MentraLive : SGCManager() {
             val packedData =
                     K900ProtocolUtils.packDataToK900(
                             cmdObject.toString().toByteArray(StandardCharsets.UTF_8),
-                            K900ProtocolUtils.CMD_TYPE_STRING
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
                     )
             if (packedData == null) {
                 Bridge.log("LIVE: Failed to pack Voice Activity Detection setting command")
@@ -8045,11 +9029,56 @@ class MentraLive : SGCManager() {
         }
     }
 
+    override fun sendLoudnessGateSetting() {
+        val value = DeviceStore.get("bluetooth", "loudness_gate_enabled")
+        val enabled =
+                if (value is Boolean) value
+                else BluetoothSdkDefaults.LOUDNESS_GATE_ENABLED
+
+        Bridge.log("LIVE: 🎚️ Sending loudness/Barrier gate setting to glasses: " + enabled)
+
+        if (!isConnected) {
+            Bridge.log("LIVE: Cannot send loudness gate setting - not connected")
+            return
+        }
+
+        try {
+            val body = JSONObject()
+            body.put("type", LOUDNESS_GATE_SWITCH_TYPE)
+            body.put("switch", if (enabled) 1 else 0)
+
+            val cmdObject = JSONObject()
+            cmdObject.put("C", "cs_swit")
+            cmdObject.put("V", 1)
+            cmdObject.put("B", body.toString())
+
+            val packedData =
+                    K900ProtocolUtils.packDataToK900(
+                            cmdObject.toString().toByteArray(StandardCharsets.UTF_8),
+                            K900ProtocolUtils.CMD_TYPE_STRING,
+                            k900LengthEndian()
+                    )
+            if (packedData == null) {
+                Bridge.log("LIVE: Failed to pack loudness gate setting command")
+                return
+            }
+            queueData(packedData)
+        } catch (e: JSONException) {
+            Log.e(TAG, "Error creating loudness gate setting command", e)
+        }
+    }
+
     /** Send button photo settings to glasses, replaying all stored scan-tuning fields. */
     override fun sendButtonPhotoSettings() {
+        val legacyZslMfnr =
+            DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_zsl_mfnr") as Boolean?
         val size = DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_size") as String?
-        val mfnr = DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_mfnr") as Boolean?
-        val zsl = DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_zsl") as Boolean?
+        val mfnr =
+            (DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_mfnr") as Boolean?)
+                ?: legacyZslMfnr
+        val zsl =
+            (DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_zsl") as Boolean?)
+                ?: legacyZslMfnr
         val noiseReduction = DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_noise_reduction") as Boolean?
         val edgeEnhancement = DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_edge_enhancement") as Boolean?
         val ispDigitalGain = DeviceStore.get(ObservableStore.BLUETOOTH_CATEGORY, "button_photo_isp_digital_gain") as Int?
@@ -8106,6 +9135,35 @@ class MentraLive : SGCManager() {
         } catch (e: JSONException) {
             Log.e(TAG, "Error creating camera FOV setting message", e)
         }
+    }
+
+    fun sendCameraFovOverride(
+        requestId: String,
+        leaseId: String,
+        fov: Int,
+        roiPosition: Int,
+        ttlMs: Int,
+    ) {
+        val json = JSONObject()
+        json.put("type", "camera_fov_override")
+        json.put("request_id", requestId)
+        json.put(
+            "params",
+            JSONObject()
+                .put("lease_id", leaseId)
+                .put("fov", fov)
+                .put("roi_position", roiPosition)
+                .put("ttl_ms", ttlMs),
+        )
+        sendJson(json, true)
+    }
+
+    fun releaseCameraFovOverride(requestId: String, leaseId: String) {
+        val json = JSONObject()
+        json.put("type", "camera_fov_override_release")
+        json.put("request_id", requestId)
+        json.put("params", JSONObject().put("lease_id", leaseId))
+        sendJson(json, true)
     }
 
     /**

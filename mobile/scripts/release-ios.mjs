@@ -2,10 +2,20 @@
 
 import { setBuildEnv } from './set-build-env.mjs';
 import { withRetry, isSPMOrSentryTransientError, writeSummary } from './release-utils.mjs';
+import {
+  appendXcodeEnvironment,
+  validateReleaseArchive,
+  xcodeBuildSettings,
+} from './release-bundle-config.mjs';
 import { getBuildNumber } from './build-number.mjs';
 import { existsSync } from 'fs';
 import path from 'path';
 import os from 'os';
+
+// Expo's export:embed command sets production mode after the CLI starts, which
+// is too late for its Babel transform to inline inherited EXPO_PUBLIC_* values.
+// Start every release subprocess in production mode instead.
+process.env.NODE_ENV = 'production';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -27,7 +37,11 @@ function ipaPrefix(version) {
 // ── Load App Store Connect credentials ────────────────────────────────────────
 
 function loadASCConfig() {
-  const configPath = path.join(os.homedir(), '.mentra', 'credentials', 'appstore-connect.env');
+  // CI injects credentials from secrets into a temp dir and points here via
+  // MENTRA_ASC_CONFIG_PATH; local dev falls back to ~/.mentra/credentials.
+  const configPath =
+    process.env.MENTRA_ASC_CONFIG_PATH ||
+    path.join(os.homedir(), '.mentra', 'credentials', 'appstore-connect.env');
   if (!existsSync(configPath)) {
     return null;
   }
@@ -72,8 +86,28 @@ console.log(`buildNumber: ${buildNumber}`);
 console.log('\n━━━ Step 3: Prebuild iOS ━━━');
 await $({ stdio: 'inherit' })`bun expo prebuild --platform ios`;
 
-// Copy .env to ios/.xcode.env.local so build env vars are available
+// Copy .env for tools that load it directly, then explicitly export public
+// runtime values for child processes launched by Xcode. Plain KEY=value lines
+// become shell variables when sourced by React Native's with-environment.sh,
+// but are not inherited by the Expo/Metro bundling process.
 await $({ stdio: 'inherit' })`cp .env ios/.xcode.env.local`;
+
+// Pin NODE_BINARY to THIS node (the one running release:ios, i.e. the Node 20
+// from setup-node). Xcode's "[CP-User] Generate app.config" build phase sources
+// .xcode.env(.local) and otherwise resolves `command -v node` against Xcode's
+// minimal PATH, which on the self-hosted runners hits the SYSTEM node symlink
+// (/usr/local/bin/node → Node 18). Node 18 lacks util.parseEnv, so @expo/env
+// throws "parseEnv is not a function" and the archive fails with exit 65.
+// .xcode.env.local is sourced after .xcode.env, so this overrides it.
+const exportedXcodeVariables = await appendXcodeEnvironment(
+  'ios/.xcode.env.local',
+  process.env,
+  process.execPath,
+);
+const archiveBuildSettings = xcodeBuildSettings(process.env, process.execPath);
+console.log(`Pinned NODE_BINARY=${process.execPath} (node ${process.version}) for Xcode build phases`);
+console.log(`Exported ${exportedXcodeVariables - 1} build variables for Xcode child processes`);
+console.log(`Passing ${archiveBuildSettings.length - 1} build variables as Xcode archive settings`);
 
 // In CI, switch the Mentra app target's Release config to MANUAL signing
 // with the fastlane match-installed AppStore profile. Without this,
@@ -143,11 +177,21 @@ if (isCIForSigning) {
 //      present and succeeds. Previously this error aborted immediately because
 //      the retry predicate only matched Sentry/network errors.
 
+// Per-workspace DerivedData. By DEFAULT xcodebuild uses
+// ~/Library/Developer/Xcode/DerivedData — which is MACHINE-GLOBAL and shared by
+// every runner process on a self-hosted Mac (bigbob runs 3). Concurrent iOS
+// builds then share the same DerivedData + ModuleCache.noindex / SDKStatCaches,
+// which corrupts/locks the module cache and makes a build hang mid-compile then
+// fail ~30min later with no error (the recurring staging iOS failure). Pinning
+// DerivedData inside the runner workspace makes each build fully isolated. The
+// path is absolute under cwd (mobile/), i.e. under RUNNER_WORKSPACE in CI.
+const derivedDataPath = path.resolve('build/DerivedData');
+
 console.log('\n━━━ Step 3.5: Resolving Mapbox SPM packages ━━━');
 
 await withRetry(
   'xcodebuild resolve packages',
-  () => $({ stdio: 'inherit' })`xcodebuild -resolvePackageDependencies -workspace ios/Mentra.xcworkspace -scheme Mentra`,
+  () => $({ stdio: 'inherit' })`xcodebuild -resolvePackageDependencies -workspace ios/Mentra.xcworkspace -scheme Mentra -derivedDataPath ${derivedDataPath}`,
   { shouldRetry: isSPMOrSentryTransientError },
 );
 
@@ -170,10 +214,16 @@ const archivePath = path.resolve('build/Mentra.xcarchive');
 // against the match profile, so xcodebuild just uses that. On a laptop
 // the project is left in Automatic mode and -allowProvisioningUpdates
 // lets Xcode fetch a profile on-demand.
+//
+// Pass the public runtime environment as command-line build settings as well as
+// writing .xcode.env.local above. Xcode exports command-line settings before it
+// starts every build phase. This is necessary because Sentry's wrapper around
+// "Bundle React Native code and images" does not reliably preserve variables
+// sourced from .xcode.env.local before it launches Expo/Metro.
 await withRetry(
   'xcodebuild archive',
   () => {
-    const p = $`xcodebuild archive -workspace ios/Mentra.xcworkspace -scheme Mentra -configuration Release -destination generic/platform=iOS -archivePath ${archivePath} -allowProvisioningUpdates DEVELOPMENT_TEAM=${teamId} SWIFT_STRICT_CONCURRENCY=minimal`;
+    const p = $`xcodebuild archive -workspace ios/Mentra.xcworkspace -scheme Mentra -configuration Release -destination generic/platform=iOS -archivePath ${archivePath} -derivedDataPath ${derivedDataPath} -allowProvisioningUpdates DEVELOPMENT_TEAM=${teamId} SWIFT_STRICT_CONCURRENCY=minimal ${archiveBuildSettings}`;
     p.stdout.pipe(process.stdout);
     p.stderr.pipe(process.stderr);
     return p;
@@ -198,6 +248,10 @@ const exportOptionsPlist = isCIForSigning
   ? path.resolve('ci/ios-export/ExportOptions-Match.plist')
   : path.resolve('ci/ios-export/ExportOptions.plist');
 
+// NOTE: -exportArchive does NOT take -derivedDataPath (xcodebuild errors:
+// "The flag -scheme, -testProductsPath, or -xctestrun is required when
+// specifying -derivedDataPath", exit 64). Export works from the archive itself,
+// so it needs no DerivedData isolation. Keep -derivedDataPath on resolve+archive only.
 await $({ stdio: 'inherit' })`xcodebuild -exportArchive -archivePath ${archivePath} -exportOptionsPlist ${exportOptionsPlist} -exportPath ${exportPath} -allowProvisioningUpdates`;
 
 // Find the exported IPA
@@ -208,6 +262,12 @@ if (ipaFiles.length === 0) {
 }
 const ipaPath = ipaFiles[0];
 console.log('IPA exported:', ipaPath);
+
+// Validate the artifact, not only the parent shell. A green archive can still
+// contain stale or missing Expo public configuration if Xcode did not pass the
+// build environment into Metro. Refuse to publish that binary anywhere.
+validateReleaseArchive(ipaPath, 'iOS');
+console.log('Verified iOS release JS bundle configuration');
 
 // ── Step 6: Upload to App Store Connect (TestFlight) ──────────────────────────
 

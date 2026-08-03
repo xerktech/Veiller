@@ -1,4 +1,14 @@
-import type {PhotoRequestParams, PhotoSize} from "../BluetoothSdk.types"
+import type {PhotoRequestParams, PhotoSize, PhotoTransferMethod} from "../BluetoothSdk.types"
+
+const PHOTO_TRANSFER_METHODS = new Set<PhotoTransferMethod>(["auto", "direct", "ble"])
+
+function photoTransferMethodForNative(value: unknown): PhotoTransferMethod {
+  if (value === undefined) return "auto"
+  if (typeof value === "string" && PHOTO_TRANSFER_METHODS.has(value as PhotoTransferMethod)) {
+    return value as PhotoTransferMethod
+  }
+  throw new TypeError(`Invalid transferMethod ${JSON.stringify(value)}. Expected "auto", "direct", or "ble".`)
+}
 
 /** Maps unknown/legacy size strings to the current wire format. */
 export function normalizePhotoSizeTier(size: string | undefined): PhotoSize {
@@ -19,17 +29,24 @@ export function normalizePhotoSizeTier(size: string | undefined): PhotoSize {
   }
 }
 
+function nonBlankString(value?: string | null): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed && trimmed.length > 0 ? trimmed : undefined
+}
+
 /** Expo Android bridge rejects null values in Map<String, Any> — omit optional nullish fields. */
-export function photoRequestParamsForNative(
-  params: PhotoRequestParams,
-): Record<string, string | number | boolean> {
+export function photoRequestParamsForNative(params: PhotoRequestParams): Record<string, string | number | boolean> {
   const payload: Record<string, string | number | boolean> = {
-    requestId: params.requestId,
-    appId: params.appId,
     size: normalizePhotoSizeTier(params.size),
+    mode: params.mode ?? "photo",
+    transferMethod: photoTransferMethodForNative(params.transferMethod),
     webhookUrl: params.webhookUrl ?? "",
     compress: params.compress,
     sound: params.sound,
+  }
+  const requestId = nonBlankString(params.requestId)
+  if (requestId != null) {
+    payload.requestId = requestId
   }
   if (params.save != null) {
     payload.save = params.save

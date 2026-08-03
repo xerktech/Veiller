@@ -1,5 +1,15 @@
 import Foundation
 
+func generatedCameraRequestId(_ prefix: String) -> String {
+    "\(prefix)-\(Int(Date().timeIntervalSince1970 * 1000))-\(UUID().uuidString.prefix(8))"
+}
+
+func nonBlankRequestId(_ requestId: String?) -> String? {
+    guard let requestId else { return nil }
+    let trimmed = requestId.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmed.isEmpty ? nil : trimmed
+}
+
 public enum PhotoSize: String {
     case low
     case medium
@@ -22,6 +32,15 @@ public enum PhotoSize: String {
     public init(normalizedRawValue value: String?) {
         let normalized = PhotoSize.normalizeLegacy(value)
         self = PhotoSize(rawValue: normalized) ?? .medium
+    }
+}
+
+public enum PhotoMode: String {
+    case photo
+    case text
+
+    public init(normalizedRawValue value: String?) {
+        self = PhotoMode(rawValue: value ?? "") ?? .photo
     }
 }
 
@@ -150,15 +169,16 @@ public enum CameraRoiPosition: Int {
 public struct CameraFov {
     public static let minFov = 62
     public static let maxFov = 118
-    public static let defaultFov = 102
+    public static let defaultFov = 118
     public static let narrowFov = 82
+    public static let standardFov = 102
     public static let defaultRoiPosition = CameraRoiPosition.center
     public static let narrow = CameraFov(
         fov: CameraFov.narrowFov,
         roiPosition: CameraFov.defaultRoiPosition
     )
     public static let standard = CameraFov(
-        fov: CameraFov.defaultFov,
+        fov: CameraFov.standardFov,
         roiPosition: CameraFov.defaultRoiPosition
     )
     public static let wide = CameraFov(
@@ -223,8 +243,9 @@ public struct CameraFovResult: CustomStringConvertible {
 
 public struct PhotoRequest {
     public let requestId: String
-    public let appId: String
     public let size: PhotoSize
+    public let mode: PhotoMode
+    public let transferMethod: String
     public let webhookUrl: String?
     public let authToken: String?
     public let compress: PhotoCompression?
@@ -244,8 +265,7 @@ public struct PhotoRequest {
     public let ispAnalogGain: String?
 
     public init(
-        requestId: String,
-        appId: String,
+        requestId: String? = nil,
         size: PhotoSize,
         webhookUrl: String? = nil,
         authToken: String? = nil,
@@ -261,10 +281,11 @@ public struct PhotoRequest {
         mfnr: Bool? = nil,
         zsl: Bool? = nil,
         ispDigitalGain: Int? = nil,
-        ispAnalogGain: String? = nil
+        ispAnalogGain: String? = nil,
+        mode: PhotoMode = .photo,
+        transferMethod: String = "auto"
     ) {
-        self.requestId = requestId
-        self.appId = appId
+        self.requestId = nonBlankRequestId(requestId) ?? generatedCameraRequestId("photo")
         self.size = size
         self.webhookUrl = webhookUrl
         self.authToken = authToken
@@ -281,11 +302,27 @@ public struct PhotoRequest {
         self.zsl = zsl
         self.ispDigitalGain = ispDigitalGain
         self.ispAnalogGain = ispAnalogGain
+        self.mode = mode
+        self.transferMethod = transferMethod
     }
 
-    public static func from(params: [String: Any]) -> PhotoRequest {
+    public static func from(params: [String: Any]) throws -> PhotoRequest {
         let sizeRaw = params["size"] as? String ?? "medium"
         let compressRaw = params["compress"] as? String ?? "none"
+        let transferMethod: String
+        if let rawValue = params["transferMethod"] {
+            guard let rawString = rawValue as? String,
+                  rawString == "auto" || rawString == "direct" || rawString == "ble"
+            else {
+                throw BluetoothSdkError(
+                    code: "invalid_photo_transfer_method",
+                    message: "Invalid transferMethod \(String(describing: rawValue)). Expected auto, direct, or ble."
+                )
+            }
+            transferMethod = rawString
+        } else {
+            transferMethod = "auto"
+        }
         let exposureTimeNs: Double?
         switch params["exposureTimeNs"] {
         case let value as Double:
@@ -331,8 +368,7 @@ public struct PhotoRequest {
         }
 
         return PhotoRequest(
-            requestId: params["requestId"] as? String ?? "",
-            appId: params["appId"] as? String ?? "",
+            requestId: params["requestId"] as? String,
             size: PhotoSize(normalizedRawValue: sizeRaw),
             webhookUrl: params["webhookUrl"] as? String,
             authToken: (params["authToken"] as? String)?.nilIfBlank,
@@ -348,7 +384,9 @@ public struct PhotoRequest {
             mfnr: optionalBool("mfnr"),
             zsl: optionalBool("zsl"),
             ispDigitalGain: optionalInt("ispDigitalGain"),
-            ispAnalogGain: params["ispAnalogGain"] as? String
+            ispAnalogGain: params["ispAnalogGain"] as? String,
+            mode: PhotoMode(normalizedRawValue: params["mode"] as? String),
+            transferMethod: transferMethod
         )
     }
 
@@ -377,6 +415,30 @@ public struct PhotoRequest {
         if let ispAnalogGain {
             json["ispAnalogGain"] = ispAnalogGain
         }
+    }
+
+    func withRequestId(_ requestId: String) -> PhotoRequest {
+        PhotoRequest(
+            requestId: requestId,
+            size: size,
+            webhookUrl: webhookUrl,
+            authToken: authToken,
+            compress: compress,
+            save: save,
+            sound: sound,
+            exposureTimeNs: exposureTimeNs,
+            iso: iso,
+            aeExposureDivisor: aeExposureDivisor,
+            isoCap: isoCap,
+            noiseReduction: noiseReduction,
+            edgeEnhancement: edgeEnhancement,
+            mfnr: mfnr,
+            zsl: zsl,
+            ispDigitalGain: ispDigitalGain,
+            ispAnalogGain: ispAnalogGain,
+            mode: mode,
+            transferMethod: transferMethod
+        )
     }
 }
 
@@ -719,6 +781,44 @@ public struct PhotoStatusEvent: CustomStringConvertible {
 
     public var description: String {
         "PhotoStatusEvent(requestId: \(requestId), status: \(status))"
+    }
+}
+
+public struct CameraStatusEvent: CustomStringConvertible {
+    public let values: [String: Any]
+
+    public init(values: [String: Any]) {
+        var values = values
+        values["type"] = "camera_status"
+        self.values = values
+    }
+
+    public var requestId: String {
+        stringValue(values, "requestId") ?? ""
+    }
+
+    public var state: String {
+        stringValue(values, "state") ?? ""
+    }
+
+    public var timestamp: Int64 {
+        if let value = values["timestamp"] as? Int64 { return value }
+        if let value = values["timestamp"] as? Int { return Int64(value) }
+        if let value = values["timestamp"] as? Double { return Int64(value) }
+        if let value = values["timestamp"] as? NSNumber { return value.int64Value }
+        return Int64(Date().timeIntervalSince1970 * 1000)
+    }
+
+    public var errorCode: String? {
+        stringValue(values, "errorCode")
+    }
+
+    public var errorMessage: String? {
+        stringValue(values, "errorMessage")
+    }
+
+    public var description: String {
+        "CameraStatusEvent(requestId: \(requestId), state: \(state))"
     }
 }
 

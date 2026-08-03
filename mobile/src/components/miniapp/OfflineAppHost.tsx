@@ -26,6 +26,7 @@
  * internal stack change (effects keyed on depth) — the host always wins.
  */
 
+import {engine} from "@mentra/engine"
 import {useCallback, useEffect, useRef, useState} from "react"
 import {StyleSheet, View} from "react-native"
 import {Screen as NativeScreen, ScreenStack} from "react-native-screens"
@@ -36,7 +37,6 @@ import {offlineAppRegistry} from "@/components/miniapp/offlineAppRegistry"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useCapsuleStore} from "@/stores/capsule"
 import {useNavigationStore, type NavInterceptor} from "@/stores/navigation"
-import {BgTimer, useAppStatusStore} from "@mentra/island"
 
 interface OfflineAppHostProps {
   packageName: string
@@ -122,7 +122,7 @@ export default function OfflineAppHost({packageName, appName, iconUrl, onExit, o
         // External route — close the overlay and let the real push proceed.
         activeRef.current = false
         onShouldCaptureRef.current?.()
-        useAppStatusStore.getState().clearForeground()
+        engine.miniapps.clearForeground()
         return false
       },
       replace: (path, params) => {
@@ -133,7 +133,7 @@ export default function OfflineAppHost({packageName, appName, iconUrl, onExit, o
         }
         // e.g. sign-out replace("/") — close the overlay first.
         activeRef.current = false
-        useAppStatusStore.getState().clearForeground()
+        engine.miniapps.clearForeground()
         return false
       },
       goBack: () => {
@@ -177,11 +177,14 @@ export default function OfflineAppHost({packageName, appName, iconUrl, onExit, o
         beginExit()
       },
       handleRightPress: () => {
+        // Stop the app BEFORE playing the exit animation so it clears from the
+        // running-apps tray immediately. The overlay's slide-out is driven by
+        // the Compositor's foreground state (renderedApp is held mounted through
+        // the animation), so stopping now — which only flips the `running` flag
+        // — doesn't interrupt it. Deferring stop() (previously by 1s) left the
+        // app lingering in the tray for the whole animation, then popping out.
+        engine.miniapps.stop(packageName)
         beginExit()
-        // wait until after the animation is complete to stop the miniapp:
-        BgTimer.setTimeout(() => {
-          useAppStatusStore.getState().stop(packageName)
-        }, 1000)
       },
     }
     useCapsuleStore.getState().setActive(registration)

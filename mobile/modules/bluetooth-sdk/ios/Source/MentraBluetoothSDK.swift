@@ -42,10 +42,15 @@ private final class ActiveScanSession {
 @MainActor
 private final class PendingWifiScan {
     let pending: PendingResponse<[WifiScanResult]>
+    let scanId: String
     var latestResults: [WifiScanResult] = []
+    // Chunks accumulated from scanId-echoing glasses, deduplicated by SSID;
+    // resolved only when the glasses flag the scan complete.
+    var accumulated: [WifiScanResult] = []
 
-    init(pending: PendingResponse<[WifiScanResult]>) {
+    init(pending: PendingResponse<[WifiScanResult]>, scanId: String) {
         self.pending = pending
+        self.scanId = scanId
     }
 }
 
@@ -90,6 +95,25 @@ private final class PendingVideoRecordingRequest {
         self.expectedStatus = expectedStatus
         self.pending = pending
         self.waitForUpload = waitForUpload
+    }
+}
+
+// seq records send order (assigned and handed to the BLE queue in a single
+// MainActor turn) so that an id-carrying status for a newer start can
+// identify which older in-flight starts it preempted.
+@MainActor
+private final class PendingStreamStart {
+    let seq: Int
+    let pending: PendingResponse<StreamStatusEvent>
+    // Set when an id-carrying error arrives: a fatal publisher error never
+    // reaches the reconnect machinery and winds down with a streamId-less
+    // stopped, so the stash both attributes that stopped to this start and
+    // preserves the real error details for the rejection.
+    var lastError: StreamStatusEvent?
+
+    init(seq: Int, pending: PendingResponse<StreamStatusEvent>) {
+        self.seq = seq
+        self.pending = pending
     }
 }
 
@@ -148,6 +172,10 @@ private final class PendingResponse<T> {
 
 @MainActor
 public final class MentraBluetoothSDK {
+    private static let wifiScanTimeoutMs = 20_000
+    // A photo response is terminal only after capture, encoding, transport, and upload.
+    // Max-quality BLE fallback can legitimately exceed the generic command deadline.
+    private static let photoRequestTimeoutMs = 30_000
     private static let otaBesVersionWaitMs = 5_000
     private static let otaMtkVersionWaitMs = 2_000
     private static let otaVersionPollMs = 100
@@ -162,7 +190,7 @@ public final class MentraBluetoothSDK {
     private var shouldRestoreControllerOnBluetoothRestore = false
     private var bridgeEventSinkId: String?
     private var storeListenerId: String?
-    private let defaultDeviceKeys: Set<String> = ["default_wearable", "device_name", "device_address"]
+    private let defaultDeviceKeys: Set<String> = ["default_wearable", "device_name", "device_address", "project_name"]
     private let videoUploadStopTimeoutMs = 10 * 60 * 1000
     private var suppressDefaultDeviceEvents = false
     private var defaultDeviceApplyGeneration = 0
@@ -170,15 +198,21 @@ public final class MentraBluetoothSDK {
     private var activeStreamKeepAlive: ActiveStreamKeepAlive?
     private let analytics: BluetoothSdkAnalytics
     private var pendingPhotoRequests: [String: PendingResponse<PhotoResponseEvent>] = [:]
+    private var pendingCameraStatusRequests: [String: PendingResponse<CameraStatusEvent>] = [:]
     private var pendingVideoRecordingRequests: [String: PendingVideoRecordingRequest] = [:]
     private var pendingRgbLedRequests: [String: PendingResponse<RgbLedControlResponseEvent>] = [:]
     private var pendingSettingsRequests: [String: PendingResponse<SettingsAckEvent>] = [:]
-    private var pendingStreamStarts: [String: PendingResponse<StreamStatusEvent>] = [:]
-    private var pendingStreamStop: (streamId: String?, pending: PendingResponse<StreamStatusEvent>)?
+    private var pendingStreamStarts: [String: PendingStreamStart] = [:]
+    private var streamStartSeq = 0
+    // seq is the stop's slot in the shared streamStartSeq order (drawn in the
+    // same await-free MainActor turn that sends the command): every pending
+    // start with a lower seq reached the glasses' FIFO before this stop.
+    private var pendingStreamStop: (streamId: String?, seq: Int, pending: PendingResponse<StreamStatusEvent>)?
     private var pendingGalleryStatus: PendingResponse<GalleryStatusEvent>?
     private var pendingOtaQuery: PendingResponse<OtaQueryResult>?
     private var pendingOtaStart: PendingResponse<OtaStartAckEvent>?
     private var pendingWifiScan: PendingWifiScan?
+    private var wifiScanTask: Task<[WifiScanResult], Error>?
     private var pendingWifiStatus: PendingWifiStatusRequest?
     private var pendingHotspotStatus: PendingHotspotStatusRequest?
     private var pendingVersionInfo: PendingResponse<VersionInfoResult>?
@@ -193,8 +227,24 @@ public final class MentraBluetoothSDK {
             }
         }
         bridgeEventSinkId = Bridge.addEventSink { [weak self] eventName, data in
-            Task { @MainActor [weak self] in
-                self?.dispatchBridgeEvent(eventName, data)
+            // Bridge.dispatchEvent always invokes sinks on the main thread, in the
+            // FIFO order events were dispatched (correlated WiFi-scan chunks rely
+            // on that order). A fresh Task per event can reach the MainActor out
+            // of creation order and reorder chunks, so consume synchronously
+            // while still on main.
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    self?.dispatchBridgeEvent(eventName, data)
+                }
+            } else {
+                // Defensive fallback only — Bridge.dispatchEvent should never take
+                // this path. A serial main-queue hop still preserves FIFO order,
+                // unlike an unstructured Task.
+                DispatchQueue.main.async {
+                    MainActor.assumeIsolated {
+                        self?.dispatchBridgeEvent(eventName, data)
+                    }
+                }
             }
         }
         storeListenerId = DeviceStore.shared.store.addListener { [weak self] category, changes in
@@ -258,6 +308,7 @@ public final class MentraBluetoothSDK {
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "default_wearable", device.model.deviceType)
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "device_name", device.name)
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "device_address", device.identifier ?? "")
+        DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "project_name", device.projectName ?? "")
         finishDefaultDeviceApply(generation: generation)
     }
 
@@ -268,6 +319,7 @@ public final class MentraBluetoothSDK {
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "default_wearable", "")
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "device_name", "")
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "device_address", "")
+        DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "project_name", "")
         finishDefaultDeviceApply(generation: generation)
     }
 
@@ -484,6 +536,11 @@ public final class MentraBluetoothSDK {
         DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "voice_activity_detection_enabled", enabled)
     }
 
+    public func setLoudnessGateEnabled(_ enabled: Bool) async throws {
+        DeviceStore.shared.apply(ObservableStore.bluetoothCategory, "loudness_gate_enabled", enabled)
+    }
+
+    @available(*, deprecated, message: "Sticky action-button photo presets are deprecated. Prefer per-request requestPhoto(...) options (e.g. mode .text for text sensor size/crop, or explicit per-shot fields). This method still works but will be removed in a future release.")
     public func setPhotoCaptureDefaults(_ settings: PhotoCaptureDefaults) async throws -> SettingsAckEvent {
         try await performSettingsCommand(
             setting: "button_photo",
@@ -492,7 +549,7 @@ public final class MentraBluetoothSDK {
                     // Mirror Android: clear all cached scan-tuning keys so reconnect sync
                     // does not replay stale values after a reset.
                     let cat = ObservableStore.bluetoothCategory
-                    for key in ["button_photo_mfnr", "button_photo_zsl", "button_photo_noise_reduction",
+                    for key in ["button_photo_zsl_mfnr", "button_photo_mfnr", "button_photo_zsl", "button_photo_noise_reduction",
                                 "button_photo_edge_enhancement", "button_photo_isp_digital_gain",
                                 "button_photo_isp_analog_gain", "button_photo_ae_exposure_divisor",
                                 "button_photo_iso_cap", "button_photo_compress", "button_photo_sound"] {
@@ -547,6 +604,12 @@ public final class MentraBluetoothSDK {
         try await performSettingsCommand(
             setting: "button_video_recording",
             updateStore: { _ in
+                DeviceStore.shared.set(
+                    ObservableStore.bluetoothCategory,
+                    "button_video_settings",
+                    ["width": defaults.width, "height": defaults.height, "fps": defaults.fps]
+                )
+                // Keep legacy cache keys readable for older internal callers during migration.
                 DeviceStore.shared.set(ObservableStore.bluetoothCategory, "button_video_width", defaults.width)
                 DeviceStore.shared.set(ObservableStore.bluetoothCategory, "button_video_height", defaults.height)
                 DeviceStore.shared.set(ObservableStore.bluetoothCategory, "button_video_fps", defaults.fps)
@@ -593,6 +656,59 @@ public final class MentraBluetoothSDK {
             ["fov": result.fov, "roi_position": result.roiPosition.rawValue]
         )
         return result
+    }
+
+    /// Compatibility path for ASG clients that support only the older one-way FOV command.
+    public func setLegacyCameraFov(_ fov: CameraFov) throws -> CameraFovResult {
+        try DeviceManager.shared.sendLegacyCameraFovSetting(
+            fov: fov.fov,
+            roiPosition: fov.roiPosition.rawValue
+        )
+        return CameraFovResult(
+            requestId: "legacy",
+            fov: fov.fov,
+            roiPosition: fov.roiPosition,
+            timestamp: Int(Date().timeIntervalSince1970 * 1000)
+        )
+    }
+
+    /// Restores the persistent base FOV without requiring a settings acknowledgement.
+    public func restoreLegacyCameraFov() throws {
+        try DeviceManager.shared.restoreLegacyCameraFovSetting()
+    }
+
+    public func setCameraFovOverride(
+        leaseId: String,
+        fov: CameraFov,
+        ttlMs: Int
+    ) async throws -> CameraFovResult {
+        let ack = try await performSettingsCommand(
+            setting: "camera_fov_override",
+            updateStore: { _ in },
+            send: { requestId in
+                try DeviceManager.shared.sendCameraFovOverride(
+                    requestId: requestId,
+                    leaseId: leaseId,
+                    fov: fov.fov,
+                    roiPosition: fov.roiPosition.rawValue,
+                    ttlMs: ttlMs
+                )
+            }
+        )
+        return try CameraFovResult.from(ack: ack, fallback: fov)
+    }
+
+    public func releaseCameraFovOverride(leaseId: String) async throws -> SettingsAckEvent {
+        try await performSettingsCommand(
+            setting: "camera_fov_override",
+            updateStore: { _ in },
+            send: { requestId in
+                try DeviceManager.shared.releaseCameraFovOverride(
+                    requestId: requestId,
+                    leaseId: leaseId
+                )
+            }
+        )
     }
 
     public func setCameraTuningConfig(anrOn: Bool, gainOn: Bool) async throws -> SettingsAckEvent {
@@ -663,37 +779,41 @@ public final class MentraBluetoothSDK {
     }
 
     public func requestWifiScan() async throws -> [WifiScanResult] {
-        guard pendingWifiScan == nil else {
-            throw BluetoothSdkError(
-                code: "request_in_flight",
-                message: "A WiFi scan is already waiting for a glasses response."
-            )
+        if let existing = wifiScanTask {
+            // Join the in-flight scan instead of failing with request_in_flight;
+            // the scan screen auto-starts a scan on mount and can be pushed twice.
+            return try await existing.value
         }
         let pending = PendingResponse<[WifiScanResult]>(operation: "WiFi scan request")
-        let request = PendingWifiScan(pending: pending)
+        let request = PendingWifiScan(pending: pending, scanId: "scan-\(UUID().uuidString)")
         pendingWifiScan = request
-        DeviceManager.shared.requestWifiScan()
-        do {
-            let results = try await pending.wait()
-            if pendingWifiScan?.pending === pending {
-                pendingWifiScan = nil
+        // Claim the scan-results store for this scan before the command goes out,
+        // so a delayed chunk from an older, abandoned scan can no longer mutate it.
+        Bridge.claimWifiScanResults(scanId: request.scanId)
+        DeviceManager.shared.requestWifiScan(scanId: request.scanId)
+        let task = Task { @MainActor [weak self] () async throws -> [WifiScanResult] in
+            defer {
+                if let self {
+                    if self.pendingWifiScan === request {
+                        self.pendingWifiScan = nil
+                    }
+                    self.wifiScanTask = nil
+                }
             }
-            return results
-        } catch {
-            let fallbackResults: [WifiScanResult]
-            if (error as? BluetoothSdkError)?.code == "request_timeout" {
-                fallbackResults = request.latestResults
-            } else {
-                fallbackResults = []
+            do {
+                // The glasses wait up to 15s for scan-results broadcasts before sending
+                // scan_complete, so give them longer than that before falling back.
+                return try await pending.wait(timeoutMs: MentraBluetoothSDK.wifiScanTimeoutMs)
+            } catch {
+                if (error as? BluetoothSdkError)?.code == "request_timeout",
+                   !request.latestResults.isEmpty {
+                    return request.latestResults
+                }
+                throw error
             }
-            if pendingWifiScan?.pending === pending {
-                pendingWifiScan = nil
-            }
-            if !fallbackResults.isEmpty {
-                return fallbackResults
-            }
-            throw error
         }
+        wifiScanTask = task
+        return try await task.value
     }
 
     public func sendWifiCredentials(ssid: String, password: String) async throws -> WifiStatusEvent {
@@ -775,20 +895,63 @@ public final class MentraBluetoothSDK {
     }
 
     public func requestPhoto(_ request: PhotoRequest) async throws -> PhotoResponseEvent {
+        let routedRequest = nonBlankRequestId(request.requestId).map { request.withRequestId($0) }
+            ?? request.withRequestId(generatedCameraRequestId("photo"))
         Bridge.log(
-            "NATIVE: PHOTO PIPELINE [3b/6] MentraBluetoothSdk.requestPhoto requestId=\(request.requestId) appId=\(request.appId)"
+            "NATIVE: PHOTO PIPELINE [3b/6] MentraBluetoothSdk.requestPhoto requestId=\(routedRequest.requestId)"
         )
-        let pending = PendingResponse<PhotoResponseEvent>(operation: "photo request \(request.requestId)")
-        pendingPhotoRequests[request.requestId] = pending
-        DeviceManager.shared.requestPhoto(request)
+        let pending = PendingResponse<PhotoResponseEvent>(operation: "photo request \(routedRequest.requestId)")
+        pendingPhotoRequests[routedRequest.requestId] = pending
+        DeviceManager.shared.requestPhoto(routedRequest)
         do {
-            let event = try await pending.wait()
-            pendingPhotoRequests.removeValue(forKey: request.requestId)
+            let event = try await pending.wait(timeoutMs: MentraBluetoothSDK.photoRequestTimeoutMs)
+            pendingPhotoRequests.removeValue(forKey: routedRequest.requestId)
             return event
         } catch {
-            pendingPhotoRequests.removeValue(forKey: request.requestId)
+            pendingPhotoRequests.removeValue(forKey: routedRequest.requestId)
             throw error
         }
+    }
+
+    public func warmUpCamera(
+        requestId: String? = nil,
+        size: PhotoSize,
+        mode: PhotoMode = .photo,
+        exposureTimeNs: Double?,
+        durationMs: Int,
+        zsl: Bool? = nil,
+        mfnr: Bool? = nil
+    ) async throws -> CameraStatusEvent {
+        let effectiveRequestId = nonBlankRequestId(requestId) ?? generatedCameraRequestId("warm")
+        let pending = PendingResponse<CameraStatusEvent>(operation: "camera warm up \(effectiveRequestId)")
+        pendingCameraStatusRequests[effectiveRequestId] = pending
+        do {
+            // Inside the catch so an unsupported-device throw also clears the pending entry.
+            try DeviceManager.shared.warmUpCamera(
+                requestId: effectiveRequestId,
+                size: size,
+                mode: mode,
+                exposureTimeNs: exposureTimeNs,
+                durationMs: durationMs,
+                zsl: zsl,
+                mfnr: mfnr
+            )
+            let event = try await pending.wait()
+            pendingCameraStatusRequests.removeValue(forKey: effectiveRequestId)
+            return event
+        } catch {
+            pendingCameraStatusRequests.removeValue(forKey: effectiveRequestId)
+            throw error
+        }
+    }
+
+    public func stopCameraWarmUp(requestId: String) throws {
+        guard let effectiveRequestId = nonBlankRequestId(requestId) else {
+            throw BluetoothSdkError(
+                code: "invalid_request", message: "A warm-up request ID is required."
+            )
+        }
+        try DeviceManager.shared.stopCameraWarmUp(requestId: effectiveRequestId)
     }
 
     public func queryGalleryStatus() async throws -> GalleryStatusEvent {
@@ -828,7 +991,12 @@ public final class MentraBluetoothSDK {
         let streamId = stringValue(values, "streamId").flatMap { $0.isEmpty ? nil : $0 } ?? "sdk-\(UUID().uuidString)"
         values["streamId"] = streamId
         let pending = PendingResponse<StreamStatusEvent>(operation: "start stream \(streamId)")
-        pendingStreamStarts[streamId] = pending
+        // seq assignment through the BLE hand-off must stay await-free so this
+        // MainActor turn is one critical section: rejectPreemptedStreamStarts
+        // only works if seq order equals the order the commands reach the
+        // glasses' FIFO.
+        streamStartSeq += 1
+        pendingStreamStarts[streamId] = PendingStreamStart(seq: streamStartSeq, pending: pending)
         stopStreamKeepAliveMonitor()
         DeviceManager.shared.startStream(values)
         do {
@@ -881,7 +1049,13 @@ public final class MentraBluetoothSDK {
             )
         }
         let pending = PendingResponse<StreamStatusEvent>(operation: "stop stream")
-        pendingStreamStop = (streamId: activeStreamKeepAlive?.streamId, pending: pending)
+        // The seq draw and the BLE hand-off stay in this single await-free
+        // MainActor turn, sharing startStream's ordering critical section:
+        // the stop takes its own slot in the send order, so its ack can
+        // separate the pending starts the glasses consumed before it (lower
+        // seq) from starts sent after it (higher seq).
+        streamStartSeq += 1
+        pendingStreamStop = (streamId: activeStreamKeepAlive?.streamId, seq: streamStartSeq, pending: pending)
         stopStreamKeepAliveMonitor()
         DeviceManager.shared.stopStream()
         do {
@@ -1097,6 +1271,20 @@ public final class MentraBluetoothSDK {
 
     func sendOtaQueryStatus() async throws -> OtaQueryResult { try await queryOtaStatus() }
 
+    func startAr99OtaFromFile(_ path: String) throws -> Bool {
+        try requireGlassesConnected(operation: "start AR99 OTA")
+        return try DeviceManager.shared.startAr99OtaFromFile(path)
+    }
+
+    func cancelAr99Ota() {
+        DeviceManager.shared.cancelAr99Ota()
+    }
+
+    func sendAr99FactoryReset() throws {
+        try requireGlassesConnected(operation: "factory reset AR99")
+        try DeviceManager.shared.sendAr99FactoryReset()
+    }
+
     private func getFreshGlassesStatus() async -> GlassesStatus {
         let status = glassesStatus
         if !status.connected || !status.buildNumber.isEmpty {
@@ -1166,7 +1354,7 @@ public final class MentraBluetoothSDK {
     private func resolveOtaVersionUrl(status: GlassesStatus) throws -> String {
         let deviceUrl = status.otaVersionUrl.trimmingCharacters(in: .whitespacesAndNewlines)
         if isLegacyAsgOtaStartBuild(status.buildNumber) {
-            return deviceUrl.isEmpty ? OtaManifestDefaults.prodOtaVersionUrl : deviceUrl
+            return OtaManifestDefaults.legacyProdOtaVersionUrl
         }
         // SDK consumers are pinned to the manifest built for their SDK version.
         // A future glasses-advertised URL should not silently change that pairing.
@@ -1178,7 +1366,7 @@ public final class MentraBluetoothSDK {
 
     private func isLegacyAsgOtaStartBuild(_ buildNumber: String) -> Bool {
         guard let parsed = Int(buildNumber) else { return false }
-        return parsed < 100_000
+        return parsed < 39
     }
 
     func sendShutdown() {
@@ -1372,14 +1560,51 @@ public final class MentraBluetoothSDK {
     }
 
     private func handleStreamStatusForRequests(_ event: StreamStatusEvent) {
-        if let (streamId, pending) = matchingStreamStart(for: event) {
+        if let (streamId, start) = matchingStreamStart(for: event) {
+            // Preemption is only proven by statuses the start path emits after
+            // the glasses' stopAllServices has run: initializing, reconnecting,
+            // reconnected, streaming. An id-stamped `error` can be a
+            // command-level preflight rejection (#3488 firmware) emitted
+            // synchronously before stopAllServices, and `stopped` is a
+            // stop-ack for a previous stream — treating either as a winner
+            // could reject an older start that is still healthy.
+            if let eventStreamId = event.streamId, !eventStreamId.isEmpty {
+                switch event.state {
+                case .initializing, .reconnecting, .reconnected, .streaming:
+                    rejectPreemptedStreamStarts(winnerSeq: start.seq)
+                default:
+                    break
+                }
+            }
             switch event.state {
-            case .streaming:
+            // `reconnected` also proves the stream is live: when an async start
+            // failure triggers the glasses' publisher retry, a successful retry
+            // reports `reconnected` instead of `streaming`.
+            case .streaming, .reconnected:
                 pendingStreamStarts.removeValue(forKey: streamId)
-                pending.resolve(event)
-            case .error, .reconnectFailed, .stopped:
+                start.pending.resolve(event)
+            case .reconnectFailed, .stopped:
                 pendingStreamStarts.removeValue(forKey: streamId)
-                pending.reject(streamStatusError(event, code: "stream_start_failed"))
+                start.pending.reject(streamStatusError(start.lastError ?? event, code: "stream_start_failed"))
+            case .error:
+                if let eventStreamId = event.streamId, !eventStreamId.isEmpty, event.willRetry == true {
+                    // The glasses flag errors their publisher will retry with
+                    // `willRetry` (emitting side lands in PR #3488), so keep the
+                    // start pending for the retry's verdict — `reconnected` or
+                    // `streaming` on success, `reconnect_failed` or the
+                    // streamId-less `stopped` wind-down (which reports these
+                    // stashed details) on failure.
+                    start.lastError = event
+                } else {
+                    // An id-less error is the glasses' command-level rejection
+                    // (missing URL, low battery, no WiFi) emitted before any
+                    // publisher starts; an id-carrying error without `willRetry`
+                    // is terminal (`camera_busy` emits an error and nothing else).
+                    // Old firmware never sends `willRetry`, so its errors always
+                    // fail fast here — the shipped pre-#3487 Android behavior.
+                    pendingStreamStarts.removeValue(forKey: streamId)
+                    start.pending.reject(streamStatusError(event, code: "stream_start_failed"))
+                }
             default:
                 break
             }
@@ -1390,6 +1615,7 @@ public final class MentraBluetoothSDK {
                 if pendingStreamStop?.pending === stop.pending {
                     pendingStreamStop = nil
                 }
+                rejectStreamStartsSuperseded(byStopSeq: stop.seq)
                 stop.pending.resolve(stoppedStreamEvent(from: event, fallbackStreamId: stop.streamId))
             } else if event.state == .error || event.state == .reconnectFailed {
                 if pendingStreamStop?.pending === stop.pending {
@@ -1400,12 +1626,73 @@ public final class MentraBluetoothSDK {
         }
     }
 
-    private func matchingStreamStart(for event: StreamStatusEvent) -> (String, PendingResponse<StreamStatusEvent>)? {
+    // The glasses process BLE commands FIFO and every start_stream begins by
+    // stopping whatever runs, so an id-carrying status proving start X's
+    // start path ran on the glasses also proves every lower-seq start has
+    // already been preempted. Their only verdict on current firmware is a
+    // streamId-less stopped, which the id-less heuristic deliberately
+    // ignores — without this they would run out the 30s timeout instead of
+    // failing fast.
+    private func rejectPreemptedStreamStarts(winnerSeq: Int) {
+        for (streamId, start) in pendingStreamStarts where start.seq < winnerSeq {
+            pendingStreamStarts.removeValue(forKey: streamId)
+            start.pending.reject(
+                BluetoothSdkError(
+                    code: "stream_preempted",
+                    message: "start stream \(streamId) was preempted by a newer start_stream; "
+                        + "the glasses run a single stream and the last request wins."
+                )
+            )
+        }
+    }
+
+    // The glasses process BLE commands FIFO, so this stop's ack also settles
+    // every start sent before it: whatever those starts brought up (or would
+    // have brought up) has been stopped, and no further status will arrive
+    // for them. Without this they would run out the 30s start timeout.
+    // Starts sent after the stop keep waiting for their own statuses.
+    private func rejectStreamStartsSuperseded(byStopSeq stopSeq: Int) {
+        for (streamId, start) in pendingStreamStarts where start.seq < stopSeq {
+            pendingStreamStarts.removeValue(forKey: streamId)
+            start.pending.reject(
+                BluetoothSdkError(
+                    code: "stream_stopped",
+                    message: "start stream \(streamId) was superseded by a stop_stream issued after it."
+                )
+            )
+        }
+    }
+
+    private func matchingStreamStart(for event: StreamStatusEvent) -> (String, PendingStreamStart)? {
         if let streamId = event.streamId, !streamId.isEmpty {
-            guard let pending = pendingStreamStarts[streamId] else { return nil }
-            return (streamId, pending)
+            guard let start = pendingStreamStarts[streamId] else { return nil }
+            return (streamId, start)
+        }
+        if event.state == .error {
+            // An id-less error is a command-level preflight rejection (missing
+            // URL, low battery, no WiFi) emitted synchronously, while lifecycle
+            // statuses arrive async — so with overlapping starts the wire is
+            // genuinely ambiguous about which start it answers. Attribute it to
+            // the newest pending start: the common case is a later start
+            // failing preflight while an earlier one is already emitting
+            // lifecycle statuses, and at worst this swaps which start carries
+            // the error instead of letting both time out.
+            guard let entry = pendingStreamStarts.max(by: { $0.value.seq < $1.value.seq }) else { return nil }
+            return (entry.key, entry.value)
         }
         if pendingStreamStarts.count == 1, let entry = pendingStreamStarts.first {
+            // A streamId-less STOPPED is the glasses' stop-ack for a PREVIOUS
+            // stream (their stop ack carries no streamId), not a verdict on the
+            // pending start — a start_stream that replaces a running publisher
+            // emits exactly this sequence (stopped -> initializing -> streaming).
+            // Attributing it here would reject a start that is about to succeed.
+            // After a stashed `willRetry` error for the pending start, though,
+            // the stopped is the retrying publisher's wind-down (the stop-ack
+            // always precedes any status for the new start), so it is that
+            // start's verdict.
+            if event.state == .stopped, entry.value.lastError == nil {
+                return nil
+            }
             return (entry.key, entry.value)
         }
         return nil
@@ -1460,6 +1747,24 @@ public final class MentraBluetoothSDK {
                     message: errorMessage
                 )
             )
+        }
+    }
+
+    private func handleCameraStatusForRequests(_ event: CameraStatusEvent) {
+        guard let pending = pendingCameraStatusRequests[event.requestId] else { return }
+        switch event.state.lowercased() {
+        case "ready":
+            pending.resolve(event)
+        case "error":
+            pending.reject(
+                BluetoothSdkError(
+                    code: event.errorCode ?? "camera_warm_up_failed",
+                    message: event.errorMessage ?? "Camera warm-up failed."
+                )
+            )
+        default:
+            // "warming"/"stopped" are progress updates; leave the pending promise alone.
+            break
         }
     }
 
@@ -1547,6 +1852,28 @@ public final class MentraBluetoothSDK {
         request.pending.resolve(results)
     }
 
+    // scanId-echoing glasses: results for another scan are ignored instead of
+    // resolving the pending request, and matching chunks accumulate until the
+    // glasses flag the scan complete.
+    private func handleCorrelatedWifiScanChunk(
+        scanId: String,
+        results: [WifiScanResult],
+        scanComplete: Bool
+    ) {
+        guard let request = pendingWifiScan, request.scanId == scanId else { return }
+        for network in results where !request.accumulated.contains(where: { $0.ssid == network.ssid }) {
+            request.accumulated.append(network)
+        }
+        if !request.accumulated.isEmpty {
+            request.latestResults = request.accumulated
+        }
+        guard scanComplete else { return }
+        if pendingWifiScan === request {
+            pendingWifiScan = nil
+        }
+        request.pending.resolve(request.accumulated)
+    }
+
     private func updateWifiScanLatestResults(_ results: [WifiScanResult]) {
         guard !results.isEmpty else { return }
         pendingWifiScan?.latestResults = results
@@ -1554,6 +1881,24 @@ public final class MentraBluetoothSDK {
 
     private func handleWifiStatusForRequests(_ event: WifiStatusEvent) {
         guard let request = pendingWifiStatus else { return }
+        // A wifi_status carrying the explicit error field is the glasses' failure
+        // verdict for the in-flight connect: reject now instead of running out the
+        // request timeout. Only the error field counts as failure — the glasses'
+        // connect sequence emits a debounced bare connected=false ~1-2s after
+        // credentials while association is still in progress, and rejecting on that
+        // would kill every connect attempt early.
+        if request.operation == .connect, let error = event.error {
+            if pendingWifiStatus === request {
+                pendingWifiStatus = nil
+            }
+            request.pending.reject(
+                BluetoothSdkError(
+                    code: error,
+                    message: "Glasses failed to join \"\(request.ssid)\": \(error)"
+                )
+            )
+            return
+        }
         guard wifiStatusMatches(event.status, request: request) else { return }
         if pendingWifiStatus === request {
             pendingWifiStatus = nil
@@ -1646,14 +1991,15 @@ public final class MentraBluetoothSDK {
         guard let model = core["default_wearable"] as? String, !model.isEmpty else { return nil }
         guard let name = core["device_name"] as? String, !name.isEmpty else { return nil }
         let identifier = (core["device_address"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        let projectName = (core["project_name"] as? String).flatMap { $0.isEmpty ? nil : $0 }
         return Device(
             model: DeviceModel.fromDeviceType(model),
             name: name,
-            identifier: identifier
+            identifier: identifier,
+            projectName: projectName
         )
     }
-
-    private func dispatchDiscoveredDevices(_ rawSearchResults: Any?) {
+private func dispatchDiscoveredDevices(_ rawSearchResults: Any?) {
         guard let results = rawSearchResults as? [[String: Any]] else { return }
         for result in results {
             guard let name = result["name"] as? String else { continue }
@@ -1740,9 +2086,15 @@ public final class MentraBluetoothSDK {
             let networks = (data["networks"] as? [[String: Any]])?.map(WifiScanResult.init(values:)) ?? []
             let hasCompletionFlag = data.keys.contains("scanComplete") || data.keys.contains("scan_complete")
             let scanComplete = data["scanComplete"] as? Bool ?? data["scan_complete"] as? Bool ?? false
-            updateWifiScanLatestResults(networks)
-            if scanComplete || !hasCompletionFlag {
-                handleWifiScanResultsForRequests(networks)
+            let scanId = (data["scanId"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+            if let scanId {
+                handleCorrelatedWifiScanChunk(scanId: scanId, results: networks, scanComplete: scanComplete)
+            } else {
+                // Old firmware: no correlation id, keep the pre-scanId heuristics.
+                updateWifiScanLatestResults(networks)
+                if scanComplete || !hasCompletionFlag {
+                    handleWifiScanResultsForRequests(networks)
+                }
             }
             delegate?.mentraBluetoothSDK(self, didReceive: .raw(name: "wifi_scan_result", values: data))
         case "hotspot_error":
@@ -1759,6 +2111,10 @@ public final class MentraBluetoothSDK {
             delegate?.mentraBluetoothSDK(self, didReceive: .photoResponse(event))
         case "photo_status":
             delegate?.mentraBluetoothSDK(self, didReceive: .photoStatus(PhotoStatusEvent(values: data)))
+        case "camera_status":
+            let event = CameraStatusEvent(values: data)
+            handleCameraStatusForRequests(event)
+            delegate?.mentraBluetoothSDK(self, didReceive: .cameraStatus(event))
         case "video_recording_status":
             let event = VideoRecordingStatusEvent(values: data)
             handleVideoRecordingStatusForRequests(event)
@@ -1815,3 +2171,7 @@ public final class MentraBluetoothSDK {
         }
     }
 }
+
+
+
+

@@ -113,7 +113,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments '-DCMAKE_OBJECT_PATH_MAX=600', '-DANDROID_STL=c++_static', '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+                arguments '-DCMAKE_OBJECT_PATH_MAX=600', '-DANDROID_STL=c++_static'
             }
         }
     }

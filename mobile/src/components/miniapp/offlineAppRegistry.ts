@@ -10,20 +10,12 @@
  */
 import type {ComponentType} from "react"
 
-import {
-  cameraPackageName,
-  feedbackPackageName,
-  lmaInstallerPackageName,
-  mirrorPackageName,
-  settingsPackageName,
-  storePackageName,
-} from "@/constants/miniapps"
+import {cameraPackageName, feedbackPackageName, mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
 import {OFFLINE_HOSTED_PACKAGES} from "./offlineHostedPackages"
 
 import GalleryScreen from "@/app/asg/gallery"
 import GallerySettingsScreen from "@/app/asg/gallery-settings"
 import DeveloperUrlScreen from "@/app/miniapps/miniappdev/developer-url"
-import MiniappDevMain from "@/app/miniapps/miniappdev/main"
 import ScannerScreen from "@/app/miniapps/miniappdev/scanner"
 import MirrorScreen from "@/app/miniapps/mirror/mirror"
 import AppearanceSettings from "@/app/miniapps/settings/appearance"
@@ -37,7 +29,6 @@ import DebugSettings from "@/app/miniapps/settings/debug"
 import DeviceInfoScreen from "@/app/miniapps/settings/device-info"
 import FeedbackScreen from "@/app/miniapps/settings/feedback"
 import GlassesMenuSettings from "@/app/miniapps/settings/glasses-menu"
-import GlassesSettings from "@/app/miniapps/settings/glasses"
 import LayoutSettings from "@/app/miniapps/settings/layout"
 import MainSettings from "@/app/miniapps/settings/main"
 import MicrophoneSettings from "@/app/miniapps/settings/microphone"
@@ -49,7 +40,6 @@ import ProfileSettings from "@/app/miniapps/settings/profile"
 import SpeechSettings from "@/app/miniapps/settings/speech"
 import StressTestScreen from "@/app/miniapps/settings/stress-test"
 import SuperSettings from "@/app/miniapps/settings/super"
-import StoreScreen from "@/app/miniapps/store/store"
 
 export interface OfflineAppDef {
   initialRoute: string
@@ -68,11 +58,14 @@ const settingsRoutes: Record<string, ComponentType<any>> = {
   "/miniapps/settings/debug": DebugSettings,
   "/miniapps/settings/device-info": DeviceInfoScreen,
   "/miniapps/settings/feedback": FeedbackScreen,
-  "/miniapps/settings/glasses": GlassesSettings,
   "/miniapps/settings/glasses-menu": GlassesMenuSettings,
   "/miniapps/settings/layout": LayoutSettings,
   "/miniapps/settings/microphone": MicrophoneSettings,
   "/miniapps/settings/miniapp-dev": MiniappDevSettings,
+  // Miniapp dev tools live under the Miniapp Developer settings screen now,
+  // so their routes are hosted by the settings overlay (not a standalone app).
+  "/miniapps/miniappdev/developer-url": DeveloperUrlScreen,
+  "/miniapps/miniappdev/scanner": ScannerScreen,
   "/miniapps/settings/notifications": NotificationSettings,
   "/miniapps/settings/position": PositionSettings,
   "/miniapps/settings/privacy": PrivacySettings,
@@ -87,10 +80,6 @@ export const offlineAppRegistry: Record<string, OfflineAppDef> = {
     initialRoute: "/miniapps/settings/main",
     routes: settingsRoutes,
   },
-  [storePackageName]: {
-    initialRoute: "/miniapps/store/store",
-    routes: {"/miniapps/store/store": StoreScreen},
-  },
   [mirrorPackageName]: {
     initialRoute: "/miniapps/mirror/mirror",
     routes: {"/miniapps/mirror/mirror": MirrorScreen},
@@ -100,19 +89,12 @@ export const offlineAppRegistry: Record<string, OfflineAppDef> = {
     routes: {
       "/asg/gallery": GalleryScreen,
       "/asg/gallery-settings": GallerySettingsScreen,
+      "/miniapps/settings/camera": CameraSettings,
     },
   },
   [feedbackPackageName]: {
     initialRoute: "/miniapps/settings/feedback",
     routes: {"/miniapps/settings/feedback": FeedbackScreen},
-  },
-  [lmaInstallerPackageName]: {
-    initialRoute: "/miniapps/miniappdev/main",
-    routes: {
-      "/miniapps/miniappdev/main": MiniappDevMain,
-      "/miniapps/miniappdev/developer-url": DeveloperUrlScreen,
-      "/miniapps/miniappdev/scanner": ScannerScreen,
-    },
   },
 }
 

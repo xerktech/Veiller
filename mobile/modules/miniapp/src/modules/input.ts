@@ -5,11 +5,11 @@
  * command, eye tracking) will extend this module rather than spawning new
  * top-level modules.
  *
- * Touch overloads mirror cloud SDK v3's `device.onTouchEvent`:
+ * Touch overloads:
  *
  *   session.input.onTouch(handler)
- *   session.input.onTouch("click", handler)
- *   session.input.onTouch(["scroll_top", "scroll_bottom"], handler)
+ *   session.input.onTouch("single_tap", handler)
+ *   session.input.onTouch(["swipe_up", "swipe_down"], handler)
  *
  * Per-gesture filtering rides on `touch_event:<gesture>` stream variants
  * the phone runtime fans out alongside the bare `touch_event` stream.
@@ -17,7 +17,7 @@
 
 import {MiniappStreamType} from "../protocol"
 import {MiniappSession} from "../session"
-import type {ButtonPressData, TouchData, UnsubscribeFn} from "./events"
+import type {ButtonPressData, TapInputData, TouchData, UnsubscribeFn} from "./events"
 
 export class InputModule {
   constructor(private readonly session: MiniappSession) {}
@@ -27,11 +27,20 @@ export class InputModule {
   }
 
   /**
+   * Foverlay: decoded Tap Strap 2 finger chords from the phone-side
+   * TapInputService. Android only today; on other platforms the subscription
+   * succeeds but no events fire.
+   */
+  onTapInput(handler: (data: TapInputData) => void): UnsubscribeFn {
+    return this.session._subscribe(MiniappStreamType.TAP_INPUT, handler as (data: unknown) => void)
+  }
+
+  /**
    * Subscribe to touch events.
    *
-   *   onTouch(handler)             — all touch events
-   *   onTouch("click", handler)    — only "click"
-   *   onTouch(["a","b"], handler)  — multiple gestures, single subscription
+   *   onTouch(handler)                — all touch events
+   *   onTouch("single_tap", handler)  — only single taps
+   *   onTouch(["a","b"], handler)     — multiple gestures, single subscription
    */
   onTouch(handler: (data: TouchData) => void): UnsubscribeFn
   onTouch(gesture: string, handler: (data: TouchData) => void): UnsubscribeFn

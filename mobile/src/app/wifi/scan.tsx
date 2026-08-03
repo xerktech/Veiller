@@ -1,6 +1,6 @@
-import BluetoothSdk, {WifiSearchResult} from "@mentra/bluetooth-sdk"
-import {useFocusEffect} from "expo-router"
-import {useCallback, useEffect, useMemo, useState} from "react"
+import {engine, type WifiSearchResult} from "@mentra/engine"
+import {useFocusEffect, useLocalSearchParams} from "expo-router"
+import {useCallback, useEffect, useMemo, useRef, useState} from "react"
 import {ActivityIndicator, ScrollView, TouchableOpacity, View} from "react-native"
 import Toast from "react-native-toast-message"
 
@@ -12,21 +12,27 @@ import {Badge} from "@/components/ui/Badge"
 import {Group} from "@/components/ui"
 import {usePushPrevious} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
+import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
-import {useGlassesStore} from "@/stores/glasses"
 import showAlert from "@/utils/AlertUtils"
 import WifiCredentialsService from "@/utils/wifi/WifiCredentialsService"
+import {mergeWifiScanResults} from "@/utils/wifi/WifiScanUtils"
 import {translate} from "@/i18n"
 
 export default function WifiScanScreen() {
+  const params = useLocalSearchParams()
+  const returnToMiniapp = params.returnToMiniapp as string | undefined
   const {theme} = useAppTheme()
 
   const [networks, setNetworks] = useState<WifiSearchResult[]>([])
+  const networksRef = useRef(networks)
+  networksRef.current = networks
   const [savedNetworks, setSavedNetworks] = useState<string[]>([])
   const [isScanning, setIsScanning] = useState(true)
-  const connectedWifi = useGlassesStore((state) => (state.wifi.state === "connected" ? state.wifi : null))
+  const wifiStatus = useEngineSnapshot(engine.glasses.wifi.status, (onChange) => engine.glasses.wifi.onStatus(onChange))
+  const connectedWifi = wifiStatus.state === "connected" ? wifiStatus : null
   const connectedWifiSsid = connectedWifi?.ssid
-  const {push, goBack, getPreviousRoute, incPreventBack, decPreventBack, setAndroidBackFn} =
+  const {push, goBack, getPreviousRoute, incPreventBack, decPreventBack, setAndroidBackFn, clearHistoryAndGoHome} =
     useNavigationStore.getState()
   const pushPrevious = usePushPrevious()
 
@@ -37,19 +43,27 @@ export default function WifiScanScreen() {
 
   // if the previous route is in this list, or the second to last route is in this list
   // show / allow the back button:
-  const backableRoutes = ["/miniapps/settings/glasses", "/home"]
+  const backableRoutes = ["/miniapps/settings/main", "/home"]
 
   const secondLastRoute = getPreviousRoute(1)
-  const showBack = backableRoutes.includes(getPreviousRoute() || "") || backableRoutes.includes(secondLastRoute || "")
+  const showBack =
+    !!returnToMiniapp ||
+    backableRoutes.includes(getPreviousRoute() || "") ||
+    backableRoutes.includes(secondLastRoute || "")
   const showSkip = connectedWifi !== null
 
-  const handleBack = () => {
+  const handleBack = useCallback(async () => {
+    if (returnToMiniapp) {
+      clearHistoryAndGoHome({transition: "fade"})
+      await engine.miniapps.setForeground(returnToMiniapp)
+      return
+    }
     if (showBack) {
       goBack()
     } else {
       pushPrevious(1)
     }
-  }
+  }, [clearHistoryAndGoHome, goBack, pushPrevious, returnToMiniapp, showBack])
 
   // only prevent back if the showBack flag is false:
   useFocusEffect(
@@ -60,20 +74,38 @@ export default function WifiScanScreen() {
       }
       setAndroidBackFn(() => {
         if (showBack) {
-          goBack()
+          void handleBack()
         }
       })
 
       return () => {
         decPreventBack()
       }
-    }, [incPreventBack, decPreventBack, showBack, refreshSavedNetworks]),
+    }, [incPreventBack, decPreventBack, showBack, refreshSavedNetworks, handleBack, setAndroidBackFn]),
   )
 
   useEffect(() => {
     refreshSavedNetworks()
+
+    // The glasses stream networks one by one while the scan runs; show them as
+    // they arrive instead of waiting for the final requestWifiScan() result.
+    // Each correlated event is one chunk, so merge it into the visible list.
+    const unsubscribe = engine.glasses.wifi.onScanResult((scanned) => {
+      if (scanned.length > 0) {
+        setNetworks((current) => mergeWifiScanResults(current, mapNetworks(scanned)))
+      }
+    })
     startScan()
+    return unsubscribe
   }, [refreshSavedNetworks])
+
+  const mapNetworks = (scanResults: WifiSearchResult[]): WifiSearchResult[] =>
+    scanResults.map((network) => ({
+      ssid: network.ssid || "",
+      requiresPassword: network.requiresPassword !== false,
+      signalStrength: network.signalStrength || -100,
+      frequency: network.frequency,
+    }))
 
   const startScan = async () => {
     console.log("WIFI_SCAN: ========= STARTING NEW WIFI SCAN =========")
@@ -81,24 +113,21 @@ export default function WifiScanScreen() {
     setNetworks([])
 
     try {
-      const scanResults = await BluetoothSdk.requestWifiScan()
+      const scanResults = await engine.glasses.wifi.scan()
       console.log(`WIFI_SCAN: Received ${scanResults.length} WiFi scan results`)
-      setNetworks(
-        scanResults.map((network) => ({
-          ssid: network.ssid || "",
-          requiresPassword: network.requiresPassword !== false,
-          signalStrength: network.signalStrength || -100,
-          frequency: network.frequency,
-        })),
-      )
+      setNetworks(mapNetworks(scanResults))
       setIsScanning(false)
     } catch (error) {
       console.error("WIFI_SCAN: Error scanning for WiFi networks:", error)
       setIsScanning(false)
-      Toast.show({
-        type: "error",
-        text1: "Failed to scan for WiFi networks",
-      })
+      // Networks that streamed in before the failure are still shown; only
+      // surface the error when the user would otherwise see an empty list.
+      if (networksRef.current.length === 0) {
+        Toast.show({
+          type: "error",
+          text1: "Failed to scan for WiFi networks",
+        })
+      }
     }
   }
 
@@ -118,7 +147,7 @@ export default function WifiScanScreen() {
             onPress: async () => {
               try {
                 console.log(`WIFI_SCAN: Forgetting network: ${selectedNetwork.ssid}`)
-                await BluetoothSdk.forgetWifiNetwork(selectedNetwork.ssid)
+                await engine.glasses.wifi.forget(selectedNetwork.ssid)
                 // Also remove from local saved credentials
                 WifiCredentialsService.removeCredentials(selectedNetwork.ssid)
                 setSavedNetworks((prev) => prev.filter((ssid) => ssid !== selectedNetwork.ssid))
@@ -145,12 +174,14 @@ export default function WifiScanScreen() {
       push("/wifi/connecting", {
         ssid: selectedNetwork.ssid,
         password: "",
+        returnToMiniapp,
       })
     } else {
       console.log(`WIFI_SCAN: Secured network selected: ${selectedNetwork.ssid} - going to password screen`)
       push("/wifi/password", {
         ssid: selectedNetwork.ssid,
         requiresPassword: selectedNetwork.requiresPassword.toString(),
+        returnToMiniapp,
       })
     }
   }
@@ -158,6 +189,7 @@ export default function WifiScanScreen() {
   const handleManualEntry = () => {
     push("/wifi/password", {
       ssid: "",
+      returnToMiniapp,
     })
   }
 
@@ -221,7 +253,7 @@ export default function WifiScanScreen() {
         <Header
           title="Wi-Fi"
           leftIcon="chevron-left"
-          onLeftPress={handleBack}
+          onLeftPress={() => void handleBack()}
           rightIcon="repeat"
           onRightPress={startScan}
         />
@@ -241,18 +273,23 @@ export default function WifiScanScreen() {
 
         {/* Content - flex-1 makes it take remaining space, flex-shrink allows it to shrink */}
         <View className="flex-1 flex-shrink min-h-0 pb-4">
-          {isScanning ? (
-            <View className="flex-1 justify-center items-center py-12">
-              <ActivityIndicator size="large" color={theme.colors.foreground} />
-              <Text className="mt-4 text-base text-text-dim" tx="wifi:scanningForNetworks" />
-            </View>
-          ) : networks.length > 0 ? (
+          {networks.length > 0 ? (
             <>
               {/* <Text className="text-sm font-semibold text-text mb-2" tx="wifi:networks" /> */}
               <ScrollView className="flex-1 px-5 -mx-5" contentContainerClassName="pb-4">
                 <Group>{sortedNetworks.map(renderNetworkItem)}</Group>
+                {isScanning && (
+                  <View className="flex-row justify-center items-center py-4">
+                    <ActivityIndicator size="small" color={theme.colors.foreground} />
+                  </View>
+                )}
               </ScrollView>
             </>
+          ) : isScanning ? (
+            <View className="flex-1 justify-center items-center py-12">
+              <ActivityIndicator size="large" color={theme.colors.foreground} />
+              <Text className="mt-4 text-base text-text-dim" tx="wifi:scanningForNetworks" />
+            </View>
           ) : (
             <View className="flex-1 justify-center items-center py-12">
               <Text className="text-base text-text-dim mb-6 text-center" tx="wifi:noNetworksFound" />
@@ -263,7 +300,7 @@ export default function WifiScanScreen() {
 
         <Button tx="wifi:enterNetworkManually" preset="primary" onPress={handleManualEntry} />
         {/* show skip button if we are already connected to a network */}
-        {showSkip && <Button tx="common:skip" preset="secondary" onPress={handleBack} className="mt-3" />}
+        {showSkip && <Button tx="common:skip" preset="secondary" onPress={() => void handleBack()} className="mt-3" />}
       </View>
     </Screen>
   )

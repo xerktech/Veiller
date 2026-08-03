@@ -18,7 +18,7 @@
 
 import nacl from "tweetnacl";
 import { getRedis } from "../../clients/redis.client";
-import { UDP_LIVENESS_PROBE_PREFIX } from "../../protocol/audio";
+import { UDP_LIVENESS_PROBE_PREFIX } from "@mentra/cloud-protocol/audio";
 
 // === Stream constants ===
 
@@ -276,7 +276,7 @@ export const SESSION_TAG_REFRESH_INTERVAL_MS = 20_000;
 
 export interface SessionTagRecord {
   mentraUserId: string;
-  oemId: string;
+  tenantId: string;
   audioSessionId: string;
   authSessionId: string;
   /** Which pod's WebSocket owns this session. Used by dispatch later. */

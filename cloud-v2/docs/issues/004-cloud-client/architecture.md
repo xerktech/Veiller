@@ -55,7 +55,7 @@ transport happens entirely on the phone, and miniapp code never notices.
 ## 2. How a local miniapp runs on-device (PR #3086)
 
 A local miniapp bundle (a ZIP) ships two entry points
-(`mobile/modules/island/src/services/AppRegistry.ts`, "Two-layer bundles ship
+(`mobile/modules/engine/src/services/AppRegistry.ts`, "Two-layer bundles ship
 `entry.background` and optional `entry.ui`"):
 
 - **Background layer:** `src/background/index.ts`, the miniapp's logic. It runs in a
@@ -74,7 +74,7 @@ the background over an **RPC bridge** (`window.mentra` / the `ui` module) and th
 background does the actual session work. So all the cloud-facing calls come from one
 place, the background.
 
-Three bridges wire it together (all `mobile/modules/island/src/services/`):
+Three bridges wire it together (all `mobile/modules/engine/src/services/`):
 
 | Bridge | Connects | File |
 | --- | --- | --- |
@@ -221,13 +221,13 @@ What the subject token is depends on who's running the app:
 - **OEM users.** The OEM's own backend mints a short-lived signed JWT for the
   signed-in user (the OEM owns its accounts; there's no Mentra login screen). The
   OEM's host app hands that JWT to the cloud-client at construction. Mentra verifies
-  it against the OEM's registered public key and maps `(oemId, oemUserId)` to a
+  it against the OEM's registered public key and maps `(tenantId, tenantUserId)` to a
   `mentraUserId`.
-- **Mentra users.** Mentra is "OEM zero" (`oemId = "mentra"`). The subject token is
+- **Mentra users.** Mentra is "OEM zero" (`tenantId = "mentra"`). The subject token is
   the existing core token during the transition, a Supabase session at the end
   state, same endpoint.
 
-Either way, hosted deployments normalize identity to `mentraUserId` + `oemId`.
+Either way, hosted deployments normalize identity to `mentraUserId` + `tenantId`.
 `cloud.runtime` uses a `cloud-runtime` token; `cloud.core` uses a `cloud-core`
 token when configured. Full mechanics:
 [`../001-cloud-core/auth/design.md`](../001-cloud-core/auth/design.md) and
@@ -241,7 +241,7 @@ credentials). Instead:
 
 1. At launch the runtime asks the cloud-client for a **miniapp-scoped token**:
    `cloud.auth.getMiniappToken(packageName)`. cloud-core mints an Ed25519 JWT with
-   `sub = mentraUserId`, `oemId`, and `aud = <packageName>`, short-lived, scoped to
+   `sub = mentraUserId`, `tenantId`, and `aud = <packageName>`, short-lived, scoped to
    that one miniapp.
 2. The runtime hands that token to the **background JSContext** (via
    `MentraJSRouter`), which owns the session. The background's `useMentraAuth()`
@@ -251,7 +251,7 @@ credentials). Instead:
 3. The miniapp calls its developer backend with
    `Authorization: Bearer <miniapp-scoped-token>`. The backend verifies it against
    Mentra's published public keys (JWKS), checks `aud == its packageName`, and applies
-   its trust policy on `oemId`. No per-request call to Mentra.
+   its trust policy on `tenantId`. No per-request call to Mentra.
 4. The runtime re-mints and re-injects before expiry (`cloud.auth` caches per
    packageName).
 
@@ -320,7 +320,7 @@ surface.
 
 ## 8. Current vs proposed v2: the code that changes
 
-The host-injected transport hook (`mobile/modules/island/src/runtime/config.ts`),
+The host-injected transport hook (`mobile/modules/engine/src/runtime/config.ts`),
 today then v2:
 
 ```ts
@@ -342,7 +342,7 @@ interface CloudRuntimeAdapter {
 ```
 
 The call site that builds subscriptions
-(`mobile/modules/island/src/services/LocalMiniappRuntime.ts`,
+(`mobile/modules/engine/src/services/LocalMiniappRuntime.ts`,
 `updateCloudSubscriptions()`), today then v2:
 
 ```ts
@@ -449,9 +449,9 @@ from the start; the legacy v1 stack stays on its own separate path until it's re
 - [`../001-cloud-core/auth/design.md`](../001-cloud-core/auth/design.md): how auth
   moves into `cloud.auth`.
 - On-device code (base + PR #3086 `fixes-navigation-bitmaps`):
-  `mobile/modules/island/src/services/LocalMiniappRuntime.ts`,
-  `mobile/modules/island/src/runtime/config.ts`,
-  `mobile/modules/island/src/services/MentraJSRouter.ts`,
+  `mobile/modules/engine/src/services/LocalMiniappRuntime.ts`,
+  `mobile/modules/engine/src/runtime/config.ts`,
+  `mobile/modules/engine/src/services/MentraJSRouter.ts`,
   `mobile/modules/miniapp/src/session.ts`,
   `mobile/src/services/{MantleManager,SocketComms,RestComms,WebSocketManager}.ts`,
   `agents/local-app-runtime-plan.md`.

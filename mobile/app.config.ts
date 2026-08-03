@@ -67,8 +67,10 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   // build-time-only and lives in ~/.gradle/gradle.properties (Android) / the
   // CocoaPods netrc (iOS), never here. Fail loudly in CI/EAS, warn in local
   // dev. See issues/mapbox-navigation-migration.md.
+  // The China build (cn variant) ships without Mentra Map, so it has no nav
+  const isChinaBuild = variant === VARIANTS.cn
   const mapboxAccessToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ?? ""
-  if (!mapboxAccessToken) {
+  if (!mapboxAccessToken && !isChinaBuild) {
     const isCiOrEas =
       process.env.CI === "true" ||
       process.env.CI === "1" ||
@@ -112,6 +114,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       allowBackup: false,
       permissions: [
         "ACCESS_FINE_LOCATION",
+        "NEARBY_WIFI_DEVICES",
         "ACCESS_WIFI_STATE",
         "ACCESS_NETWORK_STATE",
         "CHANGE_WIFI_STATE",
@@ -216,6 +219,9 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
     plugins: [
       // our custom plugins:
       "./plugins/remove-ipad-orientations.js",
+      // crust's own config plugin carries its Android build contract (Mapbox
+      // downloads repo, protobuf-javalite exclusion, core-library desugaring).
+      "@mentra/crust",
       "./plugins/android.ts",
       // Mapbox Navigation SDK v3 for iOS — added as a Swift Package (SPM is the
       // ONLY supported v3 install path; CocoaPods can't resolve it). The

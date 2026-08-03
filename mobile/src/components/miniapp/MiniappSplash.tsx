@@ -3,10 +3,9 @@
  * icon centered on the host's background color. Styled to match AppIcon on
  * the home screen: 128px squircle with memory-disk image caching.
  *
- * Fades + scales in on mount so foregrounding feels like a soft zoom rather
- * than a hard cut. Fades out (opacity 1 → 0) when `isLoaded` flips true so
- * the WebView's first paint isn't preceded by a hard splash unmount + white
- * flash.
+ * Fades in on mount so foregrounding feels soft rather than a hard cut. Fades
+ * out (opacity 1 → 0) when `isLoaded` flips true so the WebView's first paint
+ * isn't preceded by a hard splash unmount + white flash.
  */
 
 import {Image} from "expo-image"
@@ -17,7 +16,7 @@ import Animated, {runOnJS, useAnimatedStyle, useSharedValue, withTiming} from "r
 
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {Text} from "@/components/ignite"
-import {DevIcon} from "@/components/miniapps/DevIcons"
+import {DevIcon, DevMiniappBadge} from "@/components/miniapps/DevIcons"
 
 interface MiniappSplashProps {
   iconUrl?: string
@@ -79,10 +78,14 @@ export default function MiniappSplash({
       pointerEvents="none"
       style={[
         StyleSheet.absoluteFill,
-        {backgroundColor: bgColor, borderRadius: theme.spacing.s12, justifyContent: "center", alignItems: "center"},
+        {backgroundColor: bgColor, justifyContent: "center", alignItems: "center"},
         animatedStyle,
       ]}>
-      {iconUrl && (
+      {/* Always mounted: iconUrl can resolve a beat after the splash appears
+          (lazy icon resolution), and conditionally mounting this block made
+          the name text jump down when the icon landed. An empty squircle is
+          invisible, so reserving the space costs nothing. */}
+      <View style={{position: "relative"}}>
         <SquircleView
           cornerSmoothing={100}
           preserveSmoothing={true}
@@ -94,8 +97,7 @@ export default function MiniappSplash({
             alignItems: "center",
             justifyContent: "center",
           }}>
-          {devApp && <DevIcon size={size} />}
-          {!devApp && iconUrl ? (
+          {iconUrl ? (
             <Image
               source={iconUrl}
               style={{width: "100%", height: "100%"}}
@@ -103,11 +105,12 @@ export default function MiniappSplash({
               transition={200}
               cachePolicy="memory-disk"
             />
-          ) : (
-            <View className="w-full h-full bg-primary-foreground" />
-          )}
+          ) : devApp ? (
+            <DevIcon size={size} />
+          ) : null}
         </SquircleView>
-      )}
+        {devApp && <DevMiniappBadge size={18} />}
+      </View>
 
       <View className="h-16 items-center justify-center w-full mt-4">
         {name && <Text className="text-lg h-10 font-semibold text-center" text={name} />}

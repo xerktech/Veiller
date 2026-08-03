@@ -15,20 +15,29 @@ export interface Channels {
   "rec:snapshot": RecorderSnapshot
   /** Live capture status (while recording). */
   "rec:status": RecorderStatus
+  /** Stop was accepted and the capture is being finalized. */
+  "rec:stopping": Record<string, never>
   /** Recording ended — clears the live status. */
   "rec:stopped": Record<string, never>
   /** Updated recordings list + usage (after save/delete/clear). */
   "rec:list": {recordings: RecordingItem[]; usage: Usage}
   /** Which recording (if any) is currently playing back. */
   "rec:playback": {playingId: string | null}
+  /** A recording's stored audio couldn't be read back (e.g. legacy/corrupt blob). */
+  "rec:audio-missing": {id: string}
+  /** Live transcript (Soniox) during a capture: committed text + in-progress tail. */
+  "rec:transcript": {final: string; interim: string; lang?: string}
 
   // ── UI → background ────────────────────────────────────────────────────
   "rec:start": Record<string, never>
   "rec:stop": Record<string, never>
   "rec:cancel": Record<string, never>
+  "rec:pause": Record<string, never>
+  "rec:resume": Record<string, never>
   "rec:play": {id: string}
   "rec:stop-play": Record<string, never>
   "rec:export": {id: string}
+  "rec:export-transcript": {id: string}
   "rec:delete": {id: string}
   "rec:clear": Record<string, never>
   "rec:request-snapshot": Record<string, never>

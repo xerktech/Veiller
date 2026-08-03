@@ -195,11 +195,11 @@ function syntheticDataFor(requestId: string, requestType: string, requestPayload
         requestPayload.preset === "narrow"
           ? 82
           : requestPayload.preset === "wide"
-          ? 118
-          : requestPayload.preset === "standard"
-          ? 102
-          : undefined
-      const fov = typeof requestPayload.fov === "number" ? requestPayload.fov : presetFov ?? 102
+            ? 118
+            : requestPayload.preset === "standard"
+              ? 102
+              : undefined
+      const fov = typeof requestPayload.fov === "number" ? requestPayload.fov : (presetFov ?? 102)
       const roi = requestPayload.roiPosition
       const roiPosition = roi === "bottom" ? "bottom" : roi === "top" ? "top" : "center"
       return {
@@ -226,6 +226,9 @@ function syntheticDataFor(requestId: string, requestType: string, requestPayload
       // Atlantic, which makes maps/navigation unusable in the WebView.
       return {lat: 37.7956, lng: -122.3933, accuracy: 0, timestamp: Date.now()}
 
+    case MiniappRequestType.CALENDAR_LIST_EVENTS:
+      return {events: [], truncated: false}
+
     case MiniappRequestType.STORAGE_GET:
       return {value: null}
 
@@ -239,6 +242,7 @@ function syntheticDataFor(requestId: string, requestType: string, requestPayload
     case MiniappRequestType.OPEN_URL:
     case MiniappRequestType.COPY_CLIPBOARD:
     case MiniappRequestType.DOWNLOAD:
+    case MiniappRequestType.REQUEST_WIFI_SETUP:
       return {ok: true}
 
     default:

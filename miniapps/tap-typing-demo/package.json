@@ -1,0 +1,16 @@
+{
+  "name": "tap-typing-demo",
+  "private": true,
+  "description": "Foverlay demo: Tap Strap 2 chords echoed to the G2 display in real time",
+  "scripts": {
+    "dev": "mentra-miniapp dev",
+    "build": "bun run build.ts",
+    "pack": "mentra-miniapp pack"
+  },
+  "dependencies": {
+    "@mentra/miniapp": "workspace:*"
+  },
+  "devDependencies": {
+    "@mentra/miniapp-cli": "workspace:*"
+  }
+}

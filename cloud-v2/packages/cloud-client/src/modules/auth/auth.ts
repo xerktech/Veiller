@@ -14,8 +14,10 @@
  *  - Exchange, refresh, and each per-miniapp mint are single-flighted, so a
  *    reconnect storm cannot fire a burst of competing requests (and a rotated
  *    refresh token cannot be invalidated out from under a concurrent caller).
- *  - If a refresh fails, `onExpired` fires once and the host re-authenticates;
- *    we do not retry forever against a dead refresh token.
+ *  - If a refresh fails and the host can fetch a fresh subject token on demand,
+ *    we clear the dead refresh token and exchange once. If no fresh subject is
+ *    available (or exchange also fails), `onExpired` fires once and the host
+ *    re-authenticates. We do not retry forever against a dead refresh token.
  *
  * Security: the access token is never written to storage, never given to a
  * miniapp, and no token is ever logged.
@@ -31,6 +33,7 @@ import type {
 } from "../../config";
 import type { HttpClient } from "../../http";
 import type { Logger } from "../../logger";
+import type { HttpTransport } from "../../transports";
 import { AuthExpiredError } from "../../errors";
 import { decodeClaims } from "./jwt";
 import { TokenStore } from "./token-store";
@@ -52,10 +55,13 @@ export interface AuthModule {
   // current Core token, refreshing as needed (Core-backed mode only).
   getCoreToken(opts?: { forceRefresh?: boolean }): Promise<string>;
   // a miniapp-scoped token, cached per packageName and re-minted before expiry
-  getMiniappToken(packageName: string, opts?: { minTtlMs?: number }): Promise<{ token: string; expiresAt: number }>;
+  getMiniappToken(
+    packageName: string,
+    opts?: { minTtlMs?: number; devAttestation?: string },
+  ): Promise<{ token: string; expiresAt: number }>;
   // Core-owned user/oem identity, read from the Core access token.
   // Runtime-only deployments do not expose this surface.
-  readonly identity: { mentraUserId: string; oemId: string };
+  readonly identity: { mentraUserId: string; tenantId: string };
   // refresh failed; the host must send the user back through login
   onExpired(handler: () => void): () => void;
 }
@@ -128,12 +134,14 @@ export class Auth implements AuthModule {
    * Core base URL for the form-encoded `/exchange` and `/refresh` calls.
    *
    * These two endpoints take `application/x-www-form-urlencoded` bodies and
-   * present the subject/refresh token in the body (not as a Bearer), so they go
-   * through `fetch` directly rather than the JSON-only injected `HttpClient`. In
-   * runtime-only mode this is absent by design: Core identity, miniapp token
-   * minting, and miniapp auto-auth are Core-backed features.
+   * present the subject/refresh token in the body (not as a Bearer), so they do
+   * not use the JSON-only `HttpClient`. They still use the host's injected HTTP
+   * transport when one is available. In runtime-only mode this is absent by
+   * design: Core identity, miniapp token minting, and miniapp auto-auth are
+   * Core-backed features.
    */
   private readonly baseUrl?: string;
+  private readonly httpTransport: HttpTransport;
 
   /** Miniapp tokens cached per packageName until near expiry. */
   private readonly miniappCache = new Map<string, MiniappTokenEntry>();
@@ -155,6 +163,7 @@ export class Auth implements AuthModule {
     config: AuthConfig;
     logger: Logger;
     baseUrl?: string;
+    fetch?: HttpTransport;
   }) {
     this.http = deps.http;
     this.store = deps.store;
@@ -162,6 +171,7 @@ export class Auth implements AuthModule {
     this.runtimeConfig = deps.config.runtime;
     this.logger = deps.logger;
     this.baseUrl = deps.baseUrl;
+    this.httpTransport = deps.fetch ?? globalThis.fetch;
   }
 
   /**
@@ -215,7 +225,10 @@ export class Auth implements AuthModule {
    * one request. The access token is the Bearer here and is never exposed to the
    * miniapp; only the returned miniapp-scoped token is.
    */
-  async getMiniappToken(packageName: string, opts?: { minTtlMs?: number }): Promise<{ token: string; expiresAt: number }> {
+  async getMiniappToken(
+    packageName: string,
+    opts?: { minTtlMs?: number; devAttestation?: string },
+  ): Promise<{ token: string; expiresAt: number }> {
     const marginSeconds = this.tokenMarginSeconds(opts?.minTtlMs);
     const cached = this.miniappCache.get(packageName);
     if (cached && !this.isExpiring(cached.expiresAt, marginSeconds)) {
@@ -234,7 +247,10 @@ export class Auth implements AuthModule {
       const http = this.requireCoreHttp();
       const res = await http.post<MiniappTokenEntry>(
         MINIAPP_TOKEN_PATH,
-        { packageName },
+        {
+          packageName,
+          ...(opts?.devAttestation ? { devAttestation: opts.devAttestation } : {}),
+        },
         { bearer: accessToken },
       );
 
@@ -257,14 +273,14 @@ export class Auth implements AuthModule {
    * every call, so the client need not). Throws if no Core access token has been
    * obtained yet, since Core identity is meaningless before the first exchange.
    */
-  get identity(): { mentraUserId: string; oemId: string } {
+  get identity(): { mentraUserId: string; tenantId: string } {
     this.requireCoreConfig();
     const current = this.store.current();
     if (!current) {
       throw new AuthExpiredError("Core identity is unavailable before first Core sign-in");
     }
     const claims = decodeClaims(current.accessToken);
-    return { mentraUserId: claims.sub, oemId: claims.oem_id };
+    return { mentraUserId: claims.sub, tenantId: claims.tenant_id };
   }
 
   /**
@@ -310,7 +326,19 @@ export class Auth implements AuthModule {
   private async obtainAccessToken(): Promise<string> {
     const refreshToken = await this.store.refreshToken();
     if (refreshToken) {
-      return this.refresh(refreshToken);
+      try {
+        return await this.refresh(refreshToken, { deferExpired: this.canExchangeFreshSubject() });
+      } catch (err) {
+        if (this.canExchangeFreshSubject()) {
+          this.logger.info("refresh failed; exchanging fresh subject token");
+          try {
+            return await this.exchange();
+          } catch {
+            this.fireExpired();
+          }
+        }
+        throw err;
+      }
     }
     return this.exchange();
   }
@@ -361,11 +389,13 @@ export class Auth implements AuthModule {
    * Refresh near expiry: trade the stored refresh token for a new access token
    * and a rotated refresh token, saving both.
    *
-   * On failure (the refresh token is dead or revoked) we clear stored state and
-   * fire `onExpired` once, then surface an `AuthExpiredError`. We do not retry:
-   * a dead refresh token will not heal on its own, and retrying would loop.
+   * On failure (the refresh token is dead or revoked) we clear stored state.
+   * The caller either falls back to one fresh subject-token exchange (for
+   * on-demand subject-token configs) or fires `onExpired` once and surfaces an
+   * `AuthExpiredError`. We do not retry refresh forever: a dead refresh token
+   * will not heal on its own, and retrying would loop.
    */
-  private async refresh(refreshToken: string): Promise<string> {
+  private async refresh(refreshToken: string, opts?: { deferExpired?: boolean }): Promise<string> {
     const body = new URLSearchParams({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
@@ -376,9 +406,11 @@ export class Auth implements AuthModule {
       tokens = await this.postForm(REFRESH_PATH, body, "refresh");
     } catch {
       // The refresh token is unusable: drop it so we do not keep presenting a
-      // known-bad token, notify the host once, and stop.
+      // known-bad token.
       await this.store.clear();
-      this.fireExpired();
+      if (!opts?.deferExpired) {
+        this.fireExpired();
+      }
       throw new AuthExpiredError("token refresh failed; re-auth required");
     }
 
@@ -389,6 +421,10 @@ export class Auth implements AuthModule {
     this.expiredFired = false;
     this.logger.debug("refreshed access token");
     return tokens.access_token;
+  }
+
+  private canExchangeFreshSubject(): boolean {
+    return !!this.coreConfig && "getSubjectToken" in this.coreConfig;
   }
 
   /**
@@ -450,7 +486,7 @@ export class Auth implements AuthModule {
    * POST a form-encoded body to a token endpoint and parse the RFC token
    * response.
    *
-   * Uses `fetch` directly (not the injected JSON `HttpClient`) because these
+   * Uses the injected HTTP transport (not the JSON `HttpClient`) because these
    * endpoints require `application/x-www-form-urlencoded` and present the
    * subject/refresh token in the body, not as a Bearer header. We never log the
    * body: it carries a token.
@@ -461,7 +497,7 @@ export class Auth implements AuthModule {
     label: string,
   ): Promise<TokenResponse> {
     const url = this.joinUrl(path);
-    const res = await fetch(url, {
+    const res = await this.httpTransport(url, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: body.toString(),

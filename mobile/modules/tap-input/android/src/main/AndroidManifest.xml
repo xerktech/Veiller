@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- BLUETOOTH_CONNECT / BLUETOOTH_SCAN / POST_NOTIFICATIONS / FOREGROUND_SERVICE*
+       are already declared app-wide by the bluetooth-sdk module manifest and
+       mobile/plugins/android.ts; only the service itself is declared here. -->
+  <application>
+    <service
+      android:name="com.foverlay.tapinput.TapInputService"
+      android:exported="false"
+      android:foregroundServiceType="connectedDevice|dataSync" />
+  </application>
+</manifest>

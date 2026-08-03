@@ -7,6 +7,8 @@
  *   /api/* + request-context    — per-request reqId + logger
  *   /api/client/auth/*          — device-called auth: exchange, refresh,
  *                                 miniapp-token
+ *   /api/client/reports/*       — device-filed reports
+ *   /api/agent/reports/*        — read-only private dev-agent access
  *
  * Caller convention (auth/spec.md): /api/client/* is device-called and
  * /api/oem/* is reserved for the OEM's backend. The token exchange + refresh
@@ -22,8 +24,17 @@ import { Hono } from "hono";
 import { createHealthApp, createLogger, type ReadinessCheck } from "@mentra/cloud-shared";
 import type { AppEnv } from "../types/hono.types";
 import { OauthError } from "../types/oauth.types";
+import { AccountError } from "../services/account/account-error";
 import { requestContext } from "./middleware/context.middleware";
+import adminPreinstalled from "./admin/preinstalled.api";
+import reportAgent from "./agent/reports.api";
 import clientAuth from "./client/auth.api";
+import clientReports from "./client/reports.api";
+import clientMiniapps from "./client/miniapps.api";
+import accountApi from "./account/account.api";
+import accountOauth from "./account/oauth.api";
+import consoleAuth from "./console/cli-auth.api";
+import portalEnterprise from "./portal/enterprise.api";
 import wellKnown from "./well-known.api";
 
 const logger = createLogger("core").child({ service: "app" });
@@ -53,16 +64,38 @@ export function createApp(opts: CreateAppOptions): Hono<AppEnv> {
   // Per-request context (reqId, logger) for everything under /api/*.
   app.use("/api/*", requestContext);
 
+  // Minimum-client-version gate. Device-called, unauthenticated: the mobile
+  // app hits this on boot (RestComms.getMinimumClientVersion) before login and
+  // refuses to proceed if it can't reach it. Versions are config-driven and
+  // default to "0.0.0" so any build passes unless an operator pins a floor.
+  app.get("/api/client/min-version", (c) =>
+    c.json({
+      success: true,
+      data: {
+        required: process.env.CLOUD_CLIENT_MIN_VERSION ?? "0.0.0",
+        recommended: process.env.CLOUD_CLIENT_RECOMMENDED_VERSION ?? "0.0.0",
+      },
+    }),
+  );
+
   // Audience mounts. Device-called auth lives under /api/client/*.
   app.route("/api/client/auth", clientAuth);
+  app.route("/api/client/reports", clientReports);
+  app.route("/api/agent/reports", reportAgent);
+  app.route("/api/client/miniapps", clientMiniapps);
+  app.route("/api/account", accountApi);
+  app.route("/api/account/oauth", accountOauth);
+  app.route("/api/console", consoleAuth);
+  app.route("/api/portal", portalEnterprise);
+  app.route("/api/admin", adminPreinstalled);
 
   // Global error translator.
   app.onError((err, c) => {
-    if (err instanceof OauthError) {
+    if (err instanceof OauthError || err instanceof AccountError) {
       return c.json(
         { error: err.code, error_description: err.description },
         // Hono's typing wants a literal status code; cast keeps it loose so
-        // future OauthError subclasses (4xx/5xx) compile without a switch.
+        // future error subclasses (4xx/5xx) compile without a switch.
         err.httpStatus as 400,
       );
     }

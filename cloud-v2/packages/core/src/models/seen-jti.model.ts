@@ -16,7 +16,8 @@
  * Spec: docs/issues/001-oem-auth/design.md ("Data model" / "seenJtis")
  */
 
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, type InferSchemaType } from "mongoose";
+import { registerModel } from "./register-model";
 
 const SeenJtiSchema = new Schema(
   {
@@ -24,7 +25,7 @@ const SeenJtiSchema = new Schema(
     jti: { type: String, required: true },
 
     /** Issuing OEM. Scopes the uniqueness check. */
-    oemId: { type: String, required: true },
+    tenantId: { type: String, required: true },
 
     /**
      * Natural expiry of the OEM JWT plus a small buffer for clock skew.
@@ -40,7 +41,7 @@ SeenJtiSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // Uniqueness scoped per-OEM. Two different OEMs could in principle issue
 // jtis that happen to collide; we only care about replay within one OEM.
-SeenJtiSchema.index({ jti: 1, oemId: 1 }, { unique: true });
+SeenJtiSchema.index({ jti: 1, tenantId: 1 }, { unique: true });
 
 export type SeenJti = InferSchemaType<typeof SeenJtiSchema>;
-export const SeenJtiModel = model("SeenJti", SeenJtiSchema);
+export const SeenJtiModel = registerModel("SeenJti", SeenJtiSchema);

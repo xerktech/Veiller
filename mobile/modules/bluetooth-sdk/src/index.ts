@@ -25,6 +25,7 @@ const PUBLIC_EVENT_NAMES = new Set<BluetoothSdkEventName>([
   "hotspot_error",
   "photo_response",
   "photo_status",
+  "camera_status",
   "video_recording_status",
   "media_success",
   "media_error",
@@ -43,6 +44,7 @@ const PUBLIC_EVENT_NAMES = new Set<BluetoothSdkEventName>([
   "stream_status",
   "ota_start_ack",
   "ota_status",
+  "ar99_ota_status",
   "version_info",
   "extraction_progress",
 ])
@@ -95,6 +97,12 @@ export const BluetoothSdk: BluetoothSdkPublicModule = Object.freeze({
   setHotspotState: bindPublicMethod("setHotspotState"),
   setGalleryModeEnabled: bindPublicMethod("setGalleryModeEnabled"),
   setVoiceActivityDetectionEnabled: bindPublicMethod("setVoiceActivityDetectionEnabled"),
+  setLoudnessGateEnabled: bindPublicMethod("setLoudnessGateEnabled"),
+  /**
+   * @deprecated Sticky action-button photo presets are deprecated. Prefer per-request
+   * `requestPhoto(...)` options (e.g. `mode: "text"` for text sensor size/crop, or explicit per-shot
+   * fields). Still functional until removed in a future release.
+   */
   setPhotoCaptureDefaults: bindPublicMethod("setPhotoCaptureDefaults"),
   setVideoRecordingDefaults: ({width, height, fps}: VideoRecordingDefaults) => {
     const method = (PrivateBluetoothSdkModule as unknown as Record<string, unknown>).setVideoRecordingDefaults
@@ -107,9 +115,14 @@ export const BluetoothSdk: BluetoothSdkPublicModule = Object.freeze({
   },
   setMaxVideoRecordingDuration: bindPublicMethod("setMaxVideoRecordingDuration"),
   setCameraFov: bindPublicMethod("setCameraFov"),
+  setLegacyCameraFov: bindPublicMethod("setLegacyCameraFov"),
+  setCameraFovOverride: bindPublicMethod("setCameraFovOverride"),
+  releaseCameraFovOverride: bindPublicMethod("releaseCameraFovOverride"),
   setCameraTuningConfig: bindPublicMethod("setCameraTuningConfig"),
   queryGalleryStatus: bindPublicMethod("queryGalleryStatus"),
   requestPhoto: bindPublicMethod("requestPhoto"),
+  warmUpCamera: bindPublicMethod("warmUpCamera"),
+  stopCameraWarmUp: bindPublicMethod("stopCameraWarmUp"),
   startVideoRecording: bindPublicMethod("startVideoRecording"),
   stopVideoRecording: bindPublicMethod("stopVideoRecording"),
   startStream: bindPublicMethod("startStream"),
@@ -123,6 +136,10 @@ export const BluetoothSdk: BluetoothSdkPublicModule = Object.freeze({
   requestVersionInfo: bindPublicMethod("requestVersionInfo"),
   checkForOtaUpdate: bindPublicMethod("checkForOtaUpdate"),
   startOtaUpdate,
+  startAr99OtaFromFile: bindPublicMethod("startAr99OtaFromFile"),
+  cancelAr99Ota: bindPublicMethod("cancelAr99Ota"),
+  sendAr99FactoryReset: bindPublicMethod("sendAr99FactoryReset"),
+  buildAr99OtaSignature: bindPublicMethod("buildAr99OtaSignature"),
   setSttModelDetails: bindPublicMethod("setSttModelDetails"),
   getSttModelPath: bindPublicMethod("getSttModelPath"),
   checkSttModelAvailable: bindPublicMethod("checkSttModelAvailable"),
@@ -153,6 +170,7 @@ export {
 
 export type {
   AccelEvent,
+  Ar99OtaStatusEvent,
   AudioConnectedEvent,
   AudioDisconnectedEvent,
   AudioPairingNeededEvent,
@@ -202,6 +220,8 @@ export type {
   PhotoCompression,
   PhotoFpsRange,
   PhotoMeteredPreview,
+  PhotoMode,
+  PhotoTransferMethod,
   PhotoResponseEvent,
   PhotoRequestedCaptureConfig,
   PhotoRequestParams,

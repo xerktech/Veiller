@@ -30,6 +30,18 @@ public class Bridge private constructor() {
         private const val MIC_CHANNELS = 1
         private const val LC3_FRAME_DURATION_MS = 10
         private const val DEFAULT_LC3_FRAME_SIZE_BYTES = 60
+        private val AUDIO_TRACE_METADATA_KEYS =
+                listOf(
+                        "sampleRate",
+                        "bitsPerSample",
+                        "channels",
+                        "encoding",
+                        "frameDurationMs",
+                        "frameSizeBytes",
+                        "bitrate",
+                        "packetizedFromGlasses",
+                        "voiceActivityDetectionEnabled",
+                )
 
         @Volatile private var instance: Bridge? = null
 
@@ -238,7 +250,8 @@ public class Bridge private constructor() {
                 deviceModel: String,
                 deviceName: String,
                 deviceAddress: String = "",
-                rssi: Int? = null
+                rssi: Int? = null,
+                projectName: String? = null
         ) {
             val searchResults =
                     (DeviceStore.store.getCategory("bluetooth")["searchResults"] as? List<*>)
@@ -250,7 +263,7 @@ public class Bridge private constructor() {
                                         ?.toMap()
                             }
                             ?: emptyList()
-            val id = "$deviceModel:$deviceName"
+            val id = listOfNotNull(deviceModel, projectName?.takeIf { it.isNotBlank() }, deviceName).joinToString(":")
             val newResult =
                     buildMap<String, Any> {
                         put("id", id)
@@ -259,6 +272,7 @@ public class Bridge private constructor() {
                         if (deviceAddress.isNotBlank()) {
                             put("address", deviceAddress)
                         }
+                        projectName?.takeIf { it.isNotBlank() }?.let { put("projectName", it) }
                         rssi?.let { put("rssi", it) }
                     }
             // Keep the public searchResults array stable as glasses are added or removed.
@@ -372,6 +386,11 @@ public class Bridge private constructor() {
         @JvmStatic
         fun sendPhotoStatus(statusJson: Map<String, Any>) {
             sendTypedMessage("photo_status", statusJson)
+        }
+
+        @JvmStatic
+        fun sendCameraStatus(statusJson: Map<String, Any>) {
+            sendTypedMessage("camera_status", statusJson)
         }
 
         @JvmStatic
@@ -503,30 +522,81 @@ public class Bridge private constructor() {
             sendTypedMessage("glasses_serial_number", body as Map<String, Any>)
         }
 
-        /** Send WiFi status change */
+        /**
+         * Send WiFi status change. [error] is the glasses' provisioning failure reason
+         * (e.g. "connect_timeout", "connected_to_other_network") when this status is the
+         * verdict of a failed connect attempt; null for routine link-state updates.
+         */
         @JvmStatic
-        fun sendWifiStatusChange(connected: Boolean, ssid: String?, localIp: String?) {
+        @JvmOverloads
+        fun sendWifiStatusChange(
+                connected: Boolean,
+                ssid: String?,
+                localIp: String?,
+                error: String? = null
+        ) {
             val status = WifiStatus.fromStoreFields(connected, ssid, localIp) ?: return
-            sendTypedMessage("wifi_status_change", status.toMap())
+            val payload =
+                    if (error != null) status.toMap() + mapOf("error" to error)
+                    else status.toMap()
+            sendTypedMessage("wifi_status_change", payload)
+        }
+
+        /**
+         * Claim the WiFi scan-results store for a newly requested scan. Called by the
+         * SDK when it generates the scanId, BEFORE the scan command goes out: store
+         * ownership is decided at request time, not by whichever chunk arrives first,
+         * so a delayed chunk from an older, abandoned scan can never reset or clobber
+         * the current scan's accumulator.
+         */
+        @JvmStatic
+        fun claimWifiScanResults(scanId: String) {
+            DeviceStore.apply("bluetooth", "wifiScanActiveScanId", scanId)
         }
 
         /** Send WiFi scan results */
         @JvmStatic
-        fun updateWifiScanResults(networks: List<Map<String, Any>>, scanComplete: Boolean) {
-            var storedNetworks: List<Map<String, Any>> =
-                    DeviceStore.get("bluetooth", "wifiScanResults") as? List<Map<String, Any>>
-                            ?: emptyList()
-            // add the networks to the storedNetworks array, removing duplicates by ssid
-            val updatedNetworks = storedNetworks.toMutableList()
-            for (network in networks) {
-                if (!updatedNetworks.any { it["ssid"] as? String == network["ssid"] as? String }) {
-                    updatedNetworks.add(network)
+        fun updateWifiScanResults(
+                networks: List<Map<String, Any>>,
+                scanComplete: Boolean,
+                scanId: String? = null
+        ) {
+            // Only chunks echoing the active scanId claimed at request time may mutate
+            // the store; foreign chunks are still forwarded to the SDK sink, which
+            // drops stale ids itself. Scan-id-less chunks (old firmware) keep the
+            // legacy accumulate-forever store behavior.
+            val ownsStore =
+                    scanId == null || scanId == DeviceStore.get("bluetooth", "wifiScanActiveScanId")
+            var updatedNetworks: List<Map<String, Any>> = networks
+            if (ownsStore) {
+                var storedNetworks: List<Map<String, Any>> =
+                        DeviceStore.get("bluetooth", "wifiScanResults") as? List<Map<String, Any>>
+                                ?: emptyList()
+                val lastScanId = DeviceStore.get("bluetooth", "wifiScanResultsScanId")
+                if (scanId != null && scanId != lastScanId) {
+                    // First chunk of a new scan: drop networks accumulated for a previous scan
+                    // so stale entries never carry over into this scan's store.
+                    storedNetworks = emptyList()
+                    DeviceStore.apply("bluetooth", "wifiScanResultsScanId", scanId)
                 }
+                // add the networks to the storedNetworks array, removing duplicates by ssid
+                val merged = storedNetworks.toMutableList()
+                for (network in networks) {
+                    if (!merged.any { it["ssid"] as? String == network["ssid"] as? String }) {
+                        merged.add(network)
+                    }
+                }
+                DeviceStore.apply("bluetooth", "wifiScanResults", merged)
+                updatedNetworks = merged
             }
-            DeviceStore.apply("bluetooth", "wifiScanResults", updatedNetworks)
             val body = HashMap<String, Any>()
-            body["networks"] = updatedNetworks
+            // Correlated scans: the SDK accumulates and dedupes chunks per scanId itself,
+            // so forward only this chunk; the merged store list is for UI consumers.
+            body["networks"] = if (scanId != null) networks else updatedNetworks
             body["scanComplete"] = scanComplete
+            if (scanId != null) {
+                body["scanId"] = scanId
+            }
             sendTypedMessage("wifi_scan_result", body)
         }
 
@@ -726,13 +796,14 @@ public class Bridge private constructor() {
                     return
                 }
 
-                if (shouldTraceTypedMessage(type)) {
+                val tracePayload = tracePayloadForTypedMessage(type, mutableBody as Map<String, Any>)
+                if (tracePayload != null) {
                     try {
                         BleTraceLogger.logMap(
                             "phone_to_app",
                             "sdk_event_dispatch",
                             type,
-                            mutableBody as Map<String, Any>,
+                            tracePayload,
                         )
                     } catch (e: Exception) {
                         Log.d(TAG, "BLE trace logging failed for typed message '$type'", e)
@@ -757,8 +828,43 @@ public class Bridge private constructor() {
             }
         }
 
-        private fun shouldTraceTypedMessage(type: String): Boolean =
-                type != "log" && type != "mic_pcm" && type != "mic_lc3"
+        private fun tracePayloadForTypedMessage(
+                type: String,
+                body: Map<String, Any>
+        ): Map<String, Any>? =
+                when {
+                    type == "log" -> null
+                    isAudioPayloadEvent(type) -> audioTracePayload(type, body)
+                    else -> body
+                }
+
+        private fun isAudioPayloadEvent(type: String): Boolean =
+                type == "mic_pcm" || type == "mic_lc3"
+
+        private fun audioTracePayload(type: String, body: Map<String, Any>): Map<String, Any> {
+            val payload = HashMap<String, Any>()
+            payload["type"] = type
+            payload["timestamp"] = System.currentTimeMillis()
+            payload["payloadOmitted"] = true
+            payload["payloadOmittedReason"] = "audio"
+
+            val audioBytes =
+                    when (type) {
+                        "mic_pcm" -> (body["pcm"] as? ByteArray)?.size
+                        "mic_lc3" -> (body["lc3"] as? ByteArray)?.size
+                        else -> null
+                    }
+            audioBytes?.let { payload["audioBytes"] = it }
+
+            AUDIO_TRACE_METADATA_KEYS.forEach { key ->
+                val value = body[key]
+                if (value != null) {
+                    payload[key] = value
+                }
+            }
+
+            return payload
+        }
     }
 
     init {
@@ -768,3 +874,6 @@ public class Bridge private constructor() {
         }
     }
 }
+
+
+

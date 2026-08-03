@@ -1,0 +1,148 @@
+package com.foverlay.tapinput
+
+import android.content.Context
+import android.util.Log
+import com.tapwithus.sdk.TapListener
+import com.tapwithus.sdk.TapSdk
+import com.tapwithus.sdk.TapSdkFactory
+import com.tapwithus.sdk.airmouse.AirMousePacket
+import com.tapwithus.sdk.mode.RawSensorData
+import com.tapwithus.sdk.mouse.MousePacket
+
+/**
+ * Tap Strap 2 input via the tap-android-sdk (io.github.tapwithus:tap-android-sdk)
+ * in Controller Mode.
+ *
+ * Controller Mode, not Bluetooth HID: Android routes HID key events to the
+ * focused window, and "phone in pocket, screen off" has no focused window.
+ * In Controller Mode the SDK owns a direct BLE GATT connection and delivers
+ * raw tapcodes through this listener regardless of screen state — as long as
+ * a foreground service (TapInputService) keeps the process alive.
+ *
+ * Notes on SDK behavior (verified against the 0.3.6 binary):
+ *  - The SDK does not scan or pair. The Tap must already be paired in Android
+ *    Bluetooth settings; the SDK auto-attaches to bonded Taps and auto-switches
+ *    them to Controller Mode on connect.
+ *  - By default the SDK flips the Tap back to Text Mode (HID keyboard) when the
+ *    app backgrounds. That would kill screen-off input, so we call
+ *    disablePauseResumeHandling() and pin Controller Mode ourselves.
+ *  - Reconnection: the SDK re-establishes bonded connections; onTapDisconnected
+ *    → onTapConnected cycles are logged and surfaced as status events. We also
+ *    nudge it with refreshConnections() on disconnect.
+ */
+class RealTapSource(
+    private val context: Context,
+    private val sink: TapSink,
+    private val onStatus: (status: String, tapIdentifier: String?) -> Unit,
+) : TapSource, TapListener {
+
+    companion object {
+        private const val TAG = "FoverlayTapReal"
+    }
+
+    private var sdk: TapSdk? = null
+
+    override fun start() {
+        if (sdk != null) return
+        Log.i(TAG, "Starting tap-android-sdk (Controller Mode, background handling disabled)")
+        val s = TapSdkFactory.getDefault(context.applicationContext)
+        // Keep Controller Mode when the app backgrounds / screen turns off —
+        // the whole point of this demo. Without this the SDK restores Text
+        // Mode (HID) on background and input stops reaching us.
+        s.disablePauseResumeHandling()
+        s.registerTapListener(this)
+        s.resume()
+        sdk = s
+    }
+
+    override fun stop() {
+        val s = sdk ?: return
+        sdk = null
+        try {
+            s.unregisterTapListener(this)
+            // Hand the Tap back to normal keyboard behavior when the service stops.
+            for (id in s.getConnectedTaps()) s.startTextMode(id)
+            s.close()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error shutting down TapSdk", e)
+        }
+    }
+
+    // --- TapListener ---
+
+    override fun onTapInputReceived(tapIdentifier: String, data: Int, repeatData: Int) {
+        val now = System.currentTimeMillis()
+        // repeatData is 0 on firmwares that don't report repeats; normalize to 1.
+        val repeat = if (repeatData in 2..3) repeatData else 1
+        val result = TapAlphabet.decode(data, repeat)
+        if (result is TapAlphabet.Result.Unmapped) {
+            Log.i(TAG, "Unmapped tapcode=$data repeat=$repeat from $tapIdentifier")
+        }
+        sink(result, data, repeat, now, "real")
+    }
+
+    override fun onTapConnected(tapIdentifier: String) {
+        Log.i(TAG, "Tap connected: $tapIdentifier — pinning Controller Mode")
+        // The SDK switches to Controller Mode on connect by default, but pin it
+        // explicitly so a stray mode change can't silently break input.
+        sdk?.startControllerMode(tapIdentifier)
+        onStatus("connected", tapIdentifier)
+    }
+
+    override fun onTapDisconnected(tapIdentifier: String) {
+        Log.i(TAG, "Tap disconnected: $tapIdentifier")
+        onStatus("disconnected", tapIdentifier)
+        // Recovery must be automatic, not user-initiated. The SDK reconnects
+        // bonded devices on its own; refreshConnections() nudges it in case
+        // the drop left a stale cache entry.
+        try {
+            sdk?.refreshConnections()
+        } catch (e: Exception) {
+            Log.w(TAG, "refreshConnections failed", e)
+        }
+    }
+
+    override fun onTapStartConnecting(tapIdentifier: String) {
+        onStatus("connecting", tapIdentifier)
+    }
+
+    override fun onTapResumed(tapIdentifier: String) {
+        Log.i(TAG, "Tap resumed: $tapIdentifier — pinning Controller Mode")
+        sdk?.startControllerMode(tapIdentifier)
+        onStatus("connected", tapIdentifier)
+    }
+
+    override fun onError(tapIdentifier: String, code: Int, description: String) {
+        Log.w(TAG, "TapSdk error $code for $tapIdentifier: $description")
+        onStatus("error", tapIdentifier)
+    }
+
+    override fun onBluetoothTurnedOn() {
+        Log.i(TAG, "Bluetooth on")
+    }
+
+    override fun onBluetoothTurnedOff() {
+        Log.i(TAG, "Bluetooth off")
+        onStatus("bluetooth_off", null)
+    }
+
+    override fun onTapShiftSwitchReceived(tapIdentifier: String, data: Int) {
+        // Shift / layer-switch state. Layers are stubbed for the demo — log only.
+        val decoded = TapSdk.toShiftAndSwitch(data)
+        Log.i(TAG, "Shift/switch state from $tapIdentifier: shift=${decoded[0]} switch=${decoded[1]} (layers stubbed)")
+    }
+
+    override fun onTapChanged(tapIdentifier: String) {}
+
+    override fun onTapChangedState(tapIdentifier: String, state: Int) {
+        Log.d(TAG, "Tap $tapIdentifier changed state: $state")
+    }
+
+    // Demo is tapcodes only — mouse/air-gesture/raw-sensor streams are
+    // registered as no-ops to satisfy the interface.
+    override fun onMouseInputReceived(tapIdentifier: String, data: MousePacket) {}
+
+    override fun onAirMouseInputReceived(tapIdentifier: String, data: AirMousePacket) {}
+
+    override fun onRawSensorInputReceived(tapIdentifier: String, rsData: RawSensorData) {}
+}

@@ -24,11 +24,15 @@ export enum MiniappRequestType {
   /** Update the set of streams the miniapp is subscribed to. */
   SUBSCRIBE = "miniapp_subscribe",
 
-  /** Push a layout to the glasses display. */
+  /**
+   * Push a legacy display layout to the glasses. The SDK no longer emits this
+   * (render()/RENDER replaced it); hosts keep accepting it from bundles packed
+   * with older SDKs and from cloud-shaped layouts.
+   */
   DISPLAY = "miniapp_display",
 
-  /** Push a canvas command to the glasses canvas. */
-  CANVAS = "miniapp_canvas",
+  /** Render a whole scene of positioned elements (replace-the-frame). */
+  RENDER = "miniapp_render",
 
   /** Play an arbitrary audio URL through the phone's audio playback service. */
   PLAY_AUDIO = "miniapp_play_audio",
@@ -39,11 +43,25 @@ export enum MiniappRequestType {
   /** Speak text via cloud TTS — phone constructs the URL. */
   SPEAK = "miniapp_speak",
 
+  /**
+   * Live PCM output stream to the phone's audio playback service
+   * (speaker.createStream). OPEN provisions a native chunk player; WRITE
+   * appends base64 PCM (replies with {bufferedMs} for backpressure); CLOSE
+   * drains and finishes; ABORT drops immediately.
+   */
+  SPEAKER_STREAM_OPEN = "miniapp_speaker_stream_open",
+  SPEAKER_STREAM_WRITE = "miniapp_speaker_stream_write",
+  SPEAKER_STREAM_CLOSE = "miniapp_speaker_stream_close",
+  SPEAKER_STREAM_ABORT = "miniapp_speaker_stream_abort",
+
   /** Control the glasses RGB LED. */
   RGB_LED = "miniapp_rgb_led",
 
   /** One-shot location poll. */
   LOCATION_POLL = "miniapp_location_poll",
+
+  /** Read a bounded snapshot of phone calendar events. */
+  CALENDAR_LIST_EVENTS = "miniapp_calendar_list_events",
 
   /** Start a turn-by-turn navigation trip. Android only. */
   NAVIGATION_START = "miniapp_navigation_start",
@@ -89,12 +107,20 @@ export enum MiniappRequestType {
   /** Write camera FOV settings. */
   CAMERA_FOV = "miniapp_camera_fov",
 
+  /** Pre-warm the glasses camera so the next takePhoto() is near-instant. */
+  CAMERA_WARM_UP = "miniapp_camera_warm_up",
+
   /**
    * Enable/disable raw accelerometer (IMU) streaming on the glasses. The
    * accel stream also auto-enables on subscribe; this is an explicit override
    * for callers who want to control the sensor directly. G2 only today.
    */
   IMU_SET_ENABLED = "miniapp_imu_set_enabled",
+
+  /** Explicitly enable/disable glasses-side VAD (GX8002). Mirrors the app's mic settings toggle. */
+  MIC_SET_VAD_ENABLED = "miniapp_mic_set_vad_enabled",
+  /** Explicitly enable/disable the center-mic loudness gate ("Barrier"). */
+  MIC_SET_LOUDNESS_GATE_ENABLED = "miniapp_mic_set_loudness_gate_enabled",
 
   /** Share content via the OS share sheet. */
   SHARE = "miniapp_share",
@@ -153,6 +179,9 @@ export enum MiniappRequestType {
   STREAM_STOP = "miniapp_stream_stop",
   MANAGED_STREAM_START = "miniapp_managed_stream_start",
   MANAGED_STREAM_STOP = "miniapp_managed_stream_stop",
+
+  /** Ask the host to open the glasses Wi-Fi setup flow (mirrors the cloud SDK's requestWifiSetup). */
+  REQUEST_WIFI_SETUP = "miniapp_request_wifi_setup",
 
   // ----- Inter-miniapp interop (SYSTEM apps only) -----
   /** List installed miniapps (compatibility-filtered, with declared actions). */
@@ -225,7 +254,7 @@ export enum MiniappResponseType {
    * Push: phone is about to tear down the miniapp's session. Gives the SDK
    * a brief window (~50ms grace on the phone side) to fire one last
    * `sendOneShot` before the transport closes — used to flush final
-   * cleanup like `display.clear()`. Synchronous handlers only.
+   * cleanup like `display.render([])`. Synchronous handlers only.
    */
   WILL_DISCONNECT = "miniapp_will_disconnect",
 
@@ -253,6 +282,8 @@ export enum MiniappStreamType {
   GLASSES_BATTERY = "glasses_battery",
   PHONE_BATTERY = "phone_battery",
   GLASSES_CONNECTION = "glasses_connection",
+  /** Glasses Wi-Fi state (connected/ssid). Glasses with Wi-Fi only; needed for streaming. */
+  GLASSES_WIFI = "glasses_wifi",
 
   // Speech / audio (cloud or local)
   TRANSCRIPTION = "transcription", // language variant: "transcription:en-US"
@@ -277,11 +308,16 @@ export enum MiniappStreamType {
    * fire. See agents/miniapp-speaker-state-and-notif-dismissed-plan.md.
    */
   PHONE_NOTIFICATION_DISMISSED = "phone_notification_dismissed",
-  CALENDAR_EVENT = "calendar_event",
-
   // Photos, streaming
   PHOTO_TAKEN = "photo_taken",
   STREAM_STATUS = "stream_status",
+
+  /**
+   * Foverlay: decoded Tap Strap 2 finger chords from the phone-side
+   * TapInputService (@foverlay/tap-input). `{char, action, tapcode, repeat,
+   * timestamp, source}` — see TapInputData. Android only today.
+   */
+  TAP_INPUT = "tap_input",
 }
 
 // ============================================================================
@@ -289,8 +325,14 @@ export enum MiniappStreamType {
 // ============================================================================
 
 export enum MiniappErrorCode {
+  /** Request arguments failed host-side validation. */
+  INVALID_ARGUMENT = "INVALID_ARGUMENT",
+
   /** The miniapp subscribed to a stream whose required permission wasn't in its manifest. */
   PERMISSION_NOT_DECLARED = "PERMISSION_NOT_DECLARED",
+
+  /** The required phone OS permission is not currently granted. */
+  PERMISSION_DENIED = "PERMISSION_DENIED",
 
   /** Request routed to a method that isn't supported yet. */
   NOT_IMPLEMENTED = "NOT_IMPLEMENTED",
@@ -305,6 +347,9 @@ export enum MiniappErrorCode {
   TTS_TEXT_TOO_LONG = "TTS_TEXT_TOO_LONG",
   TTS_INVALID_VOICE = "TTS_INVALID_VOICE",
   TTS_UPSTREAM_ERROR = "TTS_UPSTREAM_ERROR",
+
+  /** `speak({forceLocal: true})` but the on-device offline TTS model isn't downloaded/ready. */
+  TTS_LOCAL_UNAVAILABLE = "TTS_LOCAL_UNAVAILABLE",
 
   /** Not connected / pre-ACK and transport closed. */
   NOT_CONNECTED = "NOT_CONNECTED",
