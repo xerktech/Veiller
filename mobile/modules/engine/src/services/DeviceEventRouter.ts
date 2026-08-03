@@ -16,6 +16,7 @@
  *
  * Started by `engine.start()`. Idempotent.
  */
+import {addTapInputListener, startTapInput} from "@foverlay/tap-input"
 import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
 import {shallow} from "zustand/shallow"
 
@@ -184,6 +185,19 @@ export function startDeviceEventRouter(): void {
       localMiniappRuntime.forwardEvent("touch_event", event)
     }),
   )
+  // Foverlay: Tap Strap 2 chords from the TapInputService foreground service
+  // (Android-only native module; the listener is null elsewhere). Mirrors the
+  // button_press/touch_event pattern above — forwardEvent is subscriber-gated.
+  const tapSub = addTapInputListener((event) => {
+    localMiniappRuntime.forwardEvent("tap_input", event)
+  })
+  if (tapSub) {
+    subs.push(tapSub)
+    // Kick off the foreground service that owns the Tap BLE connection.
+    // engine.start() runs while the app is foregrounded, satisfying the FGS
+    // start restriction. Idempotent; no-op where the module is absent.
+    void startTapInput().catch(() => {})
+  }
   // G2 IMU accelerometer — payload already matches the miniapp AccelData shape.
   subs.push(
     BluetoothSdk.addListener("accel_event", (event) => {

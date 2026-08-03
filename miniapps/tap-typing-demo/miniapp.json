@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.foverlay.taptypingdemo",
+  "version": "0.1.0",
+  "name": "Tap Typing Demo",
+  "description": "Echoes Tap Strap 2 finger chords into a text box on the glasses display in real time — the Foverlay keystroke-latency proof.",
+  "type": "standard",
+  "sdkVersion": "0.3.0",
+  "minHostVersion": "1.42.0",
+  "port": 3180,
+  "entry": {
+    "background": "background/index.js"
+  },
+  "permissions": [],
+  "hardwareRequirements": [
+    {
+      "type": "DISPLAY",
+      "level": "REQUIRED",
+      "description": "Typed text is echoed on the glasses display"
+    }
+  ]
+}

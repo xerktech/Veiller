@@ -70,6 +70,7 @@
     "typesafe-ts": "^1.7.1"
   },
   "devDependencies": {
+    "@foverlay/tap-input": "workspace:*",
     "@mentra/bluetooth-sdk": "workspace:*",
     "@mentra/cloud-client": "workspace:*",
     "@mentra/cloud-protocol": "workspace:*",
@@ -111,6 +112,7 @@
     "@dr.pogodin/react-native-fs": "*",
     "@craftzdog/react-native-buffer": "*",
     "axios": "*",
+    "@foverlay/tap-input": "*",
     "@mentra/bluetooth-sdk": "*",
     "@mentra/crust": "^0.1.0-dev.0",
     "@mentra/cloud-client": "^0.1.0-dev.0",

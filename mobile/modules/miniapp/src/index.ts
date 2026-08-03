@@ -87,6 +87,7 @@ export type {
   LocationData,
   NotificationDismissedData,
   PhoneNotificationData,
+  TapInputData,
   TouchData,
   TranscriptionData,
   TranslationData,

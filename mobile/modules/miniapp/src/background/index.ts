@@ -35,6 +35,7 @@ export type {
   PhoneNotificationData,
   NotificationDismissedData,
   HeadingData,
+  TapInputData,
   TouchData,
   UnsubscribeFn,
 } from "../modules/events"
