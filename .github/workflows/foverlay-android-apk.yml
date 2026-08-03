@@ -11,8 +11,6 @@ on:
   push:
     branches:
       - main
-      # Temporary, for validating this workflow pre-merge; removed once green:
-      - foverlay/upstream-reset-tap-demo
   workflow_dispatch:
 
 concurrency:
