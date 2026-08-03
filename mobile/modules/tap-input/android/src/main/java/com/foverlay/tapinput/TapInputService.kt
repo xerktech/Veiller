@@ -43,6 +43,21 @@ class TapInputService : Service() {
         var isRunning = false
             private set
 
+        @Volatile
+        private var activeInstance: TapInputService? = null
+
+        /**
+         * Inject one character through the live sink (UI "send test tap"
+         * button). Returns false when the service isn't running.
+         */
+        fun injectChar(char: Char): Boolean {
+            val service = activeInstance ?: return false
+            val chord = TapAlphabet.encode(char) ?: return false
+            val result = TapAlphabet.decode(chord.tapcode, chord.repeat)
+            service.sink(result, chord.tapcode, chord.repeat, System.currentTimeMillis(), "test")
+            return true
+        }
+
         fun start(context: Context) {
             val intent = Intent(context, TapInputService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -67,6 +82,7 @@ class TapInputService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.i(TAG, "onCreate")
+        activeInstance = this
         startInForeground()
 
         fakeSource = FakeTapSource(this, sink).also { it.start() }
@@ -76,8 +92,8 @@ class TapInputService : Service() {
         // still fully exercisable over adb.
         if (hasBluetoothConnectPermission()) {
             try {
-                realSource = RealTapSource(this, sink) { status, tapId ->
-                    TapInputModule.emitStatus(status, tapId)
+                realSource = RealTapSource(this, sink) { status, tapId, mode ->
+                    TapInputModule.emitStatus(status, tapId, mode)
                 }.also { it.start() }
             } catch (e: Exception) {
                 // Defensive: a missing/odd BT stack shouldn't take down the service.
@@ -95,6 +111,7 @@ class TapInputService : Service() {
 
     override fun onDestroy() {
         Log.i(TAG, "onDestroy")
+        if (activeInstance === this) activeInstance = null
         isRunning = false
         realSource?.stop()
         realSource = null

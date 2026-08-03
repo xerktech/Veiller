@@ -17,12 +17,26 @@ export interface TapInputEvent {
   repeat: number
   /** Wall-clock ms at the native SDK callback — latency measurement anchor. */
   timestamp: number
-  source: "real" | "fake"
+  /** "real" = strap hardware; "fake" = adb broadcast; "test" = UI test button. */
+  source: "real" | "fake" | "test"
 }
 
 export interface TapStatusEvent {
-  status: "connecting" | "connected" | "disconnected" | "error" | "bluetooth_off"
+  status: "connecting" | "connected" | "disconnected" | "mode_changed" | "error" | "bluetooth_off"
   tapIdentifier: string | null
+  /** Strap input mode name (e.g. "controller", "text (HID keyboard)") on mode_changed. */
+  mode: string | null
+}
+
+export interface TapStatusSnapshot {
+  serviceRunning: boolean
+  /** Currently connected straps and their last known mode. */
+  taps: Array<{tapIdentifier: string; mode: string}>
+  /** Total chords received since service start (all sources). */
+  tapCount: number
+  /** The last decoded chord payload (same shape as TapInputEvent), if any. */
+  lastChord: TapInputEvent | null
+  lastStatus: string | null
 }
 
 interface TapInputNativeModule {
@@ -31,6 +45,8 @@ interface TapInputNativeModule {
   start(): Promise<void>
   stop(): Promise<void>
   isRunning(): boolean
+  getStatus(): TapStatusSnapshot
+  injectTap(char: string): Promise<void>
 }
 
 const NativeTapInput = requireOptionalNativeModule<TapInputNativeModule>("TapInput")
@@ -46,9 +62,22 @@ export function addTapInputListener(listener: (event: TapInputEvent) => void): {
   return NativeTapInput?.addListener("tap_input", listener) ?? null
 }
 
-/** Subscribe to Tap Strap connection status changes. */
+/** Subscribe to Tap Strap connection/mode status changes. */
 export function addTapStatusListener(listener: (event: TapStatusEvent) => void): {remove(): void} | null {
   return NativeTapInput?.addListener("tap_status", listener) ?? null
+}
+
+/** Point-in-time status snapshot (strap list + modes + counters), or null off-Android. */
+export function getTapStatus(): TapStatusSnapshot | null {
+  return NativeTapInput?.getStatus() ?? null
+}
+
+/**
+ * Inject one character through the same pipeline real chords use — the UI
+ * "send test tap" button. Verifies the phone→glasses leg without hardware.
+ */
+export async function injectTestTap(char: string): Promise<void> {
+  await NativeTapInput?.injectTap(char)
 }
 
 /**

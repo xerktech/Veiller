@@ -41,6 +41,55 @@ let renderTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSince: number | null = null
 let pendingCount = 0
 
+// --- debug state for the phone UI (TapStrapStatusCard) ---
+
+export interface TapEchoDebugState {
+  running: boolean
+  /** Chords consumed by the echo (all sources). */
+  tapsSeen: number
+  /** Display requests issued. */
+  renders: number
+  /** Outcome of the last display request, e.g. "displayed" or "blocked: <reason>". */
+  lastRenderResult: string | null
+  lastRenderAt: number | null
+  /** Last keystroke→display-call latency in ms. */
+  lastLatencyMs: number | null
+  /** Current text buffer (what should be on the glass). */
+  buffer: string
+}
+
+const debug: TapEchoDebugState = {
+  running: false,
+  tapsSeen: 0,
+  renders: 0,
+  lastRenderResult: null,
+  lastRenderAt: null,
+  lastLatencyMs: null,
+  buffer: "",
+}
+const debugListeners = new Set<() => void>()
+
+export function getTapEchoDebugState(): TapEchoDebugState {
+  return {...debug}
+}
+
+/** Subscribe to debug-state changes; returns an unsubscribe function. */
+export function subscribeTapEchoDebug(listener: () => void): () => void {
+  debugListeners.add(listener)
+  return () => debugListeners.delete(listener)
+}
+
+function notifyDebug(): void {
+  debug.buffer = buffer
+  for (const listener of debugListeners) {
+    try {
+      listener()
+    } catch {
+      /* a broken UI listener must not break the echo */
+    }
+  }
+}
+
 export function startTapTypingEcho(): void {
   if (subs.length) return
 
@@ -65,6 +114,8 @@ export function startTapTypingEcho(): void {
   })
 
   if (isGlassesReady(useGlassesStore.getState().connection)) scheduleRender()
+  debug.running = true
+  notifyDebug()
   console.log("TapTypingEcho: started")
 }
 
@@ -79,6 +130,8 @@ export function stopTapTypingEcho(): void {
   lastRendered = ""
   pendingSince = null
   pendingCount = 0
+  debug.running = false
+  notifyDebug()
   // Forfeit the view (empty scene = clear) so nothing stale lingers.
   localDisplayManager.request(ECHO_PKG, {view: "main", scene: []})
 }
@@ -100,6 +153,7 @@ function onTap(event: TapInputEvent): void {
       return
   }
 
+  debug.tapsSeen++
   if (pendingSince === null) pendingSince = event.timestamp
   pendingCount++
   scheduleRender()
@@ -127,24 +181,43 @@ function flush(): void {
   lastRendered = text
 
   const caps = sceneRenderer.currentCapabilities()
-  localDisplayManager.request(ECHO_PKG, {
-    view: "main",
-    scene: [
-      {
-        type: "text",
-        id: "echo:buffer",
-        box: {x: 0, y: 0, w: caps?.width ?? 576, h: caps?.height ?? 288},
-        text,
-      },
-    ],
-    // no durationMs — persist until explicitly cleared
-  })
+  debug.renders++
+  debug.lastRenderAt = Date.now()
+  localDisplayManager.request(
+    ECHO_PKG,
+    {
+      view: "main",
+      scene: [
+        {
+          type: "text",
+          id: "echo:buffer",
+          box: {x: 0, y: 0, w: caps?.width ?? 576, h: caps?.height ?? 288},
+          text,
+        },
+      ],
+      // no durationMs — persist until explicitly cleared
+    },
+    (result) => {
+      // Surface the arbitration outcome — the phone UI shows this, which is
+      // the difference between "echo is broken" and "display path said no".
+      debug.lastRenderResult =
+        result.status === "displayed"
+          ? result.degraded
+            ? "displayed (degraded)"
+            : "displayed"
+          : `blocked: ${result.reason ?? "unknown"}`
+      console.log(`TapTypingEcho: render result ${debug.lastRenderResult}`)
+      notifyDebug()
+    },
+  )
 
   // Latency instrumentation: native tap-SDK callback timestamp → this display
   // call. The BLE leg to the glass (native EvenHub queue) adds on top.
   if (oldest !== null) {
-    console.log(`TapTypingEcho: latency keystroke->display-call ${Date.now() - oldest}ms (${count} chord(s) coalesced)`)
+    debug.lastLatencyMs = Date.now() - oldest
+    console.log(`TapTypingEcho: latency keystroke->display-call ${debug.lastLatencyMs}ms (${count} chord(s) coalesced)`)
   }
+  notifyDebug()
 }
 
 /**
