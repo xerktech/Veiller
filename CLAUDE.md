@@ -86,7 +86,8 @@ product-strip:
 - **A miniapp/plugin platform.** Foverlay is a dedicated app. Do not implement
   features as miniapps; do not resurrect install/store/dev surfaces. The
   runtime under `mobile/modules/{miniapp,crust}` and the `miniapps/`+`sdk/`
-  trees are inherited upstream plumbing left inert for rebase-ability.
+  trees are inherited upstream plumbing currently left inert — fair game to
+  delete outright (upstream-mergeability is no longer a constraint).
 - iOS support (deferred; don't let iOS constraints shape Android decisions).
 - Rewriting MentraOS's BLE / protobuf / audio / ASR layers.
 - Publishing to the Mentra or Even app stores.
@@ -143,10 +144,13 @@ Key data paths:
 
 ## 8. Conventions
 
-- **Keep changes upstream-mergeable**: `upstream` remote → `Mentra-Community/MentraOS`,
-  base on `upstream/dev`. Prefer additive modules (like `tap-input`) over
-  editing upstream files; when upstream files must change, keep edits minimal
-  and commented (`// Foverlay:`).
+- **Upstream-mergeability is NOT a goal (decision 2026-08-03).** Foverlay is
+  building something different from Mentra; we are a hard fork. Upstream
+  (`Mentra-Community/MentraOS`) is a parts bin to cherry-pick from (mainly the
+  G2 BLE driver), not a rebase target. Edit or delete inherited code freely
+  when it serves the product — including deleting the inert miniapp runtime
+  wholesale when convenient. Keep tagging our edits `// Foverlay:` anyway; it
+  marks intent, not rebase hygiene.
 - **Build tooling**: bun everywhere. Note: bun 1.3.x fails to resolve the
   `file:` miniapp-cli dep when (re)installing `mobile/`; bun 1.2.x works.
 - **No Even / Mentra / Tap trademarks** in product identity.

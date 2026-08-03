@@ -7,6 +7,7 @@ import com.tapwithus.sdk.TapSdk
 import com.tapwithus.sdk.TapSdkFactory
 import com.tapwithus.sdk.airmouse.AirMousePacket
 import com.tapwithus.sdk.mode.RawSensorData
+import com.tapwithus.sdk.mode.TapInputMode
 import com.tapwithus.sdk.mouse.MousePacket
 
 /**
@@ -33,11 +34,25 @@ import com.tapwithus.sdk.mouse.MousePacket
 class RealTapSource(
     private val context: Context,
     private val sink: TapSink,
-    private val onStatus: (status: String, tapIdentifier: String?) -> Unit,
+    private val onStatus: (status: String, tapIdentifier: String?, mode: String?) -> Unit,
 ) : TapSource, TapListener {
 
     companion object {
         private const val TAG = "FoverlayTapReal"
+
+        /**
+         * Human name for the state int onTapChangedState reports. The SDK
+         * delivers TapInputMode.type values here; unknown ints are surfaced
+         * verbatim rather than guessed at.
+         */
+        fun modeName(state: Int): String = when (state) {
+            TapInputMode.TEXT -> "text (HID keyboard)"
+            TapInputMode.CONTROLLER -> "controller"
+            TapInputMode.CONTROLLER_WITH_MOUSEHID -> "controller+mouseHID"
+            TapInputMode.CONTROLLER_WITH_FULLHID -> "controller+fullHID"
+            TapInputMode.RAW_SENSOR -> "raw sensor"
+            else -> "unknown($state)"
+        }
     }
 
     private var sdk: TapSdk? = null
@@ -86,12 +101,12 @@ class RealTapSource(
         // The SDK switches to Controller Mode on connect by default, but pin it
         // explicitly so a stray mode change can't silently break input.
         sdk?.startControllerMode(tapIdentifier)
-        onStatus("connected", tapIdentifier)
+        onStatus("connected", tapIdentifier, null)
     }
 
     override fun onTapDisconnected(tapIdentifier: String) {
         Log.i(TAG, "Tap disconnected: $tapIdentifier")
-        onStatus("disconnected", tapIdentifier)
+        onStatus("disconnected", tapIdentifier, null)
         // Recovery must be automatic, not user-initiated. The SDK reconnects
         // bonded devices on its own; refreshConnections() nudges it in case
         // the drop left a stale cache entry.
@@ -103,18 +118,18 @@ class RealTapSource(
     }
 
     override fun onTapStartConnecting(tapIdentifier: String) {
-        onStatus("connecting", tapIdentifier)
+        onStatus("connecting", tapIdentifier, null)
     }
 
     override fun onTapResumed(tapIdentifier: String) {
         Log.i(TAG, "Tap resumed: $tapIdentifier — pinning Controller Mode")
         sdk?.startControllerMode(tapIdentifier)
-        onStatus("connected", tapIdentifier)
+        onStatus("connected", tapIdentifier, null)
     }
 
     override fun onError(tapIdentifier: String, code: Int, description: String) {
         Log.w(TAG, "TapSdk error $code for $tapIdentifier: $description")
-        onStatus("error", tapIdentifier)
+        onStatus("error", tapIdentifier, null)
     }
 
     override fun onBluetoothTurnedOn() {
@@ -123,7 +138,7 @@ class RealTapSource(
 
     override fun onBluetoothTurnedOff() {
         Log.i(TAG, "Bluetooth off")
-        onStatus("bluetooth_off", null)
+        onStatus("bluetooth_off", null, null)
     }
 
     override fun onTapShiftSwitchReceived(tapIdentifier: String, data: Int) {
@@ -135,7 +150,9 @@ class RealTapSource(
     override fun onTapChanged(tapIdentifier: String) {}
 
     override fun onTapChangedState(tapIdentifier: String, state: Int) {
-        Log.d(TAG, "Tap $tapIdentifier changed state: $state")
+        val mode = modeName(state)
+        Log.i(TAG, "Tap $tapIdentifier mode: $mode")
+        onStatus("mode_changed", tapIdentifier, mode)
     }
 
     // Demo is tapcodes only — mouse/air-gesture/raw-sensor streams are

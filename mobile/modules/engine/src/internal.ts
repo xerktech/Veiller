@@ -158,3 +158,5 @@ export {storage, printDirectory} from "./utils/storage"
 // Process-wide event bus — one shared instance for engine services + host
 // (re-exported via the @/utils/GlobalEventEmitter shim).
 export {default as GlobalEventEmitter} from "./utils/GlobalEventEmitter"
+// Foverlay: tap-echo debug state for the phone's Tap Strap status card.
+export {getTapEchoDebugState, subscribeTapEchoDebug, type TapEchoDebugState} from "./services/TapTypingEchoService"

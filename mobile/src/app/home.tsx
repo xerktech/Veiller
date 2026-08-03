@@ -9,13 +9,13 @@ import {AppsGrid} from "@/components/home/AppsGrid"
 import {PairGlassesCard} from "@/components/home/PairGlassesCard"
 import {Screen} from "@/components/ignite"
 import {Group} from "@/components/ui"
-import {BgTimer, engine, useRefresh} from "@mentra/engine"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {BgTimer, engine, useRefresh, SETTINGS, useSetting} from "@mentra/engine"
 import {appSwitcherProgress} from "@/stores/appSwitcher"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import AppSwitcherButton from "@/components/home/AppSwitcherButtton"
 import AppSwitcher from "@/components/home/AppSwitcher"
 import {GlassesStatus, ControllerStatus} from "@/components/home/DeviceStatus"
+import {TapStrapStatusCard} from "@/components/home/TapStrapStatusCard"
 import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 import AllAppsGridSheet from "@/components/home/AllAppsGridSheet"
@@ -83,6 +83,10 @@ export default function Homepage() {
         </Group>
         <Group>
           <ControllerStatus />
+        </Group>
+        {/* Foverlay: live tap→glasses pipeline status + test-tap button. */}
+        <Group>
+          <TapStrapStatusCard />
         </Group>
         <View className="h-2" />
         <AppsGrid />
