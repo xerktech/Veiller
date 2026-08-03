@@ -21,6 +21,18 @@ codebase wins — but tell me about the drift so I can update this file.
 > `TapTypingEchoService`. The R1 ring effort is **paused, not dead** —
 > findings in `docs/r1-ring-*.md` and `tools/r1-*`. Mapbox is removed
 > (NavigationManager stubbed) so builds need no secrets.
+>
+> **What survives the endgame (decision 2026-08-03).** The only inherited
+> code that matters — and must NEVER be deleted in cleanups — is the **BLE
+> device layer** in `mobile/modules/bluetooth-sdk`: Even G2 pairing/scan/
+> dual-GATT connection management above all, the other glasses drivers too
+> (G1, Live, Z100, … — cheap insurance, keep them), and **everything
+> ring-related** (the G2-protocol ring binding — `switchRingHand`, ring bind
+> status — plus `docs/r1-ring-*` / `tools/r1-*`). Everything above that
+> layer — the RN app UI, engine runtime, miniapp plumbing, cloud client — is
+> scaffolding: once the glasses↔Tap-Strap loop is proven working, the plan
+> is a **fully custom Android app and glasses display system** on top of the
+> preserved BLE layer. Sequencing: prove the combo first, then tear down.
 
 ## 1. What Foverlay is
 
