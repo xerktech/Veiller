@@ -23,8 +23,11 @@ Foverlay-specific pieces on top of upstream:
 - `mobile/modules/engine/src/services/TapTypingEchoService.ts` — the echo as a
   host engine service rendering straight to the glasses display.
 - The miniapp product-strip and the Mapbox removal (no build secrets needed).
-- `.github/workflows/foverlay-android-apk.yml` — release APK built on every
-  push to `main` (artifact: `foverlay-release-apk`).
+- `.github/workflows/release.yml` — the release pipeline (same model as the
+  other xerktech repos): every merge to `main` touching `mobile/**` mints a
+  `vX.Y.Z` tag and a GitHub Release with `foverlay-vX.Y.Z.apk` attached;
+  root `VERSION` holds major.minor, minor/major bumps via workflow dispatch
+  (dry-run rehearsal by default).
 
 Build: `cd mobile && bun install && bun android` — use **bun 1.2.x** for
 `mobile/` (1.3.x has a `file:` dep resolver regression there). No signing or
