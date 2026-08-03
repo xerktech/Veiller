@@ -311,13 +311,6 @@ export enum MiniappStreamType {
   // Photos, streaming
   PHOTO_TAKEN = "photo_taken",
   STREAM_STATUS = "stream_status",
-
-  /**
-   * Foverlay: decoded Tap Strap 2 finger chords from the phone-side
-   * TapInputService (@foverlay/tap-input). `{char, action, tapcode, repeat,
-   * timestamp, source}` — see TapInputData. Android only today.
-   */
-  TAP_INPUT = "tap_input",
 }
 
 // ============================================================================

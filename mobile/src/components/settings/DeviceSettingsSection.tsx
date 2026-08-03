@@ -159,14 +159,8 @@ export function DeviceSettingsSection() {
         />
       )}
 
-      {/* Glasses Menu — G2 only, requires connection */}
-      {defaultWearable === DeviceTypes.G2 && glassesConnected && (
-        <RouteButton
-          icon={<Icon name="menu-2" size={24} color={theme.colors.secondary_foreground} />}
-          label={translate("settings:glassesMenu")}
-          onPress={() => push("/miniapps/settings/glasses-menu")}
-        />
-      )}
+      {/* Foverlay: Glasses Menu picker removed — it only selects miniapps for
+          the G2 swipe menu, and this is a dedicated app with no miniapps. */}
 
       {/* Auto-Brightness */}
       {features?.display?.adjustBrightness && glassesConnected && (

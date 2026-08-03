@@ -17,22 +17,13 @@
 
 import {MiniappStreamType} from "../protocol"
 import {MiniappSession} from "../session"
-import type {ButtonPressData, TapInputData, TouchData, UnsubscribeFn} from "./events"
+import type {ButtonPressData, TouchData, UnsubscribeFn} from "./events"
 
 export class InputModule {
   constructor(private readonly session: MiniappSession) {}
 
   onButtonPress(handler: (data: ButtonPressData) => void): UnsubscribeFn {
     return this.session._subscribe(MiniappStreamType.BUTTON_PRESS, handler as (data: unknown) => void)
-  }
-
-  /**
-   * Foverlay: decoded Tap Strap 2 finger chords from the phone-side
-   * TapInputService. Android only today; on other platforms the subscription
-   * succeeds but no events fire.
-   */
-  onTapInput(handler: (data: TapInputData) => void): UnsubscribeFn {
-    return this.session._subscribe(MiniappStreamType.TAP_INPUT, handler as (data: unknown) => void)
   }
 
   /**
