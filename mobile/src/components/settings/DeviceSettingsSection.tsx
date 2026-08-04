@@ -11,15 +11,25 @@ import {showAlert} from "@/contexts/ModalContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n/translate"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting, engine} from "@mentra/engine"
 import {getGlassesImage} from "@/utils/getGlassesImage"
 
 import {Capabilities, DeviceTypes, getModelCapabilities} from "@/../../cloud/packages/types/src"
-import {engine} from "@mentra/engine"
 
 import OtaProgressSection from "@/components/glasses/OtaProgressSection"
 import {Ar99OtaModal} from "@/components/settings/Ar99OtaModal"
 import BrightnessSetting from "@/components/settings/BrightnessSetting"
+import SelectSetting from "@/components/settings/SelectSetting"
+
+/** Screen-timeout options (seconds; "0" == never). */
+const SCREEN_TIMEOUT_OPTIONS = [
+  {value: "0", labelTx: "deviceSettings:screenTimeoutNever"},
+  {value: "15", labelTx: "deviceSettings:screenTimeout15s"},
+  {value: "30", labelTx: "deviceSettings:screenTimeout30s"},
+  {value: "60", labelTx: "deviceSettings:screenTimeout1m"},
+  {value: "120", labelTx: "deviceSettings:screenTimeout2m"},
+  {value: "300", labelTx: "deviceSettings:screenTimeout5m"},
+] as const
 
 const formatGlassesTitle = (title: string) => title.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
 
@@ -64,6 +74,7 @@ export function DeviceSettingsSection() {
   const glassesInfo = useEngineSnapshot(engine.glasses.info, (onChange) => engine.glasses.onInfo(onChange))
   const [autoBrightness, setAutoBrightness] = useSetting(SETTINGS.auto_brightness.key)
   const [brightness, setBrightness] = useSetting(SETTINGS.brightness.key)
+  const [screenTimeout, setScreenTimeout] = useSetting(SETTINGS.screen_timeout.key)
   // Button-action settings are no longer surfaced in the UI — the action button always launches the
   // camera (forced at runtime in ButtonActions.tsx). See the commented-out ButtonSettings block below.
   // const [defaultButtonActionEnabled, setDefaultButtonActionEnabled] = useSetting(
@@ -181,6 +192,22 @@ export function DeviceSettingsSection() {
         />
       )}
 
+      {/* Screen timeout — any display glasses. App-managed idle auto-off (no G1
+          firmware opcode exists); "Never" keeps content on screen as today. */}
+      {features?.hasDisplay && (
+        <SelectSetting
+          label={translate("deviceSettings:screenTimeout")}
+          description={translate("deviceSettings:screenTimeoutDescription")}
+          value={String(screenTimeout ?? 0)}
+          defaultValue="0"
+          options={SCREEN_TIMEOUT_OPTIONS.map((option) => ({
+            value: option.value,
+            label: translate(option.labelTx),
+          }))}
+          onValueChange={(value) => setScreenTimeout(Number(value) || 0)}
+        />
+      )}
+
       {/* Layout settings — super mode (display layout tooling) */}
       {superMode && (
         <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
@@ -230,7 +257,9 @@ export function DeviceSettingsSection() {
       )}
 
       {/* OTA Progress — OTA-capable glasses in super mode */}
-      {superMode && glassesConnected && features?.hasOta && otaProgress?.progress && otaProgress?.progress < 100 && <OtaProgressSection otaProgress={otaProgress} />}
+      {superMode && glassesConnected && features?.hasOta && otaProgress?.progress && otaProgress?.progress < 100 && (
+        <OtaProgressSection otaProgress={otaProgress} />
+      )}
 
       {/* Nex Developer Settings — Mentra Display only */}
       {defaultWearable && defaultWearable.includes(DeviceTypes.NEX) && (
@@ -282,4 +311,3 @@ export function DeviceSettingsSection() {
     </View>
   )
 }
-

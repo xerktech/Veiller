@@ -501,6 +501,18 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: false,
     persist: true,
   },
+  // Auto-off timeout for the glasses display, in seconds. 0 == never (the
+  // display keeps showing the last content, which is today's behavior). Any
+  // positive value makes ScreenTimeoutCoordinator blank the display after that
+  // many seconds without a display update. Enforced phone-side (there is no G1
+  // firmware opcode for it), so it is intentionally NOT in BLUETOOTH_SETTING_KEYS.
+  screen_timeout: {
+    key: "screen_timeout",
+    defaultValue: () => 0,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
   // glasses settings:
   contextual_dashboard: {
     key: "contextual_dashboard",
