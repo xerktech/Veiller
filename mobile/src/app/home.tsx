@@ -14,7 +14,8 @@ import {appSwitcherProgress} from "@/stores/appSwitcher"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import AppSwitcherButton from "@/components/home/AppSwitcherButtton"
 import AppSwitcher from "@/components/home/AppSwitcher"
-import {GlassesStatus, ControllerStatus, TapStrapStatus} from "@/components/home/DeviceStatus"
+// XERK-206: ControllerStatus unused while the R1 controller is disabled.
+import {GlassesStatus, TapStrapStatus} from "@/components/home/DeviceStatus"
 import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 import AllAppsGridSheet from "@/components/home/AllAppsGridSheet"
@@ -80,9 +81,11 @@ export default function Homepage() {
         <Group>
           <GlassesStatus />
         </Group>
-        <Group>
+        {/* XERK-206: R1 controller card commented out (not removed) — only the
+            G2 and Tap Strap 2 are supported for now. */}
+        {/* <Group>
           <ControllerStatus />
-        </Group>
+        </Group> */}
         <Group>
           <TapStrapStatus />
         </Group>

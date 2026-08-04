@@ -297,14 +297,17 @@ export function DeviceSettingsSection() {
         />
       )}
 
-      {/* Pair controller — super mode */}
-      {superMode && (
+      {/* Pair controller — super mode.
+          XERK-206: commented out (not removed) — the only pairable controller
+          is the Even Realities R1, and only the G2 and Tap Strap 2 are
+          supported for now. Restore when other devices come back. */}
+      {/* {superMode && (
         <RouteButton
           icon={<Icon name="bluetooth" size={24} color={theme.colors.secondary_foreground} />}
           label={translate("deviceSettings:pairController")}
           onPress={() => push("/pairing/select-controller")}
         />
-      )}
+      )} */}
 
       {/* a bit more space to scroll */}
       <Spacer height={theme.spacing.s2} />

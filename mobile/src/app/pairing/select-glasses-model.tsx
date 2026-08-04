@@ -13,7 +13,8 @@ import {Spacer} from "@/components/ui/Spacer"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {SETTINGS, useSetting} from "@mentra/engine"
-import {AR99_MODEL_OPTIONS, type Ar99ProjectName, getGlassesImage} from "@/utils/getGlassesImage"
+// XERK-206: AR99_MODEL_OPTIONS unused while non-G2 models are disabled.
+import {type Ar99ProjectName, getGlassesImage} from "@/utils/getGlassesImage"
 import GlassView from "@/components/ui/GlassView"
 
 type GlassesOption = {
@@ -60,24 +61,27 @@ export default function SelectGlassesModelScreen() {
 
   const SUPER_MODE_ONLY_MODELS = new Set<string>([DeviceTypes.NEX, DeviceTypes.NIMO])
 
-  const ar99Options: GlassesOption[] = AR99_MODEL_OPTIONS.map((option) => ({
-    key: option.key,
-    deviceModel: option.deviceModel,
-    projectName: option.projectName,
-    manufacturerName: option.manufacturerName,
-    displayName: option.displayName,
-    imageSource: option.imageSource,
-  }))
+  // XERK-206: only the Even Realities G2 (and the Tap Strap 2, paired
+  // elsewhere) are supported for now. The other models are commented out —
+  // not removed — so they can be restored later.
+  // const ar99Options: GlassesOption[] = AR99_MODEL_OPTIONS.map((option) => ({
+  //   key: option.key,
+  //   deviceModel: option.deviceModel,
+  //   projectName: option.projectName,
+  //   manufacturerName: option.manufacturerName,
+  //   displayName: option.displayName,
+  //   imageSource: option.imageSource,
+  // }))
 
   const sharedOptions: GlassesOption[] = [
-    {deviceModel: DeviceTypes.LIVE, key: "mentra_live"},
-    ...ar99Options,
-    {deviceModel: DeviceTypes.G1, key: "evenrealities_g1"},
+    // {deviceModel: DeviceTypes.LIVE, key: "mentra_live"},
+    // ...ar99Options,
+    // {deviceModel: DeviceTypes.G1, key: "evenrealities_g1"},
     {deviceModel: DeviceTypes.G2, key: "evenrealities_g2"},
-    {deviceModel: DeviceTypes.MACH1, key: "mentra_mach1"},
-    {deviceModel: DeviceTypes.Z100, key: "vuzix-z100"},
-    {deviceModel: DeviceTypes.NEX, key: "mentra_nex"},
-    {deviceModel: DeviceTypes.NIMO, key: "nimo"},
+    // {deviceModel: DeviceTypes.MACH1, key: "mentra_mach1"},
+    // {deviceModel: DeviceTypes.Z100, key: "vuzix-z100"},
+    // {deviceModel: DeviceTypes.NEX, key: "mentra_nex"},
+    // {deviceModel: DeviceTypes.NIMO, key: "nimo"},
   ]
 
   const glassesOptions = Platform.OS === "ios" ? sharedOptions : sharedOptions
