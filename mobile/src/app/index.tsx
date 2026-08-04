@@ -5,20 +5,18 @@ import semver from "semver"
 
 import {Button, Header, Icon, Screen, Text} from "@/components/ignite"
 import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
-import {useAuth} from "@/contexts/AuthContext"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import mantle from "@/services/MantleManager"
-import {SETTINGS, engine, useSetting} from "@mentra/engine"
+import {SETTINGS, engine, useSetting, BgTimer} from "@mentra/engine"
 import {SplashVideo} from "@/components/splash/SplashVideo"
 import {APP_STORE_URL, PLAY_STORE_URL} from "@/constants/appConfig"
 import {fetchMinimumClientVersion} from "@/utils/cloudVersion"
-import {BgTimer} from "@mentra/engine"
 
 // Types
-type ScreenState = "loading" | "connection" | "auth" | "outdated" | "success"
+type ScreenState = "loading" | "connection" | "outdated" | "success"
 
 interface StatusConfig {
   icon: string
@@ -34,9 +32,7 @@ const DEEPLINK_DELAY = 1000
 export default function InitScreen() {
   // Hooks
   const {theme} = useAppTheme()
-  const {user, session, loading: authLoading} = useAuth()
-  const {replace, replaceAll, getPendingRoute, setPendingRoute, clearHistoryAndGoHome, setAnimation} =
-    useNavigationStore.getState()
+  const {replace, getPendingRoute, setPendingRoute, clearHistoryAndGoHome, setAnimation} = useNavigationStore.getState()
   const {processUrl} = useDeeplink()
   const rootNavigationState = useRootNavigationState()
   const isNavigationReady = rootNavigationState?.key != null
@@ -95,14 +91,8 @@ export default function InitScreen() {
 
   const navigateToDestination = useCallback(async () => {
     console.log("INDEX: navigateToDestination()")
-    if (!user?.email) {
-      await new Promise((resolve) => setTimeout(resolve, NAVIGATION_DELAY))
-      replace("/auth/start", {transition: "fade"})
-      return
-    }
-
     // Read directly from the store so we see values that mantle.init() just
-    // loaded from the server, regardless of React render timing.
+    // loaded, regardless of React render timing.
     const onboardingDone = engine.settings.get(SETTINGS.onboarding_completed.key)
     const wearable = engine.settings.get(SETTINGS.default_wearable.key)
 
@@ -124,27 +114,14 @@ export default function InitScreen() {
     await new Promise((resolve) => setTimeout(resolve, NAVIGATION_DELAY))
     setAnimationDelayed()
     clearHistoryAndGoHome({transition: "none"})
-  }, [user, getPendingRoute, processUrl, clearHistoryAndGoHome, replace, replaceAll, setPendingRoute, setAnimation])
+  }, [getPendingRoute, processUrl, clearHistoryAndGoHome, replace, setPendingRoute, setAnimation])
 
-  const checkLoggedIn = async (): Promise<void> => {
-    if (!user) {
-      replaceAll("/auth/start")
-      return
-    }
-    handleTokenExchange()
-  }
-
-  const handleTokenExchange = async (): Promise<void> => {
-    console.log("INDEX: handleTokenExchange()")
-    // Cloud V2 cutover (issue 019): the app holds V2 tokens directly. There is no
-    // legacy Cloud V1 exchange; cloud-client obtains and exchanges a subject token
-    // itself via the auth provider. Boot just needs a valid session, then init.
-    const token = session?.token
-    if (!token) {
-      setState("auth")
-      return
-    }
-
+  // Foverlay: no user account / login. Boot straight into the app — initialize
+  // the local runtime, then route to onboarding (first run) or home. The engine
+  // runs local-only (no authenticated cloud connection); individual miniapps
+  // bring their own auth if they need it.
+  const bootIntoApp = async (): Promise<void> => {
+    console.log("INDEX: bootIntoApp()")
     setBootPhase("Initializing core…")
     await mantle.init()
 
@@ -214,7 +191,7 @@ export default function InitScreen() {
     }
 
     setIsRetrying(false)
-    checkLoggedIn()
+    bootIntoApp()
   }
 
   const handleUpdate = async (): Promise<void> => {
@@ -242,14 +219,6 @@ export default function InitScreen() {
 
   const getStatusConfig = (): StatusConfig => {
     switch (state) {
-      case "auth":
-        return {
-          icon: "account-alert",
-          iconColor: theme.colors.destructive,
-          title: translate("versionCheck:authErrorTitle"),
-          description: translate("versionCheck:authErrorDescription"),
-        }
-
       case "connection":
         return {
           icon: "wifi-off",
@@ -282,8 +251,8 @@ export default function InitScreen() {
 
   // Effects
   useEffect(() => {
-    console.log("INDEX: USE EFFECT: authLoading, isNavigationReady:", authLoading, isNavigationReady)
-    if (authLoading || !isNavigationReady) return
+    console.log("INDEX: USE EFFECT: isNavigationReady:", isNavigationReady)
+    if (!isNavigationReady) return
     if (initStartedRef.current) return
     initStartedRef.current = true
 
@@ -293,7 +262,7 @@ export default function InitScreen() {
       await checkCloudVersion()
     }
     init()
-  }, [authLoading, isNavigationReady])
+  }, [isNavigationReady])
 
   // Clear cached required version when backend URL changes so a stricter
   // server's requirement doesn't block access to a different backend.
@@ -354,7 +323,7 @@ export default function InitScreen() {
 
       {/* Buttons */}
       <View className="gap-3">
-        {(state === "connection" || state === "auth") && (
+        {state === "connection" && (
           <Button
             flexContainer
             onPress={() => checkCloudVersion(true)}
@@ -376,7 +345,7 @@ export default function InitScreen() {
           />
         )}
 
-        {(state === "connection" || state === "auth") && isUsingCustomUrl && (
+        {state === "connection" && isUsingCustomUrl && (
           <Button
             flexContainer
             onPress={handleResetUrl}
@@ -389,8 +358,7 @@ export default function InitScreen() {
           />
         )}
 
-        {(((state === "connection" || state === "auth") && !isBlockedByVersion) ||
-          (state === "outdated" && canSkipUpdate)) && (
+        {((state === "connection" && !isBlockedByVersion) || (state === "outdated" && canSkipUpdate)) && (
           <Button flexContainer preset="secondary" onPress={navigateToDestination} tx="versionCheck:continueAnyway" />
         )}
       </View>

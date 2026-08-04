@@ -31,8 +31,6 @@ import GlobalEventEmitter from "@/utils/GlobalEventEmitter"
 import {useDebugStore} from "@/stores/debug"
 import {checkFeaturePermissions, PermissionFeatures} from "@/utils/PermissionsUtils"
 import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
-import {ensureDevModeForUser} from "@/utils/dev/devModeAllowlist"
-import mentraAuth from "@/utils/auth/authClient"
 import {showAlert} from "@/utils/AlertUtils"
 import {Buffer} from "@craftzdog/react-native-buffer"
 
@@ -348,57 +346,20 @@ class MantleManager {
     // startup, not an island configuration seam.
     engine.configure({
       auth: {
+        // Foverlay has no user account (XERK-198). The engine runs local-only
+        // (config.localOnly below), so it never opens the authenticated cloud
+        // connection and this seam is never asked for a real subject token.
+        // It still has to satisfy the required IslandAuth contract; if some
+        // on-demand cloud call reaches it anyway, fail loudly rather than hang.
         getSubjectToken: async () => {
-          // Cloud V2 (issue 019): the provider mints a fresh `mentra` OEM subject
-          // token which cloud-client exchanges at /api/client/auth/exchange.
-          const res = await mentraAuth.getSubjectToken()
-          if (res.is_error() || !res.value.token) {
-            throw new Error("engine.configure: no subject token available")
-          }
-          return {token: res.value.token, type: res.value.type}
+          throw new Error("Foverlay local-only build: no cloud account, no subject token")
         },
-        // Hand back a synchronous handle with a real unsubscribe.
-        //
-        // mentraAuth is a lazy Proxy whose every method returns a Promise, so
-        // this call resolves to the Result rather than being one. The engine
-        // (CloudClientService.ensureAuthWatch) inspects the return value
-        // synchronously, finds no `unsubscribe` on a Promise, and keeps its
-        // no-op placeholder — so stopAuthWatch() never removed the listener.
-        //
-        // That used to be invisible: the provider held one callback slot, so
-        // the orphan was overwritten by whoever registered next. Now that every
-        // listener is retained, each engine.start() would stack another one, and
-        // a later SIGNED_IN would have several callbacks calling reconnect() on
-        // the same client. Resolve the real unsubscribe out of the promise, and
-        // honour an unsubscribe that arrives before it settles.
-        onStateChange: (callback) => {
-          const pending = Promise.resolve(
-            mentraAuth.onAuthStateChange((event: string, session: any) => callback(event, session)),
-          )
-          let resolved: (() => void) | null = null
-          let cancelled = false
-
-          void pending
-            .then((res: any) => {
-              const handle = res?.value ?? res
-              resolved = typeof handle?.unsubscribe === "function" ? handle.unsubscribe : null
-              if (cancelled) resolved?.()
-            })
-            .catch(() => {
-              resolved = null
-            })
-
-          return {
-            unsubscribe: () => {
-              cancelled = true
-              resolved?.()
-            },
-          }
-        },
+        // No login means no auth-state changes to listen for, so onStateChange
+        // is intentionally omitted (it is optional on IslandAuth).
       },
-      // Resolved cloud endpoints + LC3 frame size. island builds its cloud
-      // client from these; the host keeps the dev/settings URL resolution.
-      config: cloudConfigValues(),
+      // Resolved cloud endpoints + LC3 frame size, plus the local-only flag that
+      // keeps the cloud client constructed-but-never-connected.
+      config: {...cloudConfigValues(), localOnly: true},
       // Named host-UI seams: island dispatches the miniapp request, the host
       // owns the screen (branding/navigation).
       ui: {
@@ -456,11 +417,6 @@ class MantleManager {
     // exists on V1 and authenticated with a token the app no longer mints.
     // Settings are local-first until a V2 sync lands (tracked in the ripout
     // issue; island's per-change server write is the island-side cleanup).
-
-    const userRes = await mentraAuth.getUser()
-    if (userRes.is_ok()) {
-      await ensureDevModeForUser(userRes.value.email)
-    }
 
     offlineSpeechModelService.startBackgroundDownloads()
 
@@ -555,8 +511,14 @@ class MantleManager {
 
     // Then reconcile the admin-managed preinstall registry from Cloud V2. This
     // lets Core move users to newer bundled miniapp releases without shipping a
-    // new mobile binary.
-    await preinstalledMiniappSync.sync()
+    // new mobile binary. Best-effort: Foverlay runs local-only with no cloud
+    // account, so the registry fetch is expected to fail — the bundled miniapps
+    // installed above are what ship, and a failure here must not abort boot.
+    try {
+      await preinstalledMiniappSync.sync()
+    } catch (err) {
+      console.warn("MANTLE: preinstalled miniapp sync skipped (local-only / cloud unavailable):", err)
+    }
 
     // Re-spawn local miniapps that were running when the app was last killed.
     // Cloud apps get resurrected by the cloud on reconnect; local (phone-hosted)

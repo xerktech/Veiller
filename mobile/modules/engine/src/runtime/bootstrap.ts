@@ -36,6 +36,15 @@ export interface IslandConfigValues {
    * after the laptop changes networks. Omitted in production/OEM builds.
    */
   devServerHost?: () => string | undefined
+  /**
+   * Run the engine without a backend account (Foverlay): the cloud client is
+   * still constructed so the local runtime surface stays intact, but it never
+   * attempts the authenticated cloud connection. The host must not rely on any
+   * cloud-only capability (miniapp store, remote miniapps, cloud transcription);
+   * local miniapps get a synthetic device identity instead of a Core-owned one.
+   * Defaults to false (normal authenticated operation).
+   */
+  localOnly?: boolean
 }
 
 export type IslandAnalytics = (event: string, props?: Record<string, unknown>) => void

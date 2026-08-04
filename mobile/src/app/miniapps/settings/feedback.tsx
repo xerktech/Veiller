@@ -1,6 +1,6 @@
 import {useLocalSearchParams} from "expo-router"
 import * as ImagePicker from "expo-image-picker"
-import {useState, useEffect, useRef} from "react"
+import {useState, useRef} from "react"
 import {Image, Platform, Pressable, ScrollView, TextInput, View, Linking, ActivityIndicator} from "react-native"
 
 import {APP_STORE_REVIEW_URL, PLAY_STORE_URL} from "@/constants/appConfig"
@@ -18,7 +18,6 @@ import {buildReportTrigger} from "@/services/bugReport/bugReportCategorization"
 import {useNavigationStore} from "@/stores/navigation"
 import {engine, SETTINGS, useSetting} from "@mentra/engine"
 import showAlert from "@/utils/AlertUtils"
-import mentraAuth from "@/utils/auth/authClient"
 import {useRegisterCapsule} from "@/stores/capsule"
 
 export default function FeedbackPage() {
@@ -52,25 +51,9 @@ export default function FeedbackPage() {
     visibleOnRoutes: ["/miniapps/settings/feedback"],
   })
 
-  const [userEmail, setUserEmail] = useState("")
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const res = await mentraAuth.getUser()
-      if (res.is_error()) {
-        console.error("Error fetching user email:", res.error)
-        return
-      }
-      const user = res.value
-      if (user?.email) {
-        setUserEmail(user.email)
-      }
-    }
-
-    fetchUserEmail()
-  }, [])
-
-  const isApplePrivateRelay = userEmail.includes("@privaterelay.appleid.com") || userEmail.includes("@icloud.com")
+  // Foverlay has no user account (XERK-198), so there is no signed-in email to
+  // pre-fill or attach to a report. The contact-email field below is always
+  // shown and is genuinely optional — a user who wants a reply can leave one.
 
   const pickScreenshots = async () => {
     // Request permission
@@ -103,7 +86,7 @@ export default function FeedbackPage() {
     setIsSubmitting(true)
 
     // Persist the contact email for next time
-    if (isApplePrivateRelay && email.trim()) {
+    if (email.trim()) {
       setSavedContactEmail(email.trim())
     }
 
@@ -137,7 +120,7 @@ export default function FeedbackPage() {
         expectedBehavior,
         actualBehavior,
         userSeverity: severityRating as 1 | 2 | 3 | 4 | 5,
-        contactEmail: isApplePrivateRelay && email.trim() ? email.trim() : undefined,
+        contactEmail: email.trim() ? email.trim() : undefined,
       })
 
       console.log("Bug report submitted:", JSON.stringify({trigger, report}, null, 2))
@@ -162,7 +145,7 @@ export default function FeedbackPage() {
         type: feedbackType,
         message: feedbackText.trim(),
         experienceRating: experienceRating ?? undefined,
-        ...(isApplePrivateRelay && email.trim() && {contactEmail: email.trim()}),
+        ...(email.trim() && {contactEmail: email.trim()}),
       }
 
       console.log("Feedback submitted:", JSON.stringify(feedbackPayload, null, 2))
@@ -241,8 +224,8 @@ export default function FeedbackPage() {
   }
 
   const isFormValid = (): boolean => {
-    // Require email for Apple private relay users
-    if (isApplePrivateRelay && !email.trim().includes("@")) {
+    // Contact email is optional; only reject an entered value that isn't an email.
+    if (email.trim() && !email.trim().includes("@")) {
       return false
     }
     if (feedbackType === "bug") {
@@ -276,31 +259,29 @@ export default function FeedbackPage() {
               />
             </View>
 
-            {isApplePrivateRelay && (
-              <View>
-                <View className="flex-row items-center mb-2 gap-1.5">
-                  <Text className="text-sm font-semibold text-foreground">{translate("feedback:emailOptional")}</Text>
-                  <Pressable
-                    hitSlop={10}
-                    onPress={() =>
-                      showAlert(translate("feedback:emailOptional"), translate("feedback:emailInfoMessage"), [
-                        {text: translate("common:ok")},
-                      ])
-                    }>
-                    <Icon name="info-circle" size={16} color={theme.colors.muted_foreground} />
-                  </Pressable>
-                </View>
-                <TextInput
-                  className="bg-background border border-border rounded-xl p-4 text-base text-foreground"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder={translate("feedback:email")}
-                  placeholderTextColor={theme.colors.muted_foreground}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
+            <View>
+              <View className="flex-row items-center mb-2 gap-1.5">
+                <Text className="text-sm font-semibold text-foreground">{translate("feedback:emailOptional")}</Text>
+                <Pressable
+                  hitSlop={10}
+                  onPress={() =>
+                    showAlert(translate("feedback:emailOptional"), translate("feedback:emailInfoMessage"), [
+                      {text: translate("common:ok")},
+                    ])
+                  }>
+                  <Icon name="info-circle" size={16} color={theme.colors.muted_foreground} />
+                </Pressable>
               </View>
-            )}
+              <TextInput
+                className="bg-background border border-border rounded-xl p-4 text-base text-foreground"
+                value={email}
+                onChangeText={setEmail}
+                placeholder={translate("feedback:email")}
+                placeholderTextColor={theme.colors.muted_foreground}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
             {feedbackType === "bug" ? (
               <>

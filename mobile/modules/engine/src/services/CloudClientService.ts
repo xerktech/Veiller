@@ -93,6 +93,40 @@ const localMiniappUserIdentity = new LocalMiniappUserIdentity({
   },
 })
 
+/**
+ * Generate a stable, non-secret device-scoped identity for local-only mode.
+ * There is no account to own the local-miniapp namespace, so a random id is
+ * minted once and persisted (via localMiniappUserIdentity's MMKV backend). The
+ * `local:` prefix keeps it from ever colliding with a Core-owned Mentra user id.
+ */
+function newLocalDeviceUserId(): string {
+  const bytes = new Uint8Array(16)
+  try {
+    globalThis.crypto?.getRandomValues?.(bytes)
+  } catch {
+    // getRandomValues unavailable — fall through to the Math.random fill below.
+  }
+  // If crypto didn't populate the buffer (still all zeros), fill it weakly. A
+  // device id needs to be unique-per-install, not cryptographically strong.
+  if (bytes.every((b) => b === 0)) {
+    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256)
+  }
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")
+  return `local:${hex}`
+}
+
+/**
+ * Local-only mode has no backend identity to resolve, so seed a persisted
+ * synthetic device id up front. Local miniapp storage/blob namespaces key off
+ * this, and seeding it here means resolveMentraUserId()/getMentraUserId() never
+ * fall through to the (unreachable) Core identity path. Idempotent: a previously
+ * persisted id is kept across restarts.
+ */
+function ensureLocalIdentitySeeded(): void {
+  if (localMiniappUserIdentity.get()) return
+  localMiniappUserIdentity.remember(newLocalDeviceUserId())
+}
+
 const transcriptListeners = new Set<(d: TranscriptionData) => void>()
 const translationListeners = new Set<(d: TranslationData) => void>()
 const statusListeners = new Set<(snapshot: CloudClientStatusSnapshot) => void>()
@@ -483,11 +517,21 @@ function construct(): void {
     console.warn(`${LOG_TAG}: runtime error: ${err.code}`)
   })
 
-  // Best-effort connect. Do not crash the app if the dev cloud is unreachable.
-  c.runtime
-    .connect()
-    .then(() => console.log(`${LOG_TAG}: connect() resolved`))
-    .catch((err) => console.warn(`${LOG_TAG}: connect() failed: ${err?.message ?? err}`))
+  // Local-only mode (Foverlay): the client is fully wired for the local runtime
+  // surface, but there is no account to authenticate with, so never open the
+  // backend connection. Skipping connect() is what keeps a no-account build off
+  // the infinite auth-failing reconnect loop (and its persistent-failure alarm).
+  // reconnect() also routes through construct(), so every reconnect path — LC3
+  // frame-size change, dev URL switch — stays local too.
+  if (getConfigValues().localOnly) {
+    console.log(`${LOG_TAG}: localOnly — skipping cloud connect`)
+  } else {
+    // Best-effort connect. Do not crash the app if the dev cloud is unreachable.
+    c.runtime
+      .connect()
+      .then(() => console.log(`${LOG_TAG}: connect() resolved`))
+      .catch((err) => console.warn(`${LOG_TAG}: connect() failed: ${err?.message ?? err}`))
+  }
 
   syncCoreAccessTokenToBluetooth().catch((err) =>
     console.warn(`${LOG_TAG}: initial Bluetooth core_token sync failed: ${(err as Error)?.message ?? err}`),
@@ -508,6 +552,9 @@ export const cloudClientService = {
    */
   init(): void {
     if (client) return
+    // Local-only builds have no Core identity to resolve; seed the synthetic
+    // device id before anything reads it (blob/storage namespaces, getUserId).
+    if (getConfigValues().localOnly) ensureLocalIdentitySeeded()
     ensureAuthWatch()
     construct()
   },

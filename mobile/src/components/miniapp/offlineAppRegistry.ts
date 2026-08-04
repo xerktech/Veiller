@@ -20,11 +20,8 @@ import ScannerScreen from "@/app/miniapps/miniappdev/scanner"
 import MirrorScreen from "@/app/miniapps/mirror/mirror"
 import AppearanceSettings from "@/app/miniapps/settings/appearance"
 import CameraSettings from "@/app/miniapps/settings/camera"
-import ChangeEmailScreen from "@/app/miniapps/settings/change-email"
-import ChangePasswordScreen from "@/app/miniapps/settings/change-password"
 import ControllerSettings from "@/app/miniapps/settings/controller"
 import DashboardSettings from "@/app/miniapps/settings/dashboard"
-import DataExportScreen from "@/app/miniapps/settings/data-export"
 import DebugSettings from "@/app/miniapps/settings/debug"
 import DeviceInfoScreen from "@/app/miniapps/settings/device-info"
 import FeedbackScreen from "@/app/miniapps/settings/feedback"
@@ -36,7 +33,6 @@ import MiniappDevSettings from "@/app/miniapps/settings/miniapp-dev"
 import NotificationSettings from "@/app/miniapps/settings/notifications"
 import PositionSettings from "@/app/miniapps/settings/position"
 import PrivacySettings from "@/app/miniapps/settings/privacy"
-import ProfileSettings from "@/app/miniapps/settings/profile"
 import SpeechSettings from "@/app/miniapps/settings/speech"
 import StressTestScreen from "@/app/miniapps/settings/stress-test"
 import SuperSettings from "@/app/miniapps/settings/super"
@@ -50,11 +46,8 @@ const settingsRoutes: Record<string, ComponentType<any>> = {
   "/miniapps/settings/main": MainSettings,
   "/miniapps/settings/appearance": AppearanceSettings,
   "/miniapps/settings/camera": CameraSettings,
-  "/miniapps/settings/change-email": ChangeEmailScreen,
-  "/miniapps/settings/change-password": ChangePasswordScreen,
   "/miniapps/settings/controller": ControllerSettings,
   "/miniapps/settings/dashboard": DashboardSettings,
-  "/miniapps/settings/data-export": DataExportScreen,
   "/miniapps/settings/debug": DebugSettings,
   "/miniapps/settings/device-info": DeviceInfoScreen,
   "/miniapps/settings/feedback": FeedbackScreen,
@@ -69,7 +62,6 @@ const settingsRoutes: Record<string, ComponentType<any>> = {
   "/miniapps/settings/notifications": NotificationSettings,
   "/miniapps/settings/position": PositionSettings,
   "/miniapps/settings/privacy": PrivacySettings,
-  "/miniapps/settings/profile": ProfileSettings,
   "/miniapps/settings/speech": SpeechSettings,
   "/miniapps/settings/stress-test": StressTestScreen,
   "/miniapps/settings/super": SuperSettings,

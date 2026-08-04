@@ -34,12 +34,10 @@ export default function MainSettingsPage() {
     <Screen preset="fixed" safeAreaEdges={["top"]} ref={viewShotRef} className="px-0">
       <ScrollView className="pt-8 px-6" contentInsetAdjustmentBehavior="automatic">
         <View style={{flex: 1, gap: theme.spacing.s6}}>
-          <Group title={translate("account:accountSettings")}>
-            <RouteButton
-              icon={<Icon name="circle-user" size={24} color={theme.colors.secondary_foreground} />}
-              label={translate("settings:profileSettings")}
-              onPress={() => push("/miniapps/settings/profile")}
-            />
+          {/* Device/glasses settings, flattened inline (previously a separate page) */}
+          <DeviceSettingsSection />
+
+          <Group title={translate("account:appSettings")}>
             <RouteButton
               icon={<Icon name="message-2-star" size={24} color={theme.colors.secondary_foreground} />}
               label={translate("settings:feedback")}
@@ -50,12 +48,6 @@ export default function MainSettingsPage() {
                 })
               }
             />
-          </Group>
-
-          {/* Device/glasses settings, flattened inline (previously a separate page) */}
-          <DeviceSettingsSection />
-
-          <Group title={translate("account:appSettings")}>
             {appearanceMenuEnabled && (
               <RouteButton
                 icon={<Icon name="sun" size={24} color={theme.colors.secondary_foreground} />}
