@@ -69,20 +69,15 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   // dev. See issues/mapbox-navigation-migration.md.
   // The China build (cn variant) ships without Mentra Map, so it has no nav
   const isChinaBuild = variant === VARIANTS.cn
+  // Foverlay: Mapbox / on-device navigation is disabled (NavigationManager is a
+  // no-op stub, the crust gradle Mapbox deps are removed). A missing Mapbox
+  // token is therefore expected and must NOT fail the build — upstream threw in
+  // CI when the token was absent. Warn only.
   const mapboxAccessToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ?? ""
   if (!mapboxAccessToken && !isChinaBuild) {
-    const isCiOrEas =
-      process.env.CI === "true" ||
-      process.env.CI === "1" ||
-      process.env.EAS_BUILD === "true" ||
-      process.env.NODE_ENV === "production"
-    const msg =
-      "EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN is not set. Navigation (iOS + Android) will fail at " +
-      "runtime — set it in mobile/.env (see mobile/.env.example) before building."
-    if (isCiOrEas) {
-      throw new Error(msg)
-    }
-    console.warn(`[mobile/app.config] ${msg}`)
+    console.warn(
+      "[mobile/app.config] EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN not set — navigation is disabled in Foverlay (expected).",
+    )
   }
 
   const buildNumber = getBuildNumber()
