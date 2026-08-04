@@ -41,7 +41,8 @@ class RealTapSource(
 
     companion object {
         private const val TAG = "FoverlayTapReal"
-        private const val NUDGE_INTERVAL_MS = 20_000L
+        private const val MAINTAIN_INTERVAL_MS = 20_000L
+        private const val INITIAL_MAINTAIN_MS = 1_500L
 
         /**
          * Human name for the state int onTapChangedState reports. The SDK
@@ -63,24 +64,48 @@ class RealTapSource(
     private val connectedTaps = mutableSetOf<String>()
 
     /**
-     * Periodic connection nudge. TapSdk only enumerates bonded straps at a few
-     * fixed moments, so a strap paired AFTER the service starts (or one that
-     * drops without a clean disconnect callback) never attaches on its own.
-     * While nothing is connected, poke refreshConnections() — unconditional in
-     * the 0.3.6 binary — every NUDGE_INTERVAL_MS. No-ops once connected.
+     * Periodic maintenance — two jobs, both essential:
+     *
+     *  1. Reconnect nudge: TapSdk only enumerates bonded straps at a few fixed
+     *     moments, so a strap paired/powered-on AFTER the service starts never
+     *     attaches on its own. While nothing is connected, poke
+     *     refreshConnections() (unconditional in the 0.3.6 binary).
+     *
+     *  2. Pin Controller Mode on ALREADY-connected straps. onTapConnected only
+     *     fires for a *fresh* connection; a strap that was already connected
+     *     when we registered (the normal case — it stays bonded across app
+     *     restarts) never triggers it, so startControllerMode() is never
+     *     called and input notifications are never subscribed. Symptom:
+     *     "Connected — mode: controller" but zero chords. So each tick, pin
+     *     controller mode on any connected strap we haven't pinned yet.
      */
-    private val reconnectNudge = object : Runnable {
+    private val maintain = object : Runnable {
         override fun run() {
             val s = sdk ?: return
-            if (connectedTaps.isEmpty()) {
+            val connected = try {
+                s.getConnectedTaps()
+            } catch (e: Exception) {
+                Log.w(TAG, "getConnectedTaps failed", e)
+                emptySet<String>()
+            }
+            if (connected.isEmpty()) {
                 Log.i(TAG, "No strap connected — nudging refreshConnections()")
+                connectedTaps.clear()
                 try {
                     s.refreshConnections()
                 } catch (e: Exception) {
                     Log.w(TAG, "refreshConnections nudge failed", e)
                 }
+            } else {
+                for (id in connected) {
+                    if (connectedTaps.add(id)) {
+                        Log.i(TAG, "Already-connected strap $id — pinning Controller Mode")
+                        s.startControllerMode(id)
+                        onStatus("connected", id, null)
+                    }
+                }
             }
-            handler.postDelayed(this, NUDGE_INTERVAL_MS)
+            handler.postDelayed(this, MAINTAIN_INTERVAL_MS)
         }
     }
 
@@ -99,7 +124,11 @@ class RealTapSource(
         s.refreshConnections()
         s.disablePauseResumeHandling()
         sdk = s
-        handler.postDelayed(reconnectNudge, NUDGE_INTERVAL_MS)
+        // Run the first maintenance pass shortly after resume() has had a
+        // moment to (re)establish the GATT link, so an already-connected strap
+        // gets Controller Mode pinned within a second or two rather than a full
+        // interval later.
+        handler.postDelayed(maintain, INITIAL_MAINTAIN_MS)
     }
 
     override fun stop() {
@@ -190,6 +219,12 @@ class RealTapSource(
         val mode = modeName(state)
         Log.i(TAG, "Tap $tapIdentifier mode: $mode")
         onStatus("mode_changed", tapIdentifier, mode)
+        // If the strap drifts off Controller Mode while connected, input stops
+        // reaching us — re-pin it.
+        if (state != TapInputMode.CONTROLLER && connectedTaps.contains(tapIdentifier)) {
+            Log.i(TAG, "Tap $tapIdentifier left Controller Mode ($mode) — re-pinning")
+            sdk?.startControllerMode(tapIdentifier)
+        }
     }
 
     // Demo is tapcodes only — mouse/air-gesture/raw-sensor streams are
