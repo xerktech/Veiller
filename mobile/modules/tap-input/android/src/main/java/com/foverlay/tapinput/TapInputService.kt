@@ -66,14 +66,13 @@ class TapInputService : Service() {
         fun setControlEnabled(context: Context, enabled: Boolean) {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putBoolean(KEY_CONTROL_ENABLED, enabled).apply()
-            val svc = activeInstance
-            if (svc != null && enabled && svc.realSource == null && svc.hasBluetoothConnectPermission()) {
-                // Real source never came up (started fake-only — e.g. BT
-                // permission was granted after launch). Turning control on
-                // brings it up now, so the strap attaches without an app restart.
-                svc.startRealSource()
-            }
-            svc?.realSource?.setControlEnabled(enabled)
+            // This is called from Expo's AsyncFunction executor (a BACKGROUND
+            // thread). The Tap SDK's connect/mode calls (refreshConnections,
+            // startControllerMode, resume) must run on the main thread — every
+            // other path into them (onCreate, the maintenance loop) already
+            // does. Marshal onto the service's main-looper handler so the
+            // toggle path matches; running them off-main crashes the app.
+            activeInstance?.applyControlOnMain(enabled)
         }
 
         /** "stopped" | "running" | "no_permission" | "failed" — for the status card. */
@@ -223,6 +222,22 @@ class TapInputService : Service() {
             // Defensive: a missing/odd BT stack shouldn't take down the service.
             Log.e(TAG, "Failed to start RealTapSource — continuing fake-only", e)
             realSourceState = "failed"
+        }
+    }
+
+    /**
+     * Apply a control-toggle change on the MAIN thread. Called from the module
+     * (a background AsyncFunction thread), so it hops onto the service's
+     * main-looper handler before touching the Tap SDK. Starts the real source
+     * if it never came up (fake-only because BT permission was granted after
+     * launch), so turning control on attaches the strap without an app restart.
+     */
+    internal fun applyControlOnMain(enabled: Boolean) {
+        handler.post {
+            if (enabled && realSource == null && hasBluetoothConnectPermission()) {
+                startRealSource()
+            }
+            realSource?.setControlEnabled(enabled)
         }
     }
 

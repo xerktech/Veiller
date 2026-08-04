@@ -76,10 +76,16 @@ class RealTapSource(
     /** Apply the toggle's desired mode to one connected strap. */
     private fun applyDesiredMode(tapIdentifier: String) {
         val s = sdk ?: return
-        if (controlEnabled) {
-            s.startControllerMode(tapIdentifier)
-        } else {
-            s.startTextMode(tapIdentifier)
+        try {
+            if (controlEnabled) {
+                s.startControllerMode(tapIdentifier)
+            } else {
+                s.startTextMode(tapIdentifier)
+            }
+        } catch (e: Exception) {
+            // A mode write can throw if the strap dropped between discovery and
+            // here — never let it crash the app.
+            Log.w(TAG, "applyDesiredMode($tapIdentifier) failed", e)
         }
     }
 
