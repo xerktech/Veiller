@@ -57,11 +57,30 @@ object TapStrapManager {
     @Volatile private var sdk: TapSdk? = null
     @Volatile private var takeoverEnabled = false
     private val connectedTaps = mutableSetOf<String>()
-    private var bondReceiverRegistered = false
+    // Phone-level Bluetooth (ACL) links, tracked from broadcasts. This is the strap's
+    // real connection to the phone (its keyboard HID link and/or our GATT link) and is
+    // independent of whether the Tap SDK has taken the strap over.
+    private val aclConnected = mutableSetOf<String>()
+    private var receiverRegistered = false
 
-    /** Idempotent; safe to call before any toggle. Registers the bond-change watch. */
+    /** Idempotent; safe to call before any toggle. Registers the bond/ACL watchers. */
     fun init(context: Context) {
-        registerBondReceiver(context)
+        registerDeviceReceiver(context)
+    }
+
+    /**
+     * Live phone-link check for one device. BluetoothDevice.isConnected() is a
+     * greylisted-but-stable hidden API (any-profile ACL truth, including links made
+     * before we started listening); fall back to broadcast-tracked state without it.
+     */
+    private fun isDeviceConnected(device: BluetoothDevice): Boolean {
+        try {
+            val result = device.javaClass.getMethod("isConnected").invoke(device)
+            if (result is Boolean) return result
+        } catch (e: Exception) {
+            Log.d(TAG, "isConnected reflection unavailable: ${e.message}")
+        }
+        return synchronized(aclConnected) { aclConnected.contains(device.address) }
     }
 
     fun getStatus(): Map<String, Any> {
@@ -80,7 +99,8 @@ object TapStrapManager {
                         hashMapOf(
                                 "name" to name,
                                 "address" to device.address,
-                                "connected" to false,
+                                "connected" to isDeviceConnected(device),
+                                "sdkConnected" to false,
                         )
             }
         } catch (e: SecurityException) {
@@ -98,6 +118,7 @@ object TapStrapManager {
                         hashMapOf("name" to identifier, "address" to identifier)
                     }
             entry["connected"] = true
+            entry["sdkConnected"] = true
             try {
                 val cached = currentSdk?.getCachedTap(identifier)
                 if (cached != null) {
@@ -195,25 +216,58 @@ object TapStrapManager {
         Bridge.sendTypedMessage("tap_strap_status", getStatus())
     }
 
-    /** Re-emit status when a device pairs/unpairs in the phone's Bluetooth settings. */
-    private fun registerBondReceiver(context: Context) {
+    /**
+     * Keep the status card live: re-emit when a device pairs/unpairs in the phone's
+     * Bluetooth settings, and track ACL connect/disconnect so the strap's real phone
+     * link shows in real time (independent of the takeover toggle).
+     */
+    private fun registerDeviceReceiver(context: Context) {
         synchronized(this) {
-            if (bondReceiverRegistered) return
-            bondReceiverRegistered = true
+            if (receiverRegistered) return
+            receiverRegistered = true
         }
         try {
+            val filter =
+                    IntentFilter().apply {
+                        addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+                        addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+                        addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+                    }
             context.applicationContext.registerReceiver(
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context, intent: Intent) {
-                            if (intent.action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
-                                emitStatus()
+                            val device: BluetoothDevice? =
+                                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                            when (intent.action) {
+                                BluetoothDevice.ACTION_ACL_CONNECTED,
+                                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                                    val address = device?.address ?: return
+                                    val nowConnected =
+                                            intent.action == BluetoothDevice.ACTION_ACL_CONNECTED
+                                    synchronized(aclConnected) {
+                                        if (nowConnected) aclConnected.add(address)
+                                        else aclConnected.remove(address)
+                                    }
+                                    // Only Tap devices are worth an event; other BT traffic
+                                    // (headphones etc.) shouldn't spam JS. Name read can
+                                    // throw without BLUETOOTH_CONNECT — treat as non-Tap.
+                                    val isTap =
+                                            try {
+                                                device.name?.lowercase()?.startsWith(TAP_NAME_PREFIX)
+                                                        ?: false
+                                            } catch (e: SecurityException) {
+                                                false
+                                            }
+                                    if (isTap) emitStatus()
+                                }
+                                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> emitStatus()
                             }
                         }
                     },
-                    IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED),
+                    filter,
             )
         } catch (e: Exception) {
-            Log.w(TAG, "registerBondReceiver failed", e)
+            Log.w(TAG, "registerDeviceReceiver failed", e)
         }
     }
 
