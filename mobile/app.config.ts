@@ -5,7 +5,7 @@ import {getBuildNumber} from "./scripts/build-number.mjs"
 const VARIANTS = {
   default: {
     appName: "Foverlay",
-    packageName: "com.foverlay.app",
+    packageName: "com.xerktech.foverlay",
     includeFirebase: false,
     googleServicesFile: null,
     googleServicesPlist: null,
