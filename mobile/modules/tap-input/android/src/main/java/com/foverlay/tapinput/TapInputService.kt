@@ -9,7 +9,9 @@ import android.content.pm.PackageManager
 import android.bluetooth.BluetoothManager
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -39,6 +41,7 @@ class TapInputService : Service() {
         private const val CHANNEL_ID = "FoverlayTapInputChannel"
         // Distinct from MentraOS's ForegroundService NOTIFICATION_ID (1001).
         private const val NOTIFICATION_ID = 2001
+        private const val PERMISSION_POLL_MS = 10_000L
 
         @Volatile
         var isRunning = false
@@ -101,6 +104,27 @@ class TapInputService : Service() {
 
     private var realSource: RealTapSource? = null
     private var fakeSource: FakeTapSource? = null
+    private val handler = Handler(Looper.getMainLooper())
+
+    /**
+     * Self-heal for the permission latch: the BLUETOOTH_CONNECT check runs at
+     * service creation, but on a fresh install the service starts BEFORE the
+     * user grants Nearby devices — and a grant does not restart the process,
+     * so a one-shot check would stick at "no_permission" forever. While the
+     * real source is down for lack of permission, re-check every 10s and
+     * start it the moment the grant lands.
+     */
+    private val permissionRetry = object : Runnable {
+        override fun run() {
+            if (realSource == null && hasBluetoothConnectPermission()) {
+                Log.i(TAG, "BLUETOOTH_CONNECT granted after start — starting RealTapSource")
+                startRealSource()
+            }
+            if (realSource == null && realSourceState == "no_permission") {
+                handler.postDelayed(this, PERMISSION_POLL_MS)
+            }
+        }
+    }
 
     private val sink: TapSink = { result, tapcode, repeat, timestampMs, source ->
         TapInputModule.emitTap(result, tapcode, repeat, timestampMs, source)
@@ -116,31 +140,43 @@ class TapInputService : Service() {
 
         // The real source needs BLUETOOTH_CONNECT (runtime permission on 12+).
         // Without it, run fake-only rather than crashing — the demo chain is
-        // still fully exercisable over adb.
+        // still fully exercisable over adb — and keep polling for the grant.
         if (hasBluetoothConnectPermission()) {
-            try {
-                realSource = RealTapSource(this, sink) { status, tapId, mode ->
-                    TapInputModule.emitStatus(status, tapId, mode)
-                }.also { it.start() }
-                realSourceState = "running"
-            } catch (e: Exception) {
-                // Defensive: a missing/odd BT stack shouldn't take down the service.
-                Log.e(TAG, "Failed to start RealTapSource — continuing fake-only", e)
-                realSourceState = "failed"
-            }
+            startRealSource()
         } else {
-            Log.w(TAG, "BLUETOOTH_CONNECT not granted — RealTapSource disabled, fake-only")
+            Log.w(TAG, "BLUETOOTH_CONNECT not granted — RealTapSource disabled, polling for grant")
             realSourceState = "no_permission"
+            handler.postDelayed(permissionRetry, PERMISSION_POLL_MS)
         }
         isRunning = true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // start() is idempotent from the app's side; use each delivery as a
+        // chance to recover from the no-permission state immediately.
+        if (realSource == null && hasBluetoothConnectPermission()) {
+            startRealSource()
+        }
         return START_STICKY
+    }
+
+    private fun startRealSource() {
+        if (realSource != null) return
+        try {
+            realSource = RealTapSource(this, sink) { status, tapId, mode ->
+                TapInputModule.emitStatus(status, tapId, mode)
+            }.also { it.start() }
+            realSourceState = "running"
+        } catch (e: Exception) {
+            // Defensive: a missing/odd BT stack shouldn't take down the service.
+            Log.e(TAG, "Failed to start RealTapSource — continuing fake-only", e)
+            realSourceState = "failed"
+        }
     }
 
     override fun onDestroy() {
         Log.i(TAG, "onDestroy")
+        handler.removeCallbacksAndMessages(null)
         if (activeInstance === this) activeInstance = null
         isRunning = false
         realSourceState = "stopped"
