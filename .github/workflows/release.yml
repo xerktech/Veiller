@@ -172,17 +172,31 @@ jobs:
           # (Also preinstalled on the runner; this pins the job regardless.)
           bun-version: "1.2.22"
 
-      - name: Clean stale generated project (self-hosted runner reuses its workspace)
+      - name: Clean generated project ONLY when dependencies changed
         working-directory: ./mobile
-        # The self-hosted runner persists its checkout between builds. `expo
-        # prebuild` regenerates android/ but does NOT remove native-module
-        # linkage for packages that were DELETED since the last build, and a
-        # stale node_modules can keep a removed package on disk — so a
-        # dependency strip that builds fine on a clean checkout can fail here
-        # on a module that no longer exists. Force both to regenerate from the
-        # current lockfile. (bun install then repopulates node_modules.)
+        # The self-hosted runner persists its checkout between builds, which is
+        # what makes incremental Gradle builds fast. But `expo prebuild` does
+        # NOT remove native-module linkage for packages DELETED since the last
+        # build, and a stale node_modules can retain a removed package — so a
+        # dependency change that builds fine on a clean checkout can fail here.
+        #
+        # So: wipe android/ + node_modules ONLY when package.json or the
+        # lockfile actually changed vs the last build (tracked by a hash marker
+        # on the runner). Code-only releases keep the generated project and
+        # node_modules, so Gradle builds incrementally (~minutes instead of
+        # ~20). Dependency releases do the full, safe clean.
         run: |
-          rm -rf android node_modules
+          set -euo pipefail
+          marker="$RUNNER_TEMP/../foverlay-deps.sha"   # persists in the runner _work tree
+          current="$(cat package.json bun.lock 2>/dev/null | sha256sum | cut -d' ' -f1)"
+          previous="$(cat "$marker" 2>/dev/null || echo none)"
+          if [ "$current" != "$previous" ]; then
+            echo "Dependencies changed ($previous -> $current) — full clean."
+            rm -rf android node_modules
+          else
+            echo "Dependencies unchanged — keeping android/ + node_modules for an incremental build."
+          fi
+          echo "$current" > "$marker"
 
       - name: Install dependencies
         working-directory: ./mobile
