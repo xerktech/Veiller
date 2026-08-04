@@ -30,6 +30,8 @@ export interface TapStatusEvent {
 
 export interface TapStatusSnapshot {
   serviceRunning: boolean
+  /** User toggle: true = SDK Controller Mode (drives glasses); false = normal keyboard. */
+  controlEnabled: boolean
   /** "stopped" | "running" | "no_permission" | "failed" — the SDK source's state. */
   realSource: string
   /** OS-bonded Tap devices by name, connected or not — "" pairing visibility. */
@@ -51,6 +53,7 @@ interface TapInputNativeModule {
   isRunning(): boolean
   getStatus(): TapStatusSnapshot
   injectTap(char: string): Promise<void>
+  setControl(enabled: boolean): Promise<void>
 }
 
 const NativeTapInput = requireOptionalNativeModule<TapInputNativeModule>("TapInput")
@@ -82,6 +85,15 @@ export function getTapStatus(): TapStatusSnapshot | null {
  */
 export async function injectTestTap(char: string): Promise<void> {
   await NativeTapInput?.injectTap(char)
+}
+
+/**
+ * Toggle glasses control. true = SDK Controller Mode (strap drives the glasses,
+ * no keystrokes to the phone); false = Text Mode (strap acts as a normal
+ * Bluetooth keyboard). Persists across restarts.
+ */
+export async function setTapControl(enabled: boolean): Promise<void> {
+  await NativeTapInput?.setControl(enabled)
 }
 
 /**

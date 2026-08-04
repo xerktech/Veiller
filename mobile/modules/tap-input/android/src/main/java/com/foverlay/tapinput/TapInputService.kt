@@ -50,6 +50,32 @@ class TapInputService : Service() {
         @Volatile
         private var activeInstance: TapInputService? = null
 
+        private const val PREFS = "foverlay_tap"
+        private const val KEY_CONTROL_ENABLED = "control_enabled"
+
+        /** Persisted user toggle; defaults ON (SDK controls the glasses). */
+        fun isControlEnabled(context: Context): Boolean =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_CONTROL_ENABLED, true)
+
+        /**
+         * Flip control on/off. Persists so it survives restarts and is honored
+         * at the next service start, and applies live if the service is up.
+         * true = Controller Mode (drive glasses); false = Text Mode (normal
+         * Bluetooth keyboard).
+         */
+        fun setControlEnabled(context: Context, enabled: Boolean) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().putBoolean(KEY_CONTROL_ENABLED, enabled).apply()
+            val svc = activeInstance
+            if (svc != null && enabled && svc.realSource == null && svc.hasBluetoothConnectPermission()) {
+                // Real source never came up (started fake-only — e.g. BT
+                // permission was granted after launch). Turning control on
+                // brings it up now, so the strap attaches without an app restart.
+                svc.startRealSource()
+            }
+            svc?.realSource?.setControlEnabled(enabled)
+        }
+
         /** "stopped" | "running" | "no_permission" | "failed" — for the status card. */
         @Volatile
         var realSourceState = "stopped"
@@ -102,7 +128,7 @@ class TapInputService : Service() {
         }
     }
 
-    private var realSource: RealTapSource? = null
+    internal var realSource: RealTapSource? = null
     private var fakeSource: FakeTapSource? = null
     private val handler = Handler(Looper.getMainLooper())
 
@@ -189,7 +215,7 @@ class TapInputService : Service() {
     private fun startRealSource() {
         if (realSource != null) return
         try {
-            realSource = RealTapSource(this, sink) { status, tapId, mode ->
+            realSource = RealTapSource(this, sink, isControlEnabled(this)) { status, tapId, mode ->
                 TapInputModule.emitStatus(status, tapId, mode)
             }.also { it.start() }
             realSourceState = "running"

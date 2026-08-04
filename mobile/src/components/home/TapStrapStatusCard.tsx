@@ -10,7 +10,7 @@
  * from strap→phone ones.
  */
 import {useCallback, useEffect, useState} from "react"
-import {TouchableOpacity, View} from "react-native"
+import {Switch, TouchableOpacity, View} from "react-native"
 
 import GlassView from "@/components/ui/GlassView"
 import {Text} from "@/components/ignite"
@@ -20,6 +20,7 @@ import {
   getTapStatus,
   injectTestTap,
   isTapInputAvailable,
+  setTapControl,
   type TapStatusSnapshot,
 } from "@foverlay/tap-input"
 import {getTapEchoDebugState, subscribeTapEchoDebug, type TapEchoDebugState} from "@mentra/engine/internal"
@@ -50,10 +51,14 @@ export const TapStrapStatusCard = () => {
     const inputSub = addTapInputListener(refresh)
     const statusSub = addTapStatusListener(refresh)
     const echoUnsub = subscribeTapEchoDebug(() => setEcho(getTapEchoDebugState()))
+    // Poll so a strap that connects after the card is open (or a mode change
+    // from the maintenance loop) shows up without any interaction.
+    const poll = setInterval(refresh, 3000)
     return () => {
       inputSub?.remove()
       statusSub?.remove()
       echoUnsub()
+      clearInterval(poll)
     }
   }, [])
 
@@ -63,7 +68,20 @@ export const TapStrapStatusCard = () => {
     void injectTestTap(char).catch((error) => console.warn("TapStrapStatusCard: test tap failed", error))
   }, [testIndex])
 
+  const toggleControl = useCallback((next: boolean) => {
+    // Optimistic: reflect immediately, then re-sync from native truth.
+    setSnapshot((s) => (s ? {...s, controlEnabled: next} : s))
+    void setTapControl(next)
+      .then(() => setSnapshot(getTapStatus()))
+      .catch((error) => {
+        console.warn("TapStrapStatusCard: setControl failed", error)
+        setSnapshot(getTapStatus())
+      })
+  }, [])
+
   if (!isTapInputAvailable) return null
+
+  const controlEnabled = snapshot?.controlEnabled ?? true
 
   const taps = snapshot?.taps ?? []
   const bonded = snapshot?.bondedTaps ?? []
@@ -89,6 +107,17 @@ export const TapStrapStatusCard = () => {
         <TouchableOpacity onPress={sendTestTap} className="px-3 py-1.5 rounded-lg bg-secondary">
           <Text className="text-sm font-medium">Send test tap</Text>
         </TouchableOpacity>
+      </View>
+      <View className="flex-row justify-between items-center mt-3">
+        <View className="flex-1 pr-3">
+          <Text className="text-sm font-medium">Glasses control</Text>
+          <Text className="text-xs text-secondary_foreground">
+            {controlEnabled
+              ? "On — strap drives the glasses (toggle to reconnect)"
+              : "Off — strap works as a normal keyboard"}
+          </Text>
+        </View>
+        <Switch value={controlEnabled} onValueChange={toggleControl} />
       </View>
       <View className="mt-2 gap-1">
         <Text className="text-sm">{strapLine}</Text>

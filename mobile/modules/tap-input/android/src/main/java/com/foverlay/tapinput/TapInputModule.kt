@@ -95,8 +95,9 @@ class TapInputModule : Module() {
             )
         }
 
-        fun snapshot(): Map<String, Any?> = mapOf(
+        fun snapshot(context: android.content.Context?): Map<String, Any?> = mapOf(
             "serviceRunning" to TapInputService.isRunning,
+            "controlEnabled" to (context?.let { TapInputService.isControlEnabled(it) } ?: true),
             "realSource" to TapInputService.realSourceState,
             "bondedTaps" to TapInputService.bondedTapNames(),
             "taps" to tapModes.map { (id, mode) -> mapOf("tapIdentifier" to id, "mode" to mode) },
@@ -137,7 +138,7 @@ class TapInputModule : Module() {
 
         /** Full status snapshot for the phone UI (strap list, modes, counters). */
         Function("getStatus") {
-            snapshot()
+            snapshot(appContext.reactContext)
         }
 
         /**
@@ -146,6 +147,13 @@ class TapInputModule : Module() {
          * Lets the UI's "send test tap" button exercise the phone→glasses leg
          * without strap hardware or adb.
          */
+        AsyncFunction("setControl") { enabled: Boolean ->
+            val context = appContext.reactContext
+                ?: throw IllegalStateException("No React context available")
+            TapInputService.setControlEnabled(context, enabled)
+            sendEvent(EVENT_TAP_STATUS, mapOf("status" to "control_changed", "tapIdentifier" to null, "mode" to null))
+        }
+
         AsyncFunction("injectTap") { char: String ->
             if (char.isEmpty()) throw IllegalArgumentException("char required")
             val ok = TapInputService.injectChar(if (char == "\\b") '\b' else char[0])
