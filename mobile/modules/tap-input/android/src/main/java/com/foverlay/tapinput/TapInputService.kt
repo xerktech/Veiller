@@ -130,13 +130,36 @@ class TapInputService : Service() {
         TapInputModule.emitTap(result, tapcode, repeat, timestampMs, source)
     }
 
+    private var initFailed = false
+
     override fun onCreate() {
         super.onCreate()
         Log.i(TAG, "onCreate")
         activeInstance = this
-        startInForeground()
 
-        fakeSource = FakeTapSource(this, sink).also { it.start() }
+        // FAIL SOFT, NEVER CRASH-LOOP. After a package update Android
+        // restarts this sticky service in a background context, where
+        // startForeground() with a connectedDevice type can throw
+        // (ForegroundServiceStartNotAllowedException and friends on 14+).
+        // An uncaught throw here crashes the process, the system retries the
+        // sticky restart, and the user sees the app "crash over and over"
+        // right after every update — until backoff gives up. If anything in
+        // bring-up fails, stop quietly instead: the next app open calls
+        // startTapInput() from the foreground and everything starts clean.
+        try {
+            startInForeground()
+        } catch (t: Throwable) {
+            Log.e(TAG, "startForeground failed (likely background restart after update) — stopping quietly", t)
+            initFailed = true
+            stopSelf()
+            return
+        }
+
+        try {
+            fakeSource = FakeTapSource(this, sink).also { it.start() }
+        } catch (t: Throwable) {
+            Log.e(TAG, "FakeTapSource failed to start", t)
+        }
 
         // The real source needs BLUETOOTH_CONNECT (runtime permission on 12+).
         // Without it, run fake-only rather than crashing — the demo chain is
@@ -152,6 +175,9 @@ class TapInputService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // A failed bring-up must not be resurrected by the system — that is
+        // the crash/retry loop. The app restarts us properly on next open.
+        if (initFailed) return START_NOT_STICKY
         // start() is idempotent from the app's side; use each delivery as a
         // chance to recover from the no-permission state immediately.
         if (realSource == null && hasBluetoothConnectPermission()) {
