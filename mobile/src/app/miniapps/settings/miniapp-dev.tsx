@@ -34,11 +34,8 @@ export default function MiniappDeveloperSettingsScreen() {
           </GlassView>
 
           <Group title={translate("miniappDevSettings:toolsTitle")}>
-            <RouteButton
-              label={translate("miniappDevSettings:scanLabel")}
-              subtitle={translate("miniappDevSettings:scanSubtitle")}
-              onPress={() => push("/miniapps/miniappdev/scanner")}
-            />
+            {/* QR-scan loading removed in XERK-207 (phone CAMERA permission
+                killed); dev miniapps load via the manual URL entry below. */}
             <RouteButton
               label={translate("miniappDevSettings:loadUrlLabel")}
               subtitle={translate("miniappDevSettings:loadUrlSubtitle")}

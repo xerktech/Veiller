@@ -63,23 +63,24 @@ still-reachable feature (your call).
 | `BIND_NOTIFICATION_LISTENER_SERVICE` + `…CRUST_NOTIFICATION_BRIDGE` | crust | Phone-notification → glasses bridge (`privacy.tsx`) | Live | **Keep** |
 | `QUERY_ALL_PACKAGES` | android.ts | Per-app notification picker enumerates all apps (`NotificationListener:188`) | Live | **Keep** (Play-sensitive) |
 | `READ_CALENDAR` / `WRITE_CALENDAR` | expo-calendar | Calendar events → glasses/miniapps (`MantleManager`, `PhoneCalendarService`) | Live | **Keep** |
-| `CAMERA` | expo-camera (+ webrtc) | (a) mirror-mode recorder — **DEAD** (entry points commented out); (b) dev-miniapp **QR scanner** — **LIVE** (Super/dev mode, `miniappdev/scanner.tsx`) | Mixed | **Decision** — killable only if you drop QR-scan loading |
-| `WRITE_EXTERNAL_STORAGE` (maxSdk 29) | expo-media-library AAR | Save glasses photos to gallery via Crust/MediaStore (`cameraRollExportCoordinator`) | **Orphaned** — no camera device feeds it | **Kill** |
-| `READ_EXTERNAL_STORAGE` (maxSdk 32) | media/image AAR + basic perms | Legacy media read on old APIs | **Orphaned** with photos | **Kill** (verify no other lib) |
+| `CAMERA` | expo-camera (+ webrtc) | (a) mirror-mode recorder — was DEAD; (b) dev-miniapp QR scanner — was LIVE. Both removed | Removed | **Killed** ✅ (`tools:node="remove"`) |
+| `WRITE_EXTERNAL_STORAGE` (maxSdk 29) | expo-media-library AAR | Save glasses photos to gallery via Crust/MediaStore (`cameraRollExportCoordinator`) | Orphaned — no camera device feeds it | **Killed** ✅ (`tools:node="remove"`) |
+| `READ_EXTERNAL_STORAGE` (maxSdk 32) | media/image AAR + basic perms | Legacy media read on old APIs | Orphaned with photos | **Killed** ✅ (`tools:node="remove"`) |
 | `android.permission.NEARBY_DEVICES` | android.ts | Nothing — not a real Android permission | No-op | **Removed** in this PR |
 | `AD_ID` / `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO` / `WRITE_MEDIA_VIDEO` / `ACCESS_MEDIA_LOCATION` | (transitive) | — | Already stripped | **Already removed** — correct |
 
 ## The three groups you asked about
 
-### Photos — kill (safe) ✅
+### Photos — killed ✅
 The G2 has no camera, so nothing downloads photos to save. The gallery-save
 chain (`gallerySyncService` → `cameraRollExportCoordinator` →
-`CrustModule.saveToGalleryWithDate`) is still initialized at startup but has **no
+`CrustModule.saveToGalleryWithDate`) is initialized at startup but has **no
 reachable trigger** — its only source is a camera-glasses hotspot download.
-`WRITE_EXTERNAL_STORAGE` + `READ_EXTERNAL_STORAGE` + the `expo-media-library`
-dependency can all go. Caveat: the save code is not `hasCamera`-gated, so if the
-gallery screen is ever forced open via raw deeplink the (photo-less) save call
-would error instead of no-op — cosmetic, since it downloads nothing anyway.
+Removed: `WRITE_EXTERNAL_STORAGE` + `READ_EXTERNAL_STORAGE` (via
+`tools:node="remove"`), the `expo-media-library` dependency + config plugin, and
+the storage requests in `PermissionsUtils`. The deep engine gallery-sync code is
+left in place as dead-but-harmless per the repo's "disable device features,
+don't delete" convention (XERK-206) — it has no trigger on a G2.
 
 ### Maps — nothing to remove at the permission level
 Navigation is already a stub (`NavigationManager.kt` errors "Navigation is not
@@ -91,14 +92,16 @@ miniapps, both still live. So "kill maps" yields only **dead-code cleanup**
 `CrustModule.startNavigation` + the Super-Mode debug trigger), not a permission
 reduction. Track as a separate cleanup ticket.
 
-### Camera — your call
-The camera-*glasses* and mirror-recorder uses are already dead. The one thing
-still holding `CAMERA` is the **phone** camera powering the dev-miniapp **QR
-scanner** (`miniapps/miniappdev/scanner.tsx`), reachable in developer / Super
-Mode. Options:
-- **Keep `CAMERA`** — retain QR-scan loading of dev miniapps.
-- **Kill `CAMERA`** — remove/replace the QR scanner (e.g. manual URL entry for
-  dev miniapps), then drop the `expo-camera` plugin and the perm.
+### Camera — killed ✅
+The camera-*glasses* and mirror-recorder uses were already dead. The one live
+holder of `CAMERA` was the **phone** camera powering the dev-miniapp **QR
+scanner**. That scanner was dropped (dev miniapps already load via the existing
+manual **dev-URL entry** screen, `miniappdev/developer-url`). Removed: the QR
+scanner route + its entry points, the dead mirror recorder (`mirror/fullscreen`),
+the dead camera code in `ConnectedSimulatedGlassesInfo`, the `expo-camera`
+dependency + config plugin, the iOS Camera/PhotoLibrary permission handlers, and
+`CAMERA` from the manifest (via `tools:node="remove"`, which also covers the
+copy react-native-webrtc's AAR would otherwise merge).
 
 ## Play Store-sensitive permissions worth noting (all justified, kept)
 - `QUERY_ALL_PACKAGES` — requires a Play declaration form; used by the
@@ -115,10 +118,24 @@ Mode. Options:
   above, but preserve `WRITE_EXTERNAL_STORAGE` only if any API 28–29 save path
   is reinstated.
 
-## Changes applied in XERK-207 so far
+## Changes applied in XERK-207
 - Removed the no-op `android.permission.NEARBY_DEVICES` from `plugins/android.ts`.
 - Corrected the stale `app.config.ts` comment attributing the location
   foreground service / background-location block to the removed Google Nav SDK.
+- **Killed the CAMERA permission**: dropped the dev-miniapp QR scanner (route +
+  entry points, repointed to the manual dev-URL screen), deleted the dead
+  `mirror/fullscreen` recorder, cleaned dead camera code from
+  `ConnectedSimulatedGlassesInfo`, removed the `expo-camera` dependency + plugin
+  and iOS Camera handler, and `tools:node="remove"` for `CAMERA`.
+- **Killed the photo/storage permissions**: `tools:node="remove"` for
+  `WRITE_EXTERNAL_STORAGE` + `READ_EXTERNAL_STORAGE`, removed the
+  `expo-media-library` dependency + plugin and iOS PhotoLibrary handlers, and
+  dropped the storage runtime requests in `PermissionsUtils`.
+- Excluded standalone module example apps from the mobile tsconfig (the
+  bluetooth-sdk example uses `expo-media-library`, now no longer an app dep).
 
-The camera/photo removals above are left for a keep/kill decision (this ticket is
-the evaluation).
+**Verification:** `bun run compile` (tsc `--noEmit`) passes clean on the whole
+mobile app; lint is clean on the changed files. A full Android prebuild/build was
+not run locally (no Mapbox tokens in this environment) — the manifest merge is
+validated by the release build. Maps/nav dead code and the orphaned
+LiveKit/webrtc stack remain as separate follow-ups.

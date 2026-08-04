@@ -42,6 +42,11 @@
     "test/**/*",
     "e2e-tests/ui/**/*",
     "modules/*/src/**/*.test.ts",
-    "modules/*/src/**/__tests__/**/*"
+    "modules/*/src/**/__tests__/**/*",
+    // Standalone module example apps have their own package.json / tooling and
+    // must not be typechecked against the mobile app's dependency set (e.g. the
+    // bluetooth-sdk example uses expo-media-library, which the app itself no
+    // longer depends on — XERK-207).
+    "modules/*/example/**/*"
   ]
 }
