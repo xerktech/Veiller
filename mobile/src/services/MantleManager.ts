@@ -3,6 +3,7 @@ import CrustModule from "@mentra/crust"
 import {Asset} from "expo-asset"
 import * as Calendar from "expo-calendar"
 import {router} from "expo-router"
+import {AppState} from "react-native"
 
 import {bootstrapMentraJS} from "@/services/mentraJsBootstrap"
 import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
@@ -11,6 +12,7 @@ import {BUNDLED_MINIAPPS} from "@/generated/bundledMiniapps"
 import {CHINA_HIDDEN_APPS, isChinaBuild, notifyPackageName} from "@/constants/miniapps"
 import {migrate} from "@/services/Migrations"
 import {buildSpokenNotification} from "@/services/notifications/spokenNotification"
+import {shapeCalendarEventsForGlasses, type GlassesCalendarEvent} from "@/services/calendar/shapeCalendarEvents"
 import {cloudConfigValues} from "@/services/cloudClient"
 import {engine, BgTimer, SETTINGS} from "@mentra/engine"
 import {
@@ -662,15 +664,29 @@ class MantleManager {
     // route does not. Tear down queued and active Notify speech on the
     // connected -> disconnected transition so it cannot continue on the phone
     // speaker. The generation bump also invalidates synthesis already in flight.
+    // The connected edge also re-reads the phone calendar: the hourly tick
+    // alone goes stale, and the on-connect settings replay only re-sends the
+    // last-synced snapshot.
     let glassesWereConnected = engine.glasses.status().state === "connected"
     const unsubscribeGlassesPresentationState = engine.glasses.onStatus((status) => {
       const glassesAreConnected = status.state === "connected"
       if (glassesWereConnected && !glassesAreConnected) {
         this.stopPhoneNotificationPresentation()
       }
+      if (!glassesWereConnected && glassesAreConnected) {
+        void this.sendCalendarEvents()
+      }
       glassesWereConnected = glassesAreConnected
     })
     this.subs.push({remove: unsubscribeGlassesPresentationState})
+
+    // Calendar again on foreground: calendar edits and a just-granted calendar
+    // permission both happen outside the app.
+    this.subs.push(
+      AppState.addEventListener("change", (state) => {
+        if (state === "active") void this.sendCalendarEvents()
+      }),
+    )
 
     // (The device-status projection — onBluetoothStatus -> core store and
     // onGlassesStatus -> glasses store — moved into island's GlassesStatusProjection,
@@ -953,44 +969,21 @@ class MantleManager {
       // from 2 hours ago to 3 days from now:
       const startDate = new Date(Date.now() - 2 * 60 * 60 * 1000)
       const endDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-      let events = await Calendar.getEventsAsync(calendarIds, startDate, endDate)
+      const events = await Calendar.getEventsAsync(calendarIds, startDate, endDate)
+      const shapedEvents = shapeCalendarEventsForGlasses(events)
 
-      // sort by start date (soonest first)
-      events.sort((a: Calendar.Event, b: Calendar.Event) => {
-        return new Date(a.startDate as string | Date).getTime() - new Date(b.startDate as string | Date).getTime()
-      })
-
-      // limit to first 3 events:
-      events = events.slice(0, 3)
-
-      // Shape into the {title, location?, time, endDate} contract the SDK expects.
-      // time is a pre-formatted display label; endDate is unix seconds.
-      const shapedEvents = events.map((ev: Calendar.Event) => {
-        const start = new Date(ev.startDate as string | Date)
-        const end = new Date(ev.endDate as string | Date)
-        let time: string
-
-        if (ev.allDay) {
-          time = "All day"
-        } else {
-          time = start.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"})
-        }
-        // add the duration of the event, i.e. "10:00AM - 11:00AM"
-        const duration = end.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"})
-        if (!ev.allDay) {
-          time += ` - ${duration}`
-        }
-        return {
-          title: ev.title ?? "",
-          ...(ev.location ? {location: ev.location} : {}),
-          time,
-          endDate: Math.floor(end.getTime() / 1000),
-        }
-      })
-      try {
-        await BluetoothSdk.setCalendarEvents(shapedEvents)
-      } catch (error) {
-        console.warn("MANTLE: Failed to sync calendar events to glasses", error)
+      // Write through the settings store rather than straight to the SDK.
+      // GlassesSettingsSync owns the push: it debounces the change to one BLE
+      // write and replays the stored value on every glasses (re)connect. The
+      // old direct BluetoothSdk.setCalendarEvents() call bypassed the store, so
+      // the store's calendar_events stayed [] and each on-connect settings
+      // replay pushed that [] — clearing the calendar widget the driver had
+      // just restored — until the next hourly tick.
+      const previous = engine.settings.get<GlassesCalendarEvent[]>(SETTINGS.calendar_events.key)
+      if (JSON.stringify(previous) === JSON.stringify(shapedEvents)) return
+      const res = await engine.settings.set(SETTINGS.calendar_events.key, shapedEvents, false)
+      if (res.is_error()) {
+        console.warn("MANTLE: Failed to sync calendar events to glasses", res.error)
       }
     } catch (error) {
       // it's fine if this fails

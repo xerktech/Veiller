@@ -1762,29 +1762,7 @@ class G2 : SGCManager() {
         )
 
         // 6. Dashboard init (0x01) — display settings
-        // halfDayFormat: 1 = 12h, 0 = 24h
-        // temperatureUnit: 1 = Celsius (metric), 2 = Fahrenheit (imperial)
-        val dashDisplayW = ProtobufWriter()
-        dashDisplayW.writeInt32Field(1, 4) // displayMode
-        dashDisplayW.writeInt32Field(2, 3) // statusDisplayCount
-        dashDisplayW.writeMessageField(3, byteArrayOf(1, 2, 3)) // statusDisplayOrder
-        dashDisplayW.writeInt32Field(4, 4) // widgetDisplayCount
-        // WidgetType: 1=News, 2=Stock, 3=Schedule, 4=Quicklist, 5=Health
-        dashDisplayW.writeMessageField(
-            5,
-            byteArrayOf(3, 1, 2, 4, 5)
-        ) // widgetDisplayOrder: Schedule, News, Stock, Quicklist
-        dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat()) // halfDayFormat
-        dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit()) // temperatureUnit
-
-        val dashRecvW = ProtobufWriter()
-        dashRecvW.writeMessageField(2, dashDisplayW.toByteArray())
-
-        val dashPkgW = ProtobufWriter()
-        dashPkgW.writeInt32Field(1, 2) // Dashboard_Receive
-        dashPkgW.writeInt32Field(2, sendManager.nextMagicRandom())
-        dashPkgW.writeMessageField(4, dashRecvW.toByteArray())
-        sendDashboardCommand(dashPkgW.toByteArray())
+        sendDashboardDisplaySettings()
 
         // Disable "Hey Even" wakeword on connect
         val heyEvenOff = EvenAIProto.setHeyEven(sendManager.nextMagicRandom(), false)
@@ -1844,12 +1822,18 @@ class G2 : SGCManager() {
     }
 
     override fun sendDashboardDisplaySettings() {
+        // halfDayFormat: 1 = 12h, 0 = 24h
+        // temperatureUnit: 1 = Celsius (metric), 2 = Fahrenheit (imperial)
         val dashDisplayW = ProtobufWriter()
         dashDisplayW.writeInt32Field(1, 4) // displayMode
         dashDisplayW.writeInt32Field(2, 3) // statusDisplayCount
         dashDisplayW.writeMessageField(3, byteArrayOf(1, 2, 3)) // statusDisplayOrder
         dashDisplayW.writeInt32Field(4, 4) // widgetDisplayCount
-        dashDisplayW.writeMessageField(5, byteArrayOf(1, 3, 2, 2)) // widgetDisplayOrder
+        // WidgetType: 1=News, 2=Stock, 3=Schedule, 4=Quicklist, 5=Health
+        dashDisplayW.writeMessageField(
+            5,
+            byteArrayOf(3, 1, 2, 4, 5)
+        ) // widgetDisplayOrder: Schedule, News, Stock, Quicklist, Health (matches iOS)
         dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat()) // halfDayFormat
         dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit()) // temperatureUnit
 
