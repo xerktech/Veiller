@@ -26,7 +26,7 @@ set -euo pipefail
 
 SCENARIO="${1:-foreground}"
 DEVICE_NAME="${2:-Israelov}"
-APP_BUNDLE_ID="${APP_BUNDLE_ID:-com.mentra.mentra}"
+APP_BUNDLE_ID="${APP_BUNDLE_ID:-com.xerktech.foverlay}"
 MB_PER_APP="${MB_PER_APP:-25}"
 MAX_MOUNTS="${MAX_MOUNTS:-25}"
 # Apple Team ID — required by maestro to build/sign its WebDriverAgent
@@ -124,7 +124,7 @@ echo "==> idevicesyslog attached"
 #   n=N         → number of dummies to mount
 # DeeplinkContext.tsx maps /miniapps/settings/stress-test through and
 # passes mb/n/autorun query params straight into the screen.
-DEEPLINK="com.mentra:///miniapps/settings/stress-test?autorun=1&mb=${MB_PER_APP}&n=${MAX_MOUNTS}"
+DEEPLINK="com.xerktech.foverlay:///miniapps/settings/stress-test?autorun=1&mb=${MB_PER_APP}&n=${MAX_MOUNTS}"
 echo "==> Launching app with deeplink: ${DEEPLINK}"
 xcrun devicectl device process launch \
   --device "${DEVICE_ID}" \

@@ -419,7 +419,7 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   const {setSplashEnabled} = useSplashLoader()
   const nav = useNavigationStore.getState()
   const config = {
-    scheme: "com.mentra",
+    scheme: "com.xerktech.foverlay",
     host: "apps.mentra.glass",
     routes: deepLinkRoutes,
     authCheckHandler: async () => {

@@ -52,7 +52,7 @@ npm run test:maestro:ci
 
 ## Environment Variables
 
-- `MAESTRO_APP_ID` - App bundle ID (default: com.mentra.mentra)
+- `MAESTRO_APP_ID` - App bundle ID (default: com.xerktech.foverlay)
 
 ## Writing New Tests
 

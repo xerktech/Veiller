@@ -62,7 +62,7 @@ await $({ stdio: 'inherit' })`bun expo prebuild --platform android`;
 await $({ stdio: 'inherit' })`bun expo export --platform android --clear`;
 
 // Prebuild can leave a stale autolinking.json with the wrong packageName
-// (com.mentra instead of com.mentra.mentra), which makes the generated
+// (com.mentra instead of com.xerktech.foverlay), which makes the generated
 // ReactNativeApplicationEntryPoint reference a non-existent BuildConfig.
 // Delete it so gradle's settings phase regenerates it against the final build.gradle.
 await $({ stdio: 'inherit' })`rm -rf android/build/generated/autolinking`;

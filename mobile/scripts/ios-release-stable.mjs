@@ -1,6 +1,6 @@
 #!/usr/bin/env zx
 // Build iOS archive with MENTRAOS_BUILD_NAME=Mentra-Stable so it installs alongside
-// the regular Mentra build (bundle: com.mentra.mentra.stable, label: "stable").
+// the regular Mentra build (bundle: com.xerktech.foverlay.stable, label: "stable").
 
 process.env.MENTRAOS_BUILD_NAME = "Mentra Stable"
 
@@ -16,7 +16,7 @@ const archiveDate = now.toISOString().split("T")[0]
 const archivePath = `${os.homedir()}/Library/Developer/Xcode/Archives/${archiveDate}/${archiveName}`
 
 console.log(chalk.blue(`Building stable archive: ${archiveName}`))
-console.log(chalk.blue(`MENTRAOS_BUILD_NAME=stable (bundle: com.mentra.mentra.stable)`))
+console.log(chalk.blue(`MENTRAOS_BUILD_NAME=stable (bundle: com.xerktech.foverlay.stable)`))
 
 await $({stdio: "inherit"})`bun expo prebuild --platform ios`
 
