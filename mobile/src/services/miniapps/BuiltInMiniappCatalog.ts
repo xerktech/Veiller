@@ -21,7 +21,7 @@ import {getDefaultMenuApps, type GlassesMenuItem} from "@/utils/glassesMenu"
 import {markMiniappDevMode} from "@/utils/miniappDevMode"
 
 import {
-  cameraPackageName,
+  // cameraPackageName, // XERK-206: unused while the camera miniapp is disabled
   CHINA_HIDDEN_APPS,
   isChinaBuild,
   mirrorPackageName,
@@ -172,31 +172,34 @@ class BuiltInMiniappCatalog {
 
   private buildOfflineApps(): ClientApp[] {
     const apps: ClientApp[] = [
-      {
-        packageName: cameraPackageName,
-        name: translate("miniApps:camera"),
-        type: "standard",
-        offline: true,
-        logoUrl: require("@assets/applet-icons/camera.png"),
-        webviewUrl: "",
-        permissions: [],
-        offlineRoute: "/asg/gallery",
-        local: false,
-        running: false,
-        loading: false,
-        healthy: true,
-        hidden: false,
-        onStart: () => {
-          engine.settings.set(SETTINGS.offline_camera_running.key, true)
-        },
-        onStop: () => {
-          engine.settings.set(SETTINGS.offline_camera_running.key, false)
-        },
-        hardwareRequirements: [
-          {type: HardwareType.CAMERA, level: HardwareRequirementLevel.REQUIRED},
-          {type: HardwareType.EXIST, level: HardwareRequirementLevel.REQUIRED},
-        ],
-      },
+      // XERK-206: camera/gallery miniapp commented out (not removed) — it
+      // serves camera glasses (Mentra Live), and only the Even Realities G2
+      // (no camera) and Tap Strap 2 are supported for now.
+      // {
+      //   packageName: cameraPackageName,
+      //   name: translate("miniApps:camera"),
+      //   type: "standard",
+      //   offline: true,
+      //   logoUrl: require("@assets/applet-icons/camera.png"),
+      //   webviewUrl: "",
+      //   permissions: [],
+      //   offlineRoute: "/asg/gallery",
+      //   local: false,
+      //   running: false,
+      //   loading: false,
+      //   healthy: true,
+      //   hidden: false,
+      //   onStart: () => {
+      //     engine.settings.set(SETTINGS.offline_camera_running.key, true)
+      //   },
+      //   onStop: () => {
+      //     engine.settings.set(SETTINGS.offline_camera_running.key, false)
+      //   },
+      //   hardwareRequirements: [
+      //     {type: HardwareType.CAMERA, level: HardwareRequirementLevel.REQUIRED},
+      //     {type: HardwareType.EXIST, level: HardwareRequirementLevel.REQUIRED},
+      //   ],
+      // },
       {
         packageName: settingsPackageName,
         name: translate("miniApps:settings"),

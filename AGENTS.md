@@ -6,6 +6,15 @@ Repository implementation guidelines for coding agents working with MentraOS.
 
 MentraOS is an open source operating system, app store, and development framework for smart glasses.
 
+### Supported devices (XERK-206)
+
+We only care about two devices for now: the **Even Realities G2** glasses and
+the **Tap Strap 2** controller. Features and UI for every other device (Even
+Realities G1, Mentra Live, Mentra Mach1, Mentra Display/Nex, Vuzix Z100, NIMO,
+AR99, Even Realities R1 controller, etc.) are commented out — not deleted — so
+they can be restored later. Do not build new functionality for those devices,
+and do not remove their commented-out code.
+
 - Architecture: Smart glasses connect to user's phone via BLE; phone connects to backend; backend connects to third-party app servers running the MentraOS SDK
 - Mobile app: `mobile` (React Native with native modules)
 - Android logic: `android_core`

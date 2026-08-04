@@ -1,4 +1,5 @@
-import {DeviceTypes, ControllerTypes} from "@/../../cloud/packages/types/src"
+// XERK-206: ControllerTypes unused while the R1 controller is disabled.
+import {DeviceTypes} from "@/../../cloud/packages/types/src"
 import {useFocusEffect} from "expo-router"
 import {useCallback} from "react"
 import {View, TouchableOpacity, Platform, ScrollView, Image} from "react-native"
@@ -47,16 +48,19 @@ export default function SelectControllerScreen() {
   }
 
   // Platform-specific glasses options
-  const controllerOptions =
+  // XERK-206: only the Even Realities G2 and Tap Strap 2 are supported for
+  // now, so the R1 controller options are commented out — not removed — so
+  // they can be restored later.
+  const controllerOptions: {deviceModel: string; key: string}[] =
     Platform.OS === "ios"
       ? [
           // {deviceModel: DeviceTypes.SIMULATED, key: DeviceTypes.SIMULATED},
           //{deviceModel: "Brilliant Labs Frame", key: "frame"},
-          {deviceModel: ControllerTypes.R1, key: "evenrealities_r1"},
+          // {deviceModel: ControllerTypes.R1, key: "evenrealities_r1"},
         ]
       : [
           // Android:
-          {deviceModel: ControllerTypes.R1, key: "evenrealities_r1"},
+          // {deviceModel: ControllerTypes.R1, key: "evenrealities_r1"},
         ]
 
   const triggerGlassesPairingGuide = async (deviceModel: string) => {
