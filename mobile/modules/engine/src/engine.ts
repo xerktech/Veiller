@@ -17,6 +17,7 @@ import {startOtaService, stopOtaService} from "./services/OtaService"
 import {startAudioCloudUplink, stopAudioCloudUplink} from "./services/AudioCloudUplink"
 import {startDeviceEventRouter, stopDeviceEventRouter} from "./services/DeviceEventRouter"
 import {startTapStrapCoordinator, stopTapStrapCoordinator} from "./services/TapStrapCoordinator"
+import {startScreenTimeoutCoordinator, stopScreenTimeoutCoordinator} from "./services/ScreenTimeoutCoordinator"
 import {startPhoneNotificationsSync, stopPhoneNotificationsSync} from "./services/PhoneNotificationsSync"
 import {startCaptionsTesterReportService, stopCaptionsTesterReportService} from "./services/CaptionsTesterReportService"
 import {
@@ -69,6 +70,8 @@ export const engine = {
     startDeviceEventRouter()
     // Tap Strap status → store, and seed native takeover from the persisted toggle.
     startTapStrapCoordinator()
+    // Blank the glasses display after the configured idle timeout (0 == never).
+    startScreenTimeoutCoordinator()
     // Hydration contract: the native DeviceStore is in-memory and starts empty
     // every launch; seed it from the persisted settings BEFORE start() resolves
     // so every post-start getDefaultDevice() read is a trustworthy two-state
@@ -138,6 +141,7 @@ export const engine = {
     await safely("glasses status projection", stopGlassesStatusProjection)
     await safely("device event router", stopDeviceEventRouter)
     await safely("tap strap coordinator", stopTapStrapCoordinator)
+    await safely("screen timeout coordinator", stopScreenTimeoutCoordinator)
     await safely("ota service", stopOtaService)
     await safely("audio cloud uplink", stopAudioCloudUplink)
     await safely("phone notifications sync", stopPhoneNotificationsSync)
