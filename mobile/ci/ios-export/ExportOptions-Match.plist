@@ -15,8 +15,8 @@
 	<string>manual</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>com.mentra.mentra</key>
-		<string>match AppStore com.mentra.mentra</string>
+		<key>com.xerktech.foverlay</key>
+		<string>match AppStore com.xerktech.foverlay</string>
 	</dict>
 	<key>uploadBitcode</key>
 	<false/>

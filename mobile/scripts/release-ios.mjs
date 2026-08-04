@@ -144,7 +144,7 @@ if (isCIForSigning) {
 \t\t\t\tCODE_SIGN_STYLE = Manual;
 \t\t\t\tCODE_SIGN_IDENTITY = "Apple Distribution";
 \t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "match AppStore com.mentra.mentra";`,
+\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "match AppStore com.xerktech.foverlay";`,
   );
   pbxproj = before + updatedAfter;
   await (await import('fs/promises')).writeFile(pbxprojPath, pbxproj);

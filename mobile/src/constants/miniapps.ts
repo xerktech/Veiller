@@ -8,7 +8,7 @@ export const feedbackPackageName = "com.mentra.feedback"
 export const notifyPackageName = "cloud.augmentos.notify"
 export const navigationPackageName = "com.mentra.navigation" // "Mentra Map"
 
-/** True when this binary is the China (com.mentra.mentra.cn) build. */
+/** True when this binary is the China (com.xerktech.foverlay.cn) build. */
 export const isChinaBuild = (): boolean => process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china"
 
 /**

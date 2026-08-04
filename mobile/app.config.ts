@@ -4,8 +4,8 @@ import {getBuildNumber} from "./scripts/build-number.mjs"
 
 const VARIANTS = {
   default: {
-    appName: "Mentra",
-    packageName: "com.mentra.mentra",
+    appName: "Foverlay",
+    packageName: "com.xerktech.foverlay",
     includeFirebase: true,
     googleServicesFile: "./google-services.json",
     googleServicesPlist: "./GoogleService-Info.plist",
@@ -13,8 +13,8 @@ const VARIANTS = {
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground.png",
   },
   cn: {
-    appName: "Mentra",
-    packageName: "com.mentra.mentra.cn",
+    appName: "Foverlay",
+    packageName: "com.xerktech.foverlay.cn",
     includeFirebase: false,
     googleServicesFile: null,
     googleServicesPlist: null,
@@ -22,8 +22,8 @@ const VARIANTS = {
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground_china.png",
   },
   stable: {
-    appName: "Mentra Stable",
-    packageName: "com.mentra.mentra.stable",
+    appName: "Foverlay Stable",
+    packageName: "com.xerktech.foverlay.stable",
     includeFirebase: true,
     googleServicesFile: "./google-services.json",
     googleServicesPlist: "./GoogleService-Info.plist",
@@ -42,8 +42,8 @@ const variant = process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china" ? VARIANTS
  */
 module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   // Optional build-variant suffix. Set MENTRAOS_BUILD_NAME=stable to produce
-  // a parallel-installable build with package com.mentra.mentra.stable and app
-  // label "stable". Leave unset for the normal Mentra build.
+  // a parallel-installable build with package com.xerktech.foverlay.stable and
+  // app label "stable". Leave unset for the normal Foverlay build.
   const variantName = process.env.MENTRAOS_BUILD_NAME?.trim() || null
   const isValidVariant = variantName && /^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(variantName)
   if (variantName && !isValidVariant) {
@@ -85,9 +85,9 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   return {
     ...config,
     name: appName,
-    slug: "Mentra",
+    slug: "Foverlay",
     version: process.env.EXPO_PUBLIC_MENTRAOS_VERSION || "2.9.1",
-    scheme: "com.mentra",
+    scheme: "com.xerktech.foverlay",
     orientation: "portrait",
     userInterfaceStyle: "automatic",
     icon: variant.icon,
@@ -152,31 +152,31 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       infoPlist: {
         NSCameraUsageDescription: "This app needs access to your camera to capture images.",
         NSMicrophoneUsageDescription:
-          "Mentra uses your microphone to enable the 'Hey Mira' AI assistant and provide live captions for deaf and hard-of-hearing users on smart glasses. For example, you can say 'Hey Mira, what's on my calendar today?' or the app can caption conversations in real-time on your glasses display.",
+          "Foverlay uses your microphone to enable the 'Hey Mira' AI assistant and provide live captions for deaf and hard-of-hearing users on smart glasses. For example, you can say 'Hey Mira, what's on my calendar today?' or the app can caption conversations in real-time on your glasses display.",
         NSBluetoothAlwaysUsageDescription: "This app needs access to your Bluetooth to connect to your glasses.",
         NSLocationWhenInUseUsageDescription:
-          "Mentra uses your location to display nearby points of interest, weather updates, and navigation directions on your smart glasses. For example, when you're walking, the app can show restaurants within 100 meters or provide turn-by-turn directions to your destination on your glasses display.",
+          "Foverlay uses your location to display nearby points of interest, weather updates, and navigation directions on your smart glasses. For example, when you're walking, the app can show restaurants within 100 meters or provide turn-by-turn directions to your destination on your glasses display.",
         NSBluetoothPeripheralUsageDescription: "This app needs access to your Bluetooth to connect to your glasses.",
         NSCalendarsUsageDescription:
-          "Mentra accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
+          "Foverlay accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
         NSCalendarsFullAccessUsageDescription:
-          "Mentra accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
+          "Foverlay accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
         NSCalendarUsageDescription:
-          "Mentra accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
+          "Foverlay accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
         NSPhotoLibraryUsageDescription:
           "This app needs access to your photo library to provide you with photo based information on your glasses.",
         NSPhotoLibraryAddUsageDescription:
-          "Allow Mentra to save photos and videos from your glasses to your camera roll.",
+          "Allow Foverlay to save photos and videos from your glasses to your camera roll.",
         NSUserNotificationUsageDescription:
           "This app needs access to your notifications to provide you with notifications.",
         NSLocalNetworkUsageDescription:
-          "Mentra needs to access your local network to connect to Mentra Live glasses for viewing photos and media stored on the device.",
+          "Foverlay needs to access your local network to connect to Mentra Live glasses for viewing photos and media stored on the device.",
         // Required because miniapps subscribed to `heading_update` cause
         // the host's HeadingService to read the device compass via
         // CoreMotion. iOS hard-crashes any access to motion sensors
         // without this usage string declared.
         NSMotionUsageDescription:
-          "Mentra reads your device compass to show heading direction in navigation and similar miniapps on your glasses.",
+          "Foverlay reads your device compass to show heading direction in navigation and similar miniapps on your glasses.",
         NSBonjourServices: ["_mentra-live._tcp", "_http._tcp"],
         NSAppTransportSecurity: {
           NSAllowsLocalNetworking: true,
@@ -189,7 +189,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         },
         UIBackgroundModes: ["bluetooth-central", "audio", "location", "processing", "fetch"],
         NSLocationAlwaysAndWhenInUseUsageDescription:
-          "Mentra requires background location access to deliver continuous updates for apps like navigation and running, even when the app isn't in the foreground.",
+          "Foverlay requires background location access to deliver continuous updates for apps like navigation and running, even when the app isn't in the foreground.",
         UIRequiresFullScreen: true,
         UISupportedInterfaceOrientations: [
           "UIInterfaceOrientationPortrait",
@@ -246,8 +246,8 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       [
         "expo-media-library",
         {
-          photosPermission: "Allow Mentra to save photos from your glasses.",
-          savePhotosPermission: "Allow Mentra to save photos from your glasses.",
+          photosPermission: "Allow Foverlay to save photos from your glasses.",
+          savePhotosPermission: "Allow Foverlay to save photos from your glasses.",
           // Disabled - we save photos from glasses, we don't need to read EXIF location from user's library
           // Google Play rejects ACCESS_MEDIA_LOCATION for apps without core photo gallery functionality
           isAccessMediaLocationEnabled: false,
@@ -366,7 +366,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       [
         "expo-location",
         {
-          locationAlwaysAndWhenInUsePermission: "Allow Mentra to use your location.",
+          locationAlwaysAndWhenInUsePermission: "Allow Foverlay to use your location.",
         },
       ],
       ...(variant.includeFirebase ? ["@react-native-firebase/app"] : []),
