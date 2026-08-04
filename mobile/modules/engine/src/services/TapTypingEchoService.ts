@@ -40,6 +40,13 @@ let lastRendered = ""
 let renderTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSince: number | null = null
 let pendingCount = 0
+// Backpressure: never issue a display request while one is unresolved. Under
+// BLE congestion (three GATT links: strap + both G2 arms) per-keystroke
+// requests pile onto a struggling link; gating on the resolver makes renders
+// coalesce naturally instead of queue-flooding the driver.
+let renderInFlight = false
+let renderDirty = false
+let inFlightSafety: ReturnType<typeof setTimeout> | null = null
 
 // --- debug state for the phone UI (TapStrapStatusCard) ---
 
@@ -130,6 +137,12 @@ export function stopTapTypingEcho(): void {
   lastRendered = ""
   pendingSince = null
   pendingCount = 0
+  renderInFlight = false
+  renderDirty = false
+  if (inFlightSafety !== null) {
+    clearTimeout(inFlightSafety)
+    inFlightSafety = null
+  }
   debug.running = false
   notifyDebug()
   // Forfeit the view (empty scene = clear) so nothing stale lingers.
@@ -168,6 +181,15 @@ function scheduleRender(): void {
 }
 
 function flush(): void {
+  // A request is still unresolved — mark dirty and re-flush when it lands.
+  if (renderInFlight) {
+    renderDirty = true
+    return
+  }
+  // Glasses link down (or mid-reconnect-storm): don't feed the queue. The
+  // readiness watcher in start() re-schedules a render when the link returns.
+  if (!isGlassesReady(useGlassesStore.getState().connection)) return
+
   const body = buffer.length > 0 ? trailingWindow() : READY_TEXT + "\n"
   const text = body + CURSOR
   const oldest = pendingSince
@@ -198,6 +220,11 @@ function flush(): void {
       // no durationMs — persist until explicitly cleared
     },
     (result) => {
+      renderInFlight = false
+      if (inFlightSafety !== null) {
+        clearTimeout(inFlightSafety)
+        inFlightSafety = null
+      }
       // Surface the arbitration outcome — the phone UI shows this, which is
       // the difference between "echo is broken" and "display path said no".
       debug.lastRenderResult =
@@ -208,8 +235,28 @@ function flush(): void {
           : `blocked: ${result.reason ?? "unknown"}`
       console.log(`TapTypingEcho: render result ${debug.lastRenderResult}`)
       notifyDebug()
+      // Buffer changed while this request was in flight — render the newest
+      // state now that the pipe is clear.
+      if (renderDirty) {
+        renderDirty = false
+        scheduleRender()
+      }
     },
   )
+  renderInFlight = true
+  // Safety valve: if a resolver never fires (dropped mid-disconnect), don't
+  // wedge the echo forever.
+  inFlightSafety = setTimeout(() => {
+    inFlightSafety = null
+    if (renderInFlight) {
+      console.log("TapTypingEcho: render resolver timed out — releasing backpressure gate")
+      renderInFlight = false
+      if (renderDirty) {
+        renderDirty = false
+        scheduleRender()
+      }
+    }
+  }, 2000)
 
   // Latency instrumentation: native tap-SDK callback timestamp → this display
   // call. The BLE leg to the glass (native EvenHub queue) adds on top.
