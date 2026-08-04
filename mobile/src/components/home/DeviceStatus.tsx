@@ -338,8 +338,10 @@ const tapStrapImage = require("@assets/tap_strap/tap_strap.png")
 
 export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
   const {theme} = useAppTheme()
+  const {push} = useNavigationStore.getState()
   const status = useEngineSnapshot(engine.tapStrap.status, (onChange) => engine.tapStrap.onStatus(onChange))
   const [takeover] = useSetting<boolean>(SETTINGS.tap_strap_takeover.key)
+  const openTester = () => push("/miniapps/taptester/taptester", {transition: "simple_push"})
 
   // Pairing lives in the phone's Bluetooth settings, so re-pull the snapshot when
   // the card mounts; the native bond watcher covers changes while the app is up.
@@ -364,7 +366,7 @@ export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
   if (!status.paired) {
     return (
       <View style={style} className="opacity-40">
-        <DeviceStatus onPress={() => {}} image={tapStrapImage} className="h-28 mt-2">
+        <DeviceStatus onPress={openTester} image={tapStrapImage} className="h-28 mt-2">
           <Text className="font-semibold text-secondary-foreground text-end self-end" tx="home:tapStraps" />
           <Text className="text-secondary-foreground text-sm text-right" tx="home:tapStrapsNotPaired" />
         </DeviceStatus>
@@ -381,7 +383,7 @@ export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
 
   return (
     <View style={style}>
-      <DeviceStatus onPress={() => {}} image={tapStrapImage} className="h-28 mt-2">
+      <DeviceStatus onPress={openTester} image={tapStrapImage} className="h-28 mt-2">
         <Text className="font-semibold text-secondary-foreground text-base" text={title} numberOfLines={1} />
         <View className="flex-row items-center gap-3">
           {batteryTap?.battery !== undefined && batteryTap.battery >= 0 && (
