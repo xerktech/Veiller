@@ -36,6 +36,7 @@ import com.tapwithus.sdk.mouse.MousePacket
 class RealTapSource(
     private val context: Context,
     private val sink: TapSink,
+    initialControlEnabled: Boolean,
     private val onStatus: (status: String, tapIdentifier: String?, mode: String?) -> Unit,
 ) : TapSource, TapListener {
 
@@ -62,6 +63,36 @@ class RealTapSource(
     private var sdk: TapSdk? = null
     private val handler = Handler(Looper.getMainLooper())
     private val connectedTaps = mutableSetOf<String>()
+
+    /**
+     * User toggle. true  = Controller Mode: the SDK owns the strap and drives
+     *                      the glasses (no HID keystrokes to the phone).
+     *          false = Text Mode: the strap behaves as a normal Bluetooth
+     *                      keyboard; the SDK receives no input.
+     */
+    @Volatile
+    private var controlEnabled: Boolean = initialControlEnabled
+
+    /** Apply the toggle's desired mode to one connected strap. */
+    private fun applyDesiredMode(tapIdentifier: String) {
+        val s = sdk ?: return
+        if (controlEnabled) {
+            s.startControllerMode(tapIdentifier)
+        } else {
+            s.startTextMode(tapIdentifier)
+        }
+    }
+
+    /**
+     * Flip control on/off at runtime (from the phone toggle). Re-applies the
+     * mode to every connected strap immediately.
+     */
+    fun setControlEnabled(enabled: Boolean) {
+        if (controlEnabled == enabled) return
+        controlEnabled = enabled
+        Log.i(TAG, "Control ${if (enabled) "ENABLED (Controller Mode)" else "DISABLED (Text/keyboard Mode)"}")
+        for (id in connectedTaps) applyDesiredMode(id)
+    }
 
     /**
      * Periodic maintenance — two jobs, both essential:
@@ -99,8 +130,8 @@ class RealTapSource(
             } else {
                 for (id in connected) {
                     if (connectedTaps.add(id)) {
-                        Log.i(TAG, "Already-connected strap $id — pinning Controller Mode")
-                        s.startControllerMode(id)
+                        Log.i(TAG, "Already-connected strap $id — applying desired mode")
+                        applyDesiredMode(id)
                         onStatus("connected", id, null)
                     }
                 }
@@ -162,9 +193,9 @@ class RealTapSource(
     override fun onTapConnected(tapIdentifier: String) {
         Log.i(TAG, "Tap connected: $tapIdentifier — pinning Controller Mode")
         connectedTaps.add(tapIdentifier)
-        // The SDK switches to Controller Mode on connect by default, but pin it
-        // explicitly so a stray mode change can't silently break input.
-        sdk?.startControllerMode(tapIdentifier)
+        // Apply the toggle's desired mode explicitly so a stray default can't
+        // leave us in the wrong mode.
+        applyDesiredMode(tapIdentifier)
         onStatus("connected", tapIdentifier, null)
     }
 
@@ -189,7 +220,7 @@ class RealTapSource(
     override fun onTapResumed(tapIdentifier: String) {
         Log.i(TAG, "Tap resumed: $tapIdentifier — pinning Controller Mode")
         connectedTaps.add(tapIdentifier)
-        sdk?.startControllerMode(tapIdentifier)
+        applyDesiredMode(tapIdentifier)
         onStatus("connected", tapIdentifier, null)
     }
 
@@ -221,7 +252,7 @@ class RealTapSource(
         onStatus("mode_changed", tapIdentifier, mode)
         // If the strap drifts off Controller Mode while connected, input stops
         // reaching us — re-pin it.
-        if (state != TapInputMode.CONTROLLER && connectedTaps.contains(tapIdentifier)) {
+        if (controlEnabled && state != TapInputMode.CONTROLLER && connectedTaps.contains(tapIdentifier)) {
             Log.i(TAG, "Tap $tapIdentifier left Controller Mode ($mode) — re-pinning")
             sdk?.startControllerMode(tapIdentifier)
         }
