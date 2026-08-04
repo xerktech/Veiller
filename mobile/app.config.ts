@@ -301,6 +301,23 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
             targetSdkVersion: 35,
             compileSdkVersion: 36,
             enableCoreLibraryDesugaring: true,
+            // R8 code shrinking + resource shrinking for release builds. The
+            // unshrunk APK carried ~70MB of dex; R8 tree-shakes unused library
+            // code (XERK-200). The release CI attaches the R8 mapping.txt to
+            // each release so obfuscated crash traces stay resolvable (Sentry
+            // mapping upload is disabled in this pipeline).
+            enableProguardInReleaseBuilds: true,
+            enableShrinkResourcesInReleaseBuilds: true,
+            extraProguardRules: [
+              // JNI callbacks: sherpa-onnx and ONNX Runtime native code looks
+              // these classes up by name (FindClass) at runtime, which R8
+              // cannot see — keep them wholesale.
+              "-keep class com.k2fsa.sherpa.onnx.** { *; }",
+              "-keep class ai.onnxruntime.** { *; }",
+              // Bluetooth SDK: lc3/sherpa JNI and reflective glue resolve
+              // these by name; the module is small, keep it all.
+              "-keep class com.mentra.bluetoothsdk.** { *; }",
+            ].join("\n"),
           },
           ios: {
             deploymentTarget: "15.5", // for react-native-zip-archive
