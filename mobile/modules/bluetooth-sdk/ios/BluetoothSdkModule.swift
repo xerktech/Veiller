@@ -69,7 +69,8 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
             "receive_command_from_ble",
             "miniapp_selected",
             "captions_tester_incident",
-            "extraction_progress"
+            "extraction_progress",
+            "tap_strap_status"
         )
 
         OnCreate {
@@ -174,6 +175,19 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
                 DeviceManager.shared.connectDefaultController()
             }
         }
+
+        // MARK: - Tap Strap (Android-only for now; iOS reports unsupported)
+
+        AsyncFunction("getTapStrapStatus") { () -> [String: Any] in
+            return [
+                "supported": false,
+                "takeoverEnabled": false,
+                "bluetoothPermission": true,
+                "taps": [[String: Any]](),
+            ]
+        }
+
+        AsyncFunction("setTapStrapTakeover") { (_: Bool) in }
 
         AsyncFunction("connectSimulated") {
             await MainActor.run {

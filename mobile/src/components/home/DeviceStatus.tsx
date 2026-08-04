@@ -3,14 +3,13 @@ import type {GlassesNotReadyEvent} from "@mentra/engine"
 import {useState, useEffect, type ReactNode} from "react"
 import {ActivityIndicator, Image, TouchableOpacity, View, type ImageSourcePropType, type ViewStyle} from "react-native"
 import GlassView from "@/components/ui/GlassView"
-import {Button, Icon, Text} from "@/components/ignite"
+import {Button, Icon, Switch, Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
-import {decideConnectButtonAction, engine} from "@mentra/engine"
+import {decideConnectButtonAction, engine, SETTINGS, useSetting} from "@mentra/engine"
 import {useSearchingState} from "@/hooks/useSearchingState"
-import {SETTINGS, useSetting} from "@mentra/engine"
 import {showAlert} from "@/utils/AlertUtils"
 import {checkConnectivityRequirementsUI} from "@/utils/PermissionsUtils"
 import {
@@ -71,9 +70,7 @@ export const GlassesStatus = ({style}: {style?: ViewStyle}) => {
   const pairingReadiness = useEngineSnapshot(engine.pairing.readiness, (onChange) =>
     engine.pairing.onReadiness(onChange),
   )
-  const wifiStatus = useEngineSnapshot(engine.glasses.wifi.status, (onChange) =>
-    engine.glasses.wifi.onStatus(onChange),
-  )
+  const wifiStatus = useEngineSnapshot(engine.glasses.wifi.status, (onChange) => engine.glasses.wifi.onStatus(onChange))
   const glassesConnected = glassesStatus.state === "connected"
   const glassesFullyBooted = glassesStatus.fullyBooted
   const glassesStyle = glassesInfo.style
@@ -337,6 +334,71 @@ export const GlassesStatus = ({style}: {style?: ViewStyle}) => {
   )
 }
 
+const tapStrapImage = require("@assets/tap_strap/tap_strap.png")
+
+export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
+  const {theme} = useAppTheme()
+  const status = useEngineSnapshot(engine.tapStrap.status, (onChange) => engine.tapStrap.onStatus(onChange))
+  const [takeover] = useSetting<boolean>(SETTINGS.tap_strap_takeover.key)
+
+  // Pairing lives in the phone's Bluetooth settings, so re-pull the snapshot when
+  // the card mounts; the native bond watcher covers changes while the app is up.
+  useEffect(() => {
+    engine.tapStrap.refresh().catch(() => {})
+  }, [])
+
+  // No Tap SDK integration on this platform (iOS today) — no card at all.
+  if (!status.supported) {
+    return null
+  }
+
+  const handleTakeoverChange = async (value: boolean) => {
+    try {
+      await engine.tapStrap.setTakeover(value)
+    } catch (error) {
+      console.error("tap strap takeover toggle error:", error)
+    }
+  }
+
+  // Not paired: greyed-out card saying so (pair in the phone's Bluetooth settings).
+  if (!status.paired) {
+    return (
+      <View style={style} className="opacity-40">
+        <DeviceStatus onPress={() => {}} image={tapStrapImage} className="h-28 mt-2">
+          <Text className="font-semibold text-secondary-foreground text-end self-end" tx="home:tapStraps" />
+          <Text className="text-secondary-foreground text-sm text-right" tx="home:tapStrapsNotPaired" />
+        </DeviceStatus>
+      </View>
+    )
+  }
+
+  const title =
+    status.taps.length === 1 ? status.taps[0].name : `${translate("home:tapStraps")} (${status.taps.length})`
+  const batteryTap = status.taps.find((tap) => tap.connected && tap.battery !== undefined)
+  const takenOver = !!takeover && status.connectedCount > 0
+
+  return (
+    <View style={style}>
+      <DeviceStatus onPress={() => {}} image={tapStrapImage} className="h-28 mt-2">
+        <Text className="font-semibold text-secondary-foreground text-base" text={title} numberOfLines={1} />
+        <View className="flex-row items-center gap-3">
+          {batteryTap?.battery !== undefined && batteryTap.battery >= 0 && (
+            <View className="flex-row items-center gap-1">
+              <Icon name={getBatteryIcon(batteryTap.battery) as any} size={22} color={theme.colors.foreground} />
+              <Text className="text-secondary-foreground text-sm" text={`${batteryTap.battery}%`} />
+            </View>
+          )}
+          <Icon name={takenOver ? "bluetooth-connected" : "bluetooth-off"} size={22} color={theme.colors.foreground} />
+        </View>
+        <View className="flex-row items-center gap-2">
+          <Text className="text-secondary-foreground text-sm" tx="home:tapStrapTakeover" />
+          <Switch value={!!takeover} onValueChange={handleTakeoverChange} />
+        </View>
+      </DeviceStatus>
+    </View>
+  )
+}
+
 export const ControllerStatus = ({style}: {style?: ViewStyle}) => {
   const {theme} = useAppTheme()
   const {push} = useNavigationStore.getState()
@@ -416,11 +478,3 @@ export const ControllerStatus = ({style}: {style?: ViewStyle}) => {
     </DeviceStatus>
   )
 }
-
-
-
-
-
-
-
-

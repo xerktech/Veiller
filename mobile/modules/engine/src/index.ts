@@ -24,6 +24,7 @@ export type {
 } from "./facades/reports"
 export type {IslandNotification, IslandNotificationKind} from "./facades/notifications"
 export type {WifiSearchResult} from "./facades/glassesWifi"
+export type {TapStrapStatusSnapshot} from "./facades/tapStrap"
 export type {IdentitySnapshot} from "./services/PairingIdentity"
 export type {DisplayMirrorEvent} from "./facades/displayMirror"
 export type {
@@ -45,12 +46,7 @@ export {MENTRA_LIVE_SETTING_KEYS, getBluetoothSettingKeysForDevice} from "./stor
 
 // Runtime-shared constants and contract DTOs.
 export {ISLAND_SETTINGS_KEYS} from "./runtime/config"
-export type {
-  CloudClientStatusSnapshot,
-  MiniappAuthToken,
-  InteropAuditEvent,
-  TtsSynthesisResult,
-} from "./runtime/config"
+export type {CloudClientStatusSnapshot, MiniappAuthToken, InteropAuditEvent, TtsSynthesisResult} from "./runtime/config"
 
 // Pure readiness predicates over glasses connection state.
 export {
@@ -112,7 +108,15 @@ export type {
 export type {GalleryNotice, GalleryNoticeCode} from "./services/asg/galleryNotices"
 export {MediaLibraryPermissions} from "./utils/permissions/MediaLibraryPermissions"
 export {deriveGalleryDisplayName} from "./utils/permissions/galleryDisplayName"
-export type {PhotoInfo, CaptureFile, CaptureGroup, GalleryResponse, ServerStatus, HealthResponse, GalleryEvent} from "./types/asg"
+export type {
+  PhotoInfo,
+  CaptureFile,
+  CaptureGroup,
+  GalleryResponse,
+  ServerStatus,
+  HealthResponse,
+  GalleryEvent,
+} from "./types/asg"
 
 // Bluetooth SDK event types host UI subscribes to via engine facades (the
 // BluetoothSdk singleton passthrough itself is internal).

@@ -41,6 +41,7 @@ import {
   StreamKeepAliveRequest,
   StreamStartRequest,
   StreamStatusEvent,
+  TapStrapStatus,
   VideoRecordingStartedStatusEvent,
   VideoRecordingSettings,
   VideoRecordingStoppedStatusEvent,
@@ -92,6 +93,10 @@ declare class BluetoothSdkNativeModule extends NativeModule<BluetoothSdkModuleEv
   cancelConnectionAttempt(): Promise<void>
   connectDefaultController(): Promise<void>
   disconnectController(): Promise<void>
+  /** Tap Strap paired/connected snapshot (supported:false on iOS for now). */
+  getTapStrapStatus(): Promise<TapStrapStatus>
+  /** Toggle MentraOS controller-mode takeover of paired Tap Straps. */
+  setTapStrapTakeover(enabled: boolean): Promise<void>
   connectSimulated(): Promise<void>
   disconnect(): Promise<void>
   forget(): Promise<void>
@@ -164,7 +169,13 @@ declare class BluetoothSdkNativeModule extends NativeModule<BluetoothSdkModuleEv
   startAr99OtaFromFile(path: string): Promise<boolean>
   cancelAr99Ota(): Promise<void>
   sendAr99FactoryReset(): Promise<void>
-  buildAr99OtaSignature(secret: string, appName: string, currentVersion: string, serialNumber: string, nonce: string): string
+  buildAr99OtaSignature(
+    secret: string,
+    appName: string,
+    currentVersion: string,
+    serialNumber: string,
+    nonce: string,
+  ): string
 
   // Version Info Commands
   requestVersionInfo(): Promise<VersionInfoResult>
@@ -295,7 +306,7 @@ const CAMERA_ROI_POSITION_VALUES: Record<CameraRoiPosition, CameraFovSetting["ro
 }
 
 // Named presets are a convenience layer over the numeric {fov, roiPosition} API.
-// The default is the full sensor; "standard" preserves the historical 102° crop.
+// The default is the full sensor; "standard" preserves the historical 102ï¿½ crop.
 const CAMERA_FOV_PRESETS: Record<CameraFovPreset, CameraFovSetting> = {
   narrow: {fov: 82, roiPosition: 0},
   standard: {fov: 102, roiPosition: 0},
@@ -651,7 +662,3 @@ NativeBluetoothSdkModule.warmUpCamera = function (params: WarmUpCameraParams) {
 
 export default NativeBluetoothSdkModule
 export const BluetoothSdk = NativeBluetoothSdkModule as BluetoothSdkInternalModule
-
-
-
-

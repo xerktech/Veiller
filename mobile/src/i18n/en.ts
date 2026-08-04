@@ -417,9 +417,11 @@ const en = {
     versionChangeVerifying: "Verifying your glasses\u2026",
     versionChangeKeepNearby: "Keep your glasses nearby and connected. They will restart on their own.",
     versionChangeComplete: "Version Change Complete",
-    versionChangeCompleteMessage: "Your glasses are now on the required version. Their settings were reset and are being restored automatically.",
+    versionChangeCompleteMessage:
+      "Your glasses are now on the required version. Their settings were reset and are being restored automatically.",
     versionChangeFirmwarePassComplete: "Firmware updated",
-    versionChangeFirmwarePassCompleteMessage: "Your glasses restarted with new firmware. One more step: they'll now continue to the required version.",
+    versionChangeFirmwarePassCompleteMessage:
+      "Your glasses restarted with new firmware. One more step: they'll now continue to the required version.",
     updateComplete: "Update Complete",
     updateCompleteMessage: "Your glasses have been updated successfully.",
     updateFailed: "Update Failed",
@@ -437,6 +439,9 @@ const en = {
     connectGlasses: "Connect glasses",
     connectRing: "Connect ring",
     connectController: "Connect ring",
+    tapStraps: "Tap Straps",
+    tapStrapsNotPaired: "Not paired to this phone",
+    tapStrapTakeover: "Controller mode",
     start: "Start",
     getSupport: "Get support",
     getSupportMessage: "You will be taken to our support page in your browser.",

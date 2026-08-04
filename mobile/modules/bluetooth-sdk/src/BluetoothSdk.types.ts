@@ -915,6 +915,34 @@ export type BluetoothSdkModuleEvents = {
   receive_command_from_ble: (event: BleCommandTraceEvent) => void
   miniapp_selected: (event: MiniappSelectedEvent) => void
   extraction_progress: (event: ExtractionProgressEvent) => void
+  tap_strap_status: (event: TapStrapStatusEvent) => void
+}
+
+/** One Tap Strap known to the phone (bonded and/or SDK-connected). */
+export interface TapStrapDeviceInfo {
+  name: string
+  address: string
+  /** True while the Tap SDK holds this strap (controller mode / takeover). */
+  connected: boolean
+  /** Battery percent, present only when the SDK has read it. */
+  battery?: number
+}
+
+/**
+ * Tap Strap status snapshot (getTapStrapStatus / tap_strap_status event).
+ * `supported` is false on platforms without Tap SDK integration (iOS today).
+ */
+export interface TapStrapStatus {
+  supported: boolean
+  /** True while MentraOS holds paired straps in controller mode (no phone input). */
+  takeoverEnabled: boolean
+  /** False when BLUETOOTH_CONNECT hasn't been granted, so pairing state is unknown. */
+  bluetoothPermission: boolean
+  taps: TapStrapDeviceInfo[]
+}
+
+export type TapStrapStatusEvent = TapStrapStatus & {
+  type: "tap_strap_status"
 }
 
 export interface ExtractionProgressEvent {
@@ -1140,7 +1168,13 @@ export interface BluetoothSdkPublicModule {
   startAr99OtaFromFile(path: string): Promise<boolean>
   cancelAr99Ota(): Promise<void>
   sendAr99FactoryReset(): Promise<void>
-  buildAr99OtaSignature(secret: string, appName: string, currentVersion: string, serialNumber: string, nonce: string): string
+  buildAr99OtaSignature(
+    secret: string,
+    appName: string,
+    currentVersion: string,
+    serialNumber: string,
+    nonce: string,
+  ): string
 
   // // stt commands (MOVE TO CRUST)
   // setSttModelDetails(path: string, languageCode: string): Promise<void>
