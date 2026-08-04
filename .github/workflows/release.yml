@@ -231,7 +231,7 @@ jobs:
         # shrinks the APK ~5x).
         run: |
           df -h / | tail -1
-          ./gradlew assembleRelease --build-cache --max-workers=2 \
+          ./gradlew assembleRelease --build-cache --parallel --max-workers=2 \
             -x lintVitalRelease -x lintVitalAnalyzeRelease \
             -PreactNativeArchitectures=arm64-v8a \
             "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" \
@@ -241,15 +241,23 @@ jobs:
           SENTRY_DISABLE_AUTO_UPLOAD: "true"
           NODE_OPTIONS: "--max-old-space-size=4096"
 
-      - name: Name the asset
+      - name: Name the assets
         env:
           VERSION: ${{ needs.plan.outputs.version }}
-        run: cp mobile/android/app/build/outputs/apk/release/app-release.apk "foverlay-v${VERSION}.apk"
+        # mapping.txt is R8's obfuscation map — without it, release crash
+        # traces are unreadable (Sentry mapping upload is disabled here), so
+        # it ships with every release alongside the APK.
+        run: |
+          set -euo pipefail
+          cp mobile/android/app/build/outputs/apk/release/app-release.apk "foverlay-v${VERSION}.apk"
+          cp mobile/android/app/build/outputs/mapping/release/mapping.txt "foverlay-v${VERSION}-mapping.txt"
 
       - uses: actions/upload-artifact@v4
         with:
           name: asset-apk
-          path: foverlay-v*.apk
+          path: |
+            foverlay-v*.apk
+            foverlay-v*-mapping.txt
           if-no-files-found: error
           retention-days: 30
 
@@ -286,7 +294,7 @@ jobs:
           if [ -n "$PREV_TAG" ]; then
             NOTES_FLAGS+=(--notes-start-tag "$PREV_TAG")
           fi
-          gh release create "$TAG" foverlay-v*.apk \
+          gh release create "$TAG" foverlay-v*.apk foverlay-v*-mapping.txt \
             --title "Foverlay $TAG" \
             --target "$TARGET" \
             "${NOTES_FLAGS[@]}"
