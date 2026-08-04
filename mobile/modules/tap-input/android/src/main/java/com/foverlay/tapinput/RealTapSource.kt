@@ -1,5 +1,6 @@
 package com.foverlay.tapinput
 
+import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -156,8 +157,46 @@ class RealTapSource(
                         onStatus("connected", id, null)
                     }
                 }
+                // Re-assert low-power priority each tick: Android/peripheral can
+                // renegotiate the interval after connect, and this must win back
+                // radio time for the G2 display links.
+                relaxStrapConnectionPriority()
             }
             handler.postDelayed(this, MAINTAIN_INTERVAL_MS)
+        }
+    }
+
+    /**
+     * Drop the strap's BLE connection to LOW_POWER priority so it stops
+     * starving the G2's two display links on the single phone radio.
+     *
+     * Why this is the fix: the phone holds three GATT links at once — the Tap
+     * strap plus one per G2 temple arm. At Android's default interval the strap
+     * competes for radio time it doesn't need (it sends only tiny, infrequent
+     * chords), and the symptom is the G2 "displaying" frames that never repaint
+     * until the link drops and replays. LOW_POWER (~100–125 ms interval) is
+     * plenty for chords and frees the radio for the display.
+     *
+     * The tap-android-sdk (0.3.6) owns the strap's BluetoothGatt in a private
+     * static map and exposes no connection-priority control, so we reach it by
+     * reflection (field names are un-obfuscated in the shipped AAR). Best-effort
+     * and fail-soft: if the SDK internals ever change we log and move on rather
+     * than crash. The proper long-term fix is a forked SDK that exposes this.
+     */
+    private fun relaxStrapConnectionPriority() {
+        try {
+            val field = Class.forName("com.tapwithus.sdk.bluetooth.BluetoothManager")
+                .getDeclaredField("gatts")
+                .apply { isAccessible = true }
+            val gatts = field.get(null) as? Map<*, *> ?: return
+            for (value in gatts.values) {
+                (value as? BluetoothGatt)?.let { gatt ->
+                    val ok = gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER)
+                    Log.i(TAG, "Strap LOW_POWER connection priority requested: $ok")
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Could not relax strap connection priority (SDK internals changed?)", t)
         }
     }
 
@@ -217,6 +256,7 @@ class RealTapSource(
         // Apply the toggle's desired mode explicitly so a stray default can't
         // leave us in the wrong mode.
         applyDesiredMode(tapIdentifier)
+        relaxStrapConnectionPriority()
         onStatus("connected", tapIdentifier, null)
     }
 
