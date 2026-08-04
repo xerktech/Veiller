@@ -6,7 +6,7 @@ Companion to `docs/r1-ring-research.md` and `docs/r1-ring-capture-findings.md`.
 
 ## TL;DR
 
-**The fork builds, installs (`com.foverlay.app`), and runs; the G2 glasses work
+**The fork builds, installs (`com.xerktech.foverlay`), and runs; the G2 glasses work
 fully; the R1 ring connects to the phone and streams data — but ring *gesture
 control is not working yet*, and it's the same original-RE problem we started
 with, now precisely localized.** Not a wall: the ring talks to the phone. What's
@@ -65,7 +65,7 @@ Realities R1 → Continue → tap the ring on the scan screen** → ring on fing
 ## Code changes in this fork (why each exists)
 
 - `mobile/app.config.ts` — rebrand default variant to `appName "Foverlay"`, package
-  `com.foverlay.app`, `includeFirebase:false` (no google-services), kept
+  `com.xerktech.foverlay`, `includeFirebase:false` (no google-services), kept
   `scheme:"com.mentra"`. Lets it install alongside the real MentraOS + drop the
   Mentra trademark (CLAUDE.md). NOTE: a clean `expo prebuild` is needed for the
   package to fully propagate; on a reused `android/`, also remove the stale
@@ -103,7 +103,7 @@ Fork lives at `~/code/Foverlay` in WSL2 Ubuntu (ext4). `source ~/.foverlay-env`.
   `ORG_GRADLE_PROJECT_reactNativeArchitectures=arm64-v8a`).
 - Install + run on the S25 over **wireless ADB** (WSL can't see USB): `adb pair` /
   `adb connect`, `adb reverse tcp:8081`, `bun start` (Metro), `adb install -r`,
-  `adb shell am start -n com.foverlay.app/.MainActivity`. Keep the screen awake or the
+  `adb shell am start -n com.xerktech.foverlay/.MainActivity`. Keep the screen awake or the
   debug app gets killed.
 - `react-native-skia` needs its postinstall:
   `node node_modules/@shopify/react-native-skia/scripts/install-skia.mjs`.
