@@ -379,6 +379,7 @@ class BluetoothSdkModule : Module() {
             "miniapp_selected",
             "captions_tester_incident",
             "extraction_progress",
+            "tap_strap_status",
         )
 
         OnCreate {
@@ -396,6 +397,8 @@ class BluetoothSdkModule : Module() {
                             sdkListener,
                     )
             deviceManager = DeviceManager.getInstance()
+            // Watch for Tap Strap pair/unpair so the status card updates live.
+            TapStrapManager.init(context)
             val activity = appContext.currentActivity
             val activityIsResumed =
                     (activity as? LifecycleOwner)
@@ -524,6 +527,14 @@ class BluetoothSdkModule : Module() {
         AsyncFunction("disconnectController") { deviceManager?.disconnectController() }
 
         AsyncFunction("forgetController") { deviceManager?.forgetController() }
+
+        // MARK: - Tap Strap (optional input device, Android-only for now)
+
+        AsyncFunction("getTapStrapStatus") { -> TapStrapManager.getStatus() }
+
+        AsyncFunction("setTapStrapTakeover") { enabled: Boolean ->
+            TapStrapManager.setTakeoverEnabled(enabled)
+        }
 
         SdkAsyncFunction("startScan") { model: String ->
             sdk?.startScan(DeviceModel.fromDeviceType(model))

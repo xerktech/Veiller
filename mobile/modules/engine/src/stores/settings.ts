@@ -62,6 +62,16 @@ export const SETTINGS: Record<string, Setting> = {
     persist: true,
   },
   super_mode: {key: "super_mode", defaultValue: () => false, writable: true, saveOnServer: true, persist: true},
+  // Tap Strap takeover is phone-local hardware state (which straps are paired to
+  // THIS phone), so it never syncs to the server. Native is seeded from it at
+  // engine start and on every change by the TapStrapCoordinator.
+  tap_strap_takeover: {
+    key: "tap_strap_takeover",
+    defaultValue: () => false,
+    writable: true,
+    saveOnServer: false,
+    persist: true,
+  },
   appearance_menu_enabled: {
     key: "appearance_menu_enabled",
     defaultValue: () => false,
@@ -1152,6 +1162,3 @@ export const useSetting = <T = any>(key: string): [T, (value: T) => AsyncResult<
   const setSetting = useSettingsStore((state) => state.setSetting)
   return [value, (newValue: T) => setSetting(key, newValue)]
 }
-
-
-

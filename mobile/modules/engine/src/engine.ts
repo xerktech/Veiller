@@ -16,6 +16,7 @@ import {startGlassesStatusProjection, stopGlassesStatusProjection} from "./servi
 import {startOtaService, stopOtaService} from "./services/OtaService"
 import {startAudioCloudUplink, stopAudioCloudUplink} from "./services/AudioCloudUplink"
 import {startDeviceEventRouter, stopDeviceEventRouter} from "./services/DeviceEventRouter"
+import {startTapStrapCoordinator, stopTapStrapCoordinator} from "./services/TapStrapCoordinator"
 import {startPhoneNotificationsSync, stopPhoneNotificationsSync} from "./services/PhoneNotificationsSync"
 import {startCaptionsTesterReportService, stopCaptionsTesterReportService} from "./services/CaptionsTesterReportService"
 import {
@@ -27,6 +28,7 @@ import localMiniappRuntime from "./services/LocalMiniappRuntime"
 import displayProcessor from "./services/DisplayProcessor"
 import {gallerySyncService} from "./services/asg/gallerySyncService"
 import {glasses} from "./facades/glasses"
+import {tapStrap} from "./facades/tapStrap"
 import {display} from "./facades/display"
 import {speech} from "./facades/speech"
 import {session} from "./facades/session"
@@ -65,6 +67,8 @@ export const engine = {
     // store, miniapp_selected -> launcher) so a bare OEM gets device data, not just the
     // Mentra app's MantleManager.
     startDeviceEventRouter()
+    // Tap Strap status → store, and seed native takeover from the persisted toggle.
+    startTapStrapCoordinator()
     // Hydration contract: the native DeviceStore is in-memory and starts empty
     // every launch; seed it from the persisted settings BEFORE start() resolves
     // so every post-start getDefaultDevice() read is a trustworthy two-state
@@ -133,6 +137,7 @@ export const engine = {
     await safely("glasses settings sync", stopGlassesSettingsSync)
     await safely("glasses status projection", stopGlassesStatusProjection)
     await safely("device event router", stopDeviceEventRouter)
+    await safely("tap strap coordinator", stopTapStrapCoordinator)
     await safely("ota service", stopOtaService)
     await safely("audio cloud uplink", stopAudioCloudUplink)
     await safely("phone notifications sync", stopPhoneNotificationsSync)
@@ -146,6 +151,8 @@ export const engine = {
     await safely("bootstrap", bootstrapStop)
   },
   glasses,
+  /** Tap Strap 2 status + takeover toggle (optional input device). */
+  tapStrap,
   speech,
   /** Cloud (cloud-v2) live-session status + account ops — engine owns the client. */
   session,
