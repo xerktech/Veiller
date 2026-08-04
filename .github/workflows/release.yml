@@ -172,6 +172,18 @@ jobs:
           # (Also preinstalled on the runner; this pins the job regardless.)
           bun-version: "1.2.22"
 
+      - name: Clean stale generated project (self-hosted runner reuses its workspace)
+        working-directory: ./mobile
+        # The self-hosted runner persists its checkout between builds. `expo
+        # prebuild` regenerates android/ but does NOT remove native-module
+        # linkage for packages that were DELETED since the last build, and a
+        # stale node_modules can keep a removed package on disk — so a
+        # dependency strip that builds fine on a clean checkout can fail here
+        # on a module that no longer exists. Force both to regenerate from the
+        # current lockfile. (bun install then repopulates node_modules.)
+        run: |
+          rm -rf android node_modules
+
       - name: Install dependencies
         working-directory: ./mobile
         run: bun install

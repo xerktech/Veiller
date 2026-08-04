@@ -1,13 +1,8 @@
-import {useCameraPermissions} from "expo-camera"
-import {Linking, TouchableOpacity, View, ViewStyle} from "react-native"
+import {View, ViewStyle} from "react-native"
 
-import {Button, Icon, Text} from "@/components/ignite"
+import {Button, Text} from "@/components/ignite"
 import GlassesDisplayMirror from "@/components/mirror/GlassesDisplayMirror"
-import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
-import {translate} from "@/i18n/translate"
-import {ThemedStyle} from "@/theme"
-import showAlert from "@/utils/AlertUtils"
 import GlassView from "@/components/ui/GlassView"
 
 export default function ConnectedSimulatedGlassesInfo({
@@ -21,56 +16,11 @@ export default function ConnectedSimulatedGlassesInfo({
   showHeader?: boolean
   showConnectButton?: boolean
 }) {
-  const {theme} = useAppTheme()
-  const [permission, requestPermission] = useCameraPermissions()
   const {push} = useNavigationStore.getState()
 
-  // Function to navigate to fullscreen mode
-  const navigateToFullScreen = async () => {
-    // Check if camera permission is already granted
-    if (permission?.granted) {
-      push("/mirror/fullscreen")
-      return
-    }
-
-    // Show alert asking for camera permission
-    showAlert(
-      translate("mirror:cameraPermissionRequired"),
-      translate("mirror:cameraPermissionRequiredMessage"),
-      [
-        {
-          text: translate("common:continue"),
-          onPress: async () => {
-            const permissionResult = await requestPermission()
-            if (permissionResult.granted) {
-              // Permission granted, navigate to fullscreen
-              push("/mirror/fullscreen")
-            } else if (!permissionResult.canAskAgain) {
-              // Permission permanently denied, show settings alert
-              showAlert(
-                translate("mirror:cameraPermissionRequired"),
-                translate("mirror:cameraPermissionRequiredMessage"),
-                [
-                  {
-                    text: translate("common:cancel"),
-                    style: "cancel",
-                  },
-                  {
-                    text: translate("mirror:openSettings"),
-                    onPress: () => Linking.openSettings(),
-                  },
-                ],
-              )
-            }
-            // If permission denied but can ask again, do nothing (user can try again)
-          },
-        },
-      ],
-      {
-        iconName: "camera",
-      },
-    )
-  }
+  // Foverlay: fullscreen camera-background mirror removed (expo-camera dropped
+  // — G2 has no camera; the fullscreen trigger below was already commented out
+  // upstream).
 
   return (
     <GlassView className="bg-neutral-50 p-5" style={style}>
@@ -80,9 +30,6 @@ export default function ConnectedSimulatedGlassesInfo({
         </View>
       )}
       <GlassesDisplayMirror fallbackMessage="Glasses mirror" style={mirrorStyle} />
-      {/* <TouchableOpacity style={{position: "absolute", bottom: 10, right: 10}} onPress={navigateToFullScreen}>
-          <Icon name="fullscreen" size={24} color={theme.colors.secondary_foreground} />
-        </TouchableOpacity> */}
       {showConnectButton && (
         <Button
           className="mt-3"

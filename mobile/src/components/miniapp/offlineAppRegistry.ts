@@ -16,7 +16,6 @@ import {OFFLINE_HOSTED_PACKAGES} from "./offlineHostedPackages"
 import GalleryScreen from "@/app/asg/gallery"
 import GallerySettingsScreen from "@/app/asg/gallery-settings"
 import DeveloperUrlScreen from "@/app/miniapps/miniappdev/developer-url"
-import ScannerScreen from "@/app/miniapps/miniappdev/scanner"
 import MirrorScreen from "@/app/miniapps/mirror/mirror"
 import AppearanceSettings from "@/app/miniapps/settings/appearance"
 import CameraSettings from "@/app/miniapps/settings/camera"
@@ -65,7 +64,7 @@ const settingsRoutes: Record<string, ComponentType<any>> = {
   // Miniapp dev tools live under the Miniapp Developer settings screen now,
   // so their routes are hosted by the settings overlay (not a standalone app).
   "/miniapps/miniappdev/developer-url": DeveloperUrlScreen,
-  "/miniapps/miniappdev/scanner": ScannerScreen,
+  // Foverlay: scanner route removed (dedicated app, no miniapp dev tooling).
   "/miniapps/settings/notifications": NotificationSettings,
   "/miniapps/settings/position": PositionSettings,
   "/miniapps/settings/privacy": PrivacySettings,

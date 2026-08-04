@@ -11,9 +11,7 @@ import {ScreenshotFeedbackPrompt} from "@/effects/ScreenshotFeedbackPrompt"
 import NavigationHost from "@/effects/NavigationHost"
 import CapsuleMenu from "@/effects/CapsuleMenu"
 import Compositor from "@/effects/Compositor"
-// import TranscriptionsListener from "@/effects/TranscriptionsListener"
 // import SherpaTest from "@/effects/SherpaTest"
-// import WhisperTest from "@/effects/WhisperTest"
 // import SherpaTest from "@/effects/SherpaTest"
 
 export const AllEffects = () => {
@@ -22,9 +20,7 @@ export const AllEffects = () => {
       <Reconnect />
       <BtClassicPairing />
       <NavigationHost />
-      {/* <WhisperTest /> */}
       {/* <SherpaTest /> */}
-      {/* <TranscriptionsListener /> */}
       <MtkUpdateAlert />
       <OtaUpdateChecker />
       <ButtonActions />
