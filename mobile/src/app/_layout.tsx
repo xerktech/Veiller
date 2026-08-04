@@ -1,6 +1,4 @@
 import "react-native-get-random-values" // Must be first - required for tweetnacl crypto (UDP encryption)
-import "@/utils/polyfills/event" // Must be before any livekit imports
-// import {registerGlobals} from "@livekit/react-native-webrtc"
 import * as Sentry from "@sentry/react-native"
 import {useFonts} from "expo-font"
 import {useNavigationContainerRef} from "expo-router"
