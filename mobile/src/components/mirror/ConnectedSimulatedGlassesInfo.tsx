@@ -18,9 +18,9 @@ export default function ConnectedSimulatedGlassesInfo({
 }) {
   const {push} = useNavigationStore.getState()
 
-  // Foverlay: the fullscreen camera-background mirror is removed (expo-camera
-  // dropped — G2 has no camera; the fullscreen trigger below was already
-  // commented out upstream).
+  // Foverlay: fullscreen camera-background mirror removed (expo-camera dropped
+  // — G2 has no camera; the fullscreen trigger below was already commented out
+  // upstream).
 
   return (
     <GlassView className="bg-neutral-50 p-5" style={style}>

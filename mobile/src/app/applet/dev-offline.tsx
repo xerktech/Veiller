@@ -4,7 +4,6 @@ import {SquircleView} from "expo-squircle-view"
 import {View} from "react-native"
 
 import {Button, Screen, Text} from "@/components/ignite"
-import {useNavigationStore} from "@/stores/navigation"
 import {decideDevLaunchRoute, engine, useApps} from "@mentra/engine"
 import {storage} from "@/utils/storage/storage"
 import {useRegisterCapsule} from "@/stores/capsule"
@@ -28,7 +27,6 @@ export default function DevMiniappOfflineScreen() {
     name?: string
     iconUrl?: string
   }>()
-  const {push} = useNavigationStore.getState()
   const apps = useApps()
   const viewShotRef = useRef<View>(null)
 
@@ -53,7 +51,8 @@ export default function DevMiniappOfflineScreen() {
     if (!packageName) return
     const devUrlRes = storage.load<string>(`${packageName}_dev_url`)
     if (!devUrlRes.is_ok()) {
-      push("/miniapps/miniappdev/scanner")
+      // Foverlay: QR scanner removed (expo-camera dropped). Without a stored
+      // dev URL there is nothing to retry; stay on the offline screen.
       return
     }
     // Pre-flight reachability before deciding the route. If still down,
@@ -65,10 +64,6 @@ export default function DevMiniappOfflineScreen() {
     }
     // else: stay put — the "Last reached" line stays accurate, user can
     // tap again or re-scan.
-  }
-
-  const handleRescan = () => {
-    push("/miniapps/miniappdev/scanner")
   }
 
   const displayName = resolvedName ?? packageName ?? "Dev mini app"
@@ -101,7 +96,6 @@ export default function DevMiniappOfflineScreen() {
         </View>
         <View className="w-full gap-3">
           <Button text="Try again" onPress={handleTryAgain} preset="primary" />
-          <Button text="Re-scan QR" onPress={handleRescan} preset="secondary" />
         </View>
       </View>
       <CapsuleMenu forceShow={true} />

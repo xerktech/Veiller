@@ -34,11 +34,7 @@ export default function MiniappDeveloperSettingsScreen() {
           </GlassView>
 
           <Group title={translate("miniappDevSettings:toolsTitle")}>
-            <RouteButton
-              label={translate("miniappDevSettings:scanLabel")}
-              subtitle={translate("miniappDevSettings:scanSubtitle")}
-              onPress={() => push("/miniapps/miniappdev/scanner")}
-            />
+            {/* Foverlay: QR scan removed with expo-camera; dev URL entry remains. */}
             <RouteButton
               label={translate("miniappDevSettings:loadUrlLabel")}
               subtitle={translate("miniappDevSettings:loadUrlSubtitle")}

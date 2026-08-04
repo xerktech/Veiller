@@ -71,14 +71,6 @@ declare module "react-native-vector-icons/MaterialIcons" {
   export default MaterialIcons
 }
 
-declare module "expo-speech-transcriber" {
-  export function useRealTimeTranscription(): {
-    text: string
-    isFinal: boolean
-    error: Error | null
-  }
-}
-
 declare module "react-native-sherpa-onnx/download" {
   export enum ModelCategory {
     Tts = "tts",

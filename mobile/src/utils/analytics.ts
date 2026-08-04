@@ -1,56 +1,18 @@
-import {SETTINGS, engine} from "@mentra/engine"
+/**
+ * Analytics — no-op in Foverlay.
+ *
+ * Firebase (@react-native-firebase/analytics) was removed with the dependency
+ * strip: a private, unpublished app doesn't ship Google Analytics. The exported
+ * surface is preserved as no-ops so existing call sites keep compiling and
+ * running; wire a real provider here later if Foverlay ever wants telemetry.
+ */
 
-let analyticsModule: typeof import("@react-native-firebase/analytics") | null = null
-let initialized = false
+export async function initAnalytics(): Promise<void> {}
 
-function isChina(): boolean {
-  return engine.settings.get(SETTINGS.china_deployment.key) === true
-}
+export async function logEvent(_name: string, _params?: Record<string, string | number | boolean>): Promise<void> {}
 
-async function getAnalytics() {
-  if (isChina()) return null
-  if (!analyticsModule) {
-    try {
-      analyticsModule = require("@react-native-firebase/analytics")
-    } catch {
-      console.warn("Firebase Analytics not available")
-      return null
-    }
-  }
-  const module = analyticsModule
-  if (!module) return null
-  return module.default()
-}
+export async function setUserId(_id: string | null): Promise<void> {}
 
-export async function initAnalytics() {
-  if (initialized || isChina()) return
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.setAnalyticsCollectionEnabled(true)
-  initialized = true
-  console.log("Firebase Analytics initialized")
-}
+export async function setUserProperty(_name: string, _value: string | null): Promise<void> {}
 
-export async function logEvent(name: string, params?: Record<string, string | number | boolean>) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.logEvent(name, params)
-}
-
-export async function setUserId(id: string | null) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.setUserId(id)
-}
-
-export async function setUserProperty(name: string, value: string | null) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.setUserProperty(name, value)
-}
-
-export async function logScreenView(screenName: string, screenClass?: string) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.logScreenView({screen_name: screenName, screen_class: screenClass ?? screenName})
-}
+export async function logScreenView(_screenName: string, _screenClass?: string): Promise<void> {}
