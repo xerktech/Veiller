@@ -7,11 +7,9 @@ import {Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
-import {engine} from "@mentra/engine"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@mentra/engine"
 import {ThemedStyle} from "@/theme"
 import showAlert from "@/utils/AlertUtils"
-import mentraAuth from "@/utils/auth/authClient"
 
 export const VersionInfo = () => {
   const {themed} = useAppTheme()
@@ -65,11 +63,7 @@ export const VersionInfo = () => {
   }
 
   const copyVersionInfo = async () => {
-    const res = await mentraAuth.getUser()
-    let user = null
-    if (res.is_ok()) {
-      user = res.value
-    }
+    // Foverlay has no user account (XERK-198), so there is no id/email to include.
     const info = [
       `version: ${process.env.EXPO_PUBLIC_MENTRAOS_VERSION}`,
       `branch: ${process.env.EXPO_PUBLIC_BUILD_BRANCH}`,
@@ -78,11 +72,6 @@ export const VersionInfo = () => {
       `cloud_core_url: ${coreUrl || "(default)"}`,
       `audio: ${audioTransport}`,
     ]
-
-    if (user) {
-      info.push(`id: ${user.id}`)
-      info.push(`email: ${user.email}`)
-    }
 
     await Clipboard.setStringAsync(info.join("\n"))
     if (debugMode) {

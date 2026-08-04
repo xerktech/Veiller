@@ -12,7 +12,6 @@ import Toast from "react-native-toast-message"
 
 // import {ErrorBoundary} from "@/components/error"
 import {Text} from "@/components/ignite"
-import {AuthProvider} from "@/contexts/AuthContext"
 import {DeeplinkProvider} from "@/contexts/DeeplinkContext"
 import {SplashLoaderProvider} from "@/contexts/SplashLoaderProvider"
 import {ThemeProvider} from "@/contexts/ThemeContext"
@@ -78,7 +77,6 @@ export const AllProviders = withWrappers(
   SafeAreaProvider,
   SaferAreaProvider,
   KeyboardProvider,
-  AuthProvider,
   SplashLoaderProvider,
   DeeplinkProvider,
   (props) => {

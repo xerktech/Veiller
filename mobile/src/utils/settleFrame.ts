@@ -19,10 +19,11 @@ const SETTLE_TIMEOUT_MS = 500
  * wedged by a frame that never arrives (a backgrounded app, for instance).
  *
  * Use this before destroying something the current screen is rendered inside
- * of. See LogoutUtils and the Profile sign-out path (OS-1834).
+ * of (e.g. tearing down a miniapp surface the active screen lives in) so Fabric
+ * isn't asked to reparent a view that still has a parent (OS-1834).
  */
 export function settleFrame(): Promise<void> {
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     let settled = false
     const finish = () => {
       if (settled) return

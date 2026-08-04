@@ -41,18 +41,6 @@ jest.mock("@mentra/bluetooth-sdk/internal", () => {
   }
 })
 
-jest.mock("@/utils/auth/authClient", () => ({
-  __esModule: true,
-  default: {
-    getSession: jest.fn(() => Promise.resolve({is_ok: () => false, is_error: () => true})),
-    getUser: jest.fn(() => Promise.resolve({is_ok: () => false, is_error: () => true})),
-    onAuthStateChange: jest.fn(() => ({is_ok: () => true, value: {unsubscribe: jest.fn()}})),
-    signOut: jest.fn(() => Promise.resolve({is_ok: () => true})),
-    startAutoRefresh: jest.fn(() => Promise.resolve({is_ok: () => true})),
-    stopAutoRefresh: jest.fn(() => Promise.resolve({is_ok: () => true})),
-  },
-}))
-
 // Mock react-native-mmkv
 jest.mock("react-native-mmkv", () => {
   const mockStorage = new Map([

@@ -1,12 +1,10 @@
 import * as Linking from "expo-linking"
-import * as WebBrowser from "expo-web-browser"
 import {FC, ReactNode, createContext, useContext, useEffect} from "react"
-import {AppState, Platform} from "react-native"
+import {AppState} from "react-native"
 
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
-import mentraAuth from "@/utils/auth/authClient"
 import {BgTimer} from "@mentra/engine"
-import { useNavigationStore } from "@/stores/navigation"
+import {useNavigationStore} from "@/stores/navigation"
 
 /** Returns immediately if the app is already active, otherwise waits for it. */
 const waitForActive = (): Promise<void> => {
@@ -24,11 +22,14 @@ const waitForActive = (): Promise<void> => {
 export interface DeepLinkRoute {
   pattern: string
   handler: (url: string, params: Record<string, string>) => void | Promise<void>
-  requiresAuth?: boolean
 }
 
 /**
- * Define all deep link routes for the app
+ * Define all deep link routes for the app.
+ *
+ * Foverlay has no user account / login (XERK-198), so no route requires auth
+ * and there are no /auth/* routes. Individual miniapps handle their own auth if
+ * they need it.
  */
 const deepLinkRoutes: DeepLinkRoute[] = [
   // Home routes
@@ -36,11 +37,9 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/",
     handler: (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      // Don't navigate to home without authentication
-      // Let the app's index route handle the navigation logic
+      // Let the app's index route handle the boot/navigation logic.
       nav.replace("/")
     },
-    requiresAuth: false, // Let index.tsx handle auth checking
   },
   {
     pattern: "/home",
@@ -48,7 +47,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       nav.replaceAll("/home")
     },
-    requiresAuth: true, // Require auth for explicit /home navigation
   },
 
   // Settings routes
@@ -58,7 +56,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       nav.push("/miniapps/settings")
     },
-    requiresAuth: true,
   },
   {
     pattern: "/miniapps/settings/:section",
@@ -67,12 +64,9 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       // Map section names to actual routes
       const sectionRoutes: Record<string, string> = {
-        "profile": "/miniapps/settings/profile",
         "privacy": "/miniapps/settings/privacy",
         "developer": "/miniapps/settings/developer",
         "theme": "/miniapps/settings/theme",
-        "change-password": "/miniapps/settings/change-password",
-        "data-export": "/miniapps/settings/data-export",
         "dashboard": "/miniapps/settings/dashboard",
         // Test/benchmark route — only useful behind Super Mode.
         "stress-test": "/miniapps/settings/stress-test",
@@ -92,7 +86,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
         nav.push("/settings")
       }
     },
-    requiresAuth: true,
   },
 
   // Glasses management routes
@@ -102,7 +95,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       nav.push("/glasses")
     },
-    requiresAuth: true,
   },
   {
     pattern: "/asg/gallery",
@@ -110,7 +102,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       nav.push("/asg/gallery")
     },
-    requiresAuth: true,
   },
 
   // Pairing routes
@@ -120,7 +111,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       nav.push("/pairing/guide")
     },
-    requiresAuth: true,
   },
   {
     pattern: "/pairing/:step",
@@ -143,7 +133,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
         nav.push("/pairing/guide")
       }
     },
-    requiresAuth: true,
   },
 
   {
@@ -159,181 +148,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       await waitForActive()
       nav.push(`/applet/local?${routeParams.toString()}` as any)
     },
-    requiresAuth: true,
-  },
-
-  // Authentication routes
-  {
-    pattern: "/auth/start",
-    handler: (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      nav.replaceAll("/auth/start")
-    },
-  },
-  {
-    pattern: "/auth/callback",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      // console.log("[LOGIN DEBUG] params:", params)
-      // console.log("[LOGIN DEBUG] url:", url)
-
-      const parseAuthParams = (url: string) => {
-        const parts = url.split("#")
-        if (parts.length < 2) return null
-        const paramsString = parts[1]
-        const params = new URLSearchParams(paramsString)
-        return {
-          access_token: params.get("access_token"),
-          refresh_token: params.get("refresh_token"),
-          token_type: params.get("token_type"),
-          expires_in: params.get("expires_in"),
-          type: params.get("type"), // signup, email_change, recovery, etc.
-          // Error params (when link is expired/invalid)
-          error: params.get("error"),
-          error_code: params.get("error_code"),
-          error_description: params.get("error_description"),
-        }
-      }
-
-      // Account OAuth handoff (issue 019): core deep-links ?code=&state= query
-      // params (no fragment). Swap the one-time code + in-app PKCE verifier for
-      // the V2 session; an intercepted link is useless without the verifier.
-      const query = new URLSearchParams(url.split("?")[1]?.split("#")[0] ?? "")
-      const handoffCode = params.code ?? query.get("code")
-      const handoffState = params.state ?? query.get("state")
-      if (handoffCode && handoffState && !url.includes("#")) {
-        const res = await mentraAuth.completeOAuthHandoff({code: handoffCode, state: handoffState})
-        try {
-          WebBrowser.dismissBrowser()
-        } catch {
-          // browser might not be open
-        }
-        if (res.is_error()) {
-          console.error("[LOGIN DEBUG] OAuth handoff failed:", res.error)
-          nav.replace(`/auth/start?authError=oauth_failed`)
-          return
-        }
-        BgTimer.setTimeout(() => {
-          nav.setAnimation("none")
-          nav.replaceAll("/")
-        }, 100)
-        return
-      }
-
-      const authParams = parseAuthParams(url)
-
-      // Check if there's an error in the URL (e.g., expired verification link)
-      if (authParams?.error || authParams?.error_code) {
-        console.log("[LOGIN DEBUG] Error in auth callback:", authParams.error_code, authParams.error_description)
-        // Navigate to login with the error code so login screen can show the message
-        nav.replace(`/auth/start?authError=${authParams.error_code || authParams.error}`)
-        return
-      }
-
-      if (authParams && authParams.access_token && authParams.refresh_token) {
-        // Fragment tokens come from GoTrue links (email verification, legacy
-        // magic links). They are SUPABASE tokens: adopting them as V2 tokens
-        // via updateSessionWithTokens would persist a broken session (every
-        // core call rejects them). The account backend never hands tokens over
-        // deep links, so just confirm the verification and route to login.
-        console.log("[LOGIN DEBUG] GoTrue fragment link (type:", authParams.type, ") — routing to login")
-        // Dismiss the WebView after successful authentication (non-blocking)
-        console.log("[LOGIN DEBUG] About to dismiss browser, platform:", Platform.OS)
-        try {
-          const dismissResult = WebBrowser.dismissBrowser()
-          console.log("[LOGIN DEBUG] dismissBrowser returned:", dismissResult, "type:", typeof dismissResult)
-          if (dismissResult && typeof dismissResult.catch === "function") {
-            dismissResult.catch(() => {
-              // Ignore errors - browser might not be open
-            })
-          }
-        } catch (dismissError) {
-          console.log("[LOGIN DEBUG] Error calling dismissBrowser:", dismissError)
-          // Ignore - browser might not be open or function might not exist
-        }
-
-        // The email is now verified server-side; the user signs in normally.
-        // Use replace() instead of replaceAll() to avoid POP_TO_TOP errors
-        // when the navigation stack is empty (coming back from browser).
-        BgTimer.setTimeout(() => {
-          try {
-            nav.setAnimation("none")
-            nav.replace("/auth/start")
-          } catch (navError) {
-            console.error("[LOGIN DEBUG] Error navigating to login:", navError)
-          }
-        }, 100)
-        return // Don't do the navigation below
-      }
-
-      // Check if this is an auth callback without tokens
-      if (!authParams) {
-        // Try checking if user is already authenticated
-        const res = await mentraAuth.getSession()
-        if (res.is_ok()) {
-          const session = res.value
-          if (session?.token) {
-            nav.replace("/")
-          }
-        }
-      }
-    },
-  },
-  {
-    pattern: "/auth/reset-password",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      console.log("[RESET PASSWORD DEBUG] Handling reset password deep link")
-      console.log("[RESET PASSWORD DEBUG] URL:", url)
-      console.log("[RESET PASSWORD DEBUG] Params:", params)
-
-      // Parse the auth parameters from the URL fragment
-      const parseAuthParams = (url: string) => {
-        const parts = url.split("#")
-        if (parts.length < 2) return null
-        const paramsString = parts[1]
-        const urlParams = new URLSearchParams(paramsString)
-        return {
-          access_token: urlParams.get("access_token"),
-          refresh_token: urlParams.get("refresh_token"),
-          type: urlParams.get("type"),
-          // Error params (when link is expired/invalid)
-          error: urlParams.get("error"),
-          error_code: urlParams.get("error_code"),
-          error_description: urlParams.get("error_description"),
-        }
-      }
-
-      const authParams = parseAuthParams(url)
-
-      // Check if there's an error in the URL (e.g., expired link)
-      if (authParams?.error || authParams?.error_code) {
-        console.log("[RESET PASSWORD DEBUG] Error in reset link:", authParams.error_code, authParams.error_description)
-        // Navigate to login with the error code so login screen can show the message
-        nav.replace(`/auth/start?authError=${authParams.error_code || authParams.error}`)
-        return
-      }
-
-      if (authParams && authParams.access_token && authParams.refresh_token && authParams.type === "recovery") {
-        // Set the recovery session
-        const res = await mentraAuth.updateSessionWithTokens({
-          access_token: authParams.access_token,
-          refresh_token: authParams.refresh_token,
-        })
-        if (res.is_error()) {
-          console.error("[RESET PASSWORD DEBUG] Error setting recovery session:", res.error)
-          nav.replace("/auth/start?authError=invalid_reset_link")
-          return
-        }
-
-        console.log("[RESET PASSWORD DEBUG] Recovery session set successfully")
-        // Navigate to the reset password screen
-        nav.replace("/auth/reset-password")
-      } else {
-        console.log("[RESET PASSWORD DEBUG] Missing required auth parameters for password reset")
-        nav.replace("/auth/start?authError=invalid_reset_link")
-      }
-    },
   },
 
   // Mirror/Gallery routes
@@ -343,7 +157,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const nav = useNavigationStore.getState()
       nav.push("/mirror/gallery")
     },
-    requiresAuth: true,
   },
   {
     pattern: "/mirror/video/:videoId",
@@ -352,7 +165,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {videoId} = params
       nav.push(`/mirror/video-player?videoId=${videoId}`)
     },
-    requiresAuth: true,
   },
 
   // Search routes
@@ -364,7 +176,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const route = q ? `/search/search?q=${encodeURIComponent(q)}` : "/search/search"
       nav.push(route as any)
     },
-    requiresAuth: true,
   },
 
   // Onboarding routes
@@ -393,7 +204,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {packageName} = params
       nav.push(`/applet/settings?packageName=${packageName}`)
     },
-    requiresAuth: true,
   },
   {
     pattern: "/apps/:packageName/settings",
@@ -402,7 +212,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {packageName} = params
       nav.push(`/applet/settings?packageName=${packageName}`)
     },
-    requiresAuth: true,
   },
 ]
 
@@ -415,29 +224,16 @@ const DeeplinkContext = createContext<DeeplinkContextType>({} as DeeplinkContext
 export const useDeeplink = () => useContext(DeeplinkContext)
 
 export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
-
   const {setSplashEnabled} = useSplashLoader()
   const nav = useNavigationStore.getState()
   const config = {
     scheme: "com.xerktech.foverlay",
     host: "apps.mentra.glass",
     routes: deepLinkRoutes,
-    authCheckHandler: async () => {
-      // TODO: this is a hack when we should really be using the auth context:
-      const res = await mentraAuth.getSession()
-      if (res.is_error()) {
-        return false
-      }
-      const session = res.value
-      if (!session?.token) {
-        return false
-      }
-      return true
-    },
     fallbackHandler: (url: string) => {
       console.warn("Fallback handler called for URL:", url)
       setTimeout(() => {
-        nav.replaceAll("/auth/start")
+        nav.replaceAll("/")
       }, 100)
     },
   }
@@ -567,27 +363,8 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
         return
       }
 
-      const authed = await config.authCheckHandler()
-
-      // Check authentication if required
-      if (matchedRoute.requiresAuth && !authed) {
-        console.warn("Authentication required for route:", matchedRoute.pattern)
-        // Store the URL for after authentication
-        nav.setPendingRoute(url)
-        setTimeout(() => {
-          try {
-            nav.replace("/auth/start")
-          } catch (error) {
-            console.warn("Navigation failed, router may not be ready:", error)
-          }
-        }, 100)
-      }
-
       // Extract parameters from URL
       const params = extractParams(parsedUrl, matchedRoute.pattern)
-      if (authed) {
-        params.authed = "true"
-      }
       if (!initial) {
         params.preloaded = "true"
       }
