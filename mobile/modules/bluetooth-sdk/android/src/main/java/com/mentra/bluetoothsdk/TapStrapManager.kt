@@ -47,6 +47,11 @@ object TapStrapManager {
     // takeover-off, so the mode write flushes before disconnect.
     private const val TEXT_MODE_FLUSH_DELAY_MS = 400L
 
+    // Hidden broadcast the system fires when a connected device's OS-tracked battery
+    // level changes (the value shown in the phone's Bluetooth settings).
+    private const val ACTION_BATTERY_LEVEL_CHANGED =
+            "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED"
+
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private fun bluetoothAdapter(): BluetoothAdapter? =
@@ -83,6 +88,23 @@ object TapStrapManager {
         return synchronized(aclConnected) { aclConnected.contains(device.address) }
     }
 
+    /**
+     * OS-tracked battery percent for a connected device (what Bluetooth settings
+     * shows — Android reads the strap's battery service/HID reports itself), so the
+     * card can show battery without the Tap SDK being engaged.
+     * BluetoothDevice.getBatteryLevel() is greylisted-but-stable hidden API; null
+     * when unavailable or unknown.
+     */
+    private fun deviceBatteryLevel(device: BluetoothDevice): Int? {
+        return try {
+            val result = device.javaClass.getMethod("getBatteryLevel").invoke(device)
+            (result as? Int)?.takeIf { it in 0..100 }
+        } catch (e: Exception) {
+            Log.d(TAG, "getBatteryLevel reflection unavailable: ${e.message}")
+            null
+        }
+    }
+
     fun getStatus(): Map<String, Any> {
         val connected = synchronized(connectedTaps) { connectedTaps.toSet() }
         val currentSdk = sdk
@@ -95,13 +117,18 @@ object TapStrapManager {
             for (device in adapter?.bondedDevices ?: emptySet()) {
                 val name = device.name ?: continue
                 if (!name.lowercase().startsWith(TAP_NAME_PREFIX)) continue
-                taps[device.address] =
-                        hashMapOf(
+                val deviceConnected = isDeviceConnected(device)
+                val entry =
+                        hashMapOf<String, Any>(
                                 "name" to name,
                                 "address" to device.address,
-                                "connected" to isDeviceConnected(device),
+                                "connected" to deviceConnected,
                                 "sdkConnected" to false,
                         )
+                if (deviceConnected) {
+                    deviceBatteryLevel(device)?.let { entry["battery"] = it }
+                }
+                taps[device.address] = entry
             }
         } catch (e: SecurityException) {
             // BLUETOOTH_CONNECT not granted yet — report as no paired straps rather
@@ -123,7 +150,9 @@ object TapStrapManager {
                 val cached = currentSdk?.getCachedTap(identifier)
                 if (cached != null) {
                     if (!cached.name.isNullOrEmpty()) entry["name"] = cached.name
-                    entry["battery"] = cached.battery
+                    // Prefer the SDK's reading while it holds the strap; keep the
+                    // OS-tracked value (set above) when the SDK hasn't read one yet.
+                    if (cached.battery in 0..100) entry["battery"] = cached.battery
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "getStatus: reading cached tap $identifier failed", e)
@@ -232,12 +261,21 @@ object TapStrapManager {
                         addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
                         addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
                         addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+                        addAction(ACTION_BATTERY_LEVEL_CHANGED)
                     }
             context.applicationContext.registerReceiver(
                     object : BroadcastReceiver() {
                         override fun onReceive(context: Context, intent: Intent) {
                             val device: BluetoothDevice? =
-                                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                                    if (android.os.Build.VERSION.SDK_INT >= 33) {
+                                        intent.getParcelableExtra(
+                                                BluetoothDevice.EXTRA_DEVICE,
+                                                BluetoothDevice::class.java,
+                                        )
+                                    } else {
+                                        @Suppress("DEPRECATION")
+                                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                                    }
                             when (intent.action) {
                                 BluetoothDevice.ACTION_ACL_CONNECTED,
                                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
@@ -254,6 +292,16 @@ object TapStrapManager {
                                     val isTap =
                                             try {
                                                 device.name?.lowercase()?.startsWith(TAP_NAME_PREFIX)
+                                                        ?: false
+                                            } catch (e: SecurityException) {
+                                                false
+                                            }
+                                    if (isTap) emitStatus()
+                                }
+                                ACTION_BATTERY_LEVEL_CHANGED -> {
+                                    val isTap =
+                                            try {
+                                                device?.name?.lowercase()?.startsWith(TAP_NAME_PREFIX)
                                                         ?: false
                                             } catch (e: SecurityException) {
                                                 false

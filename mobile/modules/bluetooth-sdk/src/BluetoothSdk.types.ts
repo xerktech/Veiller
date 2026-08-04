@@ -929,7 +929,11 @@ export interface TapStrapDeviceInfo {
   connected: boolean
   /** True while the Tap SDK holds this strap (controller mode / takeover). */
   sdkConnected: boolean
-  /** Battery percent, present only when the SDK has read it. */
+  /**
+   * Battery percent. While connected this is the OS-tracked Bluetooth battery
+   * (what the phone's Bluetooth settings shows), so it's available with the
+   * takeover toggle off; the Tap SDK's own reading takes over when engaged.
+   */
   battery?: number
 }
 
