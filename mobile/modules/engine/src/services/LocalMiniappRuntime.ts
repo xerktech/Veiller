@@ -198,9 +198,7 @@ const SYSTEM_MINIAPP_PACKAGES = new Set([
   "com.mentra.settings",
   "com.mentra.simulated",
   "com.mentra.mirror",
-  "com.mentra.ai",
   "cloud.augmentos.notify",
-  "com.mentra.feedback",
   "com.mentra.miniappdev",
 ])
 const PING_INTERVAL_MS = 5_000

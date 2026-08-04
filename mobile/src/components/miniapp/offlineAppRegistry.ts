@@ -10,7 +10,7 @@
  */
 import type {ComponentType} from "react"
 
-import {cameraPackageName, feedbackPackageName, mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
+import {cameraPackageName, mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
 import {OFFLINE_HOSTED_PACKAGES} from "./offlineHostedPackages"
 
 import GalleryScreen from "@/app/asg/gallery"
@@ -83,10 +83,6 @@ export const offlineAppRegistry: Record<string, OfflineAppDef> = {
       "/asg/gallery-settings": GallerySettingsScreen,
       "/miniapps/settings/camera": CameraSettings,
     },
-  },
-  [feedbackPackageName]: {
-    initialRoute: "/miniapps/settings/feedback",
-    routes: {"/miniapps/settings/feedback": FeedbackScreen},
   },
 }
 

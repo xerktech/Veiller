@@ -23,7 +23,6 @@ import {markMiniappDevMode} from "@/utils/miniappDevMode"
 import {
   cameraPackageName,
   CHINA_HIDDEN_APPS,
-  feedbackPackageName,
   isChinaBuild,
   mirrorPackageName,
   notifyPackageName,
@@ -231,22 +230,6 @@ class BuiltInMiniappCatalog {
         type: "background",
         logoUrl: require("@assets/applet-icons/mirror.png"),
         local: false,
-      },
-      {
-        packageName: feedbackPackageName,
-        name: translate("miniApps:feedback"),
-        type: "background",
-        offline: true,
-        logoUrl: require("@assets/applet-icons/feedback.png"),
-        offlineRoute: "/miniapps/settings/feedback",
-        webviewUrl: "",
-        healthy: true,
-        hidden: false,
-        permissions: [],
-        running: false,
-        loading: false,
-        local: false,
-        hardwareRequirements: [],
       },
     ]
 

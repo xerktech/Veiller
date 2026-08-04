@@ -9,18 +9,8 @@
  *
  * Deliberately excludes captions / notify — no offlineRoute, nothing to render.
  */
-import {
-  cameraPackageName,
-  feedbackPackageName,
-  mirrorPackageName,
-  settingsPackageName,
-} from "@/constants/miniapps"
+import {cameraPackageName, mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
 
-export const OFFLINE_HOSTED_PACKAGES = new Set([
-  settingsPackageName,
-  mirrorPackageName,
-  cameraPackageName,
-  feedbackPackageName,
-])
+export const OFFLINE_HOSTED_PACKAGES = new Set([settingsPackageName, mirrorPackageName, cameraPackageName])
 
 export const isOfflineHosted = (packageName: string) => OFFLINE_HOSTED_PACKAGES.has(packageName)
