@@ -88,9 +88,24 @@ class RealTapSource(
      * mode to every connected strap immediately.
      */
     fun setControlEnabled(enabled: Boolean) {
-        if (controlEnabled == enabled) return
         controlEnabled = enabled
         Log.i(TAG, "Control ${if (enabled) "ENABLED (Controller Mode)" else "DISABLED (Text/keyboard Mode)"}")
+        val s = sdk ?: return
+        if (enabled) {
+            // Turning control ON doubles as a manual "(re)connect + take
+            // control" action: kick a connection refresh so a strap that
+            // powered on / connected AFTER the app opened gets attached now
+            // (onTapConnected then pins it), and run a maintenance pass
+            // immediately so any already-connected strap is pinned without
+            // waiting for the next tick — no app restart needed.
+            try {
+                s.refreshConnections()
+            } catch (e: Exception) {
+                Log.w(TAG, "refreshConnections on enable failed", e)
+            }
+            handler.removeCallbacks(maintain)
+            handler.post(maintain)
+        }
         for (id in connectedTaps) applyDesiredMode(id)
     }
 

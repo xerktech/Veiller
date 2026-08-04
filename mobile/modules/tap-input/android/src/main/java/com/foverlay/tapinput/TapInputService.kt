@@ -66,7 +66,14 @@ class TapInputService : Service() {
         fun setControlEnabled(context: Context, enabled: Boolean) {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putBoolean(KEY_CONTROL_ENABLED, enabled).apply()
-            activeInstance?.realSource?.setControlEnabled(enabled)
+            val svc = activeInstance
+            if (svc != null && enabled && svc.realSource == null && svc.hasBluetoothConnectPermission()) {
+                // Real source never came up (started fake-only — e.g. BT
+                // permission was granted after launch). Turning control on
+                // brings it up now, so the strap attaches without an app restart.
+                svc.startRealSource()
+            }
+            svc?.realSource?.setControlEnabled(enabled)
         }
 
         /** "stopped" | "running" | "no_permission" | "failed" — for the status card. */

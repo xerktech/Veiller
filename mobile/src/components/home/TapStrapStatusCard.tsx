@@ -51,10 +51,14 @@ export const TapStrapStatusCard = () => {
     const inputSub = addTapInputListener(refresh)
     const statusSub = addTapStatusListener(refresh)
     const echoUnsub = subscribeTapEchoDebug(() => setEcho(getTapEchoDebugState()))
+    // Poll so a strap that connects after the card is open (or a mode change
+    // from the maintenance loop) shows up without any interaction.
+    const poll = setInterval(refresh, 3000)
     return () => {
       inputSub?.remove()
       statusSub?.remove()
       echoUnsub()
+      clearInterval(poll)
     }
   }, [])
 
@@ -108,7 +112,9 @@ export const TapStrapStatusCard = () => {
         <View className="flex-1 pr-3">
           <Text className="text-sm font-medium">Glasses control</Text>
           <Text className="text-xs text-secondary_foreground">
-            {controlEnabled ? "On — strap drives the glasses" : "Off — strap works as a normal keyboard"}
+            {controlEnabled
+              ? "On — strap drives the glasses (toggle to reconnect)"
+              : "Off — strap works as a normal keyboard"}
           </Text>
         </View>
         <Switch value={controlEnabled} onValueChange={toggleControl} />
