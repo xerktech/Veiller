@@ -27,6 +27,7 @@ import {
   mirrorPackageName,
   notifyPackageName,
   settingsPackageName,
+  tapTesterPackageName,
 } from "@/constants/miniapps"
 
 /**
@@ -234,6 +235,29 @@ class BuiltInMiniappCatalog {
     ]
 
     if (Platform.OS !== "ios") {
+      // Tap Strap tester — a diagnostic miniapp: type into an on-screen text box
+      // with standard Tap gestures (the strap acting as a HID keyboard) and see
+      // the text mirrored to the glasses, with status + a live event log on the
+      // phone. Tap SDK support is Android-only, so this is gated with notify.
+      apps.push({
+        packageName: tapTesterPackageName,
+        name: translate("miniApps:tapTester"),
+        type: "background",
+        offline: true,
+        logoUrl: require("@assets/tap_strap/tap_strap.png"),
+        offlineRoute: "/miniapps/taptester/taptester",
+        webviewUrl: "",
+        healthy: true,
+        hidden: false,
+        permissions: [],
+        running: false,
+        loading: false,
+        local: false,
+        // Useful even without glasses connected (phone-side text + log still
+        // work), so a display is optional; glasses need not exist at all.
+        hardwareRequirements: [{type: HardwareType.DISPLAY, level: HardwareRequirementLevel.OPTIONAL}],
+      })
+
       apps.push({
         packageName: notifyPackageName,
         name: translate("miniApps:notify"),
