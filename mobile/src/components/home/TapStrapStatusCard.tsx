@@ -66,12 +66,21 @@ export const TapStrapStatusCard = () => {
   if (!isTapInputAvailable) return null
 
   const taps = snapshot?.taps ?? []
-  const strapLine =
-    taps.length > 0
-      ? taps.map((t) => `Connected — mode: ${t.mode}`).join("\n")
-      : snapshot?.serviceRunning
-        ? "No strap connected (pair it in Android Bluetooth settings, then reopen the app)"
-        : "Tap service not running"
+  const bonded = snapshot?.bondedTaps ?? []
+  let strapLine: string
+  if (taps.length > 0) {
+    strapLine = taps.map((t) => `Connected — mode: ${t.mode}`).join("\n")
+  } else if (!snapshot?.serviceRunning) {
+    strapLine = "Tap service not running"
+  } else if (snapshot.realSource === "no_permission") {
+    strapLine = "Bluetooth permission missing — grant Nearby devices to Foverlay"
+  } else if (snapshot.realSource === "failed") {
+    strapLine = "Tap SDK failed to start (see logcat FoverlayTapService)"
+  } else if (bonded.length === 0) {
+    strapLine = "No Tap paired — pair the strap in Android Bluetooth settings"
+  } else {
+    strapLine = `Paired: ${bonded.join(", ")} — connecting… (auto-retries every 20s)`
+  }
 
   return (
     <GlassView className="px-6 py-4 rounded-2xl">
