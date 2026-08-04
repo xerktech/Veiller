@@ -374,8 +374,10 @@ export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
 
   const title =
     status.taps.length === 1 ? status.taps[0].name : `${translate("home:tapStraps")} (${status.taps.length})`
-  const batteryTap = status.taps.find((tap) => tap.connected && tap.battery !== undefined)
-  const takenOver = !!takeover && status.connectedCount > 0
+  const batteryTap = status.taps.find((tap) => tap.battery !== undefined)
+  // The bluetooth icon reflects the strap's real phone link (HID and/or SDK) —
+  // NOT the takeover toggle, which only controls controller mode.
+  const anyConnected = status.connectedCount > 0
 
   return (
     <View style={style}>
@@ -388,7 +390,11 @@ export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
               <Text className="text-secondary-foreground text-sm" text={`${batteryTap.battery}%`} />
             </View>
           )}
-          <Icon name={takenOver ? "bluetooth-connected" : "bluetooth-off"} size={22} color={theme.colors.foreground} />
+          <Icon
+            name={anyConnected ? "bluetooth-connected" : "bluetooth-off"}
+            size={22}
+            color={theme.colors.foreground}
+          />
         </View>
         <View className="flex-row items-center gap-2">
           <Text className="text-secondary-foreground text-sm" tx="home:tapStrapTakeover" />

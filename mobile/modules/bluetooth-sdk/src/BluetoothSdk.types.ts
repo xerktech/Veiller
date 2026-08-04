@@ -922,8 +922,13 @@ export type BluetoothSdkModuleEvents = {
 export interface TapStrapDeviceInfo {
   name: string
   address: string
-  /** True while the Tap SDK holds this strap (controller mode / takeover). */
+  /**
+   * True while the strap has a live Bluetooth link to the phone (its keyboard HID
+   * link and/or the Tap SDK's GATT link) — independent of the takeover toggle.
+   */
   connected: boolean
+  /** True while the Tap SDK holds this strap (controller mode / takeover). */
+  sdkConnected: boolean
   /** Battery percent, present only when the SDK has read it. */
   battery?: number
 }
