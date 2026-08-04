@@ -115,10 +115,12 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "CHANGE_WIFI_STATE",
         "CHANGE_NETWORK_STATE",
       ],
-      // The Google Navigation SDK manifest merges in ACCESS_BACKGROUND_LOCATION,
-      // but navigation runs in a location foreground service and works with
-      // while-in-use permission only. Blocking it avoids the Play Store
-      // background-location declaration/video review.
+      // Some merged library manifests pull in ACCESS_BACKGROUND_LOCATION, but we
+      // only need while-in-use location: it is used for BLE scanning and for the
+      // phone-location foreground service (PhoneLocationService) that streams
+      // location to miniapps. (Android turn-by-turn navigation is a stub in this
+      // fork, so it is not a location consumer.) Blocking background location
+      // avoids the Play Store background-location declaration/video review.
       blockedPermissions: ["android.permission.ACCESS_BACKGROUND_LOCATION"],
       intentFilters: [
         {

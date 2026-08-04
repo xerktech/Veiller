@@ -260,7 +260,10 @@ function withAndroidManifestModifications(config: any) {
       {name: "android.permission.FOREGROUND_SERVICE_LOCATION"},
       {name: "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"},
       {name: "android.permission.FOREGROUND_SERVICE_MICROPHONE"},
-      {name: "android.permission.NEARBY_DEVICES"},
+      // NB: `android.permission.NEARBY_DEVICES` is intentionally NOT declared —
+      // no such platform permission exists (Android silently ignores it). The
+      // real nearby-device permissions are NEARBY_WIFI_DEVICES (app.config.ts)
+      // and the BLUETOOTH_* family declared above.
       {name: "android.permission.POST_NOTIFICATIONS"},
       {name: "android.permission.QUERY_ALL_PACKAGES"},
       {name: "android.permission.READ_PHONE_STATE"},
