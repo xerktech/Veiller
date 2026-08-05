@@ -33,6 +33,19 @@ def sherpaOnnxRepoDir = new File(
 def sherpaOnnxAar = new File(sherpaOnnxRepoDir, "${sherpaOnnxArtifact}-${sherpaOnnxVersion}.aar")
 def sherpaOnnxPom = new File(sherpaOnnxRepoDir, "${sherpaOnnxArtifact}-${sherpaOnnxVersion}.pom")
 
+// Where the downloaded AAR is kept BETWEEN builds. libs/ is gitignored, and CI
+// checkouts clean untracked files, so a workspace-only copy meant every release
+// re-downloaded ~55MB from GitHub — and one network blip failed the whole
+// release (that is what broke release 33). The cache lives outside the
+// workspace so it survives `git clean`; override with MENTRA_SHERPA_CACHE_DIR.
+def sherpaOnnxCacheDir = new File(
+  System.getenv("MENTRA_SHERPA_CACHE_DIR")
+    ?: new File(gradle.gradleUserHomeDir, "mentra-sherpa-onnx").absolutePath
+)
+def sherpaOnnxCachedAar = new File(
+  sherpaOnnxCacheDir, "${sherpaOnnxArtifact}-${sherpaOnnxVersion}.aar"
+)
+
 def sha256OfFile = { File f ->
   def digest = MessageDigest.getInstance("SHA-256")
   f.withInputStream { input ->
@@ -45,46 +58,97 @@ def sha256OfFile = { File f ->
   digest.digest().collect { String.format("%02x", it & 0xff) }.join("")
 }
 
-// If a stale AAR exists with the wrong hash (e.g. from a previous failed
-// download or a version bump), drop it so we re-fetch.
-if (sherpaOnnxAar.exists() && sha256OfFile(sherpaOnnxAar) != sherpaOnnxSha256) {
-  logger.lifecycle("Sherpa-ONNX AAR checksum mismatch on disk; redownloading.")
-  if (!sherpaOnnxAar.delete()) {
+// A file is only usable if it matches the pinned hash. Anything else — a
+// partial download, a version bump, a tampered artifact — is deleted.
+def dropIfNotPinned = { File f ->
+  if (!f.exists()) {
+    return false
+  }
+  if (sha256OfFile(f) == sherpaOnnxSha256) {
+    return true
+  }
+  logger.lifecycle("Sherpa-ONNX AAR checksum mismatch at ${f.absolutePath}; discarding.")
+  if (!f.delete()) {
     throw new GradleException(
-      "Sherpa-ONNX AAR at ${sherpaOnnxAar.absolutePath} has a mismatched SHA-256 " +
+      "Sherpa-ONNX AAR at ${f.absolutePath} has a mismatched SHA-256 " +
       "but could not be deleted. Refusing to continue with a potentially tampered artifact."
     )
   }
+  return false
 }
 
-if (!sherpaOnnxAar.exists()) {
-  sherpaOnnxRepoDir.mkdirs()
-  def sherpaOnnxUrl = "https://github.com/k2-fsa/sherpa-onnx/releases/download/v${sherpaOnnxVersion}/${sherpaOnnxArtifact}-${sherpaOnnxVersion}.aar"
-  logger.lifecycle("Downloading Sherpa-ONNX AAR v${sherpaOnnxVersion} from GitHub release…")
-  // Download to a .part sibling and rename only after the SHA-256 matches, so
-  // an interrupted or tampered download can't be silently accepted as valid.
-  def partial = file("${sherpaOnnxAar.absolutePath}.part")
-  try {
-    new URL(sherpaOnnxUrl).withInputStream { input ->
-      partial.withOutputStream { output -> output << input }
-    }
-    def actual = sha256OfFile(partial)
-    if (actual != sherpaOnnxSha256) {
-      throw new GradleException(
-        "Sherpa-ONNX AAR v${sherpaOnnxVersion} SHA-256 mismatch.\n" +
-        "  expected: ${sherpaOnnxSha256}\n" +
-        "  actual:   ${actual}\n" +
-        "Refusing to use the downloaded artifact."
-      )
-    }
-    if (!partial.renameTo(sherpaOnnxAar)) {
-      throw new GradleException("Failed to move ${partial.name} to ${sherpaOnnxAar.name}")
-    }
-  } finally {
-    if (partial.exists()) {
-      partial.delete()
+// Transient network failures are the norm on a long-lived release pipeline, so
+// retry with backoff and bound each attempt: a bare URL stream has NO timeout,
+// which is how release 33 hung for 15 minutes before failing.
+def downloadSherpaOnnx = { File dest ->
+  def url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/v${sherpaOnnxVersion}/${sherpaOnnxArtifact}-${sherpaOnnxVersion}.aar"
+  def attempts = 3
+  Exception lastFailure = null
+  for (int attempt = 1; attempt <= attempts; attempt++) {
+    logger.lifecycle(
+      "Downloading Sherpa-ONNX AAR v${sherpaOnnxVersion} from GitHub release (attempt ${attempt}/${attempts})…"
+    )
+    try {
+      def connection = new URL(url).openConnection()
+      connection.connectTimeout = 30_000
+      // Per-read, not total: a slow-but-progressing download keeps resetting it,
+      // while a genuinely stalled socket gives up in two minutes.
+      connection.readTimeout = 120_000
+      connection.inputStream.withStream { input ->
+        dest.withOutputStream { output -> output << input }
+      }
+      return
+    } catch (Exception e) {
+      lastFailure = e
+      logger.lifecycle("  attempt ${attempt} failed: ${e}")
+      dest.delete()
+      if (attempt < attempts) {
+        Thread.sleep(2000L * attempt)
+      }
     }
   }
+  throw new GradleException(
+    "Failed to download Sherpa-ONNX AAR v${sherpaOnnxVersion} after ${attempts} attempts.",
+    lastFailure
+  )
+}
+
+if (!dropIfNotPinned(sherpaOnnxAar)) {
+  sherpaOnnxRepoDir.mkdirs()
+
+  if (!dropIfNotPinned(sherpaOnnxCachedAar)) {
+    sherpaOnnxCacheDir.mkdirs()
+    // Download to a .part sibling and keep it only once the SHA-256 matches, so
+    // an interrupted or tampered download can't be silently accepted as valid.
+    def partial = new File("${sherpaOnnxCachedAar.absolutePath}.part")
+    try {
+      downloadSherpaOnnx(partial)
+      def actual = sha256OfFile(partial)
+      if (actual != sherpaOnnxSha256) {
+        throw new GradleException(
+          "Sherpa-ONNX AAR v${sherpaOnnxVersion} SHA-256 mismatch.\n" +
+          "  expected: ${sherpaOnnxSha256}\n" +
+          "  actual:   ${actual}\n" +
+          "Refusing to use the downloaded artifact."
+        )
+      }
+      if (!partial.renameTo(sherpaOnnxCachedAar)) {
+        throw new GradleException("Failed to move ${partial.name} to ${sherpaOnnxCachedAar.name}")
+      }
+    } finally {
+      if (partial.exists()) {
+        partial.delete()
+      }
+    }
+  } else {
+    logger.lifecycle("Reusing cached Sherpa-ONNX AAR from ${sherpaOnnxCacheDir}.")
+  }
+
+  java.nio.file.Files.copy(
+    sherpaOnnxCachedAar.toPath(),
+    sherpaOnnxAar.toPath(),
+    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+  )
 }
 
 // Minimal POM so the Maven resolver is happy. No transitive deps — the AAR
