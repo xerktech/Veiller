@@ -240,7 +240,8 @@ class DeviceStore {
                 DeviceManager.shared.sgc?.sendCalendarEvents(items)
             }
 
-        case ("bluetooth", "metric_system"), ("bluetooth", "twelve_hour_time"):
+        case ("bluetooth", "metric_system"), ("bluetooth", "twelve_hour_time"),
+            ("bluetooth", "dashboard_widgets"):
             DeviceManager.shared.sgc?.sendDashboardDisplaySettings()
 
         case ("bluetooth", "gallery_mode"):
