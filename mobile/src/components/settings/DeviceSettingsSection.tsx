@@ -169,6 +169,17 @@ export function DeviceSettingsSection() {
         />
       )}
 
+      {/* Glasses Controls — G2 firmware behavior toggles (Hey Even wake word,
+          wear detection, silent mode). Persist and re-apply on connect, so no
+          connection is required to configure them. */}
+      {defaultWearable === DeviceTypes.G2 && (
+        <RouteButton
+          icon={<Icon name="settings" size={24} color={theme.colors.secondary_foreground} />}
+          label={translate("settings:glassesControls")}
+          onPress={() => push("/miniapps/settings/glasses")}
+        />
+      )}
+
       {/* Auto-Brightness */}
       {features?.display?.adjustBrightness && glassesConnected && (
         <BrightnessSetting

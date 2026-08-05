@@ -751,6 +751,53 @@ private object G2SettingProto {
         w.writeMessageField(3, infoW.toByteArray())
         return w.toByteArray()
     }
+
+    /**
+     * Wear detection (proximity sensor): pause the display when the glasses are
+     * taken off.
+     *
+     * Wear_Detection_Setting sits at field 5 of DeviceReceiveInfoFromApp (field
+     * numbering per g2-kit-unofficial's decoded g2_setting proto; fields 1–4 in
+     * that message match this driver's working brightness/coordinate/head-up
+     * writers exactly, which is what validates the numbering).
+     */
+    fun setWearDetection(magicRandom: Int, enabled: Boolean): ByteArray {
+        // Wear_Detection_Setting { wearDetectionSwitch (field 1) }
+        val wearW = ProtobufWriter()
+        wearW.writeInt32Field(1, if (enabled) 1 else 0)
+
+        // DeviceReceiveInfoFromAPP
+        val infoW = ProtobufWriter()
+        infoW.writeMessageField(5, wearW.toByteArray()) // deviceReceiveWearDetection (field 5)
+
+        // G2SettingPackage
+        val w = ProtobufWriter()
+        w.writeInt32Field(1, G2SettingCommandId.DEVICE_RECEIVE_INFO.value)
+        w.writeInt32Field(2, magicRandom)
+        w.writeMessageField(3, infoW.toByteArray())
+        return w.toByteArray()
+    }
+
+    /**
+     * Silent mode: suppress the audio cue on notifications/container pushes.
+     * DeviceReceive_Silent_Mode_Setting is field 6 of DeviceReceiveInfoFromApp.
+     */
+    fun setSilentMode(magicRandom: Int, enabled: Boolean): ByteArray {
+        // DeviceReceive_Silent_Mode_Setting { silentModeSwitch (field 1) }
+        val silentW = ProtobufWriter()
+        silentW.writeInt32Field(1, if (enabled) 1 else 0)
+
+        // DeviceReceiveInfoFromAPP
+        val infoW = ProtobufWriter()
+        infoW.writeMessageField(6, silentW.toByteArray()) // deviceReceiveSilentMode (field 6)
+
+        // G2SettingPackage
+        val w = ProtobufWriter()
+        w.writeInt32Field(1, G2SettingCommandId.DEVICE_RECEIVE_INFO.value)
+        w.writeInt32Field(2, magicRandom)
+        w.writeMessageField(3, infoW.toByteArray())
+        return w.toByteArray()
+    }
 }
 
 // ---------- Onboarding Protobuf Builders ----------
@@ -1791,11 +1838,6 @@ class G2 : SGCManager() {
         // 6. Dashboard init (0x01) — display settings
         sendDashboardDisplaySettings()
 
-        // Disable "Hey Even" wakeword on connect
-        val heyEvenOff = EvenAIProto.setHeyEven(sendManager.nextMagicRandom(), false)
-        sendEvenAICommand(heyEvenOff)
-        Bridge.log("G2: Disabled Hey Even wakeword")
-
         Bridge.log("G2: Sent full Even-compatible init sequence")
 
         // Start heartbeats after auth
@@ -1853,6 +1895,18 @@ class G2 : SGCManager() {
             setDashboardTimeout(timeout)
         }
         requestDashboardTimeout()
+
+        // Re-apply the firmware toggles the app owns. The G2 has no settings
+        // replay path (that's G1-only), so without this a reconnect would drop
+        // back to whatever the firmware last had. Defaults match the firmware's
+        // own (Hey Even off, wear detection on, silent mode off), so an existing
+        // user who never touched these sees no change.
+        val heyEven = DeviceStore.get("bluetooth", "hey_even_enabled") as? Boolean ?: false
+        setHeyEvenEnabled(heyEven)
+        val wearDetection = DeviceStore.get("bluetooth", "wear_detection_enabled") as? Boolean ?: true
+        setWearDetection(wearDetection)
+        val silentMode = DeviceStore.get("bluetooth", "silent_mode_enabled") as? Boolean ?: false
+        setSilentMode(silentMode)
     }
 
     private fun dashboardHalfDayFormat(): Int {
@@ -3817,7 +3871,21 @@ class G2 : SGCManager() {
     }
 
     override fun setSilentMode(enabled: Boolean) {
-        // TODO: Implement
+        val msg = G2SettingProto.setSilentMode(sendManager.nextMagicRandom(), enabled)
+        sendG2SettingCommand(msg)
+        Bridge.log("G2: setSilentMode($enabled)")
+    }
+
+    override fun setWearDetection(enabled: Boolean) {
+        val msg = G2SettingProto.setWearDetection(sendManager.nextMagicRandom(), enabled)
+        sendG2SettingCommand(msg)
+        Bridge.log("G2: setWearDetection($enabled)")
+    }
+
+    override fun setHeyEvenEnabled(enabled: Boolean) {
+        val msg = EvenAIProto.setHeyEven(sendManager.nextMagicRandom(), enabled)
+        sendEvenAICommand(msg)
+        Bridge.log("G2: setHeyEvenEnabled($enabled)")
     }
 
     override fun exit() {

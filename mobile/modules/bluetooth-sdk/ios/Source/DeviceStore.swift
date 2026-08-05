@@ -89,6 +89,9 @@ class DeviceStore {
         store.set("bluetooth", "head_up_angle", 30)
         store.set("bluetooth", "head_up_enabled", true)
         store.set("bluetooth", "dashboard_timeout", 15)
+        store.set("bluetooth", "hey_even_enabled", false)
+        store.set("bluetooth", "wear_detection_enabled", true)
+        store.set("bluetooth", "silent_mode_enabled", false)
         store.set("bluetooth", "imu_enabled", false)
         store.set("bluetooth", "contextual_dashboard", true)
         store.set("bluetooth", "gallery_mode", true)
@@ -238,6 +241,21 @@ class DeviceStore {
         case ("bluetooth", "head_up_enabled"):
             let angle = store.get("bluetooth", "head_up_angle") as? Int ?? 30
             DeviceManager.shared.sgc?.setHeadUpAngle(angle)
+
+        case ("bluetooth", "hey_even_enabled"):
+            if let enabled = value as? Bool {
+                DeviceManager.shared.sgc?.setHeyEvenEnabled(enabled)
+            }
+
+        case ("bluetooth", "wear_detection_enabled"):
+            if let enabled = value as? Bool {
+                DeviceManager.shared.sgc?.setWearDetection(enabled)
+            }
+
+        case ("bluetooth", "silent_mode_enabled"):
+            if let enabled = value as? Bool {
+                DeviceManager.shared.sgc?.setSilentMode(enabled)
+            }
 
         case ("bluetooth", "imu_enabled"):
             if let enabled = value as? Bool {

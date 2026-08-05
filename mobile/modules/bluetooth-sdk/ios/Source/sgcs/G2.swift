@@ -805,6 +805,46 @@ private enum G2SettingProto {
         w.writeMessageField(3, infoW.data)
         return w.data
     }
+
+    /// Wear detection (pause the display when the glasses are removed).
+    /// Wear_Detection_Setting is field 5 of DeviceReceiveInfoFromApp (field
+    /// numbering per g2-kit-unofficial; fields 1–4 match this driver's working
+    /// brightness/coordinate/head-up writers, which validates the numbering).
+    static func setWearDetection(magicRandom: Int32, enabled: Bool) -> Data {
+        // Wear_Detection_Setting { wearDetectionSwitch (field 1) }
+        var wearW = ProtobufWriter()
+        wearW.writeInt32Field(1, enabled ? 1 : 0)
+
+        // DeviceReceiveInfoFromAPP
+        var infoW = ProtobufWriter()
+        infoW.writeMessageField(5, wearW.data)  // deviceReceiveWearDetection (field 5)
+
+        // G2SettingPackage
+        var w = ProtobufWriter()
+        w.writeInt32Field(1, G2SettingCommandId.deviceReceiveInfo.rawValue)
+        w.writeInt32Field(2, magicRandom)
+        w.writeMessageField(3, infoW.data)
+        return w.data
+    }
+
+    /// Silent mode (suppress the audio cue on notifications/pushes).
+    /// DeviceReceive_Silent_Mode_Setting is field 6 of DeviceReceiveInfoFromApp.
+    static func setSilentMode(magicRandom: Int32, enabled: Bool) -> Data {
+        // DeviceReceive_Silent_Mode_Setting { silentModeSwitch (field 1) }
+        var silentW = ProtobufWriter()
+        silentW.writeInt32Field(1, enabled ? 1 : 0)
+
+        // DeviceReceiveInfoFromAPP
+        var infoW = ProtobufWriter()
+        infoW.writeMessageField(6, silentW.data)  // deviceReceiveSilentMode (field 6)
+
+        // G2SettingPackage
+        var w = ProtobufWriter()
+        w.writeInt32Field(1, G2SettingCommandId.deviceReceiveInfo.rawValue)
+        w.writeInt32Field(2, magicRandom)
+        w.writeMessageField(3, infoW.data)
+        return w.data
+    }
 }
 
 // MARK: - Onboarding Protobuf Builders (onboarding.proto, service ID 16)
@@ -1973,14 +2013,6 @@ class G2: NSObject, SGCManager {
         // 6. Dashboard init (0x01) — display settings
         self.sendDashboardDisplaySettings()
 
-        // Disable "Hey Even" wakeword on connect
-        let heyEvenOff = EvenAIProto.setHeyEven(
-            magicRandom: self.sendManager.nextMagicRandom(),
-            enabled: false
-        )
-        self.sendEvenAICommand(heyEvenOff)
-        Bridge.log("G2: Disabled Hey Even wakeword")
-
         // 7. Dashboard REQUEST_NEWS_INFO (cmd=5, field7={1:1})
         // var dashNewsReqW = ProtobufWriter()
         // dashNewsReqW.writeInt32Field(1, 5) // REQUEST_NEWS_INFO
@@ -2066,6 +2098,17 @@ class G2: NSObject, SGCManager {
             self.setDashboardTimeout(timeout)
         }
         self.requestDashboardTimeout()
+
+        // Re-apply the firmware toggles the app owns. The G2 has no settings
+        // replay path (that's G1-only), so without this a reconnect would drop
+        // back to whatever the firmware last had. Defaults match the firmware's
+        // own (Hey Even off, wear detection on, silent mode off).
+        let heyEven = DeviceStore.shared.get("bluetooth", "hey_even_enabled") as? Bool ?? false
+        self.setHeyEvenEnabled(heyEven)
+        let wearDetection = DeviceStore.shared.get("bluetooth", "wear_detection_enabled") as? Bool ?? true
+        self.setWearDetection(wearDetection)
+        let silentMode = DeviceStore.shared.get("bluetooth", "silent_mode_enabled") as? Bool ?? false
+        self.setSilentMode(silentMode)
     }
 
     // MARK: - Heartbeats
@@ -4029,8 +4072,31 @@ class G2: NSObject, SGCManager {
         sendMenuCommand(msg)
     }
 
-    func setSilentMode(_: Bool) {
-        // TODO: Implement
+    func setSilentMode(_ enabled: Bool) {
+        let msg = G2SettingProto.setSilentMode(
+            magicRandom: sendManager.nextMagicRandom(),
+            enabled: enabled
+        )
+        sendG2SettingCommand(msg)
+        Bridge.log("G2: setSilentMode(\(enabled))")
+    }
+
+    func setWearDetection(_ enabled: Bool) {
+        let msg = G2SettingProto.setWearDetection(
+            magicRandom: sendManager.nextMagicRandom(),
+            enabled: enabled
+        )
+        sendG2SettingCommand(msg)
+        Bridge.log("G2: setWearDetection(\(enabled))")
+    }
+
+    func setHeyEvenEnabled(_ enabled: Bool) {
+        let msg = EvenAIProto.setHeyEven(
+            magicRandom: sendManager.nextMagicRandom(),
+            enabled: enabled
+        )
+        sendEvenAICommand(msg)
+        Bridge.log("G2: setHeyEvenEnabled(\(enabled))")
     }
 
     func exit() {
