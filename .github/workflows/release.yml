@@ -256,17 +256,23 @@ jobs:
         # mapping.txt is R8's obfuscation map — without it, release crash
         # traces are unreadable (Sentry mapping upload is disabled here), so
         # it ships with every release alongside the APK.
+        #
+        # Assets are staged in a directory wiped at the start of every run:
+        # the checkout persists between builds (checkout clean: false), so
+        # copies at the workspace root accumulate — and a bare foverlay-v*
+        # glob then attaches every PREVIOUS release's APK to the new release.
+        # The rm also scrubs root-level strays left by runs before this fix.
         run: |
           set -euo pipefail
-          cp mobile/android/app/build/outputs/apk/release/app-release.apk "foverlay-v${VERSION}.apk"
-          cp mobile/android/app/build/outputs/mapping/release/mapping.txt "foverlay-v${VERSION}-mapping.txt"
+          rm -rf release-assets foverlay-v*.apk foverlay-v*-mapping.txt
+          mkdir release-assets
+          cp mobile/android/app/build/outputs/apk/release/app-release.apk "release-assets/foverlay-v${VERSION}.apk"
+          cp mobile/android/app/build/outputs/mapping/release/mapping.txt "release-assets/foverlay-v${VERSION}-mapping.txt"
 
       - uses: actions/upload-artifact@v4
         with:
           name: asset-apk
-          path: |
-            foverlay-v*.apk
-            foverlay-v*-mapping.txt
+          path: release-assets/foverlay-v*
           if-no-files-found: error
           retention-days: 30
 
