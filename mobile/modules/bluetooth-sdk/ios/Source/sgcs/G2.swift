@@ -3375,13 +3375,20 @@ class G2: NSObject, SGCManager {
         )
     }
 
+    /// autoCloseValue the firmware gets for the "Never" setting (stored as 0).
+    /// The firmware takes the value literally — 0 closes the dashboard the
+    /// moment it opens (XERK-210) — and no disable encoding is known, so
+    /// "never" is sent as 24 hours.
+    private static let dashboardTimeoutNever = 86400
+
     func setDashboardTimeout(_ seconds: Int) {
+        let value = seconds <= 0 ? Self.dashboardTimeoutNever : seconds
         let msg = G2SettingProto.setDashboardAutoClose(
             magicRandom: sendManager.nextMagicRandom(),
-            value: Int32(seconds)
+            value: Int32(value)
         )
         sendModuleConfigureCommand(msg)
-        Bridge.log("G2: setDashboardTimeout(\(seconds))")
+        Bridge.log("G2: setDashboardTimeout(\(seconds) -> \(value))")
     }
 
     /// Ask the firmware for its current auto-close value (answer lands in the log).

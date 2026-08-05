@@ -502,7 +502,9 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
-  // Dashboard auto-close (G2 firmware), in seconds. 0 = stay up until dismissed.
+  // Dashboard auto-close (G2 firmware), in seconds. 0 = "Never"; the G2
+  // driver translates it (the firmware would take 0 literally and close the
+  // dashboard immediately).
   dashboard_timeout: {
     key: "dashboard_timeout",
     defaultValue: () => 15,
