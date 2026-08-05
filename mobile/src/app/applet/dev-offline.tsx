@@ -21,7 +21,8 @@ import CapsuleMenu from "@/effects/CapsuleMenu"
  *   "Try again"  — re-launch the miniapp; if the dev server is now reachable,
  *                  the local route mounts live and silently snapshots the
  *                  bundle to disk so future offline launches can fall back.
- *   "Re-scan QR" — open the scanner; new QR replaces the old dev URL.
+ *   "Enter dev URL" — open the manual dev-URL entry screen; a new URL replaces
+ *                     the old dev URL. (QR scanning was removed in XERK-207.)
  */
 export default function DevMiniappOfflineScreen() {
   const {packageName, name, iconUrl} = useLocalSearchParams<{
@@ -54,7 +55,7 @@ export default function DevMiniappOfflineScreen() {
     if (!packageName) return
     const devUrlRes = storage.load<string>(`${packageName}_dev_url`)
     if (!devUrlRes.is_ok()) {
-      push("/miniapps/miniappdev/scanner")
+      push("/miniapps/miniappdev/developer-url")
       return
     }
     // Pre-flight reachability before deciding the route. If still down,
@@ -81,7 +82,7 @@ export default function DevMiniappOfflineScreen() {
           storage.remove(`${packageName}${suffix}`)
         }
       }
-      if (manifest && !apps.some(app => app.packageName === manifestPackage)) {
+      if (manifest && !apps.some((app) => app.packageName === manifestPackage)) {
         const base = (launchResult.resolvedUrl || devUrlRes.value).replace(/\/$/, "")
         const icon = typeof manifest.icon === "string" ? manifest.icon : undefined
         const port = storage.load<number>(`${manifestPackage}_dev_port`)
@@ -89,8 +90,7 @@ export default function DevMiniappOfflineScreen() {
         await registerDevApp({
           packageName: manifestPackage,
           name: manifest.name || resolvedName || manifestPackage,
-          iconUrl:
-            icon && /^https?:\/\//.test(icon) ? icon : `${base}/${(icon ?? "icon.png").replace(/^\//, "")}`,
+          iconUrl: icon && /^https?:\/\//.test(icon) ? icon : `${base}/${(icon ?? "icon.png").replace(/^\//, "")}`,
           devUrl: launchResult.resolvedUrl || devUrlRes.value,
           devPort: port.is_ok() ? port.value : undefined,
           devAttestation: attestation.is_ok() ? attestation.value : undefined,
@@ -109,7 +109,7 @@ export default function DevMiniappOfflineScreen() {
   }
 
   const handleRescan = () => {
-    push("/miniapps/miniappdev/scanner")
+    push("/miniapps/miniappdev/developer-url")
   }
 
   const displayName = resolvedName ?? packageName ?? "Dev mini app"
@@ -142,7 +142,7 @@ export default function DevMiniappOfflineScreen() {
         </View>
         <View className="w-full gap-3">
           <Button text="Try again" onPress={handleTryAgain} preset="primary" />
-          <Button text="Re-scan QR" onPress={handleRescan} preset="secondary" />
+          <Button text="Enter dev URL" onPress={handleRescan} preset="secondary" />
         </View>
       </View>
       <CapsuleMenu forceShow={true} />

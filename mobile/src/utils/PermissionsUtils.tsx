@@ -18,7 +18,6 @@ export type UiPermission =
   | "POST_NOTIFICATIONS"
   | "READ_NOTIFICATIONS"
   | "BACKGROUND_LOCATION"
-  | "PHONE_CAMERA"
   | "BLUETOOTH"
   | "PHONE_STATE"
   | "BATTERY_OPTIMIZATION"
@@ -29,7 +28,10 @@ export const PermissionFeatures: Record<string, string> = {
   BASIC: "basic", // Basic permissions needed for the app to function
   POST_NOTIFICATIONS: "post_notifications",
   READ_NOTIFICATIONS: "read_notifications",
-  CAMERA: "camera", // Phone camera permission for mirror mode
+  // CAMERA (phone camera) removed in XERK-207 — the G2 has no camera, the mirror
+  // recorder is dead, and the dev-miniapp QR scanner was dropped in favor of the
+  // existing manual dev-URL entry. The CAMERA Android permission is stripped in
+  // plugins/android.ts.
   GLASSES_CAMERA: "glasses_camera", // Glasses camera permission for apps
   MICROPHONE: "microphone",
   CALENDAR: "calendar",
@@ -73,13 +75,6 @@ const PERMISSION_CONFIG: Record<string, PermissionConfig> = {
     description: "Allow Mentra to forward notifications to your glasses",
     ios: [], // iOS doesn't need special permission for reading notifications
     android: [], // Android uses NotificationListener service, handled separately
-    critical: false,
-  },
-  [PermissionFeatures.CAMERA]: {
-    name: "Camera",
-    description: "Used for the fullscreen mirror mode",
-    ios: [PERMISSIONS.IOS.CAMERA],
-    android: [PermissionsAndroid.PERMISSIONS.CAMERA],
     critical: false,
   },
   [PermissionFeatures.GLASSES_CAMERA]: {
@@ -150,13 +145,9 @@ const PERMISSION_CONFIG: Record<string, PermissionConfig> = {
 if (Platform.OS === "android") {
   const basicPermissions = []
 
-  // Storage permissions based on Android version
-  if (Platform.Version < 29) {
-    basicPermissions.push(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
-  }
-  if (Platform.Version < 33) {
-    basicPermissions.push(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE)
-  }
+  // Storage permissions removed in XERK-207: the G2 has no camera, so the
+  // glasses-photo gallery-save path (its only consumer) never runs. WRITE/READ_
+  // EXTERNAL_STORAGE are stripped from the manifest in plugins/android.ts.
 
   if (Platform.Version >= 31) {
     // Android 12+ (API 31+) requires explicit runtime permission for Bluetooth

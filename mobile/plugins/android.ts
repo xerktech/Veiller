@@ -200,6 +200,17 @@ function withAndroidManifestModifications(config: any) {
       "android.permission.READ_MEDIA_VIDEO",
       "android.permission.WRITE_MEDIA_VIDEO", // Not needed - MediaStore API works without it on API 29+
       "android.permission.ACCESS_MEDIA_LOCATION", // Not needed - we save photos, don't read EXIF from user's library
+      // XERK-207: the supported G2 glasses have no camera, so the glasses-photo
+      // gallery-save path has no trigger. Drop photo/storage permissions. Listed
+      // here (not merely un-declared) because expo-media-library's AAR still
+      // merges WRITE_EXTERNAL_STORAGE and other libs re-add READ_EXTERNAL_STORAGE.
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      // XERK-207: camera killed. The only live phone-camera feature was the
+      // dev-miniapp QR scanner (now removed); the mirror recorder was already
+      // dead. CAMERA is merged by expo-camera AND react-native-webrtc AARs, so
+      // strip it here to guarantee it leaves the merged manifest.
+      "android.permission.CAMERA",
     ]
 
     // Ensure tools namespace is available for manifest merger directives
@@ -260,7 +271,10 @@ function withAndroidManifestModifications(config: any) {
       {name: "android.permission.FOREGROUND_SERVICE_LOCATION"},
       {name: "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"},
       {name: "android.permission.FOREGROUND_SERVICE_MICROPHONE"},
-      {name: "android.permission.NEARBY_DEVICES"},
+      // NB: `android.permission.NEARBY_DEVICES` is intentionally NOT declared —
+      // no such platform permission exists (Android silently ignores it). The
+      // real nearby-device permissions are NEARBY_WIFI_DEVICES (app.config.ts)
+      // and the BLUETOOTH_* family declared above.
       {name: "android.permission.POST_NOTIFICATIONS"},
       {name: "android.permission.QUERY_ALL_PACKAGES"},
       {name: "android.permission.READ_PHONE_STATE"},
@@ -290,9 +304,9 @@ function withAndroidManifestModifications(config: any) {
       }
     })
 
+    // READ/WRITE_EXTERNAL_STORAGE are intentionally absent here — they are
+    // stripped via permissionsToRemove above (XERK-207, no camera device).
     const versionsThatNeedUpdates = [
-      {name: "android.permission.READ_EXTERNAL_STORAGE", maxSdkVersion: "32"},
-      {name: "android.permission.WRITE_EXTERNAL_STORAGE", maxSdkVersion: "29"},
       {name: "android.permission.BLUETOOTH", maxSdkVersion: "30"},
     ]
 

@@ -115,10 +115,12 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "CHANGE_WIFI_STATE",
         "CHANGE_NETWORK_STATE",
       ],
-      // The Google Navigation SDK manifest merges in ACCESS_BACKGROUND_LOCATION,
-      // but navigation runs in a location foreground service and works with
-      // while-in-use permission only. Blocking it avoids the Play Store
-      // background-location declaration/video review.
+      // Some merged library manifests pull in ACCESS_BACKGROUND_LOCATION, but we
+      // only need while-in-use location: it is used for BLE scanning and for the
+      // phone-location foreground service (PhoneLocationService) that streams
+      // location to miniapps. (Android turn-by-turn navigation is a stub in this
+      // fork, so it is not a location consumer.) Blocking background location
+      // avoids the Play Store background-location declaration/video review.
       blockedPermissions: ["android.permission.ACCESS_BACKGROUND_LOCATION"],
       intentFilters: [
         {
@@ -243,16 +245,9 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       "expo-asset",
       "expo-localization",
       "expo-font",
-      [
-        "expo-media-library",
-        {
-          photosPermission: "Allow Foverlay to save photos from your glasses.",
-          savePhotosPermission: "Allow Foverlay to save photos from your glasses.",
-          // Disabled - we save photos from glasses, we don't need to read EXIF location from user's library
-          // Google Play rejects ACCESS_MEDIA_LOCATION for apps without core photo gallery functionality
-          isAccessMediaLocationEnabled: false,
-        },
-      ],
+      // expo-media-library removed in XERK-207: the G2 has no camera, so the
+      // glasses-photo gallery-save path is orphaned. Photo/storage permissions
+      // are stripped in plugins/android.ts.
       [
         "expo-splash-screen",
         {
@@ -272,7 +267,6 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "react-native-permissions",
         {
           iosPermissions: [
-            "Camera",
             "Microphone",
             "Calendars",
             "Bluetooth",
@@ -280,18 +274,13 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
             "LocationWhenInUse",
             "LocationAlways",
             "Notifications",
-            "PhotoLibrary",
-            "PhotoLibraryAddOnly", // For save-only operations (no "select photos" prompt)
           ],
         },
       ],
-      [
-        "expo-camera",
-        {
-          cameraPermission: "Allow $(PRODUCT_NAME) to access your camera",
-          recordAudioAndroid: true,
-        },
-      ],
+      // expo-camera + iOS Camera/PhotoLibrary permission handlers removed in
+      // XERK-207: the phone-camera QR scanner was dropped and the mirror
+      // recorder was already dead, so the CAMERA permission is no longer needed
+      // (it is stripped from the Android manifest in plugins/android.ts).
       // "react-native-bottom-tabs",
       [
         "expo-build-properties",
