@@ -30,6 +30,7 @@ export default function DashboardSettingsScreen() {
   const [metricSystemEnabled, setMetricSystemEnabled] = useSetting(SETTINGS.metric_system.key)
   const [twelveHourTimeEnabled, setTwelveHourTimeEnabled] = useSetting(SETTINGS.twelve_hour_time.key)
   const [dashboardWidgets, setDashboardWidgets] = useSetting(SETTINGS.dashboard_widgets.key)
+  const [headUpEnabled, setHeadUpEnabled] = useSetting(SETTINGS.head_up_enabled.key)
   const features = getModelCapabilities(defaultWearable)
   const glassesConnected =
     useEngineSnapshot(engine.glasses.status, (onChange) => engine.glasses.onStatus(onChange)).state === "connected"
@@ -113,6 +114,16 @@ export default function DashboardSettingsScreen() {
           />
 
           {defaultWearable && features?.hasIMU && (
+            <ToggleSetting
+              label={translate("settings:headUpEnabledLabel")}
+              subtitle={translate("settings:headUpEnabledSubtitle")}
+              value={headUpEnabled}
+              onValueChange={() => setHeadUpEnabled(!headUpEnabled)}
+            />
+          )}
+
+          {/* The angle only means anything while tilt-to-wake is on. */}
+          {defaultWearable && features?.hasIMU && headUpEnabled && (
             <RouteButton
               label={translate("settings:adjustHeadAngleLabel")}
               subtitle={translate("settings:adjustHeadAngleSubtitle")}

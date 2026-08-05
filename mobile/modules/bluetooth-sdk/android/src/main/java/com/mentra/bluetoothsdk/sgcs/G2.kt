@@ -3736,10 +3736,14 @@ class G2 : SGCManager() {
 
     override fun setHeadUpAngle(angle: Int) {
         val clamped = angle.coerceIn(0, 60)
-        Bridge.log("G2: setHeadUpAngle($clamped)")
+        // The tilt-to-wake switch and the angle share one firmware message, so
+        // the on/off setting is read here rather than plumbed through the
+        // SGCManager interface (which every other device would have to stub).
+        val enabled = DeviceStore.get("bluetooth", "head_up_enabled") as? Boolean ?: true
+        Bridge.log("G2: setHeadUpAngle($clamped, enabled=$enabled)")
 
-        // Enable head-up and set the angle in ONE message — see setHeadUpSetting.
-        val msg = G2SettingProto.setHeadUpSetting(sendManager.nextMagicRandom(), true, clamped)
+        // Switch and angle in ONE message — see setHeadUpSetting.
+        val msg = G2SettingProto.setHeadUpSetting(sendManager.nextMagicRandom(), enabled, clamped)
         sendG2SettingCommand(msg)
     }
 

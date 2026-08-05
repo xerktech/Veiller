@@ -3915,12 +3915,16 @@ class G2: NSObject, SGCManager {
 
     func setHeadUpAngle(_ angle: Int) {
         let clamped = min(max(angle, 0), 60)
-        Bridge.log("G2: setHeadUpAngle(\(clamped))")
+        // The tilt-to-wake switch and the angle share one firmware message, so
+        // the on/off setting is read here rather than plumbed through the
+        // SGCManager interface (which every other device would have to stub).
+        let enabled = DeviceStore.shared.get("bluetooth", "head_up_enabled") as? Bool ?? true
+        Bridge.log("G2: setHeadUpAngle(\(clamped), enabled=\(enabled))")
 
-        // Enable head-up and set the angle in ONE message — see setHeadUpSetting.
+        // Switch and angle in ONE message — see setHeadUpSetting.
         let msg = G2SettingProto.setHeadUpSetting(
             magicRandom: sendManager.nextMagicRandom(),
-            enabled: true,
+            enabled: enabled,
             angle: Int32(clamped)
         )
         sendG2SettingCommand(msg)

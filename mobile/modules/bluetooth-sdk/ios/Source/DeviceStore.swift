@@ -87,6 +87,7 @@ class DeviceStore {
         store.set("bluetooth", "dashboard_height", 4)
         store.set("bluetooth", "dashboard_depth", 2)
         store.set("bluetooth", "head_up_angle", 30)
+        store.set("bluetooth", "head_up_enabled", true)
         store.set("bluetooth", "imu_enabled", false)
         store.set("bluetooth", "contextual_dashboard", true)
         store.set("bluetooth", "gallery_mode", true)
@@ -224,6 +225,13 @@ class DeviceStore {
             if let angle = value as? Int {
                 DeviceManager.shared.sgc?.setHeadUpAngle(angle)
             }
+
+        // The on/off switch rides along with the angle in one firmware message,
+        // so re-push the stored angle and let the driver read the new enabled
+        // value out of the store.
+        case ("bluetooth", "head_up_enabled"):
+            let angle = store.get("bluetooth", "head_up_angle") as? Int ?? 30
+            DeviceManager.shared.sgc?.setHeadUpAngle(angle)
 
         case ("bluetooth", "imu_enabled"):
             if let enabled = value as? Bool {
