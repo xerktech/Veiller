@@ -2,7 +2,6 @@ import * as RNFS from "@dr.pogodin/react-native-fs"
 import {MentraLocalNetwork, type LocalNetworkDownloadProgress} from "@mentra/bluetooth-sdk/internal"
 import {Buffer} from "buffer"
 import {Platform} from "react-native"
-import WifiManager from "react-native-wifi-reborn"
 
 type DownloadOptions = Parameters<typeof RNFS.downloadFile>[0]
 type DownloadHandle = ReturnType<typeof RNFS.downloadFile>
@@ -50,8 +49,9 @@ export const localNetworkTransport = {
     scopedConnectionActive = false
     nativeJobs.clear()
     if (!supportsScopedConnection()) {
-      await WifiManager.connectToProtectedSSID(ssid, password, false, false)
-      return
+      // XERK-200/XERK-206: the legacy (pre-Android-10 / iOS) connect path used
+      // react-native-wifi-reborn, removed while the ASG gallery is parked.
+      throw new Error("ASG gallery is parked (XERK-206): legacy WiFi connect is unavailable")
     }
     await MentraLocalNetwork!.connect(ssid, password)
     scopedConnectionActive = true

@@ -106,7 +106,6 @@
     "react-native-localize": "*",
     "react-native-ble-manager": "*",
     "react-native-permissions": "*",
-    "react-native-wifi-reborn": "*",
     "@react-native-community/netinfo": "*",
     "@dr.pogodin/react-native-fs": "*",
     "@craftzdog/react-native-buffer": "*",

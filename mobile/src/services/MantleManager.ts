@@ -19,7 +19,8 @@ import {
   appRegistry,
   audioPlaybackService,
   displayProcessor,
-  gallerySyncService,
+  // XERK-200/XERK-206: gallerySyncService boot init removed — ASG gallery parked.
+  // gallerySyncService,
   localDisplayManager,
   localMiniappRuntime,
   micStateCoordinator,
@@ -485,7 +486,8 @@ class MantleManager {
   }
 
   private async initServices() {
-    gallerySyncService.initialize()
+    // XERK-200/XERK-206: ASG gallery parked — no gallery-sync service at boot.
+    // gallerySyncService.initialize()
 
     // Bootstrap MentraJS — wires MentraJSRouter + MentraUIRouter +
     // MentraJSCrashController. The /applet/local route binds the UI
