@@ -240,6 +240,7 @@ jobs:
         run: |
           df -h / | tail -1
           ./gradlew assembleRelease --build-cache --parallel --max-workers=8 \
+            --configuration-cache --configuration-cache-problems=warn \
             -x lintVitalRelease -x lintVitalAnalyzeRelease \
             -PreactNativeArchitectures=arm64-v8a \
             "-Dorg.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m" \
