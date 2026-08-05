@@ -19,7 +19,6 @@ export default function MainSettingsPage() {
   const {push} = useNavigationStore.getState()
   const [debugMode] = useSetting(SETTINGS.debug_mode.key)
   const [superMode] = useSetting(SETTINGS.super_mode.key)
-  const [appearanceMenuEnabled] = useSetting(SETTINGS.appearance_menu_enabled.key)
   const [miniappDevMode] = useSetting(SETTINGS.miniapp_dev_mode.key)
   const viewShotRef = useRef<View>(null)
 
@@ -48,13 +47,11 @@ export default function MainSettingsPage() {
                 })
               }
             />
-            {appearanceMenuEnabled && (
-              <RouteButton
-                icon={<Icon name="sun" size={24} color={theme.colors.secondary_foreground} />}
-                label={translate("settings:appAppearance")}
-                onPress={() => push("/miniapps/settings/appearance")}
-              />
-            )}
+            <RouteButton
+              icon={<Icon name="sun" size={24} color={theme.colors.secondary_foreground} />}
+              label={translate("settings:appAppearance")}
+              onPress={() => push("/miniapps/settings/appearance")}
+            />
             {(Platform.OS === "android" || superMode) && (
               <RouteButton
                 icon={<Icon name="bell" size={24} color={theme.colors.secondary_foreground} />}
