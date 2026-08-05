@@ -2,6 +2,7 @@ import {appRegistry} from "@mentra/engine/internal"
 import {Directory, File, Paths} from "expo-file-system"
 
 import {FOVERLAY_MINIAPPS, type FoverlayMiniappSource} from "@/config/foverlayMiniapps"
+import {isFoverlayMiniappEnabled} from "@/services/miniapps/foverlayMiniappPrefs"
 
 const LOG_TAG = "FoverlayMiniappSync"
 
@@ -24,7 +25,7 @@ interface GithubRelease {
 }
 
 /** A miniapp bundle located in a repo's releases, ready to download + install. */
-interface ResolvedBundle {
+export interface ResolvedBundle {
   packageName: string
   version: string
   downloadUrl: string
@@ -66,7 +67,7 @@ function versionFromTag(tag: string): string {
  * skips over release trains that don't publish the bundle (e.g. a repo that
  * also cuts native-agent tarball or Android APK releases under other tags).
  */
-async function resolveLatestBundle(source: FoverlayMiniappSource): Promise<ResolvedBundle | null> {
+export async function resolveLatestBundle(source: FoverlayMiniappSource): Promise<ResolvedBundle | null> {
   const url = `https://api.github.com/repos/${source.repo}/releases?per_page=${RELEASES_PER_REPO}`
 
   const controller = new AbortController()
@@ -129,7 +130,33 @@ async function downloadBundle(bundle: ResolvedBundle): Promise<string> {
   }
 }
 
+/** Installed result surfaced to callers (sync log + the store's update button). */
+export interface InstalledBundle {
+  packageName: string
+  version: string
+}
+
+/** Download a resolved bundle and install it, replacing any prior version. */
+async function installResolvedBundle(bundle: ResolvedBundle): Promise<InstalledBundle> {
+  const zipUri = await downloadBundle(bundle)
+  const result = await appRegistry.installFromLocalZip(zipUri, {
+    releaseIdentity: {source: "github_release", releaseId: bundle.version},
+  })
+  if (result.is_error()) {
+    throw result.error
+  }
+  return result.value
+}
+
 async function syncEntry(source: FoverlayMiniappSource): Promise<void> {
+  // Unchecked in the store (XERK-217): skip install AND update. An already
+  // installed version is left on disk untouched — unchecking only pauses future
+  // downloads, it does not uninstall.
+  if (!isFoverlayMiniappEnabled(source.packageName)) {
+    console.log(`${LOG_TAG}: ${source.packageName} disabled in store — skipping install/update`)
+    return
+  }
+
   const bundle = await resolveLatestBundle(source)
   if (!bundle) {
     console.warn(`${LOG_TAG}: no miniapp bundle found in ${source.repo} releases for ${source.packageName}`)
@@ -143,14 +170,8 @@ async function syncEntry(source: FoverlayMiniappSource): Promise<void> {
   }
 
   console.log(`${LOG_TAG}: installing ${bundle.packageName}@${bundle.version} from ${source.repo}`)
-  const zipUri = await downloadBundle(bundle)
-  const result = await appRegistry.installFromLocalZip(zipUri, {
-    releaseIdentity: {source: "github_release", releaseId: bundle.version},
-  })
-  if (result.is_error()) {
-    throw result.error
-  }
-  console.log(`${LOG_TAG}: installed ${result.value.packageName}@${result.value.version}`)
+  const installed = await installResolvedBundle(bundle)
+  console.log(`${LOG_TAG}: installed ${installed.packageName}@${installed.version}`)
 }
 
 /**
@@ -173,5 +194,20 @@ export const foverlayMiniappSync = {
         )
       }
     }
+  },
+
+  /**
+   * Resolve, download, and install the latest bundle for one source right now,
+   * bypassing the enabled check and the already-installed skip. Backs the store
+   * screen's explicit "Install"/"Update" button, where the user has asked for
+   * this specific app regardless of its checkbox. Throws if the repo has no
+   * bundle or the download/install fails.
+   */
+  async installLatest(source: FoverlayMiniappSource): Promise<InstalledBundle> {
+    const bundle = await resolveLatestBundle(source)
+    if (!bundle) {
+      throw new Error(`no miniapp bundle found in ${source.repo} releases`)
+    }
+    return installResolvedBundle(bundle)
   },
 }

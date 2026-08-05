@@ -14,6 +14,7 @@ import {LinearGradient} from "expo-linear-gradient"
 import MaskedView from "@react-native-masked-view/masked-view"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 import GlassView from "@/components/ui/GlassView"
+import {useNavigationStore} from "@/stores/navigation"
 import {OPEN_SPRING, SWIPE_DISTANCE_THRESHOLD, SWIPE_PERCENT_THRESHOLD} from "@/stores/appSwitcher"
 import {SETTINGS, useSetting} from "@mentra/engine"
 import {hapticBuzz} from "@/utils/utils"
@@ -214,6 +215,19 @@ export default function AppSwitcherButton({swipeProgress, onGridButtonPress, blu
     )
   }
 
+  // Home entry point to the Miniapp Store (XERK-217).
+  const renderStoreButton = () => {
+    return (
+      <GlassView className={`h-16 rounded-2xl`} tintColor={buttonTint} style={{marginBottom: bottomPadding}}>
+        <TouchableOpacity
+          onPress={() => useNavigationStore.getState().push("/miniapps/store")}
+          className="items-center justify-center w-16 h-16">
+          <Icon name="building-store" color={theme.colors.foreground} size={26} />
+        </TouchableOpacity>
+      </GlassView>
+    )
+  }
+
   if (Platform.OS === "android" && appsCount === 0) {
     return (
       <View
@@ -231,6 +245,7 @@ export default function AppSwitcherButton({swipeProgress, onGridButtonPress, blu
             </GlassView>
           </View>
         </TouchableOpacity>
+        {renderStoreButton()}
         {renderGridButton()}
       </View>
     )
@@ -253,6 +268,7 @@ export default function AppSwitcherButton({swipeProgress, onGridButtonPress, blu
             </GlassView>
           </View>
         </GestureDetector>
+        {renderStoreButton()}
         {renderGridButton()}
       </View>
     )
@@ -312,6 +328,7 @@ export default function AppSwitcherButton({swipeProgress, onGridButtonPress, blu
           </GlassView>
         </View>
       </GestureDetector>
+      {renderStoreButton()}
       {renderGridButton()}
     </View>
   )
