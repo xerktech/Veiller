@@ -546,6 +546,16 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
+  // Ordered array of ENABLED firmware-dashboard widget names ("schedule",
+  // "news", "stock", "quicklist", "health"); a widget is disabled by leaving
+  // it out. null = never customized — native keeps its default (all enabled).
+  dashboard_widgets: {
+    key: "dashboard_widgets",
+    defaultValue: () => null,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
   calendar_events: {
     key: "calendar_events",
     defaultValue: () => [],
@@ -734,6 +744,7 @@ export const BLUETOOTH_SETTING_KEYS: string[] = [
   SETTINGS.dashboard_height.key,
   SETTINGS.dashboard_depth.key,
   SETTINGS.menu_apps.key,
+  SETTINGS.dashboard_widgets.key,
   SETTINGS.calendar_events.key,
   SETTINGS.use_native_dashboard.key,
   SETTINGS.twelve_hour_time.key,

@@ -954,7 +954,9 @@ class MantleManager {
     // GlassesStatusProjection, started by engine.start().
   }
 
-  private async sendCalendarEvents() {
+  // Public so settings UI can trigger an immediate sync (e.g. right after the
+  // calendar permission is granted from the dashboard-widgets screen).
+  public async sendCalendarEvents() {
     try {
       // Ungranted CALENDAR permission is the default state — skip quietly
       // instead of letting getCalendarsAsync throw into the catch as an error.

@@ -1950,26 +1950,7 @@ class G2: NSObject, SGCManager {
         )
 
         // 6. Dashboard init (0x01) — display settings
-        // halfDayFormat: 1 = 12h, 0 = 24h
-        // temperatureUnit: 1 = Celsius (metric), 2 = Fahrenheit (imperial)
-        var dashDisplayW = ProtobufWriter()
-        dashDisplayW.writeInt32Field(1, 4)  // displayMode
-        dashDisplayW.writeInt32Field(2, 3)  // statusDisplayCount
-        dashDisplayW.writeMessageField(3, Data([1, 2, 3]))  // statusDisplayOrder
-        dashDisplayW.writeInt32Field(4, 4)  // widgetDisplayCount
-        // WidgetType: 1=News, 2=Stock, 3=Schedule, 4=Quicklist, 5=Health
-        dashDisplayW.writeMessageField(5, Data([3, 1, 2, 4, 5]))  // widgetDisplayOrder: Schedule, News, Stock, Quicklist
-        dashDisplayW.writeInt32Field(6, self.dashboardHalfDayFormat())  // halfDayFormat
-        dashDisplayW.writeInt32Field(7, self.dashboardTemperatureUnit())  // temperatureUnit
-
-        var dashRecvW = ProtobufWriter()
-        dashRecvW.writeMessageField(2, dashDisplayW.data)
-
-        var dashPkgW = ProtobufWriter()
-        dashPkgW.writeInt32Field(1, 2)  // Dashboard_Receive
-        dashPkgW.writeInt32Field(2, self.sendManager.nextMagicRandom())
-        dashPkgW.writeMessageField(4, dashRecvW.data)
-        self.sendDashboardCommand(dashPkgW.data)
+        self.sendDashboardDisplaySettings()
 
         // Disable "Hey Even" wakeword on connect
         let heyEvenOff = EvenAIProto.setHeyEven(
@@ -3278,14 +3259,32 @@ class G2: NSObject, SGCManager {
         return metric ? 1 : 2
     }
 
+    /// The enabled dashboard widgets as Even WidgetType ids, in display order.
+    ///
+    /// Reads the `dashboard_widgets` device setting — an ordered array of the
+    /// ENABLED widget names; a widget is disabled by leaving it out. Unset (the
+    /// user never customized) falls back to every widget in the default order.
+    private func dashboardWidgetOrder() -> Data {
+        let widgetIds: [String: UInt8] = [
+            "news": 1, "stock": 2, "schedule": 3, "quicklist": 4, "health": 5,
+        ]
+        if let stored = DeviceStore.shared.get("bluetooth", "dashboard_widgets") as? [Any] {
+            return Data(stored.compactMap { ($0 as? String).flatMap { widgetIds[$0] } })
+        }
+        return Data([3, 1, 2, 4, 5])  // Schedule, News, Stock, Quicklist, Health
+    }
+
     func sendDashboardDisplaySettings() {
+        // halfDayFormat: 1 = 12h, 0 = 24h
+        // temperatureUnit: 1 = Celsius (metric), 2 = Fahrenheit (imperial)
+        let widgetOrder = dashboardWidgetOrder()
         var dashDisplayW = ProtobufWriter()
         dashDisplayW.writeInt32Field(1, 4)  // displayMode
         dashDisplayW.writeInt32Field(2, 3)  // statusDisplayCount
         dashDisplayW.writeMessageField(3, Data([1, 2, 3]))  // statusDisplayOrder
-        dashDisplayW.writeInt32Field(4, 4)  // widgetDisplayCount
+        dashDisplayW.writeInt32Field(4, Int32(widgetOrder.count))  // widgetDisplayCount
         // WidgetType: 1=News, 2=Stock, 3=Schedule, 4=Quicklist, 5=Health
-        dashDisplayW.writeMessageField(5, Data([3, 1, 2, 4, 5]))
+        dashDisplayW.writeMessageField(5, widgetOrder)  // widgetDisplayOrder (enabled only)
         dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat())  // halfDayFormat
         dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit())  // temperatureUnit
 
@@ -3932,35 +3931,15 @@ class G2: NSObject, SGCManager {
         requestDeviceInfo()
     }
 
-    /// Reorder the dashboard widgets so the calendar (Schedule) widget appears first.
+    /// Push the dashboard display settings so the widget pages reflect the
+    /// user's `dashboard_widgets` config (default: calendar/Schedule first).
     ///
-    /// Sends a Dashboard_Receive (service 0x01) display-settings push with
-    /// `widgetDisplayOrder` led by WidgetType 3 (Schedule). The remaining widgets
-    /// keep their default relative order.
-    ///   WidgetType: 1=News, 2=Stock, 3=Schedule, 4=Quicklist, 5=Health
+    /// Historically this hardcoded a Schedule-first order; the order now comes
+    /// from `sendDashboardDisplaySettings()`, whose default keeps Schedule
+    /// first, so the name survives for its connect-time callers.
     func setCalendarWidgetFirst() {
-        // Schedule (calendar) first, then the rest in their default order.
-        let widgetOrder: [UInt8] = [3, 1, 2, 4, 5]
-
-        var dashDisplayW = ProtobufWriter()
-        dashDisplayW.writeInt32Field(1, 4)  // displayMode
-        dashDisplayW.writeInt32Field(2, 3)  // statusDisplayCount
-        dashDisplayW.writeMessageField(3, Data([1, 2, 3]))  // statusDisplayOrder
-        dashDisplayW.writeInt32Field(4, Int32(widgetOrder.count))  // widgetDisplayCount
-        dashDisplayW.writeMessageField(5, Data(widgetOrder))  // widgetDisplayOrder: Schedule first
-        dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat())  // halfDayFormat
-        dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit())  // temperatureUnit
-
-        var dashRecvW = ProtobufWriter()
-        dashRecvW.writeMessageField(2, dashDisplayW.data)
-
-        var dashPkgW = ProtobufWriter()
-        dashPkgW.writeInt32Field(1, 2)  // Dashboard_Receive
-        dashPkgW.writeInt32Field(2, sendManager.nextMagicRandom())
-        dashPkgW.writeMessageField(4, dashRecvW.data)
-        sendDashboardCommand(dashPkgW.data)
-
-        Bridge.log("G2: setCalendarWidgetFirst — widgetDisplayOrder \(widgetOrder)")
+        sendDashboardDisplaySettings()
+        Bridge.log("G2: setCalendarWidgetFirst — pushed dashboard display settings")
     }
 
     func setDashboardMenu(_ items: [[String: Any]]) {

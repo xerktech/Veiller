@@ -1326,6 +1326,8 @@ export interface CalendarEvent {
 export interface CoreSettings {
   menu_apps: CoreDashboardMenuItem[]
   calendar_events: CalendarEvent[]
+  /** Ordered ENABLED firmware-dashboard widget names; omit a widget to disable it. */
+  dashboard_widgets: string[]
 }
 
 export interface Device {
@@ -1420,6 +1422,7 @@ export type BluetoothSettingsUpdate = Partial<{
   dashboard_depth: number
   menu_apps: DashboardMenuItem[] | CoreDashboardMenuItem[] | Array<Record<string, unknown>> | null
   calendar_events: CalendarEvent[]
+  dashboard_widgets: string[] | null
   metric_system: boolean
   twelve_hour_time: boolean
   gallery_mode: boolean

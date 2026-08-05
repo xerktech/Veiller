@@ -264,7 +264,8 @@ object DeviceStore {
                 }
             }
             "bluetooth" to "metric_system",
-            "bluetooth" to "twelve_hour_time" -> {
+            "bluetooth" to "twelve_hour_time",
+            "bluetooth" to "dashboard_widgets" -> {
                 DeviceManager.getInstance().sgc?.sendDashboardDisplaySettings()
             }
             "bluetooth" to "gallery_mode" -> {

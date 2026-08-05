@@ -1821,19 +1821,34 @@ class G2 : SGCManager() {
         return if (metric) 1 else 2
     }
 
+    /**
+     * The enabled dashboard widgets as Even WidgetType ids, in display order.
+     *
+     * Reads the `dashboard_widgets` device setting — an ordered array of the
+     * ENABLED widget names; a widget is disabled by leaving it out. Unset (the
+     * user never customized) falls back to every widget in the default order.
+     */
+    private fun dashboardWidgetOrder(): ByteArray {
+        val widgetIds = mapOf(
+            "news" to 1, "stock" to 2, "schedule" to 3, "quicklist" to 4, "health" to 5
+        )
+        val stored = DeviceStore.get("bluetooth", "dashboard_widgets") as? List<*>
+        val ids = stored?.mapNotNull { widgetIds[it] }
+            ?: listOf(3, 1, 2, 4, 5) // Schedule, News, Stock, Quicklist, Health
+        return ByteArray(ids.size) { ids[it].toByte() }
+    }
+
     override fun sendDashboardDisplaySettings() {
         // halfDayFormat: 1 = 12h, 0 = 24h
         // temperatureUnit: 1 = Celsius (metric), 2 = Fahrenheit (imperial)
+        val widgetOrder = dashboardWidgetOrder()
         val dashDisplayW = ProtobufWriter()
         dashDisplayW.writeInt32Field(1, 4) // displayMode
         dashDisplayW.writeInt32Field(2, 3) // statusDisplayCount
         dashDisplayW.writeMessageField(3, byteArrayOf(1, 2, 3)) // statusDisplayOrder
-        dashDisplayW.writeInt32Field(4, 4) // widgetDisplayCount
+        dashDisplayW.writeInt32Field(4, widgetOrder.size) // widgetDisplayCount
         // WidgetType: 1=News, 2=Stock, 3=Schedule, 4=Quicklist, 5=Health
-        dashDisplayW.writeMessageField(
-            5,
-            byteArrayOf(3, 1, 2, 4, 5)
-        ) // widgetDisplayOrder: Schedule, News, Stock, Quicklist, Health (matches iOS)
+        dashDisplayW.writeMessageField(5, widgetOrder) // widgetDisplayOrder (enabled only)
         dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat()) // halfDayFormat
         dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit()) // temperatureUnit
 
