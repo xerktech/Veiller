@@ -3819,6 +3819,11 @@ class G2 : SGCManager() {
         // Switch and angle in ONE message — see setHeadUpSetting.
         val msg = G2SettingProto.setHeadUpSetting(sendManager.nextMagicRandom(), enabled, clamped)
         sendG2SettingCommand(msg)
+
+        // Read the firmware's setting snapshot back so the debug console shows
+        // whether headUpSwitch/headUpAngle actually landed (see the diagnostic
+        // log in parseDeviceRequestResponse).
+        requestDeviceInfo()
     }
 
     override fun getBatteryStatus() {
@@ -5018,6 +5023,30 @@ class G2 : SGCManager() {
             // Bridge.log("G2: Right firmware: $rightVersion")
             DeviceStore.apply("glasses", "rightFirmwareVersion", rightVersion)
             DeviceStore.apply("glasses", "firmwareVersion", rightVersion)
+        }
+
+        // Diagnostic read-back: log the firmware's OWN restored settings so the
+        // in-app debug console can confirm whether the head-up / wear / silent /
+        // brightness writes actually landed. Field numbers are from g2-kit's
+        // DeviceReceiveRequestFromAPP snapshot (headUpSwitch=7, headUpAngle=8,
+        // wearDetection=10, silentMode=14, autoBrightnessSwitch=18). If a value
+        // reads back as we set it but the feature still doesn't behave, the
+        // problem is firmware-side, not the write.
+        val headUpSwitch = fields[7] as? Int
+        val headUpAngle = fields[8] as? Int
+        val wearDetection = fields[10] as? Int
+        val silentMode = fields[14] as? Int
+        val autoBrightnessSwitch = fields[18] as? Int
+        val autoBrightnessLevel = fields[2] as? Int
+        val yCoord = fields[3] as? Int
+        val xCoord = fields[4] as? Int
+        if (headUpSwitch != null || wearDetection != null || silentMode != null) {
+            Bridge.log(
+                "G2 firmware settings snapshot: headUpSwitch=$headUpSwitch headUpAngle=$headUpAngle " +
+                    "wearDetection=$wearDetection silentMode=$silentMode " +
+                    "autoBrightnessSwitch=$autoBrightnessSwitch autoBrightnessLevel=$autoBrightnessLevel " +
+                    "yCoord=$yCoord xCoord=$xCoord"
+            )
         }
     }
 

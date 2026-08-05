@@ -4004,6 +4004,11 @@ class G2: NSObject, SGCManager {
             angle: Int32(clamped)
         )
         sendG2SettingCommand(msg)
+
+        // Read the firmware's setting snapshot back so the debug console shows
+        // whether headUpSwitch/headUpAngle actually landed (see the diagnostic
+        // log in parseDeviceRequestResponse).
+        requestDeviceInfo()
     }
 
     func getBatteryStatus() {
@@ -5000,6 +5005,33 @@ class G2: NSObject, SGCManager {
             DeviceStore.shared.apply("glasses", "rightFirmwareVersion", rightVersion)
             // Use right version as the main version
             DeviceStore.shared.apply("glasses", "firmwareVersion", rightVersion)
+        }
+
+        // Diagnostic read-back: log the firmware's OWN restored settings so the
+        // in-app debug console can confirm whether the head-up / wear / silent /
+        // brightness writes actually landed. Field numbers are from g2-kit's
+        // DeviceReceiveRequestFromAPP snapshot (headUpSwitch=7, headUpAngle=8,
+        // wearDetection=10, silentMode=14, autoBrightnessSwitch=18). If a value
+        // reads back as we set it but the feature still doesn't behave, the
+        // problem is firmware-side, not the write.
+        let headUpSwitch = fields[7] as? Int32
+        let wearDetection = fields[10] as? Int32
+        let silentMode = fields[14] as? Int32
+        if headUpSwitch != nil || wearDetection != nil || silentMode != nil {
+            let headUpAngle = fields[8] as? Int32
+            let autoBrightnessSwitch = fields[18] as? Int32
+            let autoBrightnessLevel = fields[2] as? Int32
+            let yCoord = fields[3] as? Int32
+            let xCoord = fields[4] as? Int32
+            Bridge.log(
+                "G2 firmware settings snapshot: headUpSwitch=\(String(describing: headUpSwitch)) "
+                    + "headUpAngle=\(String(describing: headUpAngle)) "
+                    + "wearDetection=\(String(describing: wearDetection)) "
+                    + "silentMode=\(String(describing: silentMode)) "
+                    + "autoBrightnessSwitch=\(String(describing: autoBrightnessSwitch)) "
+                    + "autoBrightnessLevel=\(String(describing: autoBrightnessLevel)) "
+                    + "yCoord=\(String(describing: yCoord)) xCoord=\(String(describing: xCoord))"
+            )
         }
     }
 
