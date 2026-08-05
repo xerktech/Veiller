@@ -3,7 +3,6 @@ import {config} from "dotenv"
 import {writeFile, readFile, chmod} from "fs/promises"
 import {homedir} from "os"
 import {join} from "path"
-import {generateBundledMiniapps} from "./generate-bundled-miniapps.mjs"
 import {clearAutolinkingCache} from "./clear-autolinking-cache.mjs"
 
 /**
@@ -41,9 +40,8 @@ async function syncMapboxNetrc() {
 }
 
 export async function setBuildEnv() {
-  // Keep src/generated/bundledMiniapps.ts in sync with assets/miniapps/*.zip
-  // before any prebuild/bundle so newly-dropped bundles get shipped.
-  await generateBundledMiniapps()
+  // Foverlay bundles no miniapps in the APK (XERK-214); they're installed at
+  // startup from GitHub Releases, so there's no bundled-miniapp codegen here.
 
   // If running under `doppler run`, mirror the Mapbox sk. token into ~/.netrc
   // for iOS SPM. No-op otherwise (manual-setup developers untouched).

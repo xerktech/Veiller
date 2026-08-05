@@ -191,10 +191,18 @@ you are otherwise asked to change one of those miniapps:
    branch if it is already available locally.
 2. Make the changes in the external miniapp repository, bump its version, and
    push the changes directly to that repository's `main` branch.
-3. Package the updated miniapp as a ZIP archive.
-4. Add the new ZIP archive to `mobile/assets/miniapps/` in the MentraOS
-   monorepo so the external miniapp update is included in the MentraOS mobile
-   PR.
+3. Package the updated miniapp as a flat Mentra bundle ZIP (miniapp.json at the
+   root) and publish it as an asset on a GitHub Release in that public repo. The
+   asset name must contain `foverlay` and end in `.zip` (the Turma/Tenir
+   pipelines name it `<repo>-foverlay-v<version>.zip`), and the release must be
+   tagged `v<version>` where `<version>` equals the bundle's miniapp.json
+   version.
+4. Foverlay ships **no** miniapps inside the APK (XERK-214). To have Foverlay
+   install the miniapp, add an entry for its repo to
+   `mobile/src/config/foverlayMiniapps.ts`; the app downloads the latest release
+   bundle for each listed repo at startup (see
+   `mobile/src/services/miniapps/foverlayMiniappSync.ts`). No zip is added to the
+   monorepo.
 
 ## Bug Report Logs
 

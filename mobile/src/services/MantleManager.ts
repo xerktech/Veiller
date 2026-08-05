@@ -1,15 +1,14 @@
 import BluetoothSdk from "@mentra/bluetooth-sdk-internal"
 import CrustModule from "@mentra/crust"
-import {Asset} from "expo-asset"
 import * as Calendar from "expo-calendar"
 import {router} from "expo-router"
 import {AppState} from "react-native"
 
 import {bootstrapMentraJS} from "@/services/mentraJsBootstrap"
 import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
+import {foverlayMiniappSync} from "@/services/miniapps/foverlayMiniappSync"
 import builtInMiniappCatalog from "@/services/miniapps/BuiltInMiniappCatalog"
-import {BUNDLED_MINIAPPS} from "@/generated/bundledMiniapps"
-import {CHINA_HIDDEN_APPS, isChinaBuild, notifyPackageName} from "@/constants/miniapps"
+import {notifyPackageName} from "@/constants/miniapps"
 import {migrate} from "@/services/Migrations"
 import {buildSpokenNotification} from "@/services/notifications/spokenNotification"
 import {shapeCalendarEventsForGlasses, type GlassesCalendarEvent} from "@/services/calendar/shapeCalendarEvents"
@@ -37,35 +36,9 @@ import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
 import {showAlert} from "@/utils/AlertUtils"
 import {Buffer} from "@craftzdog/react-native-buffer"
 
-/**
- * Miniapp bundles shipped inside the app binary, installed on first launch by
- * MantleManager.installBundledMiniapps(). BUNDLED_MINIAPPS is code-generated
- * from every *.zip in assets/miniapps/ by scripts/generate-bundled-miniapps.mjs
- * (Metro can only bundle assets referenced by a literal string require(), so the
- * list must be static) — to ship an update, just drop a new zip in that
- * directory; the generator runs on `bun start`/prebuild.
- *
- * The filename encodes packageName + version (e.g.
- * `com.mentra.navigation-1.0.2.zip`), so we read those straight off the asset
- * name to decide whether the bundle is already installed and up to date — no
- * need to unzip just to check. See src/generated/bundledMiniapps.ts.
- */
-
-/**
- * Parse `<packageName>-<version>` out of a bundled miniapp asset name like
- * `com.mentra.navigation-1.0.2.zip`. Splits on the last hyphen so dotted
- * package names (which contain no hyphens) stay intact. Returns null if the
- * name doesn't match the expected shape.
- */
-function parseBundledMiniappName(name: string): {packageName: string; version: string} | null {
-  const base = name.replace(/\.zip$/i, "")
-  const lastHyphen = base.lastIndexOf("-")
-  if (lastHyphen <= 0 || lastHyphen === base.length - 1) return null
-  return {
-    packageName: base.slice(0, lastHyphen),
-    version: base.slice(lastHyphen + 1),
-  }
-}
+// Foverlay ships NO miniapps inside the APK (XERK-214). Miniapps are installed
+// at startup from their repos' GitHub Releases — see initMiniapps() below and
+// src/services/miniapps/foverlayMiniappSync.ts.
 
 // The background phone-location task + its tier control moved into island
 // (PhoneLocationService). MantleManager now drives it through the island service
@@ -508,10 +481,17 @@ class MantleManager {
     // Initialize local miniapp runtime
     localMiniappRuntime.initialize()
 
-    // Install any bundled miniapps that ship with the app and aren't on disk
-    // yet (or are an older version). Runs after the registry is warm so the
-    // already-installed check below sees the real on-disk state.
-    await this.installBundledMiniapps()
+    // Foverlay bundles no miniapps in the APK (XERK-214). Install the latest
+    // bundle for each repo in config/foverlayMiniapps.ts straight from its
+    // GitHub Releases. Runs after the registry is warm so the already-installed
+    // check sees real on-disk state, and is best-effort — an unreachable or
+    // rate-limited repo must not block boot; the app then runs with whatever
+    // versions a prior run already put on disk.
+    try {
+      await foverlayMiniappSync.sync()
+    } catch (err) {
+      console.warn("MANTLE: foverlay miniapp sync failed (offline / GitHub unavailable):", err)
+    }
 
     // Then reconcile the admin-managed preinstall registry from Cloud V2. This
     // lets Core move users to newer bundled miniapp releases without shipping a
@@ -531,57 +511,6 @@ class MantleManager {
     // upgraded bundles are on disk first. Best-effort — never block miniapp
     // init on it.
     miniappLauncher.autostartLocalMiniapps().catch((e) => console.warn("MANTLE: autostartLocalMiniapps failed", e))
-  }
-
-  /**
-   * Install the miniapp zips bundled into the app binary under
-   * @assets/miniapps. Metro's `require` needs static string literals, so the
-   * BUNDLED_MINIAPPS require() list is code-generated from the directory
-   * (see src/generated/bundledMiniapps.ts) rather than globbed at runtime.
-   *
-   * The asset name carries packageName + version, so we read those off the
-   * filename and skip the bundle entirely when that exact version is already
-   * installed — no unzip needed to check. Otherwise we materialize the asset
-   * to disk (expo-asset gives us a file:// URI, but `File.downloadFileAsync`
-   * is HTTP-only) and hand the local zip to AppRegistry, which unzips and
-   * installs it.
-   */
-  private async installBundledMiniapps() {
-    for (const module of BUNDLED_MINIAPPS) {
-      try {
-        const asset = Asset.fromModule(module)
-        const parsed = parseBundledMiniappName(asset.name)
-        if (!parsed) {
-          console.warn(`MANTLE: bundled miniapp asset name "${asset.name}" is not <packageName>-<version>`)
-          continue
-        }
-        const {packageName, version} = parsed
-
-        // China build: don't install hidden bundled miniapps (e.g. Mentra Map).
-        if (isChinaBuild() && CHINA_HIDDEN_APPS.includes(packageName)) {
-          continue
-        }
-
-        if (appRegistry.getInstalledVersions(packageName).includes(version)) {
-          continue
-        }
-
-        await asset.downloadAsync()
-        if (!asset.localUri) {
-          console.warn(`MANTLE: bundled miniapp ${packageName} has no localUri after download`)
-          continue
-        }
-
-        const res = await appRegistry.installFromLocalZip(asset.localUri)
-        if (res.is_error()) {
-          console.error(`MANTLE: failed to install bundled miniapp ${packageName}@${version}:`, res.error)
-          continue
-        }
-        console.log(`MANTLE: installed bundled miniapp ${res.value.packageName}@${res.value.version}`)
-      } catch (error) {
-        console.error(`MANTLE: error installing bundled miniapp:`, error)
-      }
-    }
   }
 
   private async setupPeriodicTasks() {
