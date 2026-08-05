@@ -140,7 +140,7 @@ interface InstalledLma {
 }
 
 export interface MiniappReleaseIdentity {
-  source: "direct_download" | "bundled_asset" | "preinstalled_registry" | "dev_snapshot"
+  source: "direct_download" | "bundled_asset" | "preinstalled_registry" | "dev_snapshot" | "github_release"
   releaseId?: string
   bundleSha256?: string
   channel?: string
