@@ -1,14 +1,13 @@
 import {Image, ImageSource} from "expo-image"
 import {useVideoPlayer, VideoView, VideoSource, VideoPlayer} from "expo-video"
 import {ReactNode, useState, useCallback, useEffect, useMemo, useRef} from "react"
-import {View, ViewStyle, ActivityIndicator, Platform, Animated, ScrollView} from "react-native"
+import {View, ViewStyle, ActivityIndicator, Animated, ScrollView} from "react-native"
 
 import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
 import {Text, Button, Header, Icon} from "@/components/ignite"
 import {focusEffectPreventBack} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting} from "@mentra/engine"
 import {translate} from "@/i18n/translate"
 import {BgTimer} from "@mentra/engine"
 
@@ -108,7 +107,6 @@ export function OnboardingGuide({
 }: OnboardingGuideProps) {
   const {clearHistoryAndGoHome} = useNavigationStore.getState()
   const {theme} = useAppTheme()
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showNextButton, setShowNextButton] = useState(false)
@@ -663,91 +661,6 @@ export function OnboardingGuide({
     )
   }
 
-  const renderDebugVideos = () => {
-    let s = step as VideoStep
-    let showPoster = false
-
-    // console.log("ONBOARD: player1Loading", player1Loading)
-    // console.log("ONBOARD: player2Loading", player2Loading)
-    // console.log("ONBOARD: activePlayer", activePlayer)
-    // console.log("ONBOARD: showPoster", showPoster)
-    return (
-      <>
-        <View className="relative flex-col w-full">
-          <View
-            className={`flex flex-row w-full z-100 px-20 bg-chart-4/20 rounded-lg ${
-              Platform.OS === "ios" ? "absolute" : ""
-            }`}>
-            <View style={{width: s.poster ? "33%" : "50%"}}>
-              {!player1Loading && (
-                <VideoView
-                  player={player1}
-                  style={{
-                    width: "100%",
-                    aspectRatio: 1,
-                    borderWidth: activePlayer === 1 && !showPoster ? 2 : 0,
-                    borderColor: theme.colors.primary,
-                  }}
-                  nativeControls={false}
-                  allowsVideoFrameAnalysis={false}
-                  onFirstFrameRender={() => {
-                    console.log("ONBOARD: player1 first frame render")
-                  }}
-                />
-              )}
-              {player1Loading && (
-                <View className="absolute top-0 left-0 right-0 bottom-0 z-10 items-center justify-center">
-                  <ActivityIndicator size="large" color={theme.colors.foreground} />
-                </View>
-              )}
-            </View>
-            <View style={{width: s.poster ? "33%" : "50%"}}>
-              {!player2Loading && (
-                <VideoView
-                  player={player2}
-                  style={{
-                    width: "100%",
-                    aspectRatio: 1,
-                    borderWidth: activePlayer === 2 && !showPoster ? 2 : 0,
-                    borderColor: theme.colors.primary,
-                  }}
-                  nativeControls={false}
-                  allowsVideoFrameAnalysis={false}
-                  onFirstFrameRender={() => {
-                    console.log("ONBOARD: player2 first frame render")
-                  }}
-                />
-              )}
-              {player2Loading && (
-                <View className="absolute top-0 left-0 right-0 bottom-0 z-10 items-center justify-center">
-                  <ActivityIndicator size="large" color={theme.colors.foreground} />
-                </View>
-              )}
-            </View>
-            {s.poster && (
-              <Image
-                source={s.poster}
-                style={{
-                  width: "33%",
-                  height: "100%",
-                  borderWidth: showPoster ? 2 : 0,
-                  borderColor: theme.colors.primary,
-                }}
-                contentFit="contain"
-              />
-            )}
-            {!s.poster && (
-              <View className="w-1/3 items-center justify-center bg-background">
-                <ActivityIndicator size="large" color={theme.colors.foreground} />
-              </View>
-            )}
-          </View>
-          <View className="relative w-full h-full">{renderComposedVideo()}</View>
-        </View>
-      </>
-    )
-  }
-
   const renderContent = () => {
     if (isCurrentStepImage) {
       return (
@@ -766,10 +679,6 @@ export function OnboardingGuide({
             ))}
         </View>
       )
-    }
-
-    if (superMode) {
-      return renderDebugVideos()
     }
 
     return renderComposedVideo()
@@ -954,8 +863,7 @@ export function OnboardingGuide({
   const renderStepCheck = () => {
     const showCheck = step.waitFn && !waitState
 
-    const showDebug = superMode && waitState && step.waitFn
-    if (!showCheck && !showDebug) {
+    if (!showCheck) {
       if (step.compactBody) {
         return null
       }
@@ -965,22 +873,13 @@ export function OnboardingGuide({
       // }
     }
     return (
-      <View id="bottom" className={`flex justify-end h-12 ${superMode ? "bg-chart-4" : ""}`}>
+      <View id="bottom" className="flex justify-end h-12">
         {showCheck && (
           <View className="flex-1 justify-center">
             <View className="flex flex-row justify-center items-center">
               <View className="bg-primary rounded-full p-1.5">
                 <Icon name="check" size={24} color={theme.colors.background} />
               </View>
-            </View>
-          </View>
-        )}
-        {/* if waitState is true, show a primary indicator with a height of 12px that overlays the content */}
-        {showDebug && (
-          <View className="flex-1 justify-center">
-            <View className="flex flex-row justify-center items-center gap-2">
-              <Text className="text-center text-sm font-bold" text="waiting for step to complete" />
-              <ActivityIndicator size="small" color={theme.colors.background} />
             </View>
           </View>
         )}
@@ -1073,12 +972,7 @@ export function OnboardingGuide({
             </View>
           )}
 
-          {hasStarted && (
-            <View className="flex-row gap-4">
-              {superMode && !isFirstStep && <Button flex preset="secondary" tx="common:back" onPress={handleBack} />}
-              {renderContinueButton()}
-            </View>
-          )}
+          {hasStarted && <View className="flex-row gap-4">{renderContinueButton()}</View>}
         </View>
       </View>
     </>

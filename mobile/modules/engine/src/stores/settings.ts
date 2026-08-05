@@ -50,8 +50,6 @@ export interface Setting {
 
 export const SETTINGS: Record<string, Setting> = {
   // feature flags / mantle settings:
-  dev_mode: {key: "dev_mode", defaultValue: () => __DEV__, writable: true, saveOnServer: true, persist: true}, // deprecated
-  debug_mode: {key: "debug_mode", defaultValue: () => __DEV__, writable: true, saveOnServer: true, persist: true},
   android_notification_listener_enabled: {
     key: "android_notification_listener_enabled",
     // Operational kill switch. The listener now runs in a guarded lightweight
@@ -61,7 +59,6 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
-  super_mode: {key: "super_mode", defaultValue: () => false, writable: true, saveOnServer: true, persist: true},
   // Tap Strap takeover is phone-local hardware state (which straps are paired to
   // THIS phone), so it never syncs to the server. Native is seeded from it at
   // engine start and on every change by the TapStrapCoordinator.
@@ -74,13 +71,6 @@ export const SETTINGS: Record<string, Setting> = {
   },
   app_boot_extra_info: {
     key: "app_boot_extra_info",
-    defaultValue: () => false,
-    writable: true,
-    saveOnServer: true,
-    persist: true,
-  },
-  miniapp_dev_mode: {
-    key: "miniapp_dev_mode",
     defaultValue: () => false,
     writable: true,
     saveOnServer: true,
@@ -350,13 +340,6 @@ export const SETTINGS: Record<string, Setting> = {
     defaultValue: () => 0,
     writable: true,
     saveOnServer: true,
-    persist: true,
-  },
-  show_advanced_settings: {
-    key: "show_advanced_settings",
-    defaultValue: () => false,
-    writable: true,
-    saveOnServer: false,
     persist: true,
   },
   onboarding_completed: {

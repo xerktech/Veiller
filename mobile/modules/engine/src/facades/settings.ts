@@ -3,7 +3,7 @@
  * the engine-owned settings store. This is the (A) OEM contract; the raw store at
  * `engine.stores.settings` is the Mentra-app escape hatch.
  *
- * Keys + their schema live in `SETTINGS` (theme, devMode, metric/twelveHourTime,
+ * Keys + their schema live in `SETTINGS` (theme, metric/twelveHourTime,
  * notifications, onboarding flags, …); `descriptor(key)`/`keys()` expose them.
  */
 import {useSettingsStore, SETTINGS} from "../stores/settings"

@@ -17,11 +17,8 @@ function isLegacyAsgOtaStartBuild(glassesBuildNumber?: string | null): boolean {
 }
 
 function getOtaVersionUrlDevOverride(): string | null {
-  // Super mode only: a wrong OTA manifest can brick glasses, so a saved
-  // override is inert unless super mode is currently enabled.
-  if (!useSettingsStore.getState().getSetting(SETTINGS.super_mode.key)) {
-    return null
-  }
+  // Warning: a wrong OTA manifest can brick glasses. A saved override is applied
+  // whenever it is set (the override URL is set from Debug > OTA Version URL).
   const value = useSettingsStore.getState().getSetting(SETTINGS.ota_version_url.key)
   const trimmed = typeof value === "string" ? value.trim() : ""
   return trimmed || null

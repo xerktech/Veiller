@@ -32,15 +32,12 @@ export default function DebugSettingsScreen() {
   const {theme} = useAppTheme()
   const {goBack, push, replaceAll, clearHistoryAndGoHome} = useNavigationStore.getState()
   const [defaultWearable] = useSetting(SETTINGS.default_wearable.key)
-  const [debugMode, setDebugMode] = useSetting(SETTINGS.debug_mode.key)
   const [androidNotificationListenerEnabled, setAndroidNotificationListenerEnabled] = useSetting(
     SETTINGS.android_notification_listener_enabled.key,
   )
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
   const [powerSavingMode, setPowerSavingMode] = useSetting(SETTINGS.power_saving_mode.key)
   const [reconnectOnAppForeground, setReconnectOnAppForeground] = useSetting(SETTINGS.reconnect_on_app_foreground.key)
   const [enableSquircles, setEnableSquircles] = useSetting(SETTINGS.enable_squircles.key)
-  const [miniappDevMode, setMiniappDevMode] = useSetting(SETTINGS.miniapp_dev_mode.key)
   const [appBootExtraInfo, setAppBootExtraInfo] = useSetting(SETTINGS.app_boot_extra_info.key)
   const [debugConsole, setDebugConsole] = useSetting(SETTINGS.debug_console.key)
   const [_onboardingOsCompleted, setOnboardingOsCompleted] = useSetting(SETTINGS.onboarding_os_completed.key)
@@ -71,12 +68,6 @@ export default function DebugSettingsScreen() {
           </View>
 
           <Group title="Settings">
-            <ToggleSetting
-              label="Debug Mode"
-              subtitle="Enable debug mode"
-              value={debugMode}
-              onValueChange={(value) => setDebugMode(value)}
-            />
             {Platform.OS === "android" && (
               <ToggleSetting
                 label="Android Notification Listener"
@@ -104,13 +95,6 @@ export default function DebugSettingsScreen() {
               subtitle="Use iOS-style squircle app icons instead of circles"
               value={enableSquircles}
               onValueChange={(value) => setEnableSquircles(value)}
-            />
-
-            <ToggleSetting
-              label="Miniapp Developer Settings"
-              subtitle="Show the Miniapp Developer settings menu"
-              value={miniappDevMode}
-              onValueChange={(value) => setMiniappDevMode(value)}
             />
 
             <ToggleSetting
@@ -270,10 +254,10 @@ export default function DebugSettingsScreen() {
             <CloudUrl />
           </Group>
 
-          {/* Super mode only: a wrong OTA manifest can brick glasses */}
-          {superMode && <OtaVersionUrl />}
+          {/* Warning: a wrong OTA manifest can brick glasses. */}
+          <OtaVersionUrl />
 
-          {superMode && <RouteButton label="Super Settings" onPress={() => push("/miniapps/settings/super")} />}
+          <RouteButton label="Super Settings" onPress={() => push("/miniapps/settings/super")} />
 
           <Spacer height={theme.spacing.s12} />
         </View>

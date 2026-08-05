@@ -125,7 +125,10 @@ async function fetchVersionInfoDetailed(url: string): Promise<ManifestFetchResul
       // 4xx: the manifest does not exist (or is gone) — permanent for this app
       // build, retrying cannot help. Everything else is transient server/network
       // trouble and retryable.
-      return {json: null, failureReason: response.status >= 400 && response.status < 500 ? "pin_unavailable" : "network"}
+      return {
+        json: null,
+        failureReason: response.status >= 400 && response.status < 500 ? "pin_unavailable" : "network",
+      }
     }
     try {
       return {json: await response.json()}
@@ -192,12 +195,7 @@ export function getApkUpdateDirection(
   // Downgrades require an exact pin AND a target at/above the enabled floor. A non-positive floor
   // disables downgrades entirely, matching ASG's fail-closed DowngradeGate — so the phone never
   // offers what the glasses would refuse.
-  if (
-    serverVersion < currentVersion &&
-    exactPin &&
-    floorVersionCode > 0 &&
-    serverVersion >= floorVersionCode
-  ) {
+  if (serverVersion < currentVersion && exactPin && floorVersionCode > 0 && serverVersion >= floorVersionCode) {
     return "downgrade"
   }
   return null
@@ -402,9 +400,8 @@ export async function checkCurrentGlassesForUpdate(
   }
 
   const embeddedManifestUrl = process.env.EXPO_PUBLIC_ASG_OTA_VERSION_URL?.trim()
-  const superMode = useSettingsStore.getState().getSetting(SETTINGS.super_mode.key)
   const overrideUrl = useSettingsStore.getState().getSetting(SETTINGS.ota_version_url.key)
-  const overrideActive = superMode && typeof overrideUrl === "string" && overrideUrl.trim() !== ""
+  const overrideActive = typeof overrideUrl === "string" && overrideUrl.trim() !== ""
   if (!embeddedManifestUrl && !overrideActive) {
     console.log("OTA: check skipped - mobile app has no embedded OTA manifest pin")
     return emptyCheckResult("dev_build")
@@ -470,7 +467,13 @@ export async function checkCurrentGlassesForUpdate(
   }
 
   const manifestUrl = resolveOtaManifestUrl(useGlassesStore.getState().otaVersionUrl, buildNumber)
-  const result = await checkForOtaUpdate(manifestUrl, buildNumber, mtkFirmwareVersion, besFirmwareVersion, floorVersionCode)
+  const result = await checkForOtaUpdate(
+    manifestUrl,
+    buildNumber,
+    mtkFirmwareVersion,
+    besFirmwareVersion,
+    floorVersionCode,
+  )
 
   if (!result.hasCheckCompleted) {
     return {

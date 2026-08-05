@@ -1199,12 +1199,6 @@ const en = {
     loadMiniApp: "Load miniapp",
   },
   debug: {
-    debugMode: "Debug mode",
-    debugModeEnabled: "Debug mode enabled!",
-    debugModeMoreTaps: "{{number}} more taps to enable debug mode",
-    superMode: "Super mode",
-    superModeActivated: "Super mode activated! 🚀",
-    superModeDeactivated: "Super mode deactivated",
     versionInfo: "Version info",
     versionInfoCopied: "Version info copied to clipboard",
   },

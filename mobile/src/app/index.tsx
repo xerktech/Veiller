@@ -40,8 +40,8 @@ export default function InitScreen() {
   // State
   const initStartedRef = useRef(false)
   const [state, setState] = useState<ScreenState>("loading")
-  const [localVersion, setLocalVersion] = useState<string | null>(null)
-  const [cloudVersion, setCloudVersion] = useState<string | null>(null)
+  const [_localVersion, setLocalVersion] = useState<string | null>(null)
+  const [_cloudVersion, setCloudVersion] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUsingCustomUrl, setIsUsingCustomUrl] = useState(false)
   const [canSkipUpdate, setCanSkipUpdate] = useState(false)
@@ -52,9 +52,8 @@ export default function InitScreen() {
   // custom-URL detection + reset recovery operate on that setting, not the
   // retired V1 backend_url.
   const [coreUrl, setCoreUrl] = useSetting(SETTINGS.cloud_core_url.key)
-  const [onboardingCompleted, _setOnboardingCompleted] = useSetting(SETTINGS.onboarding_completed.key)
-  const [defaultWearable, _setDefaultWearable] = useSetting(SETTINGS.default_wearable.key)
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
+  const [_onboardingCompleted, _setOnboardingCompleted] = useSetting(SETTINGS.onboarding_completed.key)
+  const [_defaultWearable, _setDefaultWearable] = useSetting(SETTINGS.default_wearable.key)
   const [appBootExtraInfo] = useSetting(SETTINGS.app_boot_extra_info.key)
   const [bootPhase, setBootPhase] = useState<string>("Starting up…")
   const [cachedRequiredVersion, setCachedRequiredVersion] = useSetting(SETTINGS.cached_required_version.key)
@@ -307,18 +306,6 @@ export default function InitScreen() {
         <Text text={statusConfig.title} className="font-semibold text-xl text-center" />
         <View className="h-2" />
         <Text text={statusConfig.description} className="text-sm text-center" style={{color: theme.colors.textDim}} />
-
-        {/* Version info — only visible in super mode */}
-        {state === "outdated" && superMode && localVersion && cloudVersion && (
-          <>
-            <View className="h-4" />
-            <Text
-              text={`v${localVersion} → v${cloudVersion}`}
-              className="text-xs text-center"
-              style={{color: theme.colors.textDim}}
-            />
-          </>
-        )}
       </View>
 
       {/* Buttons */}

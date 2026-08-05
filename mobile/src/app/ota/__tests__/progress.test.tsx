@@ -2,7 +2,6 @@ import React from "react"
 import {render, act, fireEvent} from "@testing-library/react-native"
 
 import {useGlassesStore} from "../../../../modules/engine/src/stores/glasses"
-import {useNavigationStore} from "@/stores/navigation"
 
 import {useConnectionOverlayConfig} from "@/contexts/ConnectionOverlayContext"
 import GlobalEventEmitter from "@/utils/GlobalEventEmitter"
@@ -11,12 +10,6 @@ import OtaProgressScreen from "@/app/ota/progress"
 import {MINIMUM_OTA_STATUS_BUILD, OtaProgressMessages} from "@mentra/engine"
 
 const mockReplace = jest.fn()
-
-// super_mode is controlled through the REAL settings store — the screen's
-// useSetting comes from the global @mentra/engine mock, which passes the real
-// store-backed hook through.
-import {useSettingsStore} from "../../../../modules/engine/src/stores/settings"
-const setSuperMode = (enabled: boolean) => useSettingsStore.getState().setSetting("super_mode", enabled, false)
 
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   focusEffectPreventBack: jest.fn(),
@@ -80,7 +73,6 @@ function setGlassesDisconnected() {
 
 beforeEach(() => {
   jest.useFakeTimers()
-  setSuperMode(false)
   useGlassesStore.getState().reset()
   useConnectionOverlayConfig.getState().clearConfig()
   mockReplace.mockClear()
@@ -217,43 +209,6 @@ describe("progress.tsx display states", () => {
     setGlassesDisconnected()
     const {getByText} = render(<OtaProgressScreen />)
     expect(getByText("Glasses disconnected")).toBeDefined()
-  })
-
-  it("shows Skip (super) when disconnected in super mode", () => {
-    setSuperMode(true)
-    setGlassesDisconnected()
-    useGlassesStore.getState().setOtaStatus({
-      sessionId: "s1",
-      totalSteps: 1,
-      currentStep: 1,
-      stepType: "apk",
-      phase: "download",
-      stepPercent: 10,
-      overallPercent: 10,
-      status: "in_progress",
-    })
-    const replaceSpy = jest.spyOn(useNavigationStore.getState(), "replace")
-    const {getByText, getByTestId} = render(<OtaProgressScreen />)
-    expect(getByText("Skip (super)")).toBeDefined()
-    fireEvent.press(getByTestId("button-Skip (super)"))
-    expect(replaceSpy).toHaveBeenCalledWith("/ota/check-for-updates")
-    replaceSpy.mockRestore()
-  })
-
-  it("hides Skip (super) when disconnected without super mode", () => {
-    setGlassesDisconnected()
-    useGlassesStore.getState().setOtaStatus({
-      sessionId: "s1",
-      totalSteps: 1,
-      currentStep: 1,
-      stepType: "apk",
-      phase: "download",
-      stepPercent: 10,
-      overallPercent: 10,
-      status: "in_progress",
-    })
-    const {queryByText} = render(<OtaProgressScreen />)
-    expect(queryByText("Skip (super)")).toBeNull()
   })
 
   it("does NOT override complete state on disconnect", () => {
