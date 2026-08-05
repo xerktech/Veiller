@@ -241,8 +241,11 @@ object DeviceStore {
                 scheduleDashboardDepthToGlasses()
             }
             "bluetooth" to "head_up_angle" -> {
-                (value as? Int)?.let { angle ->
-                    DeviceManager.getInstance().sgc?.setHeadUpAngle(angle)
+                // The value arrives from the JS bridge as a Double, so `as? Int`
+                // returned null and every live angle change was silently dropped
+                // (every other numeric setting here reads `as? Number`).
+                (value as? Number)?.let { angle ->
+                    DeviceManager.getInstance().sgc?.setHeadUpAngle(angle.toInt())
                 }
             }
             // The on/off switch rides along with the angle in one firmware

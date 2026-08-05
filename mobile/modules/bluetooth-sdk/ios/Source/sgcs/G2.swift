@@ -1835,7 +1835,13 @@ class G2: NSObject, SGCManager {
             payload: payload,
             reserveFlag: true
         )
-        sendToGlasses(packets)
+        // Device settings must reach BOTH arms — each arm runs independent
+        // firmware and applies brightness / display position / tilt-to-wake to
+        // its own lens. Sending to the right arm only (the old default) left the
+        // left lens unchanged and, for head-up, never armed tilt detection. The
+        // dashboard-display path (12h/units/widgets) already sent to both, which
+        // is why that was the only setting that visibly worked.
+        sendToGlasses(packets, left: true, right: true)
     }
 
     private func sendOnboardingCommand(_ payload: Data) {
@@ -2056,13 +2062,15 @@ class G2: NSObject, SGCManager {
         // when the angle setting CHANGES, and handleG2Ready() (the settings
         // replay) is commented out, so after a reconnect head-up would stay off
         // until the user touched the slider again.
-        if let headUpAngle = DeviceStore.shared.get("bluetooth", "head_up_angle") as? Int {
+        let storedAngle = DeviceStore.shared.get("bluetooth", "head_up_angle")
+        if let headUpAngle = (storedAngle as? Int) ?? (storedAngle as? Double).map({ Int($0) }) {
             self.setHeadUpAngle(headUpAngle)
         }
 
         // Dashboard auto-close, then read back what the firmware settled on —
         // the value's unit/range is an assumption until a device confirms it.
-        if let timeout = DeviceStore.shared.get("bluetooth", "dashboard_timeout") as? Int {
+        let storedTimeout = DeviceStore.shared.get("bluetooth", "dashboard_timeout")
+        if let timeout = (storedTimeout as? Int) ?? (storedTimeout as? Double).map({ Int($0) }) {
             self.setDashboardTimeout(timeout)
         }
         self.requestDashboardTimeout()
@@ -3311,12 +3319,16 @@ class G2: NSObject, SGCManager {
     }
 
     private func sendModuleConfigureCommand(_ payload: Data) {
+        // Dashboard auto-close is a per-arm firmware setting too — send to both
+        // arms, like the other settings services (see sendG2SettingCommand).
         sendToGlasses(
             sendManager.buildPackets(
                 serviceId: ServiceID.moduleConfigure.rawValue,
                 payload: payload,
                 reserveFlag: true
-            )
+            ),
+            left: true,
+            right: true
         )
     }
 

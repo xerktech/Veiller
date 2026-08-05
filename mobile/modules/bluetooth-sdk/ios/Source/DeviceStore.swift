@@ -223,7 +223,8 @@ class DeviceStore {
             scheduleDashboardDepthToGlasses()
 
         case ("bluetooth", "head_up_angle"):
-            if let angle = value as? Int {
+            // Accept Int or Double — the JS bridge may deliver either.
+            if let angle = (value as? Int) ?? (value as? Double).map({ Int($0) }) {
                 DeviceManager.shared.sgc?.setHeadUpAngle(angle)
             }
 
@@ -236,7 +237,8 @@ class DeviceStore {
             }
 
         case ("bluetooth", "head_up_enabled"):
-            let angle = store.get("bluetooth", "head_up_angle") as? Int ?? 30
+            let stored = store.get("bluetooth", "head_up_angle")
+            let angle = (stored as? Int) ?? (stored as? Double).map { Int($0) } ?? 30
             DeviceManager.shared.sgc?.setHeadUpAngle(angle)
 
         case ("bluetooth", "imu_enabled"):
