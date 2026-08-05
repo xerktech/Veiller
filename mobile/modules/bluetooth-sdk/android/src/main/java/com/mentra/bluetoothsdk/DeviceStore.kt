@@ -127,6 +127,9 @@ object DeviceStore {
         store.set("bluetooth", "head_up_angle", 30)
         store.set("bluetooth", "head_up_enabled", true)
         store.set("bluetooth", "dashboard_timeout", 15)
+        store.set("bluetooth", "hey_even_enabled", false)
+        store.set("bluetooth", "wear_detection_enabled", true)
+        store.set("bluetooth", "silent_mode_enabled", false)
         store.set("bluetooth", "imu_enabled", false)
         store.set("bluetooth", "contextual_dashboard", true)
         store.set("bluetooth", "gallery_mode", true)
@@ -256,6 +259,21 @@ object DeviceStore {
             "bluetooth" to "head_up_enabled" -> {
                 val angle = (get("bluetooth", "head_up_angle") as? Number)?.toInt() ?: 30
                 DeviceManager.getInstance().sgc?.setHeadUpAngle(angle)
+            }
+            "bluetooth" to "hey_even_enabled" -> {
+                (value as? Boolean)?.let { enabled ->
+                    DeviceManager.getInstance().sgc?.setHeyEvenEnabled(enabled)
+                }
+            }
+            "bluetooth" to "wear_detection_enabled" -> {
+                (value as? Boolean)?.let { enabled ->
+                    DeviceManager.getInstance().sgc?.setWearDetection(enabled)
+                }
+            }
+            "bluetooth" to "silent_mode_enabled" -> {
+                (value as? Boolean)?.let { enabled ->
+                    DeviceManager.getInstance().sgc?.setSilentMode(enabled)
+                }
             }
             "bluetooth" to "imu_enabled" -> {
                 (value as? Boolean)?.let { enabled ->

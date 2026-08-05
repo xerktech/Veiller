@@ -273,6 +273,22 @@ abstract class SGCManager {
         Bridge.log("SGC: setImuEnabled not supported")
     }
 
+    /**
+     * Enable/disable the firmware "Hey Even" wake word. Default no-op — only G2
+     * (Even Realities firmware) exposes this.
+     */
+    open fun setHeyEvenEnabled(enabled: Boolean) {
+        Bridge.log("SGC: setHeyEvenEnabled not supported")
+    }
+
+    /**
+     * Enable/disable wear detection (pause the display when the glasses are
+     * removed). Default no-op — only G2 exposes this.
+     */
+    open fun setWearDetection(enabled: Boolean) {
+        Bridge.log("SGC: setWearDetection not supported")
+    }
+
     abstract fun getBatteryStatus()
     abstract fun setSilentMode(enabled: Boolean)
     abstract fun exit()

@@ -161,6 +161,10 @@ protocol SGCManager {
     /// Enable/disable raw accelerometer (IMU) reporting from the glasses.
     /// Default no-op; only G2 streams IMU data today.
     func setImuEnabled(_ enabled: Bool) async
+    /// Enable/disable the firmware "Hey Even" wake word. Default no-op — only G2.
+    func setHeyEvenEnabled(_ enabled: Bool)
+    /// Enable/disable wear detection (pause display when removed). Default no-op — only G2.
+    func setWearDetection(_ enabled: Bool)
     func getBatteryStatus()
     func setSilentMode(_ enabled: Bool)
     func exit()
@@ -356,6 +360,11 @@ extension SGCManager {
     func showNotificationsPanel() async {}
 
     func setDashboardTimeout(_: Int) {}
+
+    // MARK: - Hey Even wake word / wear detection (default no-op — only G2)
+
+    func setHeyEvenEnabled(_: Bool) {}
+    func setWearDetection(_: Bool) {}
 
     // MARK: - IMU (default no-op — only G2 streams accelerometer data)
 

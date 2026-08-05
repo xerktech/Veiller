@@ -24,6 +24,7 @@ import DashboardSettings from "@/app/miniapps/settings/dashboard"
 import DebugSettings from "@/app/miniapps/settings/debug"
 import DeviceInfoScreen from "@/app/miniapps/settings/device-info"
 import FeedbackScreen from "@/app/miniapps/settings/feedback"
+import GlassesControlsSettings from "@/app/miniapps/settings/glasses"
 import GlassesMenuSettings from "@/app/miniapps/settings/glasses-menu"
 import LayoutSettings from "@/app/miniapps/settings/layout"
 import MainSettings from "@/app/miniapps/settings/main"
@@ -50,6 +51,7 @@ const settingsRoutes: Record<string, ComponentType<any>> = {
   "/miniapps/settings/debug": DebugSettings,
   "/miniapps/settings/device-info": DeviceInfoScreen,
   "/miniapps/settings/feedback": FeedbackScreen,
+  "/miniapps/settings/glasses": GlassesControlsSettings,
   "/miniapps/settings/glasses-menu": GlassesMenuSettings,
   "/miniapps/settings/layout": LayoutSettings,
   "/miniapps/settings/microphone": MicrophoneSettings,

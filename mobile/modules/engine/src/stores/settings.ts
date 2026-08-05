@@ -510,6 +510,34 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
+  // "Hey Even" firmware wake word (G2, EvenAI service). Default off: the app
+  // drives its own voice pipeline, and the driver has always disabled Even's
+  // wake word on connect — this makes that an explicit, opt-in choice.
+  hey_even_enabled: {
+    key: "hey_even_enabled",
+    defaultValue: () => false,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
+  // Wear detection (G2 firmware): pause the display when the glasses are taken
+  // off. Default on, matching the firmware's own default.
+  wear_detection_enabled: {
+    key: "wear_detection_enabled",
+    defaultValue: () => true,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
+  // Silent mode (G2 firmware): suppress the audio cue on notifications/pushes.
+  // Default off.
+  silent_mode_enabled: {
+    key: "silent_mode_enabled",
+    defaultValue: () => false,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
   brightness: {key: "brightness", defaultValue: () => 50, writable: true, saveOnServer: true, persist: true},
   auto_brightness: {
     key: "auto_brightness",
@@ -734,6 +762,9 @@ export const BLUETOOTH_SETTING_KEYS: string[] = [
   SETTINGS.head_up_angle.key,
   SETTINGS.head_up_enabled.key,
   SETTINGS.dashboard_timeout.key,
+  SETTINGS.hey_even_enabled.key,
+  SETTINGS.wear_detection_enabled.key,
+  SETTINGS.silent_mode_enabled.key,
   SETTINGS.brightness.key,
   SETTINGS.auto_brightness.key,
   SETTINGS.dashboard_height.key,
