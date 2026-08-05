@@ -1,0 +1,17 @@
+{
+  "name": "local-tenir",
+  "private": true,
+  "description": "Local miniapp port of the Tenir Even G2 glasses app (self-hosted live captions)",
+  "scripts": {
+    "dev": "mentra-miniapp dev",
+    "build": "bun run build.ts",
+    "pack": "bun run build && mentra-miniapp pack --no-build",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@mentra/miniapp": "workspace:*"
+  },
+  "devDependencies": {
+    "@mentra/miniapp-cli": "workspace:*"
+  }
+}
