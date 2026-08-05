@@ -33,6 +33,12 @@ export interface FoverlayMiniappSource {
   /** The miniapp package id, e.g. "com.xerktech.turma". Used for the already-installed check. */
   packageName: string
   /**
+   * Human-readable name shown in the miniapp store (XERK-217). Used as the row
+   * label before the miniapp is installed; once installed, the manifest name
+   * from the on-disk bundle takes over.
+   */
+  name: string
+  /**
    * Optional case-insensitive regex (as a string) matched against release asset
    * names to locate the bundle. Defaults to /foverlay.*\.zip$/i.
    */
@@ -40,6 +46,6 @@ export interface FoverlayMiniappSource {
 }
 
 export const FOVERLAY_MINIAPPS: FoverlayMiniappSource[] = [
-  {repo: "xerktech/Turma", packageName: "com.xerktech.turma"},
-  {repo: "xerktech/Tenir", packageName: "com.xerktech.tenir"},
+  {repo: "xerktech/Turma", packageName: "com.xerktech.turma", name: "Turma"},
+  {repo: "xerktech/Tenir", packageName: "com.xerktech.tenir", name: "Tenir"},
 ]

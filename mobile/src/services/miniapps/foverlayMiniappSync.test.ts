@@ -29,6 +29,13 @@ jest.mock("@mentra/engine/internal", () => ({
   },
 }))
 
+// Store enable/disable state (XERK-217). Defaults to enabled; a test flips it to
+// exercise the disabled-source skip.
+const mockIsEnabled = jest.fn<boolean, [string]>()
+jest.mock("@/services/miniapps/foverlayMiniappPrefs", () => ({
+  isFoverlayMiniappEnabled: (pkg: string) => mockIsEnabled(pkg),
+}))
+
 const mockDownloadFileAsync = jest.fn()
 jest.mock("expo-file-system", () => {
   class Directory {
@@ -79,6 +86,7 @@ const okResult = (packageName: string, version: string) => ({
 beforeEach(() => {
   mockSources = []
   mockGetInstalledVersions.mockReset().mockReturnValue([])
+  mockIsEnabled.mockReset().mockReturnValue(true)
   mockInstallFromLocalZip.mockReset()
   mockDownloadFileAsync.mockReset()
   ;(global as any).fetch = jest.fn()
@@ -133,6 +141,37 @@ describe("foverlayMiniappSync", () => {
     expect(mockGetInstalledVersions).toHaveBeenCalledWith("com.xerktech.turma")
     expect(mockDownloadFileAsync).not.toHaveBeenCalled()
     expect(mockInstallFromLocalZip).not.toHaveBeenCalled()
+  })
+
+  it("skips a source that is disabled (unchecked) in the store", async () => {
+    mockSources = [{repo: "xerktech/Tenir", packageName: "com.xerktech.tenir"}]
+    mockIsEnabled.mockReturnValue(false)
+
+    await foverlayMiniappSync.sync()
+
+    // Disabled sources are skipped before any network/registry work.
+    expect(mockIsEnabled).toHaveBeenCalledWith("com.xerktech.tenir")
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(mockDownloadFileAsync).not.toHaveBeenCalled()
+    expect(mockInstallFromLocalZip).not.toHaveBeenCalled()
+  })
+
+  it("installLatest installs even when the source is disabled and already installed", async () => {
+    // The store's explicit Install/Update button bypasses both the enabled check
+    // and the already-installed skip.
+    const source = {repo: "xerktech/Turma", packageName: "com.xerktech.turma", name: "Turma"}
+    mockIsEnabled.mockReturnValue(false)
+    mockGetInstalledVersions.mockReturnValue(["0.6.46"])
+    ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
+      releasesResponse([{tag: "v0.6.47", assets: ["turma-foverlay-v0.6.47.zip"]}]),
+    )
+    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/foverlay_miniapps/turma-foverlay-v0.6.47.zip"})
+    mockInstallFromLocalZip.mockResolvedValue(okResult("com.xerktech.turma", "0.6.47"))
+
+    const result = await foverlayMiniappSync.installLatest(source)
+
+    expect(result).toEqual({packageName: "com.xerktech.turma", version: "0.6.47"})
+    expect(mockInstallFromLocalZip).toHaveBeenCalledTimes(1)
   })
 
   it("picks the newest release that actually carries the foverlay bundle", async () => {
