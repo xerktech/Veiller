@@ -312,30 +312,6 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
             deploymentTarget: "15.5", // for react-native-zip-archive
             extraPods: [
               {
-                name: "FirebaseCore",
-                modular_headers: true,
-              },
-              {
-                name: "FirebaseCoreInternal",
-                modular_headers: true,
-              },
-              {
-                name: "FirebaseInstallations",
-                modular_headers: true,
-              },
-              {
-                name: "GoogleAppMeasurement",
-                modular_headers: true,
-              },
-              {
-                name: "GoogleUtilities",
-                modular_headers: true,
-              },
-              {
-                name: "nanopb",
-                modular_headers: true,
-              },
-              {
                 name: "SDWebImage",
                 modular_headers: true,
               },
@@ -367,15 +343,12 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
           },
         },
       ],
-      "@livekit/react-native-expo-plugin",
-      "@config-plugins/react-native-webrtc",
       [
         "expo-location",
         {
           locationAlwaysAndWhenInUsePermission: "Allow Foverlay to use your location.",
         },
       ],
-      ...(variant.includeFirebase ? ["@react-native-firebase/app"] : []),
       "expo-audio",
       [
         "expo-video",

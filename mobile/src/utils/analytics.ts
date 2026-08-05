@@ -1,56 +1,15 @@
-import {SETTINGS, engine} from "@mentra/engine"
+// Firebase Analytics was removed (XERK-200): the SDK shipped Firebase Core +
+// GoogleAppMeasurement in every build while nothing in the app ever logged an
+// event — PostHog and Sentry are the live telemetry paths. The exported API is
+// kept as no-ops so call sites (and future ones) stay source-compatible; if
+// product analytics are wanted here again, route them to PostHog instead.
 
-let analyticsModule: typeof import("@react-native-firebase/analytics") | null = null
-let initialized = false
+export async function initAnalytics() {}
 
-function isChina(): boolean {
-  return engine.settings.get(SETTINGS.china_deployment.key) === true
-}
+export async function logEvent(_name: string, _params?: Record<string, string | number | boolean>) {}
 
-async function getAnalytics() {
-  if (isChina()) return null
-  if (!analyticsModule) {
-    try {
-      analyticsModule = require("@react-native-firebase/analytics")
-    } catch {
-      console.warn("Firebase Analytics not available")
-      return null
-    }
-  }
-  const module = analyticsModule
-  if (!module) return null
-  return module.default()
-}
+export async function setUserId(_id: string | null) {}
 
-export async function initAnalytics() {
-  if (initialized || isChina()) return
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.setAnalyticsCollectionEnabled(true)
-  initialized = true
-  console.log("Firebase Analytics initialized")
-}
+export async function setUserProperty(_name: string, _value: string | null) {}
 
-export async function logEvent(name: string, params?: Record<string, string | number | boolean>) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.logEvent(name, params)
-}
-
-export async function setUserId(id: string | null) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.setUserId(id)
-}
-
-export async function setUserProperty(name: string, value: string | null) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.setUserProperty(name, value)
-}
-
-export async function logScreenView(screenName: string, screenClass?: string) {
-  const analytics = await getAnalytics()
-  if (!analytics) return
-  await analytics.logScreenView({screen_name: screenName, screen_class: screenClass ?? screenName})
-}
+export async function logScreenView(_screenName: string, _screenClass?: string) {}
