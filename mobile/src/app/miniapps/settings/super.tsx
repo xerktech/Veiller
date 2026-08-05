@@ -56,10 +56,6 @@ export default function SuperSettingsScreen() {
             <RouteButton label="dbg2()" onPress={() => BluetoothSdk.dbg2()} />
             <RouteButton label="Stress Test (Jetsam)" onPress={() => push("/miniapps/settings/stress-test")} />
           </Group>
-
-          <Group title="Mini Apps">
-            <RouteButton label="Miniapp Developer" onPress={() => push("/miniapps/settings/miniapp-dev")} />
-          </Group>
         </View>
         <View className="flex h-16" />
       </ScrollView>

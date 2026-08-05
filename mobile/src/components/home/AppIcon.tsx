@@ -1,11 +1,10 @@
 import {Image} from "expo-image"
 import {SquircleView} from "expo-squircle-view"
-import {memo, useEffect, useState} from "react"
+import React, {memo, useEffect, useState} from "react"
 import {ActivityIndicator, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle} from "react-native"
 import {withUniwind} from "uniwind"
 
 import {Icon} from "@/components/ignite"
-import {DevIcon, DevMiniappBadge} from "@/components/miniapps/DevIcons"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {
   isRemoteImageSourceFailed,
@@ -13,7 +12,6 @@ import {
   useCachedRemoteImageSource,
 } from "@/hooks/useCachedRemoteImageSource"
 import type {ClientApp} from "@mentra/engine"
-import React from "react"
 
 // Helper to extract style properties for width/height override
 const extractStyleProps = (style: StyleProp<ViewStyle>): Partial<ViewStyle> => {
@@ -47,7 +45,8 @@ const AppIcon = ({app, onClick, style, disableLoader, instant, resolveCachedSour
   const [iconFailed, setIconFailed] = useState(() => isRemoteImageSourceFailed(app.logoUrl))
   const isRemoteLogo =
     typeof app.logoUrl === "string" && (app.logoUrl.startsWith("http://") || app.logoUrl.startsWith("https://"))
-  const imageUri = typeof imageSource === "object" && imageSource !== null && "uri" in imageSource ? imageSource.uri : null
+  const imageUri =
+    typeof imageSource === "object" && imageSource !== null && "uri" in imageSource ? imageSource.uri : null
   const remoteUnavailable = isRemoteLogo && !imageUri
 
   useEffect(() => {
@@ -83,10 +82,7 @@ const AppIcon = ({app, onClick, style, disableLoader, instant, resolveCachedSour
               <ActivityIndicator size="large" color={theme.colors.palette.white} />
             </View>
           )}
-          {!app.iconComponent && app.isMiniappDev && (!app.logoUrl || iconFailed || remoteUnavailable) && (
-            <DevIcon size={iconSize.width as number} />
-          )}
-          {!app.iconComponent && !app.isMiniappDev && (iconFailed || remoteUnavailable) && (
+          {!app.iconComponent && (iconFailed || remoteUnavailable) && (
             <View
               style={{
                 width: "100%",
@@ -105,7 +101,7 @@ const AppIcon = ({app, onClick, style, disableLoader, instant, resolveCachedSour
               </Text>
             </View>
           )}
-          {!app.iconComponent && !iconFailed && !remoteUnavailable && (app.logoUrl || !app.isMiniappDev) && (
+          {!app.iconComponent && !iconFailed && !remoteUnavailable && (
             <Image
               source={imageSource}
               style={{width: "100%", height: "100%", resizeMode: "cover"}}
@@ -142,7 +138,6 @@ const AppIcon = ({app, onClick, style, disableLoader, instant, resolveCachedSour
           <Icon name="alert" size={theme.spacing.s4} color={theme.colors.error} />
         </View>
       )}
-      {app.isMiniappDev && <DevMiniappBadge />}
       {/* Show wifi-off badge for offline apps (excluding camera app) */}
       {/* disabled for now */}
       {/* {app.offline && app.packageName !== getMoreAppsApplet().packageName && app.packageName !== cameraPackageName && (

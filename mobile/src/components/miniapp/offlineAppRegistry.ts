@@ -18,7 +18,6 @@ import {OFFLINE_HOSTED_PACKAGES} from "./offlineHostedPackages"
 // XERK-200/XERK-206: ASG gallery screens removed while the camera miniapp is parked.
 // import GalleryScreen from "@/app/asg/gallery"
 // import GallerySettingsScreen from "@/app/asg/gallery-settings"
-import DeveloperUrlScreen from "@/app/miniapps/miniappdev/developer-url"
 import MirrorScreen from "@/app/miniapps/mirror/mirror"
 import AppearanceSettings from "@/app/miniapps/settings/appearance"
 import CameraSettings from "@/app/miniapps/settings/camera"
@@ -32,7 +31,6 @@ import GlassesMenuSettings from "@/app/miniapps/settings/glasses-menu"
 import LayoutSettings from "@/app/miniapps/settings/layout"
 import MainSettings from "@/app/miniapps/settings/main"
 import MicrophoneSettings from "@/app/miniapps/settings/microphone"
-import MiniappDevSettings from "@/app/miniapps/settings/miniapp-dev"
 import NotificationSettings from "@/app/miniapps/settings/notifications"
 import PositionSettings from "@/app/miniapps/settings/position"
 import PrivacySettings from "@/app/miniapps/settings/privacy"
@@ -58,10 +56,6 @@ const settingsRoutes: Record<string, ComponentType<any>> = {
   "/miniapps/settings/glasses-menu": GlassesMenuSettings,
   "/miniapps/settings/layout": LayoutSettings,
   "/miniapps/settings/microphone": MicrophoneSettings,
-  "/miniapps/settings/miniapp-dev": MiniappDevSettings,
-  // Miniapp dev tools live under the Miniapp Developer settings screen now,
-  // so their routes are hosted by the settings overlay (not a standalone app).
-  "/miniapps/miniappdev/developer-url": DeveloperUrlScreen,
   "/miniapps/settings/notifications": NotificationSettings,
   "/miniapps/settings/position": PositionSettings,
   "/miniapps/settings/privacy": PrivacySettings,
