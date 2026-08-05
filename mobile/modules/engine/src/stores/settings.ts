@@ -72,13 +72,6 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: false,
     persist: true,
   },
-  appearance_menu_enabled: {
-    key: "appearance_menu_enabled",
-    defaultValue: () => false,
-    writable: true,
-    saveOnServer: true,
-    persist: true,
-  },
   app_boot_extra_info: {
     key: "app_boot_extra_info",
     defaultValue: () => false,
@@ -338,9 +331,9 @@ export const SETTINGS: Record<string, Setting> = {
   },
   theme_preference: {
     key: "theme_preference",
-    defaultValue: () => "light",
-    // Force light mode - i mode is not complete yet
-    // override: () => "light",
+    // Default to the system theme (light/dark follows the OS). Users can pin
+    // light or dark from Settings > Appearance. (XERK-208)
+    defaultValue: () => "system",
     writable: true,
     saveOnServer: true,
     persist: true,

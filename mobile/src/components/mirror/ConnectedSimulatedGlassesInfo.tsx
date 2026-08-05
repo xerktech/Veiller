@@ -22,7 +22,7 @@ export default function ConnectedSimulatedGlassesInfo({
   // permission killed); this component now just renders the inline glasses
   // display mirror plus the connect button.
   return (
-    <GlassView className="bg-neutral-50 p-5" style={style}>
+    <GlassView className="bg-card p-5" style={style}>
       {showHeader && (
         <View className="flex-row justify-between items-center mb-4">
           <Text className="font-semibold text-secondary-foreground text-lg" tx="onboarding:phoneMode" />
