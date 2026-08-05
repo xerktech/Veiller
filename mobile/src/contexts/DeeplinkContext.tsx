@@ -1,23 +1,9 @@
 import * as Linking from "expo-linking"
 import {FC, ReactNode, createContext, useContext, useEffect} from "react"
-import {AppState} from "react-native"
 
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
 import {BgTimer} from "@mentra/engine"
 import {useNavigationStore} from "@/stores/navigation"
-
-/** Returns immediately if the app is already active, otherwise waits for it. */
-const waitForActive = (): Promise<void> => {
-  if (AppState.currentState === "active") return Promise.resolve()
-  return new Promise((resolve) => {
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") {
-        sub.remove()
-        resolve()
-      }
-    })
-  })
-}
 
 export interface DeepLinkRoute {
   pattern: string
@@ -133,21 +119,6 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       } else {
         nav.push("/pairing/guide")
       }
-    },
-  },
-
-  {
-    pattern: "/applet/local",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      const routeParams = new URLSearchParams()
-      for (const key of ["packageName", "appName", "version", "devUrl", "iconUrl", "devPort"]) {
-        const value = params[key]
-        if (value) routeParams.set(key, value)
-      }
-
-      await waitForActive()
-      nav.push(`/applet/local?${routeParams.toString()}` as any)
     },
   },
 

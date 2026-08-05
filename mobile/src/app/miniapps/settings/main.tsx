@@ -90,11 +90,6 @@ export default function MainSettingsPage() {
               onPress={() => push("/miniapps/settings/debug")}
               onLongPress={() => push("/miniapps/settings/super")}
             />
-            <RouteButton
-              icon={<Icon name="user-code" size={24} color={theme.colors.secondary_foreground} />}
-              label={translate("settings:miniappDeveloperSettings")}
-              onPress={() => push("/miniapps/settings/miniapp-dev")}
-            />
           </Group>
         </View>
 
