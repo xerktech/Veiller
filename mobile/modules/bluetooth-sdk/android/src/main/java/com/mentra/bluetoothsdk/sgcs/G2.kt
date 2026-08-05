@@ -1723,7 +1723,13 @@ class G2 : SGCManager() {
                 payload = payload,
                 reserveFlag = true
             )
-        sendToGlasses(packets)
+        // Device settings must reach BOTH arms — each arm runs independent
+        // firmware and applies brightness / display position / tilt-to-wake to
+        // its own lens. Sending to the right arm only (the old default) left the
+        // left lens unchanged and, for head-up, never armed tilt detection. The
+        // dashboard-display path (12h/units/widgets) already sent to both, which
+        // is why that was the only setting that visibly worked.
+        sendToGlasses(packets, left = true, right = true)
     }
 
     private fun sendOnboardingCommand(payload: ByteArray) {
@@ -1937,12 +1943,16 @@ class G2 : SGCManager() {
     }
 
     private fun sendModuleConfigureCommand(payload: ByteArray) {
+        // Dashboard auto-close is a per-arm firmware setting too — send to both
+        // arms, like the other settings services (see sendG2SettingCommand).
         sendToGlasses(
             sendManager.buildPackets(
                 serviceId = ServiceID.MODULE_CONFIGURE.value,
                 payload = payload,
                 reserveFlag = true
-            )
+            ),
+            left = true,
+            right = true
         )
     }
 
