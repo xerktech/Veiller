@@ -64,6 +64,7 @@ private enum class ServiceID(val value: Byte) {
     G2_SETTING(0x09), // UI_SETTING_APP_ID
     GESTURE_CTRL(0x0D), // gesture_ctrl lifecycle signals
     ONBOARDING(0x10), // UI_ONBOARDING_APP_ID
+    MODULE_CONFIGURE(0x20), // SERVICE_MODULE_CONFIGURE_APP_ID
     DEVICE_SETTINGS(0x80.toByte()), // UX_DEVICE_SETTINGS_APP_ID
     EVEN_HUB_CTRL(0x81.toByte()), // EvenHub CTRL channel (init/registration)
     EVEN_HUB(0xE0.toByte()); // UI_BACKGROUND_EVENHUB_APP_ID
@@ -682,6 +683,38 @@ private object G2SettingProto {
         w.writeInt32Field(1, G2SettingCommandId.DEVICE_RECEIVE_INFO.value)
         w.writeInt32Field(2, magicRandom)
         w.writeMessageField(3, infoW.toByteArray()) // deviceReceiveInfoFromApp (field 3)
+        return w.toByteArray()
+    }
+
+    /**
+     * Dashboard auto-close (screen timeout): how long the dashboard stays up
+     * before the firmware closes it on its own.
+     *
+     * module_configure_main_msg_ctx {
+     *   cmd = 2 (APP_SET_DASHBOARD_AUTO_CLOSE_VALUE) / 1 (APP_INQUIRE_...)
+     *   magicRandom
+     *   DashboardGeneralSetting (field 4) { autoCloseValue (field 1) }
+     * }
+     *
+     * The unit of autoCloseValue is NOT documented anywhere we can see; seconds
+     * is the assumption. dashboardAutoCloseQuery() reads the firmware's current
+     * value back so the log can confirm it against what Even's own app sets.
+     */
+    fun setDashboardAutoClose(magicRandom: Int, value: Int): ByteArray {
+        val settingW = ProtobufWriter()
+        settingW.writeInt32Field(1, value) // autoCloseValue
+
+        val w = ProtobufWriter()
+        w.writeInt32Field(1, 2) // APP_SET_DASHBOARD_AUTO_CLOSE_VALUE
+        w.writeInt32Field(2, magicRandom)
+        w.writeMessageField(4, settingW.toByteArray()) // DashboardGeneralSetting
+        return w.toByteArray()
+    }
+
+    fun dashboardAutoCloseQuery(magicRandom: Int): ByteArray {
+        val w = ProtobufWriter()
+        w.writeInt32Field(1, 1) // APP_INQUIRE_DASHBOARD_AUTO_CLOSE_VALUE
+        w.writeInt32Field(2, magicRandom)
         return w.toByteArray()
     }
 
@@ -1812,6 +1845,14 @@ class G2 : SGCManager() {
         if (headUpAngle != null) {
             setHeadUpAngle(headUpAngle)
         }
+
+        // Dashboard auto-close, then read back what the firmware settled on —
+        // the value's unit/range is an assumption until a device confirms it.
+        val timeout = (DeviceStore.get("bluetooth", "dashboard_timeout") as? Number)?.toInt()
+        if (timeout != null) {
+            setDashboardTimeout(timeout)
+        }
+        requestDashboardTimeout()
     }
 
     private fun dashboardHalfDayFormat(): Int {
@@ -1839,6 +1880,29 @@ class G2 : SGCManager() {
         val ids = stored?.mapNotNull { widgetIds[it] }
             ?: listOf(3, 1, 2, 4, 5) // Schedule, News, Stock, Quicklist, Health
         return ByteArray(ids.size) { ids[it].toByte() }
+    }
+
+    private fun sendModuleConfigureCommand(payload: ByteArray) {
+        sendToGlasses(
+            sendManager.buildPackets(
+                serviceId = ServiceID.MODULE_CONFIGURE.value,
+                payload = payload,
+                reserveFlag = true
+            )
+        )
+    }
+
+    override fun setDashboardTimeout(seconds: Int) {
+        val msg = G2SettingProto.setDashboardAutoClose(sendManager.nextMagicRandom(), seconds)
+        sendModuleConfigureCommand(msg)
+        Bridge.log("G2: setDashboardTimeout($seconds)")
+    }
+
+    /** Ask the firmware for its current auto-close value (answer lands in the log). */
+    private fun requestDashboardTimeout() {
+        sendModuleConfigureCommand(
+            G2SettingProto.dashboardAutoCloseQuery(sendManager.nextMagicRandom())
+        )
     }
 
     override fun sendDashboardDisplaySettings() {
@@ -4347,6 +4411,7 @@ class G2 : SGCManager() {
             ServiceID.G2_SETTING.value -> handleG2SettingResponse(payload)
             ServiceID.MENU.value -> handleMenuResponse(payload)
             ServiceID.DASHBOARD.value -> handleDashboardResponse(payload)
+            ServiceID.MODULE_CONFIGURE.value -> handleModuleConfigureResponse(payload)
             ServiceID.GESTURE_CTRL.value -> handleGestureCtrl(payload)
             ServiceID.NAVIGATION.value -> handleNavigationResponse(payload)
             ServiceID.EVEN_AI.value -> handleEvenAIResponse(payload)
@@ -4794,6 +4859,20 @@ class G2 : SGCManager() {
         Bridge.log(
             "G2: menu response: ${payload.take(32).joinToString("") { String.format("%02X", it) }}"
         )
+    }
+
+    /**
+     * module_configure (0x20) replies. The auto-close value comes back in
+     * DashboardGeneralSetting (field 4), which is how we learn the unit and
+     * range the firmware actually accepts.
+     */
+    private fun handleModuleConfigureResponse(payload: ByteArray) {
+        val fields = ProtobufReader(payload).parseFields()
+        val cmd = fields[1] as? Int ?: -1
+        val autoClose = (fields[4] as? ByteArray)?.let { f4 ->
+            ProtobufReader(f4).parseFields()[1] as? Int
+        }
+        Bridge.log("G2: moduleConfigure response: cmd=$cmd autoCloseValue=$autoClose")
     }
 
     private fun handleDashboardResponse(payload: ByteArray) {

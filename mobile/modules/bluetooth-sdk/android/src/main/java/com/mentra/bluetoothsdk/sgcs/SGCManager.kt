@@ -261,6 +261,9 @@ abstract class SGCManager {
     // Device Control
     abstract fun setHeadUpAngle(angle: Int)
 
+    /** Dashboard auto-close / screen timeout. Default no-op — only G2 supports this. */
+    open fun setDashboardTimeout(seconds: Int) {}
+
     /**
      * Enable/disable raw accelerometer (IMU) reporting from the glasses.
      * Default no-op for devices without IMU support. G2 (both iOS and Android) overrides this to

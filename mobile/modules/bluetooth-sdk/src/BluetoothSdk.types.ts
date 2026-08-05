@@ -1416,6 +1416,7 @@ export type BluetoothSettingsUpdate = Partial<{
   contextual_dashboard: boolean
   head_up_angle: number
   head_up_enabled: boolean
+  dashboard_timeout: number
   imu_enabled: boolean
   brightness: number
   auto_brightness: boolean

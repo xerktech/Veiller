@@ -519,6 +519,14 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
+  // Dashboard auto-close (G2 firmware), in seconds. 0 = stay up until dismissed.
+  dashboard_timeout: {
+    key: "dashboard_timeout",
+    defaultValue: () => 15,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
   brightness: {key: "brightness", defaultValue: () => 50, writable: true, saveOnServer: true, persist: true},
   auto_brightness: {
     key: "auto_brightness",
@@ -742,6 +750,7 @@ export const BLUETOOTH_SETTING_KEYS: string[] = [
   SETTINGS.contextual_dashboard.key,
   SETTINGS.head_up_angle.key,
   SETTINGS.head_up_enabled.key,
+  SETTINGS.dashboard_timeout.key,
   SETTINGS.brightness.key,
   SETTINGS.auto_brightness.key,
   SETTINGS.dashboard_height.key,

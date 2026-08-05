@@ -155,6 +155,9 @@ protocol SGCManager {
     // MARK: - Device Control
 
     func setHeadUpAngle(_ angle: Int)
+
+    /// Dashboard auto-close / screen timeout. Default no-op — only G2 supports this.
+    func setDashboardTimeout(_ seconds: Int)
     /// Enable/disable raw accelerometer (IMU) reporting from the glasses.
     /// Default no-op; only G2 streams IMU data today.
     func setImuEnabled(_ enabled: Bool) async
@@ -351,6 +354,8 @@ extension SGCManager {
     // MARK: - Notification Panel (default no-op — only G2 supports this)
 
     func showNotificationsPanel() async {}
+
+    func setDashboardTimeout(_: Int) {}
 
     // MARK: - IMU (default no-op — only G2 streams accelerometer data)
 

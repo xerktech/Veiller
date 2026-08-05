@@ -4,6 +4,7 @@ import {Alert, ScrollView, View} from "react-native"
 
 import {Header, Screen} from "@/components/ignite"
 import HeadUpAngleComponent from "@/components/settings/HeadUpAngleComponent"
+import SelectSetting from "@/components/settings/SelectSetting"
 import ToggleSetting from "@/components/settings/ToggleSetting"
 import {RouteButton} from "@/components/ui/RouteButton"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
@@ -21,6 +22,19 @@ import {PermissionFeatures, checkFeaturePermissions, requestFeaturePermissions} 
 import {SETTINGS, useSetting} from "@mentra/engine"
 import {engine} from "@mentra/engine"
 
+/**
+ * Dashboard auto-close values, in seconds. The firmware field's unit is an
+ * assumption (see G2's setDashboardAutoClose) — the driver reads the value back
+ * on connect and logs it, so a device can confirm or correct this scale.
+ */
+const DASHBOARD_TIMEOUT_OPTIONS = [
+  {label: "5 seconds", value: "5"},
+  {label: "10 seconds", value: "10"},
+  {label: "15 seconds", value: "15"},
+  {label: "30 seconds", value: "30"},
+  {label: "60 seconds", value: "60"},
+]
+
 export default function DashboardSettingsScreen() {
   const {goBack} = useNavigationStore.getState()
   const [headUpAngleComponentVisible, setHeadUpAngleComponentVisible] = useState(false)
@@ -31,6 +45,7 @@ export default function DashboardSettingsScreen() {
   const [twelveHourTimeEnabled, setTwelveHourTimeEnabled] = useSetting(SETTINGS.twelve_hour_time.key)
   const [dashboardWidgets, setDashboardWidgets] = useSetting(SETTINGS.dashboard_widgets.key)
   const [headUpEnabled, setHeadUpEnabled] = useSetting(SETTINGS.head_up_enabled.key)
+  const [dashboardTimeout, setDashboardTimeout] = useSetting(SETTINGS.dashboard_timeout.key)
   const features = getModelCapabilities(defaultWearable)
   const glassesConnected =
     useEngineSnapshot(engine.glasses.status, (onChange) => engine.glasses.onStatus(onChange)).state === "connected"
@@ -112,6 +127,17 @@ export default function DashboardSettingsScreen() {
             value={twelveHourTimeEnabled}
             onValueChange={() => setTwelveHourTimeEnabled(!twelveHourTimeEnabled)}
           />
+
+          {features?.hasNativeDashboard && (
+            <SelectSetting
+              label={translate("settings:dashboardTimeoutLabel")}
+              description={translate("settings:dashboardTimeoutSubtitle")}
+              value={String(dashboardTimeout)}
+              options={DASHBOARD_TIMEOUT_OPTIONS}
+              defaultValue="15"
+              onValueChange={(value) => setDashboardTimeout(parseInt(value, 10))}
+            />
+          )}
 
           {defaultWearable && features?.hasIMU && (
             <ToggleSetting
