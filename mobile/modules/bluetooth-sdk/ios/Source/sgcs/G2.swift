@@ -713,28 +713,18 @@ private enum G2SettingProto {
         return w.data
     }
 
-    /// Toggle head-up display on/off
-    static func setHeadUpSwitch(magicRandom: Int32, enabled: Bool) -> Data {
+    /// Set head-up on/off AND the trigger angle (0-60 degrees) in one message.
+    ///
+    /// headUpSwitch and headUpAngle live in one protobuf message, and proto3 has
+    /// no field presence for scalars: a message that sets only the angle is
+    /// indistinguishable on the wire from one that sets the angle AND
+    /// headUpSwitch = 0. Sending the two separately therefore armed head-up and
+    /// then immediately disarmed it, so tilt-to-wake never worked at any angle.
+    /// Always send them together.
+    static func setHeadUpSetting(magicRandom: Int32, enabled: Bool, angle: Int32) -> Data {
         // DeviceReceive_Head_UP_Setting
         var headUpW = ProtobufWriter()
-        headUpW.writeInt32Field(1, enabled ? 1 : 0)  // headUpSwitch
-
-        // DeviceReceiveInfoFromAPP
-        var infoW = ProtobufWriter()
-        infoW.writeMessageField(4, headUpW.data)  // deviceReceiveHeadUpSetting (field 4)
-
-        // G2SettingPackage
-        var w = ProtobufWriter()
-        w.writeInt32Field(1, G2SettingCommandId.deviceReceiveInfo.rawValue)
-        w.writeInt32Field(2, magicRandom)
-        w.writeMessageField(3, infoW.data)  // deviceReceiveInfoFromApp (field 3)
-        return w.data
-    }
-
-    /// Set head-up trigger angle (0-60 degrees)
-    static func setHeadUpAngle(magicRandom: Int32, angle: Int32) -> Data {
-        // DeviceReceive_Head_UP_Setting
-        var headUpW = ProtobufWriter()
+        headUpW.writeInt32Field(1, enabled ? 1 : 0)  // headUpSwitch (field 1)
         headUpW.writeInt32Field(2, angle)  // headUpAngle (field 2)
 
         // DeviceReceiveInfoFromAPP
@@ -745,7 +735,7 @@ private enum G2SettingProto {
         var w = ProtobufWriter()
         w.writeInt32Field(1, G2SettingCommandId.deviceReceiveInfo.rawValue)
         w.writeInt32Field(2, magicRandom)
-        w.writeMessageField(3, infoW.data)
+        w.writeMessageField(3, infoW.data)  // deviceReceiveInfoFromApp (field 3)
         return w.data
     }
 
@@ -2030,6 +2020,14 @@ class G2: NSObject, SGCManager {
         let calendarEvents =
             DeviceStore.shared.get("bluetooth", "calendar_events") as? [[String: Any]] ?? []
         self.sendCalendarEvents(calendarEvents)
+
+        // Re-apply head-up: the firmware's tilt-to-wake switch is only pushed
+        // when the angle setting CHANGES, and handleG2Ready() (the settings
+        // replay) is commented out, so after a reconnect head-up would stay off
+        // until the user touched the slider again.
+        if let headUpAngle = DeviceStore.shared.get("bluetooth", "head_up_angle") as? Int {
+            self.setHeadUpAngle(headUpAngle)
+        }
     }
 
     // MARK: - Heartbeats
@@ -3288,7 +3286,12 @@ class G2: NSObject, SGCManager {
         dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat())  // halfDayFormat
         dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit())  // temperatureUnit
 
+        // packageId (field 1) identifies us as the sending app, exactly as the
+        // calendar push does. Omitting it left packageId at proto3's default 0;
+        // the device-global fields (12h/units) still applied, but the widget
+        // list — which the firmware scopes to a package — did not.
         var dashRecvW = ProtobufWriter()
+        dashRecvW.writeInt32Field(1, 1)  // packageId
         dashRecvW.writeMessageField(2, dashDisplayW.data)
 
         var dashPkgW = ProtobufWriter()
@@ -3296,6 +3299,9 @@ class G2: NSObject, SGCManager {
         dashPkgW.writeInt32Field(2, sendManager.nextMagicRandom())
         dashPkgW.writeMessageField(4, dashRecvW.data)
         sendDashboardCommand(dashPkgW.data)
+        Bridge.log(
+            "G2: sendDashboardDisplaySettings — widgets \(Array(widgetOrder))"
+        )
     }
 
     /// Push a calendar event to the dashboard's Schedule widget (service 0x01).
@@ -3909,21 +3915,19 @@ class G2: NSObject, SGCManager {
 
     func setHeadUpAngle(_ angle: Int) {
         let clamped = min(max(angle, 0), 60)
-        Bridge.log("G2: setHeadUpAngle(\(clamped))")
+        // The tilt-to-wake switch and the angle share one firmware message, so
+        // the on/off setting is read here rather than plumbed through the
+        // SGCManager interface (which every other device would have to stub).
+        let enabled = DeviceStore.shared.get("bluetooth", "head_up_enabled") as? Bool ?? true
+        Bridge.log("G2: setHeadUpAngle(\(clamped), enabled=\(enabled))")
 
-        // Enable head-up display
-        let enableMsg = G2SettingProto.setHeadUpSwitch(
+        // Switch and angle in ONE message — see setHeadUpSetting.
+        let msg = G2SettingProto.setHeadUpSetting(
             magicRandom: sendManager.nextMagicRandom(),
-            enabled: true
-        )
-        sendG2SettingCommand(enableMsg)
-
-        // Set the angle
-        let angleMsg = G2SettingProto.setHeadUpAngle(
-            magicRandom: sendManager.nextMagicRandom(),
+            enabled: enabled,
             angle: Int32(clamped)
         )
-        sendG2SettingCommand(angleMsg)
+        sendG2SettingCommand(msg)
     }
 
     func getBatteryStatus() {
@@ -4944,6 +4948,24 @@ class G2: NSObject, SGCManager {
             var subReader = ProtobufReader(f6)
             let sub = subReader.parseFields()
             packageId = sub[1] as? Int32 ?? 0
+        }
+
+        // cmd=1 is Dashboard_Respond — the glasses' verdict on our last write.
+        // DashboardReceiveFLAG: 0 = SUCCESS, 1 = PARAMETER_ERROR,
+        // 2 = NEWS_VERSION_ERROR. Surfaced because a silently-rejected
+        // display-settings push looks identical to one the firmware ignored.
+        if cmd == 1, let f3 = fields[3] as? Data {
+            var subReader = ProtobufReader(f3)
+            let sub = subReader.parseFields()
+            let flag = sub[2] as? Int32 ?? 0
+            let flagName: String
+            switch flag {
+            case 0: flagName = "SUCCESS"
+            case 1: flagName = "PARAMETER_ERROR"
+            case 2: flagName = "NEWS_VERSION_ERROR"
+            default: flagName = "UNKNOWN(\(flag))"
+            }
+            Bridge.log("G2: dashboard write ack: \(flagName) (pkg \(sub[1] as? Int32 ?? 0))")
         }
 
         // cmd=3 is APP_Respond — glasses sending us info, we should respond with cmd=4 (APP_RECEIVE)

@@ -657,26 +657,20 @@ private object G2SettingProto {
         return w.toByteArray()
     }
 
-    fun setHeadUpSwitch(magicRandom: Int, enabled: Boolean): ByteArray {
+    /**
+     * Build a DeviceReceive_Head_UP_Setting write carrying BOTH fields.
+     *
+     * headUpSwitch and headUpAngle live in one protobuf message, and proto3 has
+     * no field presence for scalars: a message that sets only the angle is
+     * indistinguishable on the wire from one that sets the angle AND
+     * headUpSwitch = 0. Sending the two separately therefore armed head-up and
+     * then immediately disarmed it, so tilt-to-wake never worked at any angle.
+     * Always send them together.
+     */
+    fun setHeadUpSetting(magicRandom: Int, enabled: Boolean, angle: Int): ByteArray {
         // DeviceReceive_Head_UP_Setting
         val headUpW = ProtobufWriter()
-        headUpW.writeInt32Field(1, if (enabled) 1 else 0) // headUpSwitch
-
-        // DeviceReceiveInfoFromAPP
-        val infoW = ProtobufWriter()
-        infoW.writeMessageField(4, headUpW.toByteArray()) // deviceReceiveHeadUpSetting (field 4)
-
-        // G2SettingPackage
-        val w = ProtobufWriter()
-        w.writeInt32Field(1, G2SettingCommandId.DEVICE_RECEIVE_INFO.value)
-        w.writeInt32Field(2, magicRandom)
-        w.writeMessageField(3, infoW.toByteArray()) // deviceReceiveInfoFromApp (field 3)
-        return w.toByteArray()
-    }
-
-    fun setHeadUpAngle(magicRandom: Int, angle: Int): ByteArray {
-        // DeviceReceive_Head_UP_Setting
-        val headUpW = ProtobufWriter()
+        headUpW.writeInt32Field(1, if (enabled) 1 else 0) // headUpSwitch (field 1)
         headUpW.writeInt32Field(2, angle) // headUpAngle (field 2)
 
         // DeviceReceiveInfoFromAPP
@@ -687,7 +681,7 @@ private object G2SettingProto {
         val w = ProtobufWriter()
         w.writeInt32Field(1, G2SettingCommandId.DEVICE_RECEIVE_INFO.value)
         w.writeInt32Field(2, magicRandom)
-        w.writeMessageField(3, infoW.toByteArray())
+        w.writeMessageField(3, infoW.toByteArray()) // deviceReceiveInfoFromApp (field 3)
         return w.toByteArray()
     }
 
@@ -1809,6 +1803,15 @@ class G2 : SGCManager() {
             Bridge.log("G2: re-applying imu_enabled=true after connect")
             setImuEnabled(true)
         }
+
+        // Re-apply head-up: the firmware's tilt-to-wake switch is only pushed
+        // when the angle setting CHANGES, and the G2 has no handleG2Ready()
+        // settings replay (that path is G1-only), so after a reconnect head-up
+        // would stay off until the user touched the slider again.
+        val headUpAngle = (DeviceStore.get("bluetooth", "head_up_angle") as? Number)?.toInt()
+        if (headUpAngle != null) {
+            setHeadUpAngle(headUpAngle)
+        }
     }
 
     private fun dashboardHalfDayFormat(): Int {
@@ -1852,7 +1855,12 @@ class G2 : SGCManager() {
         dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat()) // halfDayFormat
         dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit()) // temperatureUnit
 
+        // packageId (field 1) identifies us as the sending app, exactly as the
+        // calendar push does. Omitting it left packageId at proto3's default 0;
+        // the device-global fields (12h/units) still applied, but the widget
+        // list — which the firmware scopes to a package — did not.
         val dashRecvW = ProtobufWriter()
+        dashRecvW.writeInt32Field(1, 1) // packageId
         dashRecvW.writeMessageField(2, dashDisplayW.toByteArray())
 
         val dashPkgW = ProtobufWriter()
@@ -1860,6 +1868,9 @@ class G2 : SGCManager() {
         dashPkgW.writeInt32Field(2, sendManager.nextMagicRandom())
         dashPkgW.writeMessageField(4, dashRecvW.toByteArray())
         sendDashboardCommand(dashPkgW.toByteArray())
+        Bridge.log(
+            "G2: sendDashboardDisplaySettings — widgets ${widgetOrder.joinToString(",")}"
+        )
     }
 
     // ---------- Heartbeats ----------
@@ -3725,15 +3736,15 @@ class G2 : SGCManager() {
 
     override fun setHeadUpAngle(angle: Int) {
         val clamped = angle.coerceIn(0, 60)
-        Bridge.log("G2: setHeadUpAngle($clamped)")
+        // The tilt-to-wake switch and the angle share one firmware message, so
+        // the on/off setting is read here rather than plumbed through the
+        // SGCManager interface (which every other device would have to stub).
+        val enabled = DeviceStore.get("bluetooth", "head_up_enabled") as? Boolean ?: true
+        Bridge.log("G2: setHeadUpAngle($clamped, enabled=$enabled)")
 
-        // Enable head-up display
-        val enableMsg = G2SettingProto.setHeadUpSwitch(sendManager.nextMagicRandom(), true)
-        sendG2SettingCommand(enableMsg)
-
-        // Set the angle
-        val angleMsg = G2SettingProto.setHeadUpAngle(sendManager.nextMagicRandom(), clamped)
-        sendG2SettingCommand(angleMsg)
+        // Switch and angle in ONE message — see setHeadUpSetting.
+        val msg = G2SettingProto.setHeadUpSetting(sendManager.nextMagicRandom(), enabled, clamped)
+        sendG2SettingCommand(msg)
     }
 
     override fun getBatteryStatus() {
@@ -4800,6 +4811,24 @@ class G2 : SGCManager() {
             val subReader = ProtobufReader(f6)
             val sub = subReader.parseFields()
             packageId = sub[1] as? Int ?: 0
+        }
+
+        // cmd=1 is Dashboard_Respond — the glasses' verdict on our last write.
+        // DashboardReceiveFLAG: 0 = SUCCESS, 1 = PARAMETER_ERROR,
+        // 2 = NEWS_VERSION_ERROR. Surfaced because a silently-rejected
+        // display-settings push looks identical to one the firmware ignored.
+        if (cmd == 1) {
+            (fields[3] as? ByteArray)?.let { f3 ->
+                val sub = ProtobufReader(f3).parseFields()
+                val flag = sub[2] as? Int ?: 0
+                val flagName = when (flag) {
+                    0 -> "SUCCESS"
+                    1 -> "PARAMETER_ERROR"
+                    2 -> "NEWS_VERSION_ERROR"
+                    else -> "UNKNOWN($flag)"
+                }
+                Bridge.log("G2: dashboard write ack: $flagName (pkg ${sub[1] as? Int ?: 0})")
+            }
         }
 
         // cmd=3 is APP_Respond — glasses sending us info, we should respond with cmd=4

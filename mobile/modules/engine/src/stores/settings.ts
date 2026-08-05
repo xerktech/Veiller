@@ -510,6 +510,15 @@ export const SETTINGS: Record<string, Setting> = {
     persist: true,
   },
   head_up_angle: {key: "head_up_angle", defaultValue: () => 45, writable: true, saveOnServer: true, persist: true},
+  // Firmware tilt-to-wake (G2). Default on: it is how the dashboard has always
+  // been reachable, and off would silently change behavior for existing users.
+  head_up_enabled: {
+    key: "head_up_enabled",
+    defaultValue: () => true,
+    writable: true,
+    saveOnServer: true,
+    persist: true,
+  },
   brightness: {key: "brightness", defaultValue: () => 50, writable: true, saveOnServer: true, persist: true},
   auto_brightness: {
     key: "auto_brightness",
@@ -732,6 +741,7 @@ export const BLUETOOTH_SETTING_KEYS: string[] = [
   // glasses settings:
   SETTINGS.contextual_dashboard.key,
   SETTINGS.head_up_angle.key,
+  SETTINGS.head_up_enabled.key,
   SETTINGS.brightness.key,
   SETTINGS.auto_brightness.key,
   SETTINGS.dashboard_height.key,
