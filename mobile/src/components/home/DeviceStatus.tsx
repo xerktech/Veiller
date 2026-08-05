@@ -341,7 +341,7 @@ export const TapStrapStatus = ({style}: {style?: ViewStyle}) => {
   const {push} = useNavigationStore.getState()
   const status = useEngineSnapshot(engine.tapStrap.status, (onChange) => engine.tapStrap.onStatus(onChange))
   const [takeover] = useSetting<boolean>(SETTINGS.tap_strap_takeover.key)
-  const openTester = () => push("/miniapps/taptester/taptester", {transition: "simple_push"})
+  const openTester = () => push("/miniapps/settings/taptester", {transition: "simple_push"})
 
   // Pairing lives in the phone's Bluetooth settings, so re-pull the snapshot when
   // the card mounts; the native bond watcher covers changes while the app is up.

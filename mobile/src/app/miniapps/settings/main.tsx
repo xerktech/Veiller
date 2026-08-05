@@ -8,15 +8,21 @@ import {Group} from "@/components/ui/Group"
 import {RouteButton} from "@/components/ui/RouteButton"
 import {Spacer} from "@/components/ui/Spacer"
 import {useAppTheme} from "@/contexts/ThemeContext"
+import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import {useRef} from "react"
 import {useRegisterCapsule} from "@/stores/capsule"
+import {engine} from "@mentra/engine"
 
 export default function MainSettingsPage() {
   const {theme} = useAppTheme()
   const {push} = useNavigationStore.getState()
   const viewShotRef = useRef<View>(null)
+  // Tap SDK support is Android-only; on unsupported platforms the tester row is hidden.
+  const tapStrapSupported = useEngineSnapshot(engine.tapStrap.status, (onChange) =>
+    engine.tapStrap.onStatus(onChange),
+  ).supported
 
   useRegisterCapsule({
     packageName: "com.mentra.settings",
@@ -31,6 +37,17 @@ export default function MainSettingsPage() {
         <View style={{flex: 1, gap: theme.spacing.s6}}>
           {/* Device/glasses settings, flattened inline (previously a separate page) */}
           <DeviceSettingsSection />
+
+          {/* Tap Strap tester (previously a dedicated miniapp, XERK-213) */}
+          {tapStrapSupported && (
+            <Group title={translate("home:tapStraps")}>
+              <RouteButton
+                icon={<Icon name="hand-click" size={24} color={theme.colors.secondary_foreground} />}
+                label={translate("tapTester:title")}
+                onPress={() => push("/miniapps/settings/taptester")}
+              />
+            </Group>
+          )}
 
           <Group title={translate("account:appSettings")}>
             <RouteButton
