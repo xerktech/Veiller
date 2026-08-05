@@ -126,6 +126,7 @@ object DeviceStore {
         store.set("bluetooth", "dashboard_depth", 2)
         store.set("bluetooth", "head_up_angle", 30)
         store.set("bluetooth", "head_up_enabled", true)
+        store.set("bluetooth", "dashboard_timeout", 15)
         store.set("bluetooth", "imu_enabled", false)
         store.set("bluetooth", "contextual_dashboard", true)
         store.set("bluetooth", "gallery_mode", true)
@@ -247,6 +248,11 @@ object DeviceStore {
             // The on/off switch rides along with the angle in one firmware
             // message, so re-push the stored angle and let the driver read the
             // new enabled value out of the store.
+            "bluetooth" to "dashboard_timeout" -> {
+                (value as? Number)?.let { seconds ->
+                    DeviceManager.getInstance().sgc?.setDashboardTimeout(seconds.toInt())
+                }
+            }
             "bluetooth" to "head_up_enabled" -> {
                 val angle = (get("bluetooth", "head_up_angle") as? Number)?.toInt() ?: 30
                 DeviceManager.getInstance().sgc?.setHeadUpAngle(angle)

@@ -659,6 +659,8 @@ const en = {
       "Microphone permission is required to use the phone microphone feature. Please grant microphone permission in settings.",
     contextualDashboardLabel: "Contextual Dashboard",
     contextualDashboardSubtitle: "Show a summary of your phone notifications when you look up.",
+    dashboardTimeoutLabel: "Dashboard Timeout",
+    dashboardTimeoutSubtitle: "How long the dashboard stays on screen before closing itself.",
     headUpEnabledLabel: "Look Up to Wake",
     headUpEnabledSubtitle: "Show the dashboard when you tilt your head up.",
     dashboardWidgetCalendarLabel: "Calendar Widget",
