@@ -1315,6 +1315,9 @@ class G2 : SGCManager() {
         private const val PREFS_NAME = "G2Prefs"
         private const val KEY_LEFT_ADDRESS = "g2_leftGlassAddress"
         private const val KEY_RIGHT_ADDRESS = "g2_rightGlassAddress"
+
+        /** autoCloseValue sent for the "Never" dashboard timeout: 24 hours. */
+        private const val DASHBOARD_TIMEOUT_NEVER = 86400
     }
 
     init {
@@ -1957,9 +1960,13 @@ class G2 : SGCManager() {
     }
 
     override fun setDashboardTimeout(seconds: Int) {
-        val msg = G2SettingProto.setDashboardAutoClose(sendManager.nextMagicRandom(), seconds)
+        // The firmware takes autoCloseValue literally — 0 closes the dashboard
+        // the moment it opens (XERK-210) — and no disable encoding is known,
+        // so the "Never" setting (stored as 0) is sent as 24 hours.
+        val value = if (seconds <= 0) DASHBOARD_TIMEOUT_NEVER else seconds
+        val msg = G2SettingProto.setDashboardAutoClose(sendManager.nextMagicRandom(), value)
         sendModuleConfigureCommand(msg)
-        Bridge.log("G2: setDashboardTimeout($seconds)")
+        Bridge.log("G2: setDashboardTimeout($seconds -> $value)")
     }
 
     /** Ask the firmware for its current auto-close value (answer lands in the log). */
