@@ -9,8 +9,10 @@
  *
  * Deliberately excludes captions / notify — no offlineRoute, nothing to render.
  */
-import {cameraPackageName, mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
+// XERK-200/XERK-206: cameraPackageName removed from the hosted set — the
+// camera/gallery offline app is parked and its screens were removed.
+import {mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
 
-export const OFFLINE_HOSTED_PACKAGES = new Set([settingsPackageName, mirrorPackageName, cameraPackageName])
+export const OFFLINE_HOSTED_PACKAGES = new Set([settingsPackageName, mirrorPackageName])
 
 export const isOfflineHosted = (packageName: string) => OFFLINE_HOSTED_PACKAGES.has(packageName)

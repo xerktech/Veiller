@@ -1,10 +1,7 @@
 jest.mock("react-native", () => ({Platform: {OS: "android", Version: 33}}))
 
-const mockLegacyConnect = jest.fn(() => Promise.resolve())
-jest.mock("react-native-wifi-reborn", () => ({
-  __esModule: true,
-  default: {connectToProtectedSSID: mockLegacyConnect},
-}))
+// XERK-200/XERK-206: react-native-wifi-reborn (legacy connect path) was removed
+// while the ASG gallery is parked; the transport's legacy path now throws.
 jest.mock("@dr.pogodin/react-native-fs", () => ({
   downloadFile: jest.fn(),
   stopDownload: jest.fn(),
@@ -29,7 +26,6 @@ describe("localNetworkTransport", () => {
     await localNetworkTransport.connect("AndroidShare_test", "password")
 
     expect(mockNativeModule.connect).toHaveBeenCalledWith("AndroidShare_test", "password")
-    expect(mockLegacyConnect).not.toHaveBeenCalled()
     expect(localNetworkTransport.isScopedConnectionActive()).toBe(true)
   })
 

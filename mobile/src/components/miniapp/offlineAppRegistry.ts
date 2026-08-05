@@ -10,11 +10,14 @@
  */
 import type {ComponentType} from "react"
 
-import {cameraPackageName, mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
+// XERK-200/XERK-206: cameraPackageName no longer imported — the camera/gallery
+// offline app is parked and its screens were removed.
+import {mirrorPackageName, settingsPackageName} from "@/constants/miniapps"
 import {OFFLINE_HOSTED_PACKAGES} from "./offlineHostedPackages"
 
-import GalleryScreen from "@/app/asg/gallery"
-import GallerySettingsScreen from "@/app/asg/gallery-settings"
+// XERK-200/XERK-206: ASG gallery screens removed while the camera miniapp is parked.
+// import GalleryScreen from "@/app/asg/gallery"
+// import GallerySettingsScreen from "@/app/asg/gallery-settings"
 import DeveloperUrlScreen from "@/app/miniapps/miniappdev/developer-url"
 import MirrorScreen from "@/app/miniapps/mirror/mirror"
 import AppearanceSettings from "@/app/miniapps/settings/appearance"
@@ -76,14 +79,15 @@ export const offlineAppRegistry: Record<string, OfflineAppDef> = {
     initialRoute: "/miniapps/mirror/mirror",
     routes: {"/miniapps/mirror/mirror": MirrorScreen},
   },
-  [cameraPackageName]: {
-    initialRoute: "/asg/gallery",
-    routes: {
-      "/asg/gallery": GalleryScreen,
-      "/asg/gallery-settings": GallerySettingsScreen,
-      "/miniapps/settings/camera": CameraSettings,
-    },
-  },
+  // XERK-200/XERK-206: camera/gallery offline app parked — screens removed.
+  // [cameraPackageName]: {
+  //   initialRoute: "/asg/gallery",
+  //   routes: {
+  //     "/asg/gallery": GalleryScreen,
+  //     "/asg/gallery-settings": GallerySettingsScreen,
+  //     "/miniapps/settings/camera": CameraSettings,
+  //   },
+  // },
 }
 
 if (__DEV__) {

@@ -26,7 +26,8 @@ import {
 import {ensureMiniappEngine, stopMiniappEngine} from "./services/MiniappEngine"
 import localMiniappRuntime from "./services/LocalMiniappRuntime"
 import displayProcessor from "./services/DisplayProcessor"
-import {gallerySyncService} from "./services/asg/gallerySyncService"
+// XERK-200/XERK-206: gallery-sync boot init removed while the ASG gallery is parked.
+// import {gallerySyncService} from "./services/asg/gallerySyncService"
 import {glasses} from "./facades/glasses"
 import {tapStrap} from "./facades/tapStrap"
 import {display} from "./facades/display"
@@ -121,7 +122,8 @@ export const engine = {
     localMiniappRuntime.initialize()
     ensureMiniappEngine()
     displayProcessor.attachToRuntime()
-    gallerySyncService.initialize()
+    // XERK-200/XERK-206: ASG gallery parked — no gallery-sync service at boot.
+    // gallerySyncService.initialize()
   },
   /** Stop the runtime: tear down the settings sync + cloud client + mark stopped.
    * Each step is guarded so one failing teardown can't skip the rest and leak
@@ -146,7 +148,8 @@ export const engine = {
     await safely("miniapp engine", stopMiniappEngine)
     await safely("local miniapp runtime", () => localMiniappRuntime.cleanup())
     await safely("display processor", () => displayProcessor.detachFromRuntime())
-    await safely("gallery sync service", () => gallerySyncService.cleanup())
+    // XERK-200/XERK-206: ASG gallery parked — nothing to clean up.
+    // await safely("gallery sync service", () => gallerySyncService.cleanup())
     await safely("cloud client", () => cloudClientService.stop())
     await safely("bootstrap", bootstrapStop)
   },

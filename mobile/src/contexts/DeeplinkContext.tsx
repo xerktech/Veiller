@@ -96,13 +96,14 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       nav.push("/glasses")
     },
   },
-  {
-    pattern: "/asg/gallery",
-    handler: (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      nav.push("/asg/gallery")
-    },
-  },
+  // XERK-200/XERK-206: ASG gallery route removed while the camera miniapp is parked.
+  // {
+  //   pattern: "/asg/gallery",
+  //   handler: (url: string, params: Record<string, string>) => {
+  //     const nav = useNavigationStore.getState()
+  //     nav.push("/asg/gallery")
+  //   },
+  // },
 
   // Pairing routes
   {
