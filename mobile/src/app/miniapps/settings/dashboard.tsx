@@ -23,7 +23,8 @@ import {SETTINGS, useSetting} from "@mentra/engine"
 import {engine} from "@mentra/engine"
 
 /**
- * Dashboard auto-close values, in seconds. The firmware field's unit is an
+ * Dashboard auto-close values, in seconds; 0 disables auto-close so the
+ * dashboard stays up until dismissed manually. The firmware field's unit is an
  * assumption (see G2's setDashboardAutoClose) — the driver reads the value back
  * on connect and logs it, so a device can confirm or correct this scale.
  */
@@ -33,6 +34,7 @@ const DASHBOARD_TIMEOUT_OPTIONS = [
   {label: "15 seconds", value: "15"},
   {label: "30 seconds", value: "30"},
   {label: "60 seconds", value: "60"},
+  {label: "Never", value: "0"},
 ]
 
 export default function DashboardSettingsScreen() {
