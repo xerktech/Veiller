@@ -1157,7 +1157,6 @@ const en = {
     notify: "Notifications",
     feedback: "Give Feedback",
     lmaLoader: "Miniapp Developer",
-    tapTester: "Tap Strap Tester",
   },
   tapTester: {
     title: "Tap Strap Tester",

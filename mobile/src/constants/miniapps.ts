@@ -3,7 +3,6 @@ export const galleryPackageName = "com.mentra.gallery"
 export const settingsPackageName = "com.mentra.settings"
 export const simulatedPackageName = "com.mentra.simulated"
 export const mirrorPackageName = "com.mentra.mirror"
-export const tapTesterPackageName = "com.mentra.taptester"
 export const notifyPackageName = "cloud.augmentos.notify"
 
 /** True when this binary is the China (com.xerktech.foverlay.cn) build. */
