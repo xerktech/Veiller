@@ -14,7 +14,6 @@ import {useNavigationStore} from "@/stores/navigation"
 import CapsuleMenu from "@/effects/CapsuleMenu"
 import {useRegisterCapsule} from "@/stores/capsule"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
-import {SETTINGS, useSetting} from "@mentra/engine"
 
 /**
  * LocalMiniappView — the UI half of a local (or dev) miniapp.
@@ -83,7 +82,6 @@ function LocalMiniappView({
   const [webViewCanGoBack, setWebViewCanGoBack] = useState(false)
   const [uiUri, setUiUri] = useState<string | null>(null)
   const [uiBaseDir, setUiBaseDir] = useState<string | null>(null)
-  const [devMode] = useSetting(SETTINGS.dev_mode.key)
 
   // ----- Load-state tracking -------------------------------------------------
   //
@@ -108,7 +106,7 @@ function LocalMiniappView({
   //   readyTimerRef — the pending ready-timeout timer, if any.
   const [connected, setConnected] = useState(false)
   const connectedRef = useRef(false)
-  const [loadAttempts, setLoadAttempts] = useState(0)
+  const [_loadAttempts, setLoadAttempts] = useState(0)
   const attemptsRef = useRef(0)
   const readyTimerRef = useRef<number | null>(null)
 
@@ -488,13 +486,10 @@ function LocalMiniappView({
   const uiShim = buildMentraUiShim({packageName})
   const injectedJS = `${globalsScript}\n${uiShim}`
 
-  // While the WebView is mounted but the miniapp hasn't sent `ready` yet,
-  // show retry progress on the splash. Once connected, the splash hides;
-  // once the retry budget is spent, errorMessage replaces the label.
-  let connectingLabel = undefined
-  if (loadAttempts > 0 && devMode && !errorMessage) {
-    connectingLabel = `Loading… (attempt ${loadAttempts + 1} of ${MAX_LOAD_ATTEMPTS})`
-  }
+  // While the WebView is mounted but the miniapp hasn't sent `ready` yet, the
+  // splash stays up without a label. Once connected, the splash hides; once the
+  // retry budget is spent, errorMessage replaces the label.
+  const connectingLabel = undefined
 
   return (
     <View ref={viewShotRef} collapsable={false} className="flex-1 bg-black">

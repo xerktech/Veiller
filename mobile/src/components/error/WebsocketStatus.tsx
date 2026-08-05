@@ -4,34 +4,33 @@ import {TouchableOpacity, View} from "react-native"
 import {Icon, Text, type IconTypes} from "@/components/ignite"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
-import {engine, useRefresh} from "@mentra/engine"
-import {BgTimer} from "@mentra/engine"
+import {engine, useRefresh, BgTimer, SETTINGS, useSetting} from "@mentra/engine"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {SETTINGS, useSetting} from "@mentra/engine"
 import {useNavigationStore} from "@/stores/navigation"
 
 type DisplayStatus = "connected" | "warning" | "disconnected"
 
-const STATUS_CONFIG: Record<DisplayStatus, {icon: IconTypes; label: () => string; bgClass: string; iconColor: string}> = {
-  connected: {
-    icon: "wifi",
-    label: () => translate("connection:connected"),
-    bgClass: "bg-primary",
-    iconColor: "#fff",
-  },
-  warning: {
-    icon: "wifi",
-    label: () => translate("connection:connecting"),
-    bgClass: "bg-chart-3",
-    iconColor: "#fff",
-  },
-  disconnected: {
-    icon: "wifi-off",
-    label: () => translate("connection:disconnected"),
-    bgClass: "bg-destructive",
-    iconColor: "#fff",
-  },
-}
+const STATUS_CONFIG: Record<DisplayStatus, {icon: IconTypes; label: () => string; bgClass: string; iconColor: string}> =
+  {
+    connected: {
+      icon: "wifi",
+      label: () => translate("connection:connected"),
+      bgClass: "bg-primary",
+      iconColor: "#fff",
+    },
+    warning: {
+      icon: "wifi",
+      label: () => translate("connection:connecting"),
+      bgClass: "bg-chart-3",
+      iconColor: "#fff",
+    },
+    disconnected: {
+      icon: "wifi-off",
+      label: () => translate("connection:disconnected"),
+      bgClass: "bg-destructive",
+      iconColor: "#fff",
+    },
+  }
 
 export default function WebsocketStatus() {
   // Cloud-v2 runtime connection (the Cloud V1 websocket this pill used to
@@ -42,7 +41,6 @@ export default function WebsocketStatus() {
   )
   const [displayStatus, setDisplayStatus] = useState<DisplayStatus>("connected")
   const [offlineMode] = useSetting(SETTINGS.offline_mode.key)
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
   const refreshApplets = useRefresh()
   const {theme} = useAppTheme()
   const disconnectionTimerRef = useRef<number | null>(null)
@@ -124,7 +122,7 @@ export default function WebsocketStatus() {
     )
   }
 
-  if (!superMode && displayStatus == "connected") {
+  if (displayStatus == "connected") {
     return null
   }
 

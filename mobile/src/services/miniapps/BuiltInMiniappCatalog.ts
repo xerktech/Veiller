@@ -1,14 +1,7 @@
 import {createElement} from "react"
 import {Platform} from "react-native"
 
-import {
-  decideDevLaunchRoute,
-  HardwareRequirementLevel,
-  HardwareType,
-  engine,
-  type ClientApp,
-  type StartOptions,
-} from "@mentra/engine"
+import {decideDevLaunchRoute, HardwareRequirementLevel, HardwareType, engine, type ClientApp} from "@mentra/engine"
 import {appRegistry, installAppStoreHooks} from "@mentra/engine/internal"
 
 import {DevIcon} from "@/components/miniapps/DevIcons"
@@ -18,7 +11,6 @@ import {translate} from "@/i18n"
 import {useNavigationStore} from "@/stores/navigation"
 import {SETTINGS} from "@mentra/engine"
 import {getDefaultMenuApps, type GlassesMenuItem} from "@/utils/glassesMenu"
-import {markMiniappDevMode} from "@/utils/miniappDevMode"
 
 import {
   // cameraPackageName, // XERK-206: unused while the camera miniapp is disabled
@@ -119,7 +111,6 @@ class BuiltInMiniappCatalog {
       const {packageName, devUrl, name: appName, logoUrl} = app
       decideDevLaunchRoute(packageName, devUrl).then((result) => {
         if (result.decision === "live") {
-          markMiniappDevMode()
           engine.miniapps.setForeground(packageName)
         } else {
           nav.push("/applet/dev-offline", {packageName, name: appName, iconUrl: logoUrl})
@@ -291,27 +282,23 @@ class BuiltInMiniappCatalog {
       })
     }
 
-    if (
-      engine.settings.get(SETTINGS.miniapp_dev_mode.key)
-    ) {
-      apps.push({
-        packageName: "com.mentra.miniappdev",
-        name: translate("miniApps:lmaLoader"),
-        type: "standard",
-        offline: true,
-        offlineRoute: "/miniapps/settings/miniapp-dev",
-        local: false,
-        webviewUrl: "",
-        permissions: [],
-        running: false,
-        loading: false,
-        healthy: true,
-        hidden: false,
-        hardwareRequirements: [],
-        logoUrl: require("@assets/applet-icons/store.png"),
-        iconComponent: createElement(DevIcon),
-      })
-    }
+    apps.push({
+      packageName: "com.mentra.miniappdev",
+      name: translate("miniApps:lmaLoader"),
+      type: "standard",
+      offline: true,
+      offlineRoute: "/miniapps/settings/miniapp-dev",
+      local: false,
+      webviewUrl: "",
+      permissions: [],
+      running: false,
+      loading: false,
+      healthy: true,
+      hidden: false,
+      hardwareRequirements: [],
+      logoUrl: require("@assets/applet-icons/store.png"),
+      iconComponent: createElement(DevIcon),
+    })
 
     return isChinaBuild() ? apps.filter((app) => !CHINA_HIDDEN_APPS.includes(app.packageName)) : apps
   }

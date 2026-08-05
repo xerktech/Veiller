@@ -11,9 +11,8 @@ import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import Toast from "react-native-toast-message"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting, engine} from "@mentra/engine"
 import {spacing, ThemedStyle} from "@/theme"
-import {engine} from "@mentra/engine"
 
 type PhotoSize = "low" | "medium" | "high" | "max"
 // The Mentra Live sensor only records 1080p/720p — 1440p/4K wedge the camera.
@@ -86,7 +85,6 @@ function normalizeVideoResolution(width?: number, height?: number): {width: numb
 export default function CameraSettingsScreen() {
   const {theme, themed} = useAppTheme()
   const {goBack} = useNavigationStore.getState()
-  const [_devMode, _setDevMode] = useSetting(SETTINGS.debug_mode.key)
   const [storedPhotoSize, setPhotoSize] = useSetting(SETTINGS.button_photo_size.key)
   const photoSize = normalizeButtonPhotoSize(storedPhotoSize)
   const [videoSettings, setVideoSettings] = useSetting(SETTINGS.button_video_settings.key)
@@ -284,16 +282,14 @@ export default function CameraSettingsScreen() {
             />
           </View>
         </View>
-        {_devMode && (
-          <View style={themed($section)}>
-            <ToggleSetting
-              label={translate("settings:postProcessing")}
-              subtitle={translate("settings:postProcessingSubtitle")}
-              value={postProcessing}
-              onValueChange={(v) => setPostProcessing(v)}
-            />
-          </View>
-        )}
+        <View style={themed($section)}>
+          <ToggleSetting
+            label={translate("settings:postProcessing")}
+            subtitle={translate("settings:postProcessingSubtitle")}
+            value={postProcessing}
+            onValueChange={(v) => setPostProcessing(v)}
+          />
+        </View>
       </ScrollView>
     </Screen>
   )

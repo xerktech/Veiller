@@ -7,13 +7,12 @@ import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n/translate"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting, engine} from "@mentra/engine"
 import {getGlassesImage} from "@/utils/getGlassesImage"
 import {Group} from "@/components/ui"
 import {RouteButton} from "@/components/ui/RouteButton"
 
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
-import {engine} from "@mentra/engine"
 
 import {EmptyState} from "@/components/glasses/info/EmptyState"
 import {showAlert} from "@/contexts/ModalContext"
@@ -24,7 +23,6 @@ function DeviceSettings() {
   const controllerConnected = useEngineSnapshot(engine.glasses.controller.status, (onChange) =>
     engine.glasses.controller.onStatus(onChange),
   ).connected
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
 
   const {push, goBack} = useNavigationStore.getState()
 
@@ -74,9 +72,7 @@ function DeviceSettings() {
 
   return (
     <View className="gap-6">
-      {superMode && (
-        <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
-      )}
+      <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
 
       <Group title={translate("deviceSettings:general")}>
         {controllerConnected && defaultController !== DeviceTypes.SIMULATED && (

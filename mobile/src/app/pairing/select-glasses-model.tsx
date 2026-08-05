@@ -12,7 +12,6 @@ import {Screen} from "@/components/ignite/Screen"
 import {Spacer} from "@/components/ui/Spacer"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting} from "@mentra/engine"
 // XERK-206: AR99_MODEL_OPTIONS unused while non-G2 models are disabled.
 import {type Ar99ProjectName, getGlassesImage} from "@/utils/getGlassesImage"
 import GlassView from "@/components/ui/GlassView"
@@ -29,7 +28,6 @@ type GlassesOption = {
 export default function SelectGlassesModelScreen() {
   const {theme} = useAppTheme()
   const {push, goBack} = useNavigationStore.getState()
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
 
   const getManufacturerLogo = (option: GlassesOption) => {
     if (option.manufacturerName) {
@@ -107,7 +105,7 @@ export default function SelectGlassesModelScreen() {
       <ScrollView className="-mx-6 px-6 pt-6">
         <View className="flex-col gap-4 pb-8">
           {glassesOptions
-            .filter((glasses) => !SUPER_MODE_ONLY_MODELS.has(glasses.deviceModel) || superMode)
+            .filter((glasses) => !SUPER_MODE_ONLY_MODELS.has(glasses.deviceModel))
             .map((glasses) => (
               <TouchableOpacity key={glasses.key} onPress={() => triggerGlassesPairingGuide(glasses)}>
                 <GlassView className="bg-primary-foreground flex-col items-center justify-center p-6 rounded-2xl overflow-hidden">

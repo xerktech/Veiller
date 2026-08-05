@@ -73,13 +73,12 @@ describe("OtaUpdateCheckService", () => {
     expect(global.fetch).toHaveBeenCalledWith("https://ota.example/app-pinned-version.json")
   })
 
-  it("allows an explicit super-mode manifest override from an unpinned mobile build", async () => {
+  it("allows an explicit manifest override URL from an unpinned mobile build", async () => {
     delete process.env.EXPO_PUBLIC_ASG_OTA_VERSION_URL
     useGlassesStore.getState().setGlassesInfo({buildNumber: "40"})
     useSettingsStore.setState((state) => ({
       settings: {
         ...state.settings,
-        [SETTINGS.super_mode.key]: true,
         [SETTINGS.ota_version_url.key]: "https://ota.example/manual-version.json",
       },
     }))

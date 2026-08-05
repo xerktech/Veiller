@@ -35,7 +35,6 @@ export function OtaUpdateChecker() {
 
   // OTA check state from engine
   const [defaultWearable] = useSetting(SETTINGS.default_wearable.key)
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
   const glassesConnected = otaSnapshot.connected
   const buildNumber = otaSnapshot.buildNumber
   const glassesWifiConnected = otaSnapshot.wifiConnected
@@ -217,12 +216,10 @@ export function OtaUpdateChecker() {
     const updateCount = pending.updates.length
     const isDowngrade = pending.isDowngrade
     const updateMessage = isDowngrade
-      ? translate("ota:downgradeDescriptionShort") + (superMode ? ` (${pending.updates.join(", ").toUpperCase()})` : "")
-      : superMode
-        ? `Updates available: ${pending.updates.join(", ").toUpperCase()}`
-        : updateCount === 1
-          ? "1 update available"
-          : `${updateCount} updates available`
+      ? translate("ota:downgradeDescriptionShort")
+      : updateCount === 1
+        ? "1 update available"
+        : `${updateCount} updates available`
     pendingUpdate.current = null
     hasPromptedOta.current = true
     hasPromptedOtaWifiSetup.current = false
@@ -231,7 +228,7 @@ export function OtaUpdateChecker() {
       {text: translate("ota:updateLater"), style: "cancel"},
       {text: translate("ota:install"), onPress: () => push("/ota/check-for-updates")},
     ])
-  }, [pathname, glassesConnected, glassesWifiConnected, defaultWearable, superMode, push])
+  }, [pathname, glassesConnected, glassesWifiConnected, defaultWearable, push])
 
   // Main OTA check effect
   useEffect(() => {
@@ -329,16 +326,12 @@ export function OtaUpdateChecker() {
             }
 
             const deviceName = defaultWearable || "Glasses"
-            // Super mode shows technical details (APK, MTK, BES), normal mode shows simple count
             const updateCount = updates.length
-            const updateList = updates.join(", ").toUpperCase() // "APK, MTK, BES"
             const updateMessage = isApkDowngrade
-              ? translate("ota:downgradeDescriptionShort") + (superMode ? ` (${updateList})` : "")
-              : superMode
-                ? `Updates available: ${updateList}`
-                : updateCount === 1
-                  ? "1 update available"
-                  : `${updateCount} updates available`
+              ? translate("ota:downgradeDescriptionShort")
+              : updateCount === 1
+                ? "1 update available"
+                : `${updateCount} updates available`
 
             pendingUpdate.current = {latestVersionInfo, updates, isDowngrade: isApkDowngrade}
 
@@ -364,24 +357,21 @@ export function OtaUpdateChecker() {
               return
             }
             console.log("OTA: Update available and glasses are not on WiFi - prompting WiFi setup")
-            const wifiMessage =
-              superMode && !isApkDowngrade
-                ? `Updates available: ${updateList}\n\nConnect your ${deviceName} to WiFi to install.`
-                : `${updateMessage}\n\nConnect your ${deviceName} to WiFi to install.`
+            const wifiMessage = `${updateMessage}\n\nConnect your ${deviceName} to WiFi to install.`
             hasPromptedOtaWifiSetup.current = true
             showAlert(
               translate(isApkDowngrade ? "ota:downgradeAvailable" : "ota:updateAvailable", {deviceName}),
               wifiMessage,
               [
-              {
-                text: translate("ota:updateLater"),
-                style: "cancel",
-                onPress: () => {
-                  pendingUpdate.current = null // Clear pending on dismiss
-                  hasPromptedOtaWifiSetup.current = false
+                {
+                  text: translate("ota:updateLater"),
+                  style: "cancel",
+                  onPress: () => {
+                    pendingUpdate.current = null // Clear pending on dismiss
+                    hasPromptedOtaWifiSetup.current = false
+                  },
                 },
-              },
-              {text: translate("ota:setupWifi"), onPress: () => push("/wifi/scan")},
+                {text: translate("ota:setupWifi"), onPress: () => push("/wifi/scan")},
               ],
             )
           },
@@ -407,7 +397,6 @@ export function OtaUpdateChecker() {
     defaultWearable,
     pathname,
     push,
-    superMode,
     manifestGeneration,
   ])
 

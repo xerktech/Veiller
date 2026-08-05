@@ -564,12 +564,6 @@ class MantleManager {
           continue
         }
 
-        let superMode = await engine.settings.get(SETTINGS.super_mode.key)
-        if (!superMode && packageName === "com.mentra.example") {
-          // skip installing the example miniapp if super mode is not enabled
-          continue
-        }
-
         await asset.downloadAsync()
         if (!asset.localUri) {
           console.warn(`MANTLE: bundled miniapp ${packageName} has no localUri after download`)

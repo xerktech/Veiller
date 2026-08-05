@@ -1,4 +1,4 @@
-import {Platform, View} from "react-native"
+import {View} from "react-native"
 import {ScrollView} from "react-native-gesture-handler"
 
 import {VersionInfo} from "@/components/dev/VersionInfo"
@@ -10,16 +10,12 @@ import {Spacer} from "@/components/ui/Spacer"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
-import {SETTINGS, useSetting} from "@mentra/engine"
 import {useRef} from "react"
 import {useRegisterCapsule} from "@/stores/capsule"
 
 export default function MainSettingsPage() {
   const {theme} = useAppTheme()
   const {push} = useNavigationStore.getState()
-  const [debugMode] = useSetting(SETTINGS.debug_mode.key)
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
-  const [miniappDevMode] = useSetting(SETTINGS.miniapp_dev_mode.key)
   const viewShotRef = useRef<View>(null)
 
   useRegisterCapsule({
@@ -52,13 +48,11 @@ export default function MainSettingsPage() {
               label={translate("settings:appAppearance")}
               onPress={() => push("/miniapps/settings/appearance")}
             />
-            {(Platform.OS === "android" || superMode) && (
-              <RouteButton
-                icon={<Icon name="bell" size={24} color={theme.colors.secondary_foreground} />}
-                label={translate("settings:notificationsSettings")}
-                onPress={() => push("/miniapps/settings/notifications")}
-              />
-            )}
+            <RouteButton
+              icon={<Icon name="bell" size={24} color={theme.colors.secondary_foreground} />}
+              label={translate("settings:notificationsSettings")}
+              onPress={() => push("/miniapps/settings/notifications")}
+            />
             {/* Microphone lives in the device section above (it's a glasses mic selector) */}
             <RouteButton
               icon={<Icon name="volume" size={24} color={theme.colors.secondary_foreground} />}
@@ -73,21 +67,17 @@ export default function MainSettingsPage() {
           </Group>
 
           <Group title={translate("deviceSettings:advancedSettings")}>
-            {debugMode && (
-              <RouteButton
-                icon={<Icon name="user-code" size={24} color={theme.colors.secondary_foreground} />}
-                label={translate("settings:debugSettings")}
-                onPress={() => push("/miniapps/settings/debug")}
-                onLongPress={() => superMode && push("/miniapps/settings/super")}
-              />
-            )}
-            {miniappDevMode && (
-              <RouteButton
-                icon={<Icon name="user-code" size={24} color={theme.colors.secondary_foreground} />}
-                label={translate("settings:miniappDeveloperSettings")}
-                onPress={() => push("/miniapps/settings/miniapp-dev")}
-              />
-            )}
+            <RouteButton
+              icon={<Icon name="user-code" size={24} color={theme.colors.secondary_foreground} />}
+              label={translate("settings:debugSettings")}
+              onPress={() => push("/miniapps/settings/debug")}
+              onLongPress={() => push("/miniapps/settings/super")}
+            />
+            <RouteButton
+              icon={<Icon name="user-code" size={24} color={theme.colors.secondary_foreground} />}
+              label={translate("settings:miniappDeveloperSettings")}
+              onPress={() => push("/miniapps/settings/miniapp-dev")}
+            />
           </Group>
         </View>
 

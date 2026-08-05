@@ -3,7 +3,6 @@ import {View, Animated, Easing, Image} from "react-native"
 
 import {Button, Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {useSetting, SETTINGS} from "@mentra/engine"
 import {getAr99DisplayName, getAr99ImageSource, getGlassesImage, getEvenRealitiesG1Image} from "@/utils/getGlassesImage"
 
 import {getModelSpecificTips} from "@/components/glasses/GlassesTroubleshootingModal"
@@ -17,9 +16,13 @@ interface GlassesPairingLoaderProps {
   isBooting?: boolean
 }
 
-const GlassesPairingLoader: React.FC<GlassesPairingLoaderProps> = ({deviceModel, deviceName, ar99ProjectName, onCancel, isBooting}) => {
+const GlassesPairingLoader: React.FC<GlassesPairingLoaderProps> = ({
+  deviceModel,
+  ar99ProjectName,
+  onCancel,
+  isBooting,
+}) => {
   const {theme} = useAppTheme()
-  const [superMode] = useSetting<boolean>(SETTINGS.super_mode.key)
   const progressAnim = useRef(new Animated.Value(0)).current
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
   const tipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -75,10 +78,7 @@ const GlassesPairingLoader: React.FC<GlassesPairingLoaderProps> = ({deviceModel,
       <GlassView className="bg-primary-foreground rounded-2xl p-6 gap-4">
         {/* Title */}
         <Text tx="pairing:pairing" className="text-xl font-semibold text-center" />
-        <Text className="text-xl text-center">
-          {displayName}
-          {superMode && deviceName && deviceName !== "NOTREQUIREDSKIP" ? ` - ${deviceName}` : ""}
-        </Text>
+        <Text className="text-xl text-center">{displayName}</Text>
 
         {/* Glasses image */}
         <View className="items-center justify-center py-4 h-[150px]">
@@ -119,7 +119,3 @@ const GlassesPairingLoader: React.FC<GlassesPairingLoaderProps> = ({deviceModel,
 }
 
 export default GlassesPairingLoader
-
-
-
-

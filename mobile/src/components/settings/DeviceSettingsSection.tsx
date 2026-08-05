@@ -11,11 +11,10 @@ import {showAlert} from "@/contexts/ModalContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n/translate"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting, engine} from "@mentra/engine"
 import {getGlassesImage} from "@/utils/getGlassesImage"
 
 import {Capabilities, DeviceTypes, getModelCapabilities} from "@/../../cloud/packages/types/src"
-import {engine} from "@mentra/engine"
 
 import OtaProgressSection from "@/components/glasses/OtaProgressSection"
 import {Ar99OtaModal} from "@/components/settings/Ar99OtaModal"
@@ -70,7 +69,6 @@ export function DeviceSettingsSection() {
   //   SETTINGS.default_button_action_enabled.key,
   // )
   // const [defaultButtonActionApp, setDefaultButtonActionApp] = useSetting(SETTINGS.default_button_action_app.key)
-  const [superMode] = useSetting(SETTINGS.super_mode.key)
   const [ar99OtaVisible, setAr99OtaVisible] = useState(false)
   const glassesStatus = useEngineSnapshot(engine.glasses.status, (onChange) => engine.glasses.onStatus(onChange))
   const otaSnapshot = useEngineSnapshot(engine.ota.snapshot, engine.ota.onSnapshot)
@@ -182,10 +180,8 @@ export function DeviceSettingsSection() {
         />
       )}
 
-      {/* Layout settings — super mode (display layout tooling) */}
-      {superMode && (
-        <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
-      )}
+      {/* Layout settings (display layout tooling) */}
+      <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
 
       {/* Button Settings — Mentra Live only (G2's button is a touchpad and conflicts with the native menu).
           Hidden for now: the action button always launches the camera. ButtonActions.tsx already forces
@@ -230,8 +226,10 @@ export function DeviceSettingsSection() {
         />
       )}
 
-      {/* OTA Progress — OTA-capable glasses in super mode */}
-      {superMode && glassesConnected && features?.hasOta && otaProgress?.progress && otaProgress?.progress < 100 && <OtaProgressSection otaProgress={otaProgress} />}
+      {/* OTA Progress — OTA-capable glasses */}
+      {glassesConnected && features?.hasOta && otaProgress?.progress && otaProgress?.progress < 100 && (
+        <OtaProgressSection otaProgress={otaProgress} />
+      )}
 
       {/* Nex Developer Settings — Mentra Display only */}
       {defaultWearable && defaultWearable.includes(DeviceTypes.NEX) && (
@@ -286,4 +284,3 @@ export function DeviceSettingsSection() {
     </View>
   )
 }
-
