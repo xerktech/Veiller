@@ -3412,12 +3412,17 @@ class G2: NSObject, SGCManager {
         dashDisplayW.writeInt32Field(6, dashboardHalfDayFormat())  // halfDayFormat
         dashDisplayW.writeInt32Field(7, dashboardTemperatureUnit())  // temperatureUnit
 
-        // packageId (field 1) identifies us as the sending app, exactly as the
-        // calendar push does. Omitting it left packageId at proto3's default 0;
-        // the device-global fields (12h/units) still applied, but the widget
-        // list — which the firmware scopes to a package — did not.
+        // Do NOT scope this to packageId=1. The calendar-event push
+        // (CalendarProto.calendarPush) writes its content under packageId=1, and
+        // the firmware treats a display-settings push as a reset of that
+        // package's dashboard. Sharing the packageId meant every re-send of the
+        // display settings — the on-connect settings replay, and any
+        // 12h/units/widget change — wiped the pushed calendar events, breaking
+        // calendar sync. With packageId omitted (proto3 default 0) the
+        // device-global fields (12h/units) still apply and the calendar
+        // (packageId=1) is left intact. The per-package widget list does not
+        // take effect on current firmware either way, so nothing working is lost.
         var dashRecvW = ProtobufWriter()
-        dashRecvW.writeInt32Field(1, 1)  // packageId
         dashRecvW.writeMessageField(2, dashDisplayW.data)
 
         var dashPkgW = ProtobufWriter()
