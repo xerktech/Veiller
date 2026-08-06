@@ -10,7 +10,7 @@
 
 // Mutable so each test can set the repo list. Must be `mock`-prefixed to be
 // referenceable inside the hoisted jest.mock factory.
-import {veillerMiniappSync} from "./veillerMiniappSync"
+import {resolveLatestBundle, veillerMiniappSync} from "./veillerMiniappSync"
 
 let mockSources: Array<{repo: string; packageName: string; assetPattern?: string}> = []
 
@@ -120,7 +120,7 @@ describe("veillerMiniappSync", () => {
       expect.anything(),
       expect.objectContaining({idempotent: true}),
     )
-    // Version is derived from the tag (v0.6.47 -> 0.6.47), matching miniapp.json.
+    // Version is derived from the asset name, matching the bundle's miniapp.json.
     expect(mockInstallFromLocalZip).toHaveBeenCalledWith(
       "file:///cache/veiller_miniapps/turma-veiller-v0.6.47.zip",
       expect.objectContaining({
@@ -227,6 +227,71 @@ describe("veillerMiniappSync", () => {
       "file:///cache/veiller_miniapps/tenir-veiller-v0.5.10.zip",
       expect.anything(),
     )
+  })
+
+  it("takes the version from the asset name, not the release tag (XERK-225)", async () => {
+    // Real shape from xerktech/Turma: releases are cut for every change, but the
+    // previous bundle asset is re-attached when the miniapp itself didn't
+    // change, so tag v0.6.57 ships turma-veiller-v0.6.53.zip (miniapp.json
+    // 0.6.53). Trusting the tag reports a version that is never installed, so
+    // the store shows a permanent "Update available" and the sync re-downloads
+    // the same bundle every startup.
+    const source = {repo: "xerktech/Turma", packageName: "com.xerktech.turma", name: "Turma"}
+    ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
+      releasesResponse([{tag: "v0.6.57", assets: ["turma-veiller-v0.6.53.zip"]}]),
+    )
+
+    const bundle = await resolveLatestBundle(source)
+
+    expect(bundle).toEqual(expect.objectContaining({version: "0.6.53", assetName: "turma-veiller-v0.6.53.zip"}))
+  })
+
+  it("skips the re-download when the asset's version is already installed under a newer tag", async () => {
+    mockSources = [{repo: "xerktech/Turma", packageName: "com.xerktech.turma"}]
+    mockGetInstalledVersions.mockReturnValue(["0.6.53"])
+    ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
+      releasesResponse([{tag: "v0.6.57", assets: ["turma-veiller-v0.6.53.zip"]}]),
+    )
+
+    await veillerMiniappSync.sync()
+
+    expect(mockDownloadFileAsync).not.toHaveBeenCalled()
+    expect(mockInstallFromLocalZip).not.toHaveBeenCalled()
+  })
+
+  it("falls back to the tag when the asset name carries no version", async () => {
+    const source = {repo: "xerktech/Other", packageName: "com.xerktech.other", name: "Other"}
+    ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
+      releasesResponse([{tag: "v1.2.3", assets: ["veiller-bundle.zip"]}]),
+    )
+
+    await expect(resolveLatestBundle(source)).resolves.toEqual(expect.objectContaining({version: "1.2.3"}))
+  })
+
+  it("reports each install stage so the store can show progress (XERK-225)", async () => {
+    const source = {repo: "xerktech/Tenir", packageName: "com.xerktech.tenir", name: "Tenir"}
+    ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
+      releasesResponse([{tag: "v0.6.5", assets: ["tenir-veiller-v0.6.4.zip"]}]),
+    )
+    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/veiller_miniapps/tenir-veiller-v0.6.4.zip"})
+    mockInstallFromLocalZip.mockResolvedValue(okResult("com.xerktech.tenir", "0.6.4"))
+
+    const stages: string[] = []
+    const result = await veillerMiniappSync.installLatest(source, (stage) => stages.push(stage))
+
+    expect(stages).toEqual(["checking", "downloading", "installing"])
+    expect(result).toEqual({packageName: "com.xerktech.tenir", version: "0.6.4"})
+  })
+
+  it("surfaces a download failure to the caller so the store can report it", async () => {
+    const source = {repo: "xerktech/Tenir", packageName: "com.xerktech.tenir", name: "Tenir"}
+    ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
+      releasesResponse([{tag: "v0.6.5", assets: ["tenir-veiller-v0.6.4.zip"]}]),
+    )
+    mockDownloadFileAsync.mockRejectedValue(new Error("connection reset"))
+
+    await expect(veillerMiniappSync.installLatest(source)).rejects.toThrow(/connection reset/)
+    expect(mockInstallFromLocalZip).not.toHaveBeenCalled()
   })
 
   it("logs (no throw) when a repo has no veiller bundle in any release", async () => {

@@ -199,10 +199,12 @@ you are otherwise asked to change one of those miniapps:
    push the changes directly to that repository's `main` branch.
 3. Package the updated miniapp as a flat Veiller bundle ZIP (miniapp.json at the
    root) and publish it as an asset on a GitHub Release in that public repo. The
-   asset name must contain `veiller` and end in `.zip` (the Turma/Tenir
-   pipelines name it `<repo>-veiller-v<version>.zip`), and the release must be
-   tagged `v<version>` where `<version>` equals the bundle's miniapp.json
-   version.
+   asset name must contain `veiller` and end in `.zip`, and it must be named
+   `<repo>-veiller-v<version>.zip` where `<version>` equals the bundle's
+   miniapp.json version — Veiller reads the version out of the **asset
+   filename**, not the release tag, because a repo cuts a release for every
+   change but re-attaches the previous bundle when the miniapp itself didn't
+   change (XERK-225). Tag the release `v<version>` too where they match.
 4. Veiller ships **no** miniapps inside the APK (XERK-214). To have Veiller
    install the miniapp, add an entry for its repo to
    `mobile/src/config/veillerMiniapps.ts`; the app downloads the latest release

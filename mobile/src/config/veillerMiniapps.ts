@@ -18,11 +18,17 @@
  * `turma-veiller-v0.6.47.zip`) next to their other release assets. Override
  * `assetPattern` per entry if a repo names its bundle differently.
  *
- * The release must be tagged `v<version>` (or `<version>`), where `<version>`
- * equals the `version` field inside the bundle's miniapp.json — the app records
- * that version once installed, so the already-installed check can skip a
- * re-download without unzipping. The zip must be a flat Veiller miniapp bundle
- * (miniapp.json at the root), the same shape produced by `veiller-miniapp pack`.
+ * The bundle's version comes from the **asset filename** — the `<version>` in
+ * `<repo>-veiller-v<version>.zip` must equal the `version` field inside the
+ * bundle's miniapp.json, because the app records that version on install and
+ * compares against it to decide whether an update is available. The release tag
+ * is only a fallback for assets that don't encode a version: a repo cuts a
+ * release for every change but re-attaches the previous bundle when the miniapp
+ * itself didn't change, so tag `v0.6.57` legitimately carries
+ * `turma-veiller-v0.6.53.zip` (XERK-225).
+ *
+ * The zip must be a flat Veiller miniapp bundle (miniapp.json at the root), the
+ * same shape produced by `veiller-miniapp pack`.
  *
  * The repos must be public (release assets are fetched unauthenticated).
  */
