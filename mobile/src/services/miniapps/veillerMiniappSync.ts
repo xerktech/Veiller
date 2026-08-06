@@ -38,12 +38,8 @@ export interface ResolvedBundle {
  * alongside unrelated assets (native-agent tarball, Android APK, manifest.json).
  * The `veiller` marker + `.zip` suffix selects exactly the bundle. A source may
  * override this with its own `assetPattern`.
- *
- * `foverlay` is accepted too so bundles published before the Foverlay→Veiller
- * rename keep installing; drop it once Turma/Tenir have cut a release with
- * veiller-named assets.
  */
-const DEFAULT_ASSET_PATTERN = /(veiller|foverlay).*\.zip$/i
+const DEFAULT_ASSET_PATTERN = /veiller.*\.zip$/i
 
 /** Does this asset name look like a Veiller miniapp bundle for this source? */
 function isBundleAsset(assetName: string, source: VeillerMiniappSource): boolean {
