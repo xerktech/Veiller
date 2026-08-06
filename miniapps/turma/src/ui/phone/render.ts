@@ -282,7 +282,7 @@ export function sessionViewHtml(state: AppState, verbosity: VerbosityPreset, sho
     `<button class="ph-back" data-back="1" aria-label="Back">‹</button>` +
     `<span class="ph-session-titles"><span class="ph-session-title">${esc(title)}</span>` +
     `<span class="ph-session-sub ph-mono">${esc(sub)}</span></span>` +
-    // Foverlay port: the Terminal toggle is not ported (the ttyd iframe needs
+    // Veiller port: the Terminal toggle is not ported (the ttyd iframe needs
     // WebView-jar cookies the background fetch proxy can't plant).
     `<span class="ph-kebab-wrap"><button class="ph-kebab" data-sess-menu="1" title="Actions">⋯</button>${menuHtml}</span>` +
     `</div>` +

@@ -1,16 +1,16 @@
 const VARIANTS = {
   default: {
-    packageName: "com.xerktech.foverlay",
-    playStoreUrl: "https://play.google.com/store/apps/details?id=com.xerktech.foverlay",
-    playStoreBetaUrl: "https://play.google.com/apps/testing/com.xerktech.foverlay",
+    packageName: "com.xerktech.veiller",
+    playStoreUrl: "https://play.google.com/store/apps/details?id=com.xerktech.veiller",
+    playStoreBetaUrl: "https://play.google.com/apps/testing/com.xerktech.veiller",
     appStoreUrl: "https://apps.apple.com/app/id6747363193",
     appStoreReviewUrl: "https://apps.apple.com/app/id6747363193?action=write-review",
     cdnBaseUrl: "https://mentra-videos-cdn.mentraglass.com",
   },
   china: {
-    packageName: "com.xerktech.foverlay.cn",
-    playStoreUrl: "https://play.google.com/store/apps/details?id=com.xerktech.foverlay.cn",
-    playStoreBetaUrl: "https://play.google.com/apps/testing/com.xerktech.foverlay.cn",
+    packageName: "com.xerktech.veiller.cn",
+    playStoreUrl: "https://play.google.com/store/apps/details?id=com.xerktech.veiller.cn",
+    playStoreBetaUrl: "https://play.google.com/apps/testing/com.xerktech.veiller.cn",
     appStoreUrl: "https://apps.apple.com/app/id6747363193",
     appStoreReviewUrl: "https://apps.apple.com/app/id6747363193?action=write-review",
     cdnBaseUrl: "https://asset.mentraglass.cn",

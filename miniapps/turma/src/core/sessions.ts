@@ -1,6 +1,6 @@
 import type { AgentInfo, SessionInfo, SessionRef } from "./types.ts";
 
-// "queued" added in the Foverlay port: upstream liveState never handled the
+// "queued" added in the Veiller port: upstream liveState never handled the
 // newer "queued" SessionStatus, so a queued session fell through to the live-
 // signal heuristics and read as "idle". It renders like the app-layer
 // "pending" overlay (glyph "…") — the session is waiting to start.

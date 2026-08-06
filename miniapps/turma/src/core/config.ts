@@ -37,7 +37,7 @@ export function normalizeHubUrl(raw: string): string {
 }
 
 // Upstream this read Vite's dev-only `VITE_HUB_URL` override (`import.meta.env`).
-// Foverlay port: the background bundle is evaluated as a classic script (IIFE)
+// Veiller port: the background bundle is evaluated as a classic script (IIFE)
 // where `import.meta` is a syntax error, and there is no Vite dev server —
 // packaged builds never set the override, so this is the packaged-build
 // constant "" (the stored/user-entered hub is always the one to use). Kept as

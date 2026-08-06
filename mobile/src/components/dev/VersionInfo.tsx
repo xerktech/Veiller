@@ -19,7 +19,7 @@ export const VersionInfo = () => {
   const isChina = process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china"
 
   const copyVersionInfo = async () => {
-    // Foverlay has no user account (XERK-198), so there is no id/email to include.
+    // Veiller has no user account (XERK-198), so there is no id/email to include.
     const info = [
       `version: ${process.env.EXPO_PUBLIC_MENTRAOS_VERSION}`,
       `branch: ${process.env.EXPO_PUBLIC_BUILD_BRANCH}`,

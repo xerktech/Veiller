@@ -1,9 +1,9 @@
 /**
- * Per-miniapp install/update preferences for the Foverlay miniapp store
+ * Per-miniapp install/update preferences for the Veiller miniapp store
  * (XERK-217).
  *
- * The store screen lets the user check/uncheck each Foverlay miniapp. A checked
- * (enabled) app is installed and kept up to date by foverlayMiniappSync on every
+ * The store screen lets the user check/uncheck each Veiller miniapp. A checked
+ * (enabled) app is installed and kept up to date by veillerMiniappSync on every
  * startup; an unchecked (disabled) app is skipped by the sync — it is neither
  * installed nor updated. Unchecking does NOT uninstall an already-installed app;
  * it just pauses future install/update (see the ticket: "it doesn't install and
@@ -16,7 +16,7 @@
 import {storage} from "@/utils/storage/storage"
 
 /** MMKV key holding the {packageName: enabled} map. */
-const STORAGE_KEY = "foverlay_miniapp_enabled"
+const STORAGE_KEY = "veiller_miniapp_enabled"
 
 type EnabledMap = Record<string, boolean>
 
@@ -29,16 +29,16 @@ function loadMap(): EnabledMap {
 }
 
 /**
- * Whether a Foverlay miniapp is enabled (checked) for install/update. Unknown
+ * Whether a Veiller miniapp is enabled (checked) for install/update. Unknown
  * packages default to enabled so a newly added app installs without the user
  * having to flip a switch first.
  */
-export function isFoverlayMiniappEnabled(packageName: string): boolean {
+export function isVeillerMiniappEnabled(packageName: string): boolean {
   return loadMap()[packageName] ?? true
 }
 
-/** Set a Foverlay miniapp's enabled (checked) state. */
-export function setFoverlayMiniappEnabled(packageName: string, enabled: boolean): void {
+/** Set a Veiller miniapp's enabled (checked) state. */
+export function setVeillerMiniappEnabled(packageName: string, enabled: boolean): void {
   const map = loadMap()
   map[packageName] = enabled
   storage.save(STORAGE_KEY, map)

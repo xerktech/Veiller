@@ -1,4 +1,4 @@
-// Round-trip test for the background -> phone state serialization (Foverlay
+// Round-trip test for the background -> phone state serialization (Veiller
 // port — new module). The payload must carry exactly what phone/render.ts and
 // phone/phone.ts read, and hydrate back into a full-shaped AppState.
 import { describe, expect, it } from "bun:test";

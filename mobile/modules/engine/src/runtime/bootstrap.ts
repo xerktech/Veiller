@@ -37,7 +37,7 @@ export interface IslandConfigValues {
    */
   devServerHost?: () => string | undefined
   /**
-   * Run the engine without a backend account (Foverlay): the cloud client is
+   * Run the engine without a backend account (Veiller): the cloud client is
    * still constructed so the local runtime surface stays intact, but it never
    * attempts the authenticated cloud connection. The host must not rely on any
    * cloud-only capability (miniapp store, remote miniapps, cloud transcription);

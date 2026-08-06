@@ -22,7 +22,7 @@ export interface PhoneHandle {
   richTail(sessionId: string, entries: TailEntry[]): void;
 }
 
-// Foverlay port: upstream mounted the phone against the in-process `App`
+// Veiller port: upstream mounted the phone against the in-process `App`
 // instance. Here the glasses App lives in the background JSContext, so the
 // caller (ui/main.ts) hands in a small adapter that forwards these calls
 // over the channel bus and answers getState() from the hydrated snapshot the

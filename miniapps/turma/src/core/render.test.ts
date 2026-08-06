@@ -88,7 +88,7 @@ describe("render: home", () => {
     expect(lines.some((l) => l.includes("alpha·"))).toBe(false);
     expect(lines).toContain("  beta offline");
     expect(lines).toContain("  + New session");
-    // Foverlay port: the 7-line canvas windows 6 rows, so the trailing
+    // Veiller port: the 7-line canvas windows 6 rows, so the trailing
     // Settings row sits one past the cursor-0 window; scrolling the cursor to
     // it slides it into view (same single-window behaviour, smaller window).
     const atEnd = asLines(render(base({ agents, home: { cursor: 6 } })));
@@ -201,7 +201,7 @@ describe("render: session", () => {
     expect(model.bottom.options).toEqual(["Yes", "No"]);
     expect(model.bottom.lines.some((l) => l.includes("1. Yes"))).toBe(true);
     expect(model.bottom.lines.some((l) => l.includes("2. No"))).toBe(true);
-    // Foverlay port: the 3-line box windows the sheet — the trailing Dictate
+    // Veiller port: the 3-line box windows the sheet — the trailing Dictate
     // answer row scrolls into view as the selection moves onto it.
     const atEnd = asSession(
       render(base({
@@ -548,7 +548,7 @@ describe("render: actions", () => {
     expect(box).toContain("  Send");
     expect(box).toContain("  Clear");
     expect(box).toContain("  Dictate more");
-    // Foverlay port: MENU_MAX_LINES is 5 on the 7-line canvas, so the 5-row
+    // Veiller port: MENU_MAX_LINES is 5 on the 7-line canvas, so the 5-row
     // menu windows to 4 rows + title — End this session scrolls into view as
     // the cursor moves onto it.
     const atEnd = asSession(

@@ -1,7 +1,7 @@
 # Maestro Configuration for MentraOS
 
 # Global test configuration
-appId: ${MAESTRO_APP_ID:-com.xerktech.foverlay}
+appId: ${MAESTRO_APP_ID:-com.xerktech.veiller}
 name: "MentraOS E2E Tests"
 
 # Test tags for organizing test runs
@@ -12,7 +12,7 @@ tags:
 
 # Global environment variables
 env:
-  MAESTRO_APP_ID: ${MAESTRO_APP_ID:-com.xerktech.foverlay}
+  MAESTRO_APP_ID: ${MAESTRO_APP_ID:-com.xerktech.veiller}
 
 # Flows to include in test suite
 # Comment out flows to exclude them from runs

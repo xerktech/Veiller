@@ -81,7 +81,7 @@ public enum JSCPolyfillBridge {
             JSCPolyfillBridge.dropSocket(sid: wrapper.sid)
         }
     }
-    private static let log = OSLog(subsystem: "com.xerktech.foverlay", category: "MentraJS.fetch")
+    private static let log = OSLog(subsystem: "com.xerktech.veiller", category: "MentraJS.fetch")
 
     public static func install(into dispatcher: JSCDispatcher) {
         installFetch(dispatcher)

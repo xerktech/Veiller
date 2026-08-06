@@ -335,7 +335,7 @@
 .ph-send:hover { filter: brightness(1.07); }
 .ph-send:disabled { opacity: 0.5; cursor: default; }
 
-/* ---- Foverlay port: Mentra WebView safe areas --------------------------- */
+/* ---- Veiller port: Mentra WebView safe areas --------------------------- */
 /* The Mentra host injects pixel safe-area insets as --mentra-safe-* CSS vars
    (mobile/modules/engine/src/utils/miniappGlobals.ts) — env(safe-area-inset-*)
    is 0 inside this WebView. Pad the fixed shell's header/nav/compose so

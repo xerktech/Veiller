@@ -4,11 +4,11 @@ import android.app.Activity
 import android.util.Log
 
 /**
- * Foverlay stub of MentraOS's NavigationManager.
+ * Veiller stub of MentraOS's NavigationManager.
  *
  * The upstream implementation drives on-device turn-by-turn navigation via the
  * Mapbox Navigation SDK, whose Android artifacts resolve only from Mapbox's
- * authenticated Maven repo (paid MAPBOX_DOWNLOADS_TOKEN). Foverlay does not use
+ * authenticated Maven repo (paid MAPBOX_DOWNLOADS_TOKEN). Veiller does not use
  * on-device routing, so the Mapbox engine is removed to drop the secret-token
  * build dependency entirely. The full original lives in the `upstream` remote
  * (Mentra-Community/MentraOS, mobile/modules/crust/.../NavigationManager.kt)
@@ -121,7 +121,7 @@ object NavigationManager {
   }
 
   fun start(activity: Activity, options: StartOptions, callbacks: Callbacks) {
-    Log.w(TAG, "Navigation is disabled in Foverlay (Mapbox engine removed); start() rejected")
+    Log.w(TAG, "Navigation is disabled in Veiller (Mapbox engine removed); start() rejected")
     callbacks.onError("Navigation is not available in this build")
   }
 

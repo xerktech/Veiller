@@ -3,7 +3,7 @@
 // session bottom-bar helpers) while input-box.ts imports these constants —
 // keeping them here avoids a render.ts <-> input-box.ts circular import.
 //
-// Adapted for the Mentra scene-display path (Foverlay port, XERK-211): the
+// Adapted for the Mentra scene-display path (Veiller port, XERK-211): the
 // upstream Even Hub WebView drew ~27px lines (~10 per 288px canvas); the
 // Mentra host renders G2 text at a hardware-calibrated 40px line height (see
 // mobile/modules/engine/src/utils/display/profiles/g2.ts), so the same

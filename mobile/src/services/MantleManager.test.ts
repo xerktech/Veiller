@@ -56,8 +56,8 @@ jest.mock("@/services/Migrations", () => ({
 
 // initMiniapps() installs miniapps from GitHub Releases; stub it so the boot
 // test never makes a real network call (it's best-effort in production).
-jest.mock("@/services/miniapps/foverlayMiniappSync", () => ({
-  foverlayMiniappSync: {sync: jest.fn(() => Promise.resolve())},
+jest.mock("@/services/miniapps/veillerMiniappSync", () => ({
+  veillerMiniappSync: {sync: jest.fn(() => Promise.resolve())},
 }))
 
 jest.mock("@/utils/PermissionsUtils", () => ({

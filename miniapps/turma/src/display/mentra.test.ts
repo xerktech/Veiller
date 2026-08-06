@@ -1,4 +1,4 @@
-// Tests for the new Mentra scene backend (Foverlay port — no upstream
+// Tests for the new Mentra scene backend (Veiller port — no upstream
 // counterpart; display/evenhub.test.ts covered the Even Hub backend these
 // mirror the spirit of: shape-change-immediate vs same-shape-debounced,
 // element geometry, input mapping, and the blank-content guard).

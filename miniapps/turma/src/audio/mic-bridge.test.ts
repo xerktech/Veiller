@@ -1,4 +1,4 @@
-// Tests for the Mentra AudioBridge (Foverlay port — new module). The bridge
+// Tests for the Mentra AudioBridge (Veiller port — new module). The bridge
 // is what audio.ts's teardown discipline leans on: audioControl must be an
 // idempotent subscribe/unsubscribe, and frames must decode base64 -> bytes.
 import { describe, expect, it } from "bun:test";

@@ -1,10 +1,10 @@
 name: release
 
-# Foverlay's release pipeline, modeled on the Turma/Tenir unified release
+# Veiller's release pipeline, modeled on the Turma/Tenir unified release
 # model, single-component (the Android APK is the only artifact):
 #
 #   - ONE v<MAJOR>.<MINOR>.<PATCH> tag per release, with the APK attached to
-#     the GitHub Release as foverlay-v<version>.apk.
+#     the GitHub Release as veiller-v<version>.apk.
 #   - PATCH is derived from the existing v* tags (max+1), never committed —
 #     the auto-patch path is read-only against the repo and can't re-trigger
 #     itself. Root VERSION holds MAJOR.MINOR only.
@@ -46,7 +46,7 @@ on:
 # changelog is range-based (GitHub generated notes since the previous tag), so
 # the surviving release still covers superseded merges' PRs.
 concurrency:
-  group: foverlay-release
+  group: veiller-release
   cancel-in-progress: false
 
 permissions:
@@ -197,7 +197,7 @@ jobs:
         # ~20). Dependency releases do the full, safe clean.
         run: |
           set -euo pipefail
-          marker="$RUNNER_TEMP/../foverlay-deps.sha"   # persists in the runner _work tree
+          marker="$RUNNER_TEMP/../veiller-deps.sha"   # persists in the runner _work tree
           current="$(cat package.json bun.lock 2>/dev/null | sha256sum | cut -d' ' -f1)"
           previous="$(cat "$marker" 2>/dev/null || echo none)"
           if [ "$current" != "$previous" ]; then
@@ -259,20 +259,20 @@ jobs:
         #
         # Assets are staged in a directory wiped at the start of every run:
         # the checkout persists between builds (checkout clean: false), so
-        # copies at the workspace root accumulate — and a bare foverlay-v*
+        # copies at the workspace root accumulate — and a bare veiller-v*
         # glob then attaches every PREVIOUS release's APK to the new release.
         # The rm also scrubs root-level strays left by runs before this fix.
         run: |
           set -euo pipefail
-          rm -rf release-assets foverlay-v*.apk foverlay-v*-mapping.txt
+          rm -rf release-assets veiller-v*.apk veiller-v*-mapping.txt
           mkdir release-assets
-          cp mobile/android/app/build/outputs/apk/release/app-release.apk "release-assets/foverlay-v${VERSION}.apk"
-          cp mobile/android/app/build/outputs/mapping/release/mapping.txt "release-assets/foverlay-v${VERSION}-mapping.txt"
+          cp mobile/android/app/build/outputs/apk/release/app-release.apk "release-assets/veiller-v${VERSION}.apk"
+          cp mobile/android/app/build/outputs/mapping/release/mapping.txt "release-assets/veiller-v${VERSION}-mapping.txt"
 
       - uses: actions/upload-artifact@v4
         with:
           name: asset-apk
-          path: release-assets/foverlay-v*
+          path: release-assets/veiller-v*
           if-no-files-found: error
           retention-days: 30
 
@@ -309,8 +309,8 @@ jobs:
           if [ -n "$PREV_TAG" ]; then
             NOTES_FLAGS+=(--notes-start-tag "$PREV_TAG")
           fi
-          gh release create "$TAG" foverlay-v*.apk foverlay-v*-mapping.txt \
-            --title "Foverlay $TAG" \
+          gh release create "$TAG" veiller-v*.apk veiller-v*-mapping.txt \
+            --title "Veiller $TAG" \
             --target "$TARGET" \
             "${NOTES_FLAGS[@]}"
           echo "Released: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"

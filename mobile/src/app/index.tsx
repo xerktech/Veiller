@@ -115,7 +115,7 @@ export default function InitScreen() {
     clearHistoryAndGoHome({transition: "none"})
   }, [getPendingRoute, processUrl, clearHistoryAndGoHome, replace, setPendingRoute, setAnimation])
 
-  // Foverlay: no user account / login. Boot straight into the app — initialize
+  // Veiller: no user account / login. Boot straight into the app — initialize
   // the local runtime, then route to onboarding (first run) or home. The engine
   // runs local-only (no authenticated cloud connection); individual miniapps
   // bring their own auth if they need it.

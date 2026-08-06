@@ -15,8 +15,8 @@
 	<string>manual</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>com.xerktech.foverlay</key>
-		<string>match AppStore com.xerktech.foverlay</string>
+		<key>com.xerktech.veiller</key>
+		<string>match AppStore com.xerktech.veiller</string>
 	</dict>
 	<key>uploadBitcode</key>
 	<false/>

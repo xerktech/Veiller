@@ -1195,7 +1195,7 @@ describe("App", () => {
     // 8 lines so maxOffset (8 - area(6) = 2) is reachable in exactly one
     // SESSION_SCROLL_STEP (2-line) hop — preserves the "one hop to the top"
     // shape of this test under Task 4's stepped (not full-page) scrolling.
-    // (Foverlay port: recomputed for the 7-line canvas, upstream used 11.)
+    // (Veiller port: recomputed for the 7-line canvas, upstream used 11.)
     const tail = Array.from({ length: 8 }, (_, i) => ({ id: `t${i}`, role: "assistant", text: `msg ${i}` }));
     const s = session({ session: signals({ transcriptAgeSec: 1, tail }) });
     const client = fakeClient({

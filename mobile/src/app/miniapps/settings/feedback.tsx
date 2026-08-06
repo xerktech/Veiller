@@ -51,7 +51,7 @@ export default function FeedbackPage() {
     visibleOnRoutes: ["/miniapps/settings/feedback"],
   })
 
-  // Foverlay has no user account (XERK-198), so there is no signed-in email to
+  // Veiller has no user account (XERK-198), so there is no signed-in email to
   // pre-fill or attach to a report. The contact-email field below is always
   // shown and is genuinely optional — a user who wants a reply can leave one.
 

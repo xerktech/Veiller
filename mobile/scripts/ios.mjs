@@ -94,7 +94,7 @@ if (workspaces.length !== 1) {
 }
 const WORKSPACE = workspaces[0]
 const SCHEME = path.basename(WORKSPACE, ".xcworkspace")
-const BUNDLE_ID = "com.xerktech.foverlay"
+const BUNDLE_ID = "com.xerktech.veiller"
 const derivedData = "ios/build"
 
 // Build for the connected device.

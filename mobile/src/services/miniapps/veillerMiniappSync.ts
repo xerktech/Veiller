@@ -1,10 +1,10 @@
 import {appRegistry} from "@mentra/engine/internal"
 import {Directory, File, Paths} from "expo-file-system"
 
-import {FOVERLAY_MINIAPPS, type FoverlayMiniappSource} from "@/config/foverlayMiniapps"
-import {isFoverlayMiniappEnabled} from "@/services/miniapps/foverlayMiniappPrefs"
+import {VEILLER_MINIAPPS, type VeillerMiniappSource} from "@/config/veillerMiniapps"
+import {isVeillerMiniappEnabled} from "@/services/miniapps/veillerMiniappPrefs"
 
-const LOG_TAG = "FoverlayMiniappSync"
+const LOG_TAG = "VeillerMiniappSync"
 
 /** How long to wait on a GitHub API request before giving up (per repo). */
 const API_TIMEOUT_MS = 15_000
@@ -33,16 +33,20 @@ export interface ResolvedBundle {
 }
 
 /**
- * Default asset marker: the repos publish the Foverlay bundle as
- * `<repo>-foverlay-v<version>.zip` (e.g. `turma-foverlay-v0.6.47.zip`), sitting
+ * Default asset marker: the repos publish the Veiller bundle as
+ * `<repo>-veiller-v<version>.zip` (e.g. `turma-veiller-v0.6.47.zip`), sitting
  * alongside unrelated assets (native-agent tarball, Android APK, manifest.json).
- * The `foverlay` marker + `.zip` suffix selects exactly the bundle. A source may
+ * The `veiller` marker + `.zip` suffix selects exactly the bundle. A source may
  * override this with its own `assetPattern`.
+ *
+ * `foverlay` is accepted too so bundles published before the Foverlay→Veiller
+ * rename keep installing; drop it once Turma/Tenir have cut a release with
+ * veiller-named assets.
  */
-const DEFAULT_ASSET_PATTERN = /foverlay.*\.zip$/i
+const DEFAULT_ASSET_PATTERN = /(veiller|foverlay).*\.zip$/i
 
-/** Does this asset name look like a Foverlay miniapp bundle for this source? */
-function isBundleAsset(assetName: string, source: FoverlayMiniappSource): boolean {
+/** Does this asset name look like a Veiller miniapp bundle for this source? */
+function isBundleAsset(assetName: string, source: VeillerMiniappSource): boolean {
   const pattern = source.assetPattern ? new RegExp(source.assetPattern, "i") : DEFAULT_ASSET_PATTERN
   return pattern.test(assetName)
 }
@@ -62,12 +66,12 @@ function versionFromTag(tag: string): string {
 
 /**
  * Fetch a repo's releases (newest first) and return the newest non-draft
- * release that carries a Foverlay bundle asset. GitHub returns releases in
+ * release that carries a Veiller bundle asset. GitHub returns releases in
  * reverse-chronological order, so the first match is the latest — this also
  * skips over release trains that don't publish the bundle (e.g. a repo that
  * also cuts native-agent tarball or Android APK releases under other tags).
  */
-export async function resolveLatestBundle(source: FoverlayMiniappSource): Promise<ResolvedBundle | null> {
+export async function resolveLatestBundle(source: VeillerMiniappSource): Promise<ResolvedBundle | null> {
   const url = `https://api.github.com/repos/${source.repo}/releases?per_page=${RELEASES_PER_REPO}`
 
   const controller = new AbortController()
@@ -80,7 +84,7 @@ export async function resolveLatestBundle(source: FoverlayMiniappSource): Promis
         // requests without a User-Agent.
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "Foverlay-MiniappSync",
+        "User-Agent": "Veiller-MiniappSync",
       },
       signal: controller.signal,
     })
@@ -114,7 +118,7 @@ export async function resolveLatestBundle(source: FoverlayMiniappSource): Promis
 
 /** Download a bundle to the cache dir and return the local file URI. */
 async function downloadBundle(bundle: ResolvedBundle): Promise<string> {
-  const downloadDir = new Directory(Paths.cache, "foverlay_miniapps")
+  const downloadDir = new Directory(Paths.cache, "veiller_miniapps")
   if (!downloadDir.exists) downloadDir.create()
 
   const safeName = bundle.assetName.replace(/[^a-z0-9._-]/gi, "_")
@@ -148,11 +152,11 @@ async function installResolvedBundle(bundle: ResolvedBundle): Promise<InstalledB
   return result.value
 }
 
-async function syncEntry(source: FoverlayMiniappSource): Promise<void> {
+async function syncEntry(source: VeillerMiniappSource): Promise<void> {
   // Unchecked in the store (XERK-217): skip install AND update. An already
   // installed version is left on disk untouched — unchecking only pauses future
   // downloads, it does not uninstall.
-  if (!isFoverlayMiniappEnabled(source.packageName)) {
+  if (!isVeillerMiniappEnabled(source.packageName)) {
     console.log(`${LOG_TAG}: ${source.packageName} disabled in store — skipping install/update`)
     return
   }
@@ -175,17 +179,17 @@ async function syncEntry(source: FoverlayMiniappSource): Promise<void> {
 }
 
 /**
- * Foverlay's remote miniapp installer (XERK-214).
+ * Veiller's remote miniapp installer (XERK-214).
  *
  * The APK bundles no miniapps. On every startup this reads the repo list in
- * config/foverlayMiniapps.ts and, for each entry, installs the latest bundle
+ * config/veillerMiniapps.ts and, for each entry, installs the latest bundle
  * published in that repo's GitHub Releases. Entirely best-effort: a repo being
  * unreachable, rate-limited, or missing an asset must never block boot — the
  * app simply runs with whatever versions are already on disk from a prior run.
  */
-export const foverlayMiniappSync = {
+export const veillerMiniappSync = {
   async sync(): Promise<void> {
-    for (const source of FOVERLAY_MINIAPPS) {
+    for (const source of VEILLER_MINIAPPS) {
       try {
         await syncEntry(source)
       } catch (error) {
@@ -203,7 +207,7 @@ export const foverlayMiniappSync = {
    * this specific app regardless of its checkbox. Throws if the repo has no
    * bundle or the download/install fails.
    */
-  async installLatest(source: FoverlayMiniappSource): Promise<InstalledBundle> {
+  async installLatest(source: VeillerMiniappSource): Promise<InstalledBundle> {
     const bundle = await resolveLatestBundle(source)
     if (!bundle) {
       throw new Error(`no miniapp bundle found in ${source.repo} releases`)

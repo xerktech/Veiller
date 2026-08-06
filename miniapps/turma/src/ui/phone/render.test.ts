@@ -145,7 +145,7 @@ describe("phone render", () => {
     expect(html).toMatch(/data-answer="1"[\s\S]*?>2<\/span>B/);
     expect(html).toContain('id="ph-input"');
     expect(html).toContain('id="ph-transcript"'); // filled by the controller with chat.js output
-    // Foverlay port: the Terminal toggle is not ported (see render.ts) — assert
+    // Veiller port: the Terminal toggle is not ported (see render.ts) — assert
     // it stays absent so it can't silently come back half-wired.
     expect(html).not.toContain("data-term-toggle");
     expect(html).toMatch(/data-verb="verbose"/); // verbosity control
