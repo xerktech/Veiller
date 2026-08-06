@@ -3,7 +3,7 @@ import {LinearGradient} from "expo-linear-gradient"
 import {useCallback, useMemo} from "react"
 import {Linking, Pressable, View, ViewStyle} from "react-native"
 
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import {Icon, Screen, Text} from "@/components/ignite"
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {usePushPrevious} from "@/contexts/NavigationHistoryContext"
@@ -46,7 +46,7 @@ export default function MentraOSOnboarding() {
         subtitleCentered: true,
         content: (
           <View className="flex-1 items-center justify-center" testID="mentraos-onboarding-welcome-logo">
-            <MentraLogoStandalone width={118} height={64} />
+            <VeillerLogo width={118} height={64} />
           </View>
         ),
       },
@@ -142,7 +142,7 @@ export default function MentraOSOnboarding() {
             style={$legacyHero}
             testID="mentraos-onboarding-hero-5">
             <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-white/70">
-              <MentraLogoStandalone width={52} height={28} colorOverride="#00B869" />
+              <VeillerLogo width={52} height={28} colorOverride="#00B869" />
             </View>
             <Pressable
               accessibilityLabel="Open MentraOS Legacy"

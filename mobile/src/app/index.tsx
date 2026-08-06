@@ -4,7 +4,7 @@ import {View, ActivityIndicator, Platform, Linking} from "react-native"
 import semver from "semver"
 
 import {Button, Header, Icon, Screen, Text} from "@/components/ignite"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
@@ -293,12 +293,12 @@ export default function InitScreen() {
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]} extraAndroidInsets>
-      <Header RightActionComponent={<MentraLogoStandalone />} />
+      <Header RightActionComponent={<VeillerLogo />} />
 
       {/* Content */}
       <View className="flex-1 items-center justify-center px-6">
         {state === "outdated" ? (
-          <MentraLogoStandalone width={100} height={48} />
+          <VeillerLogo width={100} height={48} />
         ) : (
           <Icon name={statusConfig.icon as any} size={64} color={statusConfig.iconColor} />
         )}

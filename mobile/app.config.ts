@@ -104,7 +104,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       adaptiveIcon: {
         foregroundImage: variant.adaptiveIcon,
         // backgroundImage: "./assets/app-icons/ic_launcher.png",
-        backgroundColor: "#fff",
+        backgroundColor: "#0E1116",
       },
       allowBackup: false,
       permissions: [
@@ -257,7 +257,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
           backgroundColor: "#fff",
           dark: {
             // backgroundColor: "#fff",
-            backgroundColor: "#171717",
+            backgroundColor: "#0E1116",
             image: "./assets/logo/logo_dark.png",
           },
         },

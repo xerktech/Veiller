@@ -7,7 +7,7 @@ import {usePushPrevious} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import WifiCredentialsService from "@/utils/wifi/WifiCredentialsService"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import {translate, type TxKeyPath} from "@/i18n"
 
 type WifiConnectionErrorCopy = {
@@ -193,7 +193,7 @@ export default function WifiConnectingScreen() {
         <Header
           leftIcon="chevron-left"
           onLeftPress={handleHeaderBack}
-          RightActionComponent={<MentraLogoStandalone />}
+          RightActionComponent={<VeillerLogo />}
         />
       )}
       {renderContent()}
