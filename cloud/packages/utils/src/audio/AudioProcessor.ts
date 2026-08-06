@@ -1,4 +1,4 @@
-// @mentra/utils/src/audio/AudioProcessor.ts
+// @veiller/utils/src/audio/AudioProcessor.ts
 
 import { Transform, TransformCallback } from 'stream';
 

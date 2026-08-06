@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import * as path from "path"
 
-// Guards the invariant that `bun run compile` type-checks @mentra/bluetooth-sdk
+// Guards the invariant that `bun run compile` type-checks @veiller/bluetooth-sdk
 // against the same files Metro bundles (src/, via the "react-native" exports
 // condition), never against the gitignored build/ output. build/ is only
 // regenerated when expo-module prepare runs, so once it goes stale tsc would

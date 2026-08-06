@@ -25,7 +25,7 @@
 import {type NavLocation, type NavRoute, type NavUpdate} from "../runtime/config"
 import {cloudClientService} from "./CloudClientService"
 import navigationService from "./NavigationService"
-import {MiniappErrorCode, MiniappResponseType, MiniappStreamType} from "@mentra/miniapp"
+import {MiniappErrorCode, MiniappResponseType, MiniappStreamType} from "@veiller/miniapp"
 
 const LOG_TAG = "LocalMiniappRuntime"
 

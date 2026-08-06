@@ -10,8 +10,8 @@
 // Internal btsdk surface — connectSimulated/reconnect/controller live on the full
 // surface, not the public entry. Relative path (the alias doesn't resolve in engine's
 // standalone build); jest moduleNameMapper + tsconfig both resolve it.
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {ButtonPressEvent, TouchEvent} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {ButtonPressEvent, TouchEvent} from "@veiller/bluetooth-sdk/internal"
 import {useGlassesStore} from "../stores/glasses"
 import {useSettingsStore, SETTINGS} from "../stores/settings"
 import {hasDefaultDevice} from "../services/DeviceStoreHydration"

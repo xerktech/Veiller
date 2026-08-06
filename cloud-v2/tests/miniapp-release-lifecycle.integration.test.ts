@@ -21,7 +21,7 @@ import {
 
 process.env.CLOUD_CORE_LOCAL_STORAGE_DIR = join(
   tmpdir(),
-  `mentra-miniapp-release-test-${process.pid}`,
+  `veiller-miniapp-release-test-${process.pid}`,
 );
 
 import {
@@ -55,7 +55,7 @@ let signing: DeveloperSigningService;
 beforeAll(async () => {
   await connectMongo(
     process.env.MONGO_URL ??
-      "mongodb://127.0.0.1:27017/mentra-cloud-v2-test",
+      "mongodb://127.0.0.1:27017/veiller-cloud-v2-test",
   );
   await Promise.all([
     MiniAppModel.syncIndexes(),

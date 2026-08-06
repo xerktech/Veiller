@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Boxes, Building2, FileText, Home, KeyRound, LogOut, Menu, MoreHorizontal } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { isUnauthorizedError, redirectToConsoleLogin } from "@/api/http";
-import mentraLogo from "@/assets/mentra-logo.svg";
+import veillerLogo from "@/assets/mentra-logo.svg";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -29,7 +29,7 @@ const navItems = [
 const pageTitles: Record<string, { title: string; description: string }> = {
   "/dashboard": {
     title: "Home",
-    description: "Build and publish miniapps for MentraOS.",
+    description: "Build and publish miniapps for Veiller.",
   },
   "/apps": {
     title: "Miniapps",
@@ -113,7 +113,7 @@ export function AppShell({ children }: AppShellProps) {
     return (
       <main className="flex min-h-dvh items-center justify-center bg-[#f5f6f4] px-4 text-[#14151b]">
         <section className="w-full max-w-md rounded-[18px] border border-[#e0e4de] bg-white p-6 text-center shadow-[0_1px_2px_rgba(20,21,27,0.06)]">
-          <img src={mentraLogo} alt="" className="mx-auto h-[24px] w-[45px]" />
+          <img src={veillerLogo} alt="" className="mx-auto h-[24px] w-[45px]" />
           <h1 className="mt-5 font-display text-xl font-bold">Could not load console</h1>
           <p className="mt-2 text-sm leading-6 text-[#747780]">
             {session.error instanceof Error ? session.error.message : "Refresh the page or sign in again."}
@@ -178,13 +178,13 @@ export function AppShell({ children }: AppShellProps) {
               </Button>
               <div className={cn("min-w-0", sidebarCollapsed && "md:hidden")}>
                 <Link to="/dashboard" className="flex min-w-0 items-center gap-3 rounded-[10px] outline-none focus-visible:ring-3 focus-visible:ring-[#9dddc7]/25">
-                  <img src={mentraLogo} alt="" className="h-[22px] w-[41px] shrink-0" />
+                  <img src={veillerLogo} alt="" className="h-[22px] w-[41px] shrink-0" />
                   <div className="min-w-0">
                     <div className="truncate font-display text-[15px] font-bold leading-5 text-[#14151b]">
                       Dev Console
                     </div>
                     <div className="truncate text-xs leading-4 text-[#8a8d95]">
-                      MentraOS
+                      Veiller
                     </div>
                   </div>
                 </Link>
@@ -335,7 +335,7 @@ function ConsoleLoadingState({ label = "Loading console..." }: { label?: string 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#f5f6f4] px-4 text-[#14151b]">
       <section className="flex items-center gap-3 rounded-full border border-[#e0e4de] bg-white px-4 py-3 text-sm font-medium text-[#5d6068] shadow-[0_1px_2px_rgba(20,21,27,0.06)]">
-        <img src={mentraLogo} alt="" className="h-[18px] w-[34px]" />
+        <img src={veillerLogo} alt="" className="h-[18px] w-[34px]" />
         {label}
       </section>
     </main>

@@ -1,11 +1,11 @@
 /**
  * registerMiniapp — entry hook for the background JSContext.
  *
- * The MentraJS host loads the polyfill (which installs __dispatch /
+ * The VeillerJS host loads the polyfill (which installs __dispatch /
  * __deliver / timers / fetch / etc.), then evaluates the miniapp's
  * background bundle. After both scripts have evaluated successfully,
  * the host delivers a single `{kind: "init", sessionId}` envelope.
- * The polyfill turns that into a call to `__mentraInitCallback(sessionId)`.
+ * The polyfill turns that into a call to `__veillerInitCallback(sessionId)`.
  *
  * This module wires that callback to:
  *   1. Construct a `MiniappSession` (DispatchTransport picks itself
@@ -29,10 +29,10 @@ export type MiniappInitHandler<TChannels extends object = Record<string, unknown
 ) => void | Promise<void>
 
 interface InitGlobals {
-  __mentraInitCallback?: (sessionId: string) => void
+  __veillerInitCallback?: (sessionId: string) => void
   /**
    * Polyfill-injected host bridge for surfacing structured errors to the
-   * host's MentraJSRouter (which feeds them into MentraJSCrashController).
+   * host's VeillerJSRouter (which feeds them into VeillerJSCrashController).
    * Optional because tests / pure-Node environments don't have it.
    */
   __hostError?: (payloadJson: string) => void
@@ -56,7 +56,7 @@ export function registerMiniapp<TChannels extends object = Record<string, unknow
   options: MiniappSessionOptions = {},
 ): void {
   const g = globalThis as unknown as InitGlobals
-  g.__mentraInitCallback = (_sessionId: string) => {
+  g.__veillerInitCallback = (_sessionId: string) => {
     const session = new MiniappSession<TChannels>(options)
     // Fire the user handler first so any session.* subscriptions get
     // registered before the CONNECT_ACK fan-out lands.
@@ -65,16 +65,16 @@ export function registerMiniapp<TChannels extends object = Record<string, unknow
       if (result && typeof (result as Promise<void>).then === "function") {
         ;(result as Promise<void>).catch((err: unknown) => {
           // eslint-disable-next-line no-console
-          console.error("[mentra-miniapp] registerMiniapp handler rejected:", err)
+          console.error("[veiller-miniapp] registerMiniapp handler rejected:", err)
         })
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("[mentra-miniapp] registerMiniapp handler threw:", err)
+      console.error("[veiller-miniapp] registerMiniapp handler threw:", err)
     }
     session.connect().catch((err: unknown) => {
       // eslint-disable-next-line no-console
-      console.error("[mentra-miniapp] session.connect() rejected:", err)
+      console.error("[veiller-miniapp] session.connect() rejected:", err)
       // Surface to the host's crash controller as a structured uncaught
       // error so the existing backoff + crashloop machinery handles it.
       // Repeated connect failures eventually flip the miniapp to

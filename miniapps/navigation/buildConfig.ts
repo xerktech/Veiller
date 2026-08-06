@@ -7,7 +7,7 @@ export interface NavigationBuildEnvironment {
 /**
  * Resolve the public Mapbox token used by the bundled navigation UI.
  *
- * Standalone miniapp development uses PUBLIC_MAPBOX_TOKEN, while Mentra App
+ * Standalone miniapp development uses PUBLIC_MAPBOX_TOKEN, while Veiller App
  * builds already expose the same public token as
  * EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN. Released miniapps run from file:// and
  * cannot fall back to the dev server's /api/config endpoint, so production

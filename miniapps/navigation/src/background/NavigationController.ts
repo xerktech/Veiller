@@ -1,11 +1,11 @@
 /**
- * NavigationController — the always-on logic for the Mentra Map
+ * NavigationController — the always-on logic for the Veiller Map
  * miniapp. Owns MiniappSession subscriptions, trip state, the glasses
  * HUD logic, storage reads/writes, and Places REST. Lives for the
  * entire session — closing the WebView does NOT stop navigation.
  *
  * The UI WebView is a thin renderer fed via session.ui.send and the
- * UI's mentra.send / mentra.request bus declared in shared/channels.ts.
+ * UI's veiller.send / veiller.request bus declared in shared/channels.ts.
  */
 
 import type {
@@ -16,7 +16,7 @@ import type {
   StartNavigationOptions,
   TravelMode,
   UIModule,
-} from "@mentra/miniapp/background"
+} from "@veiller/miniapp/background"
 
 import type {Channels} from "../shared/channels"
 import type {
@@ -160,7 +160,7 @@ export class NavigationController {
   private lastCoordsAt = 0
   private gettingFix = false
   // Tracks whether a trip has completed (arrived or stopped) in this
-  // session. Used to suppress the "Welcome to Mentra Maps!" message
+  // session. Used to suppress the "Welcome to Veiller Maps!" message
   // after the first arrival — the welcome line should only show at
   // the very start of the session, not every time the user finishes
   // and returns to idle.
@@ -735,7 +735,7 @@ export class NavigationController {
     this.appendLog(`START ${destinationName ?? "(unnamed)"}`)
     this.ui.send("nav:trip-state", this.trip)
     // Repaint the glasses HUD immediately so the left text flips from the
-    // idle "Welcome to Mentra Maps!" frame to "Starting…" the instant the
+    // idle "Welcome to Veiller Maps!" frame to "Starting…" the instant the
     // user starts — instead of the welcome frame lingering until the next
     // GPS tick / HUD pump (~1s). running is already true above, so refreshHUD
     // takes the "Starting…" branch and showManeuver overwrites the welcome
@@ -1568,7 +1568,7 @@ export class NavigationController {
       // hasCompletedTrip=true) clears the glasses and leaves them blank —
       // we do NOT bounce back to the welcome prompt after a trip. `next`
       // stays null below, which clears the HUD.
-      next = "Welcome to Mentra Maps!\nPick a destination to get started."
+      next = "Welcome to Veiller Maps!\nPick a destination to get started."
     } else if (status === "rerouting") {
       // Mapbox detected the user off-route and is fetching a new route.
       next = "Rerouting…"

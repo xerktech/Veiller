@@ -46,13 +46,13 @@ The watchdog is a packet-arrival timer with no awareness of voice activity:
 Relevant symbols:
 
 - Android:
-  `mobile/modules/bluetooth-sdk/android/src/main/java/com/mentra/bluetoothsdk/DeviceManager.kt`
+  `mobile/modules/bluetooth-sdk/android/src/main/java/com/veiller/bluetoothsdk/DeviceManager.kt`
   (`init`, `checkAndReinitGlassesMic`, `handleGlassesMicData`,
   `reportGlassesAudioActivity`)
 - iOS: `mobile/modules/bluetooth-sdk/ios/Source/DeviceManager.swift`
   (`init`, `checkAndReinitGlassesMic`, `handleGlassesMicData`)
 - Mentra Live Android:
-  `mobile/modules/bluetooth-sdk/android/src/main/java/com/mentra/bluetoothsdk/sgcs/MentraLive.kt`
+  `mobile/modules/bluetooth-sdk/android/src/main/java/com/veiller/bluetoothsdk/sgcs/MentraLive.kt`
   (`setMicEnabled`, `startMicBeat`, `sendEnableCustomAudioTxMessage`,
   `handleSpeakingStatus`)
 - Mentra Live iOS:
@@ -86,7 +86,7 @@ The two similarly named status sources are not substitutes for this evidence:
 
 ## Required hardware validation
 
-Record the phone model, OS version, Mentra App build, Mentra Live firmware
+Record the phone model, OS version, Veiller App build, Mentra Live firmware
 versions, and whether the glasses-side VAD setting is enabled.
 
 Run an A/B test without changing any other microphone setting:
@@ -134,7 +134,7 @@ If the hardware validation confirms the hypothesis:
 
 ## Secondary Android micbeat bug
 
-The repeated watchdog call exposes a separate timer-lifecycle bug in Mentra
+The repeated watchdog call exposes a separate timer-lifecycle bug in Veiller
 Live's Android `startMicBeat()`:
 
 1. It assigns a new object to `micBeatRunnable`.
@@ -171,10 +171,10 @@ cover at least:
 For the default development package, start with:
 
 ```bash
-adb logcat -v time --pid=$(adb shell pidof com.mentra.mentra) | grep -Ei "sr_vad|reinitializing glasses mic|enable_custom_audio_tx"
+adb logcat -v time --pid=$(adb shell pidof com.veiller.veiller) | grep -Ei "sr_vad|reinitializing glasses mic|enable_custom_audio_tx"
 ```
 
 The stable and China variants use different package identifiers, so replace
-`com.mentra.mentra` when testing one of those builds. Add temporary LC3 packet
+`com.veiller.veiller` when testing one of those builds. Add temporary LC3 packet
 counters or the structured BLE trace if the current log level does not expose
 packet arrival clearly enough for the required correlation.

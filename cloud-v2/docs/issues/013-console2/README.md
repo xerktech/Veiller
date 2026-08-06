@@ -26,7 +26,7 @@ submission status.
 ## Goals
 
 - Provide developer login and org management for miniapp teams.
-- Authorize `mentra login`.
+- Authorize `veiller login`.
 - Show packages, bundles, versions, channels, signing provenance, and logs.
 - Let developers claim package names and submit bundles for review.
 - Keep bundle-owned fields read-only: the repo manifest is source of truth.
@@ -50,7 +50,7 @@ interface IdentityUser {
   workosUserId: string
   email: string
   name?: string
-  linkedMentraUserId?: string
+  linkedVeillerUserId?: string
 }
 
 interface DeveloperOrg {
@@ -81,7 +81,7 @@ After a developer signs in, `GET /api/console/auth/me` returns
 - globally unique package prefix, for example `io.acme`
 
 Core stores this in `developer_orgs` and all miniapp package names must start
-with the org's prefix. Reserved prefixes such as `com.mentra` cannot be claimed
+with the org's prefix. Reserved prefixes such as `com.veiller` cannot be claimed
 by arbitrary accounts. Prefix verification is separate from reservation:
 unverified prefixes can be used for development, while public store submission
 can later require domain/brand verification.
@@ -136,7 +136,7 @@ Console-editable server-side data:
 ## CLI Authorization Flow
 
 ```txt
-mentra login
+veiller login
   -> opens Console2 authorize URL
   -> user signs in through WorkOS
   -> user selects DeveloperOrg
@@ -171,7 +171,7 @@ signing_keys:write
 Console2 depends on:
 
 - `011-miniapp-registry` package/bundle/submission APIs.
-- `012-mentra-cli-v2` auth and signing key APIs.
+- `012-veiller-cli-v2` auth and signing key APIs.
 - Cloud Core identity/session APIs for WorkOS-backed users and orgs.
 
 Current org endpoints:

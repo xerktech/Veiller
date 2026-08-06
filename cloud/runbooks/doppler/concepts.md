@@ -44,14 +44,14 @@ We have a handful of projects:
 
 | Project | Purpose |
 | --- | --- |
-| `mentraos-cloud` | Production cloud secrets, per region |
-| `mentra-sre` | SRE tooling secrets (BetterStack, Cloudflare LB token, admin JWTs) |
-| `live-captions`, `mentra-notes`, `recorder` | Per-app secrets for those apps |
+| `veiller-cloud` | Production cloud secrets, per region |
+| `veiller-sre` | SRE tooling secrets (BetterStack, Cloudflare LB token, admin JWTs) |
+| `live-captions`, `veiller-notes`, `recorder` | Per-app secrets for those apps |
 
 A project can hold any number of secrets. The same secret name
 across projects is independent (e.g. `BETTERSTACK_SOURCE_TOKEN`
-in `mentraos-cloud` is a different value from
-`BETTERSTACK_SOURCE_TOKEN` in `mentra-sre`).
+in `veiller-cloud` is a different value from
+`BETTERSTACK_SOURCE_TOKEN` in `veiller-sre`).
 
 ## Config
 
@@ -59,7 +59,7 @@ A config is one environment within a project. Think of configs
 as the columns of a spreadsheet: same set of secret names,
 different values per environment.
 
-Within `mentraos-cloud` we have:
+Within `veiller-cloud` we have:
 
 - `dev`
 - `staging`
@@ -77,7 +77,7 @@ are the resolved values for that config (after inheritance).
 
 ## Secret name + value
 
-A secret has a name (`MENTRAOS_API_KEY`, `MONGODB_URI`,
+A secret has a name (`VEILLER_API_KEY`, `MONGODB_URI`,
 `BETTERSTACK_SOURCE_TOKEN`) and a value. Names follow
 `UPPER_SNAKE_CASE`. Values are arbitrary strings, including
 JSON blobs, certificates with newlines, etc.
@@ -120,14 +120,14 @@ The most common pattern. You wrap a command in
 `doppler run --`:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bstack health
+doppler run --project veiller-sre --config dev -- bstack health
 ```
 
 Doppler does this:
 
 1. Authenticate with the personal token (from `doppler login`)
    or, in non-interactive contexts, a service token.
-2. Pull the secrets for `mentra-sre:dev`.
+2. Pull the secrets for `veiller-sre:dev`.
 3. Export them as environment variables.
 4. `exec` the rest of the command (`bstack health`) with that
    env block.
@@ -152,7 +152,7 @@ Flow at deploy time:
 1. Porter has a Doppler integration linked to a Doppler service
    account. The integration is configured per Porter app to pull
    from a specific Doppler project + config (e.g. `cloud-prod`
-   in central pulls `mentraos-cloud:prod_central-us`).
+   in central pulls `veiller-cloud:prod_central-us`).
 2. When Porter deploys, it calls Doppler with the integration's
    token, fetches the secrets, and writes them into the
    Kubernetes Secret backing the deployment's env.

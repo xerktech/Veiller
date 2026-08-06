@@ -168,7 +168,7 @@ export function OrganizationPage() {
                     />
                     {canEditPrefix ? (
                       <p className="mt-2 text-xs leading-5 text-[#8a8d95]">
-                        Use lowercase reverse-DNS text. Reserved prefixes like `com.mentra` cannot be claimed unless the
+                        Use lowercase reverse-DNS text. Reserved prefixes like `com.veiller` cannot be claimed unless the
                         account is allowed to own them.
                       </p>
                     ) : null}

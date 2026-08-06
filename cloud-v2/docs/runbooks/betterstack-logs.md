@@ -14,15 +14,15 @@ eu-central-1a region, 30-day retention.
 
 | Env | Source | id | Table | Retention |
 | --- | --- | --- | --- | --- |
-| dev | MentraCloud V2 - Dev | 2616831 | `mentracloud_v2_dev_2` | 30 days |
-| debug | MentraCloud V2 - Debug | 2616845 | `mentracloud_v2_debug` | 30 days |
-| isaiah | MentraCloud V2 - Isaiah | 2616847 | `mentracloud_v2_isaiah` | 30 days |
-| staging | MentraCloud V2 - Staging | 2616849 | `mentracloud_v2_staging` | 30 days |
-| prod | MentraCloud V2 - Prod | 2616851 | `mentracloud_v2_prod` | 30 days |
+| dev | VeillerCloud V2 - Dev | 2616831 | `mentracloud_v2_dev_2` | 30 days |
+| debug | VeillerCloud V2 - Debug | 2616845 | `mentracloud_v2_debug` | 30 days |
+| isaiah | VeillerCloud V2 - Isaiah | 2616847 | `mentracloud_v2_isaiah` | 30 days |
+| staging | VeillerCloud V2 - Staging | 2616849 | `mentracloud_v2_staging` | 30 days |
+| prod | VeillerCloud V2 - Prod | 2616851 | `mentracloud_v2_prod` | 30 days |
 
 Adding an env = one `starts_with` clause in the filter + a route entry + a sink
 in `infra/betterstack-logs/values.yaml`, never a wildcard. Per-source ingest
-tokens live in Doppler `mentra-sre/dev` as `BETTERSTACK_V2_SOURCE_TOKEN_<ENV>`
+tokens live in Doppler `veiller-sre/dev` as `BETTERSTACK_V2_SOURCE_TOKEN_<ENV>`
 (injected into the addon values; not committed). Source-management + deploy
 credentials (`BETTERSTACK_API_TOKEN`, `PORTER_TOKEN_ADMIN`) are in the same
 Doppler config.
@@ -37,7 +37,7 @@ v1.1.6** (do not use latest; v2 restructures the metrics pipeline under
 contents of `infra/betterstack-logs/values.yaml` with the real per-env tokens
 from Doppler substituted for each `PLACEHOLDER_*_TOKEN`. To change config,
 edit the add-on's Configuration tab and Deploy a new revision. The add-on's
-API calls use the Admin token in Doppler `mentra-sre/dev` `PORTER_TOKEN_ADMIN`.
+API calls use the Admin token in Doppler `veiller-sre/dev` `PORTER_TOKEN_ADMIN`.
 
 **Landmine (caused a ~19h total shipping outage on 2026-07-20/21):** one bad
 sink token takes down ALL env shipping, not just that env's. Vector runs sink
@@ -75,7 +75,7 @@ source's ingest volume for the first week after any change.
 ### Via the BetterStack UI (works today)
 
 Live Tail and Events -> Explore logs query the V2 sources fine: pick the
-`MentraCloud V2 - <env>` source in the source picker. BetterStack's own UI
+`VeillerCloud V2 - <env>` source in the source picker. BetterStack's own UI
 federates internally across clusters, so this is the reliable path for
 interactive debugging right now. Live Tail is fixed to the last 10 minutes;
 use Explore logs (Table/Text viz) with a widened time range for history.
@@ -88,11 +88,11 @@ sources live on `eu-nbg-2`. A ClickHouse HTTP client (Telemetry ->
 Integrations -> SQL API) is issued against whichever cluster is the team's
 primary at creation time and can only reach sources on that cluster.
 
-- **V2 (eu-central-1a):** Doppler `mentra-sre` `BETTERSTACK_V2_USERNAME` /
+- **V2 (eu-central-1a):** Doppler `veiller-sre` `BETTERSTACK_V2_USERNAME` /
   `BETTERSTACK_V2_PASSWORD`, host `BETTERSTACK_V2_HOST`
   (`https://eu-central-1a-connect.betterstackdata.com`). Created 2026-07-21;
   reaches all five V2 sources. Use this for cloud-v2 debugging.
-- **V1 (eu-nbg-2):** the older Doppler `mentra-sre`
+- **V1 (eu-nbg-2):** the older Doppler `veiller-sre`
   `BETTERSTACK_USERNAME` / `PASSWORD`, host
   `https://eu-nbg-2-connect.betterstackdata.com`. Legacy V1 only; it returns
   `Code 701 CLUSTER_DOESNT_EXIST` for V2 tables and the V2 cred returns
@@ -148,12 +148,12 @@ whatever structured fields the call site attached. Vector metadata is under
 
 Auth investigations: `session created`, `session revoked`, and refresh
 rejections all log from `package=core, service=session.service`; correlate
-with the mobile client's `MENTRA AUTH:` lines by timestamp and session id
+with the mobile client's `VEILLER AUTH:` lines by timestamp and session id
 suffix.
 
 ## Log hygiene rules
 
-- Everything goes through `createLogger(pkg)` from `@mentra/cloud-shared`
+- Everything goes through `createLogger(pkg)` from `@veiller/cloud-shared`
   (pino). No `console.*` in server code: it bypasses LOG_LEVEL and ships
   unstructured.
 - Per-message/per-chunk paths must be throttled or at debug. The audio

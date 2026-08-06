@@ -46,7 +46,7 @@ export function useRecorder() {
   useEffect(() => {
     mounted.current = true
     const offs: Array<() => void> = []
-    const on = mentra.on as (c: string, cb: (p: unknown) => void) => () => void
+    const on = veiller.on as (c: string, cb: (p: unknown) => void) => () => void
 
     offs.push(
       on("rec:snapshot", (p) => {
@@ -148,7 +148,7 @@ export function useRecorder() {
       }),
     )
 
-    mentra.send("rec:request-snapshot", {})
+    veiller.send("rec:request-snapshot", {})
     return () => {
       mounted.current = false
       if (unavailableTimer.current) clearTimeout(unavailableTimer.current)
@@ -173,22 +173,22 @@ export function useRecorder() {
     return () => clearInterval(id)
   }, [playingId])
 
-  const startRecording = useCallback(() => mentra.send("rec:start", {}), [])
+  const startRecording = useCallback(() => veiller.send("rec:start", {}), [])
   const stopRecording = useCallback(() => {
     // Give the tap immediate visual feedback; the background echoes
     // rec:stopping for snapshots and other control surfaces.
     setStopping(true)
-    mentra.send("rec:stop", {})
+    veiller.send("rec:stop", {})
   }, [])
-  const cancelRecording = useCallback(() => mentra.send("rec:cancel", {}), [])
-  const pauseRecording = useCallback(() => mentra.send("rec:pause", {}), [])
-  const resumeRecording = useCallback(() => mentra.send("rec:resume", {}), [])
-  const play = useCallback((id: string) => mentra.send("rec:play", {id}), [])
-  const stopPlay = useCallback(() => mentra.send("rec:stop-play", {}), [])
-  const exportRecording = useCallback((id: string) => mentra.send("rec:export", {id}), [])
-  const exportTranscript = useCallback((id: string) => mentra.send("rec:export-transcript", {id}), [])
-  const remove = useCallback((id: string) => mentra.send("rec:delete", {id}), [])
-  const clearAll = useCallback(() => mentra.send("rec:clear", {}), [])
+  const cancelRecording = useCallback(() => veiller.send("rec:cancel", {}), [])
+  const pauseRecording = useCallback(() => veiller.send("rec:pause", {}), [])
+  const resumeRecording = useCallback(() => veiller.send("rec:resume", {}), [])
+  const play = useCallback((id: string) => veiller.send("rec:play", {id}), [])
+  const stopPlay = useCallback(() => veiller.send("rec:stop-play", {}), [])
+  const exportRecording = useCallback((id: string) => veiller.send("rec:export", {id}), [])
+  const exportTranscript = useCallback((id: string) => veiller.send("rec:export-transcript", {id}), [])
+  const remove = useCallback((id: string) => veiller.send("rec:delete", {id}), [])
+  const clearAll = useCallback(() => veiller.send("rec:clear", {}), [])
 
   return {
     status,

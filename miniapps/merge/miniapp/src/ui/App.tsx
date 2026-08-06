@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState, type CSSProperties, type ReactNode} from "react"
-import {useColorScheme, useSafeArea} from "@mentra/miniapp/ui"
+import {useColorScheme, useSafeArea} from "@veiller/miniapp/ui"
 
 import MergeLogo from "./assets/merge_logo.png"
 import {useDeveloperMode, type HoldHandlers} from "./useDeveloperMode"
@@ -105,7 +105,7 @@ export function App() {
 
   useEffect(() => {
     const unsubs = [
-      mentra.on("merge:snapshot", (snapshot: MergeSnapshot) => {
+      veiller.on("merge:snapshot", (snapshot: MergeSnapshot) => {
         setTranscripts(snapshot.transcripts)
         setInsights(snapshot.insights)
         setDecisions(snapshot.decisions)
@@ -118,7 +118,7 @@ export function App() {
         setProcessing(snapshot.processing)
         setLastError(snapshot.lastError)
       }),
-      mentra.on("merge:transcript", (entry: MergeTranscript) => {
+      veiller.on("merge:transcript", (entry: MergeTranscript) => {
         setTranscripts((current) => {
           if (entry.utteranceId) {
             const existing = current.findIndex((t) => t.utteranceId === entry.utteranceId)
@@ -133,24 +133,24 @@ export function App() {
         if (entry.isFinal) setFinalCount((count) => count + 1)
         else setInterimCount((count) => count + 1)
       }),
-      mentra.on("merge:insight", (insight: MergeInsight) => {
+      veiller.on("merge:insight", (insight: MergeInsight) => {
         setInsights((current) => [...current.filter((item) => item.id !== insight.id), insight].slice(-50))
       }),
-      mentra.on("merge:decision", (decision: MergeDecision) => {
+      veiller.on("merge:decision", (decision: MergeDecision) => {
         setDecisions((current) => [...current, decision].slice(-50))
       }),
-      mentra.on("merge:cloud-status", (status: CloudClientStatus) => {
+      veiller.on("merge:cloud-status", (status: CloudClientStatus) => {
         setCloudStatus(status)
       }),
-      mentra.on("merge:backend-status", ({status, lastError}) => {
+      veiller.on("merge:backend-status", ({status, lastError}) => {
         setBackendStatus(status)
         setLastError(lastError)
       }),
-      mentra.on("merge:processing", ({processing}) => {
+      veiller.on("merge:processing", ({processing}) => {
         setProcessing(processing)
       }),
     ]
-    mentra.send("merge:request-snapshot", {})
+    veiller.send("merge:request-snapshot", {})
     return () => {
       for (const unsub of unsubs) unsub()
     }
@@ -213,11 +213,11 @@ export function App() {
                 developerMode={developerMode}
                 onFrequencyChange={(frequency) => {
                   setSettings((current) => ({...current, frequency}))
-                  mentra.send("merge:set-frequency", {frequency})
+                  veiller.send("merge:set-frequency", {frequency})
                 }}
                 onAnswerLanguageChange={(answerLanguage) => {
                   setSettings((current) => ({...current, answerLanguage}))
-                  mentra.send("merge:set-answer-language", {answerLanguage})
+                  veiller.send("merge:set-answer-language", {answerLanguage})
                 }}
                 onOpenDeveloperInfo={() => setShowDeveloperInfo(true)}
               />
@@ -553,7 +553,7 @@ function DeveloperInfo({
         </InfoCard>
         <InfoCard title="Public env vars">
           {Object.keys(publicEnv).length === 0 ? (
-            <InfoRow label="MENTRA_PUBLIC_*" value="None baked into bundle" />
+            <InfoRow label="VEILLER_PUBLIC_*" value="None baked into bundle" />
           ) : (
             Object.entries(publicEnv).map(([key, value]) => <InfoRow key={key} label={key} value={value} />)
           )}
@@ -1146,7 +1146,7 @@ function compactStatusDetail(label: string, detail: string): string {
 
 function publicEnvVars(): Record<string, string> {
   try {
-    return JSON.parse(process.env.MENTRA_PUBLIC_ENV_JSON || "{}") as Record<string, string>
+    return JSON.parse(process.env.VEILLER_PUBLIC_ENV_JSON || "{}") as Record<string, string>
   } catch {
     return {}
   }

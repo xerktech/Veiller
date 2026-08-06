@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * Test LiveKit audio publishing via Go bridge for MentraOS
+ * Test LiveKit audio publishing via Go bridge for Veiller
  *
  * This test demonstrates:
  * 1. Client connects with LiveKit enabled
@@ -10,7 +10,7 @@
  * 4. Server subscribes to audio via Node SDK and processes it
  */
 
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 import fs from "fs";
 import path from "path";
@@ -28,7 +28,7 @@ async function testLiveKitGoBridge() {
 
   // Step 2: Create client with LiveKit enabled
   console.log("2️⃣ Creating client with LiveKit + Go bridge...");
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: credentials.email,
     serverUrl: process.env.SERVER_URL || "http://localhost:8002",
     coreToken: credentials.coreToken,

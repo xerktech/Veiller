@@ -2,7 +2,7 @@
  * @fileoverview Type definitions for the new TranscriptionManager system
  */
 
-import { ExtendedStreamType, TranscriptionData } from "@mentra/sdk";
+import { ExtendedStreamType, TranscriptionData } from "@veiller/sdk";
 import dotenv from "dotenv";
 import { Logger } from "pino";
 

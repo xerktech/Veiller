@@ -1,5 +1,5 @@
 /**
- * @fileoverview Store service for MentraOS Store website.
+ * @fileoverview Store service for Veiller Store website.
  * Handles business logic for the store frontend including app browsing,
  * installation status, and user-specific app data.
  */

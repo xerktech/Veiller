@@ -14,8 +14,8 @@ import {
   MiniappSession,
   parseEnvelope,
   serializeEnvelope,
-} from "@mentra/miniapp"
-import type {Transport, TransportDisconnectHandler, TransportMessageHandler} from "@mentra/miniapp"
+} from "@veiller/miniapp"
+import type {Transport, TransportDisconnectHandler, TransportMessageHandler} from "@veiller/miniapp"
 
 export class FakeTransport implements Transport {
   sent: string[] = []
@@ -50,12 +50,12 @@ export class FakeTransport implements Transport {
 
 export async function connectedSession(opts: {location: boolean}): Promise<{session: MiniappSession; transport: FakeTransport}> {
   const transport = new FakeTransport()
-  const session = new MiniappSession({transport, packageName: "com.mentra.navigation"})
+  const session = new MiniappSession({transport, packageName: "com.veiller.navigation"})
   const connectPromise = session.connect()
   transport.deliverFromPhone({
     type: MiniappResponseType.CONNECT_ACK,
     userId: "u",
-    packageName: "com.mentra.navigation",
+    packageName: "com.veiller.navigation",
     capabilities: null,
     permissions: {
       location: opts.location,

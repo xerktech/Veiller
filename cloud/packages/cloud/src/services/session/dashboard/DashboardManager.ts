@@ -35,9 +35,9 @@ import {
   ReferenceCard,
   TextWall,
   ViewType,
-} from "@mentra/sdk";
-import { G1_PROFILE, G2_PROFILE, Z100_PROFILE, NEX_PROFILE, TextMeasurer, TextWrapper } from "@mentra/display-utils";
-import type { DisplayProfile } from "@mentra/display-utils";
+} from "@veiller/sdk";
+import { G1_PROFILE, G2_PROFILE, Z100_PROFILE, NEX_PROFILE, TextMeasurer, TextWrapper } from "@veiller/display-utils";
+import type { DisplayProfile } from "@veiller/display-utils";
 
 import { MemoryOwnerStat } from "../../metrics/memory-census";
 import { estimateStringBytes, sumEstimatedBytes } from "../../metrics/memory-estimate";
@@ -48,7 +48,7 @@ import { NotificationService, PhoneNotification } from "./NotificationService";
 
 // Internal package name for OS-generated display requests.
 // Matches OS_PACKAGE_NAME in DisplayManager6.1.ts — both must stay in sync.
-const OS_PACKAGE_NAME = "com.mentra.os" as const;
+const OS_PACKAGE_NAME = "com.veiller.os" as const;
 
 // ---------------------------------------------------------------------------
 // Display profile resolution

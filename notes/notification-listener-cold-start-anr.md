@@ -1,6 +1,6 @@
 # Notification listener ANRs by cold-starting React Native (OS-1821)
 
-Reproduced 2026-07-29 on a moto g play 2024 (Android 14, API 34), Mentra 2.12.0.
+Reproduced 2026-07-29 on a moto g play 2024 (Android 14, API 34), Veiller 2.12.0.
 This is the crash behind the "emergency kill switch" in PR #3562, which disabled
 the Android notification listener by default and has blocked OS-1821 since.
 
@@ -10,9 +10,9 @@ implemented to remove it.
 ## The ANR
 
 ```
-Process:  com.mentra.mentra
-Subject:  executing service com.mentra.mentra/
-          com.mentra.crust.services.NotificationListenerServiceImpl, InvisibleToUser
+Process:  com.veiller.veiller
+Subject:  executing service com.veiller.veiller/
+          com.veiller.crust.services.NotificationListenerServiceImpl, InvisibleToUser
 Build:    motorola/fogona_g/fogona:14/U1TFS34.100-35-14-1-16
 Foreground: No
 Process-Runtime: 42057
@@ -49,7 +49,7 @@ The device is RAM-starved and swapping.
 
 ## What is actually happening
 
-Before the fix, a notification arriving while the Mentra App was **not running**
+Before the fix, a notification arriving while the Veiller App was **not running**
 made Android start the process specifically to deliver it. Because
 `NotificationListenerServiceImpl` lived in the main process,
 `Application.onCreate` ran first — booting the entire React Native runtime,
@@ -80,7 +80,7 @@ The listener now runs in its own process:
 
 ```xml
 <service
-  android:name="com.mentra.crust.services.NotificationListenerServiceImpl"
+  android:name="com.veiller.crust.services.NotificationListenerServiceImpl"
   android:process=":notif"
   ... />
 ```
@@ -133,10 +133,10 @@ demonstrably works on API 36, so this is tidiness, not a known break.
 ## Verifying a fix
 
 1. Budget Android device (the moto g play 2024 reproduces; flagships do not).
-2. Force-stop the Mentra App so the process is dead.
+2. Force-stop the Veiller App so the process is dead.
 3. Post notifications: `adb shell cmd notification post -t T tag body`.
-4. Watch for death: `adb shell pidof com.mentra.mentra`.
-5. Check for a new record: `adb shell dumpsys dropbox --print data_app_anr | grep -A5 mentra`.
+4. Watch for death: `adb shell pidof com.veiller.veiller`.
+5. Check for a new record: `adb shell dumpsys dropbox --print data_app_anr | grep -A5 veiller`.
 
 A fix means step 5 stays empty while notifications still arrive.
 

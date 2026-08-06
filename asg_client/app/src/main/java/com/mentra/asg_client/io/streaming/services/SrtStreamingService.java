@@ -245,7 +245,7 @@ public class SrtStreamingService extends Service {
     if (mReconnecting) contentText = "Reconnecting... (Attempt " + mReconnectAttempts + ")";
 
     return new NotificationCompat.Builder(this, CHANNEL_ID)
-        .setContentTitle("MentraOS SRT Streaming")
+        .setContentTitle("Veiller SRT Streaming")
         .setContentText(contentText)
         .setSmallIcon(android.R.drawable.ic_dialog_info)
         .setPriority(NotificationCompat.PRIORITY_LOW)

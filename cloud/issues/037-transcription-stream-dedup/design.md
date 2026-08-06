@@ -31,7 +31,7 @@
 
 #### 1a. New import
 
-Add `isLanguageStream`, `parseLanguageStream` to the existing `@mentra/sdk` import (L7-15):
+Add `isLanguageStream`, `parseLanguageStream` to the existing `@veiller/sdk` import (L7-15):
 
 ```diff
  import {
@@ -44,7 +44,7 @@ Add `isLanguageStream`, `parseLanguageStream` to the existing `@mentra/sdk` impo
    DataStream,
    TranscriptSegment,
    LocalTranscription,
- } from "@mentra/sdk";
+ } from "@veiller/sdk";
 ```
 
 #### 1b. New field: `rawSubscriptions`

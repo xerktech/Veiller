@@ -1,6 +1,6 @@
 # mobile/scripts
 
-Build, release, dev, runner-bootstrap, and log-tooling scripts for the MentraOS mobile app.
+Build, release, dev, runner-bootstrap, and log-tooling scripts for the Veiller mobile app.
 
 Most are invoked via `bun` (see `mobile/package.json` `scripts:` section) and are NOT meant to be run directly — but they're also self-contained enough to run with `zx ./scripts/foo.mjs` if you know what you're doing.
 
@@ -72,7 +72,7 @@ A short, opinionated walk-through for onboarding a new Mac mini into the build f
 
 1. **Hardware**: Apple Silicon Mac mini. (Intel works but isn't tested.)
 2. **macOS user account**: a dedicated user, not your personal one. Convention: name it for the machine (e.g. `bigbob`).
-3. **Xcode**: installed from the App Store, launched once, license accepted. Sign into the Mentra Apple Developer account in Xcode → Settings → Accounts so the runner can do signed iOS archives.
+3. **Xcode**: installed from the App Store, launched once, license accepted. Sign into the Veiller Apple Developer account in Xcode → Settings → Accounts so the runner can do signed iOS archives.
 4. **Network**: machine should be reachable on Tailscale (`tag:ci`) for remote debugging.
 5. **A short-lived runner registration token**: visit https://github.com/Mentra-Community/MentraOS/settings/actions/runners/new and copy the `ghs_xxx` token from the displayed `./config.sh` command. Token expires in ~1 hour.
 
@@ -87,7 +87,7 @@ From this directory on the runner (clone the repo first):
 
 ```bash
 git clone https://github.com/Mentra-Community/MentraOS.git
-cd MentraOS/mobile/scripts
+cd Veiller/mobile/scripts
 GH_RUNNER_TOKEN=ghs_xxx ./setup-runner.sh
 ```
 
@@ -109,11 +109,11 @@ Three manual steps the script can't automate:
 1. **Copy credentials.** From an existing runner or your laptop:
 
    ```bash
-   scp ~/.mentra/credentials/{appstore-connect.env,AuthKey_*.p8,google-play-key.json} \
-       <user>@<new-runner>:~/.mentra/credentials/
+   scp ~/.veiller/credentials/{appstore-connect.env,AuthKey_*.p8,google-play-key.json} \
+       <user>@<new-runner>:~/.veiller/credentials/
    ```
 
-   Also copy `~/.gradle/gradle.properties` if it has the `MENTRAOS_UPLOAD_*` keys (needed for Android release signing):
+   Also copy `~/.gradle/gradle.properties` if it has the `VEILLER_UPLOAD_*` keys (needed for Android release signing):
 
    ```bash
    scp ~/.gradle/gradle.properties <user>@<new-runner>:~/.gradle/gradle.properties
@@ -142,7 +142,7 @@ Watch the run and confirm a job picks the new runner.
 ### Tiers
 
 - **Tier 1** (cheap caches): bun install cache, gradle build-cache + transforms, Android emulator system images, stale `_work` dirs older than 7 days. Next build is *not* noticeably slower.
-- **Tier 2** (expensive caches): everything in Tier 1, plus the whole `~/.gradle/caches`, the user cache dir (`~/Library/Caches` on macOS, `~/.cache` on Linux), `~/.android/avd`, and `~/Library/Developer/Xcode/DerivedData/Mentra-*`. First build after Tier 2 is *significantly* slower (5-15 min cold gradle, ~10 min cold iOS archive).
+- **Tier 2** (expensive caches): everything in Tier 1, plus the whole `~/.gradle/caches`, the user cache dir (`~/Library/Caches` on macOS, `~/.cache` on Linux), `~/.android/avd`, and `~/Library/Developer/Xcode/DerivedData/Veiller-*`. First build after Tier 2 is *significantly* slower (5-15 min cold gradle, ~10 min cold iOS archive).
 
 Both tiers are run by the weekly scheduler.
 
@@ -150,21 +150,21 @@ Both tiers are run by the weekly scheduler.
 
 ```bash
 # Default: --tier all, with build-process guard
-~/mentra/runner-cleanup.sh
+~/veiller/runner-cleanup.sh
 
 # Just Tier 1
-~/mentra/runner-cleanup.sh --tier 1
+~/veiller/runner-cleanup.sh --tier 1
 
 # Force run even if a build is in progress (DANGEROUS — only if you're sure)
-~/mentra/runner-cleanup.sh --force
+~/veiller/runner-cleanup.sh --force
 
 # Dry-run: see what would be deleted without changing anything
-~/mentra/runner-cleanup.sh --dry-run
+~/veiller/runner-cleanup.sh --dry-run
 ```
 
 ### Logs
 
-`~/mentra/runner-cleanup.log` — appended to on every run, trimmed to the last 500 lines automatically.
+`~/veiller/runner-cleanup.log` — appended to on every run, trimmed to the last 500 lines automatically.
 
 ---
 
@@ -179,11 +179,11 @@ Onboarding a Linux runner (after merge):
 ```bash
 # On the Linux box:
 git clone https://github.com/Mentra-Community/MentraOS.git
-cd MentraOS/mobile/scripts
+cd Veiller/mobile/scripts
 GH_RUNNER_TOKEN=ghs_xxx ./setup-runner.sh
 
 # Then on your laptop:
-scp ~/.mentra/credentials/google-play-key.json <user>@<linux-runner>:~/.mentra/credentials/
+scp ~/.veiller/credentials/google-play-key.json <user>@<linux-runner>:~/.veiller/credentials/
 scp ~/.gradle/gradle.properties <user>@<linux-runner>:~/.gradle/gradle.properties
 ```
 

@@ -1,4 +1,4 @@
-import { Input, Label } from "@mentra/shared";
+import { Input, Label } from "@veiller/shared";
 
 interface ServerUrlFieldProps {
   value: string;
@@ -35,7 +35,7 @@ export function ServerUrlField({
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        This is the public URL of your MiniApp server. MentraOS will automatically
+        This is the public URL of your MiniApp server. Veiller will automatically
         append &quot;/webhook&quot; to handle events when your app is activated.
         If your MiniApp is hosted locally, you can use a service like{" "}
         <a

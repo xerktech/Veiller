@@ -4,7 +4,7 @@
 
 This API is reached over two transports:
 
-1. **BLE (primary)** — the Mentra phone app sends commands over BLE.
+1. **BLE (primary)** — the Veiller phone app sends commands over BLE.
 2. **Intent broadcast (debug/testing)** — the same commands can be sent via Android broadcast intents from a debug APK or `adb shell am broadcast`.
 
 Both paths funnel into `CommandProcessor.processJsonCommand(JSONObject)`, so all command behavior is identical regardless of transport. See [Debug interface](#debug-interface-intent-broadcast) for the intent path.
@@ -143,7 +143,7 @@ software AVIF encode) changes both paths at once.
   "requestId": "photo_001",
   "state": "success",
   "success": true,
-  "uploadUrl": "https://api.example.com/mentra/photo",
+  "uploadUrl": "https://api.example.com/veiller/photo",
   "photoUrl": "https://cdn.example.com/photos/photo_001.jpg",
   "contentType": "image/jpeg",
   "fileSizeBytes": 58489

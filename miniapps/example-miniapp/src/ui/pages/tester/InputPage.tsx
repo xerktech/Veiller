@@ -1,10 +1,10 @@
 // Tester page — diagnostic surface, ephemeral by design.
-// Two-layer port: subscribes to the iface via mentra.send("tester:start", ...)
+// Two-layer port: subscribes to the iface via veiller.send("tester:start", ...)
 // instead of calling session.* directly. Background's TesterController
 // fans events back via "tester:event".
 
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"

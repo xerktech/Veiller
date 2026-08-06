@@ -1,5 +1,5 @@
 /**
- * @mentra/types - Shared types for MentraOS
+ * @mentra/types - Shared types for Veiller
  *
  * IMPORTANT: Uses explicit exports for Bun compatibility
  * DO NOT use `export *` - Bun runtime can't handle type re-exports

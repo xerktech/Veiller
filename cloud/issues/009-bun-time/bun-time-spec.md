@@ -2,7 +2,7 @@
 
 ## Overview
 
-Refactor MentraOS cloud WebSocket architecture to leverage Bun's native capabilities, extract message routing from WebSocket services into the UserSession/Manager hierarchy, and add proper observability.
+Refactor Veiller cloud WebSocket architecture to leverage Bun's native capabilities, extract message routing from WebSocket services into the UserSession/Manager hierarchy, and add proper observability.
 
 ## Problem
 

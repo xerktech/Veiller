@@ -23,7 +23,7 @@
  *   POST   /accounts/:acct/stream/live_inputs/:uid/outputs   (restream destinations)
  */
 
-import type { ManagedStream, StreamOptions, StreamStatusResult } from "@mentra/cloud-protocol/camera";
+import type { ManagedStream, StreamOptions, StreamStatusResult } from "@veiller/cloud-protocol/camera";
 import type { StreamProvider } from "../stream.service";
 
 const CF_API = "https://api.cloudflare.com/client/v4";
@@ -93,7 +93,7 @@ export function createCloudflareStreamProvider(): StreamProvider {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          meta: { name: `mentra-${mentraUserId}` },
+          meta: { name: `veiller-${mentraUserId}` },
           recording: { mode: "automatic" },
         }),
       });

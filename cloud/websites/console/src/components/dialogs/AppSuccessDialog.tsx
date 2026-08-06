@@ -1,6 +1,6 @@
 // components/dialogs/AppSuccessDialog.tsx
 import React, { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@mentra/shared";
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@veiller/shared";
 import { AppResponse } from '@/services/api.service';
 import { toast } from 'sonner';
 import { CheckCircle, KeyRound, Copy, ArrowRight, AlertCircle } from "lucide-react";
@@ -106,7 +106,7 @@ const AppSuccessDialog: React.FC<AppSuccessDialogProps> = ({
                 Generate API Key
               </Button>
               <p className="text-xs text-muted-foreground">
-                Generate an API key to authenticate your app with MentraOS.
+                Generate an API key to authenticate your app with Veiller.
               </p>
             </div>
           )}

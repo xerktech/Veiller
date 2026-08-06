@@ -10,7 +10,7 @@ glasses. For audio _input_ (mic frames, voice activity), use
 [`session.mic`](/app-devs/core-concepts/microphone/audio-chunks) instead.
 
 ```typescript src/background/index.ts
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 registerMiniapp((session) => {
   session.transcription.on(async (data) => {
@@ -60,7 +60,7 @@ playback completes. Offline playback may segment longer text internally to
 reduce latency; callers use the same `speak()` API and receive the same
 interruption behavior in either mode.
 
-By default, the Mentra App converts display-oriented markup and symbols into
+By default, the Veiller App converts display-oriented markup and symbols into
 natural spoken words before either TTS path runs. For example, `68°F (20°C)`
 becomes "68 degrees Fahrenheit or 20 degrees Celsius." Set
 `enableSanitization: false` when the TTS engine must receive the exact input,
@@ -99,7 +99,7 @@ WebSocket. The stream accepts signed 16-bit little-endian mono PCM on Android
 and iOS.
 
 <Warning>
-  Live PCM requires Mentra App 2.13.0 or newer. Set `minHostVersion: "2.13.0"` in a miniapp that depends on
+  Live PCM requires Veiller App 2.13.0 or newer. Set `minHostVersion: "2.13.0"` in a miniapp that depends on
   `createStream()` so older hosts reject installation instead of failing during a call.
 </Warning>
 

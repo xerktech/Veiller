@@ -33,7 +33,7 @@ import {
   CameraRoiPosition,
   OwnershipReleaseMessage,
   AppStateChange,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import App from "../../../models/app.model";
 import { appCache } from "../../core/app-cache.service";

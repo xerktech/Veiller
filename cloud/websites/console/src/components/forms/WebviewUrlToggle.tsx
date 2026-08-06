@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Input, Label, Switch } from "@mentra/shared";
+import { Input, Label, Switch } from "@veiller/shared";
 import { normalizeUrl } from "@/libs/utils";
 import { cn } from "@/libs/utils";
 

@@ -20,7 +20,7 @@ import {
   StreamRequest,
   StreamStopRequest,
   GlassesToCloudMessageType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { StreamLifecycleController } from "../streaming/StreamLifecycleController";
 import { ConnectionValidator } from "../validators/ConnectionValidator";

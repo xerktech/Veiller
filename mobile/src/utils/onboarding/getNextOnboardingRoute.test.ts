@@ -11,7 +11,7 @@ describe("getNextOnboardingRoute", () => {
     ).toBe("/onboarding/live")
   })
 
-  it("continues from completed Mentra Live onboarding into MentraOS onboarding", () => {
+  it("continues from completed Mentra Live onboarding into Veiller onboarding", () => {
     expect(
       getNextOnboardingRoute({
         includeMentraLive: true,
@@ -21,7 +21,7 @@ describe("getNextOnboardingRoute", () => {
     ).toBe("/onboarding/os")
   })
 
-  it("continues into MentraOS onboarding when leaving Mentra Live onboarding", () => {
+  it("continues into Veiller onboarding when leaving Mentra Live onboarding", () => {
     expect(
       getNextOnboardingRoute({
         includeMentraLive: false,

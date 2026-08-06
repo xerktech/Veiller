@@ -1,4 +1,4 @@
-import {appRegistry} from "@mentra/engine/internal"
+import {appRegistry} from "@veiller/engine/internal"
 import {Directory, File, Paths} from "expo-file-system"
 
 import {VEILLER_MINIAPPS, type VeillerMiniappSource} from "@/config/veillerMiniapps"

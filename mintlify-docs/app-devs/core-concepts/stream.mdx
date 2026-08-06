@@ -5,18 +5,18 @@ icon: "tower-broadcast"
 ---
 
 `session.stream` starts and stops a live video stream from camera glasses like
-Mentra Live. One method, `startStream`, covers both ways to stream: Mentra hosts
+Mentra Live. One method, `startStream`, covers both ways to stream: Veiller hosts
 it for you (the default), or you publish straight to a URL you own.
 
 ```typescript src/background/index.ts
-// Managed: Mentra hosts the stream and gives you playback URLs.
+// Managed: Veiller hosts the stream and gives you playback URLs.
 const stream = await session.stream.startStream();
 session.display.showReferenceCard("Live", stream.hlsUrl);
 ```
 
 ## Managed streaming (default)
 
-Call `startStream()` with no `direct` URL and Mentra provisions a hosted stream,
+Call `startStream()` with no `direct` URL and Veiller provisions a hosted stream,
 handles transport and reconnection, and returns playback URLs. This is the right
 choice for most apps.
 
@@ -39,7 +39,7 @@ const stream = await session.stream.startStream({
 ## Direct streaming
 
 Pass `direct` with your own ingest URL (rtmp/rtmps/srt/whip) and the glasses
-publish straight to it, with no Mentra relay. You manage the endpoint, and no
+publish straight to it, with no Veiller relay. You manage the endpoint, and no
 playback URLs come back.
 
 ```typescript src/background/index.ts

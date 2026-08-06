@@ -1,5 +1,5 @@
-import type {PreinstalledMiniappRegistryEntry} from "@mentra/cloud-client/react-native"
-import {appRegistry} from "@mentra/engine/internal"
+import type {PreinstalledMiniappRegistryEntry} from "@veiller/cloud-client/react-native"
+import {appRegistry} from "@veiller/engine/internal"
 import {Directory, File, Paths} from "expo-file-system"
 import semver from "semver"
 
@@ -9,7 +9,7 @@ const LOG_TAG = "PreinstalledMiniappSync"
 
 // The user-facing mobile app version (e.g. "2.12.0"), sourced the same way as
 // the rest of the app (see mobile/src/app/index.tsx getLocalVersion).
-const MOBILE_APP_VERSION = process.env.EXPO_PUBLIC_MENTRAOS_VERSION || null
+const MOBILE_APP_VERSION = process.env.EXPO_PUBLIC_VEILLER_VERSION || null
 
 /**
  * Whether the current mobile build satisfies an entry's minMobileVersion /
@@ -26,7 +26,7 @@ function isMobileVersionSupported(entry: PreinstalledMiniappRegistryEntry): bool
   const current = semver.coerce(MOBILE_APP_VERSION ?? undefined)
   if (!current) {
     console.warn(
-      `${LOG_TAG}: cannot determine mobile app version (EXPO_PUBLIC_MENTRAOS_VERSION=${MOBILE_APP_VERSION}); skipping version gate for ${entry.packageName}`,
+      `${LOG_TAG}: cannot determine mobile app version (EXPO_PUBLIC_VEILLER_VERSION=${MOBILE_APP_VERSION}); skipping version gate for ${entry.packageName}`,
     )
     return true
   }

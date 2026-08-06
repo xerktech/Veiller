@@ -1,8 +1,8 @@
-// Exercises the real island DeviceEventRouter by path (not via "@mentra/engine",
+// Exercises the real island DeviceEventRouter by path (not via "@veiller/engine",
 // which jest mocks): inbound device BLE events must route into island stores, the
 // process event bus (which island's own gallerySyncService listens on), the photo
 // coordinator, and local miniapps — so a bare OEM gets device data, not just the
-// Mentra app.
+// Veiller app.
 import {startDeviceEventRouter, stopDeviceEventRouter} from "../../../modules/engine/src/services/DeviceEventRouter"
 import {useGlassesStore} from "../../../modules/engine/src/stores/glasses"
 import {useSettingsStore} from "../../../modules/engine/src/stores/settings"

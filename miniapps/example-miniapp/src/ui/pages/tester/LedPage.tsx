@@ -2,7 +2,7 @@
 
 import {useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"
@@ -11,7 +11,7 @@ import {Input} from "../../components/input"
 import {Label} from "../../components/label"
 import {ErrorRow} from "./_TesterRow"
 
-// Mirror of `LedColor` from @mentra/miniapp/background. The UI WebView
+// Mirror of `LedColor` from @veiller/miniapp/background. The UI WebView
 // deliberately doesn't import background-only types — keep this list in
 // sync with that enum (or, more robustly, type the channel payload in
 // `shared/channels.ts`).

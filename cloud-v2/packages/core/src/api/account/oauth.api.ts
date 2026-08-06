@@ -24,7 +24,7 @@ const app = new Hono<AppEnv>();
 // enough for real sign-in flows, tight enough to blunt code/state brute force.
 app.use("/*", accountRateLimit({ scope: "oauth", limit: 30, windowSec: 60 }));
 
-const APP_SCHEME = "com.mentra";
+const APP_SCHEME = "com.veiller";
 const PROVIDERS = new Set(["google", "apple"]);
 const START_TTL_SEC = 10 * 60;
 const HANDOFF_TTL_SEC = 60;
@@ -35,7 +35,7 @@ function s256(verifier: string): string {
 
 /** Exported for tests. */
 export function publicOrigin(c: AppContext): string {
-  const proxied = c.req.header("x-mentra-public-origin");
+  const proxied = c.req.header("x-veiller-public-origin");
   if (proxied) return proxied;
   // TLS terminates at the ingress, so the pod sees plain http. ingress-nginx
   // sets x-forwarded-proto itself (overwriting any client-supplied value) and

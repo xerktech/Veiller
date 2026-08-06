@@ -9,7 +9,7 @@ struct PhotoUpload {
 }
 
 final class LocalPhotoUploadServer {
-  private let queue = DispatchQueue(label: "com.mentra.examples.photo-upload")
+  private let queue = DispatchQueue(label: "com.veiller.examples.photo-upload")
   private let uploadDirectory: URL
   private let onLog: (String) -> Void
   private let onUpload: (PhotoUpload) -> Void
@@ -21,7 +21,7 @@ final class LocalPhotoUploadServer {
     self.onLog = onLog
     self.onUpload = onUpload
     uploadDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("mentra-photo-uploads", isDirectory: true)
+      .appendingPathComponent("veiller-photo-uploads", isDirectory: true)
   }
 
   func start(port: UInt16) throws -> UInt16 {
@@ -182,7 +182,7 @@ final class LocalPhotoUploadServer {
       traceWifiInput("photo_receiver_request", connection: connection, state: state, values: requestTraceValues)
 
       if request.method == "GET", request.path == "/" || request.path == "/health" {
-        writeJson(connection, status: 200, body: #"{"ok":true,"service":"mentra-photo-upload-receiver"}"#)
+        writeJson(connection, status: 200, body: #"{"ok":true,"service":"veiller-photo-upload-receiver"}"#)
         return true
       }
 

@@ -86,7 +86,7 @@ Important constraints:
 - Calendar:
   - Apps call `session.subscribe(StreamType.CALENDAR_EVENT)`.
   - Apps handle events via `session.on(StreamType.CALENDAR_EVENT, handler)`.
-- System (MentraOS) settings:
+- System (Veiller) settings:
   - SDK `SettingsManager` handles `"augmentos_settings_update"` messages and per-key events.
   - This is distinct from the new `UserSettings` REST model (client-defined keys). The live-forwarding for this new system will be introduced after CalendarManager.
 
@@ -131,7 +131,7 @@ Developer experience (SDK): no changes required for Apps
     - Continue forwarding legacy WS settings to Apps for backward compatibility (no writes to the new store).
 - Eventing to Apps:
   - We will forward updates to Apps via a dedicated message (TBD name and exact shape) that delivers changed keys and values.
-  - This is separate from the existing MentraOS settings route used by the SDK’s `SettingsManager`. Keys and semantics are defined by the client.
+  - This is separate from the existing Veiller settings route used by the SDK’s `SettingsManager`. Keys and semantics are defined by the client.
   - Decisions to finalize (see Open Questions):
     - Event type name (e.g., `user_settings_update`).
     - Subscription mechanism (do Apps need to subscribe to a specific stream, or will updates always be delivered after App connection?).
@@ -204,7 +204,7 @@ Notes:
   - New REST path adds a way for mobile clients to send events via HTTP without breaking existing behavior.
 
 - User settings:
-  - Legacy WS settings are still forwarded to Apps (so existing SDK “mentraos” flows remain functional where needed).
+  - Legacy WS settings are still forwarded to Apps (so existing SDK “veiller” flows remain functional where needed).
   - We do not write legacy WS settings to `UserSettings`.
   - The new user settings system is independent; Apps will receive live updates via a new event (TBD) once wired, and can fetch current values via REST.
 

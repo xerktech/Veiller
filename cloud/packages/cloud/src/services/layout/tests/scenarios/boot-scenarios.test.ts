@@ -9,9 +9,9 @@ import { strict as assert } from "assert";
 import DisplayManager from "../../DisplayManager6.1";
 import { MockUserSession } from "../harness/MockUserSession";
 // import { systemApps } from '../../../core/system-apps';
-import { AppToCloudMessageType, ViewType, LayoutType, DisplayRequest } from "@mentra/sdk";
+import { AppToCloudMessageType, ViewType, LayoutType, DisplayRequest } from "@veiller/sdk";
 import { testShowThrottledAfterAppStop } from "./show-throttled-after-app-stop.test";
-const SYSTEM_DASHBOARD_PACKAGE_NAME = "com.mentra.os";
+const SYSTEM_DASHBOARD_PACKAGE_NAME = "com.veiller.os";
 
 // Mock app package names
 const APP1 = "com.example.app1";

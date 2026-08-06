@@ -5,12 +5,12 @@
  * Defines the hardware and software features available on this device.
  */
 
-import type { Capabilities } from "@mentra/sdk";
+import type { Capabilities } from "@veiller/sdk";
 
 /**
  * Mentra Display capability profile
  */
-export const mentraDisplay: Capabilities = {
+export const veillerDisplay: Capabilities = {
   modelName: "Mentra Display",
 
   // Camera capabilities - Mentra Display does not have a camera

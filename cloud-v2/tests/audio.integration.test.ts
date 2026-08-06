@@ -5,7 +5,7 @@
  * drives the same handshake a real mobile client would:
  *
  *   1. TestClient mints OEM JWT from TEST OEM
- *   2. Exchanges at core for a Mentra access token
+ *   2. Exchanges at core for a Veiller access token
  *   3. Opens WS to audio, sends connection.init, receives connection.ack
  *      with sessionTag + UDP info
  *   4. Sends a UDP packet
@@ -44,10 +44,10 @@ const TEST_OEM_PORT = 13100;
 // the import below.
 {
   const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
@@ -56,13 +56,13 @@ const TEST_OEM_PORT = 13100;
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS ??= JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       oemIdClaim: "oem_id",
     },
   ]);
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-audio-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-audio-test";
   // Each test file gets its own Redis DB so parallel runs don't stomp each
   // other's keys. (Redis defaults to 16 DBs — plenty for our suites.)
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/1";
@@ -111,16 +111,16 @@ let testOemHandle: TestOemHandle;
 
 beforeAll(async () => {
   // If another test file already ran in this same Bun test process, its
-  // Mentra keypair is cached in shared/auth and core/session.service. We
+  // Veiller keypair is cached in shared/auth and core/session.service. We
   // generated a fresh keypair above; reset the caches so the next sign/verify
   // reads our env values instead of the prior file's.
-  const { resetMentraKeyCache } = await import(
+  const { resetVeillerKeyCache } = await import(
     "../packages/shared/src/auth"
   );
   const { resetSigningKeyCache } = await import(
     "../packages/core/src/services/session.service"
   );
-  resetMentraKeyCache();
+  resetVeillerKeyCache();
   resetSigningKeyCache();
 
   testOemHandle = await startTestOem({ port: TEST_OEM_PORT, tenantId: TEST_OEM_ID });

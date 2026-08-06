@@ -70,7 +70,7 @@ adb -s {GLASSES_IP}:5555 shell svc power stayon true
 
 # Package Info and Permissions
 
-## List Installed Packages Related to MentraOS
+## List Installed Packages Related to Veiller
 
 ```bash
 adb -s {GLASSES_IP} shell pm list packages | grep augmentos
@@ -96,7 +96,7 @@ adb shell appops set {APP_PACKAGE_NAME} MANAGE_EXTERNAL_STORAGE allow
 
 ```xml
 
-<uses-permission android:name="com.mentra.otaupdater.PERMISSION_OTA_COMMAND" />
+<uses-permission android:name="com.veiller.otaupdater.PERMISSION_OTA_COMMAND" />
 ```
 
 //TODO list

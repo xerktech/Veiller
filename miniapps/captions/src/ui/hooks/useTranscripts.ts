@@ -35,7 +35,7 @@ export function useTranscripts() {
   useEffect(() => {
     mountedRef.current = true
     const offs: Array<() => void> = []
-    const on = mentra.on as (c: string, cb: (p: unknown) => void) => () => void
+    const on = veiller.on as (c: string, cb: (p: unknown) => void) => () => void
 
     offs.push(
       on("captions:snapshot", (payload) => {
@@ -87,7 +87,7 @@ export function useTranscripts() {
       }),
     )
 
-    mentra.send("captions:request-snapshot", {})
+    veiller.send("captions:request-snapshot", {})
 
     return () => {
       mountedRef.current = false
@@ -99,7 +99,7 @@ export function useTranscripts() {
 
   const clearTranscripts = () => {
     setTranscripts([])
-    mentra.send("captions:clear", {})
+    veiller.send("captions:clear", {})
   }
 
   // No transport to reconnect in the local runtime — kept for prop parity.

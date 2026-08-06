@@ -1,7 +1,7 @@
 /**
- * Background JSContext entry point — Mentra Example miniapp.
+ * Background JSContext entry point — Veiller Example miniapp.
  *
- * Loaded once by the MentraOS host inside a per-miniapp JSContext.
+ * Loaded once by the Veiller host inside a per-miniapp JSContext.
  * `registerMiniapp(...)` wires the handler to fire after CONNECT lands;
  * controllers constructed here live for the entire session, surviving
  * WebView open/close cycles.
@@ -14,7 +14,7 @@
  * All are idempotent — start() is safe to call again on respawn.
  */
 
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 import {ElevenLabsController} from "./controllers/ElevenLabsController"
 import {GlassesController} from "./controllers/GlassesController"

@@ -6,13 +6,13 @@ Every Monday morning, or after every major deploy. Takes 15-30 minutes.
 
 ## Prerequisites
 
-SRE credentials are in Doppler project `mentra-sre` (NOT `mentraos-cloud`):
+SRE credentials are in Doppler project `veiller-sre` (NOT `veiller-cloud`):
 
 ```bash
 # Run any bstack command with credentials injected
-doppler run --project mentra-sre --config dev -- bstack health
-doppler run --project mentra-sre --config dev -- bstack incidents --limit 10
-doppler run --project mentra-sre --config dev -- bstack sql "SELECT ..."
+doppler run --project veiller-sre --config dev -- bstack health
+doppler run --project veiller-sre --config dev -- bstack incidents --limit 10
+doppler run --project veiller-sre --config dev -- bstack sql "SELECT ..."
 ```
 
 **Important**: The hot storage table (`remote(t373499_mentracloud_prod_logs)`) only holds the last few minutes of data. For weekly audits, use the historical/S3 table: `s3Cluster(primary, t373499_mentracloud_prod_s3)` with `WHERE _row_type = 1`. Queries are slower (~3-5s) but have full history.

@@ -29,13 +29,13 @@ import {
   AccessTokenError,
   createLogger,
   verifyRuntimeToken,
-} from "@mentra/cloud-shared";
+} from "@veiller/cloud-shared";
 import {
   directionsRequestSchema,
   placeAutocompleteRequestSchema,
   placeDetailsRequestSchema,
   reverseGeocodeRequestSchema,
-} from "@mentra/cloud-protocol/maps";
+} from "@veiller/cloud-protocol/maps";
 import * as maps from "../services/maps/maps.service";
 
 const logger = createLogger("maps").child({ service: "maps.api" });

@@ -10,7 +10,7 @@
  */
 
 import { ulid } from "ulid";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { UserModel, type User } from "../models/user.model";
 
 const logger = createLogger("core").child({ service: "user.service" });

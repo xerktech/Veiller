@@ -7,7 +7,7 @@
  */
 
 import mongoose from "mongoose";
-import { createLogger, type ReadinessCheck } from "@mentra/cloud-shared";
+import { createLogger, type ReadinessCheck } from "@veiller/cloud-shared";
 
 const logger = createLogger("core").child({ component: "mongo" });
 

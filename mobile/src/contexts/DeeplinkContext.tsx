@@ -2,7 +2,7 @@ import * as Linking from "expo-linking"
 import {FC, ReactNode, createContext, useContext, useEffect} from "react"
 
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
-import {BgTimer} from "@mentra/engine"
+import {BgTimer} from "@veiller/engine"
 import {useNavigationStore} from "@/stores/navigation"
 
 export interface DeepLinkRoute {

@@ -8,8 +8,8 @@
 
 import { beforeEach, describe, expect, it } from "bun:test";
 
-import { bytesToBase64 } from "@mentra/miniapp/background";
-import type { MiniappSession } from "@mentra/miniapp/background";
+import { bytesToBase64 } from "@veiller/miniapp/background";
+import type { MiniappSession } from "@veiller/miniapp/background";
 
 import type { ApiHandlers, SessionParams } from "../../core/ws";
 import type { Channels } from "../../shared/channels";

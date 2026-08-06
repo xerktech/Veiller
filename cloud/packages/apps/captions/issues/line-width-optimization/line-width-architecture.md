@@ -57,7 +57,7 @@ Disable `splitIntoLines()` in mobile. Cloud becomes single source of truth for a
 
 ### Phase 1: Mobile Passthrough
 
-**File**: `mobile/modules/core/android/src/main/java/com/mentra/core/utils/G1Text.kt`
+**File**: `mobile/modules/core/android/src/main/java/com/veiller/core/utils/G1Text.kt`
 
 Disable or bypass `splitIntoLines()`:
 
@@ -130,7 +130,7 @@ private wrapTextByVisualWidth(text: string): string[] {
 
 ### Mobile Wrapping (To Be Disabled)
 
-`mobile/modules/core/android/src/main/java/com/mentra/core/utils/G1Text.kt`:
+`mobile/modules/core/android/src/main/java/com/veiller/core/utils/G1Text.kt`:
 
 ```kotlin
 fun splitIntoLines(text: String, maxDisplayWidth: Int): List<String> {

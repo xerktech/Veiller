@@ -1,6 +1,6 @@
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.teleprompter",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.teleprompter",
   "version": "1.0.6",
   "name": "Teleprompter",
   "description": "Your notes, floating in front of you while you speak. Paste a script, then read it from your glasses — scrolling follows your voice or runs at a speed you set.",

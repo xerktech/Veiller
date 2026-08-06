@@ -10,7 +10,7 @@
 
 Multiple users report that the transcription pipeline fires once (or not at all) and then goes silent until:
 
-- The Mentra app is restarted
+- The Veiller app is restarted
 - The glasses disconnect and reconnect
 - The Preferred Microphone source is toggled to a different setting and back
 
@@ -19,7 +19,7 @@ Behavior by mic source:
 - **Glasses / Automatic** → transcription never fires at all
 - **Phone / Bluetooth** → fires once, then silently stops
 
-Reported across Mentra AI, Mentra Notes, and third-party SDK apps — confirming this is a platform-level failure, not an individual app bug.
+Reported across Mentra AI, Veiller Notes, and third-party SDK apps — confirming this is a platform-level failure, not an individual app bug.
 
 ---
 
@@ -208,9 +208,9 @@ The debounce logic that batches mic state changes is correct for rapid toggling 
 
 With Preferred Mic set to Glasses or Automatic, no audio arrives at the cloud audio bridge at all. The `TranscriptionManager` does not even create a Soniox stream — there are no subscribers receiving audio.
 
-This is likely an iOS `AVAudioSession` routing issue: the MentraOS mobile app may not configure the audio session to use the glasses as the input device when that mic source is selected. Voice Memos works because iOS routes glasses mic through the system audio session by default; MentraOS has its own audio session that may override or not configure this.
+This is likely an iOS `AVAudioSession` routing issue: the Veiller mobile app may not configure the audio session to use the glasses as the input device when that mic source is selected. Voice Memos works because iOS routes glasses mic through the system audio session by default; Veiller has its own audio session that may override or not configure this.
 
-**Fix:** Investigate iOS `AVAudioSession` input routing in the MentraOS mobile app when Glasses or Automatic mic source is selected. This is a mobile-side bug.
+**Fix:** Investigate iOS `AVAudioSession` input routing in the Veiller mobile app when Glasses or Automatic mic source is selected. This is a mobile-side bug.
 
 ### RC-5: Phone WebSocket idle disconnect (background condition)
 

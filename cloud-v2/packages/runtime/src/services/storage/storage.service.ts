@@ -8,7 +8,7 @@
  * is provider-agnostic.
  *
  * Mirrors the provider-wrapper pattern in Cloud Core's storage-service, but
- * instantiated within Mentra Runtime Services because the runtime is
+ * instantiated within Veiller Runtime Services because the runtime is
  * self-hostable: a self-hosted runtime points at the OEM's own blob config,
  * independent of Cloud Core's instance.
  *

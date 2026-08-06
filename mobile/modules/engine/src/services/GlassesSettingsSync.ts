@@ -2,7 +2,7 @@
  * Glasses settings sync — engine-owned. Keeps the connected glasses in sync with
  * the phone's device settings (`BLUETOOTH_SETTING_KEYS`) over the bluetooth-sdk, so
  * `engine.glasses.settings.set()` (and any other settings-store write) reaches the
- * device for ANY host — not just the first-party Mentra app, where this used to live
+ * device for ANY host — not just the first-party Veiller app, where this used to live
  * in MantleManager.
  *
  * Two triggers:
@@ -14,7 +14,7 @@
  */
 import {shallow} from "zustand/shallow"
 
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {useSettingsStore, PAIRING_IDENTITY_KEYS} from "../stores/settings"
 import {useGlassesStore} from "../stores/glasses"
 import {createDebouncedPatchFlusher} from "../utils/debouncedPatch"

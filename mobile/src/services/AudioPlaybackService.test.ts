@@ -1,4 +1,4 @@
-import BluetoothSdk from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
 import {createAudioPlayer, setAudioModeAsync} from "expo-audio"
 
 import audioPlaybackService from "@/../modules/engine/src/services/AudioPlaybackService"
@@ -8,7 +8,7 @@ jest.mock("@/../modules/engine/src/services/audioPlaybackAssets", () => ({
   SILENT_AUDIO_SOURCE: 9001,
 }))
 
-jest.mock("@mentra/bluetooth-sdk", () => {
+jest.mock("@veiller/bluetooth-sdk", () => {
   const {bluetoothSdkMock} = require("@/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,
@@ -151,7 +151,7 @@ describe("AudioPlaybackService", () => {
   it("unloads cancelled playback so Bluetooth media play cannot resume it", async () => {
     const onComplete = jest.fn()
     await audioPlaybackService.play(
-      {requestId: "cancelled", audioUrl: "https://example.com/speech.mp3", appId: "com.mentra.merge"},
+      {requestId: "cancelled", audioUrl: "https://example.com/speech.mp3", appId: "com.veiller.merge"},
       onComplete,
     )
 

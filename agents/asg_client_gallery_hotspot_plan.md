@@ -25,7 +25,7 @@ This document outlines the implementation plan for adding hotspot functionality 
 
 ### Mobile Native Modules
 
-- **Android**: `mobile/android/app/src/main/java/com/mentra/mentra/AugmentOSCommunicator.java`
+- **Android**: `mobile/android/app/src/main/java/com/veiller/veiller/AugmentOSCommunicator.java`
 - **iOS**: `mobile/ios/BleManager/AOSManager.swift`
 - **BLE Pattern**: EventBus-based communication with Core service
 
@@ -575,7 +575,7 @@ export const useNetworkConnectivity = () => {
 
 #### 4.1 Android WiFi Auto-Connect
 
-**Location**: `mobile/android/app/src/main/java/com/mentra/mentra/WiFiAutoConnectModule.java`
+**Location**: `mobile/android/app/src/main/java/com/veiller/veiller/WiFiAutoConnectModule.java`
 
 ```java
 @ReactModule(name = WiFiAutoConnectModule.NAME)

@@ -1,14 +1,14 @@
 /**
- * @fileoverview Mentra access-token verification, shared across packages.
+ * @fileoverview Veiller access-token verification, shared across packages.
  *
  * Pure-crypto: signature + claims. **Does not check revocation.** Revocation
  * lives in core's Mongo, and only core's wrapper consults it. Other packages
  * (audio, proxy) accept up-to-1h staleness on revoked access tokens — the
  * actual revocation surface is the refresh token, which core owns.
  *
- * Both Mentra-issued private and public keys are PEM bodies (base64, no
+ * Both Veiller-issued private and public keys are PEM bodies (base64, no
  * BEGIN/END wrapper) in env. See cloud-v2/docs/issues/001-oem-auth/design.md
- * "Mentra-issued access token" for the claim shape.
+ * "Veiller-issued access token" for the claim shape.
  */
 
 import crypto from "node:crypto";
@@ -57,16 +57,16 @@ const runtimeRemoteJwks = new Map<string, ReturnType<typeof jose.createRemoteJWK
 const runtimeStaticKeys = new Map<string, Promise<jose.KeyLike>>();
 
 /** Reset the cached public key. Test-only — call after mutating env. */
-export function resetMentraKeyCache(): void {
+export function resetVeillerKeyCache(): void {
   publicKeyPromise = null;
   resetRuntimeAuthCache();
 }
 
 async function getPublicKey(): Promise<jose.KeyLike> {
   if (!publicKeyPromise) {
-    const pubBody = process.env.MENTRA_JWT_PUBLIC_KEY;
+    const pubBody = process.env.VEILLER_JWT_PUBLIC_KEY;
     if (!pubBody) {
-      throw new AccessTokenError("env var MENTRA_JWT_PUBLIC_KEY is not set");
+      throw new AccessTokenError("env var VEILLER_JWT_PUBLIC_KEY is not set");
     }
     const pem = `-----BEGIN PUBLIC KEY-----\n${pubBody}\n-----END PUBLIC KEY-----`;
     publicKeyPromise = jose.importSPKI(pem, ALG, { extractable: false });
@@ -75,7 +75,7 @@ async function getPublicKey(): Promise<jose.KeyLike> {
 }
 
 /**
- * Verify signature, issuer, audience, and expiry on a Mentra-issued access
+ * Verify signature, issuer, audience, and expiry on a Veiller-issued access
  * token. Throws `AccessTokenError` on failure. Does NOT check the revocation
  * blacklist — see file header.
  */

@@ -6,7 +6,7 @@ This document covers the implementation design for fixes identified in the [044 
 
 **Prerequisites:** Read the [spike](./spike.md) for root cause analysis and the [spec](./spec.md) for acceptance criteria.
 
-**Scope:** Cloud monorepo (`MentraOS/cloud/`) only. No mobile app changes.
+**Scope:** Cloud monorepo (`Veiller/cloud/`) only. No mobile app changes.
 
 ---
 
@@ -14,7 +14,7 @@ This document covers the implementation design for fixes identified in the [044 
 
 ### Problem
 
-From the spike: at 19:06:48, `com.mentra.ai` had all 11 subscriptions rejected due to "missing permissions." The app's entire data stream was silently cut — transcription, audio, everything. Four seconds later, `com.mentra.recorder` had its subscriptions accepted on the same session. The user saw "AI not getting transcripts" with no indication of why.
+From the spike: at 19:06:48, `com.veiller.ai` had all 11 subscriptions rejected due to "missing permissions." The app's entire data stream was silently cut — transcription, audio, everything. Four seconds later, `com.veiller.recorder` had its subscriptions accepted on the same session. The user saw "AI not getting transcripts" with no indication of why.
 
 ### Root Cause
 
@@ -28,8 +28,8 @@ Speed of the MongoDB query is irrelevant — the result is the same whether it t
 
 Possible root causes (need prod data to confirm):
 
-1. **`com.mentra.ai`'s App document has an empty or missing `permissions` field.** The checker does `app.permissions?.some(...)` — if `permissions` is undefined/null/empty array, every permission check fails and all subscriptions are rejected.
-2. **The permission migration (`migrate-permissions.ts`) didn't cover `com.mentra.ai`.** The migration script adds `PermissionType.ALL` to legacy apps. If this app was missed, it would have no permissions.
+1. **`com.veiller.ai`'s App document has an empty or missing `permissions` field.** The checker does `app.permissions?.some(...)` — if `permissions` is undefined/null/empty array, every permission check fails and all subscriptions are rejected.
+2. **The permission migration (`migrate-permissions.ts`) didn't cover `com.veiller.ai`.** The migration script adds `PermissionType.ALL` to legacy apps. If this app was missed, it would have no permissions.
 3. **The app was registered without proper permissions.** Developer console or API registration flow might not set permissions correctly for system apps.
 
 ### Design
@@ -62,9 +62,9 @@ If `App.findOne()` returns null, log it explicitly at `warn` level. Today the co
 
 ### Follow-Up Investigation (Not Part of This PR)
 
-- [ ] Query prod MongoDB for `com.mentra.ai`'s App document — check `permissions` field
+- [ ] Query prod MongoDB for `com.veiller.ai`'s App document — check `permissions` field
 - [ ] Query prod MongoDB for all apps with empty/null `permissions` — how widespread is this?
-- [ ] If `com.mentra.ai` lacks permissions: run the migration script or fix the app registration
+- [ ] If `com.veiller.ai` lacks permissions: run the migration script or fix the app registration
 - [ ] Audit the developer console's app creation/update flow — does it set `permissions` correctly?
 - [ ] Consider whether system apps (dashboard, recorder, AI) should bypass permission checks entirely since they're not third-party apps
 

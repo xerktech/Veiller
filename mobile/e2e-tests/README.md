@@ -55,7 +55,7 @@ brew install cloudflared
 ### 2. Clone the repos
 
 ```bash
-git clone <MentraOS repo>
+git clone <Veiller repo>
 git clone <LiveCaptionsOnSmartGlasses repo>
 ```
 
@@ -64,7 +64,7 @@ git clone <LiveCaptionsOnSmartGlasses repo>
 For the mobile repo:
 
 ```bash
-cd /path/to/MentraOS/mobile
+cd /path/to/Veiller/mobile
 bun install
 ```
 
@@ -79,16 +79,16 @@ bun install
 
 ```bash
 cd /path/to/LiveCaptionsOnSmartGlasses
-MENTRA_LOG_LEVEL=debug bun run dev
+VEILLER_LOG_LEVEL=debug bun run dev
 ```
 
 ### 5. Make sure the phone can use the app
 
-You need a working MentraOS app on the phone and a path for the phone to reach the captions mini app.
+You need a working Veiller app on the phone and a path for the phone to reach the captions mini app.
 
 Choose one:
 
-- your hosted Mentra cloud / marketplace path
+- your hosted Veiller cloud / marketplace path
 - a local development routing path you control
 
 The phone must be able to open the captions mini app and render the `Simulated glasses` mirror view.
@@ -96,7 +96,7 @@ The phone must be able to open the captions mini app and render the `Simulated g
 ### 6. Run the monitor
 
 ```bash
-cd /path/to/MentraOS/mobile/e2e-tests
+cd /path/to/Veiller/mobile/e2e-tests
 python3 scripts/live_word_monitor.py \
   --output-dir results \
   --port 8765
@@ -114,7 +114,7 @@ python3 scripts/live_word_monitor.py \
 If you want the monitor to verify a specific macOS output device and raise incidents when playback would route elsewhere, run it with the extra device flag:
 
 ```bash
-cd /path/to/MentraOS/mobile/e2e-tests
+cd /path/to/Veiller/mobile/e2e-tests
 python3 scripts/live_word_monitor.py \
   --output-dir results \
   --port 8765 \
@@ -128,7 +128,7 @@ Then open:
 If you only want to inspect previously captured results, start the same dashboard in read-only mode:
 
 ```bash
-cd /path/to/MentraOS/mobile/e2e-tests
+cd /path/to/Veiller/mobile/e2e-tests
 python3 scripts/live_word_monitor.py \
   --read-only \
   --output-dir results \
@@ -142,7 +142,7 @@ The dashboard UI now lives in `ui/` as a small React app.
 For the normal static workflow, rebuild it before restarting the monitor:
 
 ```bash
-cd /path/to/MentraOS/mobile/e2e-tests/ui
+cd /path/to/Veiller/mobile/e2e-tests/ui
 bun install
 bun run build
 ```
@@ -150,7 +150,7 @@ bun run build
 For frontend hot reload during development, run Vite separately and start the monitor in UI dev mode:
 
 ```bash
-cd /path/to/MentraOS/mobile/e2e-tests/ui
+cd /path/to/Veiller/mobile/e2e-tests/ui
 bun install
 bun run dev
 ```
@@ -158,7 +158,7 @@ bun run dev
 In another terminal:
 
 ```bash
-cd /path/to/MentraOS/mobile/e2e-tests
+cd /path/to/Veiller/mobile/e2e-tests
 python3 scripts/live_word_monitor.py \
   --output-dir results \
   --port 8765 \
@@ -241,7 +241,7 @@ curl -A 'Mozilla/5.0' https://captions.smartglasses.art
 
 Incident thresholds now live in:
 
-- [incident_config.toml](/Users/philippe/dev/MentraOS-philippe-OS-1274-e2e-testing-checklist/mobile/e2e-tests/incident_config.toml)
+- [incident_config.toml](/Users/philippe/dev/Veiller-philippe-OS-1274-e2e-testing-checklist/mobile/e2e-tests/incident_config.toml)
 
 This file defines per-incident names and thresholds. Current examples:
 
@@ -267,19 +267,19 @@ The monitor reads this file at startup.
 
 For `audio_output_device_mismatch`, the thresholds live in the TOML config, but the expected device name is still provided at runtime with `--audio-output-device`. That keeps the policy shared in git while letting a MacBook and Mac mini use different local hardware.
 
-For `captions_app_not_running`, the thresholds live in the TOML config, but the specific monitored app package is still provided at runtime with `--captions-package` and defaults to `com.mentra.captions`. The monitor opens this incident when logcat shows `SOCKET: Received app_stopped message for package: ...` for that package, and resolves it on the matching `app_started` log.
+For `captions_app_not_running`, the thresholds live in the TOML config, but the specific monitored app package is still provided at runtime with `--captions-package` and defaults to `com.veiller.captions`. The monitor opens this incident when logcat shows `SOCKET: Received app_stopped message for package: ...` for that package, and resolves it on the matching `app_started` log.
 
-When an alert is raised, the monitor also broadcasts an Android intent to the connected phone by default. This is intended for the `internal` Android build, which registers the `com.mentra.CAPTIONS_TESTER_INCIDENT` receiver and files a normal automatic incident through the mobile app.
+When an alert is raised, the monitor also broadcasts an Android intent to the connected phone by default. This is intended for the `internal` Android build, which registers the `com.veiller.CAPTIONS_TESTER_INCIDENT` receiver and files a normal automatic incident through the mobile app.
 
 ## Running it
 
-### 1. Start the local captions mini app backend (optional, can instead use the deployed com.mentra.captions)
+### 1. Start the local captions mini app backend (optional, can instead use the deployed com.veiller.captions)
 
 From the mini app repo:
 
 ```bash
 gh repo clone Mentra-Community/LiveCaptionsOnSmartGlasses
-MENTRA_LOG_LEVEL=debug bun run dev
+VEILLER_LOG_LEVEL=debug bun run dev
 ```
 
 Expected:
@@ -289,14 +289,14 @@ Expected:
 ### 2. Keep the phone and app in the right state
 
 - Connect the Android phone over USB.
-- Open MentraOS on the phone.
+- Open Veiller on the phone.
 - Start the captions mini app.
 - GO back to the home using `Simulated glasses`. The mirror view should stay visible.
 - Keep the phone awake.
 
 ### 3. Start the live dashboard monitor
 
-From the MentraOS repo:
+From the Veiller repo:
 
 ```bash
 cd mobile/e2e-tests
@@ -371,7 +371,7 @@ If the public URL is down:
 cloudflared --config ~/.cloudflared/config.yml tunnel run captions
 ```
 
-## On Mentra's mac mini
+## On Veiller's mac mini
 
 ### Disable computer sleep
 
@@ -406,12 +406,12 @@ Open the Captions app, go back to the home screen.
 #### From your local machine
 
 ```
-./mobile/e2e-tests/scripts/redeploy_mentra_mini.sh
+./mobile/e2e-tests/scripts/redeploy_veiller_mini.sh
 ```
 
 That helper will:
 
-- ssh to `mentra-mini`
+- ssh to `veiller-mini`
 - fast-forward pull the current local branch
 - rebuild `mobile/e2e-tests/ui`
 - restart `live_word_monitor.py` with the known-good Homebrew Python runtime
@@ -420,7 +420,7 @@ That helper will:
 If you want to target specific phones explicitly, you can also pass repeatable device flags:
 
 ```sh
-./mobile/e2e-tests/scripts/redeploy_mentra_mini.sh \
+./mobile/e2e-tests/scripts/redeploy_veiller_mini.sh \
   --device Q92024100001877 \
   --device RFCX71TH0CR
 ```
@@ -428,14 +428,14 @@ If you want to target specific phones explicitly, you can also pass repeatable d
 #### Terminal 1
 
 ```
-cd /Users/mentraconference/Documents/MentraOS/mobile/e2e-tests
+cd /Users/veillerconference/Documents/Veiller/mobile/e2e-tests
 python3 scripts/live_word_monitor.py --output-dir results --port 8765 --audio-output-device "External Headphones"
 ```
 
 #### Terminal 2
 
 ```
-cloudflared --config /Users/mentraconference/.cloudflared/config.yml tunnel run captions
+cloudflared --config /Users/veillerconference/.cloudflared/config.yml tunnel run captions
 ```
 
 ### Misc

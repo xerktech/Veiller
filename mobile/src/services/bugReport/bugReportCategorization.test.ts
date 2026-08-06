@@ -18,14 +18,14 @@ describe("buildReportTrigger", () => {
       buildReportTrigger({
         triggerSource: "applet_capsule_menu",
         triggerReason: "manual_bug_report",
-        sourceAppletPackageName: "com.mentra.demo",
+        sourceAppletPackageName: "com.veiller.demo",
         sourceAppletName: "Demo",
       }),
     ).toEqual({
       type: "manual",
       source: "applet_capsule_menu",
       reason: "manual_bug_report",
-      sourceAppletPackageName: "com.mentra.demo",
+      sourceAppletPackageName: "com.veiller.demo",
       sourceAppletName: "Demo",
     })
   })

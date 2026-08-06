@@ -8,7 +8,7 @@ import {useNavigationStore} from "@/stores/navigation"
 
 const mockSetOnboardingCompleted = jest.fn()
 
-jest.mock("@mentra/engine", () => ({
+jest.mock("@veiller/engine", () => ({
   SETTINGS: {
     onboarding_completed: {
       key: "onboarding_completed",
@@ -24,7 +24,7 @@ jest.mock("@/stores/navigation", () => ({
 jest.mock("@/components/brands/VeillerLogo", () => {
   const {View} = require("react-native")
   return {
-    VeillerLogo: () => <View testID="mentra-logo" />,
+    VeillerLogo: () => <View testID="veiller-logo" />,
   }
 })
 
@@ -61,10 +61,10 @@ describe("onboarding welcome", () => {
     ;(useNavigationStore.getState as jest.Mock).mockReturnValue({push})
   })
 
-  it("uses the updated MentraOS welcome copy", () => {
+  it("uses the updated Veiller welcome copy", () => {
     const {getByLabelText, getByText} = render(<OnboardingWelcome />)
 
-    expect(en.onboarding.welcome).toBe("Welcome to MentraOS")
+    expect(en.onboarding.welcome).toBe("Welcome to Veiller")
     expect(en.onboarding.setupWithGlasses).toBe("Set up\nwith glasses")
     expect(en.onboarding.setupWithoutGlasses).toBe("Set up\nwithout glasses")
     expect(getByText("onboarding:welcome")).toBeTruthy()

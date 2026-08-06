@@ -64,7 +64,7 @@ jest.mock("../../../modules/engine/src/utils/permissions/MediaLibraryPermissions
 function legacyFile(name = "IMG_20260101_120000"): DownloadedFile {
   return {
     name,
-    filePath: `/tmp/MentraPhotos/${name}/base.jpg`,
+    filePath: `/tmp/VeillerPhotos/${name}/base.jpg`,
     size: 1234,
     modified: 1_767_268_800_000,
     mime_type: "image/jpeg",

@@ -8,7 +8,7 @@ appId: ${MAESTRO_APP_ID}
 
 # Should see welcome screen after clearState
 - assertVisible:
-    text: "Welcome to MentraOS"
+    text: "Welcome to Veiller"
     timeout: 10000
 
 # Tap on Sign In or Get Started button

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { X, Upload, Image as ImageIcon, ZoomIn, Loader2, Info } from "lucide-react";
 import { cn } from "@/libs/utils";
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@mentra/shared";
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@veiller/shared";
 import { toast } from "sonner";
 import {
   AlertDialog,

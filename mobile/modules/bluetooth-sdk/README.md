@@ -1,14 +1,14 @@
-# @mentra/bluetooth-sdk
+# @veiller/bluetooth-sdk
 
-React Native and Expo SDK for connecting mobile apps directly to supported Mentra smart glasses over Bluetooth.
+React Native and Expo SDK for connecting mobile apps directly to supported Veiller smart glasses over Bluetooth.
 
 The package includes:
 
 - A React Native / Expo module API exposed as `BluetoothSdk`.
-- React hooks under `@mentra/bluetooth-sdk/react` for common scan,
+- React hooks under `@veiller/bluetooth-sdk/react` for common scan,
   connection, status, and event lifecycles.
 - Native Android code published as `com.mentraglass:bluetooth-sdk`.
-- Native iOS code available as the `MentraBluetoothSDK` Swift package.
+- Native iOS code available as the `VeillerBluetoothSDK` Swift package.
 - An Expo config plugin that wires the native dependencies into generated Android and iOS projects.
 
 Use a development build or production native build. Expo Go cannot load this package because the SDK contains native code.
@@ -25,7 +25,7 @@ Use a development build or production native build. Expo Go cannot load this pac
 ## Install
 
 ```sh
-bun add @mentra/bluetooth-sdk
+bun add @veiller/bluetooth-sdk
 bunx expo install expo-build-properties
 ```
 
@@ -36,7 +36,7 @@ For Expo apps, add the plugin to `app.json` or `app.config.ts`:
   "expo": {
     "plugins": [
       [
-        "@mentra/bluetooth-sdk",
+        "@veiller/bluetooth-sdk",
         {
           "node": true
         }
@@ -114,7 +114,7 @@ Use `scan()` when your app needs to show a picker. It calls `onResults` every ti
 ```ts
 import BluetoothSdk, {
   DeviceModels,
-} from '@mentra/bluetooth-sdk'
+} from '@veiller/bluetooth-sdk'
 
 const devices = await BluetoothSdk.scan(DeviceModels.MentraLive, {
   timeoutMs: 10_000,
@@ -150,10 +150,10 @@ uses a CoreBluetooth identifier when available, and the SDK falls back to
 platform reports RSSI, so picker UI should handle `undefined` and avoid
 reordering rows just because RSSI metadata arrives later.
 
-## Mentra SDK Usage Analytics
+## Veiller SDK Usage Analytics
 
-The SDK sends three usage events to Mentra's PostHog project by default so
-Mentra can understand SDK adoption, successful glasses connections, and
+The SDK sends three usage events to Veiller's PostHog project by default so
+Veiller can understand SDK adoption, successful glasses connections, and
 enterprise device deployments:
 
 - `bluetooth_sdk_started`: sent once per app runtime after the native SDK starts.
@@ -171,7 +171,7 @@ the config plugin:
   "expo": {
     "plugins": [
       [
-        "@mentra/bluetooth-sdk",
+        "@veiller/bluetooth-sdk",
         {
           "analytics": false
         }
@@ -182,14 +182,14 @@ the config plugin:
 ```
 
 Native Android apps can pass `BluetoothSdkAnalyticsConfig.disabled()` in
-`MentraBluetoothSdkConfig` or add
-`com.mentra.bluetoothsdk.analytics.disabled=true` as application metadata.
-Native iOS apps can pass `.disabled` in `MentraBluetoothSDKConfiguration` or set
-`MentraBluetoothSdkAnalyticsDisabled` to `true` in `Info.plist`.
+`VeillerBluetoothSdkConfig` or add
+`com.veiller.bluetoothsdk.analytics.disabled=true` as application metadata.
+Native iOS apps can pass `.disabled` in `VeillerBluetoothSDKConfiguration` or set
+`VeillerBluetoothSdkAnalyticsDisabled` to `true` in `Info.plist`.
 
-Mentra's PostHog project API key is embedded in the SDK as a public analytics
+Veiller's PostHog project API key is embedded in the SDK as a public analytics
 write token, not a private PostHog personal API key. Apps do not configure the
-analytics destination; these SDK usage events are always sent to Mentra's
+analytics destination; these SDK usage events are always sent to Veiller's
 PostHog project unless analytics are disabled.
 
 Captured properties include `event_source`, `sdk_platform`, `sdk_surface`,
@@ -198,7 +198,7 @@ the platform-specific `app_package` or `app_bundle_identifier`, OS
 platform/version, and `event_kind`. Connection events also include
 `fully_booted` and a glasses model value when known. The identification event
 intentionally includes the glasses manufacturing serial as `glasses_device_id`,
-with `glasses_device_id_type=manufacturing_serial`, so Mentra can correlate
+with `glasses_device_id_type=manufacturing_serial`, so Veiller can correlate
 fleet deployments across supported models. This serial identifies the glasses
 hardware, not the user or the host phone. Its source depends on the model:
 Mentra Live reports the serial provisioned in BES NV storage, while G1 and Ar99
@@ -218,11 +218,11 @@ commands such as `requestPhoto()`, `startStream()`, and `setMicState()`.
 
 ```tsx
 import {Button, Text, View} from 'react-native'
-import {DeviceModels} from '@mentra/bluetooth-sdk'
-import {useBluetoothEvent, useMentraBluetooth} from '@mentra/bluetooth-sdk/react'
+import {DeviceModels} from '@veiller/bluetooth-sdk'
+import {useBluetoothEvent, useVeillerBluetooth} from '@veiller/bluetooth-sdk/react'
 
 export function DeviceScreen() {
-  const mentra = useMentraBluetooth({
+  const veiller = useVeillerBluetooth({
     defaultModel: DeviceModels.MentraLive,
     scanTimeoutMs: 10_000,
   })
@@ -234,11 +234,11 @@ export function DeviceScreen() {
   return (
     <View>
       <Text>{mentra.glasses.connected ? 'Connected' : 'Disconnected'}</Text>
-      <Button disabled={mentra.busy} title="Scan" onPress={() => mentra.scan.start()} />
-      {mentra.scan.devices.map((device) => (
-        <Button key={device.id} title={device.name} onPress={() => mentra.connect(device)} />
+      <Button disabled={veiller.busy} title="Scan" onPress={() => veiller.scan.start()} />
+      {veiller.scan.devices.map((device) => (
+        <Button key={device.id} title={device.name} onPress={() => veiller.connect(device)} />
       ))}
-      <Button disabled={!mentra.glasses.connected} title="Disconnect" onPress={mentra.disconnect} />
+      <Button disabled={!mentra.glasses.connected} title="Disconnect" onPress={veiller.disconnect} />
     </View>
   )
 }
@@ -246,10 +246,10 @@ export function DeviceScreen() {
 
 The hooks do not request Android permissions or choose a persistence package for
 you. Ask for permissions in your app before calling scan/connect actions, and
-pass a `defaultDeviceStorage` adapter to `useMentraBluetooth` if you want a
+pass a `defaultDeviceStorage` adapter to `useVeillerBluetooth` if you want a
 default device to survive app restarts.
 
-Use `useMentraBluetooth()` as the React status API for connection, battery,
+Use `useVeillerBluetooth()` as the React status API for connection, battery,
 Wi-Fi, hotspot, scan, and SDK runtime state.
 
 The React hook exposes `glasses.connection` as a discriminated union:
@@ -346,7 +346,7 @@ Android and iOS async APIs use `BluetoothSdkException` / `BluetoothSdkError` for
 
 ## OTA Updates
 
-Mentra Live firmware owns the OTA flow. The SDK mirrors the MentraOS app commands and events:
+Mentra Live firmware owns the OTA flow. The SDK mirrors the Veiller app commands and events:
 
 - `checkForOtaUpdate()` fetches the configured manifest and resolves with `true` when an ASG APK, MTK, or BES update is available.
 - `startOtaUpdate()` sends `ota_start` with the same configured manifest URL and resolves with the ASG start ack after your app presents the update and the user accepts it.
@@ -360,7 +360,7 @@ or the production default if they do not advertise one, so the app does not
 prompt for an update the glasses cannot install.
 
 ```ts
-import BluetoothSdk from '@mentra/bluetooth-sdk'
+import BluetoothSdk from '@veiller/bluetooth-sdk'
 
 BluetoothSdk.addListener('ota_status', (event) => {
   console.log(`OTA ${event.status}: ${event.overall_percent}%`)
@@ -383,7 +383,7 @@ OTA requires Mentra Live glasses firmware that supports the ASG OTA protocol and
 ```ts
 const photo = await BluetoothSdk.requestPhoto({
   size: 'medium',
-  webhookUrl: 'https://api.example.com/mentra/photo',
+  webhookUrl: 'https://api.example.com/veiller/photo',
   authToken: 'optional-token',
   compress: 'medium',
   sound: true,
@@ -428,7 +428,7 @@ Use `rtmp://` or `rtmps://` for RTMP, `srt://` for SRT, and `http://` or `https:
 React Native components should use `useBluetoothEvent()` for hardware events:
 
 ```tsx
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react'
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react'
 
 export function HardwareEventLogger() {
   useBluetoothEvent('button_press', (event) => console.log(event))
@@ -468,14 +468,14 @@ Only documented imports are supported for app developers. Undocumented package s
 For normal app development, install the JavaScript package from npm. For SDK source development or release testing, install a local checkout and point Metro/native resolution at the same path:
 
 ```sh
-bun add --no-save /path/to/MentraOS/mobile/modules/bluetooth-sdk
-MENTRA_BLUETOOTH_SDK_PACKAGE_PATH=/path/to/MentraOS/mobile/modules/bluetooth-sdk bunx expo run:ios
+bun add --no-save /path/to/Veiller/mobile/modules/bluetooth-sdk
+VEILLER_BLUETOOTH_SDK_PACKAGE_PATH=/path/to/Veiller/mobile/modules/bluetooth-sdk bunx expo run:ios
 ```
 
 Use `bunx expo run:android` for Android. Keep local paths in your shell or CI environment, not in committed app config.
 
 For local Android source compile checks inside this monorepo, run from the
-MentraOS repo root:
+Veiller repo root:
 
 ```sh
 ./scripts/check-android-compile.sh bluetooth-sdk
@@ -483,7 +483,7 @@ MentraOS repo root:
 
 The `android/` folder in this package is source for the generated Expo Android
 project, not the local Gradle entrypoint. The check script prepares
-`mobile/android` and uses its Gradle wrapper with `-PmentraPublicSdk=true`,
+`mobile/android` and uses its Gradle wrapper with `-PveillerPublicSdk=true`,
 matching the CI release workflow's public SDK dependency mode.
 
 For bare native iOS apps, use the public SwiftPM repository:
@@ -492,12 +492,12 @@ For bare native iOS apps, use the public SwiftPM repository:
 https://github.com/Mentra-Community/mentra-bluetooth-sdk-ios.git
 ```
 
-Select version `0.1.20`, then add the `MentraBluetoothSDK` product to your app target.
+Select version `0.1.20`, then add the `VeillerBluetoothSDK` product to your app target.
 
 For local SDK development, add this package folder directly in Xcode:
 
 ```text
-/path/to/MentraOS/mobile/modules/bluetooth-sdk
+/path/to/Veiller/mobile/modules/bluetooth-sdk
 ```
 
 The core Swift package intentionally excludes optional local STT, Nex/SwiftProtobuf, Vuzix/Ultralite, and tar.bz2 extraction code paths.
@@ -510,8 +510,8 @@ Maintainers publishing the public SwiftPM mirror should follow
 Maintainers publishing the native Android artifacts to Maven Central should
 follow [RELEASING_ANDROID_MAVEN.md](./RELEASING_ANDROID_MAVEN.md).
 
-Public Maven publishing uses a public SDK mode that omits MentraOS-only Android
-integrations from the artifact metadata while normal MentraOS app builds keep
+Public Maven publishing uses a public SDK mode that omits Veiller-only Android
+integrations from the artifact metadata while normal Veiller app builds keep
 those integrations enabled.
 
 Use `android/gradle.properties.example` as the template for Sonatype Central and
@@ -520,4 +520,4 @@ secrets, not in the repository.
 
 ## Starter Example App
 
-The [Mentra Bluetooth SDK Starter Kit](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit) includes starter example apps for Android, iOS, and React Native / Expo. The React Native starter demonstrates scan/connect, display, camera photo upload, RTMP/SRT/WebRTC streaming, Wi-Fi/hotspot, microphone PCM, RGB LED, gallery mode, and console event inspection.
+The [Veiller Bluetooth SDK Starter Kit](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit) includes starter example apps for Android, iOS, and React Native / Expo. The React Native starter demonstrates scan/connect, display, camera photo upload, RTMP/SRT/WebRTC streaming, Wi-Fi/hotspot, microphone PCM, RGB LED, gallery mode, and console event inspection.

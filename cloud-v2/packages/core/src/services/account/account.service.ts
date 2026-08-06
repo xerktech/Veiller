@@ -1,9 +1,9 @@
 /**
- * @fileoverview Account orchestration: Mentra's first-party consumer identity
+ * @fileoverview Account orchestration: Veiller's first-party consumer identity
  * provider, running in-process as its own "OEM backend" (issue 019).
  *
  * Verifies credentials via GoTrue (server side, transient), then mints a
- * `mentra` subject token and feeds it through the SAME createSession path OEMs
+ * `veiller` subject token and feeds it through the SAME createSession path OEMs
  * use, so the device only ever receives a Cloud V2 session. No Supabase
  * material reaches the client.
  */
@@ -66,7 +66,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   });
   await sendEmail({
     to: email,
-    subject: "Your Mentra password reset code",
+    subject: "Your Veiller password reset code",
     html: `<p>Your password reset code is <b>${code}</b>. It expires in 15 minutes.</p>`,
   });
 }
@@ -86,7 +86,7 @@ export async function resetPassword(
   await gotrue.setPassword(userId, newPassword);
   // Reset kills ALL existing sessions, then logs the user in fresh. Revoke
   // before minting so the new session is the only survivor.
-  const user = await findOrCreateUser({ tenantId: "mentra", tenantUserId: userId });
+  const user = await findOrCreateUser({ tenantId: "veiller", tenantUserId: userId });
   await revokeAllSessionsForUser({ mentraUserId: user.mentraUserId });
   const identity = await gotrue.verifyPassword(email, newPassword);
   return sessionForIdentity(identity);
@@ -132,7 +132,7 @@ export async function requestEmailChange(
   });
   await sendEmail({
     to: newEmail,
-    subject: "Confirm your new Mentra email address",
+    subject: "Confirm your new Veiller email address",
     html: `<p>Your email change code is <b>${code}</b>. It expires in 15 minutes. If you did not request this, ignore this email.</p>`,
   });
 }
@@ -157,7 +157,7 @@ export async function requestAccountDeletion(email: string, tenantUserId: string
   });
   await sendEmail({
     to: email,
-    subject: "Confirm your Mentra account deletion",
+    subject: "Confirm your Veiller account deletion",
     html: `<p>Your account deletion code is <b>${code}</b>. It expires in 15 minutes. If you did not request this, ignore this email.</p>`,
   });
 }

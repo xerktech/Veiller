@@ -14,7 +14,7 @@ export async function onRequest(context: {
   const upstreamUrl = new URL(sourceUrl.pathname + sourceUrl.search, coreUrl);
   const headers = new Headers(context.request.headers);
   headers.delete("host");
-  headers.set("x-mentra-public-origin", sourceUrl.origin);
+  headers.set("x-veiller-public-origin", sourceUrl.origin);
 
   return fetch(upstreamUrl, {
     method: context.request.method,

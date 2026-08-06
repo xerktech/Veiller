@@ -11,7 +11,7 @@ appId: ${MAESTRO_APP_ID}
 
 # Navigate to Store tab
 - tapOn: "Store"
-- assertVisible: "MentraOS Store"
+- assertVisible: "Veiller Store"
 - takeScreenshot: "store-tab"
 
 # Navigate to Glasses tab

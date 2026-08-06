@@ -1,4 +1,4 @@
-import BluetoothSdk, {type CameraFovRequest, type CameraFovResult} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk, {type CameraFovRequest, type CameraFovResult} from "@veiller/bluetooth-sdk/internal"
 
 export const CAMERA_FOV_OVERRIDE_TTL_MS = 300_000
 export const CAMERA_FOV_OVERRIDE_REFRESH_MS = 120_000

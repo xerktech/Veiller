@@ -6,7 +6,7 @@
  */
 import {create} from "zustand"
 
-import type {RuntimeAudioTransport, RuntimeSnapshot, RuntimeStatus} from "@mentra/cloud-client/react-native"
+import type {RuntimeAudioTransport, RuntimeSnapshot, RuntimeStatus} from "@veiller/cloud-client/react-native"
 
 const initialSnapshot: RuntimeSnapshot = {
   status: "disconnected",

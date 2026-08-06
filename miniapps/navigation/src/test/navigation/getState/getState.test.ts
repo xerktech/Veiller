@@ -1,7 +1,7 @@
 /// <reference types="bun-types" />
 import {describe, expect, test} from "bun:test"
 
-import type {NavState} from "@mentra/miniapp"
+import type {NavState} from "@veiller/miniapp"
 
 import {ackLatest, connectedSession, lastEnvelope} from "../helpers"
 

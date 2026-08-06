@@ -1,4 +1,4 @@
-# MentraOS runner cache cleanup systemd service.
+# Veiller runner cache cleanup systemd service.
 # Installed by mobile/scripts/setup-runner.sh into
 #   ~/.config/systemd/user/runner-cleanup.service
 # with @@HOME_DIR@@ substituted to the absolute path of $HOME.
@@ -8,16 +8,16 @@
 # active, the script auto-defers and exits 0.
 
 [Unit]
-Description=MentraOS runner cache cleanup
+Description=Veiller runner cache cleanup
 # Don't run during system shutdown.
 DefaultDependencies=no
 After=default.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash @@HOME_DIR@@/mentra/runner-cleanup.sh --tier all
-StandardOutput=append:@@HOME_DIR@@/mentra/runner-cleanup.log
-StandardError=append:@@HOME_DIR@@/mentra/runner-cleanup.log
+ExecStart=/bin/bash @@HOME_DIR@@/veiller/runner-cleanup.sh --tier all
+StandardOutput=append:@@HOME_DIR@@/veiller/runner-cleanup.log
+StandardError=append:@@HOME_DIR@@/veiller/runner-cleanup.log
 # Lower priority than build processes so cleanup never starves a build.
 Nice=10
 IOSchedulingClass=idle

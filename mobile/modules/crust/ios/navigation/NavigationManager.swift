@@ -18,7 +18,7 @@ import MapboxNavigationCore
 /// The public surface — `start` / `stop` / `requestPermission` /
 /// `simulateDeviation`, plus the `onEvent` / `onLocation` / `onRoute` payload
 /// shapes — is identical to the Google version, so `CrustModule.swift` and
-/// everything above it (the `@mentra/miniapp` SDK) does not change.
+/// everything above it (the `@veiller/miniapp` SDK) does not change.
 ///
 /// ## iOS-vs-Android API differences (why this isn't a line-for-line port)
 ///

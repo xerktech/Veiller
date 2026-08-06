@@ -21,7 +21,7 @@ async function fetchReverse(
   // Guard against non-finite input before spending a cloud round-trip.
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
   try {
-    return await mentra.request(REVERSE_GEOCODE_CHANNEL, {lat, lng})
+    return await veiller.request(REVERSE_GEOCODE_CHANNEL, {lat, lng})
   } catch (err) {
     console.warn("[NAV-MINI] reverseGeocode failed:", err)
     return null

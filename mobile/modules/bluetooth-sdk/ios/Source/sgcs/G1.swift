@@ -1,6 +1,6 @@
 //
 //  G1.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created by Matthew Fosse on 3/3/25.
 //
@@ -1366,7 +1366,7 @@ extension G1 {
     func getWhitelistChunks() -> [[UInt8]] {
         // Define the hardcoded whitelist JSON
         let apps = [
-            ["id": "com.mentra.os", "name": "MentraOS"],
+            ["id": "com.veiller.os", "name": "Veiller"],
             ["id": "io.heckel.ntfy", "name": "ntfy"],
         ]
         let whitelistJson = createWhitelistJson(apps: apps)
@@ -1985,7 +1985,7 @@ extension G1 {
         return invertedData
     }
 
-    /// Core MentraOS-compatible BMP display implementation
+    /// Core Veiller-compatible BMP display implementation
     private func sendBmp(bmpData: Data) async -> Bool {
         // Frame timing validation for animation smoothness
         let currentTime = Date()
@@ -1999,10 +1999,10 @@ extension G1 {
             "G1: 🎬 Frame \(frameSequence): \(String(format: "%.0f", timeSinceLastFrame * 1000))ms since last frame"
         )
 
-        // MentraOS constants - exact match
-        let packLen = 194 // Exact chunk size from MentraOS
-        let iosDelayMs = 8 // iOS delay from MentraOS
-        let addressBytes: [UInt8] = [0x00, 0x1C, 0x00, 0x00] // Address from MentraOS
+        // Veiller constants - exact match
+        let packLen = 194 // Exact chunk size from Veiller
+        let iosDelayMs = 8 // iOS delay from Veiller
+        let addressBytes: [UInt8] = [0x00, 0x1C, 0x00, 0x00] // Address from Veiller
 
         //    // Debug: Check bmpData integrity before chunking
         //    let pixelDataStart = 62
@@ -2012,7 +2012,7 @@ extension G1 {
         //      CoreCommsService.log("G1: 🔍 Before chunking - pixel data sample (bytes 62-82): \(beforeChunkHex)")
         //    }
 
-        // Create chunks exactly like MentraOS
+        // Create chunks exactly like Veiller
         var multiPacks: [Data] = []
         var index = 0
         while index < bmpData.count {
@@ -2030,7 +2030,7 @@ extension G1 {
             index += packLen
         }
 
-        Bridge.log("G1: Created \(multiPacks.count) packs from BMP data (MentraOS format)")
+        Bridge.log("G1: Created \(multiPacks.count) packs from BMP data (Veiller format)")
 
         var chunks: [[UInt8]] = []
 
@@ -2062,11 +2062,11 @@ extension G1 {
         queueChunks(chunks, sleepAfterMs: 25, lastFrameMs: 100)
         chunks.removeAll()
 
-        // CRC validation like MentraOS - frame 1 should be 0x1914adcf
+        // CRC validation like Veiller - frame 1 should be 0x1914adcf
         var imageWithAddress = Data(addressBytes)
         imageWithAddress.append(bmpData)
 
-        // Calculate CRC32-XZ like MentraOS (not standard CRC32)
+        // Calculate CRC32-XZ like Veiller (not standard CRC32)
         let crc32Value = calculateCRC32XZ(data: imageWithAddress)
         let crcBytes = Data([
             UInt8((crc32Value >> 24) & 0xFF),
@@ -2083,7 +2083,7 @@ extension G1 {
         return true
     }
 
-    /// Helper function to calculate CRC32-XZ like MentraOS (matches Dart crclib)
+    /// Helper function to calculate CRC32-XZ like Veiller (matches Dart crclib)
     private func calculateCRC32XZ(data: Data) -> UInt32 {
         // CRC32-XZ table-based implementation (matches Dart crclib exactly)
         let polynomial: UInt32 = 0x04C1_1DB7
@@ -2103,7 +2103,7 @@ extension G1 {
             table[i] = entry
         }
 
-        // Calculate CRC using table lookup (matches MentraOS's crclib)
+        // Calculate CRC using table lookup (matches Veiller's crclib)
         for byte in data {
             let tableIndex = Int((crc >> 24) ^ UInt32(byte)) & 0xFF
             crc = (crc << 8) ^ table[tableIndex]
@@ -2131,10 +2131,10 @@ extension G1 {
         return ~crc
     }
 
-    /// Create BMP chunks with MentraOS-compatible headers
+    /// Create BMP chunks with Veiller-compatible headers
     private func createBmpChunks(from bmpData: Data, chunkSize: Int) -> [[UInt8]] {
         var chunks: [[UInt8]] = []
-        let glassesAddress: [UInt8] = [0x00, 0x1C, 0x00, 0x00] // MentraOS uses address 0x1c
+        let glassesAddress: [UInt8] = [0x00, 0x1C, 0x00, 0x00] // Veiller uses address 0x1c
 
         let totalChunks = (bmpData.count + chunkSize - 1) / chunkSize
 
@@ -2171,7 +2171,7 @@ extension G1 {
         maxAttempts: Int,
         timeoutMs: Int
     ) async -> Bool {
-        // Create data with address for CRC calculation (MentraOS pattern)
+        // Create data with address for CRC calculation (Veiller pattern)
         let glassesAddress: [UInt8] = [0x00, 0x1C, 0x00, 0x00] // Same address as in chunks
         var dataWithAddress = Data(glassesAddress)
         dataWithAddress.append(bmpData)

@@ -1,7 +1,7 @@
 /**
  * @fileoverview `refreshTokens` collection. One document per active session.
  *
- * Stores the HMAC-SHA256 hash (not the plaintext) of each refresh token Mentra
+ * Stores the HMAC-SHA256 hash (not the plaintext) of each refresh token Veiller
  * has issued. The plaintext exists only on the SDK that received it; if the
  * DB leaks, the hashes are not directly usable because the HMAC key
  * (`REFRESH_TOKEN_PEPPER` env var) lives outside the DB.

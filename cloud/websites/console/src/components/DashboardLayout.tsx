@@ -1,7 +1,7 @@
 // components/DashboardLayout.tsx
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button, IMAGES, useAuth } from "@mentra/shared";
+import { Button, IMAGES, useAuth } from "@veiller/shared";
 import api from "@/services/api.service";
 import OrgSwitcher from "./OrgSwitcher";
 import ContactEmailBanner from "./ui/ContactEmailBanner";
@@ -81,7 +81,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="mx-auto px-5 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div className="select-none">
             <div className="flex items-end gap-0">
-              <img src={IMAGES.logoLight} alt="Mentra Logo" className="h-6" />
+              <img src={IMAGES.logoLight} alt="Veiller Logo" className="h-6" />
             </div>
             <h2 className="text-xs text-muted-foreground pb-1">Developer Portal</h2>
           </div>

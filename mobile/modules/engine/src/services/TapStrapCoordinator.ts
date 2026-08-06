@@ -10,7 +10,7 @@
  *
  * Started by `engine.start()`. Idempotent.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 
 import {useTapStrapStore} from "../stores/tapStrap"
 import {useSettingsStore, SETTINGS} from "../stores/settings"

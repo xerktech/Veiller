@@ -14,7 +14,7 @@ You have to run `bun run build` in the SDK every time you change SDK code before
 
 ```json
 "paths": {
-  "@mentra/sdk": ["../sdk/dist"]  // ← Forces use of compiled output
+  "@veiller/sdk": ["../sdk/dist"]  // ← Forces use of compiled output
 }
 ```
 
@@ -35,8 +35,8 @@ Since you use `NODE_ENV=isaiah`, `NODE_ENV=staging`, etc., the "development" con
 
 ```bash
 # 1. Edit cloud/packages/cloud/tsconfig.json
-# Change from: "@mentra/sdk": ["../sdk/dist"]
-# To:         "@mentra/sdk": ["../sdk/src"]
+# Change from: "@veiller/sdk": ["../sdk/dist"]
+# To:         "@veiller/sdk": ["../sdk/src"]
 
 # 2. Restart your editor's TypeScript server
 

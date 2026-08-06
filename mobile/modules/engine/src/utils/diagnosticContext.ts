@@ -2,7 +2,7 @@ import NetInfo from "@react-native-community/netinfo"
 import Constants from "expo-constants"
 import * as Location from "expo-location"
 import {Platform} from "react-native"
-import type {ReportContext} from "@mentra/cloud-client"
+import type {ReportContext} from "@veiller/cloud-client"
 
 import appRegistry from "../services/AppRegistry"
 import localMiniappRuntime from "../services/LocalMiniappRuntime"
@@ -125,7 +125,7 @@ export async function collectDiagnosticContext(extra?: Partial<ReportContext>): 
 
   return {
     app: {
-      appVersion: process.env.EXPO_PUBLIC_MENTRAOS_VERSION || "version",
+      appVersion: process.env.EXPO_PUBLIC_VEILLER_VERSION || "version",
       buildCommit: process.env.EXPO_PUBLIC_BUILD_COMMIT || "commit",
       buildBranch: process.env.EXPO_PUBLIC_BUILD_BRANCH || "branch",
       buildTime: process.env.EXPO_PUBLIC_BUILD_TIME || "time",

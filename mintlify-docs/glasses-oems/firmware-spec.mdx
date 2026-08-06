@@ -1,11 +1,11 @@
 ---
 title: "OEM Firmware Integration Specification"
-description: "Implement the BLE, display, input, audio, notification, and device contracts required for MentraOS-compatible smart glasses."
+description: "Implement the BLE, display, input, audio, notification, and device contracts required for Veiller-compatible smart glasses."
 ---
 
-# MentraOS OEM Display Protocol
+# Veiller OEM Display Protocol
 
-This is the firmware-side contract an OEM implements so that MentraOS — running on the user's phone — can drive your glasses. The phone is the brain: it owns all application logic and screen layout and streams your glasses commands that say what to draw. Your glasses are a thin client for the live display, plus a small firmware-resident home screen they render on their own while disconnected.
+This is the firmware-side contract an OEM implements so that Veiller — running on the user's phone — can drive your glasses. The phone is the brain: it owns all application logic and screen layout and streams your glasses commands that say what to draw. Your glasses are a thin client for the live display, plus a small firmware-resident home screen they render on their own while disconnected.
 
 Control messages between the phone and the glasses are Protocol Buffers; audio and images stream as raw binary for throughput. Every BLE packet begins with a 1-byte control header that names the payload type.
 
@@ -44,7 +44,7 @@ Communication is standard BLE GATT. The phone is the **central**; the glasses ar
 
 | Role    | UUID                                   | Description                          |
 | ------- | -------------------------------------- | ------------------------------------ |
-| Service | `00004860-0000-1000-8000-00805f9b34fb` | MentraOS BLE Service                 |
+| Service | `00004860-0000-1000-8000-00805f9b34fb` | Veiller BLE Service                 |
 | TX Char | `000071FF-0000-1000-8000-00805f9b34fb` | Phone (central) → Glasses (write)    |
 | RX Char | `000070FF-0000-1000-8000-00805f9b34fb` | Glasses → Phone (notify or indicate) |
 | CCCD    | `00002902-0000-1000-8000-00805f9b34fb` | Enable notify on RX Char             |
@@ -133,12 +133,12 @@ message Font {
 
 ## 🔠 Fonts
 
-The phone wraps and lays out all text, so it must measure each line against the metrics of the font the glasses will actually render. The glasses report their fonts in the capability descriptor; the phone picks a `font_code` for every text draw and measures against the matching font's metrics, which MentraOS holds. An OEM ships at least one font covering the required languages below; the runtime then wraps text identically to what the glasses render.
+The phone wraps and lays out all text, so it must measure each line against the metrics of the font the glasses will actually render. The glasses report their fonts in the capability descriptor; the phone picks a `font_code` for every text draw and measures against the matching font's metrics, which Veiller holds. An OEM ships at least one font covering the required languages below; the runtime then wraps text identically to what the glasses render.
 
 **Required glyph coverage:** Latin (incl. extended Latin for European languages such as Spanish, French, German, Italian, Portuguese, Dutch, Polish, Turkish, Vietnamese) and CJK — Chinese (Simplified and Traditional), Japanese, and Korean.
 **Recommended:** other scripts — Cyrillic (Russian, Ukrainian), Arabic, Hebrew, Devanagari (Hindi), Bengali, and Thai.
 
-Use the Mentra-provided IBM Plex Sans build, or share your own font (Mentra loads its metrics into the runtime).
+Use the Veiller-provided IBM Plex Sans build, or share your own font (Veiller loads its metrics into the runtime).
 
 ### Runtime font upload (optional)
 
@@ -451,7 +451,7 @@ Evict a cached bitmap when it is no longer needed:
 
 ## 🏠 The Home Screen
 
-While the phone is connected, MentraOS draws every screen — including any menus or app launchers — with the ordinary draw commands above, reacting to `button_event`s. The firmware has no resident menus or navigation of its own.
+While the phone is connected, Veiller draws every screen — including any menus or app launchers — with the ordinary draw commands above, reacting to `button_event`s. The firmware has no resident menus or navigation of its own.
 
 The home screen exists for one reason: the glasses must not go dead during a momentary BLE drop. It is a single firmware-resident screen the glasses can render on their own, showing glanceable info, so a disconnect is invisible to the wearer.
 
@@ -487,11 +487,11 @@ message SyncClock {
   string msg_id = 1;
   uint64 epoch_ms = 2;            // current time
   int32  utc_offset_minutes = 3;  // for local display
-  bool   format_24h = 4;          // 12/24-hour preference (a MentraOS user setting)
+  bool   format_24h = 4;          // 12/24-hour preference (a Veiller user setting)
 }
 ```
 
-`format_24h` is a MentraOS user setting; the phone pushes it here and the firmware persists the last value and renders `TIME` accordingly. The firmware does not expose its own 12/24-hour menu.
+`format_24h` is a Veiller user setting; the phone pushes it here and the firmware persists the last value and renders `TIME` accordingly. The firmware does not expose its own 12/24-hour menu.
 
 ---
 
@@ -607,14 +607,14 @@ When voice activity starts or stops, the glasses emit:
 
 ## 🔔 Notifications
 
-The glasses firmware does very little for notifications. MentraOS owns all notification logic - what to show, how, and when - and renders notifications with the ordinary draw commands described above. The firmware never decides what is notification-worthy and never stores notification UI of its own.
+The glasses firmware does very little for notifications. Veiller owns all notification logic - what to show, how, and when - and renders notifications with the ordinary draw commands described above. The firmware never decides what is notification-worthy and never stores notification UI of its own.
 
 **Android.** The glasses are not involved at all. The phone reads notifications through its own OS-level listener and draws whatever it wants on the glasses. There is nothing to implement on the firmware side.
 
 **iOS.** iOS does not expose notifications to a companion app the way Android does; instead a BLE accessory reads them directly over Apple's **ANCS** (Apple Notification Center Service). So on iOS the glasses do one thing: act as an ANCS consumer and relay each notification to the phone.
 
 - After bonding, the glasses subscribe to ANCS on the iPhone (the iPhone is the Notification Provider; the glasses are the Notification Consumer). This is standard ANCS — most BLE SoC SDKs ship an ANCS client.
-- ANCS delivers **every** notification from the iPhone to the accessory; there is no per-app filter in the protocol itself. Each notification carries the source app's bundle id as an attribute. The glasses do not filter — they relay everything, and MentraOS applies the user's per-app preferences on the phone.
+- ANCS delivers **every** notification from the iPhone to the accessory; there is no per-app filter in the protocol itself. Each notification carries the source app's bundle id as an attribute. The glasses do not filter — they relay everything, and Veiller applies the user's per-app preferences on the phone.
 - For each notification, the glasses forward it to the phone and otherwise do nothing with it:
 
 ```protobuf
@@ -636,7 +636,7 @@ message AncsNotification {
 }}]
 ```
 
-MentraOS takes it from there — it decides whether to show the notification and, if so, draws it with the normal display commands. The firmware's entire responsibility is: subscribe to ANCS, relay, done.
+Veiller takes it from there — it decides whether to show the notification and, if so, draws it with the normal display commands. The firmware's entire responsibility is: subscribe to ANCS, relay, done.
 
 ---
 
@@ -731,7 +731,7 @@ Schema conventions: field numbers never change; new fields are optional; `oneof`
 - **Display & input:** the transport, the drawing model (queue → atomic `commit`; `clear` to start fresh; retained `id`'d elements with `update` for flicker-free partial repaint), draw primitives, image transfer and cached bitmaps, brightness, button/IMU/head events.
 - **Capability descriptor & fonts:** report geometry, intensity depth, and the resident fonts so the phone can measure and wrap text.
 - **Acknowledgements:** echo `command_result` for state-changing commands; honor forward-compatibility (ignore unknowns, return `UNSUPPORTED`).
-- **Notifications:** on iOS, subscribe to ANCS and relay each notification to the phone as `ancs_notification`; on Android, nothing. MentraOS draws notifications itself.
+- **Notifications:** on iOS, subscribe to ANCS and relay each notification to the phone as `ancs_notification`; on Android, nothing. Veiller draws notifications itself.
 - **Home screen:** accept a phone-uploaded home-screen design (`SetHomeScreen`), render it on wake while disconnected, fill the `TIME`/`DATE`/`BATTERY`/`LINK_STATUS` fields from its own state, and tick the clock from `SyncClock`. Display is off when idle.
 
 **Optional refinements** (none change the contract above): saved-bitmap transforms (scale/rotate a cached image), 4-bit grayscale bitmaps, and curved/arc line support.

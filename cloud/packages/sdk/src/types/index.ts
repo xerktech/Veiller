@@ -170,12 +170,12 @@ export interface AuthVariables {
   activeSession: AppSession | null;
 }
 
-export interface MentraAuthContext {
+export interface VeillerAuthContext {
   userId: string | null;
   session: AppSession | null;
 }
 
-export type MentraAuthHonoContext = Context<{ Variables: AuthVariables }>;
+export type VeillerAuthHonoContext = Context<{ Variables: AuthVariables }>;
 
 /**
  * @deprecated Use AuthVariables with Hono context instead

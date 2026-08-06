@@ -24,7 +24,7 @@ Pixel 8 E2E on 2026-06-14 reproduced this sequence:
 2. Local Captions WebView reached `connected=true`.
 3. The app showed cloud offline / no transcription for about 30 seconds.
 4. Logs showed repeated `QuickJSJni: Cannot get jni env because the vm is not cached`.
-5. `LOCAL_MINIAPP: com.mentra.local-captions missed 6 pings, unregistering`.
+5. `LOCAL_MINIAPP: com.veiller.local-captions missed 6 pings, unregistering`.
 6. Crash recovery killed and respawned the JSContext.
 7. Local Captions reconnected, resubscribed to `transcription:auto`, restarted
    phone PCM, and cloud captions resumed.
@@ -47,7 +47,7 @@ Add a separate foreground-open probe:
   runtime `PING` to the background JSContext;
 - if no inbound message from that package arrives within a short timeout, treat
   it as the same liveness failure as the normal watchdog;
-- unregister the app and route the package through `MentraJSRouter` crash
+- unregister the app and route the package through `VeillerJSRouter` crash
   recovery so it respawns with cached JS source, permissions, and manifest;
 - re-open UI hydration through the existing `UI_OPEN` / `session.ui.onOpen`
   snapshot path.
@@ -59,7 +59,7 @@ safe background watchdog for non-foreground contexts.
 
 - `LocalMiniappRuntime.probeForegroundLiveness(...)` sends the immediate ping and
   owns the timeout.
-- `MentraJSRouter.probeForegroundLiveness(...)` gates probes to registered
+- `VeillerJSRouter.probeForegroundLiveness(...)` gates probes to registered
   packages and keeps UI code away from runtime internals.
 - `LocalMiniappView` calls the probe after WebView bind and when the app returns
   active. Its existing UI bridge refresh still re-announces `UI_OPEN` so

@@ -4,7 +4,7 @@ import { parseJsonResponse } from "./errors.ts";
 export function createAdminClient(config: ConsoleMcpConfig) {
   const token = config.adminJwt;
   if (!token) {
-    throw new Error("Admin client requires MENTRA_ADMIN_JWT or MENTRA_ADMIN_TOKEN");
+    throw new Error("Admin client requires VEILLER_ADMIN_JWT or VEILLER_ADMIN_TOKEN");
   }
 
   async function request<T>(

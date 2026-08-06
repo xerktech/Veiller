@@ -7,7 +7,7 @@
  * tree-shakes any `if (NODE_ENV === "development")` branches (dev panels,
  * debug overlays) out of the bundle. Without this, `pack` would silently
  * zip whatever mode the last build happened to be — usually a dev build
- * left behind by `mentra-miniapp dev`.
+ * left behind by `veiller-miniapp dev`.
  */
 
 import {existsSync, readFileSync} from 'fs'

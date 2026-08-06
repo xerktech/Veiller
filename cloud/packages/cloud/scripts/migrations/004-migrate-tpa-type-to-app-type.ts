@@ -19,7 +19,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import App from '../../src/models/app.model';
-import { AppType } from '@mentra/sdk';
+import { AppType } from '@veiller/sdk';
 import { logger as rootLogger } from '../../src/services/logging/pino-logger';
 
 // Configure environment

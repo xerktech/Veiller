@@ -49,7 +49,7 @@ import {
   consoleIncidentsApi,
   // Agent APIs (coding agents)
   agentIncidentsApi,
-  // Store APIs (MentraOS Store website)
+  // Store APIs (Veiller Store website)
   storeAppsApi,
   storeAuthApi,
   storeUserApi,
@@ -367,7 +367,7 @@ cliRouter.route("/orgs", consoleOrgsApi);
 app.route("/api/cli", cliRouter);
 
 // ============================================================================
-// Store API Routes (MentraOS Store website)
+// Store API Routes (Veiller Store website)
 // ============================================================================
 
 // Store routes handle their own auth internally (mixed public/authenticated)

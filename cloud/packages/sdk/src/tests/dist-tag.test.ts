@@ -10,12 +10,12 @@ import { getDistTag, newSDKUpdate } from "../constants/log-messages/updates";
 import { createCleanStream } from "../logging/clean-transport";
 import { createLogger } from "../logging/logger";
 import {
-  MentraError,
-  MentraAuthError,
-  MentraConnectionError,
-  MentraTimeoutError,
-  MentraValidationError,
-  MentraPermissionError,
+  VeillerError,
+  VeillerAuthError,
+  VeillerConnectionError,
+  VeillerTimeoutError,
+  VeillerValidationError,
+  VeillerPermissionError,
 } from "../logging/errors";
 
 // ─── getDistTag ──────────────────────────────────────────────────────────────
@@ -88,22 +88,22 @@ describe("getDistTag", () => {
 describe("newSDKUpdate", () => {
   test("generates update message for latest track", () => {
     const msg = newSDKUpdate("2.1.29", "2.1.30", "latest");
-    expect(msg).toBe("SDK update available: 2.1.29 → 2.1.30 — bun install @mentra/sdk@latest");
+    expect(msg).toBe("SDK update available: 2.1.29 → 2.1.30 — bun install @veiller/sdk@latest");
   });
 
   test("generates update message for hono track", () => {
     const msg = newSDKUpdate("3.0.0-hono.4", "3.0.0-hono.5", "hono");
-    expect(msg).toBe("SDK update available: 3.0.0-hono.4 → 3.0.0-hono.5 — bun install @mentra/sdk@hono");
+    expect(msg).toBe("SDK update available: 3.0.0-hono.4 → 3.0.0-hono.5 — bun install @veiller/sdk@hono");
   });
 
   test("generates update message for beta track", () => {
     const msg = newSDKUpdate("2.1.31-beta.5", "2.1.31-beta.6", "beta");
-    expect(msg).toBe("SDK update available: 2.1.31-beta.5 → 2.1.31-beta.6 — bun install @mentra/sdk@beta");
+    expect(msg).toBe("SDK update available: 2.1.31-beta.5 → 2.1.31-beta.6 — bun install @veiller/sdk@beta");
   });
 
   test("defaults to latest when tag is omitted", () => {
     const msg = newSDKUpdate("2.1.29", "2.1.30");
-    expect(msg).toContain("@mentra/sdk@latest");
+    expect(msg).toContain("@veiller/sdk@latest");
   });
 
   test("contains the arrow separator", () => {
@@ -114,70 +114,70 @@ describe("newSDKUpdate", () => {
 
 // ─── Error classes ───────────────────────────────────────────────────────────
 
-describe("MentraError hierarchy", () => {
-  test("MentraError has correct name, message, and code", () => {
-    const err = new MentraError("test error", "TEST_CODE");
-    expect(err.name).toBe("MentraError");
+describe("VeillerError hierarchy", () => {
+  test("VeillerError has correct name, message, and code", () => {
+    const err = new VeillerError("test error", "TEST_CODE");
+    expect(err.name).toBe("VeillerError");
     expect(err.message).toBe("test error");
     expect(err.code).toBe("TEST_CODE");
     expect(err instanceof Error).toBe(true);
-    expect(err instanceof MentraError).toBe(true);
+    expect(err instanceof VeillerError).toBe(true);
   });
 
-  test("MentraAuthError", () => {
-    const err = new MentraAuthError("bad key");
-    expect(err.name).toBe("MentraAuthError");
+  test("VeillerAuthError", () => {
+    const err = new VeillerAuthError("bad key");
+    expect(err.name).toBe("VeillerAuthError");
     expect(err.code).toBe("AUTH_ERROR");
-    expect(err instanceof MentraError).toBe(true);
-    expect(err instanceof MentraAuthError).toBe(true);
+    expect(err instanceof VeillerError).toBe(true);
+    expect(err instanceof VeillerAuthError).toBe(true);
     expect(err instanceof Error).toBe(true);
   });
 
-  test("MentraConnectionError with default code", () => {
-    const err = new MentraConnectionError("connection lost");
-    expect(err.name).toBe("MentraConnectionError");
+  test("VeillerConnectionError with default code", () => {
+    const err = new VeillerConnectionError("connection lost");
+    expect(err.name).toBe("VeillerConnectionError");
     expect(err.code).toBe("CONNECTION_ERROR");
-    expect(err instanceof MentraError).toBe(true);
+    expect(err instanceof VeillerError).toBe(true);
   });
 
-  test("MentraConnectionError with custom code", () => {
-    const err = new MentraConnectionError("refused", "ECONNREFUSED");
+  test("VeillerConnectionError with custom code", () => {
+    const err = new VeillerConnectionError("refused", "ECONNREFUSED");
     expect(err.code).toBe("ECONNREFUSED");
   });
 
-  test("MentraTimeoutError", () => {
-    const err = new MentraTimeoutError("timed out");
-    expect(err.name).toBe("MentraTimeoutError");
+  test("VeillerTimeoutError", () => {
+    const err = new VeillerTimeoutError("timed out");
+    expect(err.name).toBe("VeillerTimeoutError");
     expect(err.code).toBe("TIMEOUT_ERROR");
-    expect(err instanceof MentraError).toBe(true);
+    expect(err instanceof VeillerError).toBe(true);
   });
 
-  test("MentraValidationError", () => {
-    const err = new MentraValidationError("bad input");
-    expect(err.name).toBe("MentraValidationError");
+  test("VeillerValidationError", () => {
+    const err = new VeillerValidationError("bad input");
+    expect(err.name).toBe("VeillerValidationError");
     expect(err.code).toBe("VALIDATION_ERROR");
-    expect(err instanceof MentraError).toBe(true);
+    expect(err instanceof VeillerError).toBe(true);
   });
 
-  test("MentraPermissionError includes stream and permission info", () => {
-    const err = new MentraPermissionError("denied", "audio", "microphone");
-    expect(err.name).toBe("MentraPermissionError");
+  test("VeillerPermissionError includes stream and permission info", () => {
+    const err = new VeillerPermissionError("denied", "audio", "microphone");
+    expect(err.name).toBe("VeillerPermissionError");
     expect(err.code).toBe("PERMISSION_ERROR");
     expect(err.stream).toBe("audio");
     expect(err.requiredPermission).toBe("microphone");
-    expect(err instanceof MentraError).toBe(true);
+    expect(err instanceof VeillerError).toBe(true);
   });
 
   test("error classes work with try/catch instanceof", () => {
     try {
-      throw new MentraAuthError("unauthorized");
+      throw new VeillerAuthError("unauthorized");
     } catch (e) {
-      expect(e instanceof MentraAuthError).toBe(true);
-      expect(e instanceof MentraError).toBe(true);
+      expect(e instanceof VeillerAuthError).toBe(true);
+      expect(e instanceof VeillerError).toBe(true);
       expect(e instanceof Error).toBe(true);
       // Should NOT be a different error type
-      expect(e instanceof MentraConnectionError).toBe(false);
-      expect(e instanceof MentraTimeoutError).toBe(false);
+      expect(e instanceof VeillerConnectionError).toBe(false);
+      expect(e instanceof VeillerTimeoutError).toBe(false);
     }
   });
 });
@@ -289,12 +289,12 @@ describe("dist-tag integration", () => {
   ];
 
   for (const { version, expectedTag, nextVersion } of testCases) {
-    test(`${version} → detects '${expectedTag}' track → installs @mentra/sdk@${expectedTag}`, () => {
+    test(`${version} → detects '${expectedTag}' track → installs @veiller/sdk@${expectedTag}`, () => {
       const tag = getDistTag(version);
       expect(tag).toBe(expectedTag);
 
       const msg = newSDKUpdate(version, nextVersion, tag);
-      expect(msg).toContain(`@mentra/sdk@${expectedTag}`);
+      expect(msg).toContain(`@veiller/sdk@${expectedTag}`);
       expect(msg).toContain(version);
       expect(msg).toContain(nextVersion);
     });

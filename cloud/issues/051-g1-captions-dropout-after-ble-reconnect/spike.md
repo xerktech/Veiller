@@ -3,7 +3,7 @@
 ## Overview
 
 **What this doc covers:** Investigation of a user-reported complete captions failure on Even Realities G1, traced through phone logs, cloud logs, and BetterStack telemetry to identify three compounding failure modes.
-**Why this doc exists:** A user reported captions working for ~20 minutes in a staff meeting then completely disappearing. Multiple app restarts failed to restore transcription. The Even Realities native transcription worked fine on the same glasses immediately after, ruling out hardware failure — this is a MentraOS pipeline issue.
+**Why this doc exists:** A user reported captions working for ~20 minutes in a staff meeting then completely disappearing. Multiple app restarts failed to restore transcription. The Even Realities native transcription worked fine on the same glasses immediately after, ruling out hardware failure — this is a Veiller pipeline issue.
 **Who should read this:** Mobile engineers (BLE reconnect path), cloud engineers (transcription stream lifecycle), anyone working on resilience of the audio/transcription pipeline.
 
 ---
@@ -80,7 +80,7 @@ This means:
 - The glasses microphone is effectively stuck in whatever state it was last successfully set to
 - When the cloud sends `mic_state_change`, the phone tries to push it over BLE, the BLE command times out, and the mic stays in the last known state
 
-**Why the Even Realities native transcription worked:** ER's own app uses a separate BLE connection profile and their own firmware-level audio path. When the user unpaired from MentraOS and connected via the ER app, the G1 GATT services were fully re-negotiated with a fresh connection. The degraded state MentraOS was in didn't carry over to the ER app.
+**Why the Even Realities native transcription worked:** ER's own app uses a separate BLE connection profile and their own firmware-level audio path. When the user unpaired from Veiller and connected via the ER app, the G1 GATT services were fully re-negotiated with a fresh connection. The degraded state Veiller was in didn't carry over to the ER app.
 
 **What likely triggered the degraded state:** The G1 GATT service became unavailable after ~10 minutes of continuous use — possibly the right arm entering a power-saving mode mid-session, or the phone's Core Bluetooth stack losing service discovery for the G1 without triggering a proper disconnect event. The phone thinks it's connected (devices found in scan) but GATT is not functional.
 
@@ -165,7 +165,7 @@ G1 GATT degrades after 10min
   → Transcription never recovers across 4+ restarts
 ```
 
-The Even Realities native app bypasses all of this because it owns its own BLE profile, its own audio path, and doesn't depend on MentraOS cloud infrastructure.
+The Even Realities native app bypasses all of this because it owns its own BLE profile, its own audio path, and doesn't depend on Veiller cloud infrastructure.
 
 ---
 

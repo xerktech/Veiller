@@ -18,7 +18,7 @@ export class DashboardAPI {
 
   setContent(mode: DashboardMode, content: string): void {
     if (!this.warned) {
-      console.warn("[@mentra/miniapp] dashboard.setContent() is deferred in v1.")
+      console.warn("[@veiller/miniapp] dashboard.setContent() is deferred in v1.")
       this.warned = true
     }
     // Still forward so the phone can log/ignore consistently.

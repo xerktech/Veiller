@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the implementation plan for adding Camera Settings to the MentraOS mobile app's glasses menu. The settings will allow users to configure button-initiated photo and video recording resolutions for supported glasses (Mentra Live).
+This document outlines the implementation plan for adding Camera Settings to the Veiller mobile app's glasses menu. The settings will allow users to configure button-initiated photo and video recording resolutions for supported glasses (Mentra Live).
 
 ## Architecture
 
@@ -541,4 +541,4 @@ describe("Camera Settings Flow", () => {
 
 ## Conclusion
 
-This implementation plan provides a comprehensive approach to adding Camera Settings to the MentraOS mobile app. By following the existing patterns (especially the button mode implementation), we ensure consistency and maintainability. The phased approach allows for iterative development and testing, reducing risk and ensuring quality.
+This implementation plan provides a comprehensive approach to adding Camera Settings to the Veiller mobile app. By following the existing patterns (especially the button mode implementation), we ensure consistency and maintainability. The phased approach allows for iterative development and testing, reducing risk and ensuring quality.

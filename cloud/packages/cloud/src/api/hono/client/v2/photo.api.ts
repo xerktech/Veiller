@@ -87,9 +87,9 @@ function resolveWaiters(requestId: string, state: PhotoState): void {
 }
 
 function getUploadSecret(): string | null {
-  const secret = process.env.MENTRA_PHOTO_UPLOAD_SECRET;
+  const secret = process.env.VEILLER_PHOTO_UPLOAD_SECRET;
   if (secret) return secret;
-  logger.error("MENTRA_PHOTO_UPLOAD_SECRET is not configured");
+  logger.error("VEILLER_PHOTO_UPLOAD_SECRET is not configured");
   return null;
 }
 

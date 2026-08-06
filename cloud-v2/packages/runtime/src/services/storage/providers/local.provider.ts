@@ -23,7 +23,7 @@ import type {
 } from "../storage.service";
 
 /** Where blobs live on disk. Override with CAMERA_LOCAL_DIR. */
-const BLOB_DIR = process.env.CAMERA_LOCAL_DIR ?? join(tmpdir(), "mentra-camera-blobs");
+const BLOB_DIR = process.env.CAMERA_LOCAL_DIR ?? join(tmpdir(), "veiller-camera-blobs");
 
 /** The runtime path that serves local blobs. Kept in sync with camera.api.ts. */
 const BLOB_ROUTE = "/api/camera/blob";

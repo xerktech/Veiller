@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/libs/utils"
-import { buttonVariants } from "@mentra/shared"
+import { buttonVariants } from "@veiller/shared"
 
 function Calendar({
   className,

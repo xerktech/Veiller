@@ -1,4 +1,4 @@
-MentraOS/cloud/packages/cloud/src/api/client/docs/design-location-manager.md
+Veiller/cloud/packages/cloud/src/api/client/docs/design-location-manager.md
 
 # Design: LocationManager and REST Location API (Cloud-only)
 

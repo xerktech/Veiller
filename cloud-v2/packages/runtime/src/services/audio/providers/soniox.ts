@@ -36,7 +36,7 @@ import type {
   TranscriptionProvider,
   TranscriptEvent,
 } from "./provider";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 
 const logger = createLogger("runtime").child({ module: "soniox" });
 
@@ -187,8 +187,8 @@ export async function createSonioxProvider(
     // being pinned.
     language_hints: sonioxLanguageHints(opts.language, opts.languageHints),
     context: {
-      terms: ["Mentra", "Hey Mentra"],
-      text: "Mentra, Hey Mentra (an AI assistant)",
+      terms: ["Mentra", "Hey Veiller"],
+      text: "Veiller, Hey Veiller (an AI assistant)",
     },
     // For translation subs, configure Soniox's one-way translation. Result
     // tokens then carry `translation_status: "original" | "translation"`

@@ -32,7 +32,7 @@ around the photo window (16:33:41 request sent, 16:33:45 photo_response):
 
 | layer | evidence | during the window |
 |---|---|---|
-| glasses mic over BLE | `MentraBleTrace layer=sdk_event_dispatch type=mic_lc` | steady 20 pkts/s, zero interruption |
+| glasses mic over BLE | `VeillerBleTrace layer=sdk_event_dispatch type=mic_lc` | steady 20 pkts/s, zero interruption |
 | RN JS thread, cloud receive | `LocalMiniappRuntime: transcript cloud_recv` | steady ~5/s |
 | RN JS thread, miniapp fan-out | `LocalMiniappRuntime: transcript fanout` | steady ~15/s, **kept flowing** |
 | delivery into miniapp QuickJS | miniapp `[TRANSCRIPT]` console lines | **zero for 16:33:42 to :44**, 50-line burst at :45 |
@@ -40,7 +40,7 @@ around the photo window (16:33:41 request sent, 16:33:45 photo_response):
 So the freeze sits strictly between `LocalMiniappRuntime.sendToMiniapp()`
 (which ran on time) and the QuickJS `__deliver` execution (which ran 4s
 late, in order). The only components in between are
-`Crust.mentraJsDispatchToJs` (an Expo `AsyncFunction`) and the per-context
+`Crust.veillerJsDispatchToJs` (an Expo `AsyncFunction`) and the per-context
 QuickJS executor.
 
 ## Root cause
@@ -54,19 +54,19 @@ of EVERY module in the app on one shared single-threaded queue:
 Two of our functions collide on that thread:
 
 1. `BluetoothSdkModule.kt` (`SdkAsyncFunction("requestPhoto")`, line ~555)
-   calls `MentraBluetoothSdk.requestPhoto()`, which parks the calling thread
+   calls `VeillerBluetoothSdk.requestPhoto()`, which parks the calling thread
    on a `CountDownLatch` (`PendingResponse.await()`,
-   `MentraBluetoothSdk.kt:162`) until the glasses send the terminal
+   `VeillerBluetoothSdk.kt:162`) until the glasses send the terminal
    `photo_response`, with `DEFAULT_REQUEST_TIMEOUT_MS = 15_000`.
 
-2. `CrustModule.kt` (`AsyncFunction("mentraJsDispatchToJs")`, line ~220) is
+2. `CrustModule.kt` (`AsyncFunction("veillerJsDispatchToJs")`, line ~220) is
    the ONLY path that pushes envelopes (events, request results) into a
    miniapp background JS context.
 
 While (1) holds the thread, every (2) call queues behind it. When the latch
 releases, the queue drains in order: exactly the observed gap + burst.
 
-`MentraBluetoothSdk.kt` has **17 blocking `PendingResponse.await(...)` sites
+`VeillerBluetoothSdk.kt` has **17 blocking `PendingResponse.await(...)` sites
 across 16 functions** (lines 468, 659, 665, 701, 724, 747, 773, 797, 816,
 845, 872, 895, 926, 958, 977, 1042, 1071 as of `origin/dev` e8f7e7936):
 settings commands, WiFi scan/connect/forget, hotspot, photo, camera warm-up,
@@ -90,7 +90,7 @@ functions keep executing. Only the Kotlin side blocks a real thread.
 
 - The OS-1701 family: an in-flight capture delaying an unrelated
   `location.getOnce()`. The LOCATION_POLL result is delivered back to the
-  miniapp through `mentraJsDispatchToJs`, i.e. through the blocked queue.
+  miniapp through `veillerJsDispatchToJs`, i.e. through the blocked queue.
   The merged OS-1701 fixes (SDK `timeoutMs` + the miniapp's 1.2s bound on
   speculative captures) settle the JS promise early, but the NATIVE latch
   keeps blocking the queue until photo_response or the 15s native timeout,
@@ -126,14 +126,14 @@ Preferred shape, keeping the public JS API identical:
    API: `AsyncFunction("requestPhoto") Coroutine { params: Map<String, Any?> -> ... }`.
    Coroutine bodies are launched on the same modulesQueue scope but SUSPEND
    at the deferred await instead of holding the thread, so
-   `mentraJsDispatchToJs` (and every other module) keeps flowing. Extend the
+   `veillerJsDispatchToJs` (and every other module) keeps flowing. Extend the
    local `SdkAsyncFunction` helpers with suspending variants so
    `withExpoSdkError` wrapping is preserved.
 
 4. **Guardrail:** add a lint/grep CI check (or at minimum a comment ban) for
    `latch.await(`/`.get()`/`Thread.sleep(` inside `AsyncFunction` bodies in
    `mobile/modules/*/android`, so the queue cannot silently regain blockers.
-   `Crust.mentraJsDispatchToJs` itself is already non-blocking (it submits
+   `Crust.veillerJsDispatchToJs` itself is already non-blocking (it submits
    to the per-context executor and returns); it is the victim here, not the
    culprit.
 
@@ -172,7 +172,7 @@ not, which surfaced two rules (both applied in PR #3474):
 
 ### Public Android SDK impact
 
-`MentraBluetoothSdk` ships as the published Maven artifact
+`VeillerBluetoothSdk` ships as the published Maven artifact
 `com.mentraglass:bluetooth-sdk`. Converting the entry points to
 `suspend fun` keeps the public JS API identical, but for native Android
 consumers it is a source- and binary-incompatible change for Kotlin callers
@@ -191,7 +191,7 @@ WiFi-direct and a forced-BLE (`transferMethod: "ble"`) capture.
 
 ## Repro recipe
 
-1. Mentra-AI-Miniapp `bun run dev:localhost` (`MENTRA_AUTH_JWKS_URL=""` so
+1. Mentra-AI-Miniapp `bun run dev:localhost` (`VEILLER_AUTH_JWKS_URL=""` so
    the multi-env JWKS fallback verifies the token) + `adb reverse tcp:3131
    tcp:3131`, connect the phone via Miniapp Developer Settings.
 2. Loop `say "test marker number $i, the quick brown fox jumps over the

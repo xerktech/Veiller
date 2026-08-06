@@ -1,6 +1,6 @@
 import { Info, Share2, Smartphone, ChevronLeft, X, ChevronRight, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import GetMentraOSButton from "../components/GetMentraOSButton";
+import GetVeillerButton from "../components/GetVeillerButton";
 import { HardwareRequirementLevel, HardwareType } from "../types";
 import {
   APP_TAGS,
@@ -649,11 +649,11 @@ const AppDetailsDesktop: React.FC<AppDetailsDesktopProps> = ({
           </div>
         </div>
 
-        {/* Get MentraOS - Hide in React Native WebView */}
+        {/* Get Veiller - Hide in React Native WebView */}
         {!isWebView && (
           <div className="text-center mb-8 mt-12">
             {/* <div className="flex justify-center">
-              <GetMentraOSButton size="small" />
+              <GetVeillerButton size="small" />
             </div> */}
           </div>
         )}

@@ -47,7 +47,7 @@ export enum StreamType {
   WILDCARD = "*",
 
   // New stream type
-  MENTRAOS_SETTINGS_UPDATE_REQUEST = "settings_update_request",
+  VEILLER_SETTINGS_UPDATE_REQUEST = "settings_update_request",
   /**
    * @deprecated Use the settings system (mentraosSettings) instead.
    * This stream type was used for datetime updates but is no longer needed.
@@ -115,7 +115,7 @@ export const STREAM_CATEGORIES: Record<StreamType, StreamCategory> = {
   [StreamType.ALL]: StreamCategory.SYSTEM,
   [StreamType.WILDCARD]: StreamCategory.SYSTEM,
 
-  [StreamType.MENTRAOS_SETTINGS_UPDATE_REQUEST]: StreamCategory.SYSTEM,
+  [StreamType.VEILLER_SETTINGS_UPDATE_REQUEST]: StreamCategory.SYSTEM,
   [StreamType.CUSTOM_MESSAGE]: StreamCategory.SYSTEM,
   [StreamType.PHOTO_TAKEN]: StreamCategory.HARDWARE,
 };

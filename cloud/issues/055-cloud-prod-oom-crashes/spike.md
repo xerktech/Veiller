@@ -10,7 +10,7 @@
 
 ## Background
 
-The MentraOS cloud runs on Bun (single-threaded event loop). All WebSocket messages, UDP audio processing, HTTP requests, LC3 decoding, Soniox stream management, and timer callbacks run on one thread. If any operation blocks this thread for too long, everything freezes — including the `/health` endpoint that Kubernetes uses to determine if the pod is alive.
+The Veiller cloud runs on Bun (single-threaded event loop). All WebSocket messages, UDP audio processing, HTTP requests, LC3 decoding, Soniox stream management, and timer callbacks run on one thread. If any operation blocks this thread for too long, everything freezes — including the `/health` endpoint that Kubernetes uses to determine if the pod is alive.
 
 Sessions are stored in an in-memory `Map<string, UserSession>`. When the process is killed, every session is lost — no persistence layer. Users must reconnect via WebSocket to create a new session.
 

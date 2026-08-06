@@ -543,7 +543,7 @@ appCommand
         logoURL: app.logoURL,
         // Add other exportable fields as needed
         exportedAt: new Date().toISOString(),
-        exportedBy: "mentra-cli",
+        exportedBy: "veiller-cli",
       }
 
       const jsonOutput = JSON.stringify(exportData, null, 2)

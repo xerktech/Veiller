@@ -133,7 +133,7 @@ async releaseOwnership(reason: "switching_clouds" | "clean_shutdown" | "user_log
 
 ```typescript
 /**
- * 👋 Disconnect from MentraOS Cloud
+ * 👋 Disconnect from Veiller Cloud
  * @param options - Disconnect options
  * @param options.releaseOwnership - If true, send OWNERSHIP_RELEASE before disconnecting
  * @param options.reason - Reason for ownership release (required if releaseOwnership is true)

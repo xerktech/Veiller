@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/line-width",
+  "name": "@veiller/line-width",
   "version": "0.1.0",
   "type": "module",
   "module": "src/index.ts",
@@ -12,7 +12,7 @@
     "start": "bun run build:webview && NODE_ENV=development bun src/index.ts"
   },
   "dependencies": {
-    "@mentra/sdk": "workspace:*",
+    "@veiller/sdk": "workspace:*",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",

@@ -1,5 +1,5 @@
 import type { AppSettings } from "../../types";
-import { MentraSession } from "../MentraSession";
+import { VeillerSession } from "../VeillerSession";
 
 type SettingsChangeMap = Record<
   string,
@@ -10,9 +10,9 @@ type SettingsChangeMap = Record<
 >;
 
 export class _V2SettingsShim {
-  private readonly session: MentraSession;
+  private readonly session: VeillerSession;
 
-  constructor(session: MentraSession) {
+  constructor(session: VeillerSession) {
     this.session = session;
   }
 

@@ -16,7 +16,7 @@ LC3 is a predictive codec with strict frame boundaries (320 bytes PCM → 20/40/
 
 ### 1. Partial PCM Frames Dropped at Encoder Input
 
-**File**: `mobile/modules/core/android/src/main/java/com/mentra/core/CoreManager.kt`
+**File**: `mobile/modules/core/android/src/main/java/com/veiller/core/CoreManager.kt`
 
 Phone mic sends variable-sized PCM chunks that don't align to LC3 frame boundaries (320 bytes = 160 samples @ 16kHz). Encoder silently dropped partial frames → audio data loss.
 
@@ -37,7 +37,7 @@ else null
 
 ### 2. LC3 Codec Thread Safety
 
-**File**: `mobile/modules/core/android/src/main/java/com/mentra/core/CoreManager.kt`
+**File**: `mobile/modules/core/android/src/main/java/com/veiller/core/CoreManager.kt`
 
 LC3 encoder/decoder are stateful (predictive coding) and NOT thread-safe. Concurrent calls from phone mic (`AudioRecordingThread`) and glasses mic (BLE callbacks) corrupted codec state.
 

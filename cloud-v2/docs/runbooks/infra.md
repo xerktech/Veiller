@@ -23,10 +23,10 @@ We split the v1 monolith into three:
 
 | Package | Role | Deployable | Talks to |
 | --- | --- | --- | --- |
-| `@mentra/cloud-core` | OEM auth, REST endpoints, miniapp store backend | yes (`core` service in `porter.yaml`) | MongoDB Atlas |
-| `@mentra/cloud-audio` | UDP/WS audio ingress, workers, transcription | yes (`audio` service) | Redis (ElastiCache), Soniox |
-| `@mentra/cloud-proxy` | OEM forwarder / reverse proxy (stub) | yes (planned) | core, audio (downstream) |
-| `@mentra/cloud-shared` | Logger, health, JWT verifier | no (workspace dep) | — |
+| `@veiller/cloud-core` | OEM auth, REST endpoints, miniapp store backend | yes (`core` service in `porter.yaml`) | MongoDB Atlas |
+| `@veiller/cloud-audio` | UDP/WS audio ingress, workers, transcription | yes (`audio` service) | Redis (ElastiCache), Soniox |
+| `@veiller/cloud-proxy` | OEM forwarder / reverse proxy (stub) | yes (planned) | core, audio (downstream) |
+| `@veiller/cloud-shared` | Logger, health, JWT verifier | no (workspace dep) | — |
 
 Why the split:
 - **Audio is the biggest workload.** Splitting lets us scale it independently
@@ -150,7 +150,7 @@ Cluster: aws-us-west-2 (5692)
 
 - The `cloud-v2-mongo` and `cloud-v2-redis` Porter apps on `aws-us-east-2`
   (5690) — mistaken first-deploy artifacts. Delete via Porter dashboard.
-- The `mentraos-cloud` (v1) Doppler project — DO NOT MODIFY. v1 prod is
+- The `veiller-cloud` (v1) Doppler project — DO NOT MODIFY. v1 prod is
   still serving real users.
 - The Azure clusters in Porter's list — v1 territory.
 

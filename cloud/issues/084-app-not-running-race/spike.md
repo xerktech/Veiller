@@ -17,7 +17,7 @@ Timeline of what happens (all within ~75ms):
 5. Cloud receives `STREAM_REQUEST`, calls `UnmanagedStreamingExtension.startStream()`
 6. `startStream()` calls `AppManager.isAppRunning(packageName)`
 7. `isAppRunning()` checks `this.apps.get(packageName)?.isRunning` — returns `false`
-8. Cloud throws "App dev.mentra.streamtest is not running"
+8. Cloud throws "App dev.veiller.streamtest is not running"
 9. Error sent back to SDK, crashes the session runtime, transport closes
 
 The app IS running — it has an authenticated WebSocket connection, it received CONNECTION_ACK, and it's sending messages. But the cloud's internal state hasn't caught up yet.

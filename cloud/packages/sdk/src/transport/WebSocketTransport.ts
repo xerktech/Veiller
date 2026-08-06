@@ -2,7 +2,7 @@
  * WebSocketTransport
  *
  * Transport implementation that wraps the `ws` library for cloud/server apps.
- * Used by MentraApp to connect MentraSession instances to the cloud.
+ * Used by VeillerApp to connect VeillerSession instances to the cloud.
  *
  * This is the ONLY file in the SDK that imports `ws` — the session layer
  * and all managers are transport-agnostic and never touch WebSocket directly.

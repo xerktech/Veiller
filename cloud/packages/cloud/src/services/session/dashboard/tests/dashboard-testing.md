@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the testing system for the MentraOS Dashboard. The testing system provides a way to visualize dashboard behavior in the terminal during development, allowing for quick iteration and debugging without requiring actual smart glasses hardware.
+This document outlines the testing system for the Veiller Dashboard. The testing system provides a way to visualize dashboard behavior in the terminal during development, allowing for quick iteration and debugging without requiring actual smart glasses hardware.
 
 ## Testing Framework Design
 

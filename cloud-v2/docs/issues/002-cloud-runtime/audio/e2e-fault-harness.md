@@ -14,7 +14,7 @@ bun run fault:e2e preflight --target local --host <mac-lan-ip>
 bun run fault:e2e cloud-down-up --target local --host <mac-lan-ip>
 ```
 
-Artifacts are written to `/tmp/mentra-audio-faults/<timestamp>-<scenario>-<target>`
+Artifacts are written to `/tmp/veiller-audio-faults/<timestamp>-<scenario>-<target>`
 unless `--artifacts` is supplied. Each run contains:
 
 - `run.md`: phases, commands, screenshots, and pass criteria.
@@ -53,7 +53,7 @@ doppler run -- env \
   bun scripts/dev-stack.ts
 ```
 
-Override this with `--local-start-command` or `MENTRA_FAULT_LOCAL_START_CMD`
+Override this with `--local-start-command` or `VEILLER_FAULT_LOCAL_START_CMD`
 when testing a different local stack shape.
 
 ## Porter target

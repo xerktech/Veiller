@@ -1,6 +1,6 @@
 import { Suspense, lazy, type ReactNode, type FC } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@mentra/shared";
+import { AuthProvider, useAuth } from "@veiller/shared";
 import { PlatformProvider } from "./hooks/usePlatform";
 import { SearchProvider } from "./contexts/SearchContext";
 import { ProfileDropdownProvider } from "./contexts/ProfileDropdownContext";
@@ -11,8 +11,8 @@ const AppStore = lazy(() => import("./pages/AppStore"));
 // const AppDetails = lazy(() => import('./pages/AppDetails'));
 const AppDetailsV2 = lazy(() => import("./pages/AppDetailsV2"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
-const ForgotPasswordPage = lazy(() => import("@mentra/shared").then((m) => ({ default: m.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import("@mentra/shared").then((m) => ({ default: m.ResetPasswordPage })));
+const ForgotPasswordPage = lazy(() => import("@veiller/shared").then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import("@veiller/shared").then((m) => ({ default: m.ResetPasswordPage })));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Loading spinner component (simplified)

@@ -32,7 +32,7 @@
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 /**
- * Permission types supported by the MentraOS platform.
+ * Permission types supported by the Veiller platform.
  *
  * These correspond to capabilities and data streams that require
  * explicit opt-in via the developer console app manifest.
@@ -45,7 +45,7 @@ export type PermissionType = "location" | "microphone" | "camera" | "notificatio
 export type PermissionRecord = Record<PermissionType, boolean>;
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  */
 export interface PermissionsManagerDeps {
   /** Logger instance scoped to the session. */
@@ -232,12 +232,12 @@ export class PermissionsManager {
     return cleanup;
   }
 
-  // ─── Internal (called by MentraSession) ─────────────────────────────────
+  // ─── Internal (called by VeillerSession) ─────────────────────────────────
 
   /**
    * Update permissions from connection settings or a settings update payload.
    *
-   * Called internally by MentraSession when:
+   * Called internally by VeillerSession when:
    * - A CONNECTION_ACK is received with initial settings/permissions
    * - A mid-session settings update includes permission changes
    *

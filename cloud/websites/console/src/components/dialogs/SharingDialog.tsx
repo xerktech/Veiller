@@ -1,10 +1,10 @@
 // components/dialogs/SharingDialog.tsx
 import {useEffect, useState, FC} from "react"
-import {Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input} from "@mentra/shared"
+import {Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input} from "@veiller/shared"
 
 import {Copy, LinkIcon, CheckCircle, ExternalLink} from "lucide-react"
 import api from "@/services/api.service"
-import {AppI} from "@mentra/sdk"
+import {AppI} from "@veiller/sdk"
 import {App} from "@/types/app"
 
 interface SharingDialogProps {
@@ -101,11 +101,11 @@ const SharingDialog: FC<SharingDialogProps> = ({app, open, onOpenChange, orgId})
             </div>
           </div>
 
-          {/* Mentra MiniApp Store Information */}
+          {/* Veiller MiniApp Store Information */}
           <div className="bg-accent/10 border border-accent p-3 rounded-md">
-            <p className="text-sm text-link font-medium mb-2">View in Mentra MiniApp Store</p>
+            <p className="text-sm text-link font-medium mb-2">View in Veiller MiniApp Store</p>
             <p className="text-xs text-link mb-3">
-              You can also visit the Mentra MiniApp Store and search for the exact package name to see how your MiniApp appears to
+              You can also visit the Veiller MiniApp Store and search for the exact package name to see how your MiniApp appears to
               others.
             </p>
             <a
@@ -114,7 +114,7 @@ const SharingDialog: FC<SharingDialogProps> = ({app, open, onOpenChange, orgId})
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-link hover:text-link hover:underline">
               <ExternalLink className="h-4 w-4" />
-              Open in Mentra MiniApp Store
+              Open in Veiller MiniApp Store
             </a>
             <div className="mt-2 pt-2 border-t border-accent">
               <div className="flex items-center justify-between gap-2">

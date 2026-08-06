@@ -21,8 +21,8 @@
  * The release must be tagged `v<version>` (or `<version>`), where `<version>`
  * equals the `version` field inside the bundle's miniapp.json — the app records
  * that version once installed, so the already-installed check can skip a
- * re-download without unzipping. The zip must be a flat Mentra miniapp bundle
- * (miniapp.json at the root), the same shape produced by `mentra-miniapp pack`.
+ * re-download without unzipping. The zip must be a flat Veiller miniapp bundle
+ * (miniapp.json at the root), the same shape produced by `veiller-miniapp pack`.
  *
  * The repos must be public (release assets are fetched unauthenticated).
  */

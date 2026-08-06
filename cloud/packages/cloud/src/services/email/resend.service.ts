@@ -22,7 +22,7 @@ export class ResendEmailService {
     }
     this.resend = new Resend(apiKey);
     this.defaultSender =
-      process.env.EMAIL_SENDER || "Mentra <noreply@mentra.glass>";
+      process.env.EMAIL_SENDER || "Veiller <noreply@mentra.glass>";
   }
 
   /**
@@ -39,7 +39,7 @@ export class ResendEmailService {
       const { data, error } = await this.resend.emails.send({
         from: this.defaultSender,
         to: [recipientEmail],
-        subject: `Your MentraOS app "${appName}" was approved`,
+        subject: `Your Veiller app "${appName}" was approved`,
         html: this.generateApprovalEmailHtml(appName, packageName, notes),
       });
 
@@ -71,7 +71,7 @@ export class ResendEmailService {
         from: this.defaultSender,
         to: [recipientEmail],
         cc: reviewerEmail ? [reviewerEmail] : undefined,
-        subject: `Your MentraOS app "${appName}" was not approved`,
+        subject: `Your Veiller app "${appName}" was not approved`,
         html: this.generateRejectionEmailHtml(
           appName,
           packageName,
@@ -117,7 +117,7 @@ export class ResendEmailService {
             <p>We detected that your app <strong>${appName}</strong> (${packageName}) is currently not responding as of ${new Date().toISOString()}.</p>
             ${healthUrl ? `<p>Please check your server's health endpoint: <a href="${healthUrl}">${healthUrl}</a></p>` : ""}
             <p>We will send at most one notification every 24 hours while the app remains offline.</p>
-            <p>— MentraOS</p>
+            <p>— Veiller</p>
           </body>
         </html>
       `;
@@ -163,7 +163,7 @@ export class ResendEmailService {
       const { data, error } = await this.resend.emails.send({
         from: this.defaultSender,
         to: [recipientEmail],
-        subject: `You've been invited to join ${organizationName} on Mentra`,
+        subject: `You've been invited to join ${organizationName} on Veiller`,
         html: this.generateInviteEmailHtml(
           inviterName,
           organizationName,
@@ -312,7 +312,7 @@ export class ResendEmailService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>You've Been Invited to an Organization on Mentra!</h1>
+              <h1>You've Been Invited to an Organization on Veiller!</h1>
             </div>
 
             <div class="content">
@@ -321,7 +321,7 @@ export class ResendEmailService {
               <p>
                 <strong>${inviterName}</strong> has invited you to join
                 <strong class="highlight">${organizationName}</strong>
-                as a <strong>${role}</strong> on the Mentra Developer Console.
+                as a <strong>${role}</strong> on the Veiller Developer Console.
               </p>
 
               <p>As a member of this organization, you'll have access to all the applications and resources shared by the team.</p>
@@ -336,7 +336,7 @@ export class ResendEmailService {
             </div>
 
             <div class="footer">
-              &copy; ${new Date().getFullYear()} Mentra Labs.
+              &copy; ${new Date().getFullYear()} Veiller Labs.
             </div>
           </div>
         </body>
@@ -358,7 +358,7 @@ export class ResendEmailService {
       const { data, error } = await this.resend.emails.send({
         from: this.defaultSender,
         to: [recipientEmail],
-        subject: "Confirm Account Deletion - Mentra",
+        subject: "Confirm Account Deletion - Veiller",
         html: this.generateDeletionEmailHtml(verificationCode),
       });
 
@@ -396,7 +396,7 @@ export class ResendEmailService {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Confirm Account Deletion - Mentra</title>
+          <title>Confirm Account Deletion - Veiller</title>
           <style>
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -479,7 +479,7 @@ export class ResendEmailService {
             </div>
 
             <div class="content">
-              <p><strong>You have requested to delete your Mentra account.</strong></p>
+              <p><strong>You have requested to delete your Veiller account.</strong></p>
 
               <div class="warning">
                 <strong>⚠️ Warning:</strong> This action is permanent and cannot be undone. All your data, including photos, settings, and app configurations will be permanently deleted.
@@ -495,11 +495,11 @@ export class ResendEmailService {
 
               <p>If you did not request this account deletion, please ignore this email. Your account will remain safe and no action will be taken.</p>
 
-              <p>If you're having issues with Mentra and considering deletion, please reach out to our support team at <a href="mailto:support@mentra.glass">support@mentra.glass</a> - we'd love to help!</p>
+              <p>If you're having issues with Veiller and considering deletion, please reach out to our support team at <a href="mailto:support@mentra.glass">support@mentra.glass</a> - we'd love to help!</p>
             </div>
 
             <div class="footer">
-              &copy; ${new Date().getFullYear()} Mentra Labs.
+              &copy; ${new Date().getFullYear()} Veiller Labs.
             </div>
           </div>
         </body>
@@ -567,7 +567,7 @@ export class ResendEmailService {
               <a href="${consoleUrl}" class="button">View Incident Details</a>
             </div>
             <div class="footer">
-              &copy; ${new Date().getFullYear()} Mentra Labs
+              &copy; ${new Date().getFullYear()} Veiller Labs
             </div>
           </div>
         </body>
@@ -610,7 +610,7 @@ export class ResendEmailService {
       const { data, error } = await this.resend.emails.send({
         from: this.defaultSender,
         to: [recipientEmail],
-        subject: `Thanks for your Mentra ${feedbackLabel}`,
+        subject: `Thanks for your Veiller ${feedbackLabel}`,
         html,
         text,
       });
@@ -677,7 +677,7 @@ export class ResendEmailService {
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Thanks for your Mentra ${escapedFeedbackLabel}</title>
+            <title>Thanks for your Veiller ${escapedFeedbackLabel}</title>
             <style>
               body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background-color: #f6f7f9; margin: 0; padding: 0; }
               .container { max-width: 600px; margin: 20px auto; background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -698,7 +698,7 @@ export class ResendEmailService {
           <body>
             <div class="container">
               <div class="header">
-                <img src="https://mentra-store-cdn.mentraglass.com/mentra_store_assets/Mentra_Logo/PNG/Full/Full%20-%20W.png" alt="Mentra" />
+                <img src="https://veiller-store-cdn.mentraglass.com/veiller_store_assets/Mentra_Logo/PNG/Full/Full%20-%20W.png" alt="Mentra" />
                 <h2>Thanks for your ${escapedFeedbackLabel}</h2>
               </div>
               <div class="content">
@@ -706,20 +706,20 @@ export class ResendEmailService {
                 <p>If we need to follow up, our team will reach out by email.</p>
                 ${echoHtml}
                 ${referenceHtml}
-                <p>Thanks again,<br>The Mentra Team</p>
+                <p>Thanks again,<br>The Veiller Team</p>
               </div>
-              <div class="footer">&copy; ${new Date().getFullYear()} Mentra Labs</div>
+              <div class="footer">&copy; ${new Date().getFullYear()} Veiller Labs</div>
             </div>
           </body>
         </html>
       `,
       text: [
-        `Thanks for your Mentra ${feedbackLabel}.`,
+        `Thanks for your Veiller ${feedbackLabel}.`,
         "Thanks a ton for sending this in. Reports and requests like this are very helpful for us, and we read every one.",
         "If we need to follow up, our team will reach out by email.",
         ...echoText,
         ...referenceText,
-        "Thanks again,\nThe Mentra Team",
+        "Thanks again,\nThe Veiller Team",
       ].join("\n\n"),
     };
   }
@@ -781,7 +781,7 @@ export class ResendEmailService {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>MentraOS App Approved</title>
+          <title>Veiller App Approved</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background-color: #f6f7f9; margin: 0; padding: 0; }
             .container { max-width: 600px; margin: 20px auto; background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -798,11 +798,11 @@ export class ResendEmailService {
               <h2>Your app was approved</h2>
             </div>
             <div class="content">
-              <p>Great news! Your app <strong>${appName}</strong> (<code>${packageName}</code>) has been approved for publishing on MentraOS.</p>
+              <p>Great news! Your app <strong>${appName}</strong> (<code>${packageName}</code>) has been approved for publishing on Veiller.</p>
               ${notes && notes.trim() ? `<div class="meta">Review notes from our team:</div><div class="notes">${notes}</div>` : ""}
-              <p>Your app will now appear in the MentraOS app store and be available to users.</p>
+              <p>Your app will now appear in the Veiller app store and be available to users.</p>
             </div>
-            <div class="footer">&copy; ${new Date().getFullYear()} Mentra Labs</div>
+            <div class="footer">&copy; ${new Date().getFullYear()} Veiller Labs</div>
           </div>
         </body>
       </html>
@@ -824,7 +824,7 @@ export class ResendEmailService {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>MentraOS App Not Approved</title>
+          <title>Veiller App Not Approved</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background-color: #f6f7f9; margin: 0; padding: 0; }
             .container { max-width: 600px; margin: 20px auto; background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -845,7 +845,7 @@ export class ResendEmailService {
               <p>You can address the items above and resubmit the app when ready.</p>
               ${reviewerEmail ? `<p class="meta">If you have questions about this decision, you can reply to <a href="mailto:${reviewerEmail}">${reviewerEmail}</a>.</p>` : ""}
             </div>
-            <div class="footer">&copy; ${new Date().getFullYear()} Mentra Labs</div>
+            <div class="footer">&copy; ${new Date().getFullYear()} Veiller Labs</div>
           </div>
         </body>
       </html>

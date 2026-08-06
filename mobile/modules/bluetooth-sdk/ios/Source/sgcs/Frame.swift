@@ -462,7 +462,7 @@ func sendRgbLedControl(requestId: String, packageName _: String?, action _: Stri
 
 //         // Wait then send welcome message
 //         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-//             self?.queueCommand("frame.display.text('MentraOS Connected!', 100, 100);frame.display.show();print(nil)")
+//             self?.queueCommand("frame.display.text('Veiller Connected!', 100, 100);frame.display.show();print(nil)")
 //         }
 //     }
 

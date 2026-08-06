@@ -1,6 +1,6 @@
 //
 //  MentraNex.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created by Gemini on 2024-07-29.
 //
@@ -130,8 +130,8 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         canvasElements.firstIndex(where: { $0.key == key })
     }
 
-    private func sendCanvasCommand(_ configure: (inout Mentraos_Ble_PhoneToGlasses) -> Void) {
-        var msg = Mentraos_Ble_PhoneToGlasses()
+    private func sendCanvasCommand(_ configure: (inout Veiller_Ble_PhoneToGlasses) -> Void) {
+        var msg = Veiller_Ble_PhoneToGlasses()
         configure(&msg)
         guard let data = try? msg.serializedData() else { return }
         queueDataWithOptimalChunking(data, packetType: PACKET_TYPE_PROTOBUF, waitTimeMs: 10)
@@ -531,7 +531,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
     /// Custom Bluetooth queue for better performance (like G1)
     private static let _bluetoothQueue = DispatchQueue(
-        label: "com.mentra.nex.bluetooth", qos: .background
+        label: "com.veiller.nex.bluetooth", qos: .background
     )
 
     static var instance: MentraNexSGC?
@@ -736,7 +736,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         guard packetData.count > 1 else { return }
         let payload = packetData.subdata(in: 1 ..< packetData.count)
         let commandName: String
-        if let phoneToGlasses = try? Mentraos_Ble_PhoneToGlasses(serializedData: payload) {
+        if let phoneToGlasses = try? Veiller_Ble_PhoneToGlasses(serializedData: payload) {
             commandName = String(describing: phoneToGlasses.payload)
         } else {
             commandName = "UNKNOWN"
@@ -929,7 +929,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         let patterns = [
             "Mentra_([0-9A-Fa-f]+)",
             "NEX_([0-9A-Fa-f]+)",
-            "MENTRA_NEX_([0-9A-Fa-f]+)",
+            "VEILLER_NEX_([0-9A-Fa-f]+)",
             "MENTRA_DISPLAY_([0-9A-Fa-f]+)",
         ]
 
@@ -1258,7 +1258,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         // during continuous speech) and each Bridge.log costs the JS thread.
         // Bridge.log("NEX: Displaying text wall: '\(sanitizedText)'")
 
-        let displayText = Mentraos_Ble_DisplayText.with {
+        let displayText = Veiller_Ble_DisplayText.with {
             $0.text = sanitizedText
             $0.size = 48
             $0.x = 20
@@ -1266,7 +1266,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
             $0.color = 10000
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.displayText = displayText
         }
 
@@ -1355,7 +1355,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
         Bridge.log("NEX: Displaying scrolling text: '\(text)'")
 
-        let displayScrollingText = Mentraos_Ble_DisplayScrollingText.with {
+        let displayScrollingText = Veiller_Ble_DisplayScrollingText.with {
             $0.text = text
             $0.size = 48
             $0.x = 20
@@ -1369,7 +1369,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
             $0.lineSpacing = 2
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.displayScrollingText = displayScrollingText
         }
 
@@ -1413,7 +1413,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         let totalChunks = Int(ceil(Double(bmpData.count) / Double(bmpChunkSize)))
 
         // Send display image command first
-        let displayImage = Mentraos_Ble_DisplayImage.with {
+        let displayImage = Veiller_Ble_DisplayImage.with {
             $0.streamID = streamId
             $0.totalChunks = UInt32(totalChunks)
             $0.x = 0
@@ -1423,7 +1423,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
             $0.encoding = "raw"
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.msgID = "img_start_1"
             $0.displayImage = displayImage
         }
@@ -1616,7 +1616,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         if !canvasElements.isEmpty || currentLayoutId != nil {
             canvasElements.removeAll()
             currentLayoutId = nil
-            sendCanvasCommand { $0.canvasClear = Mentraos_Ble_CanvasClear() }
+            sendCanvasCommand { $0.canvasClear = Veiller_Ble_CanvasClear() }
         }
 
         // Drop any pending/resendable text wall so a stale caption can't
@@ -1627,9 +1627,9 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         textWallResendsRemaining = 0
         textWallLock.unlock()
 
-        let clearDisplay = Mentraos_Ble_ClearDisplay()
+        let clearDisplay = Veiller_Ble_ClearDisplay()
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.msgID = "clear_disp_001"
             $0.clearDisplay_p = clearDisplay
         }
@@ -1676,11 +1676,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         }
         Bridge.log("NEX: Setting brightness to wire value \(validBrightness)")
 
-        let brightnessConfig = Mentraos_Ble_BrightnessConfig.with {
+        let brightnessConfig = Veiller_Ble_BrightnessConfig.with {
             $0.value = UInt32(validBrightness)
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.brightness = brightnessConfig
         }
 
@@ -1696,11 +1696,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
         Bridge.log("NEX: Setting auto brightness to \(enabled)")
 
-        let autoBrightnessConfig = Mentraos_Ble_AutoBrightnessConfig.with {
+        let autoBrightnessConfig = Veiller_Ble_AutoBrightnessConfig.with {
             $0.enabled = enabled
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.autoBrightness = autoBrightnessConfig
         }
 
@@ -1718,11 +1718,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         let validAngle = max(0, min(60, angle))
         Bridge.log("NEX: Setting head-up angle to \(validAngle) degrees")
 
-        let headUpAngleConfig = Mentraos_Ble_HeadUpAngleConfig.with {
+        let headUpAngleConfig = Veiller_Ble_HeadUpAngleConfig.with {
             $0.angle = UInt32(validAngle)
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.headUpAngle = headUpAngleConfig
         }
 
@@ -1740,11 +1740,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         let validHeight = max(0, min(8, height))
         Bridge.log("NEX: Setting display height to \(validHeight)")
 
-        let displayHeightConfig = Mentraos_Ble_DisplayHeightConfig.with {
+        let displayHeightConfig = Veiller_Ble_DisplayHeightConfig.with {
             $0.height = UInt32(validHeight)
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.displayHeight = displayHeightConfig
         }
 
@@ -1761,11 +1761,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         let tier = NexDashboardDisplayWire.depthToWireTier(depth)
         Bridge.log("NEX: Setting display distance tier \(tier) in distance_cm field (dashboard depth \(depth))")
 
-        let displayDistanceConfig = Mentraos_Ble_DisplayDistanceConfig.with {
+        let displayDistanceConfig = Veiller_Ble_DisplayDistanceConfig.with {
             $0.distanceCm = tier
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.displayDistance = displayDistanceConfig
         }
 
@@ -1783,11 +1783,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
             return
         }
 
-        let vadConfig = Mentraos_Ble_VadEnabledConfig.with {
+        let vadConfig = Veiller_Ble_VadEnabledConfig.with {
             $0.enabled = enabled
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.vadEnabled = vadConfig
         }
 
@@ -1807,11 +1807,11 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
         Bridge.log("NEX: Setting microphone enabled: \(enabled)")
 
-        let micStateConfig = Mentraos_Ble_MicStateConfig.with {
+        let micStateConfig = Veiller_Ble_MicStateConfig.with {
             $0.enabled = enabled
         }
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.micState = micStateConfig
         }
 
@@ -1845,9 +1845,9 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
         Bridge.log("NEX: Querying battery status")
 
-        let batteryStateRequest = Mentraos_Ble_BatteryStateRequest()
+        let batteryStateRequest = Veiller_Ble_BatteryStateRequest()
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.batteryState = batteryStateRequest
         }
 
@@ -1863,9 +1863,9 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
         Bridge.log("NEX: Querying glasses information")
 
-        let glassesInfoRequest = Mentraos_Ble_GlassesInfoRequest()
+        let glassesInfoRequest = Veiller_Ble_GlassesInfoRequest()
 
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
             $0.glassesInfo = glassesInfoRequest
         }
 
@@ -1979,7 +1979,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
     private func processProtobufData(_ protobufData: Data) {
         do {
-            let glassesToPhone = try Mentraos_Ble_GlassesToPhone(serializedData: protobufData)
+            let glassesToPhone = try Veiller_Ble_GlassesToPhone(serializedData: protobufData)
             // No per-message log: String(describing: payload) stringifies the whole
             // protobuf and every Bridge.log costs the JS thread.
             // Bridge.log("NEX: Processing protobuf payload case: \(glassesToPhone.payload)")
@@ -2068,7 +2068,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
 
     // MARK: - Protobuf Event Handlers
 
-    private func handleBatteryStatusProtobuf(_ batteryStatus: Mentraos_Ble_BatteryStatus) {
+    private func handleBatteryStatusProtobuf(_ batteryStatus: Veiller_Ble_BatteryStatus) {
         let level = Int(batteryStatus.level)
         let isCharging = batteryStatus.charging
 
@@ -2079,7 +2079,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         DeviceStore.shared.apply("glasses", "charging", isCharging)
     }
 
-    private func handleChargingStateProtobuf(_ chargingState: Mentraos_Ble_ChargingState) {
+    private func handleChargingStateProtobuf(_ chargingState: Veiller_Ble_ChargingState) {
         let chargingState = chargingState.state == .charging
 
         Bridge.log("NEX: 🔌 Charging State: \(chargingState ? "CHARGING" : "NOT_CHARGING")")
@@ -2088,7 +2088,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         DeviceStore.shared.apply("glasses", "charging", chargingState)
     }
 
-    private func handleDeviceInfoProtobuf(_ deviceInfo: Mentraos_Ble_DeviceInfo) {
+    private func handleDeviceInfoProtobuf(_ deviceInfo: Veiller_Ble_DeviceInfo) {
         Bridge.log("NEX: 📱 Device Info: \(deviceInfo)")
 
         // Update @Published properties (G1-compatible approach)
@@ -2096,7 +2096,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         DeviceStore.shared.apply("glasses", "deviceHardwareModel", deviceInfo.hwModel)
     }
 
-    private func handleHeadPositionProtobuf(_ headPosition: Mentraos_Ble_HeadPosition) {
+    private func handleHeadPositionProtobuf(_ headPosition: Veiller_Ble_HeadPosition) {
         let angle = Int(headPosition.angle)
 
         Bridge.log("NEX: 📐 Head Position - Angle: \(angle)°")
@@ -2105,7 +2105,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         headUpAngle = angle
     }
 
-    private func handleHeadUpAngleResponseProtobuf(_ response: Mentraos_Ble_HeadUpAngleResponse) {
+    private func handleHeadUpAngleResponseProtobuf(_ response: Veiller_Ble_HeadUpAngleResponse) {
         let success = response.success
 
         Bridge.log("NEX: 📐 Head Up Angle Set Response - Success: \(success)")
@@ -2120,7 +2120,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         emitEvent("HeadUpAngleResponseEvent", body: eventBody)
     }
 
-    private func handleVadEventProtobuf(_ vadEvent: Mentraos_Ble_VadEvent) {
+    private func handleVadEventProtobuf(_ vadEvent: Veiller_Ble_VadEvent) {
         let vadActiveState = vadEvent.state == .active
 
         Bridge.log("NEX: 🎤 VAD Event - Voice Activity: \(vadActiveState)")
@@ -2131,7 +2131,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
     }
 
     private func handleImageTransferCompleteProtobuf(
-        _ transferComplete: Mentraos_Ble_ImageTransferComplete
+        _ transferComplete: Veiller_Ble_ImageTransferComplete
     ) {
         let status = transferComplete.status
         let missingChunks = transferComplete.missingChunks
@@ -2179,7 +2179,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         }
     }
 
-    private func handleImuDataProtobuf(_ imuData: Mentraos_Ble_ImuData) {
+    private func handleImuDataProtobuf(_ imuData: Veiller_Ble_ImuData) {
         Bridge.log("NEX: 📊 IMU Data: \(imuData)")
 
         // Update @Published properties (G1-compatible approach)
@@ -2188,7 +2188,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         magnetometer = [imuData.mag.x, imuData.mag.y, imuData.mag.z]
     }
 
-    private func handleButtonEventProtobuf(_ buttonEvent: Mentraos_Ble_ButtonEvent) {
+    private func handleButtonEventProtobuf(_ buttonEvent: Veiller_Ble_ButtonEvent) {
         let buttonNumber = Int(buttonEvent.button.rawValue)
         let buttonState = buttonEvent.state
 
@@ -2199,7 +2199,7 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
         lastButtonState = "\(buttonState.rawValue)"
     }
 
-    private func handleHeadGestureProtobuf(_ headGesture: Mentraos_Ble_HeadGesture) {
+    private func handleHeadGestureProtobuf(_ headGesture: Veiller_Ble_HeadGesture) {
         let gestureType = headGesture.gesture
 
         Bridge.log("NEX: 👤 Head Gesture: \(gestureType)")
@@ -2489,8 +2489,8 @@ class MentraNexSGC: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, SG
     }
 
     private func sendDisconnectRequest() {
-        let phoneToGlasses = Mentraos_Ble_PhoneToGlasses.with {
-            $0.disconnect = Mentraos_Ble_DisconnectRequest()
+        let phoneToGlasses = Veiller_Ble_PhoneToGlasses.with {
+            $0.disconnect = Veiller_Ble_DisconnectRequest()
         }
         guard let protobufData = try? phoneToGlasses.serializedData() else {
             Bridge.log("NEX: ⚠️ Failed to serialize DisconnectRequest")

@@ -2,13 +2,13 @@
  * Characterization tests for the island OtaInstallCoordinator (WP 8B) — the OTA
  * install state machine moved verbatim out of mobile/src/app/ota/progress.tsx.
  *
- * Imports the real island sources by path (not via "@mentra/engine", which jest
+ * Imports the real island sources by path (not via "@veiller/engine", which jest
  * mocks) so the actual watchdog/retry/arbitration logic runs under the mobile
  * jest runner; the bluetooth SDK stays the shared jest.setup mock. Inputs are
  * driven by mutating the real island glasses store and emitting on island's
  * GlobalEventEmitter (what OtaService does with the BLE events).
  */
-import type {OtaStatus} from "@mentra/bluetooth-sdk-internal"
+import type {OtaStatus} from "@veiller/bluetooth-sdk-internal"
 
 import {otaInstallCoordinator} from "../../modules/engine/src/services/OtaInstallCoordinator"
 import {

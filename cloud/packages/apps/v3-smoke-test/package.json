@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/v3-smoke-test",
+  "name": "@veiller/v3-smoke-test",
   "version": "0.1.0",
   "type": "module",
   "module": "src/index.ts",
@@ -10,8 +10,8 @@
     "typecheck": "bunx tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mentra/react": "workspace:*",
-    "@mentra/sdk": "workspace:*",
+    "@veiller/react": "workspace:*",
+    "@veiller/sdk": "workspace:*",
     "hono": "^4.8.12",
     "react": "^19",
     "react-dom": "^19"

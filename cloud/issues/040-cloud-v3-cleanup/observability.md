@@ -6,11 +6,11 @@
 
 ## What is this doc?
 
-This doc covers how to make the MentraOS system observable — how to see what's happening, detect when something is broken, and quickly identify which layer of the stack the issue originates from.
+This doc covers how to make the Veiller system observable — how to see what's happening, detect when something is broken, and quickly identify which layer of the stack the issue originates from.
 
 ## Why it matters
 
-When something breaks in MentraOS, the investigation is slow and often misdirected. The cloud has structured logging in BetterStack, but the mobile client, ASG client, and glasses firmware don't ship their logs anywhere accessible. So debugging starts and ends with cloud logs, even when the issue is in a completely different layer — BLE disconnects, mobile app state, firmware rendering. Without visibility into the full stack, every issue looks like a cloud issue.
+When something breaks in Veiller, the investigation is slow and often misdirected. The cloud has structured logging in BetterStack, but the mobile client, ASG client, and glasses firmware don't ship their logs anywhere accessible. So debugging starts and ends with cloud logs, even when the issue is in a completely different layer — BLE disconnects, mobile app state, firmware rendering. Without visibility into the full stack, every issue looks like a cloud issue.
 
 We need to answer three questions quickly:
 

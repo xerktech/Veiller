@@ -70,15 +70,15 @@ report_count() {
 }
 
 echo "boundary burn-down (informational):"
-# Raw stores are only importable via @mentra/engine/internal now (directly or
+# Raw stores are only importable via @veiller/engine/internal now (directly or
 # through the @/stores/* shims, which re-export from it). The hook-name
 # pattern counts every consumer regardless of route, so the number stays
 # comparable across the burn-down campaign.
 # ALL raw engine stores graduated to FAILING patterns above (burn-down slices
 # 1-5 complete); the allowlisted Cloud V1 files + the dev-tooling fallback are
 # the only sanctioned users until tier 5 retires the former.
-report_count "@mentra/engine/internal importers" 'from "@mentra/engine/internal"'
-report_count "@mentra/engine/devtools importers" 'from "@mentra/engine/devtools"'
+report_count "@veiller/engine/internal importers" 'from "@veiller/engine/internal"'
+report_count "@veiller/engine/devtools importers" 'from "@veiller/engine/devtools"'
 report_count "engine.stores escape hatch (deleted; should stay 0)" 'engine\.stores\.'
-report_count "bluetooth-sdk internal surface in host" '@mentra/bluetooth-sdk-internal|@mentra/bluetooth-sdk/internal'
+report_count "bluetooth-sdk internal surface in host" '@veiller/bluetooth-sdk-internal|@veiller/bluetooth-sdk/internal'
 report_count "flat engine OTA helpers in host" 'checkBesUpdate|findMatchingMtkPatch|fetchVersionInfo|getAsgOtaVersionUrl'

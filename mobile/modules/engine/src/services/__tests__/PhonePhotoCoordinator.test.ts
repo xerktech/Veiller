@@ -4,12 +4,12 @@ import {beforeEach, describe, expect, mock, test} from "bun:test"
 
 // Mock module dependencies BEFORE importing the coordinator.
 
-// --- BLE native bridge (@mentra/bluetooth-sdk/internal) -------------------
+// --- BLE native bridge (@veiller/bluetooth-sdk/internal) -------------------
 const requestPhotoNative = mock(async (_req: unknown): Promise<undefined> => undefined)
 const warmUpCameraNative = mock(async (_req: unknown): Promise<undefined> => undefined)
 const stopCameraWarmUpNative = mock(async (_requestId: string): Promise<undefined> => undefined)
 
-mock.module("@mentra/bluetooth-sdk/internal", () => ({
+mock.module("@veiller/bluetooth-sdk/internal", () => ({
   default: {
     requestPhoto: requestPhotoNative,
     warmUpCamera: warmUpCameraNative,

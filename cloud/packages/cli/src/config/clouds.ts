@@ -1,7 +1,7 @@
 /**
  * Cloud Management
  *
- * Manages Mentra cloud environments (production, staging, development, custom)
+ * Manages Veiller cloud environments (production, staging, development, custom)
  */
 
 import {readFileSync} from "fs"
@@ -61,12 +61,12 @@ export function getCurrentCloud(): {key: string; cloud: Cloud} {
 
 /**
  * Get API URL for current cloud
- * Priority: MENTRA_API_URL env var > current cloud > production
+ * Priority: VEILLER_API_URL env var > current cloud > production
  */
 export function getApiUrl(): string {
   // Environment variable takes precedence
-  if (process.env.MENTRA_API_URL) {
-    return process.env.MENTRA_API_URL
+  if (process.env.VEILLER_API_URL) {
+    return process.env.VEILLER_API_URL
   }
 
   const {cloud} = getCurrentCloud()

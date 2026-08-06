@@ -9,7 +9,7 @@
  */
 
 import type { Context } from "hono";
-import type { Logger } from "@mentra/cloud-shared";
+import type { Logger } from "@veiller/cloud-shared";
 
 export interface AppVariables {
   /** Request ID for log correlation. Set by request-id middleware on every request. */
@@ -30,7 +30,7 @@ export interface AppVariables {
     role: "owner" | "admin" | "viewer";
   };
 
-  /** End user (mobile client), identified via Mentra-issued access token. */
+  /** End user (mobile client), identified via Veiller-issued access token. */
   user?: {
     mentraUserId: string;
     tenantId: string;

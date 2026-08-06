@@ -1,4 +1,4 @@
-import type {ButtonPressData, MiniappSession, TranscriptionData} from "@mentra/miniapp/background"
+import type {ButtonPressData, MiniappSession, TranscriptionData} from "@veiller/miniapp/background"
 
 import type {Channels} from "../../shared/channels"
 

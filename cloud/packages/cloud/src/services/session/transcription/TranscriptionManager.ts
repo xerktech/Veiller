@@ -13,7 +13,7 @@ import {
   CloudToAppMessageType,
   DataStream,
   LocalTranscription,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { PosthogService } from "../../logging/posthog.service";
 import { MemoryOwnerStat } from "../../metrics/memory-census";

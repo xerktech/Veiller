@@ -3,7 +3,7 @@ import {
   HardwareRequirement,
   HardwareType,
   HardwareRequirementLevel,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 import { AppI } from "../../models/app.model";
 
 /**

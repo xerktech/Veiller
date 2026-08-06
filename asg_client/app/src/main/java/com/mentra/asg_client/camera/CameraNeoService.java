@@ -468,7 +468,7 @@ public class CameraNeoService extends LifecycleService {
 
     /**
      * Predicts whether a photo with the given parameters would be a "warm" capture — one that
-     * reuses the already-open camera/ISP instead of paying the 1–2s cold startup cost on Mentra
+     * reuses the already-open camera/ISP instead of paying the 1–2s cold startup cost on Veiller
      * Live. Callers use this to choose between a short feedback sound (warm, capture is quick) and
      * a long one (cold, capture lags behind the button press while the camera spins up).
      *

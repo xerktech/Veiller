@@ -1,6 +1,6 @@
 # SDK Express → Hono Refactor
 
-Migrate `@mentra/sdk` AppServer from Express to Hono with Bun fullstack integration.
+Migrate `@veiller/sdk` AppServer from Express to Hono with Bun fullstack integration.
 
 ## Documents
 

@@ -1,6 +1,6 @@
 # Miniapp Hardware Requirements — Implementation Plan
 
-Branch: `mentra-miniapp-sdk`
+Branch: `veiller-miniapp-sdk`
 Scope: add `hardwareRequirements` (required) to `miniapp.json` for the new local miniapp SDK, and wire it into the mobile app so the existing cloud-app compatibility UX (greyed icon + tap-to-show-missing-hardware dialog) applies to local miniapps too.
 
 ## Goals
@@ -52,13 +52,13 @@ Both paths merge into `applets` before hitting the compat loop, so both need `ha
 - Export a plain TypeScript type (e.g. `MiniappManifestV1`) alongside `validateManifest` for consumers that want a compile-time shape. Keep it a lightweight local type — don't pull in `@mentra/types` (CLI has deliberately avoided that dep per the top-of-file comment).
 
 **`sdk/miniapp/src/` (SDK itself)**
-- Re-export `HardwareRequirement`, `HardwareType`, `HardwareRequirementLevel` from `@mentra/sdk` (or `@mentra/types`, whichever is the right public surface — check what `sdk/miniapp/package.json` already depends on). Single source of truth; no parallel definition.
+- Re-export `HardwareRequirement`, `HardwareType`, `HardwareRequirementLevel` from `@veiller/sdk` (or `@mentra/types`, whichever is the right public surface — check what `sdk/miniapp/package.json` already depends on). Single source of truth; no parallel definition.
 - The SDK runtime doesn't use these itself (miniapps are the ones declaring them), but exporting them makes it trivial for developers to type their `miniapp.json` in TS-authored projects.
 
 **`sdk/example-miniapp/miniapp.json`**
 - Add `hardwareRequirements`. At minimum: `[{type: "DISPLAY", level: "REQUIRED"}, {type: "MICROPHONE", level: "REQUIRED"}]` (since the example does transcription + text wall).
 
-**`sdk/create-mentra-miniapp/template/miniapp.json`**
+**`sdk/create-veiller-miniapp/template/miniapp.json`**
 - Add a sensible default: `[{type: "DISPLAY", level: "REQUIRED"}]`. New miniapps almost certainly need display.
 
 ### Part 2 — Phone reads `hardwareRequirements` for dev miniapps
@@ -109,7 +109,7 @@ Worth confirming during implementation that nothing else in `startApplet` bypass
 | `sdk/miniapp-cli/src/manifest.ts` | Validate `hardwareRequirements` (required). Fix permissions validator loop. Export `MiniappManifestV1` type. |
 | `sdk/miniapp/src/index.ts` (or wherever public exports live) | Re-export `HardwareRequirement`, `HardwareType`, `HardwareRequirementLevel`. |
 | `sdk/example-miniapp/miniapp.json` | Add `hardwareRequirements`. |
-| `sdk/create-mentra-miniapp/template/miniapp.json` | Add default `hardwareRequirements`. |
+| `sdk/create-veiller-miniapp/template/miniapp.json` | Add default `hardwareRequirements`. |
 | `mobile/src/components/miniapp/MiniappHost.tsx` | `mountDev` extracts `hardwareRequirements` from the fetched manifest; passes through to `setInstalledManifest`. |
 | `mobile/src/services/LocalMiniappRuntime.ts` | Widen `installedManifest` shape to include `hardwareRequirements`. |
 | `mobile/src/services/Composer.ts` | `getLocalApplets()` extracts `hardwareRequirements` from installed bundles; appends `EXIST` requirement. |

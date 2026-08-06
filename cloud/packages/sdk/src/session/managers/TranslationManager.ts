@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * const session = await mentra.connect();
+ * const session = await veiller.connect();
  *
  * // Subscribe to ALL active translation events
  * const stopAll = session.translation.on((evt) => {
@@ -81,7 +81,7 @@ export type TranslationHandler = (data: TranslationEvent) => void;
 // ─── Internal Types ─────────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  *
  * This is intentionally a *structural* type — we don't import the concrete
  * `DataStreamRouter` class so that the manager remains unit-testable with

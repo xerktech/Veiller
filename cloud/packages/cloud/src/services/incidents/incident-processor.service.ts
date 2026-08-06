@@ -10,7 +10,7 @@ import { slackService } from "../notifications/slack.service";
 import { emailService } from "../email/resend.service";
 import { generateBugSummary, createOrUpdateLinearIssue, type BugSummary } from "../integrations/linear.service";
 import { UserSession } from "../session/UserSession";
-import { CloudToAppMessageType } from "@mentra/sdk";
+import { CloudToAppMessageType } from "@veiller/sdk";
 
 const AUGMENTOS_AUTH_JWT_SECRET = process.env.AUGMENTOS_AUTH_JWT_SECRET || "";
 

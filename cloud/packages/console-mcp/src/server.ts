@@ -10,7 +10,7 @@ import { registerAdminTools } from "./tools/admin.ts";
 
 export function createMcpServer(config: ConsoleMcpConfig): McpServer {
   const server = new McpServer({
-    name: "mentra-console",
+    name: "veiller-console",
     version: "0.1.0",
   });
 

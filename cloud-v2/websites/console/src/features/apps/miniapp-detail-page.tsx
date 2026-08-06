@@ -65,7 +65,7 @@ export function MiniappDetailPage() {
                 </div>
                 <h2 className="mt-5 font-display text-[19px] font-bold">No releases yet</h2>
                 <p className="mt-2 max-w-md text-sm leading-6 text-[#747780]">
-                  Build and upload your first release from your project with <code className="rounded bg-[#f0f2ef] px-1.5 py-0.5 font-mono text-[13px]">mentra publish</code>.
+                  Build and upload your first release from your project with <code className="rounded bg-[#f0f2ef] px-1.5 py-0.5 font-mono text-[13px]">veiller publish</code>.
                 </p>
               </div>
             ) : (

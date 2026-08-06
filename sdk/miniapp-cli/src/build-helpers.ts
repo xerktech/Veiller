@@ -44,7 +44,7 @@ const UNSUPPORTED_BACKGROUND_GLOBALS = new Map<string, string>([
   ["customElements", "move DOM work to src/ui/"],
   ["indexedDB", "use session.storage, session.blob, or localStorage"],
   ["caches", "use session.storage, session.blob, or localStorage"],
-  ["process", "remove the Node API; build.ts only inlines MENTRA_PUBLIC_* values"],
+  ["process", "remove the Node API; build.ts only inlines VEILLER_PUBLIC_* values"],
   ["Buffer", "use Uint8Array plus TextEncoder/TextDecoder or the SDK base64 helpers"],
   ["require", "use a static import that Bun can bundle"],
   ["module", "use ES modules"],
@@ -157,7 +157,7 @@ function isPublicEnvAccess(node: ts.Identifier): boolean {
   return (
     ts.isPropertyAccessExpression(valueAccess) &&
     valueAccess.expression === envAccess &&
-    valueAccess.name.text.startsWith("MENTRA_PUBLIC_")
+    valueAccess.name.text.startsWith("VEILLER_PUBLIC_")
   )
 }
 
@@ -292,12 +292,12 @@ export function findUnsupportedBackgroundApis(
 
 /**
  * Fail the background bundle when source code relies on browser or Node APIs
- * that do not exist in MentraOS's JavaScriptCore/QuickJS runtime.
+ * that do not exist in Veiller's JavaScriptCore/QuickJS runtime.
  */
 export function backgroundRuntimeGuardPlugin(importMetaUrl: string) {
   const sourceRoot = resolve(dirname(fileURLToPath(importMetaUrl)), "src")
   return {
-    name: "mentra-background-runtime-guard",
+    name: "veiller-background-runtime-guard",
     setup(build: BunBuild) {
       build.onLoad({filter: /\.[cm]?[jt]sx?$/}, async ({path}) => {
         const rel = relative(sourceRoot, path)
@@ -310,7 +310,7 @@ export function backgroundRuntimeGuardPlugin(importMetaUrl: string) {
             .map(({api, line, column, replacement}) => `  ${rel}:${line}:${column} ${api}: ${replacement}`)
             .join("\n")
           throw new Error(
-            `Unsupported API in Mentra miniapp background runtime:\n${details}\n` +
+            `Unsupported API in Veiller miniapp background runtime:\n${details}\n` +
               "Background is not a browser or Node. Put browser UI code in src/ui/.",
           )
         }
@@ -344,7 +344,7 @@ export function reactSingletonPlugin(importMetaUrl: string) {
   ])
 
   return {
-    name: "mentra-react-singleton",
+    name: "veiller-react-singleton",
     setup(build: BunBuild) {
       build.onResolve({filter: /^react(?:\/jsx-runtime|\/jsx-dev-runtime)?$/}, ({path}) => {
         return {path: aliases.get(path)!}

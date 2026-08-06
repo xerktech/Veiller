@@ -1,7 +1,7 @@
 /**
  * Background JSContext entry — Local Translation miniapp.
  *
- * A faithful local (island-runtime) port of the @mentra/translation cloud app.
+ * A faithful local (island-runtime) port of the @veiller/translation cloud app.
  * `registerMiniapp(...)` wires the handler to fire after CONNECT lands; the
  * controller constructed here lives for the entire session and survives WebView
  * open/close cycles. It subscribes to any-source -> target translation, renders
@@ -9,7 +9,7 @@
  * typed session.ui channel bus (see shared/channels.ts).
  */
 
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 import {TranslationController} from "./controllers/TranslationController"
 

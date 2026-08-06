@@ -260,7 +260,7 @@ Let mobile tell cloud which apps should be running:
 // Mobile sends on connection:
 {
   type: "connection_init",
-  runningApps: ["com.augmentos.livecaptions", "com.mentra.notes"]
+  runningApps: ["com.augmentos.livecaptions", "com.veiller.notes"]
 }
 
 // Cloud starts only those apps, ignoring server-side state

@@ -1,11 +1,11 @@
-MentraOS Debugger UI Design Document
+Veiller Debugger UI Design Document
 1. Introduction
 1.1 Purpose
-The MentraOS Debugger UI is a web-based monitoring and debugging tool that provides real-time visibility into the MentraOS cloud system. It enables developers and operators to inspect user sessions, monitor Apps (Third-Party Applications), track system state, and diagnose issues within the system.
+The Veiller Debugger UI is a web-based monitoring and debugging tool that provides real-time visibility into the Veiller cloud system. It enables developers and operators to inspect user sessions, monitor Apps (Third-Party Applications), track system state, and diagnose issues within the system.
 1.2 Scope
-This document outlines the design and implementation of the MentraOS Debugger UI, focusing on the MVP (Minimum Viable Product) requirements, architecture, and UI components. It serves as a guide for the development team working on the debugger interface.
+This document outlines the design and implementation of the Veiller Debugger UI, focusing on the MVP (Minimum Viable Product) requirements, architecture, and UI components. It serves as a guide for the development team working on the debugger interface.
 1.3 System Context
-The debugger is a part of the MentraOS cloud ecosystem and interacts primarily with the following components:
+The debugger is a part of the Veiller cloud ecosystem and interacts primarily with the following components:
 
 Session Service: Manages user sessions and their state
 WebSocket Service: Handles real-time communication
@@ -88,7 +88,7 @@ Shared sessions
 3.1 Overall Architecture
 +------------------+      +-----------------+      +------------------+
 |                  |      |                 |      |                  |
-|  Debugger UI     |<---->|  Debugger API   |<---->|  MentraOS Cloud |
+|  Debugger UI     |<---->|  Debugger API   |<---->|  Veiller Cloud |
 |  (React/Tailwind)|      | (Server Events) |      |  System          |
 |                  |      |                 |      |                  |
 +------------------+      +-----------------+      +------------------+
@@ -128,7 +128,7 @@ typescriptclass DebugService {
   private transformSessionForDebugger(session: ExtendedUserSession): DebugSessionInfo;
   private sanitizeSessionData(session: ExtendedUserSession): DebugSessionInfo;
 }
-The DebugService will interface with the following MentraOS services:
+The DebugService will interface with the following Veiller services:
 
 sessionService: To access user session data
 webSocketService: To monitor communication status
@@ -291,7 +291,7 @@ javascriptuseEffect(() => {
   }
 }, [liveUpdates]);
 6.3 Session Data Structure
-The session data structure mirrors the actual ExtendedUserSession from the MentraOS cloud system:
+The session data structure mirrors the actual ExtendedUserSession from the Veiller cloud system:
 typescriptinterface ExtendedUserSession {
   sessionId: string;
   userId: string;

@@ -47,7 +47,7 @@ The same derived version drives all public artifacts:
 - ASG OTA manifest:
   `https://github.com/Mentra-Community/MentraOS/releases/download/bluetooth-sdk-ota/bluetooth-sdk-VERSION-version.json`
 - ASG APK release asset under the persistent `bluetooth-sdk-ota` release tag
-- npm staged package: `@mentra/bluetooth-sdk`
+- npm staged package: `@veiller/bluetooth-sdk`
 - Maven Central: `com.mentraglass:bluetooth-sdk` and `com.mentraglass:lc3Lib`
 - SwiftPM: tag `VERSION` in `Mentra-Community/mentra-bluetooth-sdk-ios`
 
@@ -57,14 +57,14 @@ remain separate. SDK OTA APKs are never uploaded into the rolling cleanup bucket
 
 ## Required Registry Settings, GitHub Secrets, and Variables
 
-Configure npm Trusted Publishing for `@mentra/bluetooth-sdk` before relying on
+Configure npm Trusted Publishing for `@veiller/bluetooth-sdk` before relying on
 the workflow for a real npm stage release:
 
 | Field | Value |
 | --- | --- |
 | Provider | GitHub Actions |
 | Organization or user | `Mentra-Community` |
-| Repository | `MentraOS` |
+| Repository | `Veiller` |
 | Workflow filename | `bluetooth-sdk-release.yml` |
 | Environment name | Leave blank unless the workflow starts using a GitHub environment |
 | Allowed actions | `npm stage publish` |
@@ -84,7 +84,7 @@ workflow for a real release:
 | `MAVEN_CENTRAL_TOKEN_BASE64` | Secret | Base64 string of `username:password` for the Sonatype Central publishing token. |
 | `MAVEN_SIGNING_KEY` | Secret | ASCII-armored PGP private key used by Gradle in-memory signing. |
 | `MAVEN_SIGNING_PASSWORD` | Secret | Passphrase for `MAVEN_SIGNING_KEY`. |
-| `MENTRA_BLUETOOTH_SDK_IOS_PUSH_TOKEN` | Secret | GitHub token with write access to `Mentra-Community/mentra-bluetooth-sdk-ios` for pushing `main` and version tags. |
+| `VEILLER_BLUETOOTH_SDK_IOS_PUSH_TOKEN` | Secret | GitHub token with write access to `Mentra-Community/mentra-bluetooth-sdk-ios` for pushing `main` and version tags. |
 | `NPM_TOKEN` | Secret | npm automation token used for dev-channel direct publishes (staged beta/latest publishes use the OIDC Trusted Publisher). |
 
 The Sonatype publishing type is no longer a repository variable: the workflow
@@ -122,7 +122,7 @@ derives it from the channel (`automatic` on `dev`, `user_managed` on
 5. The Maven job installs the mobile workspace, runs Expo prebuild to create the
    generated `mobile/android` Gradle project, checks Maven Central for both
    Android artifacts, runs a public-mode `publishToMavenLocal`, then uploads the
-   signed public-mode `lc3Lib` and `mentra-bluetooth-sdk` publications to
+   signed public-mode `lc3Lib` and `veiller-bluetooth-sdk` publications to
    Sonatype Central — `publishing_type=automatic` on dev (goes live on its
    own), `user_managed` on staging/prod (publish it in the Central Portal).
 6. The iOS export job checks out the SwiftPM mirror repository, refuses to
@@ -138,7 +138,7 @@ derives it from the channel (`automatic` on `dev`, `user_managed` on
 The npm package is staged, not published live. After the workflow stages a
 version, a maintainer must open npmjs.com, review the staged package from the
 Staged Packages tab, and approve it with 2FA. The CLI alternative is to run
-`npm stage list @mentra/bluetooth-sdk`, inspect the stage ID with
+`npm stage list @veiller/bluetooth-sdk`, inspect the stage ID with
 `npm stage view <stage-id>`, and approve with `npm stage approve <stage-id>`.
 
 Maven Central still uses `user_managed` publishing. After the workflow uploads
@@ -169,8 +169,8 @@ though the SDK package version did not change.
 After a real release:
 
 ```bash
-npm view @mentra/bluetooth-sdk@VERSION version
-npm stage list @mentra/bluetooth-sdk
+npm view @veiller/bluetooth-sdk@VERSION version
+npm stage list @veiller/bluetooth-sdk
 curl -fsS "https://github.com/Mentra-Community/MentraOS/releases/download/bluetooth-sdk-ota/bluetooth-sdk-VERSION-version.json"
 curl -fsS "https://repo.maven.apache.org/maven2/com/mentraglass/bluetooth-sdk/VERSION/bluetooth-sdk-VERSION.pom"
 curl -fsS "https://repo.maven.apache.org/maven2/com/mentraglass/lc3Lib/VERSION/lc3Lib-VERSION.pom"

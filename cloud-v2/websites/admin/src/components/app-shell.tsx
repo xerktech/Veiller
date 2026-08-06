@@ -1,6 +1,6 @@
 import { LogOut, Menu, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import mentraLogo from "@/assets/mentra-logo.svg";
+import veillerLogo from "@/assets/mentra-logo.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -94,7 +94,7 @@ export function AppShell({
               <Menu className="size-5" />
             </Button>
             <div className={cn("flex min-w-0 items-center gap-3", sidebarCollapsed && "md:hidden")}>
-              <img src={mentraLogo} alt="" className="h-[22px] w-[41px] shrink-0" />
+              <img src={veillerLogo} alt="" className="h-[22px] w-[41px] shrink-0" />
               <div className="min-w-0">
                 <div className="truncate font-display text-[15px] font-bold leading-5 text-[#14151b]">{brandTitle}</div>
                 <div className="truncate text-xs leading-4 text-[#8a8d95]">{brandSubtitle}</div>

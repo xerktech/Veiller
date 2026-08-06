@@ -1,6 +1,6 @@
 import {create} from "zustand"
 import {subscribeWithSelector} from "zustand/middleware"
-import type {TapStrapStatus} from "@mentra/bluetooth-sdk/internal"
+import type {TapStrapStatus} from "@veiller/bluetooth-sdk/internal"
 
 /**
  * Tap Strap status store — mirror of the native TapStrapManager snapshot

@@ -115,6 +115,6 @@ export function wrapText(text: string, maxWidthPx: number, measure: Measure = de
 }
 
 // not ported: upstream's `pretextMeasure()` (a dynamic import of
-// `@evenrealities/pretext`, the Even Hub WebView font measurer). The Mentra
+// `@evenrealities/pretext`, the Even Hub WebView font measurer). The Veiller
 // port instead points the default measure at the vendored G1/G2 glyph-table
 // measurer (display/measure.ts) via `setDefaultMeasure` at background boot.

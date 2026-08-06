@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, Navigate } from "react-router-dom";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 
 interface AccountLayoutProps {
   children: React.ReactNode;
@@ -31,7 +31,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Link to="/" className="text-xl font-bold text-gray-900">
-              Mentra Account
+              Veiller Account
             </Link>
           </div>
 

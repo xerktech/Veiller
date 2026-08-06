@@ -1,4 +1,4 @@
-# MentraOS Cloud Architecture v3
+# Veiller Cloud Architecture v3
 
 - author: Codex + Isaiah Ballah
 - status: draft
@@ -16,7 +16,7 @@ This document is intentionally separate from [`architecture.md`](./architecture.
 ## Core Naming
 
 - `MiniAppServer`: cloud/server host abstraction for mini apps
-- `MentraSession`: per-user runtime abstraction for app logic
+- `VeillerSession`: per-user runtime abstraction for app logic
 - `AppServer` / `AppSession`: legacy compatibility surface
 
 ## High-Level Direction
@@ -46,7 +46,7 @@ But the contract is evolving toward:
 Developer code should target:
 
 - `MiniAppServer`
-- `MentraSession`
+- `VeillerSession`
 
 The SDK should keep top-level public classes lean and push orchestration into private underscore-prefixed internals.
 
@@ -75,7 +75,7 @@ Cloud restart recovery direction:
 - cloud remains authoritative
 - v3 app reconnects may be deferred while cloud is booting or restoring app state
 - deferred sockets can remain open temporarily
-- SDK parks `MentraSession` state rather than destroying it immediately
+- SDK parks `VeillerSession` state rather than destroying it immediately
 - manual stop bypasses parked recovery and tears down immediately
 
 ## Cloud Ownership Model
@@ -94,14 +94,14 @@ Cloud restart recovery direction:
 
 As of this draft:
 
-- the new `MentraSession` runtime exists
+- the new `VeillerSession` runtime exists
 - `MiniAppServer` exists
 - cloud deferred reconnect support exists in first-pass form
 - the system is still hybrid, with compatibility layers still in place
 
 ## Remaining Work
 
-- finish hardening `MiniAppServer` + `MentraSession` for fresh app authors
+- finish hardening `MiniAppServer` + `VeillerSession` for fresh app authors
 - validate reconnect/resurrection behavior end to end
 - continue removing hybrid assumptions from cloud and SDK internals
 - update developer-facing docs once the runtime is stable enough to recommend broadly

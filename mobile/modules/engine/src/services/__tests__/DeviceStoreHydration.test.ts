@@ -3,7 +3,7 @@
 import {beforeEach, describe, expect, mock, test} from "bun:test"
 
 const mockGetDefaultDevice = mock((): Promise<Record<string, unknown> | null> => Promise.resolve(null))
-mock.module("@mentra/bluetooth-sdk/internal", () => ({
+mock.module("@veiller/bluetooth-sdk/internal", () => ({
   __esModule: true,
   default: {
     getDefaultDevice: mockGetDefaultDevice,

@@ -55,7 +55,7 @@ expressApp.get("/api/profile", (req, res) => {
   if (!authReq.authUserId) {
     return res.status(401).json({
       error: "Not authenticated",
-      message: "Please authenticate via /mentra-auth",
+      message: "Please authenticate via /veiller-auth",
     })
   }
 
@@ -101,7 +101,7 @@ export const routes = {
       const userId = getAuthUserId(req)
 
       if (!userId) {
-        return unauthorizedResponse("Please authenticate via /mentra-auth")
+        return unauthorizedResponse("Please authenticate via /veiller-auth")
       }
 
       return Response.json({
@@ -438,7 +438,7 @@ export const routes = {
 
 ### Hybrid Approach (Recommended):
 
-- **Express**: MentraOS-specific routes (session management, webhooks)
+- **Express**: Veiller-specific routes (session management, webhooks)
 - **Bun**: Your app's API routes (most of your endpoints)
 - **Auth**: Works in both (forwarded via headers to Bun)
 
@@ -571,7 +571,7 @@ export const routes = {
 # Public route
 curl http://localhost:3333/api/hello
 
-# Protected route (need to authenticate first via /mentra-auth)
+# Protected route (need to authenticate first via /veiller-auth)
 curl http://localhost:3333/api/profile \
   --cookie-jar cookies.txt \
   --cookie cookies.txt

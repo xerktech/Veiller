@@ -6,7 +6,7 @@
 
 import { Hono } from "hono";
 import jwt from "jsonwebtoken";
-import { AppType } from "@mentra/sdk";
+import { AppType } from "@veiller/sdk";
 import { User } from "../../../models/user.model";
 import appService from "../../../services/core/app.service";
 import * as AppUptimeService from "../../../services/core/app-uptime.service";
@@ -30,11 +30,11 @@ const ALLOWED_API_KEY_PACKAGES = [
   "test.augmentos.mira",
   "cloud.augmentos.mira",
   "com.augmentos.mira",
-  "com.mentra.mentraai.beta",
-  "com.mentra.mentraai.dev",
-  "com.mentra.ai.noporter",
-  "com.mentra.ai.dev",
-  "com.mentra.ai",
+  "com.veiller.veillerai.beta",
+  "com.veiller.veillerai.dev",
+  "com.veiller.ai.noporter",
+  "com.veiller.ai.dev",
+  "com.veiller.ai",
 ];
 
 // ============================================================================

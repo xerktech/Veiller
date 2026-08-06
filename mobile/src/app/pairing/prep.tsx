@@ -15,7 +15,7 @@ import {useState} from "react"
 import GlassesTroubleshootingModal from "@/components/glasses/GlassesTroubleshootingModal"
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {CDN_BASE_URL} from "@/constants/appConfig"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {getAr99DisplayName, getAr99ImageSource} from "@/utils/getGlassesImage"
 import {ThemedStyle} from "@/theme"
 
@@ -216,10 +216,10 @@ export default function PairingPrepScreen() {
   const SimulatedPairingGuide = () => {
     return (
       <View className="flex-1 flex-col justify-start">
-        <Text text="Preview MentraOS" className="text-2xl font-bold mb-4 text-secondary-foreground" />
+        <Text text="Preview Veiller" className="text-2xl font-bold mb-4 text-secondary-foreground" />
         <GlassesDisplayMirror demoText="Simulated glasses display" />
         <Text
-          text="Experience the full power of MentraOS without physical glasses. Simulated Glasses provides a virtual display that mirrors exactly what you would see on real smart glasses."
+          text="Experience the full power of Veiller without physical glasses. Simulated Glasses provides a virtual display that mirrors exactly what you would see on real smart glasses."
           className="text-sm text-secondary-foreground mt-6"
         />
       </View>
@@ -299,7 +299,7 @@ export default function PairingPrepScreen() {
     )
   }
 
-  const MentraDisplayGlassesPairingGuide = () => {
+  const VeillerDisplayGlassesPairingGuide = () => {
     return (
       <View className="flex-1 flex-col justify-start mt-6">
         <Text text="Mentra Display" className="text-2xl font-bold mb-4 text-secondary-foreground" />
@@ -475,7 +475,7 @@ export default function PairingPrepScreen() {
       case DeviceTypes.Z100:
         return <VuzixZ100PairingGuide />
       case DeviceTypes.NEX:
-        return <MentraDisplayGlassesPairingGuide />
+        return <VeillerDisplayGlassesPairingGuide />
       case DeviceTypes.NIMO:
         return <NimoPairingGuide />
       case DeviceTypes.AR99:

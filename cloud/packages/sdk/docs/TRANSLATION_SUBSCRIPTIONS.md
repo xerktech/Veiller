@@ -1,6 +1,6 @@
 # Translation Subscriptions
 
-MentraOS supports real-time translation powered by Soniox v3, enabling live captions and conversations across 60+ languages.
+Veiller supports real-time translation powered by Soniox v3, enabling live captions and conversations across 60+ languages.
 
 ## Subscription Formats
 
@@ -9,7 +9,7 @@ MentraOS supports real-time translation powered by Soniox v3, enabling live capt
 Translate from **any language** to a single target language.
 
 ```typescript
-import { createUniversalTranslationStream } from "@mentra/sdk";
+import { createUniversalTranslationStream } from "@veiller/sdk";
 
 // Subscribe to translations from ANY language → Spanish
 const subscription = createUniversalTranslationStream("es-ES");
@@ -43,7 +43,7 @@ session.subscribe(subscription);
 Translate between **two specific languages** for better accuracy.
 
 ```typescript
-import { createTranslationStream } from "@mentra/sdk";
+import { createTranslationStream } from "@veiller/sdk";
 
 // Subscribe to English ⟷ Spanish translations
 const subscription = createTranslationStream("en-US", "es-ES");
@@ -83,7 +83,7 @@ session.subscribe(subscription);
 ### Live Captions App
 
 ```typescript
-import { AppSession, createUniversalTranslationStream } from "@mentra/sdk";
+import { AppSession, createUniversalTranslationStream } from "@veiller/sdk";
 
 const session = new AppSession({
   packageName: "com.example.livecaptions",
@@ -112,7 +112,7 @@ session.on("translation", (data) => {
 ### Two-Way Conversation App
 
 ```typescript
-import { AppSession, createTranslationStream } from "@mentra/sdk";
+import { AppSession, createTranslationStream } from "@veiller/sdk";
 
 const session = new AppSession({
   packageName: "com.example.translator",

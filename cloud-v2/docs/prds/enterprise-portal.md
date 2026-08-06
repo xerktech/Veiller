@@ -6,7 +6,7 @@
 ## Purpose
 
 The Enterprise Portal is for OEM and enterprise partners who need to manage the
-trusted identity issuers Mentra accepts for their organization.
+trusted identity issuers Veiller accepts for their organization.
 
 This is separate from the Developer Console and Admin Console. A human might
 have access to multiple surfaces, but the product concepts are different.
@@ -16,7 +16,7 @@ have access to multiple surfaces, but the product concepts are different.
 - Enterprise/OEM organization owner.
 - Enterprise/OEM technical admin.
 - Enterprise/OEM viewer/support user.
-- Mentra admin reviewing or approving enterprise org access.
+- Veiller admin reviewing or approving enterprise org access.
 
 ## Product Principles
 
@@ -36,7 +36,7 @@ have access to multiple surfaces, but the product concepts are different.
 An enterprise org represents an OEM or enterprise customer. Enterprise orgs are
 separate from developer orgs.
 
-New enterprise orgs require Mentra approval before users can manage trusted
+New enterprise orgs require Veiller approval before users can manage trusted
 issuers.
 
 ### Trusted Issuer
@@ -55,7 +55,7 @@ configuration.
 
 ### JWKS
 
-JWKS is the public key endpoint Mentra services use to verify tokens from that
+JWKS is the public key endpoint Veiller services use to verify tokens from that
 issuer. Users do not need a cryptography lesson, but the UI should help them
 understand whether the URL is reachable and valid.
 
@@ -111,7 +111,7 @@ Pending users should see a clear waiting state, not a mostly empty dashboard.
 - As an enterprise admin, I can see recent issuer changes.
 - As an enterprise admin, I can see who changed an issuer and when.
 - As an enterprise admin, I can understand when a JWKS URL is failing validation.
-- As an enterprise admin, I can contact Mentra/support if the org is pending,
+- As an enterprise admin, I can contact Veiller/support if the org is pending,
   rejected, or disabled.
 
 ## Required Pages
@@ -140,14 +140,14 @@ The onboarding flow should ask whether the user wants to:
 - Request a new enterprise org.
 
 Creating a new enterprise org should not immediately unlock configuration.
-Mentra approval is required first.
+Veiller approval is required first.
 
 ### Pending Approval
 
 The pending state should be a complete page with clear next steps:
 
 - Request submitted.
-- What Mentra is reviewing.
+- What Veiller is reviewing.
 - Who to contact if urgent.
 
 ### Trusted Issuers

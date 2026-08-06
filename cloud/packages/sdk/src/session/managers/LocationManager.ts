@@ -70,7 +70,7 @@ export interface LocationConfig {
 // ─── Internal Types ─────────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  *
  * Structural type — no concrete imports so the manager stays unit-testable
  * with plain stubs.
@@ -160,7 +160,7 @@ function normalise(raw: any): LocationData {
  *
  * @example
  * ```ts
- * const session = await mentra.connect();
+ * const session = await veiller.connect();
  *
  * // Subscribe to continuous location updates
  * const stop = session.location.onUpdate((loc) => {
@@ -497,7 +497,7 @@ export class LocationManager {
   }
 
   /**
-   * Called by MentraSession if a permission error for location is received.
+   * Called by VeillerSession if a permission error for location is received.
    * @internal
    */
   setPermission(granted: boolean): void {
@@ -509,7 +509,7 @@ export class LocationManager {
   /**
    * Clean up all resources.
    *
-   * Called by MentraSession during disconnect/cleanup.
+   * Called by VeillerSession during disconnect/cleanup.
    * @internal
    */
   destroy(): void {

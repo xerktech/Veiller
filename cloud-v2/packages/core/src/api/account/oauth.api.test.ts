@@ -23,10 +23,10 @@ describe("publicOrigin", () => {
     expect(await originFor("http://localhost:8002/probe")).toBe("http://localhost:8002");
   });
 
-  test("prefers x-mentra-public-origin over the derived origin", async () => {
+  test("prefers x-veiller-public-origin over the derived origin", async () => {
     expect(
       await originFor("http://core.internal/probe", {
-        "x-mentra-public-origin": "https://api.mentra.glass",
+        "x-veiller-public-origin": "https://api.mentra.glass",
         "x-forwarded-proto": "https",
       }),
     ).toBe("https://api.mentra.glass");

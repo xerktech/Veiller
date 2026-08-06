@@ -2,13 +2,13 @@ import {useEffect, useRef} from "react"
 import {Platform} from "react-native"
 
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {usePathname} from "expo-router"
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
 import showAlert from "@/utils/AlertUtils"
 import {translate} from "@/i18n"
 import {useNavigationStore} from "@/stores/navigation"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 
 export function BtClassicPairing() {
   const readiness = useEngineSnapshot(engine.pairing.readiness, (onChange) => engine.pairing.onReadiness(onChange))

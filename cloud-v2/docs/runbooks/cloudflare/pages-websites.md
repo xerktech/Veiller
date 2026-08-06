@@ -4,9 +4,9 @@ Cloud V2 has three browser surfaces:
 
 | Surface | Local package | Pages project pattern | Hostname pattern |
 | --- | --- | --- | --- |
-| Developer console | `websites/console` | `mentra-console2-<env>` | `console2.<env>.mentraglass.com` |
-| Admin console | `websites/admin` | `mentra-admin-<env>` | `admin.<env>.mentraglass.com` |
-| Enterprise portal | `websites/portal` | `mentra-enterprise-portal-<env>` | `portal.<env>.mentraglass.com` |
+| Developer console | `websites/console` | `veiller-console2-<env>` | `console2.<env>.mentraglass.com` |
+| Admin console | `websites/admin` | `veiller-admin-<env>` | `admin.<env>.mentraglass.com` |
+| Enterprise portal | `websites/portal` | `veiller-enterprise-portal-<env>` | `portal.<env>.mentraglass.com` |
 
 Production hostnames omit the environment label:
 
@@ -24,9 +24,9 @@ depending on branch-preview behavior.
 
 | Branch | Workflow target | Pages projects |
 | --- | --- | --- |
-| `dev` | dev | `mentra-console2-dev`, `mentra-admin-dev`, `mentra-enterprise-portal-dev` |
-| `staging` | staging | `mentra-console2-staging`, `mentra-admin-staging`, `mentra-enterprise-portal-staging` |
-| `main` | prod | `mentra-console2-prod`, `mentra-admin-prod`, `mentra-enterprise-portal-prod` |
+| `dev` | dev | `veiller-console2-dev`, `veiller-admin-dev`, `veiller-enterprise-portal-dev` |
+| `staging` | staging | `veiller-console2-staging`, `veiller-admin-staging`, `veiller-enterprise-portal-staging` |
+| `main` | prod | `veiller-console2-prod`, `veiller-admin-prod`, `veiller-enterprise-portal-prod` |
 
 The workflow can also be run manually from a PR branch with an explicit
 environment and site selection. The environment comes from the website URL and

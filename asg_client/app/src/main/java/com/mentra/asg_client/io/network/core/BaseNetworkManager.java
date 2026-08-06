@@ -35,9 +35,9 @@ public abstract class BaseNetworkManager implements INetworkController {
     private static final String TAG = "BaseNetworkManager";
 
     // Constants for device-persistent hotspot credentials
-    private static final String PREFS_NAME = "MentraOSNetworkManager";
+    private static final String PREFS_NAME = "VeillerNetworkManager";
     private static final String PREF_DEVICE_ID = "device_hotspot_id";
-    private static final String HOTSPOT_SSID_PREFIX = "MentraOS_";
+    private static final String HOTSPOT_SSID_PREFIX = "Veiller_";
     private static final String HOTSPOT_PASSWORD = "12345678";
 
     protected final Context context;
@@ -113,7 +113,7 @@ public abstract class BaseNetworkManager implements INetworkController {
     /**
      * Get the device-persistent hotspot SSID
      *
-     * @return The hotspot SSID in format MentraOS_XXXXX
+     * @return The hotspot SSID in format Veiller_XXXXX
      */
     protected String getDeviceHotspotSsid() {
         return deviceHotspotSsid;

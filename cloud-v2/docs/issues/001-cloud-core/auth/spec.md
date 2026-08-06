@@ -2,7 +2,7 @@
 
 **TL;DR:** The v2 Core auth contract: the endpoints and token shapes the
 cloud-client and developer backends build against for Core-owned APIs. Every actor
-(OEM user, Mentra user, miniapp) can obtain a Core credential via RFC 8693 token
+(OEM user, Veiller user, miniapp) can obtain a Core credential via RFC 8693 token
 exchange; a miniapp gets a short-lived audience-pinned token derived from that
 Core-backed path. Runtime live services are split onto a separate
 `cloud-runtime` audience token in
@@ -27,7 +27,7 @@ product implied by the domain (no version segment; a future break would take
 `/api/v2/...`):
 
 - `/api/client/...` endpoints the **mobile client / device** calls. The same
-  routes serve an OEM's client and Mentra's client; the **subject token**
+  routes serve an OEM's client and Veiller's client; the **subject token**
   distinguishes them, not the path.
 - `/api/oem/...` endpoints the **OEM's backend** calls, server to server
   (registration, public-key management). The mobile client does not hit these.
@@ -46,7 +46,7 @@ to a miniapp.
 ### Runtime token
 
 Separate JWT with `aud = "cloud-runtime"` for Runtime Services. In
-Mentra-hosted deployments, Core/Auth can mint or broker this token after verifying
+Veiller-hosted deployments, Core/Auth can mint or broker this token after verifying
 the OEM subject token. In OEM-hosted deployments, the runtime may trust an OEM
 issuer/JWKS directly and Core is not required for live services. The runtime token
 contract is tracked in issue 007.
@@ -69,8 +69,8 @@ Core-backed tokens. `subject_token_type` selects the verification path:
 | subject token | verified with | `tenantId` | `tenantUserId` |
 | --- | --- | --- | --- |
 | OEM-signed JWT | the OEM's registered public key | `iss` | `sub` |
-| Mentra core token (transition) | shared `AUGMENTOS_AUTH_JWT_SECRET` (HS256) | `"mentra"` | core token `sub` (the Supabase sub) |
-| Mentra Supabase session (end state) | `SUPABASE_JWT_SECRET` | `"mentra"` | `sub` |
+| Veiller core token (transition) | shared `AUGMENTOS_AUTH_JWT_SECRET` (HS256) | `"veiller"` | core token `sub` (the Supabase sub) |
+| Veiller Supabase session (end state) | `SUPABASE_JWT_SECRET` | `"veiller"` | `sub` |
 
 Maps `(tenantId, tenantUserId)` to the user's `_id` (the `mentraUserId`), creating the
 record on first sight. Returns `{ access_token, refresh_token, token_type,
@@ -112,7 +112,7 @@ Services verify the token locally against their configured issuer/JWKS list.
 
 ### `GET /.well-known/jwks.json`
 
-Publishes Mentra's public keys in JWK form, each with a `kid`. Developer backends
+Publishes Veiller's public keys in JWK form, each with a `kid`. Developer backends
 fetch it to verify miniapp tokens; Core services verify Core access tokens the
 same way. Runtime token verification is deployment-configured in issue 007.
 
@@ -131,7 +131,7 @@ client coordination is needed.
 ## How the cloud-client uses this
 
 - In Core-backed mode, constructed with a **subject token** (the OEM-minted JWT,
-  or the Mentra core token), or a `getSubjectToken()` callback. It calls
+  or the Veiller core token), or a `getSubjectToken()` callback. It calls
   `/exchange` to get Core access + refresh tokens and owns refresh via `/refresh`.
 - Runtime uses its own `cloud-runtime` token provider. Hosted deployments may
   source that provider through Core/Auth; runtime-only deployments do not need a

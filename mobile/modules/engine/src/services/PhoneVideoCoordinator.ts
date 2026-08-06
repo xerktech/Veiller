@@ -15,7 +15,7 @@
  * closed/crashed miniapp be cleaned up on unregister.
  */
 
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {useGlassesStore} from "../stores/glasses"
 import {isGlassesConnected} from "./GlassesReadiness"
 

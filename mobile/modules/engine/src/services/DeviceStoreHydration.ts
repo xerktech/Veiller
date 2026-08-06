@@ -21,7 +21,7 @@
  * destructive or routing decisions must fail open (treat as "has a device"),
  * matching the foreground-reconnect pattern.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {useSettingsStore, SETTINGS} from "../stores/settings"
 import {useGlassesStore} from "../stores/glasses"
 import {pushAllBluetoothSettings} from "./GlassesSettingsSync"

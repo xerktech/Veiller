@@ -1,23 +1,22 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {},
     "../cloud-v2/packages/auth": {
-      "name": "@mentra/auth",
+      "name": "@veiller/auth",
       "version": "0.1.0-dev.0",
       "dependencies": {
         "jose": "^5.9.6",
       },
     },
     "../cloud-v2/packages/cli": {
-      "name": "@mentra/cli",
+      "name": "@veiller/cli",
       "version": "2.0.0-dev.0",
       "bin": {
-        "mentra": "./src/index.ts",
+        "veiller": "./src/index.ts",
       },
       "dependencies": {
-        "@mentra/miniapp-cli": "file:../../../sdk/miniapp-cli",
+        "@veiller/miniapp-cli": "file:../../../sdk/miniapp-cli",
         "commander": "^14.0.2",
         "qrcode": "^1.5.4",
       },
@@ -27,10 +26,10 @@
       },
     },
     "../cloud-v2/packages/cloud-client": {
-      "name": "@mentra/cloud-client",
+      "name": "@veiller/cloud-client",
       "version": "0.1.0-dev.0",
       "dependencies": {
-        "@mentra/cloud-protocol": "^0.1.0-dev.0",
+        "@veiller/cloud-protocol": "^0.1.0-dev.0",
         "tweetnacl": "^1.0.3",
       },
       "devDependencies": {
@@ -45,10 +44,10 @@
       ],
     },
     "../cloud-v2/packages/core": {
-      "name": "@mentra/cloud-core",
+      "name": "@veiller/cloud-core",
       "version": "0.0.0",
       "dependencies": {
-        "@mentra/cloud-shared": "workspace:*",
+        "@veiller/cloud-shared": "workspace:*",
         "@workos-inc/node": "^10.3.0",
         "hono": "^4.11.1",
         "jose": "^5.9.6",
@@ -58,26 +57,26 @@
       },
     },
     "../cloud-v2/packages/protocol": {
-      "name": "@mentra/cloud-protocol",
+      "name": "@veiller/cloud-protocol",
       "version": "0.1.0-dev.0",
       "dependencies": {
         "zod": "^3.24.1",
       },
     },
     "../cloud-v2/packages/proxy": {
-      "name": "@mentra/cloud-proxy",
+      "name": "@veiller/cloud-proxy",
       "version": "0.0.0",
       "dependencies": {
-        "@mentra/cloud-shared": "workspace:*",
+        "@veiller/cloud-shared": "workspace:*",
       },
     },
     "../cloud-v2/packages/runtime": {
-      "name": "@mentra/cloud-runtime",
+      "name": "@veiller/cloud-runtime",
       "version": "0.0.0",
       "dependencies": {
-        "@mentra/cloud-protocol": "^0.1.0-dev.0",
-        "@mentra/cloud-shared": "workspace:*",
         "@soniox/node": "^2.1.0",
+        "@veiller/cloud-protocol": "^0.1.0-dev.0",
+        "@veiller/cloud-shared": "workspace:*",
         "hono": "^4.11.1",
         "ioredis": "^5.4.1",
         "tweetnacl": "^1.0.3",
@@ -86,7 +85,7 @@
       },
     },
     "../cloud-v2/packages/shared": {
-      "name": "@mentra/cloud-shared",
+      "name": "@veiller/cloud-shared",
       "version": "0.0.0",
       "dependencies": {
         "hono": "^4.11.1",
@@ -100,7 +99,7 @@
     "../miniapps/captions": {
       "name": "local-captions",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
         "react": "^19.0.0",
@@ -109,26 +108,25 @@
         "tailwindcss": "^4.0.8",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
         "@types/react": "^19.1.6",
         "@types/react-dom": "^19.1.6",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
       },
     },
     "../miniapps/codex-kawaii-e2e": {
       "name": "codex-kawaii-e2e-miniapp",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-types": "^1.3.14",
       },
     },
     "../miniapps/example-miniapp": {
       "name": "example-miniapp",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
         "@radix-ui/react-alert-dialog": "^1.1.13",
         "@radix-ui/react-checkbox": "^1.1.4",
         "@radix-ui/react-dialog": "^1.1.7",
@@ -137,6 +135,7 @@
         "@radix-ui/react-select": "^2.1.6",
         "@radix-ui/react-slot": "^1.2.2",
         "@radix-ui/react-switch": "^1.1.3",
+        "@veiller/miniapp": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
@@ -148,37 +147,37 @@
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^17.4.4",
-        "@mentra/miniapp-cli": "workspace:*",
         "@testing-library/react": "^16.3.0",
         "@types/react": "^19.1.6",
         "@types/react-dom": "^19.1.6",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
       },
     },
     "../miniapps/kawaii": {
       "name": "kawaii-miniapp",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-types": "^1.3.14",
       },
     },
     "../miniapps/merge": {
       "name": "local-merge",
       "dependencies": {
-        "@mentra/auth": "workspace:*",
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/auth": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "hono": "^4.11.1",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "tailwindcss": "^4.0.8",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
         "@types/react": "^19.1.6",
         "@types/react-dom": "^19.1.6",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
         "bun-types": "^1.3.14",
       },
@@ -187,8 +186,8 @@
       "name": "navigation-miniapp",
       "version": "1.0.6",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
         "@turf/turf": "^7.3.5",
+        "@veiller/miniapp": "workspace:*",
         "liquid-glass-react": "^1.1.1",
         "lucide-react": "^0.511.0",
         "mapbox-gl": "^3.25.0",
@@ -198,10 +197,10 @@
         "zustand": "^5.0.13",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
         "@types/node": "^25.8.0",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
         "bun-types": "^1.3.14",
         "tailwindcss": "^4.2.4",
@@ -210,7 +209,7 @@
     "../miniapps/recorder": {
       "name": "recorder-miniapp",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
         "react": "^19.0.0",
@@ -219,16 +218,16 @@
         "tailwindcss": "^4.0.8",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
         "@types/react": "^19.1.6",
         "@types/react-dom": "^19.1.6",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
       },
     },
     "../miniapps/teleprompter": {
       "name": "teleprompter-miniapp",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
         "react": "^19.0.0",
@@ -237,16 +236,25 @@
         "tailwindcss": "^4.0.8",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
         "@types/react": "^19.1.6",
         "@types/react-dom": "^19.1.6",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
+      },
+    },
+    "../miniapps/tenir": {
+      "name": "local-tenir",
+      "dependencies": {
+        "@veiller/miniapp": "workspace:*",
+      },
+      "devDependencies": {
+        "@veiller/miniapp-cli": "workspace:*",
       },
     },
     "../miniapps/translation": {
       "name": "local-translation",
       "dependencies": {
-        "@mentra/miniapp": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
         "react": "^19.0.0",
@@ -255,14 +263,24 @@
         "tailwindcss": "^4.0.8",
       },
       "devDependencies": {
-        "@mentra/miniapp-cli": "workspace:*",
         "@types/react": "^19.1.6",
         "@types/react-dom": "^19.1.6",
+        "@veiller/miniapp-cli": "workspace:*",
         "bun-plugin-tailwind": "^0.1.2",
       },
     },
+    "../miniapps/turma": {
+      "name": "local-turma",
+      "dependencies": {
+        "@veiller/miniapp": "workspace:*",
+      },
+      "devDependencies": {
+        "@veiller/miniapp-cli": "workspace:*",
+        "bun-types": "^1.3.14",
+      },
+    },
     "../mobile/modules/bluetooth-sdk": {
-      "name": "@mentra/bluetooth-sdk",
+      "name": "@veiller/bluetooth-sdk",
       "version": "0.1.21-dev.3",
       "devDependencies": {
         "@types/node": "^25.9.3",
@@ -278,10 +296,10 @@
       },
     },
     "../mobile/modules/crust": {
-      "name": "@mentra/crust",
+      "name": "@veiller/crust",
       "version": "0.1.0-dev.1",
       "dependencies": {
-        "@mentra/jspolyfill": "^0.1.0-dev.0",
+        "@veiller/jspolyfill": "^0.1.0-dev.0",
       },
       "devDependencies": {
         "@expo/config-plugins": ">=8.0.0",
@@ -296,7 +314,7 @@
       },
     },
     "../mobile/modules/engine": {
-      "name": "@mentra/engine",
+      "name": "@veiller/engine",
       "version": "0.1.0-dev.0",
       "dependencies": {
         "buffer": "^6.0.3",
@@ -305,11 +323,11 @@
         "typesafe-ts": "^1.7.1",
       },
       "devDependencies": {
-        "@mentra/bluetooth-sdk": "workspace:*",
-        "@mentra/cloud-client": "workspace:*",
-        "@mentra/cloud-protocol": "workspace:*",
-        "@mentra/miniapp": "workspace:*",
         "@types/semver": "^7.7.1",
+        "@veiller/bluetooth-sdk": "workspace:*",
+        "@veiller/cloud-client": "workspace:*",
+        "@veiller/cloud-protocol": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "expo-module-scripts": "^55.0.2",
         "expo-modules-core": "55.0.25",
         "react-native-nitro-modules": "^0.31.10",
@@ -318,13 +336,13 @@
       "peerDependencies": {
         "@craftzdog/react-native-buffer": "*",
         "@dr.pogodin/react-native-fs": "*",
-        "@mentra/bluetooth-sdk": "*",
-        "@mentra/cloud-client": "^0.1.0-dev.0",
-        "@mentra/cloud-protocol": "^0.1.0-dev.0",
-        "@mentra/crust": "^0.1.0-dev.0",
-        "@mentra/miniapp": "^0.3.0-dev.0",
         "@react-native-community/netinfo": "*",
         "@types/react": "*",
+        "@veiller/bluetooth-sdk": "*",
+        "@veiller/cloud-client": "^0.1.0-dev.0",
+        "@veiller/cloud-protocol": "^0.1.0-dev.0",
+        "@veiller/crust": "^0.1.0-dev.0",
+        "@veiller/miniapp": "^0.3.0-dev.0",
         "axios": "*",
         "expo": "*",
         "expo-audio": "*",
@@ -348,23 +366,23 @@
         "react-native-reanimated": "*",
         "react-native-share": "*",
         "react-native-udp": "*",
-        "react-native-wifi-reborn": "*",
         "react-native-zip-archive": "*",
         "zustand": "*",
       },
     },
     "../mobile/modules/jspolyfill": {
-      "name": "@mentra/jspolyfill",
+      "name": "@veiller/jspolyfill",
       "version": "0.1.0-dev.0",
       "devDependencies": {
         "esbuild": "^0.23.0",
       },
     },
     "../mobile/modules/miniapp": {
-      "name": "@mentra/miniapp",
+      "name": "@veiller/miniapp",
       "version": "0.3.0-dev.1",
       "dependencies": {
         "@mentra/types": "1.0.0-beta.2",
+        "@veiller/cloud-protocol": "workspace:*",
         "eventemitter3": "^5.0.1",
       },
       "devDependencies": {
@@ -379,11 +397,11 @@
         "react",
       ],
     },
-    "create-mentra-miniapp": {
-      "name": "create-mentra-miniapp",
+    "create-veiller-miniapp": {
+      "name": "create-veiller-miniapp",
       "version": "0.1.0-dev.1",
       "bin": {
-        "create-mentra-miniapp": "./bin/index.ts",
+        "create-veiller-miniapp": "./bin/index.ts",
       },
       "dependencies": {
         "@clack/prompts": "^1.2.0",
@@ -398,14 +416,14 @@
       "dependencies": {
         "@craftzdog/react-native-buffer": "^6.1.2",
         "@dr.pogodin/react-native-fs": "^2.37.0",
-        "@mentra/bluetooth-sdk": "workspace:*",
-        "@mentra/cloud-client": "workspace:*",
-        "@mentra/cloud-protocol": "workspace:*",
-        "@mentra/crust": "workspace:*",
-        "@mentra/engine": "workspace:*",
-        "@mentra/jspolyfill": "workspace:*",
-        "@mentra/miniapp": "workspace:*",
         "@react-native-community/netinfo": "11.5.2",
+        "@veiller/bluetooth-sdk": "workspace:*",
+        "@veiller/cloud-client": "workspace:*",
+        "@veiller/cloud-protocol": "workspace:*",
+        "@veiller/crust": "workspace:*",
+        "@veiller/engine": "workspace:*",
+        "@veiller/jspolyfill": "workspace:*",
+        "@veiller/miniapp": "workspace:*",
         "axios": "^1.13.6",
         "expo": "~55.0.24",
         "expo-application": "~55.0.15",
@@ -446,9 +464,10 @@
       },
     },
     "miniapp-cli": {
-      "name": "@mentra/miniapp-cli",
+      "name": "@veiller/miniapp-cli",
       "version": "0.1.0-dev.1",
       "bin": {
+        "veiller-miniapp": "./src/index.ts",
         "mentra-miniapp": "./src/index.ts",
       },
       "dependencies": {
@@ -921,34 +940,6 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
-
-    "@mentra/auth": ["@mentra/auth@workspace:../cloud-v2/packages/auth"],
-
-    "@mentra/bluetooth-sdk": ["@mentra/bluetooth-sdk@workspace:../mobile/modules/bluetooth-sdk"],
-
-    "@mentra/cli": ["@mentra/cli@workspace:../cloud-v2/packages/cli"],
-
-    "@mentra/cloud-client": ["@mentra/cloud-client@workspace:../cloud-v2/packages/cloud-client"],
-
-    "@mentra/cloud-core": ["@mentra/cloud-core@workspace:../cloud-v2/packages/core"],
-
-    "@mentra/cloud-protocol": ["@mentra/cloud-protocol@workspace:../cloud-v2/packages/protocol"],
-
-    "@mentra/cloud-proxy": ["@mentra/cloud-proxy@workspace:../cloud-v2/packages/proxy"],
-
-    "@mentra/cloud-runtime": ["@mentra/cloud-runtime@workspace:../cloud-v2/packages/runtime"],
-
-    "@mentra/cloud-shared": ["@mentra/cloud-shared@workspace:../cloud-v2/packages/shared"],
-
-    "@mentra/crust": ["@mentra/crust@workspace:../mobile/modules/crust"],
-
-    "@mentra/engine": ["@mentra/engine@workspace:../mobile/modules/engine"],
-
-    "@mentra/jspolyfill": ["@mentra/jspolyfill@workspace:../mobile/modules/jspolyfill"],
-
-    "@mentra/miniapp": ["@mentra/miniapp@workspace:../mobile/modules/miniapp"],
-
-    "@mentra/miniapp-cli": ["@mentra/miniapp-cli@workspace:miniapp-cli"],
 
     "@mentra/types": ["@mentra/types@1.0.0-beta.2", "", {}, "sha512-yn0H7oYId8TSOGlSDmstds4nnmZbXyDncFy3FC1h4dWpDx6o4BmBehAJd2Otp9gr1bWwIL0yEp6JK60I8TBUGw=="],
 
@@ -1426,6 +1417,34 @@
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.3.2", "", {}, "sha512-5jsZFwgR5rTdKwidH9Qmat75RKwqfpKlWWB1frDkljN127mwqBu8K0PYo7/hFpF03IEJpfVPpCQDY/eDx3iHvA=="],
 
+    "@veiller/auth": ["@veiller/auth@workspace:../cloud-v2/packages/auth"],
+
+    "@veiller/bluetooth-sdk": ["@veiller/bluetooth-sdk@workspace:../mobile/modules/bluetooth-sdk"],
+
+    "@veiller/cli": ["@veiller/cli@workspace:../cloud-v2/packages/cli"],
+
+    "@veiller/cloud-client": ["@veiller/cloud-client@workspace:../cloud-v2/packages/cloud-client"],
+
+    "@veiller/cloud-core": ["@veiller/cloud-core@workspace:../cloud-v2/packages/core"],
+
+    "@veiller/cloud-protocol": ["@veiller/cloud-protocol@workspace:../cloud-v2/packages/protocol"],
+
+    "@veiller/cloud-proxy": ["@veiller/cloud-proxy@workspace:../cloud-v2/packages/proxy"],
+
+    "@veiller/cloud-runtime": ["@veiller/cloud-runtime@workspace:../cloud-v2/packages/runtime"],
+
+    "@veiller/cloud-shared": ["@veiller/cloud-shared@workspace:../cloud-v2/packages/shared"],
+
+    "@veiller/crust": ["@veiller/crust@workspace:../mobile/modules/crust"],
+
+    "@veiller/engine": ["@veiller/engine@workspace:../mobile/modules/engine"],
+
+    "@veiller/jspolyfill": ["@veiller/jspolyfill@workspace:../mobile/modules/jspolyfill"],
+
+    "@veiller/miniapp": ["@veiller/miniapp@workspace:../mobile/modules/miniapp"],
+
+    "@veiller/miniapp-cli": ["@veiller/miniapp-cli@workspace:miniapp-cli"],
+
     "@workos-inc/node": ["@workos-inc/node@10.7.0", "", {}, "sha512-rffa9znZuIv4yo+9JRxGOLTTSxh0XhOT6jlsktgqEi9MuB9V0VFHRzLd3bTpkq+J9sgrPZNGpvX4aWNfMqt5cQ=="],
 
     "@xmldom/xmldom": ["@xmldom/xmldom@0.8.13", "", {}, "sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw=="],
@@ -1644,7 +1663,7 @@
 
     "create-jest": ["create-jest@29.7.0", "", { "dependencies": { "@jest/types": "^29.6.3", "chalk": "^4.0.0", "exit": "^0.1.2", "graceful-fs": "^4.2.9", "jest-config": "^29.7.0", "jest-util": "^29.7.0", "prompts": "^2.0.1" }, "bin": { "create-jest": "bin/create-jest.js" } }, "sha512-Adz2bdH0Vq3F53KEMJOoftQFutWCukm6J24wbPWRO4k1kMY7gS7ds/uoJkNuV8wDCtWWnuwGcJwpWcih+zEW1Q=="],
 
-    "create-mentra-miniapp": ["create-mentra-miniapp@workspace:create-mentra-miniapp"],
+    "create-veiller-miniapp": ["create-veiller-miniapp@workspace:create-veiller-miniapp"],
 
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
 
@@ -2276,7 +2295,11 @@
 
     "local-merge": ["local-merge@workspace:../miniapps/merge"],
 
+    "local-tenir": ["local-tenir@workspace:../miniapps/tenir"],
+
     "local-translation": ["local-translation@workspace:../miniapps/translation"],
+
+    "local-turma": ["local-turma@workspace:../miniapps/turma"],
 
     "locate-path": ["locate-path@5.0.0", "", { "dependencies": { "p-locate": "^4.1.0" } }, "sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g=="],
 

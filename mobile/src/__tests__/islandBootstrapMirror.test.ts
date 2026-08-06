@@ -1,4 +1,4 @@
-// Imports the real bootstrap + displayMirror by path (not via "@mentra/engine",
+// Imports the real bootstrap + displayMirror by path (not via "@veiller/engine",
 // which jest mocks) so the actual logic runs under the mobile jest CI runner.
 import * as bootstrap from "../../modules/engine/src/runtime/bootstrap"
 import {displayMirror} from "../../modules/engine/src/facades/displayMirror"
@@ -16,9 +16,9 @@ describe("island bootstrap front door", () => {
   it("configure() stores auth/config/analytics for island to read", () => {
     const auth = {getSubjectToken: async () => ({token: "t", type: "supabase" as const})}
     const analytics = jest.fn()
-    bootstrap.configure({auth, config: {coreUrl: "http://core", oemId: "mentra"}, analytics})
+    bootstrap.configure({auth, config: {coreUrl: "http://core", oemId: "veiller"}, analytics})
     expect(bootstrap.getAuth()).toBe(auth)
-    expect(bootstrap.getConfigValues()).toEqual({coreUrl: "http://core", oemId: "mentra"})
+    expect(bootstrap.getConfigValues()).toEqual({coreUrl: "http://core", oemId: "veiller"})
     expect(bootstrap.getAnalytics()).toBe(analytics)
   })
 

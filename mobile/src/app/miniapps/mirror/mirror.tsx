@@ -9,7 +9,7 @@ import {useRegisterCapsule} from "@/stores/capsule"
 export default function GallerySettingsScreen() {
   const viewShotRef = useRef<View>(null)
   useRegisterCapsule({
-    packageName: "com.mentra.mirror",
+    packageName: "com.veiller.mirror",
     viewShotRef,
     visibleOnRoutes: ["/miniapps/mirror/mirror"],
   })

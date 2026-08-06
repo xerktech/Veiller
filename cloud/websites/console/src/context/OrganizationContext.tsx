@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import api, { Organization } from "../services/api.service";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { toast } from "sonner";
 
 /**
@@ -27,7 +27,7 @@ interface OrganizationContextType {
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 // Local storage key for persisting the current organization
-const CURRENT_ORG_STORAGE_KEY = "mentraos_current_org";
+const CURRENT_ORG_STORAGE_KEY = "veiller_current_org";
 
 /** Small helper — wait `ms` milliseconds (for retry backoff). */
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));

@@ -33,7 +33,7 @@ missing.
 
 | Folder | Service | What it covers |
 | --- | --- | --- |
-| `npm/` | npmjs.com | Publishing `@mentra/*` packages |
+| `npm/` | npmjs.com | Publishing `@veiller/*` packages |
 | `porter/` | Porter (on AKS) | Deploys, env vars, logs, rollback |
 | `cloudflare/` | Cloudflare | Edge, DNS, load balancer, idle timeouts |
 | `betterstack/` | BetterStack | Logs, dashboards, the `bstack` CLI |

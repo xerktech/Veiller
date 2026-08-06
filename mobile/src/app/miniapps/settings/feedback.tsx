@@ -16,7 +16,7 @@ import {
 } from "@/services/bugReport/bugReportSubmission"
 import {buildReportTrigger} from "@/services/bugReport/bugReportCategorization"
 import {useNavigationStore} from "@/stores/navigation"
-import {engine, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@veiller/engine"
 import showAlert from "@/utils/AlertUtils"
 import {useRegisterCapsule} from "@/stores/capsule"
 
@@ -46,7 +46,7 @@ export default function FeedbackPage() {
   const {goBack, getPreviousRoute} = useNavigationStore.getState()
 
   useRegisterCapsule({
-    packageName: "com.mentra.settings",
+    packageName: "com.veiller.settings",
     viewShotRef,
     visibleOnRoutes: ["/miniapps/settings/feedback"],
   })

@@ -283,33 +283,33 @@ public enum BluetoothEvent: CustomStringConvertible {
 }
 
 @MainActor
-public protocol MentraBluetoothSDKDelegate: AnyObject {
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdate state: MentraBluetoothState)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateSdkState sdkState: PhoneSdkRuntimeState)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateScan scan: BluetoothScanState)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didDiscover device: Device)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didStopScan reason: ScanStopReason)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEvent)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceiveMicPcm event: MicPcmEvent)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceiveMicLc3 event: MicLc3Event)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didChangeDefaultDevice device: Device?)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didLog message: String)
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didFail error: BluetoothSdkError)
+public protocol VeillerBluetoothSDKDelegate: AnyObject {
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdate state: VeillerBluetoothState)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateSdkState sdkState: PhoneSdkRuntimeState)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateScan scan: BluetoothScanState)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didDiscover device: Device)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didStopScan reason: ScanStopReason)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceive event: BluetoothEvent)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceiveMicPcm event: MicPcmEvent)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceiveMicLc3 event: MicLc3Event)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didChangeDefaultDevice device: Device?)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didLog message: String)
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didFail error: BluetoothSdkError)
 }
 
 @MainActor
-public extension MentraBluetoothSDKDelegate {
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didUpdate _: MentraBluetoothState) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didUpdateGlasses _: GlassesRuntimeState) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didUpdateSdkState _: PhoneSdkRuntimeState) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didUpdateScan _: BluetoothScanState) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didDiscover _: Device) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didStopScan _: ScanStopReason) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didReceive _: BluetoothEvent) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didReceiveMicPcm _: MicPcmEvent) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didReceiveMicLc3 _: MicLc3Event) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didChangeDefaultDevice _: Device?) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didLog _: String) {}
-    func mentraBluetoothSDK(_: MentraBluetoothSDK, didFail _: BluetoothSdkError) {}
+public extension VeillerBluetoothSDKDelegate {
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didUpdate _: VeillerBluetoothState) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didUpdateGlasses _: GlassesRuntimeState) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didUpdateSdkState _: PhoneSdkRuntimeState) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didUpdateScan _: BluetoothScanState) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didDiscover _: Device) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didStopScan _: ScanStopReason) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didReceive _: BluetoothEvent) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didReceiveMicPcm _: MicPcmEvent) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didReceiveMicLc3 _: MicLc3Event) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didChangeDefaultDevice _: Device?) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didLog _: String) {}
+    func veillerBluetoothSDK(_: VeillerBluetoothSDK, didFail _: BluetoothSdkError) {}
 }

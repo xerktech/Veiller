@@ -2,7 +2,7 @@
 
 ## Why
 
-Feedback from the PR #2512 dev-ex round: the example miniapp is "super React-y in a bad way." The specific complaint isn't that the SDK requires React (it doesn't — `@mentra/miniapp` is framework-agnostic, with React behind the optional `/react` subpath). The complaint is that the *example* treats glasses behavior as a function of which React route is mounted.
+Feedback from the PR #2512 dev-ex round: the example miniapp is "super React-y in a bad way." The specific complaint isn't that the SDK requires React (it doesn't — `@veiller/miniapp` is framework-agnostic, with React behind the optional `/react` subpath). The complaint is that the *example* treats glasses behavior as a function of which React route is mounted.
 
 Today's example (`sdk/example-miniapp/src/pages/CaptionsPage.tsx`-ish): the `CaptionsPage` component subscribes to transcription on mount, displays it, drives glasses on its `useEffect`. If the user navigates to the tester menu, transcription unsubscribes — the glasses go silent. That's the wrong shape for smart glasses.
 
@@ -12,21 +12,21 @@ The cloud SDK didn't have this problem because cloud miniapps had two processes 
 
 ## Research: how cloud miniapps do it
 
-Surveyed six sibling cloud miniapps in `~/Programming/OSSG/`: Livestreamer, LiveTranslationOnSmartGlasses, Notify, Merge, Mentra-AI, Mentra-Notes.
+Surveyed six sibling cloud miniapps in `~/Programming/OSSG/`: Livestreamer, LiveTranslationOnSmartGlasses, Notify, Merge, Veiller-AI, Veiller-Notes.
 
 Universal patterns across all six:
 
 1. **Two-layer class structure.** The `XxxApp extends AppServer` is *thin* — its `onSession` callback gets/creates a per-user state container and delegates to it. All glasses-event subscriptions live inside that container, never inside the App class itself.
-   - Examples: `MergeApp.onSession` → `User.setAppSession(session)` (Merge); `MentraAI.onSession` → `User.setAppSession(session)` (Mentra-AI); `NotesApp.onSession` → `notesSession.setAppSession(session)` (Mentra-Notes).
+   - Examples: `MergeApp.onSession` → `User.setAppSession(session)` (Merge); `VeillerAI.onSession` → `User.setAppSession(session)` (Veiller-AI); `NotesApp.onSession` → `notesSession.setAppSession(session)` (Veiller-Notes).
 2. **The per-user container owns subscriptions.** `User.setAppSession(session)` registers `session.events.onTranscription`, `onLocation`, `onButtonPress`, etc. The `clearAppSession` method tears them down. This pair is called on connect/disconnect/reconnect and is idempotent.
-3. **Manager-per-responsibility composition.** Mentra-AI is the most disciplined: `User` composes `TranscriptionManager`, `PhotoManager`, `InputManager`, `LocationManager`, `NotificationManager`, `ChatHistoryManager`, `QueryProcessor`, `AudioManager`, `StorageManager`. Each manager owns one concern and exposes `setup(session) / destroy()`. Mentra-Notes formalizes this with a `@manager` decorator.
+3. **Manager-per-responsibility composition.** Veiller-AI is the most disciplined: `User` composes `TranscriptionManager`, `PhotoManager`, `InputManager`, `LocationManager`, `NotificationManager`, `ChatHistoryManager`, `QueryProcessor`, `AudioManager`, `StorageManager`. Each manager owns one concern and exposes `setup(session) / destroy()`. Veiller-Notes formalizes this with a `@manager` decorator.
 4. **Single source of truth in the glasses-side container.** State (chat history, current notes, stream status, whatever) lives in the User/Session object. Webviews are read-only viewers + RPC callers; they don't hold authoritative state.
-5. **Glasses → webview is event-stream-shaped.** SSE in most repos, WebSocket sync in Mentra-Notes. Always per-user broadcast: `broadcastInsight(userId, event)`, `broadcastChatEvent(userId, event)`, etc.
-6. **Pending-event queue for "webview opens after first event".** Mentra-AI's `pendingEvents` map and Merge's `eventQueue` buffer events when no client is attached and replay on connect.
+5. **Glasses → webview is event-stream-shaped.** SSE in most repos, WebSocket sync in Veiller-Notes. Always per-user broadcast: `broadcastInsight(userId, event)`, `broadcastChatEvent(userId, event)`, etc.
+6. **Pending-event queue for "webview opens after first event".** Veiller-AI's `pendingEvents` map and Merge's `eventQueue` buffer events when no client is attached and replay on connect.
 7. **Initial-state replay on webview connect.** Every SSE handler sends a `history` snapshot before live events.
-8. **Webview → glasses is REST/RPC, never raw events.** Settings updates and commands are POST endpoints (or `@rpc` methods in Mentra-Notes) that mutate the User. Mutations cause broadcasts that re-render the webview.
+8. **Webview → glasses is REST/RPC, never raw events.** Settings updates and commands are POST endpoints (or `@rpc` methods in Veiller-Notes) that mutate the User. Mutations cause broadcasts that re-render the webview.
 9. **Subscriptions never depend on webview state.** Every glasses listener is registered in `onSession` / `User.setAppSession`. Webview routes only register a viewer client. This is the load-bearing pattern that prevents the React-route problem.
-10. **Soft-disconnect grace period.** Both Merge and Mentra-AI keep the User alive for ~60s after disconnect (`SessionManager.softRemove`). Prevents losing state on transient disconnects.
+10. **Soft-disconnect grace period.** Both Merge and Veiller-AI keep the User alive for ~60s after disconnect (`SessionManager.softRemove`). Prevents losing state on transient disconnects.
 
 ## What we copy in the local case
 
@@ -66,15 +66,15 @@ sdk/example-miniapp/
     └── ui/...
 ```
 
-**Why one controller file, not a manager fleet:** The example does ~3 things (live captions, TTS, button events). Mentra-AI's per-concern manager fleet (`TranscriptionManager`, `PhotoManager`, `InputManager`, etc.) is appropriate when an app has 5+ distinct domains. For the example, splitting into managers is more file plumbing than the app warrants. **One `CaptionsController` class with inline `session.events.onTranscription` / `session.events.onButtonPress` handlers** is closer to Merge's `User.ts` shape — easier to read top-to-bottom for newcomers.
+**Why one controller file, not a manager fleet:** The example does ~3 things (live captions, TTS, button events). Veiller-AI's per-concern manager fleet (`TranscriptionManager`, `PhotoManager`, `InputManager`, etc.) is appropriate when an app has 5+ distinct domains. For the example, splitting into managers is more file plumbing than the app warrants. **One `CaptionsController` class with inline `session.events.onTranscription` / `session.events.onButtonPress` handlers** is closer to Merge's `User.ts` shape — easier to read top-to-bottom for newcomers.
 
-Document Mentra-AI-style as the recommended pattern when an app grows past ~5 concerns. Don't force it on the example.
+Document Veiller-AI-style as the recommended pattern when an app grows past ~5 concerns. Don't force it on the example.
 
 ### `main.tsx` shape
 
 ```ts
 // pseudocode
-import { MiniappSession } from "@mentra/miniapp"
+import { MiniappSession } from "@veiller/miniapp"
 import { CaptionsController } from "./controller/CaptionsController"
 import { appStore } from "./store/appStore"
 
@@ -141,8 +141,8 @@ I'd recommend ship without the base class first, see if authors want it, add lat
 
 All locked in:
 
-- **Repo to mirror: Merge-style (single controller class, inline handlers).** Mentra-AI's manager fleet is documented as the recommended pattern for apps with 5+ concerns; the example doesn't need it.
-- **Vanilla (non-React) template variant: deferred.** Get the React example right first. `bunx create-mentra-miniapp --vanilla` is a 1-day follow-up after the controller pattern is proven.
+- **Repo to mirror: Merge-style (single controller class, inline handlers).** Veiller-AI's manager fleet is documented as the recommended pattern for apps with 5+ concerns; the example doesn't need it.
+- **Vanilla (non-React) template variant: deferred.** Get the React example right first. `bunx create-veiller-miniapp --vanilla` is a 1-day follow-up after the controller pattern is proven.
 - **Store: Zustand.** Parity with the rest of the `mobile/` codebase, well-understood, trivial React integration via `useStore(selector)`.
 - **Soft-disconnect grace period: none in V1.** Local miniapps disconnect rarely. Add later if flicker becomes a real issue.
 - **Tester pages keep inline-subscribe.** Documented as the explicit exception ("user-facing glasses logic uses the controller; diagnostic pages may inline-subscribe because they are ephemeral by design"). Do NOT extend Zustand to tester pages — would bloat the controller with debug-only methods.

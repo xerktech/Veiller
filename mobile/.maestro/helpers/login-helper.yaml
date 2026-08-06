@@ -1,7 +1,7 @@
 # Helper flow for logging in
 # This is a reusable flow that can be called from other tests
 ---
-- assertVisible: "Welcome to MentraOS"
+- assertVisible: "Welcome to Veiller"
 
 # Tap on Sign In or Get Started button
 - tapOn:

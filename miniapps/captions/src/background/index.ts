@@ -1,7 +1,7 @@
 /**
  * Background JSContext entry — Local Captions miniapp.
  *
- * A faithful local (island-runtime) port of the @mentra/captions cloud app.
+ * A faithful local (island-runtime) port of the @veiller/captions cloud app.
  * `registerMiniapp(...)` wires the handler to fire after CONNECT lands; the
  * controller constructed here lives for the entire session and survives WebView
  * open/close cycles. It subscribes to transcription, renders captions on the
@@ -13,7 +13,7 @@
  * 40s inactivity clear, settings) now lives in CaptionsController.
  */
 
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 import {CaptionsController} from "./controllers/CaptionsController"
 

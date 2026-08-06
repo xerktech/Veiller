@@ -16,7 +16,7 @@ import type {LatLng} from "@/shared/types"
 import {isDev} from "@/ui/lib/env"
 import {useDevOverride} from "@/ui/lib/devOverride"
 import {getMapbox, mapboxgl} from "@/ui/lib/mapbox"
-import {useColorScheme} from "@mentra/miniapp/ui"
+import {useColorScheme} from "@veiller/miniapp/ui"
 
 import {mapboxStyleUrl} from "./mapStyle"
 import {useDrawerOffset} from "@/ui/components/Drawer/DrawerOffsetContext"
@@ -717,7 +717,7 @@ export function NavMap({
     // pivots once the SDK's async computeRoute resolves).
     let cancelled = false
     const fetchAndDraw = () => {
-      mentra
+      veiller
         .request("nav:get-pivots", undefined)
         .then((pivots) => {
           if (cancelled) return

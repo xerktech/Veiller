@@ -6,11 +6,11 @@
 
 ## What is this doc?
 
-This doc covers scalability concerns in the MentraOS cloud — what happens as the number of concurrent users grows, where the bottlenecks are, and what architectural decisions need to be made to support growth beyond a single server.
+This doc covers scalability concerns in the Veiller cloud — what happens as the number of concurrent users grows, where the bottlenecks are, and what architectural decisions need to be made to support growth beyond a single server.
 
 ## Why it matters
 
-The MentraOS cloud already runs multi-region (US Central, France, East Asia), with each region running as a single-process server. User sessions live in an in-memory `Map`, WebSocket connections are stateful and pinned to the process, and each active transcription user consumes a persistent connection to Soniox. The short-term plan is to add US West and US East clusters alongside US Central. The longer-term goal is horizontal auto-scaling within each region. This doc documents the current constraints, the short-term plan, and what's needed for auto-scaling.
+The Veiller cloud already runs multi-region (US Central, France, East Asia), with each region running as a single-process server. User sessions live in an in-memory `Map`, WebSocket connections are stateful and pinned to the process, and each active transcription user consumes a persistent connection to Soniox. The short-term plan is to add US West and US East clusters alongside US Central. The longer-term goal is horizontal auto-scaling within each region. This doc documents the current constraints, the short-term plan, and what's needed for auto-scaling.
 
 ## System context
 
@@ -103,7 +103,7 @@ Cloud → mini app communication is HTTP. This scales naturally:
 
 ## Current State: Multi-Region (already running)
 
-MentraOS already runs process-per-region. Each region is an independent single-process deployment:
+Veiller already runs process-per-region. Each region is an independent single-process deployment:
 
 | Region     | Status                                       |
 | ---------- | -------------------------------------------- |
@@ -164,7 +164,7 @@ Move session state to an external store (Redis, etc.). Cloud instances become fu
 
 **Pros:** Instances are interchangeable. Survives instance failures without reconnection.
 **Cons:** Major architectural change. Every manager that holds in-memory state needs to be refactored. Real-time audio streaming through an external store is impractical — streaming data paths would still need affinity.
-**Note:** This is likely overkill for MentraOS's scale trajectory. Sticky sessions should be sufficient. Mentioned for completeness.
+**Note:** This is likely overkill for Veiller's scale trajectory. Sticky sessions should be sufficient. Mentioned for completeness.
 
 ---
 

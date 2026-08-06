@@ -1,6 +1,6 @@
-# MentraOS CLI Spec
+# Veiller CLI Spec
 
-Command-line tool for app developers to manage MentraOS apps and organizations.
+Command-line tool for app developers to manage Veiller apps and organizations.
 
 ## Problem
 
@@ -97,9 +97,9 @@ Settings → CLI Keys → Generate
 **CLI Authentication:**
 
 ```bash
-$ mentra auth eyJhbGci...
+$ veiller auth eyJhbGci...
 ✓ Authenticated as dev@example.com
-✓ Credentials saved to ~/.mentraos/credentials.json
+✓ Credentials saved to ~/.veiller/credentials.json
 ```
 
 **Security:**
@@ -114,49 +114,49 @@ $ mentra auth eyJhbGci...
 ### Authentication
 
 ```bash
-mentra auth <token>              # Authenticate, store in ~/.mentraos/credentials.json
-mentra logout                    # Clear credentials
-mentra whoami                    # Show user, org, key info
+veiller auth <token>              # Authenticate, store in ~/.veiller/credentials.json
+veiller logout                    # Clear credentials
+veiller whoami                    # Show user, org, key info
 ```
 
 ### Apps
 
 ```bash
-mentra app list [--org <id>]     # List apps
-mentra app create                # Interactive or --flags
-mentra app get <pkg>             # JSON output
-mentra app update <pkg>          # Interactive or --flags
-mentra app delete <pkg>          # Requires confirmation
-mentra app publish <pkg>         # Submit to store
-mentra app api-key <pkg>         # Regenerate (show once)
-mentra app export <pkg> [-o file] # JSON export
-mentra app import <file>         # JSON import
+veiller app list [--org <id>]     # List apps
+veiller app create                # Interactive or --flags
+veiller app get <pkg>             # JSON output
+veiller app update <pkg>          # Interactive or --flags
+veiller app delete <pkg>          # Requires confirmation
+veiller app publish <pkg>         # Submit to store
+veiller app api-key <pkg>         # Regenerate (show once)
+veiller app export <pkg> [-o file] # JSON export
+veiller app import <file>         # JSON import
 ```
 
 ### Organizations (Read-Only MVP)
 
 ```bash
-mentra org list                  # List user's orgs
-mentra org get [org-id]          # Details (default org if no ID)
-mentra org switch <org-id>       # Set default org
+veiller org list                  # List user's orgs
+veiller org get [org-id]          # Details (default org if no ID)
+veiller org switch <org-id>       # Set default org
 ```
 
 ### Cloud Management
 
 ```bash
-mentra cloud list                # List available clouds
-mentra cloud current             # Show current cloud
-mentra cloud use <cloud>         # Switch cloud (staging, production, etc.)
-mentra cloud add <key>           # Add custom cloud
-mentra cloud remove <cloud>      # Remove custom cloud
+veiller cloud list                # List available clouds
+veiller cloud current             # Show current cloud
+veiller cloud use <cloud>         # Switch cloud (staging, production, etc.)
+veiller cloud add <key>           # Add custom cloud
+veiller cloud remove <cloud>      # Remove custom cloud
 ```
 
 ### Config
 
 ```bash
-mentra config set <key> <value>
-mentra config get <key>
-mentra config list
+veiller config set <key> <value>
+veiller config get <key>
+veiller config list
 ```
 
 ### Global Flags
@@ -171,10 +171,10 @@ mentra config list
 
 ## Command Examples
 
-### `mentra app create` (Interactive)
+### `veiller app create` (Interactive)
 
 ```bash
-$ mentra app create
+$ veiller app create
 ? Package name: org.example.myapp
 ? App name: My App
 ? Description: ...
@@ -185,27 +185,27 @@ $ mentra app create
 🔑 API Key: aos_abc123... (SAVE THIS)
 ```
 
-### `mentra app create` (Flags)
+### `veiller app create` (Flags)
 
 ```bash
-$ mentra app create \
+$ veiller app create \
   --package-name org.example.myapp \
   --name "My App" \
   --app-type background \
   --public-url https://...
 ```
 
-### `mentra app export`
+### `veiller app export`
 
 ```bash
-$ mentra app export org.example.myapp
+$ veiller app export org.example.myapp
 Exported to org.example.myapp.json
 
 # Custom output
-$ mentra app export org.example.myapp -o config.json
+$ veiller app export org.example.myapp -o config.json
 
 # Stdout
-$ mentra app export org.example.myapp -o -
+$ veiller app export org.example.myapp -o -
 ```
 
 **Export Format:**
@@ -228,10 +228,10 @@ $ mentra app export org.example.myapp -o -
 }
 ```
 
-### `mentra app import`
+### `veiller app import`
 
 ```bash
-$ mentra app import config.json
+$ veiller app import config.json
 
 Changes detected:
   ~ description: "old" → "new"
@@ -241,7 +241,7 @@ Changes detected:
 ✓ App updated
 
 # Force (CI/CD)
-$ mentra app import config.json --force
+$ veiller app import config.json --force
 ```
 
 ## Cloud Management
@@ -271,7 +271,7 @@ local:
 
 ### Custom Clouds (User Config)
 
-Users can add custom clouds via `~/.mentra/config.json`:
+Users can add custom clouds via `~/.veiller/config.json`:
 
 ```json
 {
@@ -293,7 +293,7 @@ Users can add custom clouds via `~/.mentra/config.json`:
 
 ```bash
 # List all clouds
-$ mentra cloud list
+$ veiller cloud list
 
 Available Clouds:
 
@@ -310,28 +310,28 @@ Custom:
 * = current cloud
 
 # Switch clouds
-$ mentra cloud use staging
+$ veiller cloud use staging
 ✓ Switched to Staging (https://staging-api.mentra.glass)
 
 # Add custom cloud
-$ mentra cloud add my-cloud \
+$ veiller cloud add my-cloud \
   --name "My Cloud" \
   --url https://my-cloud.mentra.glass
 ✓ Added cloud 'my-cloud'
 
 # Remove custom cloud
-$ mentra cloud remove my-cloud
+$ veiller cloud remove my-cloud
 ✓ Removed cloud 'my-cloud'
 
 # Show current
-$ mentra cloud current
+$ veiller cloud current
 production (https://api.mentra.glass)
 ```
 
 ### Priority Override
 
 ```
-1. MENTRA_API_URL env var (highest priority)
+1. VEILLER_API_URL env var (highest priority)
 2. Current cloud from config
 3. "production" (default fallback)
 ```
@@ -349,7 +349,7 @@ Credentials stored securely in OS-native keychain:
 ```typescript
 // Stored in OS keychain as:
 await Bun.secrets.set({
-  service: "mentra-cli",
+  service: "veiller-cli",
   name: "credentials",
   value: JSON.stringify({
     token: "eyJhbGci...",
@@ -362,9 +362,9 @@ await Bun.secrets.set({
 })
 ```
 
-**Fallback:** `~/.mentra/credentials.json` (chmod 600) if `Bun.secrets` unavailable
+**Fallback:** `~/.veiller/credentials.json` (chmod 600) if `Bun.secrets` unavailable
 
-### `~/.mentra/config.json` (chmod 600)
+### `~/.veiller/config.json` (chmod 600)
 
 ```json
 {
@@ -385,7 +385,7 @@ await Bun.secrets.set({
 }
 ```
 
-### `.mentrarc` (Optional, per-project)
+### `.veillerrc` (Optional, per-project)
 
 ```json
 {
@@ -462,18 +462,18 @@ GET    /api/cli/orgs/:id                  # → /api/console/orgs/:id
 ### 1. Developer Setup
 
 ```bash
-npm install -g @mentra/cli
-mentra auth <token-from-console>
-mentra app create
-mentra app export org.example.myapp
+npm install -g @veiller/cli
+veiller auth <token-from-console>
+veiller app create
+veiller app export org.example.myapp
 git add org.example.myapp.json
 ```
 
 ### 2. Terminal Workflow
 
 ```bash
-mentra app update org.example.myapp --add-permission LOCATION
-mentra app export org.example.myapp
+veiller app update org.example.myapp --add-permission LOCATION
+veiller app export org.example.myapp
 git commit -am "Add location permission"
 ```
 
@@ -483,13 +483,13 @@ git commit -am "Add location permission"
 
 ```yaml
 # Environment variable authentication
-- run: MENTRA_CLI_TOKEN=${{ secrets.MENTRA_CLI_TOKEN }} mentra app list
+- run: VEILLER_CLI_TOKEN=${{ secrets.VEILLER_CLI_TOKEN }} veiller app list
 
 # Or authenticate explicitly
-- run: mentra auth ${{ secrets.MENTRA_CLI_TOKEN }}
-- run: mentra cloud use staging
-- run: mentra app import config.json --force
-- run: mentra app publish org.example.myapp
+- run: veiller auth ${{ secrets.VEILLER_CLI_TOKEN }}
+- run: veiller cloud use staging
+- run: veiller app import config.json --force
+- run: veiller app publish org.example.myapp
 ```
 
 ### 4. Lost Laptop
@@ -504,14 +504,14 @@ Console → CLI Keys → Revoke "My Laptop"
 
 ```bash
 # Lead creates app + exports config
-mentra app create
-mentra app export org.acme.team -o config.json
+veiller app create
+veiller app export org.acme.team -o config.json
 git add config.json && git push
 
 # Team member updates via CLI
-mentra auth <their-token>
+veiller auth <their-token>
 vim config.json  # Edit
-mentra app import config.json
+veiller app import config.json
 git commit -am "Update permissions"
 ```
 
@@ -526,7 +526,7 @@ Stores credentials in OS-native keychain:
 - **Windows:** Credential Manager
 
 ```bash
-$ mentra auth <token>
+$ veiller auth <token>
 ✓ Authenticated as dev@example.com
 ✓ Credentials saved securely to macOS Keychain
 ```
@@ -535,21 +535,21 @@ $ mentra auth <token>
 
 If `Bun.secrets` unavailable (older Bun, headless environments):
 
-- Store in `~/.mentra/credentials.json` (chmod 600)
+- Store in `~/.veiller/credentials.json` (chmod 600)
 - Warn user about less secure storage
 - Auto-migrate from file to secrets on upgrade
 
 ### CI/CD: Environment Variable
 
 ```bash
-export MENTRA_CLI_TOKEN=<token>
-mentra app list  # No auth command needed
+export VEILLER_CLI_TOKEN=<token>
+veiller app list  # No auth command needed
 ```
 
 ## Open Questions
 
 1. **Member management in CLI?** → Phase 2 (low priority, console works)
-2. **App scaffolding (`mentra init`)?** → Phase 2 (needs SDK templates)
+2. **App scaffolding (`veiller init`)?** → Phase 2 (needs SDK templates)
 3. **Exported configs include orgId?** → Yes (optional field, ignored on import)
 4. **Update checks?** → Once per day, show notice
 5. **Bulk operations?** → Phase 2 (wait for usage data)
@@ -560,7 +560,7 @@ mentra app list  # No auth command needed
 
 **In:**
 
-- CLI tool (`@mentra/cli` package, Bun 1.3+ runtime)
+- CLI tool (`@veiller/cli` package, Bun 1.3+ runtime)
 - CLI key system (backend model + console UI + middleware)
 - Credential storage: `Bun.secrets` (primary) + file fallback
 - Cloud management: Built-in clouds + custom clouds
@@ -572,7 +572,7 @@ mentra app list  # No auth command needed
 **Out (Phase 2):**
 
 - Member management
-- App scaffolding (`mentra init`)
+- App scaffolding (`veiller init`)
 - Real-time logs
 - Scoped keys
 - Bulk operations
@@ -584,26 +584,26 @@ mentra app list  # No auth command needed
 **NPM:**
 
 ```bash
-npm install -g @mentra/cli
+npm install -g @veiller/cli
 # or
-bun install -g @mentra/cli
+bun install -g @veiller/cli
 ```
 
-**Package:** `@mentra/cli`  
-**Binary:** `mentra`  
+**Package:** `@veiller/cli`  
+**Binary:** `veiller`  
 **Entry:** `packages/cli/src/index.ts`  
 **Min Bun:** 1.3+ (for `Bun.secrets`)
 
 **Config:**
 
-- `~/.mentra/config.json` - Settings and custom clouds
-- `~/.mentra/credentials.json` - Fallback if no `Bun.secrets`
-- `.mentrarc` - Per-project config
+- `~/.veiller/config.json` - Settings and custom clouds
+- `~/.veiller/credentials.json` - Fallback if no `Bun.secrets`
+- `.veillerrc` - Per-project config
 - OS Keychain - Primary credential storage (via `Bun.secrets`)
 
 **Environment Variables:**
 
-- `MENTRA_CLI_TOKEN` - Token for CI/CD
-- `MENTRA_API_URL` - Override API URL
+- `VEILLER_CLI_TOKEN` - Token for CI/CD
+- `VEILLER_API_URL` - Override API URL
 
 **Future:** Homebrew, direct download scripts

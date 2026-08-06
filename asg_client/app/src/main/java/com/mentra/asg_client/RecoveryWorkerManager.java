@@ -29,15 +29,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.json.JSONObject;
 
-/** Deploys and starts the {@code com.mentra.recovery} sidecar (recovery worker APK). */
+/** Deploys and starts the {@code com.veiller.recovery} sidecar (recovery worker APK). */
 public class RecoveryWorkerManager {
     private static final String TAG = "RecoveryWorkerManager";
-    private static final String RECOVERY_PACKAGE = "com.mentra.recovery";
+    private static final String RECOVERY_PACKAGE = "com.veiller.recovery";
     private static final String LEGACY_UPDATER_PACKAGE = "com.augmentos.otaupdater";
-    private static final String RECOVERY_LAUNCHER_ACTIVITY = "com.mentra.recovery.ui.LauncherActivity";
-    private static final String ACTION_START_RECOVERY = "com.mentra.recovery.ACTION_START_RECOVERY";
+    private static final String RECOVERY_LAUNCHER_ACTIVITY = "com.veiller.recovery.ui.LauncherActivity";
+    private static final String ACTION_START_RECOVERY = "com.veiller.recovery.ACTION_START_RECOVERY";
     private static final String RECOVERY_CONTROL_PERMISSION =
-            "com.mentra.recovery.permission.CONTROL";
+            "com.veiller.recovery.permission.CONTROL";
     private static final String RECOVERY_APK_ASSET_NAME = "recovery_worker.apk";
     private static final String RECOVERY_APK_FILE_PATH =
             "/storage/emulated/0/asg/recovery_worker.apk";
@@ -108,7 +108,7 @@ public class RecoveryWorkerManager {
 
     /**
      * Fetches the OTA manifest and installs the recovery worker from the network if a newer
-     * versionCode than what is installed is listed under {@code apps["com.mentra.recovery"]}.
+     * versionCode than what is installed is listed under {@code apps["com.veiller.recovery"]}.
      *
      * <p>The APK is always downloaded fresh and SHA-256 verified before the OEM install broadcast
      * is sent, so no stale-file risk exists. Returns {@code true} when an install was dispatched;

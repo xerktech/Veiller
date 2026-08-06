@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge } from "@mentra/shared";
+import { Badge } from "@veiller/shared";
 import {
   updateDayBar,
   UptimeStreakBar,

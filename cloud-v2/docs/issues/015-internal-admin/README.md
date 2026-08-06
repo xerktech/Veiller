@@ -6,7 +6,7 @@ admin CLI, and durable role mapping are still draft.
 
 ## Problem
 
-Cloud v2 needs an internal admin surface for Mentra operators. This should not
+Cloud v2 needs an internal admin surface for Veiller operators. This should not
 live in Console2, because Console2 is developer-facing. It should also not live
 inside the enterprise portal, because portal users are external customer admins.
 
@@ -24,16 +24,16 @@ admin.staging.mentraglass.com
 CLI:
 
 ```txt
-mentra admin ...
+veiller admin ...
 ```
 
 or, if we want a separate package later:
 
 ```txt
-@mentra/admin-cli
+@veiller/admin-cli
 ```
 
-Initial preference: keep one `mentra` binary and gate admin commands by admin
+Initial preference: keep one `veiller` binary and gate admin commands by admin
 auth/roles.
 
 ## Auth Direction
@@ -55,7 +55,7 @@ Role-based auth remains required before production admin launch.
 
 Requirements:
 
-- User must belong to a Mentra internal WorkOS org.
+- User must belong to a Veiller internal WorkOS org.
 - User should usually have an `@mentraglass.com` email.
 - User must have explicit admin role(s).
 - Every mutation writes an audit log entry.
@@ -149,16 +149,16 @@ Review data references the registry models in `011-miniapp-registry`.
 Initial commands should cover emergency and release operations:
 
 ```txt
-mentra admin whoami
-mentra admin submissions list
-mentra admin submissions approve <submissionId>
-mentra admin submissions reject <submissionId>
-mentra admin registry list
-mentra admin registry draft <registryName>
-mentra admin registry promote <revisionId> --reason "..."
-mentra admin incidents list
-mentra admin incidents show <incidentId>
-mentra admin issuers disable <trustedIssuerId> --reason "..."
+veiller admin whoami
+veiller admin submissions list
+veiller admin submissions approve <submissionId>
+veiller admin submissions reject <submissionId>
+veiller admin registry list
+veiller admin registry draft <registryName>
+veiller admin registry promote <revisionId> --reason "..."
+veiller admin incidents list
+veiller admin incidents show <incidentId>
+veiller admin issuers disable <trustedIssuerId> --reason "..."
 ```
 
 Admin CLI must call the same Cloud Core admin APIs as admin site and produce the
@@ -223,11 +223,11 @@ curl http://localhost:3000/api/admin/health
 
 The integration test covers the release state transitions that power the admin
 review queue. Local HTTP smoke checks verify admin health is public and protected
-admin endpoints require a Mentra/WorkOS session.
+admin endpoints require a Veiller/WorkOS session.
 
 ## Open Decisions
 
-- One `mentra` binary with admin namespace vs separate `@mentra/admin-cli`.
+- One `veiller` binary with admin namespace vs separate `@veiller/admin-cli`.
 - Whether admin site shares frontend shell/components with Console2.
 - Which old incident fields must be migrated exactly from cloud v1.
 - Whether internal admin auth uses the same WorkOS project as Console2/Portal or

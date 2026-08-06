@@ -4,7 +4,7 @@
  * Mounted at: /api/client/auth
  *
  *   POST /exchange      — RFC 8693 token exchange. OEM-signed JWT (or other
- *                         supported subject token) in, Mentra access + refresh
+ *                         supported subject token) in, Veiller access + refresh
  *                         tokens out.
  *   POST /refresh       — RFC 6749 refresh flow. Old refresh token in, fresh
  *                         access + refresh out (rotated).
@@ -208,7 +208,7 @@ function parseDevAttestation(value: string): DevMiniappAttestation {
   } catch {
     // fall through to InvalidRequest below
   }
-  throw new InvalidRequest("devAttestation must be a signed mentra dev attestation");
+  throw new InvalidRequest("devAttestation must be a signed veiller dev attestation");
 }
 
 export default app;

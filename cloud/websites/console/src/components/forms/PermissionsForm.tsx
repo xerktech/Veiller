@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@mentra/shared";
+import { Button, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@veiller/shared";
 import { Shield, Plus, Trash2 } from "lucide-react";
 import { PermissionType, Permission } from "../../types/app";
 

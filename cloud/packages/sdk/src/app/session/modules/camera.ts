@@ -634,7 +634,7 @@ export class CameraModule {
   /**
    * 📹 Start a livestream
    *
-   * Managed by Mentra cloud. Returns playback URLs automatically.
+   * Managed by Veiller cloud. Returns playback URLs automatically.
    * By default uses WebRTC for sub-second latency. If restreamDestinations
    * are provided, switches to SRT ingest with HLS/DASH playback.
    * Multiple miniapps can consume the same livestream simultaneously.

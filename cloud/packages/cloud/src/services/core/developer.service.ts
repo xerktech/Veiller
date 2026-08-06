@@ -8,7 +8,7 @@
 
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { AppI } from "@mentra/sdk";
+import { AppI } from "@veiller/sdk";
 import App from "../../models/app.model";
 import { logger as rootLogger } from "../logging/pino-logger";
 import UserSession from "../session/UserSession";

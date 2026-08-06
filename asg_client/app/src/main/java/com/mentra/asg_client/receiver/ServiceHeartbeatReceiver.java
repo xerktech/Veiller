@@ -17,10 +17,10 @@ public class ServiceHeartbeatReceiver extends BroadcastReceiver {
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
     private static long lastHeartbeatTime = 0;
     private static final String ACTION_HEARTBEAT_LEGACY = "com.mentra.asg_client.ACTION_HEARTBEAT";
-    private static final String ACTION_PING = "com.mentra.recovery.ACTION_PING";
-    private static final String ACTION_PONG = "com.mentra.recovery.ACTION_PONG";
+    private static final String ACTION_PING = "com.veiller.recovery.ACTION_PING";
+    private static final String ACTION_PONG = "com.veiller.recovery.ACTION_PONG";
     private static final String RECOVERY_HEARTBEAT_PERMISSION =
-            "com.mentra.recovery.permission.HEARTBEAT";
+            "com.veiller.recovery.permission.HEARTBEAT";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -56,7 +56,7 @@ public class ServiceHeartbeatReceiver extends BroadcastReceiver {
 
             try {
                 Intent pongIntent = new Intent(ACTION_PONG);
-                pongIntent.setPackage("com.mentra.recovery");
+                pongIntent.setPackage("com.veiller.recovery");
                 context.sendBroadcast(pongIntent, RECOVERY_HEARTBEAT_PERMISSION);
                 Log.d(TAG, "Sent heartbeat acknowledgment");
             } catch (Exception e) {

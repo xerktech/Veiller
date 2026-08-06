@@ -1,1 +1,1 @@
-# websites related to MentraOS Cloud
+# websites related to Veiller Cloud

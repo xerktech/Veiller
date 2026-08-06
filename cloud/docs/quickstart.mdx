@@ -1,6 +1,6 @@
 ---
 title: "Quick Start"
-description: "Get your first MentraOS app running in 5 minutes"
+description: "Get your first Veiller app running in 5 minutes"
 ---
 
 ## Prerequisites
@@ -14,8 +14,8 @@ Before you begin, make sure you have:
   <Step title="Developer Account">
     Sign up at [console.mentraglass.com](https://console.mentraglass.com) to get your API key
   </Step>
-  <Step title="MentraOS App">
-    Install the MentraOS mobile app and connect your smart glasses
+  <Step title="Veiller App">
+    Install the Veiller mobile app and connect your smart glasses
   </Step>
 </Steps>
 
@@ -24,7 +24,7 @@ Before you begin, make sure you have:
 ### 1. Install the SDK
 
 ```bash
-bun add @mentraos/sdk
+bun add @veiller/sdk
 ```
 
 ### 2. Create Your App
@@ -32,7 +32,7 @@ bun add @mentraos/sdk
 Create a new file `app.ts` with strict TypeScript:
 
 ```typescript
-import { AppServer, AppSession } from '@mentraos/sdk';
+import { AppServer, AppSession } from '@veiller/sdk';
 
 // Extend AppServer and override onSession
 class MyAppServer extends AppServer {
@@ -44,7 +44,7 @@ class MyAppServer extends AppServer {
     console.log(`New session: ${sessionId} for user: ${userId}`);
     
     // Show welcome message
-    await session.layouts.showTextWall('Hello from MentraOS!');
+    await session.layouts.showTextWall('Hello from Veiller!');
     
     // Listen for transcriptions
     session.events.onTranscription((data) => {
@@ -70,7 +70,7 @@ class MyAppServer extends AppServer {
 // Create and start the server
 const server = new MyAppServer({
   packageName: 'com.example.myapp',
-  apiKey: process.env.MENTRAOS_API_KEY!,
+  apiKey: process.env.VEILLER_API_KEY!,
   port: 3000
 });
 
@@ -83,7 +83,7 @@ console.log('App server running on port 3000');
 Create a `.env` file:
 
 ```bash
-MENTRAOS_API_KEY=your_api_key_here
+VEILLER_API_KEY=your_api_key_here
 ```
 
 ### 4. Run Your App
@@ -102,7 +102,7 @@ bun run app.ts
     Set your webhook URL to `http://your-server.com/webhook`
   </Step>
   <Step title="Start the App">
-    In the MentraOS mobile app, say "Start [your app name]"
+    In the Veiller mobile app, say "Start [your app name]"
   </Step>
 </Steps>
 
@@ -114,7 +114,7 @@ bun run app.ts
     icon="cloud"
     href="/1-overview"
   >
-    Understand how MentraOS Cloud works under the hood
+    Understand how Veiller Cloud works under the hood
   </Card>
   <Card
     title="Message Types"

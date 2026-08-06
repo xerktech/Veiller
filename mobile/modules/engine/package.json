@@ -1,7 +1,7 @@
 {
-  "name": "@mentra/engine",
+  "name": "@veiller/engine",
   "version": "0.1.0-dev.0",
-  "description": "Mentra Engine — miniapp registry, WebView bridge, and miniapp store",
+  "description": "Veiller Engine — miniapp registry, WebView bridge, and miniapp store",
   "main": "build/index.js",
   "react-native": "src/index.ts",
   "types": "build/index.d.ts",
@@ -56,7 +56,7 @@
   "bugs": {
     "url": "https://github.com/Mentra-Community/MentraOS/issues"
   },
-  "author": "Mentra Community",
+  "author": "Veiller Community",
   "license": "MIT",
   "homepage": "https://github.com/Mentra-Community/MentraOS/tree/dev/mobile/modules/engine#readme",
   "publishConfig": {
@@ -70,10 +70,10 @@
     "typesafe-ts": "^1.7.1"
   },
   "devDependencies": {
-    "@mentra/bluetooth-sdk": "workspace:*",
-    "@mentra/cloud-client": "workspace:*",
-    "@mentra/cloud-protocol": "workspace:*",
-    "@mentra/miniapp": "workspace:*",
+    "@veiller/bluetooth-sdk": "workspace:*",
+    "@veiller/cloud-client": "workspace:*",
+    "@veiller/cloud-protocol": "workspace:*",
+    "@veiller/miniapp": "workspace:*",
     "@types/semver": "^7.7.1",
     "expo-module-scripts": "^55.0.2",
     "expo-modules-core": "55.0.25",
@@ -110,10 +110,10 @@
     "@dr.pogodin/react-native-fs": "*",
     "@craftzdog/react-native-buffer": "*",
     "axios": "*",
-    "@mentra/bluetooth-sdk": "*",
-    "@mentra/crust": "^0.1.0-dev.0",
-    "@mentra/cloud-client": "^0.1.0-dev.0",
-    "@mentra/miniapp": "^0.3.0-dev.0",
-    "@mentra/cloud-protocol": "^0.1.0-dev.0"
+    "@veiller/bluetooth-sdk": "*",
+    "@veiller/crust": "^0.1.0-dev.0",
+    "@veiller/cloud-client": "^0.1.0-dev.0",
+    "@veiller/miniapp": "^0.3.0-dev.0",
+    "@veiller/cloud-protocol": "^0.1.0-dev.0"
   }
 }

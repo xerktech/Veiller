@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/v3-stream-example",
+  "name": "@veiller/v3-stream-example",
   "version": "0.1.0",
   "type": "module",
   "module": "src/index.ts",
@@ -16,8 +16,8 @@
     "setup": "cp -n .env.example .env && echo 'Created .env — edit it with your API key and local IP'"
   },
   "dependencies": {
-    "@mentra/sdk": "file:../../sdk",
-    "@mentra/react": "^2.1.2",
+    "@veiller/sdk": "file:../../sdk",
+    "@veiller/react": "workspace:*",
     "hono": "4.12.8",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",

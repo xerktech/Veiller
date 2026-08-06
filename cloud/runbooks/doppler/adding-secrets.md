@@ -8,10 +8,10 @@ How to add a new secret so the cloud can read it from
 ### 1. Decide which project + configs
 
 - Cloud secrets that pods read at startup go in
-  `mentraos-cloud`. Add to every region config you need
+  `veiller-cloud`. Add to every region config you need
   (`prod_central-us`, `prod_us-east`, `prod_us-west`, etc.) plus
   any non-prod configs (`dev`, `staging`).
-- SRE / tooling secrets go in `mentra-sre`. Usually just `dev`
+- SRE / tooling secrets go in `veiller-sre`. Usually just `dev`
   and `prod` configs.
 
 If a secret only matters in one region, document why; otherwise
@@ -30,10 +30,10 @@ CLI:
 
 ```bash
 doppler secrets set FOO=bar \
-  --project mentraos-cloud --config prod_central-us
+  --project veiller-cloud --config prod_central-us
 
 doppler secrets set FOO=bar \
-  --project mentraos-cloud --config prod_us-east
+  --project veiller-cloud --config prod_us-east
 # ... and so on
 ```
 
@@ -123,7 +123,7 @@ configs:
 REGIONS=(prod_central-us prod_us-east prod_us-west prod_france prod_east-asia)
 
 for cfg in "${REGIONS[@]}"; do
-  doppler secrets --project mentraos-cloud --config $cfg \
+  doppler secrets --project veiller-cloud --config $cfg \
     --only-names > /tmp/$cfg
 done
 

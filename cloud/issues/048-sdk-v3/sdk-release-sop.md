@@ -9,14 +9,14 @@
 
 ## Purpose
 
-This document defines the standard operating procedure for releasing new versions of `@mentra/sdk`, with particular focus on how to handle breaking changes, major version bumps, and prerelease/experimental versions. It exists because:
+This document defines the standard operating procedure for releasing new versions of `@veiller/sdk`, with particular focus on how to handle breaking changes, major version bumps, and prerelease/experimental versions. It exists because:
 
 1. Currently, releases happen manually from arbitrary branches with no process.
 2. Nobody else on the team knows which code is actually published or under which tag.
 3. The `3.0.0-hono.8` prerelease tag was published from a feature branch with no documentation of what it contains.
 4. There is no established pattern for deprecation timelines, compat layers, or developer communication.
 
-This SOP applies to `@mentra/sdk` specifically but the principles extend to any published package in the monorepo (`@mentra/types`, `@mentra/display-utils`, etc.).
+This SOP applies to `@veiller/sdk` specifically but the principles extend to any published package in the monorepo (`@mentra/types`, `@veiller/display-utils`, etc.).
 
 ---
 
@@ -72,7 +72,7 @@ If a breaking change is accompanied by a compatibility shim that preserves the o
 
 ## Release Channels (npm dist-tags)
 
-npm supports multiple "channels" via dist-tags. When a developer runs `npm install @mentra/sdk`, they get the `latest` tag by default. Other tags require explicit opt-in: `npm install @mentra/sdk@beta`.
+npm supports multiple "channels" via dist-tags. When a developer runs `npm install @veiller/sdk`, they get the `latest` tag by default. Other tags require explicit opt-in: `npm install @veiller/sdk@beta`.
 
 ### Standard channels
 
@@ -93,7 +93,7 @@ npm supports multiple "channels" via dist-tags. When a developer runs `npm insta
 
 1. **`latest` is sacred.** It must always point to tested, stable, production-ready code from `main`. Never publish `latest` from a feature branch. Never publish `latest` without the full test suite passing.
 
-2. **`beta` auto-publishes from `dev`.** Every merge to `dev` that changes `packages/sdk/` triggers a beta publish. Developers opt in with `npm install @mentra/sdk@beta`.
+2. **`beta` auto-publishes from `dev`.** Every merge to `dev` that changes `packages/sdk/` triggers a beta publish. Developers opt in with `npm install @veiller/sdk@beta`.
 
 3. **`rc` auto-publishes from `staging`.** When `dev` is promoted to `staging`, an RC is published. This is the "final test" before production.
 
@@ -300,7 +300,7 @@ npm publish --tag my-experiment
 #   - Version: 3.0.0-my-experiment.1
 #   - Branch: feature/my-experiment
 #   - What it contains
-#   - How to install: npm install @mentra/sdk@my-experiment
+#   - How to install: npm install @veiller/sdk@my-experiment
 
 # 6. Tell the team
 # Post in Slack/Discord with install instructions
@@ -316,14 +316,14 @@ npm publish --tag my-experiment
 # 1. DON'T npm unpublish — it breaks installs for anyone who already downloaded it.
 
 # 2. Identify the last good version
-npm view @mentra/sdk versions --json | tail -20
+npm view @veiller/sdk versions --json | tail -20
 
 # 3. Point 'latest' back to the last good version
-npm dist-tag add @mentra/sdk@2.5.3 latest
-# This makes 'npm install @mentra/sdk' download 2.5.3 again
+npm dist-tag add @veiller/sdk@2.5.3 latest
+# This makes 'npm install @veiller/sdk' download 2.5.3 again
 
 # 4. Deprecate the bad version (shows a warning on install)
-npm deprecate @mentra/sdk@3.0.0 "This version has a critical bug. Use 2.5.3 instead."
+npm deprecate @veiller/sdk@3.0.0 "This version has a critical bug. Use 2.5.3 instead."
 
 # 5. Fix the bug, publish a new patch version
 # Follow the normal release process
@@ -336,10 +336,10 @@ npm deprecate @mentra/sdk@3.0.0 "This version has a critical bug. Use 2.5.3 inst
 
 ```bash
 # Remove the tag from the wrong version
-npm dist-tag rm @mentra/sdk my-tag
+npm dist-tag rm @veiller/sdk my-tag
 
 # Add the tag to the correct version
-npm dist-tag add @mentra/sdk@3.0.0-beta.5 beta
+npm dist-tag add @veiller/sdk@3.0.0-beta.5 beta
 ```
 
 ---
@@ -351,23 +351,23 @@ npm dist-tag add @mentra/sdk@3.0.0-beta.5 beta
 The monorepo has packages that depend on each other:
 
 ```
-@mentra/types         ← foundational, no deps on other @mentra packages
-@mentra/display-utils ← depends on @mentra/types
-@mentra/utils         ← depends on @mentra/types
-@mentra/sdk           ← depends on @mentra/types (bundled)
+@mentra/types         ← foundational, no deps on other @veiller packages
+@veiller/display-utils ← depends on @mentra/types
+@veiller/utils         ← depends on @mentra/types
+@veiller/sdk           ← depends on @mentra/types (bundled)
 ```
 
 When publishing, build order matters:
 
 ```
 1. @mentra/types       (if changed)
-2. @mentra/display-utils, @mentra/utils  (parallel, if changed)
-3. @mentra/sdk         (last, depends on the above)
+2. @veiller/display-utils, @veiller/utils  (parallel, if changed)
+3. @veiller/sdk         (last, depends on the above)
 ```
 
 ### Version coordination
 
-If a change in `@mentra/types` breaks `@mentra/sdk`, both need to be published together. The CI pipeline should:
+If a change in `@mentra/types` breaks `@veiller/sdk`, both need to be published together. The CI pipeline should:
 
 1. Detect which packages changed
 2. Build them in dependency order
@@ -376,9 +376,9 @@ If a change in `@mentra/types` breaks `@mentra/sdk`, both need to be published t
 
 ### `workspace:*` protocol
 
-The root `package.json` uses `"@mentra/sdk": "workspace:*"` for local development. The SDK's `package.json` uses `"@mentra/types": "^1.0.0-beta.1"` with `bundledDependencies` for publishing. This means the published SDK bundles its own copy of `@mentra/types` — consumers don't need to install it separately.
+The root `package.json` uses `"@veiller/sdk": "workspace:*"` for local development. The SDK's `package.json` uses `"@mentra/types": "^1.0.0-beta.1"` with `bundledDependencies` for publishing. This means the published SDK bundles its own copy of `@mentra/types` — consumers don't need to install it separately.
 
-When bumping `@mentra/types`, also bump the version range in `@mentra/sdk`'s `dependencies` and rebuild the bundle.
+When bumping `@mentra/types`, also bump the version range in `@veiller/sdk`'s `dependencies` and rebuild the bundle.
 
 ---
 
@@ -389,8 +389,8 @@ After every `latest` publish:
 1. **Verify the publish:**
 
    ```bash
-   npm view @mentra/sdk version          # should show new version
-   npm view @mentra/sdk dist-tags        # latest should point to new version
+   npm view @veiller/sdk version          # should show new version
+   npm view @veiller/sdk dist-tags        # latest should point to new version
    ```
 
 2. **Test a clean install:**
@@ -398,7 +398,7 @@ After every `latest` publish:
    ```bash
    mkdir /tmp/test-sdk && cd /tmp/test-sdk
    npm init -y
-   npm install @mentra/sdk
+   npm install @veiller/sdk
    # Verify it installs, version is correct, basic import works
    ```
 
@@ -441,6 +441,6 @@ Keep a running log of every published version, what branch it came from, and wha
 | 2   | **Should we add `engines` to package.json?**              | e.g., `"engines": { "node": ">=18", "bun": ">=1.0" }` — signals supported runtimes.                                                                                                              |
 | 3   | **Should we publish ESM + CJS or ESM only?**              | Currently ESM only (`"format": "esm"`). Some older projects need CJS. But dual publishing adds complexity.                                                                                       |
 | 4   | **npm 2FA for publishes?**                                | npm supports requiring 2FA for all publishes. Good security but blocks CI. Solution: use npm automation tokens (bypass 2FA for CI, require 2FA for manual).                                      |
-| 5   | **Should prerelease versions be installable by default?** | Currently, `npm install @mentra/sdk` skips prereleases. This is correct behavior. But should the dev console's "install SDK" instructions point to beta during active development?               |
+| 5   | **Should prerelease versions be installable by default?** | Currently, `npm install @veiller/sdk` skips prereleases. This is correct behavior. But should the dev console's "install SDK" instructions point to beta during active development?               |
 | 6   | **Changelogs — manual or auto-generated?**                | Tools like `changesets` auto-generate changelogs from PR descriptions. Manual changelogs are more curated. Recommendation: use changesets for the mechanical part, hand-edit for major releases. |
 | 7   | **Should we notify developers programmatically?**         | If we have developer emails from the dev console, we could email on major releases. Privacy and spam concerns — probably opt-in only.                                                            |

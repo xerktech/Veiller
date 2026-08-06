@@ -11,7 +11,7 @@
  */
 
 import { resolve } from "path";
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 
 const LIVE_CAPTIONS_PACKAGE = "com.augmentos.livecaptions";
@@ -65,7 +65,7 @@ export async function runLiveCaptionsTestOnce(
   const account = accountService.getDefaultTestAccount();
 
   // Create client
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: account.email,
     coreToken: account.coreToken,
     serverUrl: process.env.DEFAULT_SERVER_URL || "ws://localhost:8002",
@@ -82,8 +82,8 @@ export async function runLiveCaptionsTestOnce(
   const startTime = Date.now();
 
   try {
-    // Step 1: Connect to MentraOS Cloud
-    console.log("📡 Connecting to MentraOS Cloud...");
+    // Step 1: Connect to Veiller Cloud
+    console.log("📡 Connecting to Veiller Cloud...");
     await client.connect();
     console.log("✅ Connected successfully\n");
 
@@ -188,7 +188,7 @@ export async function runLiveCaptionsTestOnce(
 }
 
 function setupEventListeners(
-  client: MentraClient,
+  client: VeillerClient,
   whenLetterIsHeard: (letter: string) => void,
 ) {
   // Display events (transcription results should appear here)

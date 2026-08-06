@@ -12,7 +12,7 @@ import {
   // HardwareRequirement,
   HardwareType,
   HardwareRequirementLevel,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 export type AppStoreStatus = "DEVELOPMENT" | "SUBMITTED" | "REJECTED" | "PUBLISHED";
 

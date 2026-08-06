@@ -70,7 +70,7 @@ def _api_headers(token: str) -> dict:
   return {
     "Authorization": f"Bearer {token}",
     "Accept": "application/vnd.github+json",
-    "User-Agent": "Mentra-ASG-upload-asg-client-github-release.sh",
+    "User-Agent": "Veiller-ASG-upload-asg-client-github-release.sh",
     "X-GitHub-Api-Version": "2022-11-28",
   }
 
@@ -115,7 +115,7 @@ def _upload(
     "Authorization": f"Bearer {token}",
     "Content-Type": "application/octet-stream",
     "Accept": "application/vnd.github+json",
-    "User-Agent": "Mentra-ASG-upload-asg-client-github-release.sh",
+    "User-Agent": "Veiller-ASG-upload-asg-client-github-release.sh",
     "Content-Length": str(size),
   }
   r = None

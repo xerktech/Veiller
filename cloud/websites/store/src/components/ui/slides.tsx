@@ -29,7 +29,7 @@ export const CaptionsSlide: React.FC = () => {
           fontSize: "clamp(11px, 1vw, 15px)",
           padding: "0 clamp(16px, 2vw, 32px)",
         }}
-        onClick={() => navigate("/package/com.mentra.captions")}
+        onClick={() => navigate("/package/com.veiller.captions")}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
@@ -58,7 +58,7 @@ export const CaptionsSlideMobile: React.FC = () => {
   useEffect(() => {
     const fetchAppData = async () => {
       try {
-        const result = await api.app.getAppByPackageName("com.mentra.captions");
+        const result = await api.app.getAppByPackageName("com.veiller.captions");
         if (result.app) {
           setAppData({
             name: result.app.name || "Live Captions",
@@ -150,7 +150,7 @@ export const CaptionsSlideMobile: React.FC = () => {
         {/* Get Now Button */}
         <motion.button
           className="shrink-0  w-[88px] h-[38px] xs:w-[70px] xs:h-[28px] sm:w-[80px] sm:h-[32px] bg-[#2E610B] hover:bg-[#ffd500] text-white shadow-lg rounded-full cursor-pointer xs:text-[14px] sm:text-[14px] text-[14px] font-medium"
-          onClick={() => navigate(`/package/${appData?.packageName || "com.mentra.captions"}`)}
+          onClick={() => navigate(`/package/${appData?.packageName || "com.veiller.captions"}`)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}>
           Get Now
@@ -186,7 +186,7 @@ export const MergeSlide: React.FC = () => {
           fontSize: "clamp(11px, 0.85vw, 13px)",
           padding: "0 clamp(16px, 2vw, 32px)",
         }}
-        onClick={() => navigate("/package/com.mentra.merge")}
+        onClick={() => navigate("/package/com.veiller.merge")}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
@@ -215,7 +215,7 @@ export const MergeSlideMobile: React.FC = () => {
   useEffect(() => {
     const fetchAppData = async () => {
       try {
-        const result = await api.app.getAppByPackageName("com.mentra.merge");
+        const result = await api.app.getAppByPackageName("com.veiller.merge");
         if (result.app) {
           setAppData({
             name: result.app.name || "Merge",
@@ -297,7 +297,7 @@ export const MergeSlideMobile: React.FC = () => {
         {/* Get Now Button */}
         <motion.button
           className="shrink-0 w-[88px] h-[38px] xs:w-[70px] xs:h-[28px] sm:w-[80px] sm:h-[32px] bg-[#8F2995] hover:bg-[#00ddff] text-white shadow-lg rounded-full cursor-pointer xs:text-[14px] sm:text-[14px] text-[14px] font-medium"
-          onClick={() => navigate(`/package/${appData?.packageName || "com.mentra.merge"}`)}
+          onClick={() => navigate(`/package/${appData?.packageName || "com.veiller.merge"}`)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}>
           Get Now
@@ -333,7 +333,7 @@ export const StreamSlide: React.FC = () => {
           fontSize: "clamp(11px, 1vw, 15px)",
           padding: "0 clamp(16px, 2vw, 32px)",
         }}
-        onClick={() => navigate("/package/com.mentra.streamer")}
+        onClick={() => navigate("/package/com.veiller.streamer")}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
@@ -362,7 +362,7 @@ export const StreamSlideMobile: React.FC = () => {
   useEffect(() => {
     const fetchAppData = async () => {
       try {
-        const result = await api.app.getAppByPackageName("com.mentra.streamer");
+        const result = await api.app.getAppByPackageName("com.veiller.streamer");
         if (result.app) {
           setAppData({
             name: result.app.name || "Stream",
@@ -444,7 +444,7 @@ export const StreamSlideMobile: React.FC = () => {
         {/* Get Now Button */}
         <motion.button
           className="shrink-0 w-[88px] h-[38px] xs:w-[70px] xs:h-[28px] sm:w-[80px] sm:h-[32px] bg-[#000000] hover:bg-[#333333] text-white shadow-lg rounded-full cursor-pointer xs:text-[14px] sm:text-[14px] text-[14px] font-medium"
-          onClick={() => navigate(`/package/${appData?.packageName || "com.mentra.streamer"}`)}
+          onClick={() => navigate(`/package/${appData?.packageName || "com.veiller.streamer"}`)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}>
           Get Now

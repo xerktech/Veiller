@@ -5,11 +5,11 @@
  * so there's no runtime cross-boundary I/O.
  *
  * Channels wrapped in `Rpc<Req, Res>` are request/response (call via
- * `mentra.request` / `session.ui.handle`); the rest are broadcast
- * (`mentra.send` + `mentra.on` / `session.ui.send` + `session.ui.on`).
+ * `veiller.request` / `session.ui.handle`); the rest are broadcast
+ * (`veiller.send` + `veiller.on` / `session.ui.send` + `session.ui.on`).
  */
 
-import type { Rpc } from "@mentra/miniapp/ui";
+import type { Rpc } from "@veiller/miniapp/ui";
 
 import type {
   LoginRequest,
@@ -50,5 +50,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>;
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>;
 }

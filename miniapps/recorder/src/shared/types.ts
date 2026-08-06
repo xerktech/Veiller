@@ -1,9 +1,9 @@
 /**
  * Shared domain types referenced by BOTH the background JSContext and the UI
  * WebView. Both bundlers inline this file at build time. Anything crossing the
- * mentra.send / session.ui channel boundary needs its shape declared here.
+ * veiller.send / session.ui channel boundary needs its shape declared here.
  *
- * Note: the UI never imports `@mentra/miniapp/background` (it's browser-side), so
+ * Note: the UI never imports `@veiller/miniapp/background` (it's browser-side), so
  * the background maps the SDK's `BlobMeta` into the UI-friendly `RecordingItem`.
  */
 

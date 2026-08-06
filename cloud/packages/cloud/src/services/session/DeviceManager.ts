@@ -1,4 +1,4 @@
-// MentraOS/cloud/packages/cloud/src/services/session/DeviceManager.ts
+// Veiller/cloud/packages/cloud/src/services/session/DeviceManager.ts
 /**
  * DeviceManager
  *
@@ -21,7 +21,7 @@
 
 import type { Logger } from "pino";
 
-import { Capabilities, CloudToAppMessageType, GlassesToCloudMessageType } from "@mentra/sdk";
+import { Capabilities, CloudToAppMessageType, GlassesToCloudMessageType } from "@veiller/sdk";
 import { GlassesInfo } from "@mentra/types";
 
 import { getCapabilitiesForModel, isModelSupported } from "../../config/hardware-capabilities";

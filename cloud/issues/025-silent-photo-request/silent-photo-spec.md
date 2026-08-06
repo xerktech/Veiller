@@ -6,7 +6,7 @@ Add cloud-controlled `silent` mode for photo requests. When `silent: true`, the 
 
 ## Problem
 
-AI apps like Mira and MentraAI take photos continuously for context awareness. Currently:
+AI apps like Mira and VeillerAI take photos continuously for context awareness. Currently:
 
 1. Each photo triggers LED flash and shutter sound
 2. This is disruptive in social/work settings
@@ -62,9 +62,9 @@ Hardcoded packages that always get `silent: true`:
 
 ```typescript
 const SILENT_PHOTO_PACKAGES = new Set([
-  'com.mentra.mira',
-  'com.mentra.mentraai',
-  'com.mentra.mentraai.beta',
+  'com.veiller.mira',
+  'com.veiller.veillerai',
+  'com.veiller.veillerai.beta',
 ]);
 ```
 
@@ -103,9 +103,9 @@ export interface PhotoRequestToGlasses extends BaseMessage {
 ```typescript
 // At module level
 const SILENT_PHOTO_PACKAGES = new Set([
-  'com.mentra.mira',
-  'com.mentra.mentraai', 
-  'com.mentra.mentraai.beta',
+  'com.veiller.mira',
+  'com.veiller.veillerai', 
+  'com.veiller.veillerai.beta',
 ]);
 
 // Add env var packages at startup
@@ -126,9 +126,9 @@ const messageToGlasses = {
 
 | packageName | silent value | LED | Sound |
 |-------------|--------------|-----|-------|
-| `com.mentra.mira` | `true` | Off | Off |
-| `com.mentra.mentraai` | `true` | Off | Off |
-| `com.mentra.mentraai.beta` | `true` | Off | Off |
+| `com.veiller.mira` | `true` | Off | Off |
+| `com.veiller.veillerai` | `true` | Off | Off |
+| `com.veiller.veillerai.beta` | `true` | Off | Off |
 | Any other app | `false` | On | On |
 | App in `SILENT_PHOTO_PACKAGES` env | `true` | Off | Off |
 

@@ -6,7 +6,7 @@ import {Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
-import {engine, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@veiller/engine"
 import {ThemedStyle} from "@/theme"
 
 export const VersionInfo = () => {
@@ -21,7 +21,7 @@ export const VersionInfo = () => {
   const copyVersionInfo = async () => {
     // Veiller has no user account (XERK-198), so there is no id/email to include.
     const info = [
-      `version: ${process.env.EXPO_PUBLIC_MENTRAOS_VERSION}`,
+      `version: ${process.env.EXPO_PUBLIC_VEILLER_VERSION}`,
       `branch: ${process.env.EXPO_PUBLIC_BUILD_BRANCH}`,
       `time: ${process.env.EXPO_PUBLIC_BUILD_TIME}`,
       `commit: ${process.env.EXPO_PUBLIC_BUILD_COMMIT}`,
@@ -45,7 +45,7 @@ export const VersionInfo = () => {
         <View className="flex-row gap-2">
           <Text
             style={themed($buildInfo)}
-            text={translate("common:version", {number: process.env.EXPO_PUBLIC_MENTRAOS_VERSION})}
+            text={translate("common:version", {number: process.env.EXPO_PUBLIC_VEILLER_VERSION})}
           />
           <Text style={themed($buildInfo)} text={`${process.env.EXPO_PUBLIC_BUILD_BRANCH}`} />
         </View>

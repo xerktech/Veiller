@@ -1,5 +1,5 @@
 /**
- * Shared envelope types for the MentraJS runtime — the polyfill bundle
+ * Shared envelope types for the VeillerJS runtime — the polyfill bundle
  * uses these to drive globalThis.__deliver and the dispatch surface.
  *
  * Native (Swift on iOS, Kotlin on Android) injects:

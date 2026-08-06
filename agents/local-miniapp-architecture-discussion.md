@@ -21,13 +21,13 @@ After the dev-ex feedback round on this PR, the following spec docs were added. 
 
 ## What this is
 
-We're designing how third-party (and first-party) miniapps run on MentraOS. A miniapp is a small program that drives smart glasses — displays text, subscribes to transcription, responds to button presses, takes photos, etc. Today miniapps run as cloud apps: each miniapp is a Node/Bun server somewhere on the internet, the cloud routes events to it over WebSockets, the cloud routes display commands back down to the phone, the phone routes them to the glasses over BLE.
+We're designing how third-party (and first-party) miniapps run on Veiller. A miniapp is a small program that drives smart glasses — displays text, subscribes to transcription, responds to button presses, takes photos, etc. Today miniapps run as cloud apps: each miniapp is a Node/Bun server somewhere on the internet, the cloud routes events to it over WebSockets, the cloud routes display commands back down to the phone, the phone routes them to the glasses over BLE.
 
 This doc is about whether we keep that model, replace it, or pick something in between — and what architecture gives us the best outcome given our constraints.
 
 ## Scope clarification
 
-This doc is about the **new local miniapp SDK only**. The existing `@mentra/sdk` (cloud SDK) is not in scope here — it continues to work, both SDKs coexist during development, and `@mentra/sdk` will eventually be deprecated. We're not trying to design "one SDK for everything." If the local SDK ends up sharing transport logic with the cloud SDK as a happy side effect, great. If not, that's fine too.
+This doc is about the **new local miniapp SDK only**. The existing `@veiller/sdk` (cloud SDK) is not in scope here — it continues to work, both SDKs coexist during development, and `@veiller/sdk` will eventually be deprecated. We're not trying to design "one SDK for everything." If the local SDK ends up sharing transport logic with the cloud SDK as a happy side effect, great. If not, that's fine too.
 
 ## Goals
 
@@ -94,7 +94,7 @@ Pebble's architecture is a direct precedent for what we're considering. The engi
 
 ### Option 1 — Current plan: Everything in WebViews, run always
 
-Miniapps are static web bundles (HTML/CSS/JS) that load into WebViews inside the MentraOS app. The WebView stays mounted always (offscreen when backgrounded, `opacity: 0`, not `display: none`). The WebView drives the glasses through a postMessage bridge to the native MentraOS code.
+Miniapps are static web bundles (HTML/CSS/JS) that load into WebViews inside the Veiller app. The WebView stays mounted always (offscreen when backgrounded, `opacity: 0`, not `display: none`). The WebView drives the glasses through a postMessage bridge to the native Veiller code.
 
 **Pros:**
 
@@ -115,7 +115,7 @@ Miniapps are static web bundles (HTML/CSS/JS) that load into WebViews inside the
 
 ### Option 2 — nodejs-mobile: Same SDK on phone and cloud, phone runs embedded Node
 
-Embed the full Node.js runtime on the phone via `nodejs-mobile` (community fork of the original Janea project). Each miniapp is still a `@mentra/sdk` Node app — same code that runs on a cloud server. The difference: instead of the developer hosting it, MentraOS embeds Node in the mobile app and runs the miniapp there.
+Embed the full Node.js runtime on the phone via `nodejs-mobile` (community fork of the original Janea project). Each miniapp is still a `@veiller/sdk` Node app — same code that runs on a cloud server. The difference: instead of the developer hosting it, Veiller embeds Node in the mobile app and runs the miniapp there.
 
 **Pros:**
 
@@ -126,7 +126,7 @@ Embed the full Node.js runtime on the phone via `nodejs-mobile` (community fork 
 
 **Cons:**
 
-- **Heavy.** Adds ~30MB to MentraOS binary (per platform). Android crosses Play Store "large app" warning threshold.
+- **Heavy.** Adds ~30MB to Veiller binary (per platform). Android crosses Play Store "large app" warning threshold.
 - **50-80MB RAM per Node instance.** 3-5 miniapps = 150-400MB just for runtimes, before user code. iOS jetsam starts killing us.
 - iOS has no JIT for third-party apps — Node runs in interpreter mode, 3-5x slower on CPU-bound code. For IO-bound miniapps (which is most), it's fine.
 - Separate process per miniapp means cross-process messaging overhead
@@ -158,7 +158,7 @@ UI, if the miniapp needs one, is a separate concern: launch a WebView on demand 
 
 - **No npm packages that require Node APIs.** Developers get a curated subset. Same constraint as browser JS, minus DOM. If a miniapp author needs `express` or `node:fs`, they're out of luck.
 - We have to implement the API surface ourselves — `fetch`, `WebSocket`, timers, crypto, storage all wired through native bridges. Not hard, but real work. (~2-3 weeks for a complete polyfill layer.)
-- Fallback to cloud requires a code refactor — the miniapp JS uses our curated surface, which is a SUBSET of what `@mentra/sdk` offers. Not zero-change migration but close.
+- Fallback to cloud requires a code refactor — the miniapp JS uses our curated surface, which is a SUBSET of what `@veiller/sdk` offers. Not zero-change migration but close.
 
 **Cost to build:** 6-10 weeks. Longer than Option 1 because we're building the runtime from scratch. Shorter than Option 2 because we're not dealing with nodejs-mobile complexity.
 

@@ -1,4 +1,4 @@
-import type { MentraSession, TranscriptionData } from "@mentra/sdk";
+import type { VeillerSession, TranscriptionData } from "@veiller/sdk";
 
 import type { AppState, AppStateKey, RuntimeState, StateSnapshot, StateSource, StateUpdate } from "../shared/state";
 
@@ -7,7 +7,7 @@ interface StateClient {
   send(event: "ping" | "runtime_update" | "snapshot" | "state_update", payload: unknown): Promise<void> | void;
 }
 
-const USER_SESSIONS_KEY = Symbol.for("mentra.v3SmokeTest.userSessions");
+const USER_SESSIONS_KEY = Symbol.for("veiller.v3SmokeTest.userSessions");
 (globalThis as Record<PropertyKey, unknown>)[USER_SESSIONS_KEY] ??= new Map<string, UserSession>();
 
 const DEFAULT_RUNTIME_STATE: RuntimeState = {
@@ -51,7 +51,7 @@ export class UserSession {
   }
 
   private readonly stateClients = new Set<StateClient>();
-  private mentraSession: MentraSession | null = null;
+  private veillerSession: VeillerSession | null = null;
   private runtime: RuntimeState = { ...DEFAULT_RUNTIME_STATE };
   private state: Partial<AppState> = { ...DEFAULT_APP_STATE };
 
@@ -65,11 +65,11 @@ export class UserSession {
   }
 
   hasActiveSession(): boolean {
-    return this.mentraSession !== null;
+    return this.veillerSession !== null;
   }
 
-  attachSession(session: MentraSession): void {
-    this.mentraSession = session;
+  attachSession(session: VeillerSession): void {
+    this.veillerSession = session;
     this.runtime = {
       ...this.runtime,
       sessionId: session.sessionId,
@@ -80,8 +80,8 @@ export class UserSession {
     this.broadcastSnapshot();
   }
 
-  markReconnected(session: MentraSession): void {
-    this.mentraSession = session;
+  markReconnected(session: VeillerSession): void {
+    this.veillerSession = session;
     this.runtime = {
       ...this.runtime,
       lastReconnectAt: new Date().toISOString(),
@@ -94,7 +94,7 @@ export class UserSession {
   }
 
   markStopped(reason: string): void {
-    this.mentraSession = null;
+    this.veillerSession = null;
     this.runtime = {
       ...this.runtime,
       status: "stopped",

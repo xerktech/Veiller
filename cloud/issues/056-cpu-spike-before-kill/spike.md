@@ -55,7 +55,7 @@ So "5.02 cores" means: the main JS thread is pegged at 100%, AND JSC's backgroun
 | Mar 9      | `81b4eae33`     | feat(046): SDK app-ws liveness ping-pong                                                  |
 | Mar 17     | `6d7b4cf32`     | fix: resolve all pre-existing TypeScript strict errors (34 violations)                    |
 | **Mar 22** | **`71a2ab8b2`** | **fixes (touched incident processor again — 3 days before crash)**                        |
-| **Mar 23** | **`9a6c81ed6`** | **feat(048): SDK v3 runtime — MentraSession, managers, MiniAppServer, transport, compat** |
+| **Mar 23** | **`9a6c81ed6`** | **feat(048): SDK v3 runtime — VeillerSession, managers, MiniAppServer, transport, compat** |
 | Mar 23     | `598a4f51c`     | refactor(048): rename compat adapters, add missing v2 compat methods                      |
 | Mar 23     | `f52d8cfd8`     | fix(048): batch subscriptions, fix LocationManager leak                                   |
 | Mar 24     | `379f9653d`     | chore: enable the content moderation                                                      |
@@ -65,7 +65,7 @@ The two highest-risk changes that landed in the 72 hours before the March 25 cra
 
 1. **March 22: `71a2ab8b2` — incident processor touched again.** The incident system was introduced Feb 22 and has been patched multiple times. This is its most recent change before the crash.
 
-2. **March 23: `9a6c81ed6` — SDK v3 runtime.** A massive refactor introducing `MentraSession`, new managers, `MiniAppServer`, transport layer, and compatibility adapters. This is the single largest change in the 30 days before the crash.
+2. **March 23: `9a6c81ed6` — SDK v3 runtime.** A massive refactor introducing `VeillerSession`, new managers, `MiniAppServer`, transport layer, and compatibility adapters. This is the single largest change in the 30 days before the crash.
 
 **The LC3 WASM decode code has NOT been modified in any of these commits.** It has been running fine with 40+ sessions for months.
 
@@ -211,11 +211,11 @@ The incident system at realistic sizes is **not the primary cause**, but:
 
 ### Suspect 1: SDK v3 Runtime (feat 048) — landed March 23
 
-Commit `9a6c81ed6` introduced `MentraSession`, new managers, `MiniAppServer`, transport layer, and compatibility adapters. This is a **massive** change that landed 2 days before the crash.
+Commit `9a6c81ed6` introduced `VeillerSession`, new managers, `MiniAppServer`, transport layer, and compatibility adapters. This is a **massive** change that landed 2 days before the crash.
 
 **What we need to investigate:**
 
-- Does `MentraSession` or the new transport layer introduce new per-message processing overhead?
+- Does `VeillerSession` or the new transport layer introduce new per-message processing overhead?
 - Do the compatibility adapters add synchronous work to the hot audio/message path?
 - Does the new `MiniAppServer` change how app WebSocket messages are handled?
 - Are there new timers, intervals, or event handlers that fire per-session?

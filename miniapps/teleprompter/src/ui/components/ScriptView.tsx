@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react"
 import {ChevronDown, ChevronUp, Mic, Pause, Play, RotateCcw} from "lucide-react"
-import {useColorScheme} from "@mentra/miniapp/ui"
+import {useColorScheme} from "@veiller/miniapp/ui"
 
 import type {PlaybackStatus, TeleprompterSettings} from "../../shared/types"
 import {fmtClock, fmtWords} from "../lib/format"

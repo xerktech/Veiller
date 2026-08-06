@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# MentraOS self-hosted runner bootstrap (macOS + Linux).
+# Veiller self-hosted runner bootstrap (macOS + Linux).
 #
 # Bootstraps a fresh Mac mini OR a Linux box (Ubuntu/Debian) into a working
-# GitHub Actions runner host for the MentraOS pipelines. Re-running is safe —
+# GitHub Actions runner host for the Veiller pipelines. Re-running is safe —
 # every step is idempotent.
 #
 # Platform support:
@@ -24,7 +24,7 @@
 #      you've already set them up by hand).
 #
 # Manual post-install steps (do these once after running this script):
-#   1. Copy ~/.mentra/credentials/ from an existing runner (or your laptop).
+#   1. Copy ~/.veiller/credentials/ from an existing runner (or your laptop).
 #      Three files are required for the staging-builds workflow:
 #        - appstore-connect.env       (ASC API key id + issuer id)
 #        - AuthKey_<id>.p8             (ASC API private key)
@@ -60,7 +60,7 @@
 #   --runners N       Create N runner instances. Default 2. Pass 0 to skip
 #                     runner registration entirely (useful when runners are
 #                     already configured manually). If any runner is already
-#                     configured under ~/mentra/actions-runner-* the runner
+#                     configured under ~/veiller/actions-runner-* the runner
 #                     registration step is skipped automatically.
 #
 # Usage:
@@ -145,7 +145,7 @@ if [[ -z "${RUNNER_VERSION:-}" ]]; then
     RUNNER_VERSION="${RUNNER_VERSION:-$RUNNER_VERSION_FALLBACK}"
 fi
 
-RUNNER_BASE_DIR="$HOME/mentra"
+RUNNER_BASE_DIR="$HOME/veiller"
 
 # Detect existing runners up front. If any are present, skip registration.
 shopt -s nullglob
@@ -399,9 +399,9 @@ rbenv rehash
 # release scripts crash at Step 1. Value is purely cosmetic; pick anything
 # that's safe to display in the app's debug overlay.
 if [[ -z "$(git config --global user.name 2>/dev/null)" ]]; then
-    git config --global user.name "Mentra CI"
+    git config --global user.name "Veiller CI"
     git config --global user.email "ci@mentra.glass"
-    ok "Set global git identity (Mentra CI <ci@mentra.glass>)"
+    ok "Set global git identity (Veiller CI <ci@mentra.glass>)"
 fi
 
 ok "Core toolchain installed"
@@ -553,10 +553,10 @@ sudo launchctl load -w /Library/LaunchDaemons/limit.maxfiles.plist 2>/dev/null |
 ok "File descriptor limit raised to 524288 (system-wide)"
 else
     # Linux: bump via systemd user limits + /etc/security/limits.conf.
-    if ! grep -q "MentraOS runner" /etc/security/limits.conf 2>/dev/null; then
+    if ! grep -q "Veiller runner" /etc/security/limits.conf 2>/dev/null; then
         sudo tee -a /etc/security/limits.conf >/dev/null <<'EOF'
 
-# MentraOS runner (added by setup-runner.sh)
+# Veiller runner (added by setup-runner.sh)
 * soft nofile 524288
 * hard nofile 524288
 EOF
@@ -604,7 +604,7 @@ else
 
     if [[ "$PLATFORM" == "mac" ]]; then
         CLEANUP_PLIST_SRC="$SCRIPT_DIR_ABS/runner-cleanup.plist.template"
-        CLEANUP_PLIST_DST="$HOME/Library/LaunchAgents/com.mentra.runner-cleanup.plist"
+        CLEANUP_PLIST_DST="$HOME/Library/LaunchAgents/com.veiller.runner-cleanup.plist"
         if [[ ! -f "$CLEANUP_PLIST_SRC" ]]; then
             warn "runner-cleanup.plist.template not found — cleanup install skipped."
         else
@@ -754,10 +754,10 @@ $([ "$PLATFORM" = mac ] && cat <<MAC_STEPS
 MAC_STEPS
 )
     - Confirm runner(s) appear at $GH_RUNNER_URL/settings/actions/runners
-    - Copy ~/.mentra/credentials/ from an existing runner (or your laptop):
-        scp ~/.mentra/credentials/{appstore-connect.env,AuthKey_*.p8,google-play-key.json} \\
-            user@$RUNNER_NAME_BASE:~/.mentra/credentials/
-$([ "$PLATFORM" = mac ] && echo "    - For Android signing: also copy ~/.gradle/gradle.properties (has MENTRAOS_UPLOAD_* keys).")
+    - Copy ~/.veiller/credentials/ from an existing runner (or your laptop):
+        scp ~/.veiller/credentials/{appstore-connect.env,AuthKey_*.p8,google-play-key.json} \\
+            user@$RUNNER_NAME_BASE:~/.veiller/credentials/
+$([ "$PLATFORM" = mac ] && echo "    - For Android signing: also copy ~/.gradle/gradle.properties (has VEILLER_UPLOAD_* keys).")
 
   Automated maintenance:
     - Weekly cache cleanup runs Sundays at 03:00 (defers if a build is active).

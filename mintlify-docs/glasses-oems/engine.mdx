@@ -1,10 +1,10 @@
 ---
-title: "Mentra OEM Integration Engine API"
-description: "The engine.* API an OEM host calls to drive MentraOS on its glasses — connection, pairing, device + user settings, wifi, speech, display, cloud session, miniapps, permissions, notifications, and reports, over a device-agnostic runtime."
+title: "Veiller OEM Integration Engine API"
+description: "The engine.* API an OEM host calls to drive Veiller on its glasses — connection, pairing, device + user settings, wifi, speech, display, cloud session, miniapps, permissions, notifications, and reports, over a device-agnostic runtime."
 ---
 
 <Note>
-**Status: preview (Phase 1).** The Mentra OEM Integration Engine covers the full Phase-1 surface
+**Status: preview (Phase 1).** The Veiller OEM Integration Engine covers the full Phase-1 surface
 documented below. Firmware **OTA** and the media **gallery** are intentionally
 deferred to a later phase. The runtime is not yet packaged for external install —
 reach out to [help@mentra.glass](mailto:help@mentra.glass) to integrate today.
@@ -12,12 +12,12 @@ reach out to [help@mentra.glass](mailto:help@mentra.glass) to integrate today.
 
 ## What it is
 
-The **Mentra OEM Integration Engine** is the API an OEM host app (the phone-side app
-that talks to your glasses) calls to run MentraOS. It ships as the `@mentra/engine` module and
+The **Veiller OEM Integration Engine** is the API an OEM host app (the phone-side app
+that talks to your glasses) calls to run Veiller. It ships as the `@veiller/engine` module and
 exposes a single namespaced object, **`engine`**:
 
 ```ts
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 ```
 
 The dividing line:
@@ -35,7 +35,7 @@ across glasses models.
 The host hands the engine its auth + config once, then starts it.
 
 ```ts
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 
 engine.configure({
   // REQUIRED — the host owns login; the engine owns the rest.
@@ -165,7 +165,7 @@ The current keys, their types, and defaults:
 | `voice_activity_detection_enabled` | boolean | `true` | voice-activity detection |
 | `power_saving_mode` | boolean | `false` | low-power mode |
 | `offline_mode` | boolean | `false` | offline operation |
-| `gallery_mode` | boolean | `true` | capture-to-gallery enabled — when `true`, a camera-button press takes a photo to the on-device gallery. The Mentra App auto-manages this (enabled when the camera app is running or no other app is claiming button events); set it directly only if your host has no equivalent button-routing logic |
+| `gallery_mode` | boolean | `true` | capture-to-gallery enabled — when `true`, a camera-button press takes a photo to the on-device gallery. The Veiller App auto-manages this (enabled when the camera app is running or no other app is claiming button events); set it directly only if your host has no equivalent button-routing logic |
 | `calendar_events` | array | `[]` | synced calendar events |
 | `twelve_hour_time` | boolean | `true` | 12-hour vs 24-hour clock |
 | `metric_system` | boolean | `false` | metric vs imperial |
@@ -334,8 +334,8 @@ const off = engine.notifications.onNotification((n) => {
 ## `engine.miniapps`
 
 Miniapp lifecycle. The miniapp **WebView is a host component** — engine ships the
-bridge primitives (`buildMiniappGlobalsScript`, `buildMentraUiShim`, the MentraJS
-router), exported from `@mentra/engine` directly; your app mounts the `<WebView>` and
+bridge primitives (`buildMiniappGlobalsScript`, `buildVeillerUiShim`, the VeillerJS
+router), exported from `@veiller/engine` directly; your app mounts the `<WebView>` and
 wires it to those. This facade is the lifecycle half.
 
 ```ts
@@ -355,10 +355,10 @@ await engine.miniapps.uninstall(packageName, version?)
 
 The raw device-state stores are also exposed under `engine.stores`
 (`glasses`, `display`, `core`, `connection`, `gallerySync`, `cloudClientStatus`,
-`settings`) so the first-party Mentra App can keep using them directly during migration.
+`settings`) so the first-party Veiller App can keep using them directly during migration.
 
 <Warning>
-`engine.stores.*` is a **Mentra-app convenience, not the OEM contract.** It exposes
+`engine.stores.*` is a **Veiller-app convenience, not the OEM contract.** It exposes
 the internal store shape, which can change. OEMs should use the typed facades above;
 prefer a facade wherever one exists.
 </Warning>
@@ -372,8 +372,8 @@ storage, the cloud client, glasses/BLE, settings, speech, display, and the minia
 runtime from there.
 
 <Note>
-You may see internal `configureRuntime(...)` wiring in the first-party Mentra App —
-that's **transitional** scaffolding for migrating Mentra's own screens, not part of
+You may see internal `configureRuntime(...)` wiring in the first-party Veiller App —
+that's **transitional** scaffolding for migrating Veiller's own screens, not part of
 the OEM contract. It deletes itself as each domain lands in engine. An OEM only ever
 calls `configure({auth, config?})` + `start()`.
 </Note>

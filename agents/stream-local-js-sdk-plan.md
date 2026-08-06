@@ -388,7 +388,7 @@ Once Phases 1-4 land, on-device verification:
 
 - No changes to cloud-1 `ManagedStreamingExtension`, `UnmanagedStreamingExtension`, `StreamRegistry`, `StreamLifecycleController`, the existing `streams.routes.ts`, `glasses-message-handler.ts`'s phone-stream handlers, or `app-message-handler.ts`. All cloud-SDK app paths unchanged.
 - No changes to `asg_client/` (glasses code).
-- No changes to `@mentra/miniapp` SDK module surface. `session.stream.*` API preserved.
+- No changes to `@veiller/miniapp` SDK module surface. `session.stream.*` API preserved.
 - No moving of Cloudflare credentials to phone.
 - No mid-stream restream destination management for v1 (immutable after `provision`). Can revisit.
 - No touching the photo flow — separate "move to phone" candidate, out of scope.

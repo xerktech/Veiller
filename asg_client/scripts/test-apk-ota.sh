@@ -136,7 +136,7 @@ echo ""
 # --- Trigger OTA ---
 echo "🚀 Triggering APK OTA check..."
 adb shell am broadcast \
-    -a com.mentra.DEBUG_APK_OTA \
+    -a com.veiller.DEBUG_APK_OTA \
     --es url "http://localhost:$PORT/version.json" \
     -n com.mentra.asg_client/.receiver.DebugApkOtaReceiver
 

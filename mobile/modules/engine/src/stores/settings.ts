@@ -391,7 +391,7 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
-  // The Mentra App intentionally preserves Mentra Live's historical VAD-on
+  // The Veiller App intentionally preserves Mentra Live's historical VAD-on
   // product default. Standalone public Bluetooth SDK hosts default VAD off so
   // their microphone audio remains continuous.
   voice_activity_detection_enabled: {
@@ -710,7 +710,7 @@ export const SETTINGS: Record<string, Setting> = {
   },
   default_button_action_app: {
     key: "default_button_action_app",
-    defaultValue: () => "com.mentra.camera",
+    defaultValue: () => "com.veiller.camera",
     writable: true,
     saveOnServer: true,
     persist: true,
@@ -749,7 +749,7 @@ export const SETTINGS: Record<string, Setting> = {
   },
 } as const
 
-export const OFFLINE_APPLETS: string[] = ["com.mentra.livecaptions", "com.mentra.camera"]
+export const OFFLINE_APPLETS: string[] = ["com.veiller.livecaptions", "com.veiller.camera"]
 
 // These settings are automatically synced to the Bluetooth SDK.
 // Keep this list hardware-facing; app/UI/cloud-only preferences should stay in JS/Crust.

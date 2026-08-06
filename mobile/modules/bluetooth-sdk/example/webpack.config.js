@@ -7,7 +7,7 @@ module.exports = async (env, argv) => {
     {
       ...env,
       babel: {
-        dangerouslyAddModulePathsToTranspile: ["@mentra/bluetooth-sdk"],
+        dangerouslyAddModulePathsToTranspile: ["@veiller/bluetooth-sdk"],
       },
     },
     argv,

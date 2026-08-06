@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the implementation of glasses model tracking within the MentraOS Cloud backend. The system tracks which glasses models users have connected and stores this information both in MongoDB and as PostHog person properties for analytics.
+This document describes the implementation of glasses model tracking within the Veiller Cloud backend. The system tracks which glasses models users have connected and stores this information both in MongoDB and as PostHog person properties for analytics.
 
 ## Architecture
 

@@ -4,12 +4,12 @@ import android.util.Log;
 import com.mentra.asg_client.camera.policy.ManualExposurePolicy;
 
 /**
- * Structured {@code MentraDbg} log lines for camera pipeline diagnostics (shape preserved for
+ * Structured {@code VeillerDbg} log lines for camera pipeline diagnostics (shape preserved for
  * logcat parsers).
  */
 public final class CameraDiagnosticsLog {
 
-    private static final String TAG = "MentraDbg";
+    private static final String TAG = "VeillerDbg";
 
     private CameraDiagnosticsLog() {}
 

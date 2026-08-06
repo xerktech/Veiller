@@ -1,7 +1,7 @@
 import type { UserSession } from "../UserSession"
 
 /**
- * StorageManager — read/write user preferences via MentraOS Simple Storage.
+ * StorageManager — read/write user preferences via Veiller Simple Storage.
  */
 export class StorageManager {
   constructor(private userSession: UserSession) {}

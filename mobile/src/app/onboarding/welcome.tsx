@@ -1,5 +1,5 @@
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {Image, TouchableOpacity, useWindowDimensions, View} from "react-native"
 import type {ImageSourcePropType, ImageStyle, ViewStyle} from "react-native"
 

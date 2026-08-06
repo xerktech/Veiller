@@ -5,8 +5,8 @@
 
 import {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import type {DownloadResult} from "@mentra/miniapp"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import type {DownloadResult} from "@veiller/miniapp"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import type {TesterEventPayload} from "../../shared/types"
 import {useChannel} from "../../hooks/useChannel"
@@ -134,7 +134,7 @@ export default function CameraPage() {
       {
         url: result.photoUrl,
         mimeType: result.mimeType ?? "image/jpeg",
-        filename: `mentra-photo-${result.requestId ?? Date.now()}.${imageExtension(result.mimeType)}`,
+        filename: `veiller-photo-${result.requestId ?? Date.now()}.${imageExtension(result.mimeType)}`,
       },
     ])
       .then((response) => {

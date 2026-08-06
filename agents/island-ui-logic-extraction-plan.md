@@ -1,4 +1,4 @@
-# Island — the MentraOS OEM Integration Engine
+# Island — the Veiller OEM Integration Engine
 
 > **Status:** design / build plan. **Base branch:** `dev`. The cloud-client move (#5)
 > sequences last, once `cloud-v2` has merged into `dev` (days out).
@@ -7,36 +7,36 @@
 
 ## Why
 
-We are turning `@mentra/engine` into the **MentraOS OEM Integration Engine**: a single
-library a glasses OEM drops into their app to get *all* of MentraOS — glasses connection,
+We are turning `@veiller/engine` into the **Veiller OEM Integration Engine**: a single
+library a glasses OEM drops into their app to get *all* of Veiller — glasses connection,
 the miniapp runtime, backend services, OTA, pairing, settings, sensors — while writing
-their own UI. The Mentra app becomes the first consumer of that same engine: a thin UI
+their own UI. The Veiller app becomes the first consumer of that same engine: a thin UI
 layer over island, with no privileged backdoor.
 
 Today the logic is inverted — business logic lives in React screens and the app reaches
 past island straight into the native modules. This plan moves the logic into island and
 makes island the single boundary the UI talks to.
 
-**Scope — this is Phase 1.** Phase 1 moves MentraOS into island so the runtime owns
-Mentra's *own* glasses (the SGCs already in `@mentra/bluetooth-sdk`: G1/G2/Live/Nex/Mach1/
+**Scope — this is Phase 1.** Phase 1 moves Veiller into island so the runtime owns
+Veiller's *own* glasses (the SGCs already in `@veiller/bluetooth-sdk`: G1/G2/Live/Nex/Mach1/
 Simulated) and the app becomes a UI layer. **Phase 2** (separate, later) makes the glasses
 layer *injectable* — an OEM registers its own SGC(s) at runtime instead of PRing them into
-`@mentra/bluetooth-sdk` — turning island into a true third-party engine. Phase 1 is the
+`@veiller/bluetooth-sdk` — turning island into a true third-party engine. Phase 1 is the
 prerequisite; Phase 2's adapter dynamics are TBD and out of scope here.
 
 ## What
 
-**Island is the entire MentraOS runtime. The host is UI + auth.**
+**Island is the entire Veiller runtime. The host is UI + auth.**
 
 - **Island owns** glasses (BLE), the miniapp runtime, **backend comms** (the
-  `@mentra/cloud-client`), OTA, pairing, settings + sync, sensors / navigation / media /
+  `@veiller/cloud-client`), OTA, pairing, settings + sync, sensors / navigation / media /
   notifications (via `crust`), STT/TTS, display, permissions logic, incident filing.
 - **The host provides** its UI and **one required thing: an auth token.** Everything else
   the host needs, it *reads from* or *calls on* island.
 
-> **Governing principle — if the Mentra app's UI uses it, island exposes it.** The Mentra
+> **Governing principle — if the Veiller app's UI uses it, island exposes it.** The Veiller
 > app is OEM #1 and the reference consumer; the engine surface is the *union* of
-> everything the Mentra app needs. A third-party OEM consumes whatever subset it wants.
+> everything the Veiller app needs. A third-party OEM consumes whatever subset it wants.
 
 The complete host→island injection:
 
@@ -51,14 +51,14 @@ await island.start()
 
 That is the whole seam. There is **no** glasses adapter, cloud adapter, nav adapter,
 permissions adapter, or display/mic/photo/stream adapter to implement — island bundles
-`crust` + `@mentra/bluetooth-sdk` and owns them. The OEM owns login (its identity system)
+`crust` + `@veiller/bluetooth-sdk` and owns them. The OEM owns login (its identity system)
 and feeds island a token; island does the rest.
 
 **The auth seam.** `getSubjectToken` is the dev-today shape: the host hands island a subject
 token (on dev, the Supabase session token) that island presents to the cloud-client. It is the
 local form of Cloud-V2's **`OemJwtMinter`** model — RFC 8693 token-exchange, where the OEM
-backend signs a short-lived JWT (`aud:"mentra"`, fresh `jti`) that island exchanges at
-`/api/oem/oauth/token` for a Mentra access JWT + an opaque refresh token. When Cloud-V2's
+backend signs a short-lived JWT (`aud:"veiller"`, fresh `jti`) that island exchanges at
+`/api/oem/oauth/token` for a Veiller access JWT + an opaque refresh token. When Cloud-V2's
 OEM-auth lands in `dev`, this config field evolves from `getSubjectToken` to `OemJwtMinter` —
 a config swap, not a re-architecture, because island already owns the exchange / refresh /
 storage on both sides of that change. **Cloud-V2 owns the auth protocol (catalogued in OS-1590);
@@ -82,7 +82,7 @@ coverage for logic that today can only run on a live device.
 
 **Delivery:** one branch on `dev`, built in the order below, debugged after — not a stack of
 PRs. Every domain except the cloud-client move (#5) is cloud-agnostic and builds on `dev` now,
-shipping incrementally. The cloud-client move needs `@mentra/cloud-client`, which lands in `dev`
+shipping incrementally. The cloud-client move needs `@veiller/cloud-client`, which lands in `dev`
 when `cloud-v2` merges (days out); it sequences **last**, on `dev`, after that merge — no
 separate cloud-v2-branch work. Absorb `cloud-v2` with one early `git merge dev` while the branch
 is young, so the only reconcile (`MantleManager`, `components/home`, the media coordinators,
@@ -105,10 +105,10 @@ since v1 serves traffic for ~a month yet and shares the single `getSubjectToken`
 | 7 | Feature domains: **gallery, incidents, phoneNotifications, speech, wifi, logs** | **M** each | respective btsdk/crust | self-contained facades; `incidents` (bug-report) also backs pairing/OTA auto-filing; camera ones capability-gated |
 | 8 | **Native re-export sweep** + the `glasses.btsdk` passthrough | **M** | the orphan imports (incl. `app/ota/*`) | re-export btsdk/crust through island; ESLint ratchet locks the boundary |
 | — | **Onboarding** | — | — | **stays host UI**; island adds raw input events + `isFirstPairing` |
-| — | **OTA** | — | `app/ota/*` btsdk → `glasses.btsdk` | Mentra-Live firmware orchestration; lives in the Mentra app, driving the glasses through `island.glasses.btsdk` |
+| — | **OTA** | — | `app/ota/*` btsdk → `glasses.btsdk` | Mentra-Live firmware orchestration; lives in the Veiller app, driving the glasses through `island.glasses.btsdk` |
 
 Build order: 1 → 2 → 3; 4/6/7/8 slot in independently. The cloud-client move (#5) sequences
-**last** — it needs `@mentra/cloud-client`, which arrives in `dev` when cloud-v2 merges (days
+**last** — it needs `@veiller/cloud-client`, which arrives in `dev` when cloud-v2 merges (days
 out). v1 and v2 are separate transports, so until then island consumes v1 via `socketComms`
 unchanged.
 
@@ -143,8 +143,8 @@ Shape rule everywhere: `getX()` (snapshot) · `onX(cb) → unsubscribe` · `doX(
 ### `island.session` — backend + identity session (lands with the cloud-client move, #5)
 `status()` (connected|connecting|reconnecting|offline) · `onStatusChanged(cb)` · `user()`
 (id/email/name/avatar/provider) · `onUserChanged(cb)` · `isAuthenticated()` · `signOut()` ·
-`account.delete()` · `account.requestDataExport()`. *(Account ops hit the Mentra backend and
-stay in island — an OEM offering "delete account" must also delete the user's Mentra account
+`account.delete()` · `account.requestDataExport()`. *(Account ops hit the Veiller backend and
+stay in island — an OEM offering "delete account" must also delete the user's Veiller account
 registered through them.)*
 
 ### `island.glasses` — connection + live status + info
@@ -178,12 +178,12 @@ sensing{Enabled,Vad}, powerSaving, galleryMode, button{DefaultAction,DefaultApp,
 (idle→scanning→connecting→booting→booted|failed|timeout) · `onStateChanged(cb)`.
 
 ### `island.glasses.btsdk` — typed passthrough (the escape hatch)
-The re-exported `@mentra/bluetooth-sdk` command + event surface, namespaced under glasses:
+The re-exported `@veiller/bluetooth-sdk` command + event surface, namespaced under glasses:
 `<cmd>(...)` (e.g. `sendOtaStart(url)`, `sendOtaQueryStatus()`, `requestVersionInfo()`) ·
 `on(event, cb)` (e.g. `ota_status`, `version_info`). It exists so the host can drive
 device-specific things island does **not** model — chiefly **OTA**, the Mentra-Live firmware
-flow (APK→MTK→BES), which lives in the Mentra app (its only consumer). Because the call routes
-through island, the app's OTA code imports only `@mentra/engine`.
+flow (APK→MTK→BES), which lives in the Veiller app (its only consumer). Because the call routes
+through island, the app's OTA code imports only `@veiller/engine`.
 
 > **Facades vs passthrough.** Model *shared* capabilities (connection, settings, wifi, pairing)
 > as typed facades; reach for `glasses.btsdk` only for the *long tail* no facade covers. If a
@@ -291,7 +291,7 @@ reimplement any of it.**
 Therefore the contract is a single mountable component:
 
 ```tsx
-import { MiniappView } from "@mentra/engine"
+import { MiniappView } from "@veiller/engine"
 <MiniappView packageName={pkg} onExit={...} />   // island owns spawn, shim, routing, handshake, respawn, the capsule menu
 ```
 
@@ -320,11 +320,11 @@ timeout watchdog into island. Pairing (the 35s boot watchdog → incident) and C
 detection) build on it; the app's OTA flow also uses it via the passthrough. Cheapest first
 step; no new seam.
 
-### OTA — in the Mentra app, on `glasses.btsdk`
+### OTA — in the Veiller app, on `glasses.btsdk`
 OTA is Mentra-Live firmware orchestration (APK→MTK→BES sequencing; the watchdog cascade — global
 20 min, retry 5 s ×3, stuck-at-0 % 70 s, per-step 120 s, MTK 300 s, post-APK 6 s, query-reply 6 s,
 10 s ping; reconnect+version gating; `mtkUpdatedThisSession` filter; index resync; stall
-signature). Mentra Live is its only consumer, so it lives in the Mentra app. Its `app/ota/*` code
+signature). Mentra Live is its only consumer, so it lives in the Veiller app. Its `app/ota/*` code
 reaches the glasses through `island.glasses.btsdk` (`sendOtaStart`, `requestVersionInfo`,
 `on("ota_status")`, …) — importing only island — and surfaces failures through
 `island.notifications`.
@@ -349,7 +349,7 @@ dummy-insert/order-vs-priority sort), `placeAppOnHome`/`reorderApps` + order per
 that proves the pattern. Gestures/animation/sheets stay UI.
 
 ### Cloud-client + auth — the keystone (last; needs cloud-v2 in dev)
-Runs once `cloud-v2` has merged into `dev`, so `@mentra/cloud-client` exists. Relocate its
+Runs once `cloud-v2` has merged into `dev`, so `@veiller/cloud-client` exists. Relocate its
 singleton from `mobile/src/services/cloudClient.ts` **into** island; island constructs it with
 island-owned transports (the UDP socket is already in island) and the host-injected auth seam,
 exposes `island.session`, and drives transcription/managed-photo/stream. The auth seam is the
@@ -363,12 +363,12 @@ and its comms route their btsdk imports through island in the sweep; island cons
 
 ## The native dependency boundary
 
-End-state: the app imports `@mentra/engine` only; island imports `crust` + `@mentra/bluetooth-sdk`
+End-state: the app imports `@veiller/engine` only; island imports `crust` + `@veiller/bluetooth-sdk`
 and exposes their surface. Today the app reaches past island in **80 files** (67 btsdk + 13
 crust). Most die for free — when a coordinator lands, its screens stop importing btsdk because the
 device port owns the calls. The sweep (#8) mops up the orphans: re-export btsdk through
 `island/index.ts`; wrap `crust`'s capabilities (heading, nav, media, notifications) as island
-services. An ESLint `no-restricted-imports` rule banning `crust`/`@mentra/bluetooth-sdk` outside
+services. An ESLint `no-restricted-imports` rule banning `crust`/`@veiller/bluetooth-sdk` outside
 `mobile/modules/engine/**` ratchets the boundary shut per migrated surface.
 
 Two special cases: `stores/glasses.ts` + `stores/core.ts` move **into** island (they *are* the
@@ -378,19 +378,19 @@ natives) stays host as the bootstrap that injects island, and cleans up last.
 
 ## Background execution + Android packaging
 
-MentraOS runs continuously in the background (BLE link, always-on miniapp JSContexts, audio).
+Veiller runs continuously in the background (BLE link, always-on miniapp JSContexts, audio).
 The embedded RN runtime lives as long as its host **process** does:
 
 - **iOS** — the `bluetooth-central` background mode keeps the process alive while connected. The
   OEM adds it to their `Info.plist`; no island code.
 - **Android** — a backgrounded process is reaped unless a **foreground service** holds it.
-  island's FGS is `com.mentra.bluetoothsdk.services.ForegroundService` (type auto-detected at
+  island's FGS is `com.veiller.bluetoothsdk.services.ForegroundService` (type auto-detected at
   runtime: `connectedDevice`, `+microphone`/`+dataSync` while streaming), started/stopped from
   `DeviceManager` on connect/disconnect.
 
 The engine's Android packaging has **two layers that merge differently**: a library module's
 AndroidManifest **auto-merges** into the consuming app; **Gradle build config does not.**
-`mobile/plugins/android.ts` is the *Mentra app's* Expo config plugin (runs only in Mentra's
+`mobile/plugins/android.ts` is the *Veiller app's* Expo config plugin (runs only in Veiller's
 prebuild; an OEM never runs it), so anything an island module needs that currently lives there
 is invisible to OEMs and must be relocated.
 
@@ -410,16 +410,16 @@ Move each runtime requirement into the owning module manifest (`bluetooth-sdk` f
 | `NEARBY_DEVICES` | plugin only | **drop/fix** — not a real permission |
 | FileProvider `<provider>` + `res/xml/file_paths.xml` (gallery/STT/recordings) | plugin writes | **→ bluetooth-sdk module resources** |
 | `networkSecurityConfig` (cleartext to glasses) | plugin writes | **→ module resources** |
-| media/`AD_ID` **removals** (`tools:node="remove"`) | plugin | **stays app-policy** (Mentra's Play stance; OEM does its own) |
+| media/`AD_ID` **removals** (`tools:node="remove"`) | plugin | **stays app-policy** (Veiller's Play stance; OEM does its own) |
 
-Make the FGS notification **brandable**: `Foreground.kt` hardcodes `setContentTitle("Mentra
+Make the FGS notification **brandable**: `Foreground.kt` hardcodes `setContentTitle("Veiller
 Connected")` + a system icon. Read title/icon from `R.string`/`R.drawable` resources so an OEM
 overrides by shadowing the resource — no code fork.
 
 ### Layer 2 — Gradle (does **not** merge)
 Two different things hide here; separate them.
 
-**(a) Config the consuming app genuinely must set → ship as `@mentra/engine/plugin`** (an Expo
+**(a) Config the consuming app genuinely must set → ship as `@veiller/engine/plugin`** (an Expo
 config plugin in the island package; native OEMs follow the same snippets):
 - enable `coreLibraryDesugaring` (`+ desugar_jdk_libs`) — AGP requires the *app* to enable it
   because crust's Nav SDK uses Java 8+ APIs; crust enables it module-side, the app must too.
@@ -434,12 +434,12 @@ app's `settings.gradle` must register `:lc3Lib`. Fix at the source — btsdk dep
 `lc3` artifact (lc3Lib already has a Maven publish task) instead of `project(':lc3Lib')`, so no
 consumer `settings.gradle` entry exists.
 
-Mentra's app-only glue (signing, versionName, Sentry, deep-link scheme, heap/node-path) stays in
+Veiller's app-only glue (signing, versionName, Sentry, deep-link scheme, heap/node-path) stays in
 `mobile/plugins/android.ts` and is not part of the engine.
 
 ### OEM residual obligations (irreducible — policy / branding / keys)
-1. Apply `@mentra/engine/plugin` (Expo) or the documented Gradle steps (native).
-2. Supply a Google Nav API key value (or use Mentra's).
+1. Apply `@veiller/engine/plugin` (Expo) or the documented Gradle steps (native).
+2. Supply a Google Nav API key value (or use Veiller's).
 3. Play Console: justify the FGS types (`connectedDevice`, `microphone`) and `QUERY_ALL_PACKAGES`.
 4. iOS: add the `bluetooth-central` background mode to `Info.plist`.
 5. Optional: override the FGS notification string/icon resources for branding.
@@ -449,7 +449,7 @@ Mentra's app-only glue (signing, versionName, Sentry, deep-link scheme, heap/nod
 - **Passthrough discipline.** Facade-owned capabilities go through the facade; `glasses.btsdk`
   is only for the long tail no facade models (OTA, unmodeled commands). A raw call for a
   facade-managed capability leaves island's snapshot stale.
-- **The keystone needs cloud-v2 in dev.** It relocates `@mentra/cloud-client`, which lands when
+- **The keystone needs cloud-v2 in dev.** It relocates `@veiller/cloud-client`, which lands when
   cloud-v2 merges (~days), so it sequences last. Absorb cloud-v2 via an early `git merge dev` so
   the one-time reconcile (`MantleManager`, `components/home`, the media coordinators, island's
   `config.ts`) stays small.
@@ -461,9 +461,9 @@ Mentra's app-only glue (signing, versionName, Sentry, deep-link scheme, heap/nod
 
 ## Appendix A — direct-native-import offenders
 
-Regenerate: `grep -rl "@mentra/bluetooth-sdk" mobile/src | grep -v __tests__` (67) ·
+Regenerate: `grep -rl "@veiller/bluetooth-sdk" mobile/src | grep -v __tests__` (67) ·
 `grep -rlE "from ['\"]crust['\"]" mobile/src` (13). Bucketed by the PR that removes the import
-(✅ a coordinator owns the calls so the import vanishes; 🔁 re-point to `@mentra/engine` in the
+(✅ a coordinator owns the calls so the import vanishes; 🔁 re-point to `@veiller/engine` in the
 sweep):
 
 - **OTA** 🔁 (stays in the app; re-point to `island.glasses.btsdk`) `app/ota/{check-for-updates,progress,progress-legacy,deriveOtaDisplayState}.tsx`,
@@ -477,7 +477,7 @@ sweep):
 - **Sweep** 🔁 `app/miniapps/settings/{camera,controller,glasses,speech,stress-test,super,notifications,privacy}.tsx`,
   `app/wifi/{connecting,scan}.tsx`, `components/dev/CoreStatusBar.tsx`,
   `components/glasses/NexDeveloperSettings.tsx`, `effects/{ButtonActions,WhisperTest,ScreenshotFeedbackPrompt}.tsx`,
-  `services/{AudioPlaybackService,RestComms,SocketComms,SocketComms.normalizers,HeadingService,NavigationService,mentraJsBootstrap}.ts`,
+  `services/{AudioPlaybackService,RestComms,SocketComms,SocketComms.normalizers,HeadingService,NavigationService,veillerJsBootstrap}.ts`,
   `services/asg/{gallerySyncService,mediaProcessingQueue}.ts`, `services/bugReport/*` (→ `island.incidents`, domain #7),
   `services/miniapps/MiniappCatalog.ts`, `services/{photo,video,streaming}/Phone*Coordinator.ts`,
   `stores/{glasses,core}.ts` (→ move into island), `utils/{LogoutUtils,PermissionsUtils,SettingsNavigationUtils,NotificationServiceUtils}.tsx`,

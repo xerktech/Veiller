@@ -9,8 +9,8 @@
 // Internal btsdk surface — updateBluetoothSettings (the Bluetooth Classic
 // target hint) lives on the full surface, not the public entry (same reason
 // the glasses facade imports internal).
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {ConnectOptions, Device, PairFailureEvent, GlassesNotReadyEvent} from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {ConnectOptions, Device, PairFailureEvent, GlassesNotReadyEvent} from "@veiller/bluetooth-sdk"
 import {useCoreStore} from "../stores/core"
 import {useGlassesStore} from "../stores/glasses"
 import {hasDefaultDevice} from "../services/DeviceStoreHydration"

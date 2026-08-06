@@ -9,7 +9,7 @@
 
 ## Overview
 
-**What this doc covers:** The typed shared state system (`session.state`) for SDK v3 — how mini apps share state between the session runtime (Hermes on phone, or Hono on a server) and the webview (phone screen, or browser). Covers the problem, proposed API with full TypeScript generics, transport mechanism, webview connection lifecycle, and MentraJS framework integration.
+**What this doc covers:** The typed shared state system (`session.state`) for SDK v3 — how mini apps share state between the session runtime (Hermes on phone, or Hono on a server) and the webview (phone screen, or browser). Covers the problem, proposed API with full TypeScript generics, transport mechanism, webview connection lifecycle, and VeillerJS framework integration.
 
 **What this doc does NOT cover:** The broader SDK v3 migration plan (see [spike.md](./spike.md)), persistent storage (`session.storage` — that's a separate, already-existing system), display/layout rendering on the glasses (see `session.display`), or the webview auth system itself (existing infrastructure, reused here).
 
@@ -55,14 +55,14 @@ interface AppState {
 }
 ```
 
-### `MentraSession<T>` — generic session
+### `VeillerSession<T>` — generic session
 
-The state interface is passed as a generic parameter to `MentraSession`. This threads type information through the entire session, so every `.state` call is fully type-checked:
+The state interface is passed as a generic parameter to `VeillerSession`. This threads type information through the entire session, so every `.state` call is fully type-checked:
 
 ```typescript
 import type { AppState } from "../shared/state";
 
-type Session = MentraSession<AppState>;
+type Session = VeillerSession<AppState>;
 ```
 
 ### Full type definitions
@@ -109,10 +109,10 @@ interface StateManager<T extends Record<string, unknown>> {
 }
 
 /**
- * MentraSession with typed shared state.
+ * VeillerSession with typed shared state.
  * T defaults to Record<string, unknown> for untyped usage.
  */
-class MentraSession<T extends Record<string, unknown> = Record<string, unknown>> {
+class VeillerSession<T extends Record<string, unknown> = Record<string, unknown>> {
   readonly transcription: TranscriptionManager;
   readonly translation: TranslationManager;
   readonly display: DisplayManager;
@@ -139,7 +139,7 @@ class MentraSession<T extends Record<string, unknown> = Record<string, unknown>>
 // session/index.ts
 import type { AppState } from "../shared/state";
 
-export default function onSession(session: MentraSession<AppState>) {
+export default function onSession(session: VeillerSession<AppState>) {
   // ✅ Type-checked — "lastTranscript" exists and is string
   session.state.set("lastTranscript", "hello world");
 
@@ -171,7 +171,7 @@ export default function onSession(session: MentraSession<AppState>) {
 
 ### Webview-side usage (React hooks)
 
-The webview side exposes React hooks that subscribe to shared state. These hooks are provided by `@mentra/react` (or the webview SDK package):
+The webview side exposes React hooks that subscribe to shared state. These hooks are provided by `@veiller/react` (or the webview SDK package):
 
 ```typescript
 /**
@@ -179,13 +179,13 @@ The webview side exposes React hooks that subscribe to shared state. These hooks
  * Re-renders the component when the value changes.
  * Returns the current value (or undefined if not yet set).
  */
-function useMentraState<T extends Record<string, unknown>, K extends keyof T>(key: K): T[K] | undefined;
+function useVeillerState<T extends Record<string, unknown>, K extends keyof T>(key: K): T[K] | undefined;
 
 /**
  * React hook — returns the current connection status
  * between the webview and the session runtime.
  */
-function useMentraConnection(): ConnectionStatus;
+function useVeillerConnection(): ConnectionStatus;
 
 type ConnectionStatus =
   | "connected" // WebSocket open, state syncing
@@ -197,7 +197,7 @@ type ConnectionStatus =
  * React hook — returns the auth context for the current webview.
  * Already exists in the current SDK — reused here for state transport auth.
  */
-function useMentraAuth(): {
+function useVeillerAuth(): {
   frontendToken: string | null;
   sessionId: string | null;
   userId: string | null;
@@ -212,12 +212,12 @@ import type { AppState } from "../shared/state";
 
 function CaptionsView() {
   // ✅ Type-checked — "lastTranscript" exists in AppState, typed as string
-  const lastTranscript = useMentraState<AppState, "lastTranscript">("lastTranscript");
+  const lastTranscript = useVeillerState<AppState, "lastTranscript">("lastTranscript");
 
   // ❌ TS error — "doesNotExist" is not a key in AppState
-  const oops = useMentraState<AppState, "doesNotExist">("doesNotExist");
+  const oops = useVeillerState<AppState, "doesNotExist">("doesNotExist");
 
-  const status = useMentraConnection();
+  const status = useVeillerConnection();
 
   if (status === "no-session") {
     return <div>App is not running</div>;
@@ -235,12 +235,12 @@ function CaptionsView() {
 }
 
 function SettingsPanel() {
-  const settings = useMentraState<AppState, "settings">("settings");
-  const { setMentraState } = useMentraActions<AppState>();
+  const settings = useVeillerState<AppState, "settings">("settings");
+  const { setVeillerState } = useVeillerActions<AppState>();
 
   // Webview can write state too — syncs back to session
   const updateFontSize = (size: number) => {
-    setMentraState("settings", {
+    setVeillerState("settings", {
       ...settings,
       fontSize: size,
     });
@@ -268,8 +268,8 @@ Webview write hook:
  * React hook — returns functions to write to shared state from the webview.
  * Writes are sent to the session and broadcast to all subscribers.
  */
-function useMentraActions<T extends Record<string, unknown>>(): {
-  setMentraState: <K extends keyof T>(key: K, value: T[K]) => void;
+function useVeillerActions<T extends Record<string, unknown>>(): {
+  setVeillerState: <K extends keyof T>(key: K, value: T[K]) => void;
 };
 ```
 
@@ -307,7 +307,7 @@ For cloud apps, the webview (in the browser or phone) connects to the Hono serve
 
 ### Authentication
 
-The state WebSocket reuses the existing webview auth system. The webview already obtains a `frontendToken` via `useMentraAuth()` — this token is sent during the WebSocket handshake to authenticate and associate the connection with the correct session.
+The state WebSocket reuses the existing webview auth system. The webview already obtains a `frontendToken` via `useVeillerAuth()` — this token is sent during the WebSocket handshake to authenticate and associate the connection with the correct session.
 
 No new auth infrastructure needed.
 
@@ -347,7 +347,7 @@ State values must be JSON-serializable. No functions, no class instances, no cir
 
 ## Webview Connection States
 
-The webview needs to know the status of its connection to the session. This is exposed via the `useMentraConnection()` hook:
+The webview needs to know the status of its connection to the session. This is exposed via the `useVeillerConnection()` hook:
 
 ```
                     ┌──────────────┐
@@ -391,16 +391,16 @@ The `disconnected` state preserves the last-known state in the webview. Componen
 
 ---
 
-## MentraJS Framework Integration
+## VeillerJS Framework Integration
 
-The shared state system aligns with the MentraJS framework convention structure. The framework uses convention-based directories to separate session code, webview code, and shared types:
+The shared state system aligns with the VeillerJS framework convention structure. The framework uses convention-based directories to separate session code, webview code, and shared types:
 
 ```
 my-app/
 ├── session/
 │   └── index.ts          ← session.state.set("key", value)
 ├── webview/
-│   └── App.tsx           ← useMentraState<AppState>("key")
+│   └── App.tsx           ← useVeillerState<AppState>("key")
 └── shared/
     └── state.ts          ← interface AppState { ... }
 ```
@@ -411,8 +411,8 @@ The `shared/state.ts` file exports the state interface. Both `session/index.ts` 
 
 The framework handles the bridge setup automatically:
 
-1. **Session side:** The framework creates `MentraSession<AppState>` with the developer's state type. `session.state` is ready to use — the developer never manually creates a WebSocket server or serializes messages.
-2. **Webview side:** The framework wraps the React app in a `<MentraProvider>` that establishes the state WebSocket connection. Hooks like `useMentraState` read from this context. The developer never manually connects or parses messages.
+1. **Session side:** The framework creates `VeillerSession<AppState>` with the developer's state type. `session.state` is ready to use — the developer never manually creates a WebSocket server or serializes messages.
+2. **Webview side:** The framework wraps the React app in a `<VeillerProvider>` that establishes the state WebSocket connection. Hooks like `useVeillerState` read from this context. The developer never manually connects or parses messages.
 3. **Shared types:** TypeScript's project references (or the framework's build step) ensure `shared/` is compiled once and used by both sides. No code duplication, no copy-paste type definitions.
 
 ### End-to-end type safety example
@@ -432,7 +432,7 @@ export interface AppState {
 // session/index.ts
 import type { AppState } from "../shared/state";
 
-export default function onSession(session: MentraSession<AppState>) {
+export default function onSession(session: VeillerSession<AppState>) {
   session.state.set("lastTranscript", "hello"); // ✅
   session.state.set("lastTranscript", 42); // ❌ TS2345: number not assignable to string
   session.state.set("bogus", "value"); // ❌ TS2345: "bogus" not assignable to keyof AppState
@@ -444,10 +444,10 @@ export default function onSession(session: MentraSession<AppState>) {
 import type { AppState } from "../shared/state";
 
 function MyComponent() {
-  const transcript = useMentraState<AppState, "lastTranscript">("lastTranscript");
+  const transcript = useVeillerState<AppState, "lastTranscript">("lastTranscript");
   //    ^? string | undefined
 
-  const nope = useMentraState<AppState, "bogus">("bogus");
+  const nope = useVeillerState<AppState, "bogus">("bogus");
   //   ❌ TS2344: "bogus" does not satisfy keyof AppState
 }
 ```
@@ -470,7 +470,7 @@ This is intentional:
 Typical pattern:
 
 ```typescript
-export default function onSession(session: MentraSession<AppState>) {
+export default function onSession(session: VeillerSession<AppState>) {
   // Load persisted settings into ephemeral state on startup
   const savedSettings = await session.storage.get("settings");
   if (savedSettings) {
@@ -501,8 +501,8 @@ These are **not decided** — they need team discussion.
 | #   | Question                                                                                | Context                                                                                                                                                                                                                                                                                                                                                                                                                |
 | --- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | **What happens when webview is open but no session exists?**                            | User opens the browser URL directly, or the mini app crashed. Does the webview show stale data? A blank "app not running" screen? Read-only access to `session.storage`? The `no-session` connection status exists, but we haven't decided what the _default behavior_ should be. This might be app-specific (developer handles it in their `no-session` UI branch).                                                   |
-| 2   | **Should the webview have read access to `session.storage` without an active session?** | If the session is not running, there's no `session.state`. But `session.storage` is persisted server-side. Should the webview SDK expose a `useMentraStorage()` hook that works even in `no-session` state? This would let the webview show saved settings or history even when the app isn't active. Adds complexity — the webview would need a separate REST/WS path to storage that doesn't go through the session. |
-| 3   | **Does a `MentraSession` instance exist when only the webview is connected?**           | Today, sessions are created by webhooks (cloud) or app launch (local). If a user opens the webview URL but the mini app isn't running on any glasses, there is no session. Should connecting a webview create a "headless" session? Or is the session strictly tied to an active glasses connection?                                                                                                                   |
+| 2   | **Should the webview have read access to `session.storage` without an active session?** | If the session is not running, there's no `session.state`. But `session.storage` is persisted server-side. Should the webview SDK expose a `useVeillerStorage()` hook that works even in `no-session` state? This would let the webview show saved settings or history even when the app isn't active. Adds complexity — the webview would need a separate REST/WS path to storage that doesn't go through the session. |
+| 3   | **Does a `VeillerSession` instance exist when only the webview is connected?**           | Today, sessions are created by webhooks (cloud) or app launch (local). If a user opens the webview URL but the mini app isn't running on any glasses, there is no session. Should connecting a webview create a "headless" session? Or is the session strictly tied to an active glasses connection?                                                                                                                   |
 | 4   | **Grace period before `no-session` state fires?**                                       | If the mini app stops (crash, user switches apps, glasses disconnect), how quickly should the webview transition to `no-session`? Immediately? After 5 seconds? 30 seconds? A grace period would smooth over brief interruptions (glasses Bluetooth reconnecting, app restart). Too long and the webview shows stale data with no indication the session is gone.                                                      |
 | 5   | **Auto-restart: should the webview trigger a mini app restart?**                        | If the webview detects `no-session`, should it be able to request that the OS restart the mini app? This is probably an OS-level concern (the phone OS decides when to start/stop apps), not an SDK concern. But the webview might need a `requestRestart()` API that signals the OS. Needs mobile team input.                                                                                                         |
 | 6   | **Should `state.set()` support partial updates for object values?**                     | If `settings` is `{ fontSize: number, language: string }`, should `session.state.set("settings", { fontSize: 20 })` merge with the existing value, or replace it entirely? Replace is simpler and predictable. Merge is more ergonomic for large objects. React's `setState` merges at the top level — do we follow that precedent, or keep it simple with full replacement?                                           |

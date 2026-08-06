@@ -1,6 +1,6 @@
 /**
- * @fileoverview Mentra first-party account endpoints (issue 019).
- * Mounted at /api/account. Contract: docs/issues/019-mentra-account-auth/spec.md.
+ * @fileoverview Veiller first-party account endpoints (issue 019).
+ * Mounted at /api/account. Contract: docs/issues/019-veiller-account-auth/spec.md.
  */
 import { Hono } from "hono";
 import type { AppContext, AppEnv } from "../../types/hono.types";
@@ -220,11 +220,11 @@ async function tenantUserIdFor(mentraUserId: string): Promise<string> {
   // Every authenticated account route resolves identity through here, so this
   // is the single gate keeping external-OEM sessions out of the first-party
   // account surface. Without it, an OEM-authenticated user could hit
-  // /subject-token and mint themselves a `mentra` session.
-  if (user.tenantId !== "mentra") {
+  // /subject-token and mint themselves a `veiller` session.
+  if (user.tenantId !== "veiller") {
     throw new AccountError(
       "unauthorized_client",
-      "account endpoints require a Mentra first-party session",
+      "account endpoints require a Veiller first-party session",
       403,
     );
   }

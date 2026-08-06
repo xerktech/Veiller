@@ -16,10 +16,10 @@ An audit of the CI workflows and Docker build files revealed multiple issues: de
 Before understanding what's wrong, here's what the build order **should** be:
 
 ```
-Level 0 (no workspace deps):   @mentra/types, @mentra/display-utils
-Level 1 (needs Level 0):       @mentra/sdk  (depends on types + display-utils)
-Level 2 (needs Level 1):       @mentra/utils (depends on sdk)
-Level 3 (needs Level 2):       @mentra/cloud (depends on sdk, utils, types)
+Level 0 (no workspace deps):   @mentra/types, @veiller/display-utils
+Level 1 (needs Level 0):       @veiller/sdk  (depends on types + display-utils)
+Level 2 (needs Level 1):       @veiller/utils (depends on sdk)
+Level 3 (needs Level 2):       @veiller/cloud (depends on sdk, utils, types)
 ```
 
 **Correct sequential order**: `types` + `display-utils` → `sdk` → `utils` → `cloud`
@@ -118,7 +118,7 @@ This works by accident because Bun resolves workspace packages from source files
 
 **Where**: All Dockerfiles (`porter`, `stress`, `livekit`), plus `cloud-build.yml`, `cloud-console-build.yml`, `cloud-store-build.yml`, `cloud-sdk-build.yml`
 
-**Problem**: `@mentra/sdk` depends on `@mentra/display-utils`. None of the Docker build sequences or CI workflows build `display-utils`. The SDK's `bun build` bundles it from source, but `tsc` for type generation needs the compiled output.
+**Problem**: `@veiller/sdk` depends on `@veiller/display-utils`. None of the Docker build sequences or CI workflows build `display-utils`. The SDK's `bun build` bundles it from source, but `tsc` for type generation needs the compiled output.
 
 **Fix**: Add `display-utils` build step before `sdk` in all build chains:
 

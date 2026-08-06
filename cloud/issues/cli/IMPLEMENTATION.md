@@ -2,7 +2,7 @@
 
 ## What We Built
 
-A complete CLI tool for managing Mentra apps and organizations with secure credential storage and multi-cloud support.
+A complete CLI tool for managing Veiller apps and organizations with secure credential storage and multi-cloud support.
 
 ## Components Implemented
 
@@ -63,7 +63,7 @@ A complete CLI tool for managing Mentra apps and organizations with secure crede
 - `src/config/credentials.ts` - Bun.secrets (primary) + file fallback + env var
 - `src/config/clouds.yaml` - Built-in clouds (production, staging, development, local)
 - `src/config/clouds.ts` - Cloud management (get, switch, add, remove)
-- `src/config/settings.ts` - Config file manager (`~/.mentra/config.json`)
+- `src/config/settings.ts` - Config file manager (`~/.veiller/config.json`)
 
 **3. API Client**
 
@@ -92,43 +92,43 @@ A complete CLI tool for managing Mentra apps and organizations with secure crede
 ### Security
 
 - **Primary:** OS keychain via `Bun.secrets` (macOS Keychain, Linux libsecret, Windows Credential Manager)
-- **Fallback:** File-based storage with `chmod 600` (`~/.mentra/credentials.json`)
-- **CI/CD:** Environment variable (`MENTRA_CLI_TOKEN`)
+- **Fallback:** File-based storage with `chmod 600` (`~/.veiller/credentials.json`)
+- **CI/CD:** Environment variable (`VEILLER_CLI_TOKEN`)
 - **Revocation:** Instant via database check on every request
 - **Token exposure:** Never logged, only `keyId` appears in logs
 
 ### Cloud Management
 
 - **Built-in clouds:** production, staging, development, local
-- **Custom clouds:** User can add via `mentra cloud add`
-- **Priority:** `MENTRA_API_URL` env > current cloud > production
-- **Per-project:** `.mentrarc` for project-specific defaults
+- **Custom clouds:** User can add via `veiller cloud add`
+- **Priority:** `VEILLER_API_URL` env > current cloud > production
+- **Per-project:** `.veillerrc` for project-specific defaults
 
 ### Commands Working
 
-✅ `mentra auth <token>` - Authenticates and stores in OS keychain
-✅ `mentra auth logout` - Clears credentials
-✅ `mentra auth whoami` - Shows current user, cloud, key info
-✅ `mentra cloud list` - Shows all clouds with current marked
-✅ `mentra cloud use <cloud>` - Switches cloud
-✅ `mentra cloud add <key>` - Adds custom cloud
-✅ `mentra cloud remove <cloud>` - Removes custom cloud
-✅ `mentra cloud current` - Shows current cloud
-✅ `mentra app list` - Lists apps (requires auth)
-✅ `mentra app get <pkg>` - Shows app details
-✅ `mentra org list` - Lists organizations
-✅ `mentra org get [id]` - Shows org details
-✅ `mentra org switch <id>` - Sets default org
+✅ `veiller auth <token>` - Authenticates and stores in OS keychain
+✅ `veiller auth logout` - Clears credentials
+✅ `veiller auth whoami` - Shows current user, cloud, key info
+✅ `veiller cloud list` - Shows all clouds with current marked
+✅ `veiller cloud use <cloud>` - Switches cloud
+✅ `veiller cloud add <key>` - Adds custom cloud
+✅ `veiller cloud remove <cloud>` - Removes custom cloud
+✅ `veiller cloud current` - Shows current cloud
+✅ `veiller app list` - Lists apps (requires auth)
+✅ `veiller app get <pkg>` - Shows app details
+✅ `veiller org list` - Lists organizations
+✅ `veiller org get [id]` - Shows org details
+✅ `veiller org switch <id>` - Sets default org
 
 ### Commands TODO (Phase 2)
 
-- `mentra app create` - Create new app
-- `mentra app update` - Update app
-- `mentra app delete` - Delete app
-- `mentra app publish` - Publish to store
-- `mentra app api-key` - Regenerate API key
-- `mentra app export` - Export config to JSON
-- `mentra app import` - Import config from JSON
+- `veiller app create` - Create new app
+- `veiller app update` - Update app
+- `veiller app delete` - Delete app
+- `veiller app publish` - Publish to store
+- `veiller app api-key` - Regenerate API key
+- `veiller app export` - Export config to JSON
+- `veiller app import` - Import config from JSON
 
 ## File Structure
 
@@ -180,19 +180,19 @@ $ bun run build
 ✓ Binary made executable
 
 # CLI works
-$ mentra --help
+$ veiller --help
 ✓ Shows all commands
 
 # Cloud management works
-$ mentra cloud list
+$ veiller cloud list
 ✓ Shows 4 built-in clouds
 ✓ Production marked as current
 
 # All commands respond
-$ mentra auth
-$ mentra cloud
-$ mentra app
-$ mentra org
+$ veiller auth
+$ veiller cloud
+$ veiller app
+$ veiller org
 ✓ All show help/subcommands
 ```
 
@@ -215,9 +215,9 @@ $ mentra org
 3. **Test full flow:**
    ```bash
    # Generate key in console
-   mentra auth <token>
-   mentra app list
-   mentra org list
+   veiller auth <token>
+   veiller app list
+   veiller org list
    ```
 
 ### Phase 2
@@ -225,7 +225,7 @@ $ mentra org
 1. Implement remaining app commands (create, update, delete, publish, api-key, export, import)
 2. Console UI for CLI key management (`websites/console/src/pages/CLIKeys.tsx`)
 3. Add member management commands
-4. Add app scaffolding (`mentra init`)
+4. Add app scaffolding (`veiller init`)
 5. Add real-time logs streaming
 6. Add shell completion
 7. Publish to npm
@@ -267,8 +267,8 @@ app.use("/api/cli/apps", authenticateCLI, transformCLIToConsole, consoleAppsRout
 
 **CLI:**
 
-- `MENTRA_CLI_TOKEN` - CLI token for CI/CD (bypasses auth command)
-- `MENTRA_API_URL` - Override API URL (bypasses cloud config)
+- `VEILLER_CLI_TOKEN` - CLI token for CI/CD (bypasses auth command)
+- `VEILLER_API_URL` - Override API URL (bypasses cloud config)
 
 ## Security Considerations
 

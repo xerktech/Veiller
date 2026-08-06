@@ -2,9 +2,9 @@
 
 ## What This Is
 
-A new JavaScript SDK (`@mentra/miniapp`) that lets miniapps run locally on the phone in WebViews instead of on remote servers. The phone handles display, events, and hardware access directly — no cloud hop. The existing cloud SDK (`@mentra/sdk`) stays untouched and both coexist until deprecation.
+A new JavaScript SDK (`@veiller/miniapp`) that lets miniapps run locally on the phone in WebViews instead of on remote servers. The phone handles display, events, and hardware access directly — no cloud hop. The existing cloud SDK (`@veiller/sdk`) stays untouched and both coexist until deprecation.
 
-**How it works:** Developer builds a static web app using `@mentra/miniapp`. App is bundled as a ZIP, installed on the phone, and loaded into a WebView inside MentraOS. The WebView talks to the phone over postMessage. The phone drives the glasses directly via BLE. For features that require cloud (STT, translation), the phone proxies subscriptions over its existing cloud WebSocket. TTS is a direct REST call — the phone constructs the cloud TTS URL and plays the audio stream itself.
+**How it works:** Developer builds a static web app using `@veiller/miniapp`. App is bundled as a ZIP, installed on the phone, and loaded into a WebView inside Veiller. The WebView talks to the phone over postMessage. The phone drives the glasses directly via BLE. For features that require cloud (STT, translation), the phone proxies subscriptions over its existing cloud WebSocket. TTS is a direct REST call — the phone constructs the cloud TTS URL and plays the audio stream itself.
 
 **Why:** Eliminates latency from the cloud round-trip for most operations. Makes miniapps work offline for local-only features. Simplifies the developer experience (static web app vs. running a server). Prepares for Apple Guideline 4.7 compliance.
 
@@ -18,7 +18,7 @@ Full technical spec: `agents/local-app-runtime-plan.md`
 
 Local JS miniapps for display-only glasses (G1, G2). No camera, no streaming. Cloud SDK unchanged, both coexist. All internal.
 
-### [OS-1292: @mentra/miniapp SDK Package](https://linear.app/mentralabs/issue/OS-1292)
+### [OS-1292: @veiller/miniapp SDK Package](https://linear.app/mentralabs/issue/OS-1292)
 
 Build the new browser-native SDK.
 
@@ -76,7 +76,7 @@ WebView lifecycle manager. Depends on [OS-1294](https://linear.app/mentralabs/is
 - `mount(packageName, bundleDir|devUrl)` / `unmount(packageName)` / `setForeground` / `setBackground`
 - Bundle loading via `file://` URI with proper Android flags (`allowFileAccess`, `allowFileAccessFromFileURLs`)
 - Dev URL loading via `http://` for QR sideloading
-- Inject `window.MentraOS = {packageName, platform}` before content loads
+- Inject `window.Veiller = {packageName, platform}` before content loads
 - `onContentProcessDidTerminate` / `onError` → teardown + unregister
 - Debug alert on iOS WebView eviction (`__DEV__` only)
 - Route `onMessage` to `LocalMiniappRuntime.handleRawMessage()`
@@ -119,23 +119,23 @@ CLI tools + phone UI for dev workflow. Depends on [OS-1292](https://linear.app/m
 
 **CLI:**
 
-- `create-mentra-miniapp` scaffolder: generates Bun Fullstack + React + `@mentra/miniapp` project with `server.ts`, `miniapp.json` template, starter `App.tsx`
-- `@mentra/miniapp-cli`: `mentra-miniapp dev` (spawn Bun Fullstack, detect LAN IP, print QR) and `mentra-miniapp pack` (validate manifest, build ZIP from `dist/`)
+- `create-veiller-miniapp` scaffolder: generates Bun Fullstack + React + `@veiller/miniapp` project with `server.ts`, `miniapp.json` template, starter `App.tsx`
+- `@veiller/miniapp-cli`: `veiller-miniapp dev` (spawn Bun Fullstack, detect LAN IP, print QR) and `veiller-miniapp pack` (validate manifest, build ZIP from `dist/`)
 
 **Phone UI:**
 
-- Miniapp Developer screen (`developer.tsx`, behind Mentra Dev Mode gate) with:
+- Miniapp Developer screen (`developer.tsx`, behind Veiller Dev Mode gate) with:
   - QR scanner page — scan → parse URL → fetch manifest → check permissions → load WebView
   - Install from URL page — text input for ZIP URL → `Composer.installFromUrl()` → shows on home screen
   - Recent dev miniapps list
 
-**Acceptance:** `bunx create-mentra-miniapp test-app && cd test-app && bun dev` prints QR. Scan from phone → miniapp loads on glasses with hot reload. `bun run build && bun run pack` produces a ZIP. Install from URL screen installs it.
+**Acceptance:** `bunx create-veiller-miniapp test-app && cd test-app && bun dev` prints QR. Scan from phone → miniapp loads on glasses with hot reload. `bun run build && bun run pack` produces a ZIP. Install from URL screen installs it.
 
 ### [OS-1299: Port Live Captions to Local SDK](https://linear.app/mentralabs/issue/OS-1299)
 
 First miniapp ported. Integration test for the full stack. Depends on [OS-1292](https://linear.app/mentralabs/issue/OS-1292), [OS-1293](https://linear.app/mentralabs/issue/OS-1293), [OS-1294](https://linear.app/mentralabs/issue/OS-1294), [OS-1295](https://linear.app/mentralabs/issue/OS-1295), [OS-1296](https://linear.app/mentralabs/issue/OS-1296), [OS-1297](https://linear.app/mentralabs/issue/OS-1297).
 
-- Rewrite Live Captions using `@mentra/miniapp` (display + transcription subscription)
+- Rewrite Live Captions using `@veiller/miniapp` (display + transcription subscription)
 - Ship as bundled ZIP in `mobile/assets/miniapps/`
 - Validates end-to-end: display, transcription via cloud proxy, mic enablement, reconnection
 
@@ -145,7 +145,7 @@ First miniapp ported. Integration test for the full stack. Depends on [OS-1292](
 
 Second miniapp ported. Same subscription proxy path as captions but with TTS. Depends on [OS-1292](https://linear.app/mentralabs/issue/OS-1292), [OS-1294](https://linear.app/mentralabs/issue/OS-1294), [OS-1297](https://linear.app/mentralabs/issue/OS-1297).
 
-- Rewrite Translation using `@mentra/miniapp`
+- Rewrite Translation using `@veiller/miniapp`
 - Translation subscription via cloud proxy (same `__phone__` path as transcription)
 - TTS via `session.audio.speak()` → phone constructs cloud TTS URL → plays audio
 - Ship as bundled ZIP in `mobile/assets/miniapps/`
@@ -199,15 +199,15 @@ Depends on [OS-1294](https://linear.app/mentralabs/issue/OS-1294) and [OS-1297](
 
 ### [OS-1304: Port Livestreamer to Local SDK](https://linear.app/mentralabs/issue/OS-1304)
 
-Port Livestreamer miniapp from cloud SDK to `@mentra/miniapp`. Ship as bundled ZIP. Depends on [OS-1302](https://linear.app/mentralabs/issue/OS-1302) and [OS-1303](https://linear.app/mentralabs/issue/OS-1303).
+Port Livestreamer miniapp from cloud SDK to `@veiller/miniapp`. Ship as bundled ZIP. Depends on [OS-1302](https://linear.app/mentralabs/issue/OS-1302) and [OS-1303](https://linear.app/mentralabs/issue/OS-1303).
 
 ### [OS-1305: Port Call to Local SDK](https://linear.app/mentralabs/issue/OS-1305)
 
-Port Call miniapp from cloud SDK to `@mentra/miniapp`. Ship as bundled ZIP. Depends on [OS-1303](https://linear.app/mentralabs/issue/OS-1303) (Managed Streaming).
+Port Call miniapp from cloud SDK to `@veiller/miniapp`. Ship as bundled ZIP. Depends on [OS-1303](https://linear.app/mentralabs/issue/OS-1303) (Managed Streaming).
 
 ### [OS-1306: Port Remaining Miniapps to Local SDK](https://linear.app/mentralabs/issue/OS-1306)
 
-Port all remaining miniapps (Teleprompter, Flash, etc.) from cloud SDK to `@mentra/miniapp`. Ship as bundled ZIPs. Depends on [OS-1301](https://linear.app/mentralabs/issue/OS-1301), [OS-1302](https://linear.app/mentralabs/issue/OS-1302), [OS-1303](https://linear.app/mentralabs/issue/OS-1303).
+Port all remaining miniapps (Teleprompter, Flash, etc.) from cloud SDK to `@veiller/miniapp`. Ship as bundled ZIPs. Depends on [OS-1301](https://linear.app/mentralabs/issue/OS-1301), [OS-1302](https://linear.app/mentralabs/issue/OS-1302), [OS-1303](https://linear.app/mentralabs/issue/OS-1303).
 
 ---
 
@@ -227,7 +227,7 @@ Local JS SDK is still internal through V1 and V2. This phase opens it up.
 
 ### [OS-1308: Migration Guide (Cloud SDK → Local SDK)](https://linear.app/mentralabs/issue/OS-1308)
 
-- API mapping: `@mentra/sdk` → `@mentra/miniapp` (what maps to what, what's different)
+- API mapping: `@veiller/sdk` → `@veiller/miniapp` (what maps to what, what's different)
 - Architecture change (server app → static bundle)
 - New dev workflow (`bun dev` → QR → hot reload)
 - Publish on developer docs site
@@ -248,11 +248,11 @@ Depends on [OS-1293](https://linear.app/mentralabs/issue/OS-1293) and [OS-1307](
 
 Depends on [OS-1307](https://linear.app/mentralabs/issue/OS-1307), [OS-1308](https://linear.app/mentralabs/issue/OS-1308), [OS-1309](https://linear.app/mentralabs/issue/OS-1309).
 
-- Move Miniapp Developer screen from behind Mentra Dev Mode to top-level settings
-- Publish `@mentra/miniapp`, `@mentra/miniapp-cli`, `create-mentra-miniapp` to npm
+- Move Miniapp Developer screen from behind Veiller Dev Mode to top-level settings
+- Publish `@veiller/miniapp`, `@veiller/miniapp-cli`, `create-veiller-miniapp` to npm
 - Announce
 
-**Acceptance:** `bunx create-mentra-miniapp` works from npm. Miniapp Developer screen visible without Mentra Dev Mode.
+**Acceptance:** `bunx create-veiller-miniapp` works from npm. Miniapp Developer screen visible without Veiller Dev Mode.
 
 ---
 
@@ -264,18 +264,18 @@ After a migration period (~1 month after V3).
 
 Depends on [OS-1310](https://linear.app/mentralabs/issue/OS-1310).
 
-- `@mentra/sdk` marked deprecated on npm
+- `@veiller/sdk` marked deprecated on npm
 - Developer console removes ability to create new cloud apps
 - Existing cloud apps continue running (no kill switch)
 - Cloud app server infrastructure stays up for remaining apps
 
-**Acceptance:** npm shows deprecation warning on `@mentra/sdk` install. Console blocks new cloud app creation. Existing cloud apps still work.
+**Acceptance:** npm shows deprecation warning on `@veiller/sdk` install. Console blocks new cloud app creation. Existing cloud apps still work.
 
 ### [OS-1312: Archive Cloud SDK](https://linear.app/mentralabs/issue/OS-1312)
 
 Depends on [OS-1311](https://linear.app/mentralabs/issue/OS-1311).
 
-- `@mentra/sdk` and `@mentra/react` archived on npm and GitHub
+- `@veiller/sdk` and `@veiller/react` archived on npm and GitHub
 - Remove cloud app infrastructure when no longer needed
 
 **Acceptance:** No cloud apps running. Packages archived. Infrastructure decommissioned.
@@ -284,7 +284,7 @@ Depends on [OS-1311](https://linear.app/mentralabs/issue/OS-1311).
 
 ## Key Architectural Decisions
 
-- **Fork, don't refactor.** `@mentra/miniapp` is a new package. `@mentra/sdk` is not modified. Zero risk to existing cloud apps.
+- **Fork, don't refactor.** `@veiller/miniapp` is a new package. `@veiller/sdk` is not modified. Zero risk to existing cloud apps.
 - **Phone is the hub.** Local miniapps talk to the phone, phone talks to glasses and cloud. Miniapps never talk to cloud directly.
 - **Cloud proxy for STT/translation only.** TTS is a REST URL the phone constructs. Everything else (display, events, buttons, LED, storage, location) is phone-local.
 - **Bun Fullstack for dev tooling.** Built-in HMR + console log forwarding. No custom log infrastructure.

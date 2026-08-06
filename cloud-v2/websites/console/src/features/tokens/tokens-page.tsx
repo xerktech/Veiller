@@ -51,7 +51,7 @@ export function TokensPage() {
   }
 
   async function copyLoginCommand() {
-    const didCopy = await copyTextToClipboard("mentra login");
+    const didCopy = await copyTextToClipboard("veiller login");
     setCopiedLoginCommand(didCopy);
     window.setTimeout(() => setCopiedLoginCommand(false), 1600);
   }
@@ -77,7 +77,7 @@ export function TokensPage() {
                   Best for day-to-day local development on your machine.
                 </p>
               </div>
-              <CommandRow command="mentra login" copied={copiedLoginCommand} onCopy={copyLoginCommand} />
+              <CommandRow command="veiller login" copied={copiedLoginCommand} onCopy={copyLoginCommand} />
             </section>
           </CardContent>
         </Card>

@@ -1,35 +1,35 @@
 /**
- * MiniappEngine — constructs the MentraJS router singletons (crash controller,
+ * MiniappEngine — constructs the VeillerJS router singletons (crash controller,
  * UI router, JS router), binds them to the native Crust module + the launcher,
  * wires the dev-server background-respawn signal, and starts the message pump.
  *
  * Engine owns this so a bare OEM's `engine.start()` brings up the local-miniapp
  * engine with no host construction step. Host-only concerns that remain outside
- * engine, such as Mentra-app crashloop telemetry, are attached by the host after
+ * engine, such as Veiller-app crashloop telemetry, are attached by the host after
  * this returns via `router.onCrashloop` / `router.onRestartToast`.
  *
  * Idempotent — `ensureMiniappEngine()` returns the same singletons on every call,
  * so it's safe to call from both `engine.start()` and the host bootstrap.
  */
 
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 import devServerBridge from "./DevServerBridge"
 import localMiniappRuntime from "./LocalMiniappRuntime"
 import {miniappLauncher} from "./MiniappLauncher"
-import {MentraJSCrashController} from "./MentraJSCrashController"
-import {MentraJSRouter, type MentraJSCrustBinding} from "./MentraJSRouter"
-import {MentraUIRouter} from "./MentraUIRouter"
+import {VeillerJSCrashController} from "./VeillerJSCrashController"
+import {VeillerJSRouter, type VeillerJSCrustBinding} from "./VeillerJSRouter"
+import {VeillerUIRouter} from "./VeillerUIRouter"
 
 export interface MiniappEngine {
-  router: MentraJSRouter
-  uiRouter: MentraUIRouter
-  crashController: MentraJSCrashController
+  router: VeillerJSRouter
+  uiRouter: VeillerUIRouter
+  crashController: VeillerJSCrashController
 }
 
 let engine: MiniappEngine | null = null
 
-function wireDevServerRespawnBackground(router: MentraJSRouter, uiRouter: MentraUIRouter): void {
+function wireDevServerRespawnBackground(router: VeillerJSRouter, uiRouter: VeillerUIRouter): void {
   devServerBridge.onRespawnBackground(async (packageName) => {
     try {
       // Re-resolve the freshly built bundle (dev: HTTP off the dev server;
@@ -40,7 +40,7 @@ function wireDevServerRespawnBackground(router: MentraJSRouter, uiRouter: Mentra
       // hot-reload.
       const resolved = await miniappLauncher.resolveBundle(packageName)
       if (!resolved) {
-        console.warn(`MentraJS: respawn-bg could not resolve bundle for ${packageName}`)
+        console.warn(`VeillerJS: respawn-bg could not resolve bundle for ${packageName}`)
         return
       }
       // Force a respawn (kill + spawn) rather than launcher.ensureRunning,
@@ -51,22 +51,22 @@ function wireDevServerRespawnBackground(router: MentraJSRouter, uiRouter: Mentra
         installedManifest: resolved.installedManifest,
       })
       if (!ok) {
-        console.warn(`MentraJS: respawn-bg failed for ${packageName}`)
+        console.warn(`VeillerJS: respawn-bg failed for ${packageName}`)
         return
       }
       // The respawned JSContext is a fresh MiniappSession with ui.bound false.
-      // The mounted WebView won't re-fire mentra.ready() (it's latched), so
-      // re-announce it so RPC replies (mentra.request) reach the UI again
+      // The mounted WebView won't re-fire veiller.ready() (it's latched), so
+      // re-announce it so RPC replies (veiller.request) reach the UI again
       // instead of being dropped while unbound.
       uiRouter.notifyReopen(packageName)
     } catch (e) {
-      console.warn(`MentraJS: respawn-bg threw for ${packageName}:`, e)
+      console.warn(`VeillerJS: respawn-bg threw for ${packageName}:`, e)
     }
   })
 }
 
 /**
- * Construct (once) and return the MentraJS engine singletons. Starts the router's
+ * Construct (once) and return the VeillerJS engine singletons. Starts the router's
  * message pump on first call. Subsequent calls return the same instances.
  */
 export function ensureMiniappEngine(): MiniappEngine {
@@ -77,22 +77,22 @@ export function ensureMiniappEngine(): MiniappEngine {
   }
 
   // The Crust native module's published TS typing doesn't include the new
-  // mentraJs* functions until expo prebuild regenerates it; cast to the binding
+  // veillerJs* functions until expo prebuild regenerates it; cast to the binding
   // shapes the routers expect.
-  const crust = CrustModule as unknown as MentraJSCrustBinding
+  const crust = CrustModule as unknown as VeillerJSCrustBinding
 
-  const crashController = new MentraJSCrashController({
+  const crashController = new VeillerJSCrashController({
     maxRetries: 3,
   })
-  const uiRouter = new MentraUIRouter({
-    mentraJsDispatchToJs: (packageName: string, envelope: Record<string, unknown>) =>
+  const uiRouter = new VeillerUIRouter({
+    veillerJsDispatchToJs: (packageName: string, envelope: Record<string, unknown>) =>
       (
         CrustModule as unknown as {
-          mentraJsDispatchToJs: (p: string, e: Record<string, unknown>) => Promise<void>
+          veillerJsDispatchToJs: (p: string, e: Record<string, unknown>) => Promise<void>
         }
-      ).mentraJsDispatchToJs(packageName, envelope),
+      ).veillerJsDispatchToJs(packageName, envelope),
   })
-  const router = new MentraJSRouter(localMiniappRuntime, crust)
+  const router = new VeillerJSRouter(localMiniappRuntime, crust)
   router.crashController = crashController
   router.uiRouter = uiRouter
 
@@ -112,7 +112,7 @@ export function ensureMiniappEngine(): MiniappEngine {
   return engine
 }
 
-/** Stop the MentraJS message pump and tear down router-managed JSContexts. */
+/** Stop the VeillerJS message pump and tear down router-managed JSContexts. */
 export async function stopMiniappEngine(): Promise<void> {
   const current = engine
   if (!current) return
@@ -131,7 +131,7 @@ export async function stopMiniappEngine(): Promise<void> {
       try {
         await current.router.unregister(packageName)
       } catch (err) {
-        console.warn(`MentraJS: failed to unregister ${packageName} during stop:`, err)
+        console.warn(`VeillerJS: failed to unregister ${packageName} during stop:`, err)
       }
     }),
   )

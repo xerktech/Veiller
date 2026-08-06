@@ -2,7 +2,7 @@
 
 import {useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader, useRpc} from "@mentra/miniapp/ui"
+import {MiniappHeader, useRpc} from "@veiller/miniapp/ui"
 
 import type {Channels} from "../../../shared/channels"
 import type {CalendarSnapshotResult} from "../../../shared/types"

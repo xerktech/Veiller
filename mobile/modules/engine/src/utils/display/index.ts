@@ -1,5 +1,5 @@
 /**
- * @mentra/display-utils
+ * @veiller/display-utils
  *
  * Glasses-agnostic, pixel-accurate text measurement and wrapping library
  * for smart glasses displays.
@@ -17,7 +17,7 @@
  *   TextWrapper,
  *   DisplayHelpers,
  *   G1_PROFILE
- * } from '@mentra/display-utils'
+ * } from '@veiller/display-utils'
  *
  * // Create measurer and wrapper for G1 glasses
  * const measurer = new TextMeasurer(G1_PROFILE)

@@ -1,4 +1,4 @@
 // react-sdk/src/index.ts
-export { MentraAuthProvider } from './AuthProvider';
-export { useMentraAuth } from './useMentraAuth';
+export { VeillerAuthProvider } from './AuthProvider';
+export { useVeillerAuth } from './useVeillerAuth';
 export type { AuthState } from './lib/authCore'; // Expose AuthState if useful

@@ -1,9 +1,9 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "aspen",
-  "name": "MentraOS",
+  "name": "Veiller",
   "banner": {
-    "content": "**Beta.** The Mentra Miniapp SDK and these docs are subject to change. Enable it at **Settings → Debug Settings → Miniapp Developer Settings** in the Mentra App. Send feedback with an in-app bug report, on [Discord](https://discord.gg/5ukNvkEAqT), or by [email](mailto:help@mentra.glass).",
+    "content": "**Beta.** The Veiller Miniapp SDK and these docs are subject to change. Enable it at **Settings → Debug Settings → Miniapp Developer Settings** in the Veiller App. Send feedback with an in-app bug report, on [Discord](https://discord.gg/5ukNvkEAqT), or by [email](mailto:help@mentra.glass).",
     "dismissible": false
   },
   "colors": {
@@ -183,7 +183,7 @@
     },
     {
       "anchor": "Miniapp SDK Package",
-      "href": "https://www.npmjs.com/package/@mentra/miniapp",
+      "href": "https://www.npmjs.com/package/@veiller/miniapp",
       "icon": "npm"
     }
   ],
@@ -301,8 +301,8 @@
     {"source": "/app-devs/reference/interfaces/webhook-types", "destination": "/app-devs/core-concepts/session"},
     {"source": "/cookbook/dashboard-note-app", "destination": "/app-devs/getting-started/overview"},
     {"source": "/os-devs/contributing/overview", "destination": "/contributing"},
-    {"source": "/os-devs/contributing/mentraos-manager-guidelines", "destination": "/contributing"},
-    {"source": "/os-devs/contributing/mentraos-asg-client-guidelines", "destination": "/contributing"},
+    {"source": "/os-devs/contributing/veiller-manager-guidelines", "destination": "/contributing"},
+    {"source": "/os-devs/contributing/veiller-asg-client-guidelines", "destination": "/contributing"},
     {"source": "/os-devs/contributing/add-new-glasses-support", "destination": "/contributing"},
     {"source": "/os-devs/asg-client/README", "destination": "/contributing"},
     {"source": "/os-devs/asg-client/architecture", "destination": "/contributing"},

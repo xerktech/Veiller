@@ -39,8 +39,8 @@ Fixed build order to ensure types package is built before SDK and cloud:
 
 ```
 1. @mentra/types → bun run build (creates dist/)
-2. @mentra/sdk → bun run build (imports from types dist/)
-3. @mentra/cloud → bun run build (imports from types dist/)
+2. @veiller/sdk → bun run build (imports from types dist/)
+3. @veiller/cloud → bun run build (imports from types dist/)
 ```
 
 **Why needed**: Production builds use `exports.default` which points to `dist/`, so types must be compiled first.
@@ -127,8 +127,8 @@ Fast endpoint for mobile home screen:
 **Solution**: Updated all Dockerfiles and GitHub Actions to build packages in correct order:
 
 1. Build @mentra/types first
-2. Build @mentra/sdk second
-3. Build @mentra/cloud last
+2. Build @veiller/sdk second
+3. Build @veiller/cloud last
 
 **Files Fixed**:
 

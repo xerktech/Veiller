@@ -8,10 +8,10 @@
 
 import DisplayManager from "../../DisplayManager6.1";
 import { MockUserSession } from "../harness/MockUserSession";
-import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from "@mentra/sdk";
+import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from "@veiller/sdk";
 import { strict as assert } from "assert";
 // import { systemApps } from '../../../core/system-apps';
-const OS_PACKAGE_NAME = "com.mentra.os";
+const OS_PACKAGE_NAME = "com.veiller.os";
 
 // App package names for testing
 const APP1 = "com.example.app1"; // First app (Mira)

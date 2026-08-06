@@ -1,4 +1,4 @@
-import {AppSession} from "@mentra/sdk"
+import {AppSession} from "@veiller/sdk"
 import {PhotoManager} from "./managers/photo.manager"
 import {TranscriptionManager} from "./managers/transcription.manager"
 import {AudioManager} from "./managers/audio.manager"
@@ -27,7 +27,7 @@ import {OutputStreamManager} from "./managers/output-stream.manager"
  */
 
 // Single process-wide sessions store — survives duplicate module loads
-const SESSIONS_KEY = Symbol.for("mentra.mini-app.sessions")
+const SESSIONS_KEY = Symbol.for("veiller.mini-app.sessions")
 ;(globalThis as any)[SESSIONS_KEY] ??= new Map<string, UserSession>()
 
 export class UserSession {
@@ -72,7 +72,7 @@ export class UserSession {
   /** Text-to-speech and audio control */
   audio: AudioManager
 
-  /** User preferences via MentraOS Simple Storage */
+  /** User preferences via Veiller Simple Storage */
   storage: StorageManager
 
   /** Button presses and touchpad gestures */

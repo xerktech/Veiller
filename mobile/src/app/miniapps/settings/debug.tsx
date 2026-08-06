@@ -13,8 +13,8 @@ import {Spacer} from "@/components/ui/Spacer"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
-import {SETTINGS, useSetting} from "@mentra/engine"
-import {navigationService} from "@mentra/engine/internal"
+import {SETTINGS, useSetting} from "@veiller/engine"
+import {navigationService} from "@veiller/engine/internal"
 import showAlert from "@/utils/AlertUtils"
 
 // Hardcoded test destination for the nav POC. SF Ferry Building.
@@ -145,8 +145,8 @@ export default function DebugSettingsScreen() {
             />
 
             <RouteButton
-              label="MentraOS Onboarding"
-              subtitle="Reset and start the MentraOS onboarding"
+              label="Veiller Onboarding"
+              subtitle="Reset and start the Veiller onboarding"
               onPress={() => {
                 setOnboardingOsCompleted(false)
                 clearHistoryAndGoHome()

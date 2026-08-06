@@ -9,10 +9,10 @@
   },
   "author": "Isaiah Ballah",
   "license": "ISC",
-  "description": "MentraOS Example App using Hono version of @mentra/sdk",
+  "description": "Veiller Example App using Hono version of @veiller/sdk",
   "dependencies": {
-    "@mentra/react": "2.1.2",
-    "@mentra/sdk": "3.0.0-hono.6",
+    "@veiller/react": "workspace:*",
+    "@veiller/sdk": "workspace:*",
     "@radix-ui/react-scroll-area": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-switch": "^1.1.3",

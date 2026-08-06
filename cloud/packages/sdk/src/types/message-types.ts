@@ -43,7 +43,7 @@ export enum GlassesToCloudMessageType {
 
   // TODO(isaiah): Remove CALENDAR_EVENT after moving to REST request.
   CALENDAR_EVENT = StreamType.CALENDAR_EVENT,
-  MENTRAOS_SETTINGS_UPDATE_REQUEST = StreamType.MENTRAOS_SETTINGS_UPDATE_REQUEST,
+  VEILLER_SETTINGS_UPDATE_REQUEST = StreamType.VEILLER_SETTINGS_UPDATE_REQUEST,
 
   // TODO(isaiah): Remove CORE_STATUS_UPDATE after moving to REST request.
   CORE_STATUS_UPDATE = StreamType.CORE_STATUS_UPDATE,
@@ -245,7 +245,7 @@ export const EventTypes = [
   GlassesToCloudMessageType.PHONE_NOTIFICATION,
   GlassesToCloudMessageType.PHONE_NOTIFICATION_DISMISSED,
   GlassesToCloudMessageType.CALENDAR_EVENT,
-  GlassesToCloudMessageType.MENTRAOS_SETTINGS_UPDATE_REQUEST,
+  GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST,
   GlassesToCloudMessageType.CORE_STATUS_UPDATE,
   GlassesToCloudMessageType.LOCAL_TRANSCRIPTION,
 ] as const;

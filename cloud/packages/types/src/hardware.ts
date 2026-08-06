@@ -4,7 +4,7 @@
 
 import { evenRealitiesG1 } from "./capabilities/even-realities-g1";
 import { evenRealitiesG2 } from "./capabilities/even-realities-g2";
-import { mentraDisplay } from "./capabilities/mentra-display";
+import { veillerDisplay } from "./capabilities/mentra-display";
 import { mentraLive } from "./capabilities/mentra-live";
 import { simulatedGlasses } from "./capabilities/simulated-glasses";
 import { vuzixZ100 } from "./capabilities/vuzix-z100";
@@ -156,8 +156,8 @@ export interface Capabilities {
 
   // Native dashboard capability
   // True when the device renders its own dashboard in firmware (e.g. Even
-  // Realities' built-in dashboard on G2). MentraOS does not manage or expose
-  // dashboard settings for these devices. Absent/false means MentraOS owns the
+  // Realities' built-in dashboard on G2). Veiller does not manage or expose
+  // dashboard settings for these devices. Absent/false means Veiller owns the
   // dashboard.
   hasNativeDashboard?: boolean;
 }
@@ -170,7 +170,7 @@ export interface Capabilities {
 export const HARDWARE_CAPABILITIES: Record<string, Capabilities> = {
   [evenRealitiesG1.modelName]: evenRealitiesG1,
   [evenRealitiesG2.modelName]: evenRealitiesG2,
-  [mentraDisplay.modelName]: mentraDisplay,
+  [veillerDisplay.modelName]: veillerDisplay,
   [mentraLive.modelName]: mentraLive,
   [simulatedGlasses.modelName]: simulatedGlasses,
   [vuzixZ100.modelName]: vuzixZ100,
@@ -202,4 +202,4 @@ export const getModelCapabilities = (deviceType: DeviceTypes): Capabilities => {
 };
 
 // export * from "./capabilities"
-export { simulatedGlasses, evenRealitiesG1, evenRealitiesG2, mentraLive, vuzixZ100, mentraDisplay, nimo };
+export { simulatedGlasses, evenRealitiesG1, evenRealitiesG2, mentraLive, vuzixZ100, veillerDisplay, nimo };

@@ -2,14 +2,14 @@
 
 ## Scope
 
-This change makes the two camera controls currently exposed to Mentra miniapps behave like
+This change makes the two camera controls currently exposed to Veiller miniapps behave like
 session-owned resources:
 
 - camera warm-up
 - camera FOV/ROI crop
 
 ANR/gain tuning and the text-mode ML crop are out of scope. Persistent FOV changes made from the
-Mentra App remain persistent user settings.
+Veiller App remain persistent user settings.
 
 ## Product rules
 
@@ -24,7 +24,7 @@ Mentra App remain persistent user settings.
 ### Miniapp FOV/ROI override
 
 - `camera.setFov()` creates or replaces a temporary override owned by the calling miniapp package.
-- The override does not update the Mentra App settings store or ASG persistent preferences.
+- The override does not update the Veiller App settings store or ASG persistent preferences.
 - The most recently applied live miniapp override wins. Closing a non-active owner only removes its
   saved override. Closing the active owner applies the next-most-recent live override, or restores
   the persistent base setting when none remains.

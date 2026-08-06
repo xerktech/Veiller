@@ -181,7 +181,7 @@ The overall dashboard content flow follows these steps:
 
 ## SDK Usage Guidelines
 
-The MentraOS SDK is designed to provide a simple and intuitive interface for App developers. Here are some key principles for how to use the SDK correctly:
+The Veiller SDK is designed to provide a simple and intuitive interface for App developers. Here are some key principles for how to use the SDK correctly:
 
 ### Event Subscription Model
 

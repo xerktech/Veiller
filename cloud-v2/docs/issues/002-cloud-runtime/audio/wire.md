@@ -126,7 +126,7 @@ The runtime package used to carry a v1 phone-contract adapter
 (`wire/phone-protocol.ts`: `phone_subscription_update` inbound, `data_stream`
 outbound) so the unchanged legacy mobile could reach cloud-v2. That adapter has been
 removed: the v2 path now emits `stream.transcript` / `stream.translation` and takes
-subscriptions over REST. With `@mentra/cloud-client` owning the v2 path, the legacy
+subscriptions over REST. With `@veiller/cloud-client` owning the v2 path, the legacy
 miniapp system stays on the v1 cloud over its own connection. The `?token=` query
 mechanism is the only piece carried forward, as the documented auth fallback in
 [`../protocol.md`](../protocol.md#auth-and-handshake).

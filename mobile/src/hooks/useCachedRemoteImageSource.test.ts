@@ -1,7 +1,7 @@
 /**
  * Regression coverage for the dev-miniapp icon load path.
  *
- * `mentra dev`'s static server serves the tile icon with `Cache-Control:
+ * `veiller dev`'s static server serves the tile icon with `Cache-Control:
  * no-store`, so expo-image downloads it (prefetch → true) but never persists it
  * to disk — `getCachePathAsync` stays null. The hook must NOT treat that as a
  * failure; it should fall back to the original URL (warm in expo-image's memory

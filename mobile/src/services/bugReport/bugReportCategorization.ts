@@ -1,4 +1,4 @@
-import type {ReportTrigger} from "@mentra/engine"
+import type {ReportTrigger} from "@veiller/engine"
 
 export interface BugReportCategorization {
   triggerSource: string

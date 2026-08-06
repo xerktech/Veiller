@@ -2,8 +2,8 @@
  * @fileoverview LocalSocket transport — browser fallback.
  *
  * When the miniapp runs in an external browser (Safari/Chrome, not inside the
- * MentraOS React Native WebView), it connects to a localhost WebSocket that
- * MentraOS exposes via MiniSockets.
+ * Veiller React Native WebView), it connects to a localhost WebSocket that
+ * Veiller exposes via MiniSockets.
  *
  * Default endpoint: ws://127.0.0.1:8765. Override via the `url` option for
  * dev / testing.

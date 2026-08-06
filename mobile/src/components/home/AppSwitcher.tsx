@@ -16,12 +16,12 @@ import Animated, {
 } from "react-native-reanimated"
 import {Gesture, GestureDetector} from "react-native-gesture-handler"
 import {runOnJS, scheduleOnRN} from "react-native-worklets"
-import {BgTimer, saveLastOpenTime, sortAppsByLastOpenTime, engine, type ClientApp, useActiveApps, useSetForeground} from "@mentra/engine"
+import {BgTimer, saveLastOpenTime, sortAppsByLastOpenTime, engine, type ClientApp, useActiveApps, useSetForeground} from "@veiller/engine"
 import AppIcon from "@/components/home/AppIcon"
 import {isOfflineHosted} from "@/components/miniapp/offlineHostedPackages"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {BlurView} from "expo-blur"
 import GlassView from "@/components/ui/GlassView"
 import {hapticBuzz} from "@/utils/utils"
@@ -252,10 +252,10 @@ interface AppSwitcherProps {
 // let DUMMY_APPS: ClientApp[] = []
 // for (let i = 0; i < 30; i++) {
 //   DUMMY_APPS.push({
-//     packageName: `com.mentra.dummy.${i}`,
+//     packageName: `com.veiller.dummy.${i}`,
 //     name: `Dummy ${i}`,
-//     logoUrl: "https://www.mentra.com/icon.png",
-//     // screenshot: "https://www.mentra.com/screenshot.png",
+//     logoUrl: "https://www.veiller.com/icon.png",
+//     // screenshot: "https://www.veiller.com/screenshot.png",
 //     offline: false,
 //     offlineRoute: "",
 //     loading: false,

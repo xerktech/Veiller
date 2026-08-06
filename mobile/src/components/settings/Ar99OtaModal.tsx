@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from "react"
 import {ActivityIndicator, Modal, ScrollView, TouchableOpacity, useWindowDimensions, View} from "react-native"
 
-import BluetoothSdk, {Ar99OtaStatusEvent} from "@mentra/bluetooth-sdk"
-import {engine} from "@mentra/engine"
+import BluetoothSdk, {Ar99OtaStatusEvent} from "@veiller/bluetooth-sdk"
+import {engine} from "@veiller/engine"
 
 import {Text} from "@/components/ignite"
 import {Ar99VersionInfo, checkAr99OtaVersion, clearAr99OtaFiles, downloadAr99Firmware} from "@/services/ar99Ota"

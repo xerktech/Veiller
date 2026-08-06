@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mentra.exampleoemapp",
+      "bundleIdentifier": "com.veiller.exampleoemapp",
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "This app connects to your smart glasses over Bluetooth.",
         "NSMicrophoneUsageDescription": "This app uses the microphone when you enable audio features.",
@@ -32,7 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.mentra.exampleoemapp",
+      "package": "com.veiller.exampleoemapp",
       "permissions": [
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
@@ -47,9 +47,9 @@
       ]
     },
     "plugins": [
-      "@mentra/crust",
+      "@veiller/crust",
       [
-        "@mentra/bluetooth-sdk",
+        "@veiller/bluetooth-sdk",
         {
           "node": true
         }

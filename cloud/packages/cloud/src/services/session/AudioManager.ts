@@ -8,7 +8,7 @@
 
 import { Logger } from "pino";
 
-import { CloudToGlassesMessageType, ConnectionAck, StreamType } from "@mentra/sdk";
+import { CloudToGlassesMessageType, ConnectionAck, StreamType } from "@veiller/sdk";
 
 import { AudioWriter } from "../debug/audio-writer";
 import { createLC3Service, LC3Service } from "../lc3/lc3.service";

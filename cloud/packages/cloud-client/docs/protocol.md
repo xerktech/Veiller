@@ -1,6 +1,6 @@
 # Protocol Documentation
 
-This document describes the WebSocket message protocol between the MentraClient and AugmentOS cloud, based on the official SDK types.
+This document describes the WebSocket message protocol between the VeillerClient and AugmentOS cloud, based on the official SDK types.
 
 ## Connection Flow
 

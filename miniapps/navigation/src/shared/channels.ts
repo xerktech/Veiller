@@ -4,19 +4,19 @@
  * WebView. Both halves import this file at build time; the bundler
  * inlines the declarations so there's no runtime cross-boundary I/O.
  *
- * Channels wrapped in `Rpc<Req, Res>` are RPC (call via mentra.request /
- * session.ui.handle). Everything else is broadcast (mentra.send /
+ * Channels wrapped in `Rpc<Req, Res>` are RPC (call via veiller.request /
+ * session.ui.handle). Everything else is broadcast (veiller.send /
  * session.ui.on / session.ui.send).
  */
 
-import type {Rpc} from "@mentra/miniapp/ui"
+import type {Rpc} from "@veiller/miniapp/ui"
 import type {
   ComputeRouteOptions,
   ComputeRouteResult,
   NavPermissionResult,
   Pivot,
   StartNavigationOptions,
-} from "@mentra/miniapp"
+} from "@veiller/miniapp"
 
 import type {
   Coords,
@@ -104,8 +104,8 @@ export interface Channels {
   "test:show-large-map": Rpc<{size?: number}, {ok: boolean; error?: string}>
 }
 
-// Convenience: the typed shape of `window.mentra` for this miniapp.
+// Convenience: the typed shape of `window.veiller` for this miniapp.
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>
 }

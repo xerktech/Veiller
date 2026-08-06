@@ -4,7 +4,7 @@
  * halves import this file at build time; the bundler inlines the declarations
  * so there's no runtime cross-boundary I/O.
  *
- * All channels here are broadcast (`mentra.send` / `session.ui.on` /
+ * All channels here are broadcast (`veiller.send` / `session.ui.on` /
  * `session.ui.send`); the teleprompter UI never needs request/response RPC.
  */
 
@@ -46,5 +46,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>
 }

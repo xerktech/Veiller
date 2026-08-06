@@ -1,6 +1,6 @@
 # Miniapp SDK Branch — Engineering Handover
 
-This is the design + handover doc for the work landing on `mentra-miniapp-sdk-aryan`. It walks the system end-to-end: the native bridge (crust), the JS-side host services (HeadingService, LocationManager, NavigationService), the runtime that brokers requests from miniapps to the host (LocalMiniappRuntime in `@mentra/engine`), the developer-facing SDK (`@mentra/miniapp`), the WebView host that mounts miniapps inside the manager (MiniappHost), and the new dev-loop screens (scanner, dev-URL, dev-offline, local mount).
+This is the design + handover doc for the work landing on `veiller-miniapp-sdk-aryan`. It walks the system end-to-end: the native bridge (crust), the JS-side host services (HeadingService, LocationManager, NavigationService), the runtime that brokers requests from miniapps to the host (LocalMiniappRuntime in `@veiller/engine`), the developer-facing SDK (`@veiller/miniapp`), the WebView host that mounts miniapps inside the manager (MiniappHost), and the new dev-loop screens (scanner, dev-URL, dev-offline, local mount).
 
 It is written so a fresh engineer can pick up any layer without having to reverse-engineer the others. Numbers in the diff: **49 mobile files changed, +7701 / −555**.
 
@@ -10,7 +10,7 @@ It is written so a fresh engineer can pick up any layer without having to revers
 
 Three things shipped on this branch:
 
-1. **A turn-by-turn navigation pipeline** — Google Navigation SDK on iOS + Android, exposed through the `crust` Expo module, fanned out by a JS singleton (`NavigationService`), wired into the miniapp runtime (`LocalMiniappRuntime`), and surfaced to miniapp authors as `session.navigation.*` in `@mentra/miniapp`. Includes a SDK-side **pivot engine** that synthesizes `CROSS_STREET` maneuvers from polyline geometry so glasses HUDs can prompt at crosswalks.
+1. **A turn-by-turn navigation pipeline** — Google Navigation SDK on iOS + Android, exposed through the `crust` Expo module, fanned out by a JS singleton (`NavigationService`), wired into the miniapp runtime (`LocalMiniappRuntime`), and surfaced to miniapp authors as `session.navigation.*` in `@veiller/miniapp`. Includes a SDK-side **pivot engine** that synthesizes `CROSS_STREET` maneuvers from polyline geometry so glasses HUDs can prompt at crosswalks.
 2. **A heading + location pipeline** — magnetic compass (`crust.startHeading()` → `HeadingService` → `heading_update` stream) and GPS (`expo-location` → `LocationManager` → `location_update` stream / `LOCATION_POLL` request).
 3. **A dev loop for local miniapps** — QR scanner, manual dev-URL entry, recent-list, an "offline" splash when the dev server is down, and a route (`/applet/local`) that mounts a dev miniapp into the existing `MiniappHost` WebView pool.
 
@@ -23,7 +23,7 @@ Everything else on the branch is plumbing in service of those three: app config 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Miniapp (WebView)                                                           │
-│   import {MiniappSession} from "@mentra/miniapp"                            │
+│   import {MiniappSession} from "@veiller/miniapp"                            │
 │   session.navigation.start({stops})                                         │
 │   session.navigation.onUpdate(handler)                                      │
 │   session.heading.onUpdate(handler)                                         │
@@ -32,7 +32,7 @@ Everything else on the branch is plumbing in service of those three: app config 
                                │ envelope (JSON over postMessage / local socket)
                                ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ LocalMiniappRuntime (in @mentra/engine)                                     │
+│ LocalMiniappRuntime (in @veiller/engine)                                     │
 │   - Owns the session-per-app map                                            │
 │   - Receives MiniappRequest envelopes, dispatches by type                   │
 │   - Owns ref-counted host-side subscriptions (heading, location, nav)       │
@@ -71,21 +71,21 @@ Existing module docs already explain crust's role and layout — see [docs/modul
 
 ### Navigation (`crust.startNavigation` / events)
 
-- **Entry points:** [CrustModule.swift](../modules/crust/ios/CrustModule.swift) and [CrustModule.kt](../modules/crust/android/src/main/java/com/mentra/crust/CrustModule.kt) — thin dispatchers.
-- **Real work:** [NavigationManager.swift](../modules/crust/ios/navigation/NavigationManager.swift) and [NavigationManager.kt](../modules/crust/android/src/main/java/com/mentra/crust/navigation/NavigationManager.kt) — own the `GMSNavigator` / Android `Navigator` lifecycle, polyline + step extraction, off-route detection, and simulator polling.
-- **Android-specific:** [NavInfoReceiverService.kt](../modules/crust/android/src/main/java/com/mentra/crust/navigation/NavInfoReceiverService.kt) — bound by `Navigator.registerServiceForNavUpdates()` so we can read road names off the SDK's `StepInfo` ticks.
+- **Entry points:** [CrustModule.swift](../modules/crust/ios/CrustModule.swift) and [CrustModule.kt](../modules/crust/android/src/main/java/com/veiller/crust/CrustModule.kt) — thin dispatchers.
+- **Real work:** [NavigationManager.swift](../modules/crust/ios/navigation/NavigationManager.swift) and [NavigationManager.kt](../modules/crust/android/src/main/java/com/veiller/crust/navigation/NavigationManager.kt) — own the `GMSNavigator` / Android `Navigator` lifecycle, polyline + step extraction, off-route detection, and simulator polling.
+- **Android-specific:** [NavInfoReceiverService.kt](../modules/crust/android/src/main/java/com/veiller/crust/navigation/NavInfoReceiverService.kt) — bound by `Navigator.registerServiceForNavUpdates()` so we can read road names off the SDK's `StepInfo` ticks.
 - **Payload helpers:** [NavPayloads.swift](../modules/crust/ios/navigation/NavPayloads.swift) — `maneuverString()` enum mapping and `pathToPoints()` polyline encoder for iOS.
 
 The full event vocabulary lives in [Crust.types.ts](../modules/crust/src/Crust.types.ts):
 `onNavRoute`, `onNavManeuver`, `onNavLocation`, `onNavRerouting`, `onNavOffRoute`, `onNavArrived`, `onNavError`, `onHeading`.
 
-Permissions: `requestNavigationPermission()` is **idempotent** — it shows the Google Nav T&C dialog if not yet accepted, otherwise resolves `{accepted: true}` immediately. It is safe (and intended) to call eagerly on mount. Once the user accepts, the acceptance is persisted inside the MentraOS app and survives across launches; it goes away only if the user deletes the app. Behavior across app updates has not been tested yet, so treat that as unverified.
+Permissions: `requestNavigationPermission()` is **idempotent** — it shows the Google Nav T&C dialog if not yet accepted, otherwise resolves `{accepted: true}` immediately. It is safe (and intended) to call eagerly on mount. Once the user accepts, the acceptance is persisted inside the Veiller app and survives across launches; it goes away only if the user deletes the app. Behavior across app updates has not been tested yet, so treat that as unverified.
 
 Dev-only navigation toggles surface as `crust.simulateDeviation()`, `crust.setWrongSidewalkOffset()`, `crust.setSkipCrossings()`. They're Android-only today; iOS is a no-op stub. They exist to reproduce specific pivot scenarios (e.g. wrong-sidewalk-then-missed-the-turn) inside the simulator.
 
 ### Heading (`crust.startHeading` / `onHeading`)
 
-- **Native:** [HeadingManager.swift](../modules/crust/ios/heading/HeadingManager.swift) (CLLocationManager + 1° threshold) and [HeadingManager.kt](../modules/crust/android/src/main/java/com/mentra/crust/heading/HeadingManager.kt) (SensorManager).
+- **Native:** [HeadingManager.swift](../modules/crust/ios/heading/HeadingManager.swift) (CLLocationManager + 1° threshold) and [HeadingManager.kt](../modules/crust/android/src/main/java/com/veiller/crust/heading/HeadingManager.kt) (SensorManager).
 - **Contract:** emits `onHeading: { degrees }` only when the angle changes ≥1° since the last emission. Keeps the bridge quiet at rest.
 
 ### Native build configuration (Android only)
@@ -179,11 +179,11 @@ configureRuntime({
 })
 ```
 
-This indirection is what keeps `@mentra/engine` portable: the runtime never imports concrete services, it only consumes the hook shape. OEM hosts implement the same shape with their own backing.
+This indirection is what keeps `@veiller/engine` portable: the runtime never imports concrete services, it only consumes the hook shape. OEM hosts implement the same shape with their own backing.
 
 ---
 
-## Layer 3 — `LocalMiniappRuntime` (in `@mentra/engine`)
+## Layer 3 — `LocalMiniappRuntime` (in `@veiller/engine`)
 
 `mobile/modules/engine/src/services/LocalMiniappRuntime.ts` is the broker between miniapp WebViews and host services. One singleton handles every running miniapp.
 
@@ -216,11 +216,11 @@ The same pattern is used for any other sensor-style stream the runtime gates cen
 
 ### Dev-mode caveat
 
-`installDevReloadListenerIfDevMode()` (in `@mentra/miniapp/index.ts`) auto-installs a dev-reload handler on module import. Production builds gate it on `window.MentraOS.miniappDeveloperMode`, so consumers don't get reload behavior in real apps.
+`installDevReloadListenerIfDevMode()` (in `@veiller/miniapp/index.ts`) auto-installs a dev-reload handler on module import. Production builds gate it on `window.Veiller.miniappDeveloperMode`, so consumers don't get reload behavior in real apps.
 
 ---
 
-## Layer 4 — `@mentra/miniapp` SDK
+## Layer 4 — `@veiller/miniapp` SDK
 
 `mobile/modules/miniapp/` is the SDK consumed by miniapp authors. It runs **inside** a miniapp's WebView, not in the manager. **Not published yet** — everything is local right now; the package lives in-tree and is consumed via the local checkout. Publishing to npm is future work.
 
@@ -235,7 +235,7 @@ Public entry: [src/index.ts](../modules/miniapp/src/index.ts). The headline expo
 - `MiniappStreamType` — HEADING_UPDATE, LOCATION_UPDATE, NAVIGATION_UPDATE, BUTTON_PRESS, AUDIO_CHUNK, ...
 - `MiniappErrorCode` — PERMISSION_NOT_DECLARED, INTERNAL, UNSUPPORTED, ...
 
-This file has **no runtime dependency on `@mentra/sdk`**. Cloud↔app and phone↔miniapp are deliberately separate protocols, so they can evolve independently.
+This file has **no runtime dependency on `@veiller/sdk`**. Cloud↔app and phone↔miniapp are deliberately separate protocols, so they can evolve independently.
 
 ### Session lifecycle
 

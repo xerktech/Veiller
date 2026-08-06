@@ -1,6 +1,6 @@
 //
 //  PhoneMic.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created on 3/8/25.
 //
@@ -20,7 +20,7 @@ class PhoneMic {
 
     /// Recording state - tracked via boolean to avoid EXC_BAD_ACCESS crash
     /// when AVAudioEngine becomes invalid during audio route changes.
-    /// See: MENTRA-OS-14P
+    /// See: VEILLER-OS-14P
     private var _isRecording = false
     var isRecording: Bool {
         _isRecording
@@ -558,7 +558,7 @@ class PhoneMic {
 
         // Remove any existing tap before installing new one (prevents crash if tap
         // already exists from previous engine). This is safe even if no tap exists.
-        // See: MENTRA-OS-YM, MENTRA-OS-137
+        // See: VEILLER-OS-YM, VEILLER-OS-137
         inputNode.removeTap(onBus: 0)
 
         // Buffer size of 1024 at 48kHz = ~21ms of audio
@@ -638,7 +638,7 @@ class PhoneMic {
 
         // Remove the tap and stop the engine safely
         // Accessing inputNode can crash if engine is in an invalid state (e.g., during
-        // audio route changes), so we guard against this. See: MENTRA-OS-17X
+        // audio route changes), so we guard against this. See: VEILLER-OS-17X
         if let engine = engine {
             // Only access inputNode if engine is still attached
             if engine.inputNode.engine != nil {

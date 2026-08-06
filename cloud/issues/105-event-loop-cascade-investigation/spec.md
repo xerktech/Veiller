@@ -29,7 +29,7 @@ Did the WS storm happen before, during, or after the slow path?
 Did the process receive and handle shutdown cleanly?
 ```
 
-Better Stack will store, search, graph, and alert on these records. The application still has to emit the Mentra-specific facts because no vendor can infer `CONNECTION_INIT`, `RECONNECT`, `subscription_update`, or `broadcastAppState` from generic container metrics.
+Better Stack will store, search, graph, and alert on these records. The application still has to emit the Veiller-specific facts because no vendor can infer `CONNECTION_INIT`, `RECONNECT`, `subscription_update`, or `broadcastAppState` from generic container metrics.
 
 ---
 
@@ -109,7 +109,7 @@ For slow protocol-level calls, log:
 {
   "feature": "slow-app-protocol",
   "protocolType": "connection_init",
-  "packageName": "com.mentra.captions.debug",
+  "packageName": "com.veiller.captions.debug",
   "userIdHash": 1514391467,
   "durationMs": 412.3,
   "phaseTimings": {
@@ -176,7 +176,7 @@ Counts matter because a window can be slow because one message took 2s, or becau
 - `cloud/packages/cloud/src/services/session/AppManager.ts`
 - `cloud/packages/cloud/src/services/core/app.service.ts`
 
-**Why:** The local Mentra-path harness points at legacy `CONNECTION_INIT` and reconnect/init fanout. v3 `RECONNECT` is relatively light; legacy init calls `attachAppSocket`, then `broadcastAppState`, then `refreshInstalledApps`, which can do DB-backed app/user lookups.
+**Why:** The local Veiller-path harness points at legacy `CONNECTION_INIT` and reconnect/init fanout. v3 `RECONNECT` is relatively light; legacy init calls `attachAppSocket`, then `broadcastAppState`, then `refreshInstalledApps`, which can do DB-backed app/user lookups.
 
 Add operation timers:
 
@@ -212,7 +212,7 @@ Slow log:
 {
   "feature": "slow-app-connect",
   "mode": "connection_init",
-  "packageName": "com.mentra.captions.debug",
+  "packageName": "com.veiller.captions.debug",
   "sdkVersion": "none",
   "userIdHash": 1514391467,
   "durationMs": 418.7,
@@ -278,7 +278,7 @@ Slow log:
 ```json
 {
   "feature": "slow-subscription-update",
-  "packageName": "com.mentra.ai",
+  "packageName": "com.veiller.ai",
   "userIdHash": 1514391467,
   "durationMs": 281.4,
   "subscriptionCount": 3,
@@ -412,7 +412,7 @@ On every app WS close, log:
 {
   "feature": "ws-close",
   "wsKind": "app",
-  "packageName": "com.mentra.captions.debug",
+  "packageName": "com.veiller.captions.debug",
   "userIdHash": 1514391467,
   "code": 1006,
   "reasonLength": 0,
@@ -565,7 +565,7 @@ If these seven questions are answerable for the next event, Phase 1.5 succeeded.
 3. Local harness smoke:
 
 ```bash
-bun run tools/ws-storm-local/mentra-path-storm-harness.ts -- \
+bun run tools/ws-storm-local/veiller-path-storm-harness.ts -- \
   --users=56 \
   --apps-per-user=1 \
   --rounds=1 \

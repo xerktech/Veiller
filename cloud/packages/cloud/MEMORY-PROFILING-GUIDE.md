@@ -16,7 +16,7 @@ cloud-prod OOM-crashes every ~3-4 hours. RSS grows at ~2 MB/min regardless of se
 
 ## Profiling Tools (already built)
 
-All tools are in `cloud/packages/cloud/src/scripts/analyze-heap.ts`. Requires `MENTRA_ADMIN_JWT` env var (any Mentra admin's JWT from the auth flow, signed with `AUGMENTOS_AUTH_JWT_SECRET`).
+All tools are in `cloud/packages/cloud/src/scripts/analyze-heap.ts`. Requires `VEILLER_ADMIN_JWT` env var (any Veiller admin's JWT from the auth flow, signed with `AUGMENTOS_AUTH_JWT_SECRET`).
 
 ### 1. Live Memory Tracker (best starting point)
 
@@ -24,7 +24,7 @@ Polls `/api/admin/memory/now` every N seconds, shows per-session memory breakdow
 
 ```bash
 cd cloud
-export MENTRA_ADMIN_JWT="eyJ..."
+export VEILLER_ADMIN_JWT="eyJ..."
 
 # Track for 30 minutes, poll every 30s
 bun ./packages/cloud/src/scripts/analyze-heap.ts live --host=uscentralapi.mentra.glass --interval=30 --duration=1800
@@ -39,7 +39,7 @@ Shows: RSS, heap, external, ArrayBuffers, session count, audio buffers, VAD buff
 
 ```bash
 # Fetch Bun/JSC heap snapshot
-curl -s -H "Authorization: Bearer $MENTRA_ADMIN_JWT" \
+curl -s -H "Authorization: Bearer $VEILLER_ADMIN_JWT" \
   https://uscentralapi.mentra.glass/api/admin/memory/heap-snapshot-bun \
   -o snapshot.heapsnapshot
 ```
@@ -72,7 +72,7 @@ Shows which sessions grew in audio/VAD/segments/apps between snapshots.
 
 ```bash
 # Quick memory snapshot with per-session breakdown
-curl -s -H "Authorization: Bearer $MENTRA_ADMIN_JWT" \
+curl -s -H "Authorization: Bearer $VEILLER_ADMIN_JWT" \
   https://uscentralapi.mentra.glass/api/admin/memory/now | jq .
 
 # Health check (memory stats, event loop lag, session count)

@@ -11,7 +11,7 @@ appId: ${MAESTRO_APP_ID}
     clearState: true
 
 # Should see connection error screen
-- assertVisible: "Could not connect to MentraOS"
+- assertVisible: "Could not connect to Veiller"
 - takeScreenshot: "no-internet-error"
 
 # Look for retry button
@@ -30,5 +30,5 @@ appId: ${MAESTRO_APP_ID}
 - tapOn: "Retry"
 
 # Should now connect successfully
-- assertVisible: "Welcome to MentraOS"
+- assertVisible: "Welcome to Veiller"
 - takeScreenshot: "connected-after-retry"

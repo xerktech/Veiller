@@ -1,18 +1,18 @@
 /**
- * @mentra/miniapp — SDK for building MentraOS local miniapps.
+ * @veiller/miniapp — SDK for building Veiller local miniapps.
  *
  * Public entry point. Consumers do:
  *
- *   import {MiniappSession} from "@mentra/miniapp"            // background JSContext
- *   import {useColorScheme} from "@mentra/miniapp/react"      // UI WebView hooks
- *   import {MiniappRequestType} from "@mentra/miniapp/protocol"
+ *   import {MiniappSession} from "@veiller/miniapp"            // background JSContext
+ *   import {useColorScheme} from "@veiller/miniapp/react"      // UI WebView hooks
+ *   import {MiniappRequestType} from "@veiller/miniapp/protocol"
  */
 
 import {installDevReloadListenerIfDevMode} from "./dev-reload"
 
 // Auto-install the dev-reload listener on module import so authors get live
 // reload for free in dev builds. No-op in production (gated on
-// window.MentraOS.miniappDeveloperMode).
+// window.Veiller.miniappDeveloperMode).
 installDevReloadListenerIfDevMode()
 
 export {MiniappSession, NotConnectedError} from "./session"
@@ -31,8 +31,8 @@ export type {AuthFetchOptions, AuthModule} from "./modules/auth"
 export {makeRequestId, parseEnvelope, serializeEnvelope} from "./envelope"
 export type {MiniappEnvelope} from "./envelope"
 
-export {getMentraOSGlobals} from "./globals"
-export type {MentraOSGlobals, MiniappCapsuleMenuRect, MiniappColorScheme, MiniappSafeAreaInsets} from "./globals"
+export {getVeillerGlobals} from "./globals"
+export type {VeillerGlobals, MiniappCapsuleMenuRect, MiniappColorScheme, MiniappSafeAreaInsets} from "./globals"
 
 export {MiniappErrorCode, MiniappRequestType, MiniappResponseType, MiniappStreamType} from "./protocol"
 export {CLOUD_STATUS_STREAM} from "./modules/cloud"

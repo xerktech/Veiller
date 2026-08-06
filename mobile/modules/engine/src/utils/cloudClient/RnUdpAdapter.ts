@@ -1,5 +1,5 @@
 /**
- * @fileoverview react-native-udp backed UdpSocketLike for @mentra/cloud-client.
+ * @fileoverview react-native-udp backed UdpSocketLike for @veiller/cloud-client.
  *
  * The cloud-client encrypts each audio frame in shared code (NaCl secretbox) and
  * hands the raw bytes here; this adapter only owns the native dgram socket and
@@ -7,7 +7,7 @@
  * Buffer wrap the native module needs.
  */
 import dgram from "react-native-udp"
-import type {UdpSocketLike} from "@mentra/cloud-client"
+import type {UdpSocketLike} from "@veiller/cloud-client"
 
 type CloudUdpSocket = ReturnType<typeof dgram.createSocket> & {
   on(event: "error", cb: (err: Error) => void): void

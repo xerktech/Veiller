@@ -1,12 +1,12 @@
 /**
  * @fileoverview `oems` collection. One document per registered OEM.
  *
- * The OEM record holds the public key Mentra uses to verify OEM-signed JWTs
+ * The OEM record holds the public key Veiller uses to verify OEM-signed JWTs
  * during token exchange. Two key-source modes:
  *
  *   - "static": OEM pasted a PEM-encoded public key into the portal. Stored
  *     on this document directly. Rotating means re-pasting.
- *   - "jwks-url": OEM hosts a JWKS document at a URL. Mentra fetches and
+ *   - "jwks-url": OEM hosts a JWKS document at a URL. Veiller fetches and
  *     caches the keys here on this document; cache refreshes on a TTL and
  *     on verification failure. Supports multi-key rotation windows.
  *
@@ -48,7 +48,7 @@ const OemSchema = new Schema(
 
     /**
      * If true, token exchange and refresh are rejected for this OEM. Set
-     * during OEM termination; flipped by Mentra admin.
+     * during OEM termination; flipped by Veiller admin.
      */
     disabled: { type: Boolean, default: false, index: true },
   },

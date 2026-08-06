@@ -1,6 +1,6 @@
-# MentraOS Cloud
+# Veiller Cloud
 
-MentraOS Cloud is the backend infrastructure for MentraOS - an open-source operating system for smart glasses. It orchestrates communication between glasses, mobile apps, and third-party applications, enabling real-time augmented reality experiences.
+Veiller Cloud is the backend infrastructure for Veiller - an open-source operating system for smart glasses. It orchestrates communication between glasses, mobile apps, and third-party applications, enabling real-time augmented reality experiences.
 
 ## Quick Start
 
@@ -16,7 +16,7 @@ MentraOS Cloud is the backend infrastructure for MentraOS - an open-source opera
 
    ```bash
    git clone https://github.com/Mentra-Community/MentraOS.git
-   cd MentraOS/cloud
+   cd Veiller/cloud
    ```
 
 2. **Start development environment:**

@@ -1,6 +1,6 @@
 //
 //  JSCRuntime.swift
-//  MentraJS — per-miniapp JavaScriptCore runtime host (iOS).
+//  VeillerJS — per-miniapp JavaScriptCore runtime host (iOS).
 //
 //  Owns N JSContexts keyed by `packageName`. Each context gets:
 //    - its own JSVirtualMachine (heap isolation)
@@ -12,11 +12,11 @@
 //      crashes when the host runtime's GC races with it).
 //
 //  The Expo Function surface on `CrustModule`:
-//    mentraJsSpawn(packageName, polyfillBundle, miniappJs) → Bool
-//    mentraJsEvaluate(packageName, src) → Any?
-//    mentraJsKill(packageName) → Void
-//    mentraJsDispatchToJs(packageName, channel, payloadJson) → Void
-//    Event "mentrajs_message" — fired when JS calls __dispatch back.
+//    veillerJsSpawn(packageName, polyfillBundle, miniappJs) → Bool
+//    veillerJsEvaluate(packageName, src) → Any?
+//    veillerJsKill(packageName) → Void
+//    veillerJsDispatchToJs(packageName, channel, payloadJson) → Void
+//    Event "veillerjs_message" — fired when JS calls __dispatch back.
 //
 
 import Foundation
@@ -31,10 +31,10 @@ public final class JSCRuntime: NSObject {
     public static let shared = JSCRuntime()
 
     /// Tag for os_log lines; visible via Console.app under
-    /// `subsystem == "com.xerktech.veiller" && category == "MentraJS"`.
-    static let log = OSLog(subsystem: "com.xerktech.veiller", category: "MentraJS")
+    /// `subsystem == "com.xerktech.veiller" && category == "VeillerJS"`.
+    static let log = OSLog(subsystem: "com.xerktech.veiller", category: "VeillerJS")
 
-    /// Message emitted back to RN via `Crust.addListener("mentrajs_message", …)`.
+    /// Message emitted back to RN via `Crust.addListener("veillerjs_message", …)`.
     /// `payload` is JSON-friendly so the bridge can ship it verbatim.
     public struct OutboundMessage {
         public let packageName: String
@@ -111,17 +111,17 @@ public final class JSCRuntime: NSObject {
     /// is missing (host RN code should treat that as a fatal misconfig
     /// — every JSContext spawn depends on this bundle).
     public static func loadPolyfillBundle() -> String {
-        // Cocoapods generates `MentraJSRuntime.bundle` next to the pod
+        // Cocoapods generates `VeillerJSRuntime.bundle` next to the pod
         // binary. The runtime resolves it via Bundle(for:).
         let main = Bundle.main
         // The resource_bundles directive on the podspec emits a bundle
-        // named "MentraJSRuntime" inside the main app bundle's path.
+        // named "VeillerJSRuntime" inside the main app bundle's path.
         // We look it up by name; fall back to scanning Bundle.main for
         // a startup.js anywhere if cocoapods placed it differently
         // (e.g. inside the Crust framework bundle in static linkage).
         let candidates: [URL?] = [
-            main.url(forResource: "MentraJSRuntime", withExtension: "bundle"),
-            Bundle(for: JSCRuntime.self).url(forResource: "MentraJSRuntime", withExtension: "bundle"),
+            main.url(forResource: "VeillerJSRuntime", withExtension: "bundle"),
+            Bundle(for: JSCRuntime.self).url(forResource: "VeillerJSRuntime", withExtension: "bundle"),
         ]
         for case let bundleUrl? in candidates {
             let startupUrl = bundleUrl.appendingPathComponent("startup.js")
@@ -134,7 +134,7 @@ public final class JSCRuntime: NSObject {
            let str = try? String(contentsOfFile: path, encoding: .utf8) {
             return str
         }
-        os_log("MentraJS: polyfill bundle not found in resources", log: Self.log, type: .error)
+        os_log("VeillerJS: polyfill bundle not found in resources", log: Self.log, type: .error)
         return ""
     }
 
@@ -152,7 +152,7 @@ public final class JSCRuntime: NSObject {
     ///   - packageName: stable id (e.g. "com.alex.notes"). Must be unique
     ///     within the host process. Re-spawning a live id kills the old
     ///     context first.
-    ///   - polyfillBundle: the contents of `mentrajs-runtime/dist/startup.js`.
+    ///   - polyfillBundle: the contents of `veillerjs-runtime/dist/startup.js`.
     ///     Evaluated first, before `miniappJs`.
     ///   - miniappJs: the miniapp's `background/index.js` source. Evaluated
     ///     immediately after the polyfill installs.
@@ -168,7 +168,7 @@ public final class JSCRuntime: NSObject {
         let vm = JSVirtualMachine()!
         let queue = DispatchQueue(label: "com.xerktech.veillerjs.\(packageName)", qos: .userInitiated)
         let ctx = JSContext(virtualMachine: vm)!
-        ctx.name = "MentraJS: \(packageName)"
+        ctx.name = "VeillerJS: \(packageName)"
         #if DEBUG
         if #available(iOS 16.4, *) {
             ctx.isInspectable = true
@@ -199,7 +199,7 @@ public final class JSCRuntime: NSObject {
         if !success {
             kill(packageName: packageName)
         } else {
-            os_log("MentraJS: spawned %{public}@", log: Self.log, type: .info, packageName)
+            os_log("VeillerJS: spawned %{public}@", log: Self.log, type: .info, packageName)
         }
         return success
     }
@@ -225,7 +225,7 @@ public final class JSCRuntime: NSObject {
             timer.setEventHandler { [weak self, weak record] in
                 guard let self, let record else { return }
                 let phase = cold ? "cold-start" : "steady-state"
-                os_log("MentraJS NACK: %{public}@ %{public}@ ready signal not received in %.0fs",
+                os_log("VeillerJS NACK: %{public}@ %{public}@ ready signal not received in %.0fs",
                        log: Self.log, type: .error,
                        record.packageName, phase, timeoutSeconds)
                 // Surface to RN as a recoverable error frame so the
@@ -281,7 +281,7 @@ public final class JSCRuntime: NSObject {
             record.context.exception = nil
             let raw = record.context.evaluateScript(source)
             if let exception = record.context.exception {
-                os_log("MentraJS [%{public}@] evaluate threw: %{public}@",
+                os_log("VeillerJS [%{public}@] evaluate threw: %{public}@",
                        log: Self.log, type: .error,
                        record.packageName, exception.toString() ?? "unknown")
                 record.context.exception = nil
@@ -301,7 +301,7 @@ public final class JSCRuntime: NSObject {
     public func dispatchToJs(packageName: String, envelope: [String: Any]) {
         guard let record = lock.withLock({ contexts[packageName] }) else { return }
         guard let json = Self.jsonString(from: envelope) else {
-            os_log("MentraJS: bad envelope, drop", log: Self.log, type: .error)
+            os_log("VeillerJS: bad envelope, drop", log: Self.log, type: .error)
             return
         }
         // Steady-state NACK: re-arm the timer so a wedged JSContext
@@ -348,7 +348,7 @@ public final class JSCRuntime: NSObject {
         timer.schedule(deadline: .now() + warn, repeating: .never)
         timer.setEventHandler { [weak self, weak record] in
             guard let self, let record else { return }
-            os_log("MentraJS watchdog: %{public}@ %{public}@ blocked >%.0fs",
+            os_log("VeillerJS watchdog: %{public}@ %{public}@ blocked >%.0fs",
                    log: Self.log, type: .info,
                    record.packageName, label, warn)
             // Schedule the kill timer immediately.
@@ -356,7 +356,7 @@ public final class JSCRuntime: NSObject {
             killTimer.schedule(deadline: .now() + (kill - warn))
             killTimer.setEventHandler { [weak self, weak record] in
                 guard let self, let record else { return }
-                os_log("MentraJS watchdog: %{public}@ blocked >%.0fs, killing",
+                os_log("VeillerJS watchdog: %{public}@ blocked >%.0fs, killing",
                        log: Self.log, type: .error,
                        record.packageName, kill)
                 self.lock.withLock { self._onOutbound }?(
@@ -427,7 +427,7 @@ public final class JSCRuntime: NSObject {
             //    Heap Helper Thread.
             JSGarbageCollect(record.context.jsGlobalContextRef)
         }
-        os_log("MentraJS: killed %{public}@", log: Self.log, type: .info, packageName)
+        os_log("VeillerJS: killed %{public}@", log: Self.log, type: .info, packageName)
     }
 
     // MARK: - Internals
@@ -591,7 +591,7 @@ public final class JSCRuntime: NSObject {
                     ],
                 )
             )
-            os_log("MentraJS exception in %{public}@: %{public}@",
+            os_log("VeillerJS exception in %{public}@: %{public}@",
                    log: Self.log, type: .error,
                    record.packageName, message)
         }
@@ -607,7 +607,7 @@ public final class JSCRuntime: NSObject {
         _ = record.context.evaluateScript(source)
         if let exception = record.context.exception {
             let msg = exception.toString() ?? "unknown"
-            os_log("MentraJS [%{public}@] %{public}@ eval threw: %{public}@",
+            os_log("VeillerJS [%{public}@] %{public}@ eval threw: %{public}@",
                    log: Self.log, type: .error,
                    record.packageName, label, msg)
             record.context.exception = nil

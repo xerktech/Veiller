@@ -35,12 +35,12 @@ Each result card shows:
 # From the monorepo root
 cd cloud/packages/apps/photo-test
 
-# Install dependencies (uses workspace:* for @mentra/sdk)
+# Install dependencies (uses workspace:* for @veiller/sdk)
 bun install
 
 # Set required env vars
-export PACKAGE_NAME="com.mentra.phototest"      # or your registered package name
-export MENTRAOS_API_KEY="your-api-key-here"
+export PACKAGE_NAME="com.veiller.phototest"      # or your registered package name
+export VEILLER_API_KEY="your-api-key-here"
 
 # Run in dev mode (hot reload)
 bun run dev
@@ -50,7 +50,7 @@ Then open `http://localhost:3000` in a browser.
 
 ### Using the Dashboard
 
-1. **Connect your glasses** — launch the app on your MentraOS glasses
+1. **Connect your glasses** — launch the app on your Veiller glasses
 2. **Enter your User ID** in the input field (get it from the glasses session or server logs)
 3. **Click Connect** to start the SSE stream
 4. **Click "📸 Take Photo"** to trigger a photo request

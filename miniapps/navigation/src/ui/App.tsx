@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react"
-import {useColorScheme} from "@mentra/miniapp/ui"
+import {useColorScheme} from "@veiller/miniapp/ui"
 
 import "@/shared/channels"
 import {RouterProvider, useRouter} from "@/ui/router"
@@ -34,7 +34,7 @@ function Pages() {
               ...(name ? {savedName: name} : {}),
               ...(type ? {type} : {}),
             }
-            await mentra.request("storage:add-saved", saved)
+            await veiller.request("storage:add-saved", saved)
             setSavedPlacesVersion((v) => v + 1)
             pop()
           }}
@@ -47,7 +47,7 @@ function Pages() {
 }
 
 export default function App() {
-  // Follow the host-reported color scheme (window.MentraOS.colorScheme) by
+  // Follow the host-reported color scheme (window.Veiller.colorScheme) by
   // toggling the `.dark` class on <html>, which drives the `dark:` variants.
   const scheme = useColorScheme()
   useEffect(() => {

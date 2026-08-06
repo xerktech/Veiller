@@ -427,7 +427,7 @@ Local app:
 
 The message format is identical — an `AudioChunk` with PCM data. The `MicManager` processes it the same way.
 
-For local apps, the native transport routes `audio_chunk` subscription to the phone's audio pipeline (which already captures audio from the glasses BLE connection). The phone side sends PCM frames through `globalThis.__mentraTransport.onMessage()` using the same `AudioChunk` shape.
+For local apps, the native transport routes `audio_chunk` subscription to the phone's audio pipeline (which already captures audio from the glasses BLE connection). The phone side sends PCM frames through `globalThis.__veillerTransport.onMessage()` using the same `AudioChunk` shape.
 
 **What about transcription?** For local apps, transcription happens on-device (Sherpa-ONNX). The native transport intercepts `transcription:*` subscriptions and routes audio to the local STT engine instead of sending it to a cloud. The `MicManager` doesn't need to know — it just receives `AudioChunk` or `VadEvent` messages through the transport.
 

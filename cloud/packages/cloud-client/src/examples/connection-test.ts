@@ -2,7 +2,7 @@
  * Test actual connection to AugmentOS cloud using generated core token
  */
 
-import { MentraClient, AccountService } from "../index";
+import { VeillerClient, AccountService } from "../index";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,7 +16,7 @@ async function testConnection() {
     console.log(`🔑 Token: ${credentials.coreToken.substring(0, 30)}...\n`);
 
     // Create client with pre-generated token
-    const client = new MentraClient({
+    const client = new VeillerClient({
       email: credentials.email,
       serverUrl: process.env.DEFAULT_SERVER_URL || "ws://localhost:8002",
       coreToken: credentials.coreToken,

@@ -1,4 +1,4 @@
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 
 async function main() {
@@ -12,7 +12,7 @@ async function main() {
   console.log("🚀 Testing LiveKit connection...");
   console.log("Server:", server);
 
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email,
     serverUrl: `${wsServer}`,
     coreToken: token,

@@ -1,7 +1,7 @@
-// Imports the real glasses.wifi facade by path (not via "@mentra/engine", which
+// Imports the real glasses.wifi facade by path (not via "@veiller/engine", which
 // jest mocks) so the actual delegation runs under the mobile jest CI runner.
-// @mentra/bluetooth-sdk is globally mocked in jest.setup.js — the facade calls it.
-import BluetoothSdk from "@mentra/bluetooth-sdk"
+// @veiller/bluetooth-sdk is globally mocked in jest.setup.js — the facade calls it.
+import BluetoothSdk from "@veiller/bluetooth-sdk"
 import {glassesWifi} from "../../modules/engine/src/facades/glassesWifi"
 import {useGlassesStore} from "../../modules/engine/src/stores/glasses"
 

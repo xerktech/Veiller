@@ -2,7 +2,7 @@
  * @fileoverview TTS service REST routes (Hono). Mounted at `/api/tts`.
  */
 import { Hono, type Context } from "hono";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { ttsService } from "../services/tts/tts.service";
 
 const logger = createLogger("tts").child({ service: "tts.api" });

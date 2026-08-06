@@ -7,10 +7,10 @@
  */
 
 import { resolve } from 'path';
-import { MentraClient } from '../MentraClient';
+import { VeillerClient } from '../VeillerClient';
 import { AccountService } from '../services/AccountService';
 
-const LIVE_CAPTIONS_PACKAGE = 'com.mentra.livecaptions';
+const LIVE_CAPTIONS_PACKAGE = 'com.veiller.livecaptions';
 const AUDIO_FILE_PATH = resolve(__dirname, '../audio/good-morning-2033.wav');
 const NUM_ACCOUNTS = 10; // Quick test with fewer accounts
 
@@ -21,12 +21,12 @@ async function main() {
 
   const accountService = new AccountService();
   const accounts = accountService.createTestAccounts('quick-test-{}@test.com', NUM_ACCOUNTS);
-  const clients: MentraClient[] = [];
+  const clients: VeillerClient[] = [];
 
   try {
     // Start all accounts simultaneously (more aggressive than full test)
     const promises = accounts.map(async (account, index) => {
-      const client = new MentraClient({
+      const client = new VeillerClient({
         email: account.email,
         coreToken: account.coreToken,
         serverUrl: process.env.DEFAULT_SERVER_URL || 'ws://localhost:8002',

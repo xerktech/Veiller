@@ -43,13 +43,13 @@ adb reverse tcp:3130 tcp:3130
 
 The miniapp dev sidecar uses `3123`, so the backend uses `3130` in dev.
 
-The `/api/insights` route requires a Mentra miniapp token. In local development
+The `/api/insights` route requires a Veiller miniapp token. In local development
 the backend verifies that token against Cloud Core's JWKS. The production JWKS
 is the default, so only override it when testing against local/staging Core:
 
 ```bash
-MENTRA_AUTH_JWKS_URL=http://localhost:3000/.well-known/jwks.json
-MERGE_PACKAGE_NAME=com.mentra.local-merge
+VEILLER_AUTH_JWKS_URL=http://localhost:3000/.well-known/jwks.json
+MERGE_PACKAGE_NAME=com.veiller.local-merge
 ```
 
 The mobile host mints the token via `cloudClient.auth.getMiniappToken(...)` and

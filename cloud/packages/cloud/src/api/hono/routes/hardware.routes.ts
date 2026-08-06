@@ -8,7 +8,7 @@ import { Hono } from "hono";
 import jwt from "jsonwebtoken";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import UserSession from "../../../services/session/UserSession";
-import { StreamType } from "@mentra/sdk";
+import { StreamType } from "@veiller/sdk";
 import photoRequestService from "../../../services/core/photo-request.service";
 import type { AppEnv, AppContext } from "../../../types/hono";
 

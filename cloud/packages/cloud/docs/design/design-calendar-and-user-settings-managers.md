@@ -10,7 +10,7 @@ Scope: Cloud-only changes. No SDK changes required for this phase.
 Non-goals:
 
 - No migration from deprecated `User.augmentosSettings`.
-- Do not persist legacy WS MentraOS settings into `UserSettings`.
+- Do not persist legacy WS Veiller settings into `UserSettings`.
 - No new SDK APIs (e.g., `session.calendar`) in this phase.
 - No changes to AppSettings (per-app settings).
 
@@ -49,9 +49,9 @@ Limitations:
 - APIs exist at `/api/client/user/settings/*` for CRUD.
 - Missing: wiring to active sessions to forward changes live to Apps (no SDK changes are required for now; we can use existing Cloud→App message types).
 
-  1.4 Legacy WS settings (MentraOS)
+  1.4 Legacy WS settings (Veiller)
 
-- WS handlers in `websocket-glasses.service.ts` process old MentraOS settings traffic.
+- WS handlers in `websocket-glasses.service.ts` process old Veiller settings traffic.
 - We will NOT persist these into `UserSettings`; we will still forward them to Apps for back-compat.
 
 ---
@@ -81,8 +81,8 @@ Limitations:
 - On successful REST update:
   - Persist to `UserSettings`.
   - Special-case bridge: if `metric_system_enabled` is present, map to legacy `metricSystemEnabled` and broadcast a legacy `"augmentos_settings_update"` to Apps (maintains backward compatibility without SDK changes).
-- Do NOT persist legacy WS MentraOS settings to `UserSettings`.
-- Continue forwarding the legacy WS MentraOS settings to Apps as-is for backwards compatibility. This path remains separate and unchanged.
+- Do NOT persist legacy WS Veiller settings to `UserSettings`.
+- Continue forwarding the legacy WS Veiller settings to Apps as-is for backwards compatibility. This path remains separate and unchanged.
 
 ---
 
@@ -124,7 +124,7 @@ Primary responsibilities:
 
 - Runtime access to the canonical `UserSettings` document for the active user.
 - Track successful REST updates (already persisted) to maintain a session snapshot; no live forwarding in this phase.
-- Do not write legacy WS MentraOS settings into `UserSettings`.
+- Do not write legacy WS Veiller settings into `UserSettings`.
 - Keep WS legacy forwarding intact (no behavior change) in `websocket-glasses.service.ts` for back-compat.
 
 Proposed methods (internal design):
@@ -253,7 +253,7 @@ Proposed methods (internal design):
   - Cached replay behavior is preserved.
 
 - User settings:
-  - Legacy WS MentraOS settings continue to be forwarded to Apps along their existing path.
+  - Legacy WS Veiller settings continue to be forwarded to Apps along their existing path.
   - We do not write legacy WS settings to `UserSettings`.
   - REST-based user settings are live-forwarded only for the special-case bridge:
     - `metric_system_enabled` → broadcast legacy `"augmentos_settings_update"` with `{ metricSystemEnabled }`.
@@ -343,7 +343,7 @@ Phase B: User Settings
 - Implement `UserSettingsManager`, wire `user-settings.api.ts` to:
   - Update session snapshot on REST updates.
   - If `metric_system_enabled` is present, bridge to legacy and broadcast `"augmentos_settings_update"` with `{ metricSystemEnabled }` (only this key in this phase).
-- Keep legacy WS MentraOS settings forwarding unchanged.
+- Keep legacy WS Veiller settings forwarding unchanged.
 - Validate in staging.
 
 ---

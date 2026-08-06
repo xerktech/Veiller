@@ -3,14 +3,14 @@
 ## Overview
 
 **What this doc covers:** The full end-to-end architecture of `session.audio.playAudio()` and `session.audio.speak()`, and a detailed investigation of why those calls cause audio to loop indefinitely on the Mentra Live until the app is force-stopped.
-**Why this doc exists:** Reported 2026-03-23 by Aryan. All mini apps using `playAudio()` or `speak()` are affected. The looping state is unrecoverable without a force-stop — no SDK call, no app disconnect, nothing short of killing the MentraOS process breaks it.
+**Why this doc exists:** Reported 2026-03-23 by Aryan. All mini apps using `playAudio()` or `speak()` are affected. The looping state is unrecoverable without a force-stop — no SDK call, no app disconnect, nothing short of killing the Veiller process breaks it.
 **Who should read this:** Mobile engineers (the bug lives in the native Android audio layer), cloud engineers (understanding where the system goes silent), and anyone building or debugging mini apps that use audio.
 
 ---
 
 ## Background
 
-The Mentra Live is a Android-based wearable. Its companion mobile app (the MentraOS app, `com.mentra.mentra`) runs on the user's Android phone. Mini apps (TPAs) run as cloud processes — they connect to the MentraOS cloud over WebSocket and send commands. The cloud relays those commands to the mobile app. The mobile app physically plays audio through its own speaker or the phone speaker.
+The Mentra Live is a Android-based wearable. Its companion mobile app (the Veiller app, `com.veiller.veiller`) runs on the user's Android phone. Mini apps (TPAs) run as cloud processes — they connect to the Veiller cloud over WebSocket and send commands. The cloud relays those commands to the mobile app. The mobile app physically plays audio through its own speaker or the phone speaker.
 
 Audio from `playAudio()` and `speak()` plays on the **phone**, not on the glasses hardware. The glasses are not involved in audio playback for these SDK calls.
 
@@ -193,7 +193,7 @@ Mini App SDK
 
 ### Symptom
 
-Audio plays once, then loops indefinitely on the phone speaker. No SDK call stops it. Force-stopping the MentraOS app is the only fix. The mini app's `playAudio()` promise never resolves.
+Audio plays once, then loops indefinitely on the phone speaker. No SDK call stops it. Force-stopping the Veiller app is the only fix. The mini app's `playAudio()` promise never resolves.
 
 ### What the logs confirm
 
@@ -260,7 +260,7 @@ This interaction only manifests on the K900 (Mentra Live). Simulated glasses and
 
 ### Why force-stop fixes it
 
-Force-stopping terminates the MentraOS process, which destroys the ExoPlayer instance, releases all AudioTrack handles, and clears all native audio state. Nothing short of this breaks the loop because `AudioPlaybackService` is a singleton that holds the `AudioPlayer` for the entire app lifetime, and once ExoPlayer is in the restart loop it never hands control back to JS.
+Force-stopping terminates the Veiller process, which destroys the ExoPlayer instance, releases all AudioTrack handles, and clears all native audio state. Nothing short of this breaks the loop because `AudioPlaybackService` is a singleton that holds the `AudioPlayer` for the entire app lifetime, and once ExoPlayer is in the restart loop it never hands control back to JS.
 
 ---
 

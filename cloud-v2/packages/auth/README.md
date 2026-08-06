@@ -1,16 +1,16 @@
-# @mentra/auth
+# @veiller/auth
 
 Helpers for miniapp backends that need to verify Local Runtime auto-auth tokens.
 
 ```ts
-import {createMentraAuth, type MentraAuthVariables} from "@mentra/auth";
+import {createVeillerAuth, type VeillerAuthVariables} from "@veiller/auth";
 import {Hono} from "hono";
 
-const mentraAuth = createMentraAuth({
+const mentraAuth = createVeillerAuth({
   packageName: "com.example.miniapp",
 });
 
-const app = new Hono<{ Variables: MentraAuthVariables }>();
+const app = new Hono<{ Variables: VeillerAuthVariables }>();
 
 app.use("/api/*", mentraAuth.hono());
 
@@ -22,14 +22,14 @@ app.post("/api/endpoint", async (c) => {
 
 Defaults:
 
-- `packageName`: required, or set `MENTRA_PACKAGE_NAME`, `MINIAPP_PACKAGE_NAME`, or `PACKAGE_NAME`.
-- `jwksUrl`: `MENTRA_AUTH_JWKS_URL`, falling back to `https://core.mentraglass.com/.well-known/jwks.json`.
-- `issuer`: `MENTRA_AUTH_ISSUERS` as a comma-separated list, or `MENTRA_AUTH_ISSUER` as one value, falling back to `cloud-core`.
+- `packageName`: required, or set `VEILLER_PACKAGE_NAME`, `MINIAPP_PACKAGE_NAME`, or `PACKAGE_NAME`.
+- `jwksUrl`: `VEILLER_AUTH_JWKS_URL`, falling back to `https://core.mentraglass.com/.well-known/jwks.json`.
+- `issuer`: `VEILLER_AUTH_ISSUERS` as a comma-separated list, or `VEILLER_AUTH_ISSUER` as one value, falling back to `cloud-core`.
 
 Use `jwksUrl` for local, staging, test, or self-hosted Core deployments:
 
 ```ts
-const mentraAuth = createMentraAuth({
+const mentraAuth = createVeillerAuth({
   packageName: "com.example.miniapp",
   jwksUrl: "http://localhost:3000/.well-known/jwks.json",
 });

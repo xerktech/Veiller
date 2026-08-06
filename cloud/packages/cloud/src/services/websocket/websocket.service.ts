@@ -7,7 +7,7 @@
 import WebSocket from "ws";
 import { Server } from "http";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { CloudToGlassesMessageType } from "@mentra/sdk";
+import { CloudToGlassesMessageType } from "@veiller/sdk";
 import { GlassesWebSocketService } from "./websocket-glasses.service";
 import { AppWebSocketService } from "./websocket-app.service";
 import { logger } from "../logging/pino-logger";

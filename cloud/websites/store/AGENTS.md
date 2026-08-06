@@ -1,4 +1,4 @@
-# MentraOS Web Store Development Guide
+# Veiller Web Store Development Guide
 
 ## Commands
 

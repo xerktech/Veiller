@@ -216,7 +216,7 @@ cloud/packages/types/
 {
   "name": "@mentra/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for MentraOS",
+  "description": "Shared TypeScript types for Veiller",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -324,7 +324,7 @@ export interface Capabilities {
 
 ```typescript
 /**
- * @mentra/types - Shared types for MentraOS
+ * @mentra/types - Shared types for Veiller
  *
  * IMPORTANT: Uses explicit exports for Bun compatibility
  * DO NOT use `export *` - Bun runtime can't handle type re-exports
@@ -354,7 +354,7 @@ export type {
 {
   "workspaces": ["packages/*"],
   "dependencies": {
-    "@mentra/sdk": "workspace:*",
+    "@veiller/sdk": "workspace:*",
     "@mentra/types": "workspace:*"
   }
 }

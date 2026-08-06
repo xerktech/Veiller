@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/display-utils",
+  "name": "@veiller/display-utils",
   "version": "1.0.0",
   "description": "Pixel-accurate text measurement and wrapping for smart glasses displays. Shared between cloud SDK and mobile app.",
   "main": "dist/index.js",
@@ -32,7 +32,7 @@
     "src"
   ],
   "keywords": [
-    "mentra",
+    "veiller",
     "smart-glasses",
     "display",
     "text-wrapping",

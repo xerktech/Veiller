@@ -16,7 +16,7 @@ Apps that were deleted or renamed are still in users' installed/running lists, c
 | `com.augmentos.livetranslation`  | 32    | Deleted |
 | `cloud.augmentos.recorder`       | 30    | Deleted |
 | `com.augmentos.calendarreminder` | 30    | Deleted |
-| `com.mentra.teleprompter`        | 14    | Deleted |
+| `com.veiller.teleprompter`        | 14    | Deleted |
 
 ## Fix
 

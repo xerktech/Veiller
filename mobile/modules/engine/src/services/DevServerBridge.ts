@@ -1,5 +1,5 @@
 /**
- * DevServerBridge — phone-side WebSocket connection to a `mentra-miniapp dev`
+ * DevServerBridge — phone-side WebSocket connection to a `veiller-miniapp dev`
  * sidecar running on a developer's laptop.
  *
  * Multiplexed over a single WebSocket per dev miniapp:
@@ -17,7 +17,7 @@
  */
 
 const LOG_TAG = "DEV_SERVER_BRIDGE"
-const PROTOCOL_VERSION = "mentra-dev/1"
+const PROTOCOL_VERSION = "veiller-dev/1"
 const HELLO_TIMEOUT_MS = 1_000
 const BACKOFF_MIN_MS = 1_000
 const BACKOFF_MAX_MS = 30_000
@@ -64,7 +64,7 @@ class DevServerBridge {
   /**
    * Register a global background-respawn handler. Fires when the dev
    * server sends `{type: "respawn-bg"}` — emitted on filesystem changes
-   * under `src/background/`. The host (MentraJSRouter via the
+   * under `src/background/`. The host (VeillerJSRouter via the
    * bootstrap) should kill + respawn the JSContext to pick up the
    * change. WebView reload is separate (see `onReload`).
    */
@@ -112,12 +112,12 @@ class DevServerBridge {
 
   /**
    * Forward a `log` envelope to the connected dev sidecar. Called from
-   * the JSContext side (`MentraJSRouter.__log` handler) AND the WebView
-   * side (`MentraUIRouter.routeFromWebView` for `type:"log"` frames).
+   * the JSContext side (`VeillerJSRouter.__log` handler) AND the WebView
+   * side (`VeillerUIRouter.routeFromWebView` for `type:"log"` frames).
    *
    * `source` distinguishes the two halves so the CLI can prefix lines
-   * `[UI]` vs `[MentraJS]`. Logs are silently dropped when no bridge
-   * exists for the package (no `mentra-miniapp dev` running) and
+   * `[UI]` vs `[VeillerJS]`. Logs are silently dropped when no bridge
+   * exists for the package (no `veiller-miniapp dev` running) and
    * buffered in the per-bridge ring while disconnected.
    */
   public forwardLog(
@@ -152,7 +152,7 @@ class DevServerBridge {
       // devHostUrl might already be just an IP; best-effort.
       host = devHostUrl.replace(/^https?:\/\//, "").split(":")[0].split("/")[0]
     }
-    return `ws://${host}:${devPort}/__mentra_dev`
+    return `ws://${host}:${devPort}/__veiller_dev`
   }
 
   private openSocket(packageName: string, entry: BridgeEntry): void {
@@ -233,7 +233,7 @@ class DevServerBridge {
 
       // Two-layer dev signal: filesystem changes under src/background/
       // trigger a full JSContext kill + respawn (not just a WebView
-      // reload). The host's MentraJSRouter listens here.
+      // reload). The host's VeillerJSRouter listens here.
       if (parsed.type === "respawn-bg") {
         console.log(`${LOG_TAG}: ${packageName} received respawn-bg signal`)
         this.globalRespawnBackgroundHandler?.(packageName)

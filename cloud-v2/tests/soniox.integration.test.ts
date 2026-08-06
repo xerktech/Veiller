@@ -41,8 +41,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** macOS `say` -> 16 kHz mono signed-16 PCM, returned as an Int16Array. */
 function generateSpeechPcm(phrase: string): Int16Array {
   const stamp = `${process.pid}-${phrase.replace(/\W+/g, "").slice(0, 12)}`;
-  const aiff = join(tmpdir(), `mentra-say-${stamp}.aiff`);
-  const wav = join(tmpdir(), `mentra-say-${stamp}.wav`);
+  const aiff = join(tmpdir(), `veiller-say-${stamp}.aiff`);
+  const wav = join(tmpdir(), `veiller-say-${stamp}.wav`);
 
   const say = Bun.spawnSync(["/usr/bin/say", "-o", aiff, phrase]);
   if (say.exitCode !== 0) throw new Error(`say failed: ${say.stderr}`);

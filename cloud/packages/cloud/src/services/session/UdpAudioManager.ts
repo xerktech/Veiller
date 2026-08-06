@@ -9,7 +9,7 @@
 
 import { Logger } from "pino";
 
-import { UdpRegister, UdpUnregister } from "@mentra/sdk";
+import { UdpRegister, UdpUnregister } from "@veiller/sdk";
 
 import { udpAudioServer } from "../udp/UdpAudioServer";
 import { UdpEncryptionState, createEncryptionState, encodeKey, decrypt } from "../udp/UdpCrypto";

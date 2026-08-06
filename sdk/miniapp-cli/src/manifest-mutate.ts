@@ -1,7 +1,7 @@
 // Pure manifest mutation helpers. No I/O. Returns new manifest objects.
 //
 // Used by the object-verb subcommands (`permission add`, `hardware add`, etc.)
-// and the interactive `mentra-miniapp manifest` wizard. Both surfaces share
+// and the interactive `veiller-miniapp manifest` wizard. Both surfaces share
 // these primitives so behavior is identical.
 
 import {
@@ -56,7 +56,7 @@ export function addPermission(
   if (existing.some((p) => p.type === validated)) {
     throw new MutateError({
       code: "duplicate",
-      message: `${validated} is already declared. Use 'mentra-miniapp permission remove ${validated}' first if you want to update its description / required flag.`,
+      message: `${validated} is already declared. Use 'veiller-miniapp permission remove ${validated}' first if you want to update its description / required flag.`,
     })
   }
   const entry: ManifestPermission = {type: validated}
@@ -97,7 +97,7 @@ export function addHardware(
   if (existing.some((h) => h.type === validatedType)) {
     throw new MutateError({
       code: "duplicate",
-      message: `${validatedType} hardware requirement already declared. Use 'mentra-miniapp hardware remove ${validatedType}' first if you want to update its level / description.`,
+      message: `${validatedType} hardware requirement already declared. Use 'veiller-miniapp hardware remove ${validatedType}' first if you want to update its level / description.`,
     })
   }
   const entry: ManifestHardwareRequirement = {type: validatedType, level: validatedLevel}

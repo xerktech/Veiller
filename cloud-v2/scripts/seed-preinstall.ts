@@ -32,11 +32,11 @@ const developer = {
 // A real zip bundle so the SHA-256 + mobile install path are valid.
 const BUNDLE_PATH =
   process.env.SEED_BUNDLE ??
-  ".cloud-v2-storage/core/miniapps/com.mentra.local-captions/releases/1.0.5/admin-preinstall-1781780396924-bundle.zip";
+  ".cloud-v2-storage/core/miniapps/com.veiller.local-captions/releases/1.0.5/admin-preinstall-1781780396924-bundle.zip";
 
 async function main() {
   const mongoUrl =
-    process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/mentra-cloud-v2";
+    process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/veiller-cloud-v2";
   await connectMongo(mongoUrl);
   // Log only safe metadata (host + db name); never the full URI, which can carry credentials.
   let mongoTarget = mongoUrl;
@@ -81,7 +81,7 @@ async function main() {
   await miniapps.approveRelease({ releaseId: release.id, adminId: ADMIN, notes: "seed" });
   console.log(`approved release ${release.id}`);
 
-  // 4) registry (global, tenantId null -> matches the mentra client token)
+  // 4) registry (global, tenantId null -> matches the veiller client token)
   const registry = await registries.ensureRegistry({ adminId: ADMIN }, { environment: ENVIRONMENT });
   console.log(`registry id=${registry.id} env=${ENVIRONMENT}`);
 

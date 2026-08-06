@@ -1,9 +1,9 @@
 /**
  * @fileoverview Language validation at the SDK boundary (issue 021, WP2).
  *
- * The registry itself lives in `@mentra/cloud-protocol/languages` (single
+ * The registry itself lives in `@veiller/cloud-protocol/languages` (single
  * source of truth shared with the cloud). This module re-exports the types so
- * miniapps import everything from `@mentra/miniapp`, and adds the throwing
+ * miniapps import everything from `@veiller/miniapp`, and adds the throwing
  * validators the typed module surfaces (`transcription.*`, `translation.*`)
  * call on every language parameter.
  *
@@ -24,8 +24,8 @@ import {
   toTranscriptionLanguage,
   SUPPORTED_LANGUAGE_HINTS,
   SUPPORTED_TRANSCRIPTION_LANGUAGES,
-} from "@mentra/cloud-protocol/languages"
-import type {LanguageHint, TranscriptionLanguage} from "@mentra/cloud-protocol/languages"
+} from "@veiller/cloud-protocol/languages"
+import type {LanguageHint, TranscriptionLanguage} from "@veiller/cloud-protocol/languages"
 
 export {SUPPORTED_LANGUAGE_HINTS, SUPPORTED_TRANSCRIPTION_LANGUAGES, isTranscriptionLanguage}
 export type {LanguageHint, TranscriptionLanguage}

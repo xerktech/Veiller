@@ -1,4 +1,4 @@
-package com.mentra.otaupdater;
+package com.veiller.otaupdater;
 
 import org.junit.Test;
 

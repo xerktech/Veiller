@@ -1,11 +1,11 @@
-# MentraOS runner cache cleanup systemd timer.
+# Veiller runner cache cleanup systemd timer.
 # Installed by mobile/scripts/setup-runner.sh into
 #   ~/.config/systemd/user/runner-cleanup.timer
 #
 # Fires the runner-cleanup.service every Sunday at 03:00 local time.
 
 [Unit]
-Description=Weekly trigger for MentraOS runner cache cleanup
+Description=Weekly trigger for Veiller runner cache cleanup
 Requires=runner-cleanup.service
 
 [Timer]

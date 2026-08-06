@@ -12,7 +12,7 @@
 
 ## Summary
 
-When a user stops a mini app from the Mentra phone app, the app restarts within
+When a user stops a mini app from the Veiller phone app, the app restarts within
 2–3 seconds. The cloud correctly processes the stop — it sends `APP_STOPPED`,
 closes the WebSocket, and removes the app from `runningApps`. But two bugs allow
 the app to resurrect:
@@ -28,7 +28,7 @@ The result: users cannot stop mini apps. They keep coming back.
 
 ## How We Found It
 
-A user tapped "Stop" on a mini app in the Mentra phone app. The app stopped
+A user tapped "Stop" on a mini app in the Veiller phone app. The app stopped
 momentarily, then reappeared within 2–3 seconds. Repeatable every time. Checked
 the logs and found the SDK was reconnecting immediately after the cloud closed
 the connection.
@@ -40,12 +40,12 @@ the connection.
 ### Terminal output from the mini app process
 
 ```
-[14:17:12.640] INFO: MentraSession received app_stopped
+[14:17:12.640] INFO: VeillerSession received app_stopped
     reason: "unknown"
 [14:17:12.640] INFO: Session stopped for isaiahballah@gmail.com: unknown
-[14:17:12.640] WARN: MentraSession transport closed; scheduling reconnect
+[14:17:12.640] WARN: VeillerSession transport closed; scheduling reconnect
     attempt: 1, delay: 1000
-[14:17:13.933] WARN: MentraSession transport closed; scheduling reconnect
+[14:17:13.933] WARN: VeillerSession transport closed; scheduling reconnect
     attempt: 2, delay: 2000
 [14:17:16.243] INFO: Session reconnected for isaiahballah@gmail.com
 ```
@@ -78,14 +78,14 @@ WebSocket after `APP_STOPPED`, `explicitDisconnect` is still `false`.
 
 The close handler sees `permanent = false` and calls `scheduleReconnect()`.
 
-Meanwhile, the `APP_STOPPED` handler in `MentraSession.ts` only emits the
+Meanwhile, the `APP_STOPPED` handler in `VeillerSession.ts` only emits the
 "stopped" event — it never tells `_ConnectionManager` to stop reconnecting:
 
 ```typescript
-// MentraSession.ts line ~311 — BEFORE fix
+// VeillerSession.ts line ~311 — BEFORE fix
 register(CloudToAppMessageType.APP_STOPPED, (message) => {
     const reason = message.reason ?? "unknown";
-    this.logger.info({ reason }, "MentraSession received app_stopped");
+    this.logger.info({ reason }, "VeillerSession received app_stopped");
     this.emit("stopped", reason);  // ← emits event but doesn't prevent reconnect
 });
 ```
@@ -93,7 +93,7 @@ register(CloudToAppMessageType.APP_STOPPED, (message) => {
 The sequence:
 
 1. Cloud sends `APP_STOPPED` message over WebSocket
-2. `MentraSession` receives it, emits "stopped" event
+2. `VeillerSession` receives it, emits "stopped" event
 3. Cloud closes the WebSocket
 4. `_ConnectionManager.onClose` fires
 5. `this.explicitDisconnect` is `false` (nobody set it)
@@ -164,7 +164,7 @@ must be the final authority on whether a reconnection is allowed.
 ### Steps
 
 1. Start any mini app (connect glasses, run the app)
-2. Open the Mentra phone app
+2. Open the Veiller phone app
 3. Tap "Stop" on the running mini app
 4. Watch the terminal output from the mini app process
 
@@ -198,6 +198,6 @@ then "Session reconnected." App is running again within 2–3 seconds.
 
 ## Next Steps
 
-1. **SDK fix (Layer 1):** Already applied — call `disconnect()` on `APP_STOPPED` in `MentraSession.ts`
+1. **SDK fix (Layer 1):** Already applied — call `disconnect()` on `APP_STOPPED` in `VeillerSession.ts`
 2. **Cloud fix (Layer 2):** Not yet implemented — design doc covers the approach (see `design.md`)
 3. **Testing:** Need to verify both layers independently and together

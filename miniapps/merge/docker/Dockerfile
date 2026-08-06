@@ -1,7 +1,7 @@
 # Local Merge backend image.
 #
 # Build from the repository root so Bun can resolve workspace packages like
-# @mentra/auth without publishing them first.
+# @veiller/auth without publishing them first.
 FROM oven/bun:1.3.14
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
@@ -23,7 +23,7 @@ COPY miniapps/codex-kawaii-e2e/package.json ./miniapps/codex-kawaii-e2e/package.
 COPY miniapps/everything/package.json ./miniapps/everything/package.json
 COPY miniapps/example-miniapp/package.json ./miniapps/example-miniapp/package.json
 COPY miniapps/kawaii/package.json ./miniapps/kawaii/package.json
-COPY miniapps/mentra-ai/package.json ./miniapps/mentra-ai/package.json
+COPY miniapps/veiller-ai/package.json ./miniapps/veiller-ai/package.json
 COPY miniapps/merge/package.json ./miniapps/merge/package.json
 COPY miniapps/navigation/package.json ./miniapps/navigation/package.json
 COPY miniapps/recorder/package.json ./miniapps/recorder/package.json

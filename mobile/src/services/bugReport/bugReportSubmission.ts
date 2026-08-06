@@ -1,6 +1,6 @@
 import type * as ImagePicker from "expo-image-picker"
 
-import {engine, type ReportContext, type ReportDetails, type ReportTrigger} from "@mentra/engine"
+import {engine, type ReportContext, type ReportDetails, type ReportTrigger} from "@veiller/engine"
 
 export interface SubmitBugReportInput {
   trigger: ReportTrigger

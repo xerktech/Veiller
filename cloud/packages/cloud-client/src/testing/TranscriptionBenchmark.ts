@@ -2,13 +2,13 @@
  * TranscriptionBenchmark - Performance and accuracy testing for transcription
  */
 
-import type { MentraClient } from '../MentraClient';
+import type { VeillerClient } from '../VeillerClient';
 import type { BenchmarkResult, ExpectedWord } from './types';
 
 export class TranscriptionBenchmark {
-  private client: MentraClient;
+  private client: VeillerClient;
 
-  constructor(client: MentraClient) {
+  constructor(client: VeillerClient) {
     this.client = client;
   }
 

@@ -5,7 +5,7 @@
  */
 
 import { Hono } from "hono";
-import { StreamType } from "@mentra/sdk";
+import { StreamType } from "@veiller/sdk";
 import { clientAuth, requireUserSession } from "../middleware/client.middleware";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import type { AppEnv, AppContext } from "../../../types/hono";

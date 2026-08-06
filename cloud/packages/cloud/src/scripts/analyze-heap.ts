@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * analyze-heap.ts — Live memory analysis for MentraCloud pods.
+ * analyze-heap.ts — Live memory analysis for VeillerCloud pods.
  *
  * Modes:
  *   1. LIVE: Poll a running pod's /api/admin/memory/now endpoint and track growth
@@ -23,7 +23,7 @@
  *   bun run src/scripts/analyze-heap.ts fetch --host=uscentralapi.mentra.glass --out=../../.heap/
  *
  * Environment:
- *   MENTRA_ADMIN_JWT — Bearer token for admin endpoints (reads from process.env or Doppler)
+ *   VEILLER_ADMIN_JWT — Bearer token for admin endpoints (reads from process.env or Doppler)
  */
 
 export {};
@@ -32,10 +32,10 @@ export {};
 // Config
 // ---------------------------------------------------------------------------
 
-const ADMIN_JWT = process.env.MENTRA_ADMIN_JWT ?? "";
+const ADMIN_JWT = process.env.VEILLER_ADMIN_JWT ?? "";
 
 if (!ADMIN_JWT) {
-  console.error("❌ MENTRA_ADMIN_JWT not set. Set it in environment or cloud/.env");
+  console.error("❌ VEILLER_ADMIN_JWT not set. Set it in environment or cloud/.env");
   process.exit(1);
 }
 

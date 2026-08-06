@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/debugger",
+  "name": "@veiller/debugger",
   "private": true,
   "type": "module",
   "scripts": {

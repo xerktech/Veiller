@@ -58,7 +58,7 @@ Result: TPA thinks session ended, but user is still active on Server B
 ```typescript
 // In AppManager.triggerAppWebhookInternal()
 sessionId: this.userSession.userId + "-" + packageName
-// = "isaiah@mentra.glass-com.mentra.captions.beta"
+// = "isaiah@mentra.glass-com.veiller.captions.beta"
 
 // Same value for:
 // - Session on cloud-dev

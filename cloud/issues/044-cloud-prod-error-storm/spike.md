@@ -144,16 +144,16 @@ Full timeline for `israelov+test2022@mentra.glass` from 18:50–19:07 UTC, recon
 
 **19:06:48** — The critical moment:
 
-1. `com.mentra.ai` sends subscription update with 11 subscriptions
+1. `com.veiller.ai` sends subscription update with 11 subscriptions
 2. `Rejected subscriptions due to missing permissions` ← **Subscriptions rejected**
-3. `All subscriptions cleared` for com.mentra.ai
+3. `All subscriptions cleared` for com.veiller.ai
 4. `No active subscriptions - all streams cleaned up`
 5. `Receiving unauthorized audio (no subscriptions) - forcing mic off immediately`
-6. `Failed to send transcription data to App com.mentra.ai` ← Bug Report #1
+6. `Failed to send transcription data to App com.veiller.ai` ← Bug Report #1
 
-**19:06:53** — `com.mentra.recorder` sends subscription update, gets accepted. Recorder starts working but `com.mentra.ai` is still locked out.
+**19:06:53** — `com.veiller.recorder` sends subscription update, gets accepted. Recorder starts working but `com.veiller.ai` is still locked out.
 
-**19:06:57** — Another Soniox stream error → retry → success within seconds. `com.mentra.recorder` gets transcription: _"Test, test, test. One, two, three. This is a test, and it seems to work fine."_
+**19:06:57** — Another Soniox stream error → retry → success within seconds. `com.veiller.recorder` gets transcription: _"Test, test, test. One, two, three. This is a test, and it seems to work fine."_
 
 So the recorder worked because its subscriptions were accepted. The AI app didn't because its permissions were rejected during the reconnect window.
 
@@ -177,14 +177,14 @@ This happens on **every single reconnect** for **every user**. With an average o
 
 ### 6. Subscription permission rejection during reconnect
 
-At 19:06:48, `com.mentra.ai` tried to subscribe to transcription and got `Rejected subscriptions due to missing permissions`. This is the **direct cause** of Bug Report #1 ("AI not getting transcripts").
+At 19:06:48, `com.veiller.ai` tried to subscribe to transcription and got `Rejected subscriptions due to missing permissions`. This is the **direct cause** of Bug Report #1 ("AI not getting transcripts").
 
-The rejection cleared all of com.mentra.ai's subscriptions, which caused:
+The rejection cleared all of com.veiller.ai's subscriptions, which caused:
 
 - `No active subscriptions - all streams cleaned up`
 - `Receiving unauthorized audio (no subscriptions) - forcing mic off immediately`
 
-Meanwhile, `com.mentra.recorder` (which reconnected ~4 seconds later) had its subscriptions accepted and worked fine. This suggests a **timing-dependent permission check** during the reconnect grace window — similar to the race condition documented in [008-subscription-race-condition](../008-subscription-race-condition/).
+Meanwhile, `com.veiller.recorder` (which reconnected ~4 seconds later) had its subscriptions accepted and worked fine. This suggests a **timing-dependent permission check** during the reconnect grace window — similar to the race condition documented in [008-subscription-race-condition](../008-subscription-race-condition/).
 
 ### 7. MongoDB VersionError storm: 45K in 4 hours
 

@@ -1156,7 +1156,7 @@ if (detectedGlasses?.supportsCTKD && detectedGlasses?.requiresBtAudio) {
    - Alternative: If BT audio connected, try BLE connection?
 
 2. **How to handle multiple paired glasses?**
-   - User has 2+ Mentra glasses paired
+   - User has 2+ Veiller glasses paired
    - Which one are they trying to connect to?
 
 3. **Should Android also use this system for consistency?**
@@ -1178,7 +1178,7 @@ if (detectedGlasses?.supportsCTKD && detectedGlasses?.requiresBtAudio) {
 - [iOS Core Bluetooth Documentation](https://developer.apple.com/documentation/corebluetooth)
 - [AVAudioSession Documentation](https://developer.apple.com/documentation/avfaudio/avaudiosession)
 - [React Native Native Modules](https://reactnative.dev/docs/native-modules-ios)
-- [MentraOS CTKD Android Implementation](../android_core/README.md)
+- [Veiller CTKD Android Implementation](../android_core/README.md)
 
 ---
 

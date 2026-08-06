@@ -1,5 +1,5 @@
 import {copyFile, rm} from "fs/promises"
-import {reactSingletonPlugin} from "@mentra/miniapp-cli/build-helpers"
+import {reactSingletonPlugin} from "@veiller/miniapp-cli/build-helpers"
 
 const distDir = "./dist"
 
@@ -7,16 +7,16 @@ await rm(distDir, {recursive: true, force: true})
 
 const define: Record<string, string> = {}
 const publicEnv: Record<string, string> = {}
-define["process.env.MENTRA_PUBLIC_MERGE_BACKEND_URL"] = JSON.stringify(
-  process.env.MENTRA_PUBLIC_MERGE_BACKEND_URL ?? "",
+define["process.env.VEILLER_PUBLIC_MERGE_BACKEND_URL"] = JSON.stringify(
+  process.env.VEILLER_PUBLIC_MERGE_BACKEND_URL ?? "",
 )
 for (const [key, value] of Object.entries(process.env)) {
-  if (key.startsWith("MENTRA_PUBLIC_") && typeof value === "string") {
+  if (key.startsWith("VEILLER_PUBLIC_") && typeof value === "string") {
     publicEnv[key] = value
     define[`process.env.${key}`] = JSON.stringify(value)
   }
 }
-define["process.env.MENTRA_PUBLIC_ENV_JSON"] = JSON.stringify(JSON.stringify(publicEnv))
+define["process.env.VEILLER_PUBLIC_ENV_JSON"] = JSON.stringify(JSON.stringify(publicEnv))
 
 const backgroundResult = await Bun.build({
   entrypoints: ["./src/background/index.ts"],

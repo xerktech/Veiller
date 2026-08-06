@@ -8,17 +8,17 @@ import {
 } from "./session.service";
 
 const savedEnv = {
-  MENTRA_JWT_PRIVATE_KEY: process.env.MENTRA_JWT_PRIVATE_KEY,
-  MENTRA_JWT_PUBLIC_KEY: process.env.MENTRA_JWT_PUBLIC_KEY,
-  MENTRA_MINIAPP_JWT_PRIVATE_KEY: process.env.MENTRA_MINIAPP_JWT_PRIVATE_KEY,
-  MENTRA_MINIAPP_JWT_PUBLIC_KEY: process.env.MENTRA_MINIAPP_JWT_PUBLIC_KEY,
+  VEILLER_JWT_PRIVATE_KEY: process.env.VEILLER_JWT_PRIVATE_KEY,
+  VEILLER_JWT_PUBLIC_KEY: process.env.VEILLER_JWT_PUBLIC_KEY,
+  VEILLER_MINIAPP_JWT_PRIVATE_KEY: process.env.VEILLER_MINIAPP_JWT_PRIVATE_KEY,
+  VEILLER_MINIAPP_JWT_PUBLIC_KEY: process.env.VEILLER_MINIAPP_JWT_PUBLIC_KEY,
 };
 
 afterEach(() => {
-  restoreEnv("MENTRA_JWT_PRIVATE_KEY", savedEnv.MENTRA_JWT_PRIVATE_KEY);
-  restoreEnv("MENTRA_JWT_PUBLIC_KEY", savedEnv.MENTRA_JWT_PUBLIC_KEY);
-  restoreEnv("MENTRA_MINIAPP_JWT_PRIVATE_KEY", savedEnv.MENTRA_MINIAPP_JWT_PRIVATE_KEY);
-  restoreEnv("MENTRA_MINIAPP_JWT_PUBLIC_KEY", savedEnv.MENTRA_MINIAPP_JWT_PUBLIC_KEY);
+  restoreEnv("VEILLER_JWT_PRIVATE_KEY", savedEnv.VEILLER_JWT_PRIVATE_KEY);
+  restoreEnv("VEILLER_JWT_PUBLIC_KEY", savedEnv.VEILLER_JWT_PUBLIC_KEY);
+  restoreEnv("VEILLER_MINIAPP_JWT_PRIVATE_KEY", savedEnv.VEILLER_MINIAPP_JWT_PRIVATE_KEY);
+  restoreEnv("VEILLER_MINIAPP_JWT_PUBLIC_KEY", savedEnv.VEILLER_MINIAPP_JWT_PUBLIC_KEY);
   resetSigningKeyCache();
 });
 
@@ -38,8 +38,8 @@ describe("Core JWKS", () => {
 
     expect(header.kid).toBe("cloud-core-runtime-1");
     expect(kids).toContain(header.kid);
-    expect(kids).toContain("mentra-access-1");
-    expect(kids).toContain("mentra-miniapp-1");
+    expect(kids).toContain("veiller-access-1");
+    expect(kids).toContain("veiller-miniapp-1");
   });
 });
 
@@ -47,13 +47,13 @@ function setSigningEnv(): void {
   const access = createEd25519Keypair();
   const miniapp = createEd25519Keypair();
   const account = createEd25519Keypair();
-  process.env.MENTRA_JWT_PRIVATE_KEY = access.privateKey;
-  process.env.MENTRA_JWT_PUBLIC_KEY = access.publicKey;
-  process.env.MENTRA_MINIAPP_JWT_PRIVATE_KEY = miniapp.privateKey;
-  process.env.MENTRA_MINIAPP_JWT_PUBLIC_KEY = miniapp.publicKey;
+  process.env.VEILLER_JWT_PRIVATE_KEY = access.privateKey;
+  process.env.VEILLER_JWT_PUBLIC_KEY = access.publicKey;
+  process.env.VEILLER_MINIAPP_JWT_PRIVATE_KEY = miniapp.privateKey;
+  process.env.VEILLER_MINIAPP_JWT_PUBLIC_KEY = miniapp.publicKey;
   // getPublicJwks now also publishes the account-token key (issue 019).
-  process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY = account.privateKey;
-  process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY = account.publicKey;
+  process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY = account.privateKey;
+  process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY = account.publicKey;
   resetSigningKeyCache();
 }
 

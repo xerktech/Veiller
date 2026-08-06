@@ -1,10 +1,10 @@
 // Tester page — diagnostic surface, ephemeral by design.
-// Tester pages call into background via `mentra.send` to the
+// Tester pages call into background via `veiller.send` to the
 // TesterController; user-facing glasses logic lives in
 // src/background/controllers/GlassesController.ts.
 
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import "../../../shared/channels"
 import {useChannel} from "../../hooks/useChannel"
@@ -25,7 +25,7 @@ const EXAMPLE_ROWS: Row[] = [
   {emoji: "💬", title: "Captions", subtitle: "live transcription demo (the example app)", path: "/captions"},
 ]
 
-// API surface — one row per @mentra/miniapp SDK module.
+// API surface — one row per @veiller/miniapp SDK module.
 // Order mirrors the SDK module overview doc: output first (display, speaker),
 // then input (mic, transcription, translation, input, location, imu),
 // then state (glasses, phone), then misc (system, led, storage),
@@ -116,7 +116,7 @@ function RowButton({
       className={`group flex items-center gap-3 rounded-xl border border-border px-4 py-3 text-left transition ${
         disabled
           ? "cursor-not-allowed bg-muted/30 opacity-55"
-          : "bg-card hover:border-mentra-green/40 hover:bg-mentra-green/5"
+          : "bg-card hover:border-veiller-green/40 hover:bg-veiller-green/5"
       }`}>
       <div className="text-2xl">{row.emoji}</div>
       <div className="flex-1 min-w-0">
@@ -156,7 +156,7 @@ export default function TesterMenu() {
 
       <div className="flex-1 overflow-y-auto px-4 pb-6">
         <p className="mb-3 px-1 text-[13px] text-muted-foreground">
-          Each section exercises the @mentra/miniapp SDK. Use this to verify your glasses + phone + miniapp host are
+          Each section exercises the @veiller/miniapp SDK. Use this to verify your glasses + phone + miniapp host are
           talking correctly.
         </p>
 

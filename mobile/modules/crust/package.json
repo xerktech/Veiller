@@ -1,7 +1,7 @@
 {
-  "name": "@mentra/crust",
+  "name": "@veiller/crust",
   "version": "0.1.0-dev.1",
-  "description": "Mentra Native Module",
+  "description": "Veiller Native Module",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "app.plugin": "app.plugin.js",
@@ -31,7 +31,7 @@
   "license": "MIT",
   "homepage": "https://github.com/fossephate/crust#readme",
   "dependencies": {
-    "@mentra/jspolyfill": "^0.1.0-dev.0"
+    "@veiller/jspolyfill": "^0.1.0-dev.0"
   },
   "devDependencies": {
     "@expo/config-plugins": ">=8.0.0",

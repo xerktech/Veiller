@@ -1,6 +1,6 @@
-# MentraOS Debugger
+# Veiller Debugger
 
-A web-based debugger for monitoring and debugging MentraOS sessions and Apps.
+A web-based debugger for monitoring and debugging Veiller sessions and Apps.
 
 ## Features
 

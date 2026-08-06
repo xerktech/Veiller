@@ -1,6 +1,6 @@
 //
 //  R1.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Even Realities R1 Smart Ring controller
 //  Protocol reverse-engineered from BTSnoop captures and firmware analysis

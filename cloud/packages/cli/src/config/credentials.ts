@@ -3,8 +3,8 @@
  *
  * Manages authentication credentials with multiple storage strategies:
  * 1. Primary: Bun.secrets (OS keychain - requires Bun 1.3+)
- * 2. Fallback: File-based storage (~/.mentra/credentials.json)
- * 3. CI/CD: Environment variable (MENTRA_CLI_TOKEN)
+ * 2. Fallback: File-based storage (~/.veiller/credentials.json)
+ * 3. CI/CD: Environment variable (VEILLER_CLI_TOKEN)
  */
 
 import {homedir} from "os"
@@ -13,8 +13,8 @@ import {readFileSync, writeFileSync, mkdirSync, unlinkSync, existsSync} from "fs
 import {CLICredentials} from "@mentra/types"
 import jwt from "jsonwebtoken"
 
-const MENTRA_DIR = join(homedir(), ".mentra")
-const CREDS_FILE = join(MENTRA_DIR, "credentials.json")
+const VEILLER_DIR = join(homedir(), ".veiller")
+const CREDS_FILE = join(VEILLER_DIR, "credentials.json")
 
 /**
  * Save credentials using Bun.secrets (primary) with file fallback
@@ -37,7 +37,7 @@ export async function saveCredentials(token: string): Promise<void> {
   try {
     if (typeof Bun !== "undefined" && typeof Bun.secrets !== "undefined") {
       await Bun.secrets.set({
-        service: "mentra-cli",
+        service: "veiller-cli",
         name: "credentials",
         value: JSON.stringify(creds),
       })
@@ -49,9 +49,9 @@ export async function saveCredentials(token: string): Promise<void> {
   }
 
   // Fallback to file-based storage
-  mkdirSync(MENTRA_DIR, {recursive: true})
+  mkdirSync(VEILLER_DIR, {recursive: true})
   writeFileSync(CREDS_FILE, JSON.stringify(creds, null, 2), {mode: 0o600})
-  console.log("✓ Credentials saved to ~/.mentra/credentials.json")
+  console.log("✓ Credentials saved to ~/.veiller/credentials.json")
 }
 
 /**
@@ -62,7 +62,7 @@ export async function loadCredentials(): Promise<CLICredentials | null> {
   try {
     if (typeof Bun !== "undefined" && typeof Bun.secrets !== "undefined") {
       const value = await Bun.secrets.get({
-        service: "mentra-cli",
+        service: "veiller-cli",
         name: "credentials",
       })
       if (value) {
@@ -84,8 +84,8 @@ export async function loadCredentials(): Promise<CLICredentials | null> {
   }
 
   // Try environment variable (for CI/CD)
-  if (process.env.MENTRA_CLI_TOKEN) {
-    const token = process.env.MENTRA_CLI_TOKEN
+  if (process.env.VEILLER_CLI_TOKEN) {
+    const token = process.env.VEILLER_CLI_TOKEN
     const decoded = jwt.decode(token) as any
     if (decoded) {
       return {
@@ -111,7 +111,7 @@ export async function clearCredentials(): Promise<void> {
     if (typeof Bun !== "undefined" && typeof Bun.secrets !== "undefined") {
       // Bun.secrets doesn't have a delete method yet, so we set to empty
       await Bun.secrets.set({
-        service: "mentra-cli",
+        service: "veiller-cli",
         name: "credentials",
         value: "",
       })
@@ -137,8 +137,8 @@ export async function requireAuth(): Promise<CLICredentials> {
   const creds = await loadCredentials()
   if (!creds) {
     console.error("✗ Not authenticated")
-    console.error("  Run: mentra auth <token>")
-    console.error("  Or set: MENTRA_CLI_TOKEN=<token>")
+    console.error("  Run: veiller auth <token>")
+    console.error("  Or set: VEILLER_CLI_TOKEN=<token>")
     process.exit(3)
   }
 

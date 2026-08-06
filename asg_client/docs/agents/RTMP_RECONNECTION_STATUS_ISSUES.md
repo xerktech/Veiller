@@ -94,7 +94,7 @@ override fun write(packet: Packet) {
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓ WebSocket
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          CLOUD (MentraOS Cloud)                         │
+│                          CLOUD (Veiller Cloud)                         │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                           │
 │  6. UnmanagedStreamingExtension.handleRtmpStreamStatus()                │

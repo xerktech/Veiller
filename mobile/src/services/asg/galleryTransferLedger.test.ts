@@ -95,8 +95,8 @@ describe("galleryTransferLedger", () => {
       2,
     )
     galleryTransferLedger.transition(captureId, "TRASHED", {
-      finalPath: "/current/Documents/MentraPhotos/v2/base.jpg",
-      thumbnailPath: "/current/Documents/MentraPhotos/v2/thumb.jpg",
+      finalPath: "/current/Documents/VeillerPhotos/v2/base.jpg",
+      thumbnailPath: "/current/Documents/VeillerPhotos/v2/thumb.jpg",
       files: [
         {
           name: `${captureId}/base.jpg`,
@@ -129,7 +129,7 @@ describe("galleryTransferLedger", () => {
       3,
     )
     galleryTransferLedger.transition(captureId, "TRASHED", {
-      finalPath: `/current/Documents/MentraPhotos/${captureId}/base.jpg`,
+      finalPath: `/current/Documents/VeillerPhotos/${captureId}/base.jpg`,
     })
 
     galleryTransferLedger.releaseAllMissingLocalCommits(true)
@@ -153,7 +153,7 @@ describe("galleryTransferLedger", () => {
       3,
     )
     galleryTransferLedger.transition(captureId, "TRASHED", {
-      finalPath: `/current/Documents/MentraPhotos/${captureId}/base.jpg`,
+      finalPath: `/current/Documents/VeillerPhotos/${captureId}/base.jpg`,
     })
     storage.save("asg_downloaded_files", {})
     mockExists.mockResolvedValue(false)
@@ -166,7 +166,7 @@ describe("galleryTransferLedger", () => {
 
   it("rebuilds a missing local index from committed media on disk", async () => {
     const captureId = `IMG_missing_index_${Date.now()}`
-    const filePath = `/current/Documents/MentraPhotos/${captureId}/base.jpg`
+    const filePath = `/current/Documents/VeillerPhotos/${captureId}/base.jpg`
     galleryTransferLedger.ensureCapture(
       {
         capture_id: captureId,
@@ -198,7 +198,7 @@ describe("galleryTransferLedger", () => {
 
   it("releases a restored local record when its media file is missing", async () => {
     const captureId = `IMG_missing_restored_file_${Date.now()}`
-    const filePath = `/current/Documents/MentraPhotos/${captureId}/base.jpg`
+    const filePath = `/current/Documents/VeillerPhotos/${captureId}/base.jpg`
     galleryTransferLedger.ensureCapture(
       {
         capture_id: captureId,
@@ -213,7 +213,7 @@ describe("galleryTransferLedger", () => {
     storage.save("asg_downloaded_files", {
       [captureId]: {
         name: captureId,
-        filePath: `MentraPhotos/${captureId}/base.jpg`,
+        filePath: `VeillerPhotos/${captureId}/base.jpg`,
         size: 100,
         modified: 1000,
         mime_type: "image/jpeg",

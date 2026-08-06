@@ -19,11 +19,11 @@ export function IdleDrawer({onSelect, onAddPlace, refreshKey}: Props) {
   const [recents, setRecents] = useState<PlaceDetails[]>([])
 
   useEffect(() => {
-    mentra
+    veiller
       .request("storage:list-saved", undefined as never)
       .then(setSavedPlaces)
       .catch(() => {})
-    mentra
+    veiller
       .request("storage:list-recent", undefined as never)
       .then(setRecents)
       .catch(() => {})

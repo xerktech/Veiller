@@ -12,7 +12,7 @@
  * is allowlisted via CLOUD_CORE_ADMIN_EMAILS. Fully local — no WorkOS needed.
  *
  * Prereq: a running Mongo. Defaults to
- * `mongodb://127.0.0.1:27017/mentra-cloud-v2-test`; override via `MONGO_URL`.
+ * `mongodb://127.0.0.1:27017/veiller-cloud-v2-test`; override via `MONGO_URL`.
  * The test wipes its own collections between cases — do NOT point at a real DB.
  *
  * Run: `bun test tests/admin-reports.integration.test.ts`
@@ -24,19 +24,19 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 
-const STORAGE_DIR = join(tmpdir(), `mentra-admin-reports-test-${process.pid}`);
+const STORAGE_DIR = join(tmpdir(), `veiller-admin-reports-test-${process.pid}`);
 const savedAdminEmails = process.env.CLOUD_CORE_ADMIN_EMAILS;
 {
   const { privateKey: nodePriv, publicKey: nodePub } =
     crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     nodePriv.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     nodePub.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
-  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/mentra-cloud-v2-test";
+  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/veiller-cloud-v2-test";
   process.env.SUPABASE_JWT_SECRET = "test-supabase-secret-not-for-production";
   process.env.SUPABASE_URL = "https://testproj.supabase.co";
   process.env.CLOUD_CORE_LOCAL_STORAGE_DIR = STORAGE_DIR;

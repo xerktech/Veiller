@@ -2,7 +2,7 @@
 
 import {describe, expect, test} from "bun:test"
 
-import {MiniappErrorCode} from "@mentra/miniapp"
+import {MiniappErrorCode} from "@veiller/miniapp"
 
 import {
   calendarEventOverlapsWindow,

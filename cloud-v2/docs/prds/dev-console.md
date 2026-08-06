@@ -49,7 +49,7 @@ com.example.notes
 ```
 
 The prefix is chosen during onboarding. After miniapps exist, the prefix is
-locked unless it is rejected during review. Reserved prefixes like `com.mentra`
+locked unless it is rejected during review. Reserved prefixes like `com.veiller`
 cannot be claimed by arbitrary developers.
 
 ### Miniapp
@@ -75,7 +75,7 @@ review or rejected.
 
 ### Console Environment vs Miniapp Channels
 
-The console hostname selects the MentraOS backend environment. There should not
+The console hostname selects the Veiller backend environment. There should not
 be an in-app environment switcher for normal developer use:
 
 - `console2.dev.mentraglass.com` uses the dev backend/data.
@@ -85,7 +85,7 @@ be an in-app environment switcher for normal developer use:
 This is separate from a developer's own release workflow. A developer using the
 production console may still publish a beta/tester channel for their miniapp,
 share that release with selected users, and later promote it to the production
-channel. That beta channel is app release state, not a MentraOS infrastructure
+channel. That beta channel is app release state, not a Veiller infrastructure
 environment.
 
 ### CLI Relationship
@@ -142,13 +142,13 @@ creation flow as web forms in v1.
   without replacing the production channel.
 - As a developer, I can promote a beta release to the production channel after
   validation.
-- As a developer, I can tell the difference between MentraOS backend
+- As a developer, I can tell the difference between Veiller backend
   environments and my miniapp's release channels.
 
 ### CLI Access
 
 - As a developer, I can see how to install and run the CLI.
-- As a developer, I can run `mentra login` and authorize the CLI through the
+- As a developer, I can run `veiller login` and authorize the CLI through the
   browser.
 - As a developer, I can see which org the CLI will publish under.
 - As a developer, I can copy relevant CLI commands without visual noise.
@@ -180,7 +180,7 @@ creation flow as web forms in v1.
 
 ### Sign In
 
-Use the Mentra visual identity. The page should feel polished and focused.
+Use the Veiller visual identity. The page should feel polished and focused.
 Avoid sending users through a visually redundant second login page when possible.
 
 ### Org Onboarding
@@ -237,7 +237,7 @@ API key creation belongs in the console.
 - Public store marketing pages.
 - Enterprise/OEM issuer management.
 - Internal review queue or preinstall registry controls.
-- In-app switching between MentraOS infrastructure environments.
+- In-app switching between Veiller infrastructure environments.
 
 ## Designer Questions
 
@@ -247,5 +247,5 @@ API key creation belongs in the console.
   documentation?
 - What is the ideal empty state for an org with no miniapps?
 - How should multiple orgs be selected without making the sidebar feel crowded?
-- How should beta/tester channels be shown without implying a MentraOS
+- How should beta/tester channels be shown without implying a Veiller
   environment switcher?

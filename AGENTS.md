@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Repository implementation guidelines for coding agents working with MentraOS.
+Repository implementation guidelines for coding agents working with Veiller.
 
 ## Project Overview
 
-MentraOS is an open source operating system, app store, and development framework for smart glasses.
+Veiller is an open source operating system, app store, and development framework for smart glasses.
 
 ### Supported devices (XERK-206)
 
@@ -17,13 +17,13 @@ and do not remove their commented-out code. Bundled miniapps that serve those
 devices (e.g. the Livestreamer) are parked in
 `mobile/assets/miniapps/disabled/` rather than deleted.
 
-- Architecture: Smart glasses connect to user's phone via BLE; phone connects to backend; backend connects to third-party app servers running the MentraOS SDK
+- Architecture: Smart glasses connect to user's phone via BLE; phone connects to backend; backend connects to third-party app servers running the Veiller SDK
 - Mobile app: `mobile` (React Native with native modules)
 - Android logic: `android_core`
 - iOS native module: `mobile/ios`
 - Backend & web portals: `cloud` (includes developer portal & app store)
 - Android-based smart glasses client: `asg_client` (uses `android_core` as a library)
-- MentraOS Store: `cloud/websites/store/` (web app for app discovery)
+- Veiller Store: `cloud/websites/store/` (web app for app discovery)
 - Developer Console: `cloud/websites/console/` (web app for app management)
 
 ## Monorepo Structure
@@ -63,7 +63,7 @@ The Bluetooth SDK Android sources under `mobile/modules/bluetooth-sdk/android`
 are compiled through the generated Expo Android project at `mobile/android`,
 matching CI. Do not rely on a system `gradle` install from the SDK source
 directory; use the repo script so the Gradle wrapper and prebuild setup are
-consistent. The Bluetooth SDK check runs with `-PmentraPublicSdk=true` so it
+consistent. The Bluetooth SDK check runs with `-PveillerPublicSdk=true` so it
 validates the public Maven artifact dependency shape.
 
 ### Cloud Backend (cloud)
@@ -131,18 +131,21 @@ validates the public Maven artifact dependency shape.
 ### Product & terminology (user-facing copy, docs, marketing)
 
 - **`miniapp`** is always one word, lowercase, in running text.
-- **Products take a capital `M`**: "Mentra Miniapp SDK", "Mentra Miniapp Store".
-  When you write "miniapp SDK" capitalize it as "**Miniapp SDK**"; the full
-  product name is "**Mentra Miniapp SDK**" (not "MentraOS miniapp SDK").
-- The **iOS/Android mobile app** is the "**Mentra App**" (not "MentraOS app",
-  not "Mentra app").
-- **Miniapps in general** (apps that run on the Mentra platform) are "**Mentra
-  miniapp**" / "**Mentra miniapps**" (not "MentraOS apps").
-- The store is the "**Mentra Miniapp Store**".
-- "**MentraOS**" stays as-is when it names the operating system / platform /
-  repo (e.g. "MentraOS is the operating system for smart glasses"). Don't swap
-  it for "Mentra" in those cases.
-- The package identifier `@mentra/miniapp` is code; leave it in code formatting.
+- **The product is "Veiller"** (XERK-220). The app, the platform, docs, code
+  identifiers, and workspace packages (`@veiller/*`) all use the Veiller name —
+  never "Mentra" or "MentraOS", in user-facing copy or in code.
+- **"Mentra" survives only where it names the Mentra glasses hardware or is
+  functionally load-bearing.** Do not rename: device names ("Mentra Live",
+  "Mentra Mach1", "Mentra Display" / "Mentra Nex") and their BLE protocol
+  (`mentraos_ble` / `MentraosBle`); mentra.glass / mentraglass.com domains and
+  URLs (incl. the `com.mentraglass` Maven group); Mentra-Community GitHub
+  repositories; the published `@mentra/types` npm package; auth/wire/persisted
+  fields (`mentraUserId`, `mentraAuth`, `mentraosSettings`,
+  `mentraOSWebsocketUrl`); external Mentra products ("MentraOS Legacy", the
+  "Mentra AI" miniapp); the glasses-side `com.mentra.asg_client` application
+  id and Java package; and the `mentra-miniapp` CLI bin alias that external
+  miniapp pipelines invoke (`veiller-miniapp` is the primary name).
+- When you write "miniapp SDK" capitalize it as "**Miniapp SDK**".
 
 ## Testing Guidelines
 
@@ -184,14 +187,14 @@ Automated ransomware scanners actively target exposed MongoDB instances. Use Mon
 - [Mentra AI Miniapp](https://github.com/Mentra-Community/Mentra-AI-Miniapp)
 - [Mentra Enterprise Miniapp](https://github.com/Mentra-Community/Mentra-Enterprise-Miniapp)
 
-If a MentraOS PR also requires changes to one of the external miniapps above, or
+If a Veiller PR also requires changes to one of the external miniapps above, or
 you are otherwise asked to change one of those miniapps:
 
 1. Clone the external miniapp repository if needed, or pull the latest `main`
    branch if it is already available locally.
 2. Make the changes in the external miniapp repository, bump its version, and
    push the changes directly to that repository's `main` branch.
-3. Package the updated miniapp as a flat Mentra bundle ZIP (miniapp.json at the
+3. Package the updated miniapp as a flat Veiller bundle ZIP (miniapp.json at the
    root) and publish it as an asset on a GitHub Release in that public repo. The
    asset name must contain `veiller` and end in `.zip` (the Turma/Tenir
    pipelines name it `<repo>-veiller-v<version>.zip`), and the release must be
@@ -206,12 +209,12 @@ you are otherwise asked to change one of those miniapps:
 
 ## Bug Report Logs
 
-Bug reports and feedback filed from the Mentra App land in the Cloud V2 reports system. Report ids look like `rep_01...` and appear in the reports Slack notifications and in the admin console's Incident system page (admin.mentraglass.com).
+Bug reports and feedback filed from the Veiller App land in the Cloud V2 reports system. Report ids look like `rep_01...` and appear in the reports Slack notifications and in the admin console's Incident system page (admin.mentraglass.com).
 
 1. Get the report id (from Slack, the admin console, or the user)
 2. Fetch it: `./scripts/fetch-incident-logs.sh {reportId}` — downloads `report.json` plus every artifact into `./incident-logs/{reportId}/`
-3. Requires `MENTRA_ADMIN_TOKEN` in your environment: an org API key (`msk_...`) whose synthetic email is allowlisted via `CLOUD_CORE_ADMIN_EMAILS`, or a WorkOS access token of an admin user
-4. Without an environment override, the script tries prod, dev, then staging and reports which backend succeeded. Use `--env prod|dev|staging` or `MENTRA_CORE_URL` to target one backend explicitly.
+3. Requires `VEILLER_ADMIN_TOKEN` in your environment: an org API key (`msk_...`) whose synthetic email is allowlisted via `CLOUD_CORE_ADMIN_EMAILS`, or a WorkOS access token of an admin user
+4. Without an environment override, the script tries prod, dev, then staging and reports which backend succeeded. Use `--env prod|dev|staging` or `VEILLER_CORE_URL` to target one backend explicitly.
 
 What you get:
 
@@ -224,11 +227,11 @@ Other modes: `--json` prints the raw report JSON to stdout (no downloads); `--li
 Example:
 
 ```bash
-export MENTRA_ADMIN_TOKEN=msk_your-admin-key
+export VEILLER_ADMIN_TOKEN=msk_your-admin-key
 ./scripts/fetch-incident-logs.sh rep_01JZWY3V8N0F2E9GQ4T6KXH5RD
 ```
 
-Note: the **mentra-console** MCP server (`cloud/packages/console-mcp`, tools `incident_get` / `incident_get_logs`) still targets the legacy V1 incidents API (`/api/agent/incidents`, `X-Agent-Key`) and has not been ported to the V2 reports API yet.
+Note: the **veiller-console** MCP server (`cloud/packages/console-mcp`, tools `incident_get` / `incident_get_logs`) still targets the legacy V1 incidents API (`/api/agent/incidents`, `X-Agent-Key`) and has not been ported to the V2 reports API yet.
 
 ## Additional Documentation
 

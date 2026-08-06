@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/fetch-incident-logs.sh
 # Fetch a Cloud V2 bug report and its artifacts (log bundles, screenshots)
-# for debugging. Reports are filed from the Mentra App and stored by the
+# for debugging. Reports are filed from the Veiller App and stored by the
 # Cloud V2 reports service; this script reads them back through the admin
 # reports API (GET /api/admin/reports/...).
 #
@@ -18,11 +18,11 @@
 #   --limit N        (--list) max reports to return (1-200, default 50)
 #
 # Environment variables:
-#   MENTRA_ADMIN_TOKEN  (required) Bearer token for the admin API: an org API
+#   VEILLER_ADMIN_TOKEN  (required) Bearer token for the admin API: an org API
 #                       key (msk_...) whose synthetic email is allowlisted in
 #                       CLOUD_CORE_ADMIN_EMAILS, or a WorkOS access token of
 #                       an admin user.
-#   MENTRA_CORE_URL     (optional) Core API base URL; disables auto-discovery
+#   VEILLER_CORE_URL     (optional) Core API base URL; disables auto-discovery
 #                       and overrides --env.
 
 set -euo pipefail
@@ -84,9 +84,9 @@ core_url_for_env() {
 
 CANDIDATE_NAMES=()
 CANDIDATE_URLS=()
-if [ -n "${MENTRA_CORE_URL:-}" ]; then
+if [ -n "${VEILLER_CORE_URL:-}" ]; then
   CANDIDATE_NAMES+=("custom")
-  CANDIDATE_URLS+=("${MENTRA_CORE_URL%/}")
+  CANDIDATE_URLS+=("${VEILLER_CORE_URL%/}")
 elif [ "$ENV_EXPLICIT" -eq 1 ]; then
   CANDIDATE_NAMES+=("$ENV_NAME")
   CANDIDATE_URLS+=("$(core_url_for_env "$ENV_NAME")")
@@ -108,21 +108,21 @@ if [ -n "$REPORT_ID" ] && ! printf '%s' "$REPORT_ID" | grep -Eq '^[A-Za-z0-9_-]+
   exit 1
 fi
 
-if [ -z "${MENTRA_ADMIN_TOKEN:-}" ]; then
-  err "MENTRA_ADMIN_TOKEN environment variable not set"
+if [ -z "${VEILLER_ADMIN_TOKEN:-}" ]; then
+  err "VEILLER_ADMIN_TOKEN environment variable not set"
   note ""
   note "The admin reports API needs a bearer token with admin access:"
   note "  - an org API key (msk_...) allowlisted via CLOUD_CORE_ADMIN_EMAILS, or"
   note "  - a WorkOS access token of an admin user"
   note ""
-  note "  export MENTRA_ADMIN_TOKEN=msk_..."
+  note "  export VEILLER_ADMIN_TOKEN=msk_..."
   exit 1
 fi
 
 # api_get PATH OUTFILE -> echoes HTTP status; body lands in OUTFILE.
 api_get() {
   curl -sS -m 60 \
-    -H "Authorization: Bearer $MENTRA_ADMIN_TOKEN" \
+    -H "Authorization: Bearer $VEILLER_ADMIN_TOKEN" \
     -H "Accept: application/json" \
     -o "$2" -w '%{http_code}' \
     "$CORE_URL$1"
@@ -132,7 +132,7 @@ fail_for_status() {
   local status="$1" body="$2" what="$3"
   case "$status" in
     2??) return 0 ;;
-    401) err "unauthorized (401) fetching $what — MENTRA_ADMIN_TOKEN was rejected" ;;
+    401) err "unauthorized (401) fetching $what — VEILLER_ADMIN_TOKEN was rejected" ;;
     403) err "forbidden (403) fetching $what — token is valid but not admin-allowlisted (CLOUD_CORE_ADMIN_EMAILS)" ;;
     404) err "not found (404) fetching $what — wrong report id, or this environment does not serve the admin reports API yet" ;;
     *) err "HTTP $status fetching $what" ;;
@@ -143,7 +143,7 @@ fail_for_status() {
 
 # discover_get PATH OUTFILE WHAT
 #
-# Uses a single backend when --env or MENTRA_CORE_URL is explicit. Otherwise,
+# Uses a single backend when --env or VEILLER_CORE_URL is explicit. Otherwise,
 # tries each Cloud V2 environment until the request succeeds. This matters for
 # environment-pinned msk_<env>_* API keys and report ids whose origin is not
 # known when copied from a notification.

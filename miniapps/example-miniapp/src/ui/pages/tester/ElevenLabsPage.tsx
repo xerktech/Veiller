@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader, useRpc} from "@mentra/miniapp/ui"
+import {MiniappHeader, useRpc} from "@veiller/miniapp/ui"
 
 import "../../../shared/channels"
 import type {Channels} from "../../../shared/channels"
@@ -122,7 +122,7 @@ export default function ElevenLabsPage() {
           ConvAI mic → WebSocket, agent PCM → glasses speaker. Mic PCM from
           <code className="mx-1">session.mic.onAudioChunk</code>
           is recorded for playback (same feed as Recorder). Glasses must already be connected via
-          MentraOS. Run the local signing server first. Do not use the
+          Veiller. Run the local signing server first. Do not use the
           <code className="mx-1">session.mic</code>
           tester at the same time.
         </p>

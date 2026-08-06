@@ -1,2 +1,2 @@
-export { default } from "./MentraPhotoReceiverModule"
-export * from "./MentraPhotoReceiver.types"
+export { default } from "./VeillerPhotoReceiverModule"
+export * from "./VeillerPhotoReceiver.types"

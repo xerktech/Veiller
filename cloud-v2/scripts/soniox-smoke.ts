@@ -42,10 +42,10 @@ const PORT_TEST_OEM = 16100;
       .replace(/-----BEGIN [A-Z ]+-----/, "")
       .replace(/-----END [A-Z ]+-----/, "")
       .replace(/\s+/g, "");
-  process.env.MENTRA_JWT_PRIVATE_KEY = strip(
+  process.env.VEILLER_JWT_PRIVATE_KEY = strip(
     privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = strip(
+  process.env.VEILLER_JWT_PUBLIC_KEY = strip(
     publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "smoke-test-pepper";
@@ -54,13 +54,13 @@ const PORT_TEST_OEM = 16100;
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/4";
 }
 
-const { resetMentraKeyCache } = await import(
+const { resetVeillerKeyCache } = await import(
   "../packages/shared/src/auth"
 );
 const { resetSigningKeyCache } = await import(
   "../packages/core/src/services/session.service"
 );
-resetMentraKeyCache();
+resetVeillerKeyCache();
 resetSigningKeyCache();
 
 console.log("[smoke] booting test-oem, core, runtime…");

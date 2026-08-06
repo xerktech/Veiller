@@ -322,7 +322,7 @@ App restarts → connects WebSocket → CONNECTION_ACK
 ```
 App restarts → connects WebSocket → CONNECTION_ACK
     │
-    ├── Cloud: clearLastSentStatus("dev.mentra.streamtest")  ← FIX 1
+    ├── Cloud: clearLastSentStatus("dev.veiller.streamtest")  ← FIX 1
     │
     ├── Cloud: deliverActiveStreamState()                    ← FIX 2
     │   ├── Found active managed stream

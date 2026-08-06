@@ -6,8 +6,8 @@
 
   <application>
     <service
-      android:name="com.mentra.crust.services.NotificationListenerServiceImpl"
-      android:label="@string/mentra_crust_notification_listener_label"
+      android:name="com.veiller.crust.services.NotificationListenerServiceImpl"
+      android:label="@string/veiller_crust_notification_listener_label"
       android:enabled="false"
       android:exported="false"
       android:process=":notif"
@@ -20,7 +20,7 @@
     </service>
 
     <receiver
-      android:name="com.mentra.crust.services.NotificationConfigReceiver"
+      android:name="com.veiller.crust.services.NotificationConfigReceiver"
       android:enabled="true"
       android:exported="false"
       android:permission="${applicationId}.permission.CRUST_NOTIFICATION_BRIDGE"

@@ -99,7 +99,7 @@ Bun reads `patchedDependencies` natively — no `postinstall` hook, no extra dev
 
 When upstream merges + ships v2.0.1+: bump our pinned version, delete `cloud/patches/@soniox%2Fnode@2.0.0.patch`, remove the `patchedDependencies` entry from `cloud/package.json`, close issue 104.
 
-### S4. No changes to MentraOS code
+### S4. No changes to Veiller code
 
 Explicitly out of scope for this PR:
 
@@ -165,9 +165,9 @@ After merging to `dev` and deploying to us-central-prod:
 1. Branch `cloud/104-soniox-eventqueue-leak-fix` off `dev`. Done.
 2. Apply changes per S1, S2 in this PR.
 3. Open this PR against `dev`.
-4. Open the upstream PR per S3 in parallel (independent of MentraOS PR review).
+4. Open the upstream PR per S3 in parallel (independent of Veiller PR review).
 5. Deploy to `cloud-debug` for soak validation (≥1 hour).
-6. Merge MentraOS PR → auto-deploys to `cloud-dev` via porter-dev.yml.
+6. Merge Veiller PR → auto-deploys to `cloud-dev` via porter-dev.yml.
 7. Watch dev for 24 hours; confirm memory floor stable.
 8. Cherry-pick to `main` → deploys to prod regions.
 9. When upstream merges + releases v2.0.1+: file follow-up PR to bump version + remove patch + remove postinstall hook + close issue 104.

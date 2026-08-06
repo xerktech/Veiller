@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMentraAuth } from "@mentra/react";
+import { useVeillerAuth } from "@veiller/react";
 import { WebRTCPlayer } from "./WebRTCPlayer";
 import { useAppState } from "./use-app-state";
 
@@ -37,7 +37,7 @@ async function postStreamStop(
 
 export default function App() {
   const { userId, isLoading, error, isAuthenticated, frontendToken } =
-    useMentraAuth();
+    useVeillerAuth();
   const { state, isConnected } = useAppState(isAuthenticated, frontendToken);
   const streamInfo = state.stream;
   const [actionPending, setActionPending] = useState(false);
@@ -84,7 +84,7 @@ export default function App() {
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col items-center justify-center gap-2">
         <p className="text-red-400 text-sm">{error}</p>
         <p className="text-neutral-500 text-xs">
-          Open this page from the Mentra app.
+          Open this page from the Veiller app.
         </p>
       </div>
     );

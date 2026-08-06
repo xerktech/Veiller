@@ -2,7 +2,7 @@
 
 ## Overview
 
-**What this doc covers:** The Kubernetes concepts you need to understand to work on Mentra's cloud infrastructure — from "what is a cluster" all the way up to Ingress routing rules and how Porter fits in. Written for someone who has never touched Kubernetes.
+**What this doc covers:** The Kubernetes concepts you need to understand to work on Veiller's cloud infrastructure — from "what is a cluster" all the way up to Ingress routing rules and how Porter fits in. Written for someone who has never touched Kubernetes.
 
 **Why this doc exists:** The WS ingress timeout fix (035) required creating a standalone Kubernetes resource outside of Porter's management. Without understanding what Kubernetes objects are and how they relate, it's unclear why that fix works, why Porter won't overwrite it, and what could go wrong. More generally, if you deploy cloud changes or debug production issues, you need a mental model of what's underneath.
 

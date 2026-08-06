@@ -11,7 +11,7 @@ import {showAlert} from "@/contexts/ModalContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n/translate"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting, engine} from "@mentra/engine"
+import {SETTINGS, useSetting, engine} from "@veiller/engine"
 import {getGlassesImage} from "@/utils/getGlassesImage"
 
 import {Capabilities, DeviceTypes, getModelCapabilities} from "@/../../cloud/packages/types/src"
@@ -146,7 +146,7 @@ export function DeviceSettingsSection() {
         />
       )}
 
-      {/* Dashboard — any display glasses. On MentraOS-dashboard devices this
+      {/* Dashboard — any display glasses. On Veiller-dashboard devices this
           screen manages the head-up overlay; on native-firmware-dashboard
           devices (G2) it manages the firmware widget pages, units, and time
           formatting instead. */}
@@ -196,7 +196,7 @@ export function DeviceSettingsSection() {
 
       {/* Button Settings — Mentra Live only (G2's button is a touchpad and conflicts with the native menu).
           Hidden for now: the action button always launches the camera. ButtonActions.tsx already forces
-          `default_button_action_app` to com.mentra.camera at runtime for any Mentra Live (camera) glasses, so
+          `default_button_action_app` to com.veiller.camera at runtime for any Mentra Live (camera) glasses, so
           there's nothing for the user to configure. Re-enable this block if we ship a real button-config UX. */}
       {/* {glassesConnected && defaultWearable === DeviceTypes.LIVE && (
         <ButtonSettings

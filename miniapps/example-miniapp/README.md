@@ -1,6 +1,6 @@
-# Mentra Example Miniapp
+# Veiller Example Miniapp
 
-Reference MentraOS miniapp for the `@mentra/miniapp` SDK — captions demo plus the full per-iface SDK Tester surface.
+Reference Veiller miniapp for the `@veiller/miniapp` SDK — captions demo plus the full per-iface SDK Tester surface.
 
 ## Dev
 
@@ -12,7 +12,7 @@ bun run dev
 
 ## ElevenLabs ConvAI tester
 
-Ports the React Native [`react-native-elevenlabs-audio`](../../Mentra-Bluetooth-SDK-Starter-Kit/examples/react-native-elevenlabs-audio) repro into **Tester → ElevenLabs**.
+Ports the React Native [`react-native-elevenlabs-audio`](../../Veiller-Bluetooth-SDK-Starter-Kit/examples/react-native-elevenlabs-audio) repro into **Tester → ElevenLabs**.
 
 Same logic and variables:
 
@@ -29,18 +29,18 @@ Flow: local signing server (holds `ELEVENLABS_API_KEY`) → background fetches s
 ```bash
 cp .env.example .env.local
 # put ELEVENLABS_API_KEY in .env.local
-bun run dev      # auto-starts the signing server on :8788 if needed, then mentra-miniapp dev
+bun run dev      # auto-starts the signing server on :8788 if needed, then veiller-miniapp dev
 ```
 
 Open the miniapp → **ElevenLabs** → **Start**.
 
-`bun run build` / `dev` bakes the signed-URL endpoint to this Mac’s LAN IP (and `ELEVENLABS_SIGNING_SERVER_PORT` when set). Override with `MENTRA_PUBLIC_ELEVENLABS_SIGNED_URL_ENDPOINT` if needed. Keep the API key in `.env.local` only — never bake it into the miniapp.
+`bun run build` / `dev` bakes the signed-URL endpoint to this Mac’s LAN IP (and `ELEVENLABS_SIGNING_SERVER_PORT` when set). Override with `VEILLER_PUBLIC_ELEVENLABS_SIGNED_URL_ENDPOINT` if needed. Keep the API key in `.env.local` only — never bake it into the miniapp.
 
 Manual signer only: `bun run signer` (loads `.env.local`). Miniapp-only (no signer): `bun run dev:miniapp`.
 
 ### Notes
 
-- Glasses must already be connected via MentraOS (no scan/pair UI).
+- Glasses must already be connected via Veiller (no scan/pair UI).
 - Do not run the `session.mic` tester and ElevenLabs at the same time (both own the mic).
 - The `session.mic` tester can toggle glasses-side VAD and the loudness Barrier via `setVoiceActivityDetectionEnabled` / `setLoudnessGateEnabled` (Mentra Live). Audio chunks are whatever PCM the host delivers after LC3 decode (~16 kHz mono).
 - The signing server binds `0.0.0.0` with an unauthenticated `/signed-url` endpoint so a phone on the LAN can reach it. **Keep it on a trusted network only** — never expose it beyond your LAN / VPN.

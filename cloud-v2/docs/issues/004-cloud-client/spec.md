@@ -1,6 +1,6 @@
 # Cloud Client spec
 
-**Status:** Spec. The public API of `@mentra/cloud-client`. The big picture and the
+**Status:** Spec. The public API of `@veiller/cloud-client`. The big picture and the
 decisions are in [`architecture.md`](./architecture.md), and how it's built behind
 this API is in [`design.md`](./design.md). This is the contract to build against, now
 that the protocol ([`../002-cloud-runtime/protocol.md`](../002-cloud-runtime/protocol.md))
@@ -14,8 +14,8 @@ build already has its network sockets and storage wired in, so the constructor i
 just config:
 
 ```ts
-import { CloudClient } from "@mentra/cloud-client/react-native"   // device
-import { CloudClient } from "@mentra/cloud-client/node"           // tests, dev-stack
+import { CloudClient } from "@veiller/cloud-client/react-native"   // device
+import { CloudClient } from "@veiller/cloud-client/node"           // tests, dev-stack
 
 const cloud = new CloudClient({
   endpoints:
@@ -33,7 +33,7 @@ cloud.runtime
 cloud.core // present/usable only when Core is configured
 ```
 
-The root import (`@mentra/cloud-client`) is the shared build; it doesn't know what
+The root import (`@veiller/cloud-client`) is the shared build; it doesn't know what
 platform it's on and takes the platform pieces as inputs. The `react-native` and
 `node` imports are thin wrappers that supply them:
 
@@ -162,7 +162,7 @@ Guardrail: device-facing only, no Dev Console / OEM Portal / store web UI.
 
 The message types (`AudioSubscription`, `TranscriptionData`, `TranslationData`,
 `ProtocolError`, and the rest) aren't defined here. They come from
-`@mentra/cloud-runtime/protocol`, the one package the cloud server also uses. The
+`@veiller/cloud-runtime/protocol`, the one package the cloud server also uses. The
 cloud-client imports them, so it can't drift from what the cloud actually accepts.
 
 ## Consumers

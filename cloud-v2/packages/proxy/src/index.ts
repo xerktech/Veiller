@@ -1,11 +1,11 @@
 /**
- * `@mentra/cloud-proxy` — Forwarder / reverse proxy. OEM-deployable.
+ * `@veiller/cloud-proxy` — Forwarder / reverse proxy. OEM-deployable.
  * Handles REST + WS + UDP relay with per-traffic-type upstream config.
  *
  * Spec + design pending: cloud-v2/docs/issues/004-api-proxy/.
  */
 
-import { createHealthApp, createLogger } from "@mentra/cloud-shared";
+import { createHealthApp, createLogger } from "@veiller/cloud-shared";
 
 const logger = createLogger("proxy");
 const PORT = Number.parseInt(process.env.PORT ?? "3002", 10);

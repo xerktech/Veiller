@@ -1,6 +1,6 @@
 // Note: these enum string values must stay in sync with @mentra/types.
 // We cannot depend on @mentra/types here because this lightweight CLI package
-// is intentionally dependency-minimal (so `bunx @mentra/miniapp-cli` starts
+// is intentionally dependency-minimal (so `bunx @veiller/miniapp-cli` starts
 // fast). Mirror string lists manually; failing validations point authors at
 // the allowed values directly.
 //
@@ -106,9 +106,9 @@ export interface MiniappManifestV1 {
   port?: number;
   permissions?: ManifestPermission[];
   hardwareRequirements: ManifestHardwareRequirement[];
-  /** Semver of the @mentra/miniapp SDK ABI this bundle targets. */
+  /** Semver of the @veiller/miniapp SDK ABI this bundle targets. */
   sdkVersion?: string;
-  /** Lowest MentraOS Manager host version that can run this bundle. */
+  /** Lowest Veiller Manager host version that can run this bundle. */
   minHostVersion?: string;
   /** Two-layer bundle entry points. */
   entry?: ManifestEntry;

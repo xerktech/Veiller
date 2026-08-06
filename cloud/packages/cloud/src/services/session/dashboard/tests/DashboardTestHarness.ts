@@ -13,7 +13,7 @@ import {
   DashboardSystemUpdate,
   LayoutType,
   ViewType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 import { logger } from "../../../logging/pino-logger";
 import { DashboardManager } from "../DashboardManager";
 
@@ -146,7 +146,7 @@ class MockWebSocketService {
 }
 
 // Local constant for dashboard package name
-const DASHBOARD_PACKAGE_NAME = "com.mentra.os";
+const DASHBOARD_PACKAGE_NAME = "com.veiller.os";
 
 /**
  * Dashboard test harness
@@ -382,7 +382,7 @@ export class DashboardTestHarness {
     console.log("=== RUNNING NOTIFICATION SUMMARY AGENT TEST ===");
 
     // Import NotificationSummaryAgent
-    const { NotificationSummaryAgent } = await import("@mentra/agents");
+    const { NotificationSummaryAgent } = await import("@veiller/agents");
     const agent = new NotificationSummaryAgent();
 
     // Notification data (from previous test)
@@ -406,7 +406,7 @@ export class DashboardTestHarness {
         seenCount: 0,
       },
       {
-        title: "Mentra <> Auki：Cayden Pierce",
+        title: "Veiller <> Auki：Cayden Pierce",
         content: "I'll come around Sunday or monday or so, tbd but I'll let you guys know",
         timestamp: new Date("2025-05-26T05:37:59.781Z"),
         uuid: "975c9fcf-9ac1-476c-bf26-d9afd1d6efb1",
@@ -424,7 +424,7 @@ export class DashboardTestHarness {
         seenCount: 0,
       },
       {
-        title: "‎Mentra <> Auki (2条消息)：Cayden Pierce",
+        title: "‎Veiller <> Auki (2条消息)：Cayden Pierce",
         content: "Will stay in camlux",
         timestamp: new Date("2025-05-26T05:38:00.267Z"),
         uuid: "ab003049-c251-47ed-9257-9bc5e85b06a5",

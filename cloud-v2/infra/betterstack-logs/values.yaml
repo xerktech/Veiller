@@ -21,16 +21,16 @@
 # wildcard. Retention is 30 days per source (Betterstack API floor).
 #
 # Sources (all germany / eu-central-1a region; tokens are NOT committed, they
-# live in Doppler mentra-sre/dev and are injected into the sinks below):
-#   DEV      src 2616831  host s2616831.eu-central-1a.betterstackdata.com  token Doppler mentra-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_DEV
-#   DEBUG    src 2616845  host s2616845.eu-central-1a.betterstackdata.com  token Doppler mentra-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_DEBUG
-#   ISAIAH   src 2616847  host s2616847.eu-central-1a.betterstackdata.com  token Doppler mentra-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_ISAIAH
-#   STAGING  src 2616849  host s2616849.eu-central-1a.betterstackdata.com  token Doppler mentra-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_STAGING
-#   PROD     src 2616851  host s2616851.eu-central-1a.betterstackdata.com  token Doppler mentra-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_PROD
+# live in Doppler veiller-sre/dev and are injected into the sinks below):
+#   DEV      src 2616831  host s2616831.eu-central-1a.betterstackdata.com  token Doppler veiller-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_DEV
+#   DEBUG    src 2616845  host s2616845.eu-central-1a.betterstackdata.com  token Doppler veiller-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_DEBUG
+#   ISAIAH   src 2616847  host s2616847.eu-central-1a.betterstackdata.com  token Doppler veiller-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_ISAIAH
+#   STAGING  src 2616849  host s2616849.eu-central-1a.betterstackdata.com  token Doppler veiller-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_STAGING
+#   PROD     src 2616851  host s2616851.eu-central-1a.betterstackdata.com  token Doppler veiller-sre/dev BETTERSTACK_V2_SOURCE_TOKEN_PROD
 #
 # Deploy path: this cluster does NOT expose kubeconfig, so `porter helm`/`kubectl`
 # 400. Deploy through Porter Add-ons -> Helm Chart (dashboard) or its API with an
-# Admin token (Doppler mentra-sre/dev PORTER_TOKEN_ADMIN). Paste these values with
+# Admin token (Doppler veiller-sre/dev PORTER_TOKEN_ADMIN). Paste these values with
 # the real per-env tokens substituted for the PLACEHOLDER_*_TOKEN strings below.
 # The better_stack_http_metrics_sink override below MUST stay. The chart default
 # for that sink has token: null, which is invalid Vector config and crash-loops

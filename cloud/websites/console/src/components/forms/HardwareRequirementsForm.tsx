@@ -1,9 +1,9 @@
 // components/forms/HardwareRequirementsForm.tsx
 import React from "react"
-import {Button, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea} from "@mentra/shared"
+import {Button, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea} from "@veiller/shared"
 import {Plus, Trash2, Cpu, Camera, Mic, Speaker, Wifi, RotateCw, CircleDot, Lightbulb} from "lucide-react"
 import {HardwareType, HardwareRequirementLevel} from "../../types/enums"
-import {HardwareRequirement} from "@mentra/sdk"
+import {HardwareRequirement} from "@veiller/sdk"
 
 interface HardwareRequirementsFormProps {
   requirements: HardwareRequirement[]

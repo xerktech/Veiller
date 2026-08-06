@@ -1,18 +1,18 @@
 import {AuthingWrapperClient} from "./provider/authingClient"
 import {SupabaseWrapperClient} from "./provider/supabaseClient"
 import {
-  MentraAuthSessionResponse,
-  MentraAuthStateChangeSubscriptionResponse,
-  MentraOauthProviderResponse,
-  MentraPasswordResetResponse,
-  MentraSigninResponse,
-  MentraSignOutResponse,
+  VeillerAuthSessionResponse,
+  VeillerAuthStateChangeSubscriptionResponse,
+  VeillerOauthProviderResponse,
+  VeillerPasswordResetResponse,
+  VeillerSigninResponse,
+  VeillerSignOutResponse,
 } from "./authingProvider.types"
 
 const DEPLOYMENT_REGION = import.meta.env.VITE_DEPLOYMENT_REGION || "global"
 const IS_CHINA = DEPLOYMENT_REGION === "china"
 
-class MentraAuthProvider {
+class VeillerAuthProvider {
   constructor() {
     this.supabaseClient = new SupabaseWrapperClient()
     this.authingClient = new AuthingWrapperClient()
@@ -21,7 +21,7 @@ class MentraAuthProvider {
   private supabaseClient: SupabaseWrapperClient
   private authingClient: AuthingWrapperClient
 
-  async getSession(): Promise<MentraAuthSessionResponse> {
+  async getSession(): Promise<VeillerAuthSessionResponse> {
     if (IS_CHINA) {
       return this.authingClient.getSession()
     } else {
@@ -29,7 +29,7 @@ class MentraAuthProvider {
     }
   }
 
-  async signInWithEmail(email: string, password: string): Promise<MentraSigninResponse> {
+  async signInWithEmail(email: string, password: string): Promise<VeillerSigninResponse> {
     if (IS_CHINA) {
       return this.authingClient.signInWithEmail(email, password)
     } else {
@@ -37,7 +37,7 @@ class MentraAuthProvider {
     }
   }
 
-  async signOut(): Promise<MentraSignOutResponse> {
+  async signOut(): Promise<VeillerSignOutResponse> {
     if (IS_CHINA) {
       return this.authingClient.signOut()
     } else {
@@ -45,7 +45,7 @@ class MentraAuthProvider {
     }
   }
 
-  async signUpWithEmail(email: string, password: string, redirectTo?: string): Promise<MentraSigninResponse> {
+  async signUpWithEmail(email: string, password: string, redirectTo?: string): Promise<VeillerSigninResponse> {
     if (IS_CHINA) {
       return this.authingClient.signUpWithEmail(email, password, redirectTo)
     } else {
@@ -53,7 +53,7 @@ class MentraAuthProvider {
     }
   }
 
-  onAuthStateChange(callback: (event: string, session: any) => void): MentraAuthStateChangeSubscriptionResponse {
+  onAuthStateChange(callback: (event: string, session: any) => void): VeillerAuthStateChangeSubscriptionResponse {
     if (IS_CHINA) {
       return this.authingClient.onAuthStateChange(callback)
     } else {
@@ -61,7 +61,7 @@ class MentraAuthProvider {
     }
   }
 
-  async resetPasswordForEmail(email: string, redirectTo?: string): Promise<MentraPasswordResetResponse> {
+  async resetPasswordForEmail(email: string, redirectTo?: string): Promise<VeillerPasswordResetResponse> {
     if (IS_CHINA) {
       throw new Error("Method not implemented.")
     } else {
@@ -69,7 +69,7 @@ class MentraAuthProvider {
     }
   }
 
-  async refreshUser(): Promise<MentraAuthSessionResponse> {
+  async refreshUser(): Promise<VeillerAuthSessionResponse> {
     if (IS_CHINA) {
       throw new Error("Method not implemented.")
     } else {
@@ -77,7 +77,7 @@ class MentraAuthProvider {
     }
   }
 
-  async appleSignIn(redirectTo?: string): Promise<MentraOauthProviderResponse> {
+  async appleSignIn(redirectTo?: string): Promise<VeillerOauthProviderResponse> {
     if (IS_CHINA) {
       throw new Error("Apple sign in not supported in China")
     } else {
@@ -85,7 +85,7 @@ class MentraAuthProvider {
     }
   }
 
-  async googleSignIn(redirectTo?: string): Promise<MentraOauthProviderResponse> {
+  async googleSignIn(redirectTo?: string): Promise<VeillerOauthProviderResponse> {
     if (IS_CHINA) {
       throw new Error("Google sign in not supported in China")
     } else {
@@ -94,4 +94,4 @@ class MentraAuthProvider {
   }
 }
 
-export const mentraAuthProvider = new MentraAuthProvider()
+export const mentraAuthProvider = new VeillerAuthProvider()

@@ -3,7 +3,7 @@
 Read this first if you are new to npm publishing. Operational
 procedures live in [README.md](README.md), [sdk.md](sdk.md), and [react-sdk.md](react-sdk.md).
 
-The summary: we publish a handful of `@mentra/*` packages to
+The summary: we publish a handful of `@veiller/*` packages to
 the public npm registry. They install via `npm install`
 (or `bun add`). Today every publish is manual; CI/CD is on the
 roadmap.
@@ -20,7 +20,7 @@ into `node_modules/`. Same for Bun, Yarn, pnpm.
 
 We publish to the public registry. There is one of these by
 default; alternative registries (private, GitHub Packages,
-self-hosted) exist but we do not use them for `@mentra/*`.
+self-hosted) exist but we do not use them for `@veiller/*`.
 
 ## Packages and versions
 
@@ -36,10 +36,10 @@ package's dist-tags (see below).
 
 ## Scoped packages (`@scope/name`)
 
-A "scope" is a namespace prefix. `@mentra/sdk` is in the
-`@mentra` scope. Scopes are owned by an npm user or an npm
-organization. Only members of the `@mentra` org can publish
-under `@mentra/*`.
+A "scope" is a namespace prefix. `@veiller/sdk` is in the
+`@veiller` scope. Scopes are owned by an npm user or an npm
+organization. Only members of the `@veiller` org can publish
+under `@veiller/*`.
 
 Scoped packages can be public or private. Ours are public
 (visible to anyone, free to install). The `publishConfig` in
@@ -47,14 +47,14 @@ Scoped packages can be public or private. Ours are public
 
 ```json
 {
-  "name": "@mentra/react",
+  "name": "@veiller/react",
   "publishConfig": { "access": "public" }
 }
 ```
 
 ## Org membership
 
-The `@mentra` org has a list of members on npmjs.com. Only
+The `@veiller` org has a list of members on npmjs.com. Only
 members can publish. Adding someone is done from the org
 admin page; we ask Isaiah or Israelov to add a new member.
 
@@ -62,7 +62,7 @@ Verify your membership:
 
 ```bash
 npm whoami            # confirms logged in
-npm org ls @mentra    # lists members
+npm org ls @veiller    # lists members
 ```
 
 If `npm whoami` errors, run `npm login` first. The org
@@ -71,7 +71,7 @@ publishing).
 
 ## Semver
 
-`@mentra/*` packages follow [Semantic Versioning](https://semver.org/)
+`@veiller/*` packages follow [Semantic Versioning](https://semver.org/)
 (semver):
 
 ```
@@ -107,7 +107,7 @@ no version specified, npm resolves `foo@latest`.
 Multiple tags can exist simultaneously:
 
 ```bash
-npm view @mentra/sdk dist-tags
+npm view @veiller/sdk dist-tags
 # {
 #   latest: "2.5.3",
 #   alpha:  "3.0.0-alpha.4",
@@ -118,9 +118,9 @@ npm view @mentra/sdk dist-tags
 Consumers opt into non-default tags explicitly:
 
 ```bash
-npm install @mentra/sdk          # gets latest (2.5.3)
-npm install @mentra/sdk@alpha    # gets alpha   (3.0.0-alpha.4)
-npm install @mentra/sdk@beta     # gets beta    (3.0.0-beta.1)
+npm install @veiller/sdk          # gets latest (2.5.3)
+npm install @veiller/sdk@alpha    # gets alpha   (3.0.0-alpha.4)
+npm install @veiller/sdk@beta     # gets beta    (3.0.0-beta.1)
 ```
 
 We use this to keep unstable code accessible without breaking
@@ -128,12 +128,12 @@ consumers who default to `latest`. Today's policy:
 
 - `latest`: stable, production-ready. The default. Must work
   for everyone.
-- `alpha`: experimental. Used by `@mentra/sdk` v3 because we
+- `alpha`: experimental. Used by `@veiller/sdk` v3 because we
   are migrating to the local SDK; we do not want to force
   developers to refactor against an API that will change again
   soon.
 - `beta`: pre-release of something we plan to promote. Used
-  for `@mentra/react` when changes have not been thoroughly
+  for `@veiller/react` when changes have not been thoroughly
   tested.
 
 Dist-tags are mutable. You can repoint `latest` at an older
@@ -190,7 +190,7 @@ copy:
 
 ```json
 {
-  "name": "@mentra/cloud",
+  "name": "@veiller/cloud",
   "dependencies": {
     "@mentra/types": "workspace:*"
   }
@@ -208,9 +208,9 @@ When publishing, packages either:
    dependency.
 2. Bundle the dependency into their own tarball using
    `bundledDependencies`. The consumer gets a vendored copy
-   inside `node_modules/@mentra/sdk/node_modules/@mentra/types`.
+   inside `node_modules/@veiller/sdk/node_modules/@mentra/types`.
 
-`@mentra/sdk` uses option 2 for `@mentra/types`: the published
+`@veiller/sdk` uses option 2 for `@mentra/types`: the published
 SDK ships its own copy. This avoids the consumer needing to
 install `@mentra/types` separately.
 
@@ -244,7 +244,7 @@ breaking installs for anyone who already cached it. Instead,
 deprecate it:
 
 ```bash
-npm deprecate @mentra/sdk@3.0.0-alpha.3 \
+npm deprecate @veiller/sdk@3.0.0-alpha.3 \
   "Has a critical bug; use 3.0.0-alpha.4."
 ```
 
@@ -253,7 +253,7 @@ correct way to flag a bad version.
 
 ## Two-factor authentication
 
-The `@mentra` org requires 2FA on accounts that publish. When
+The `@veiller` org requires 2FA on accounts that publish. When
 you `npm publish`, npm prompts for an OTP. Have your
 authenticator app handy.
 

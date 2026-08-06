@@ -1,6 +1,6 @@
 /**
  * @fileoverview Hono store auth API routes.
- * Authentication endpoints for the MentraOS Store website.
+ * Authentication endpoints for the Veiller Store website.
  * Mounted at: /api/store/auth
  */
 

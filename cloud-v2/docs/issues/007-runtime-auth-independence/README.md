@@ -4,7 +4,7 @@
 
 ## One-line problem
 
-Mentra Runtime Services are meant to be self-hostable, but the current
+Veiller Runtime Services are meant to be self-hostable, but the current
 cloud-client auth lifecycle still assumes Cloud Core is available to exchange and
 refresh access tokens. Runtime itself does not import Core or call Core on
 each request, but a phone cannot stay connected forever without a Core-backed
@@ -27,7 +27,7 @@ and always exposes:
 cloud.core
 ```
 
-That makes sense for Mentra-managed deployments, where the same SDK talks to both
+That makes sense for Veiller-managed deployments, where the same SDK talks to both
 Cloud Core and Cloud Runtime. It is too strict for runtime-only deployments.
 
 Making them optional means:
@@ -38,10 +38,10 @@ Making them optional means:
   Core exchange/refresh;
 - `cloud.core` is absent, disabled, or throws a clear "Core not configured"
   error in that mode;
-- Mentra-managed deployments still configure Core exactly as they do today.
+- Veiller-managed deployments still configure Core exactly as they do today.
 
-It does **not** mean Mentra gives up ownership of Core services. Core remains the
-Mentra-owned product surface for accounts, store/catalog, installs, user mapping,
+It does **not** mean Veiller gives up ownership of Core services. Core remains the
+Veiller-owned product surface for accounts, store/catalog, installs, user mapping,
 miniapp-token minting, console/store/oem portal, and other non-live-service APIs.
 
 ## Current state
@@ -52,7 +52,7 @@ Runtime authentication currently works like this:
    `/api/client/auth/exchange`.
 2. Cloud-client refreshes through Core via `/api/client/auth/refresh`.
 3. Runtime WebSocket/REST receives that access token.
-4. Runtime verifies the token locally with `@mentra/cloud-shared`
+4. Runtime verifies the token locally with `@veiller/cloud-shared`
    `verifyAccessTokenSignature`.
 
 Runtime is already request-independent from Core: it does not ask Core to
@@ -62,11 +62,11 @@ the token issuer/refresh path and the fixed token audience/issuer assumptions.
 ## Goals
 
 - Allow Runtime Services to operate with zero live dependency on Cloud Core.
-- Let Mentra-managed deployments continue using Cloud Core/Auth as the default
+- Let Veiller-managed deployments continue using Cloud Core/Auth as the default
   broker and issuer.
 - Let OEMs choose between:
-  - using Mentra Core directly;
-  - proxying Mentra Core;
+  - using Veiller Core directly;
+  - proxying Veiller Core;
   - using their own runtime-token issuer/JWKS;
   - running runtime-only with no Core endpoint at all.
 - Keep runtime request authorization local and fast: JWT signature + claims, no
@@ -76,9 +76,9 @@ the token issuer/refresh path and the fixed token audience/issuer assumptions.
 
 ## Non-goals
 
-- Replacing Mentra Core product APIs.
+- Replacing Veiller Core product APIs.
 - Requiring OEMs to self-host Core.
-- Making runtime-only deployments automatically support Mentra Store/catalog,
+- Making runtime-only deployments automatically support Veiller Store/catalog,
   installs, or Core-backed miniapp-token minting.
 - Designing the full developer-backend miniapp auth replacement here. That may
   become a follow-up once runtime-token issuance is split.
@@ -101,12 +101,12 @@ audiences so the protocol survives a product/company rename.
 - Issuer: any configured runtime issuer:
   - Cloud Core/Auth;
   - OEM auth service;
-  - OEM proxy to Mentra;
+  - OEM proxy to Veiller;
   - local/dev issuer.
 - Used only for Runtime Services: WebSocket session, subscriptions, audio,
   camera, stream, and related live-service REST.
 
-The same JWKS can sign both token families in Mentra-managed deployments, but
+The same JWKS can sign both token families in Veiller-managed deployments, but
 the design must not require that. Runtime should trust configured issuers, not a
 hard-coded "Core exists" assumption.
 
@@ -114,7 +114,7 @@ hard-coded "Core exists" assumption.
 
 ### Hosted Core + hosted Runtime
 
-This is the default Mentra-managed path. An OEM onboards through the portal with:
+This is the default Veiller-managed path. An OEM onboards through the portal with:
 
 - a unique `tenantId`;
 - production issuer metadata (`issuer`, JWKS or well-known URL);
@@ -124,13 +124,13 @@ Core/Auth verifies the OEM's subject token using that onboarded metadata, maps
 `(tenantId, tenantUserId)`, then mints normalized `cloud-runtime` tokens for the hosted
 Runtime. Hosted Runtime only has to trust the normalized Cloud Runtime issuer.
 
-Mentra's own mobile app is treated as one OEM integration. During migration, its
+Veiller's own mobile app is treated as one OEM integration. During migration, its
 login credential can still be the v1 core token obtained from the legacy backend;
 Core/Auth uses that credential to issue the same normalized runtime token shape.
 
 ### Hosted Runtime via OEM proxy
 
-An OEM may hide Mentra endpoints behind its own backend. The proxy can either
+An OEM may hide Veiller endpoints behind its own backend. The proxy can either
 delegate token exchange to Cloud Core/Auth or return a Cloud Runtime token minted
 by an issuer our hosted Runtime is configured to trust. Runtime still sees a
 normal `cloud-runtime` JWT and does local verification.
@@ -248,14 +248,14 @@ current coupling.
 
 ## Miniapp auth impact
 
-Today miniapp-scoped tokens are minted by Core. No Core means no Mentra-managed
+Today miniapp-scoped tokens are minted by Core. No Core means no Veiller-managed
 miniapp backend auth. If an OEM wants a runtime-only miniapp backend auth story,
 that should be a separate OEM-specific design and should not block runtime auth
 independence for live captions/audio/camera.
 
 ## Implementation plan
 
-1. Add a runtime token verifier abstraction in `@mentra/cloud-runtime`.
+1. Add a runtime token verifier abstraction in `@veiller/cloud-runtime`.
    - Support JWKS URL(s), issuer, audience, and claim mapping.
    - Require explicit issuer config at runtime startup.
 2. Introduce runtime-token audience `cloud-runtime`.
@@ -285,7 +285,7 @@ independence for live captions/audio/camera.
   running.
 - E2E: local captions can connect to local runtime while Core service is stopped,
   as long as the host supplies a valid runtime token.
-- E2E: Mentra-managed path still exchanges/refreshes via Core and connects to
+- E2E: Veiller-managed path still exchanges/refreshes via Core and connects to
   Runtime.
 
 ## Open decisions

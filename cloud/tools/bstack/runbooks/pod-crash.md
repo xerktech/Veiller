@@ -203,21 +203,21 @@ Verify zero event loop gaps and GC probes within range.
 
 ### Getting credentials
 
-SRE credentials (BetterStack, admin JWT) are in Doppler project `mentra-sre`:
+SRE credentials (BetterStack, admin JWT) are in Doppler project `veiller-sre`:
 
 ```bash
 # Run any bstack command with SRE credentials injected
-doppler run --project mentra-sre --config dev -- bstack health
-doppler run --project mentra-sre --config dev -- bstack incidents --limit 10
+doppler run --project veiller-sre --config dev -- bstack health
+doppler run --project veiller-sre --config dev -- bstack incidents --limit 10
 
 # Or export for a session
-export BETTERSTACK_USERNAME=$(doppler secrets get BETTERSTACK_USERNAME --project mentra-sre --config dev --plain)
-export BETTERSTACK_PASSWORD=$(doppler secrets get BETTERSTACK_PASSWORD --project mentra-sre --config dev --plain)
-export BETTERSTACK_API_TOKEN=$(doppler secrets get BETTERSTACK_API_TOKEN --project mentra-sre --config dev --plain)
-export MENTRA_ADMIN_JWT=$(doppler secrets get MENTRA_ADMIN_JWT --project mentra-sre --config dev --plain)
+export BETTERSTACK_USERNAME=$(doppler secrets get BETTERSTACK_USERNAME --project veiller-sre --config dev --plain)
+export BETTERSTACK_PASSWORD=$(doppler secrets get BETTERSTACK_PASSWORD --project veiller-sre --config dev --plain)
+export BETTERSTACK_API_TOKEN=$(doppler secrets get BETTERSTACK_API_TOKEN --project veiller-sre --config dev --plain)
+export VEILLER_ADMIN_JWT=$(doppler secrets get VEILLER_ADMIN_JWT --project veiller-sre --config dev --plain)
 ```
 
-Cloud runtime secrets (MONGO_URL, SONIOX_API_KEY, etc.) are in Doppler project `mentraos-cloud` — configs: `dev`, `dev_debug`, `staging`, `prod_central-us`, etc. **Don't put SRE tokens in the cloud project.**
+Cloud runtime secrets (MONGO_URL, SONIOX_API_KEY, etc.) are in Doppler project `veiller-cloud` — configs: `dev`, `dev_debug`, `staging`, `prod_central-us`, etc. **Don't put SRE tokens in the cloud project.**
 
 ### BetterStack log table gotchas
 
@@ -284,17 +284,17 @@ porter kubectl --cluster 4689 -- logs -n default <POD_NAME> -f | grep -i error
 
 ```bash
 # Fetch a Bun heap snapshot (saves as JSON, loadable in Chrome DevTools Memory tab)
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   bun run packages/cloud/src/scripts/analyze-heap.ts fetch \
   --host=uscentralapi.mentra.glass --out=.heap/
 
 # Analyze object counts
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   bun run packages/cloud/src/scripts/analyze-heap.ts snapshot \
   --file=.heap/uscentralapi-TIMESTAMP.json
 
 # Live memory tracking (polls /api/admin/memory/now every 30s)
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   bun run packages/cloud/src/scripts/analyze-heap.ts live \
   --host=franceapi.mentra.glass --interval=10 --duration=300
 ```

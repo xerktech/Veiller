@@ -1,6 +1,6 @@
 # SDK v3 — Documentation Update Spec
 
-> **Note:** This doc was originally written using `MentraApp` as the server class name.
+> **Note:** This doc was originally written using `VeillerApp` as the server class name.
 > That was renamed to `MiniAppServer` — see `decisions.md` D-002.
 > All references below use the current name.
 
@@ -20,7 +20,7 @@ This document specifies everything that needs to happen to the developer-facing 
 1. **Don't break existing links.** Developers have bookmarked pages, blog posts link to them, LLMs have them in training data. Old URLs must either serve updated content or redirect.
 2. **New developers see v3 first.** The primary docs teach the new API. v2 is archived, not deleted.
 3. **Migration is a first-class document.** The single highest-value page we write is "I just updated, what changed?"
-4. **Don't write docs for things that don't ship.** Local apps, `mentra` CLI, and MentraJS framework are v3.1+. No docs until they exist.
+4. **Don't write docs for things that don't ship.** Local apps, `veiller` CLI, and VeillerJS framework are v3.1+. No docs until they exist.
 
 ---
 
@@ -43,7 +43,7 @@ This document specifies everything that needs to happen to the developer-facing 
 
 ```
 docs.mentra.glass/sdk/getting-started    → REWRITE for v3 (MiniAppServer pattern)
-docs.mentra.glass/sdk/session            → REWRITE for v3 (MentraSession + managers)
+docs.mentra.glass/sdk/session            → REWRITE for v3 (VeillerSession + managers)
 docs.mentra.glass/sdk/events             → REDIRECT to /sdk/v2/events (removed concept)
 docs.mentra.glass/sdk/layouts            → REDIRECT to /sdk/display
 docs.mentra.glass/sdk/audio              → REDIRECT to /sdk/speaker
@@ -61,7 +61,7 @@ docs.mentra.glass/sdk/v2/audio           → old audio docs (preserved)
 ```
 /sdk/                           → landing / overview
 /sdk/getting-started            → quickstart with MiniAppServer
-/sdk/session                    → MentraSession overview (managers, lifecycle, events)
+/sdk/session                    → VeillerSession overview (managers, lifecycle, events)
 
 /sdk/transcription              → session.transcription
 /sdk/translation                → session.translation
@@ -112,7 +112,7 @@ Every page under `/sdk/v2/` gets a top-of-page banner:
 
 ### Tier 1 — Blocks the 3.0.0 release
 
-These must exist before we run `npm publish @mentra/sdk@3.0.0`.
+These must exist before we run `npm publish @veiller/sdk@3.0.0`.
 
 | Page                                      | What it covers                                                                                                               | Estimated effort | Notes                                                                                      |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------ |
@@ -127,7 +127,7 @@ These make the v3 docs useful as reference. Can ship same week as the release.
 
 | Page                        | What it covers                                                                                                                                         | Effort |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| `/sdk/session`              | MentraSession overview: what managers exist, system events (`connected`, `disconnected`, `error`), lifecycle, `userId`, `sessionId`, `wasResurrected`. | Medium |
+| `/sdk/session`              | VeillerSession overview: what managers exist, system events (`connected`, `disconnected`, `error`), lifecycle, `userId`, `sessionId`, `wasResurrected`. | Medium |
 | `/sdk/transcription`        | `session.transcription` — `.on()`, `.forLanguage()`, `.configure()`, `TranscriptionEvent` shape, language codes, examples.                             | Low    |
 | `/sdk/translation`          | `session.translation` — `.on()`, `.to()`, `.fromTo()`, examples.                                                                                       | Low    |
 | `/sdk/display`              | `session.display` — `.showText()`, `.showTextWall()`, `.showDoubleTextWall()`, `.clear()`, wrapping.                                                   | Low    |
@@ -156,8 +156,8 @@ Reference pages for all managers. Lower urgency because developers can discover 
 Do NOT write these until the features ship:
 
 - Local apps / on-device runtime
-- `mentra` CLI (`mentra dev`, `mentra build`, `mentra publish`)
-- MentraJS framework (session/ + webview/ convention)
+- `veiller` CLI (`veiller dev`, `veiller build`, `veiller publish`)
+- VeillerJS framework (session/ + webview/ convention)
 - `session.state<T>` shared state and React hooks
 - Video recording
 - SRT streaming
@@ -174,7 +174,7 @@ The migration guide (`/sdk/migration`) is the most important document. Here's th
 
 ## TL;DR (30-second version)
 
-- `npm update @mentra/sdk` — your existing code still works
+- `npm update @veiller/sdk` — your existing code still works
 - You'll see deprecation warnings in the console
 - Follow this guide to update at your own pace
 - v3.1 removes the compat layer — update before then
@@ -219,7 +219,7 @@ The migration guide (`/sdk/migration`) is the most important document. Here's th
 
 ## Step 7: Clean up deprecated imports
 
-[AppSession → MentraSession]
+[AppSession → VeillerSession]
 [TpaSession → delete]
 [TpaServer → delete]
 
@@ -253,15 +253,15 @@ Shows v2 patterns: `class MyApp extends AppServer`, `session.events.onTranscript
 ### Target state
 
 ```markdown
-# @mentra/sdk
+# @veiller/sdk
 
-Build apps for MentraOS smart glasses.
+Build apps for Veiller smart glasses.
 
 ## Quick Start
 
-    npm install @mentra/sdk
+    npm install @veiller/sdk
 
-    import { MiniAppServer } from "@mentra/sdk"
+    import { MiniAppServer } from "@veiller/sdk"
 
     const app = new MiniAppServer({
       packageName: "com.example.myapp",
@@ -286,7 +286,7 @@ Your existing code still works — v3 includes a compatibility layer.
 - [Getting Started](https://docs.mentra.glass/sdk/getting-started)
 - [API Reference](https://docs.mentra.glass/sdk/session)
 - [Migration Guide](https://docs.mentra.glass/sdk/migration)
-- [Examples](https://github.com/user/mentraos-example-apps)
+- [Examples](https://github.com/user/veiller-example-apps)
 
 ## Session Managers
 
@@ -443,7 +443,7 @@ Need a reusable component for:
 
 ### Within 1 week of release
 
-- [ ] Write `/sdk/session` (MentraSession overview)
+- [ ] Write `/sdk/session` (VeillerSession overview)
 - [ ] Write `/sdk/transcription`, `/sdk/translation`
 - [ ] Write `/sdk/display`, `/sdk/camera`, `/sdk/speaker`
 - [ ] Write `/sdk/migration/app-server`, `/sdk/migration/events`
@@ -472,8 +472,8 @@ Need a reusable component for:
 
 3. **Don't remove v2 docs from the site.** Archive them. Some teams will be on v2 for months. Removing docs for code that still works is hostile.
 
-4. **Don't write local app docs yet.** Local apps, Hermes runtime, `mentra build` are v3.1+. Documenting unshipped features creates confusion.
+4. **Don't write local app docs yet.** Local apps, Hermes runtime, `veiller build` are v3.1+. Documenting unshipped features creates confusion.
 
-5. **Don't put the migration guide behind a login or paywall.** It needs to be the first Google result for "mentra sdk v3 migration."
+5. **Don't put the migration guide behind a login or paywall.** It needs to be the first Google result for "veiller sdk v3 migration."
 
 6. **Don't assume developers read changelogs.** The deprecation warning in their console IS the changelog for most developers. Make the warning message useful and link to the migration guide.

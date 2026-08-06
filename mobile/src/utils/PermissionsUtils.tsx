@@ -1,5 +1,5 @@
 import {AppletInterface, AppletPermission} from "@/../../cloud/packages/types/src"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 import {Alert, Linking, PermissionsAndroid, Platform} from "react-native"
 import BleManager from "react-native-ble-manager"
 import {check, PERMISSIONS, request, RESULTS} from "react-native-permissions"
@@ -55,14 +55,14 @@ interface PermissionConfig {
 const PERMISSION_CONFIG: Record<string, PermissionConfig> = {
   [PermissionFeatures.BASIC]: {
     name: "Basic Permissions",
-    description: "Basic permissions required for Mentra to function",
+    description: "Basic permissions required for Veiller to function",
     ios: [], // Different approach for iOS - we'll handle these individually
     android: [], // Will be set dynamically based on Android version, excluding Bluetooth which is handled in pairing flow
     critical: true, // App can't function without these
   },
   [PermissionFeatures.POST_NOTIFICATIONS]: {
     name: "Notifications",
-    description: "Allow Mentra to send you notifications",
+    description: "Allow Veiller to send you notifications",
     ios: ["post_notifications"],
     android:
       typeof Platform.Version === "number" && Platform.Version >= 33
@@ -72,7 +72,7 @@ const PERMISSION_CONFIG: Record<string, PermissionConfig> = {
   },
   [PermissionFeatures.READ_NOTIFICATIONS]: {
     name: "Notification Access",
-    description: "Allow Mentra to forward notifications to your glasses",
+    description: "Allow Veiller to forward notifications to your glasses",
     ios: [], // iOS doesn't need special permission for reading notifications
     android: [], // Android uses NotificationListener service, handled separately
     critical: false,
@@ -287,7 +287,7 @@ export const requestBackgroundLocationPermission = async (): Promise<boolean> =>
     return new Promise((resolve) => {
       Alert.alert(
         "Background Location Permission",
-        "MentraOS needs access to your location when the app is in the background " +
+        "Veiller needs access to your location when the app is in the background " +
           "to provide continuous tracking and location-based features. " +
           'On the next screen, please select "Allow all the time".',
         [
@@ -530,7 +530,7 @@ export const displayCriticalPermissionDeniedWarning = (permissionName: string): 
   return new Promise((resolve) => {
     showAlert(
       `${permissionName} Required`,
-      `Mentra needs ${permissionName.toLowerCase()} permissions to function properly. Please grant these permissions to continue.`,
+      `Veiller needs ${permissionName.toLowerCase()} permissions to function properly. Please grant these permissions to continue.`,
       [
         {
           text: "Try Again",
@@ -550,7 +550,7 @@ export const handlePreviouslyDeniedPermission = (config: PermissionConfig): Prom
     return new Promise((resolve) => {
       showAlert(
         translate("permissions:permissionRequired"),
-        "MentraOS needs access to your location when the app is in the background " +
+        "Veiller needs access to your location when the app is in the background " +
           `to provide location-based features\n` +
           `\n\nOn the next screen, select Location, then select "Always" instead of "While Using the App"`,
         [

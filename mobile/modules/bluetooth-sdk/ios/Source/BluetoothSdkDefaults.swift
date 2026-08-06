@@ -8,8 +8,8 @@ enum BluetoothSdkDefaults {
 
     static let voiceActivityDetectionEnabled = false
     static let loudnessGateEnabled = true
-    private static let swiftPackageSdkVersion = "__MENTRA_BLUETOOTH_SDK_VERSION__"
-    private static let swiftPackageSdkVersionPlaceholder = "__MENTRA" + "_BLUETOOTH_SDK_VERSION__"
+    private static let swiftPackageSdkVersion = "__VEILLER_BLUETOOTH_SDK_VERSION__"
+    private static let swiftPackageSdkVersionPlaceholder = "__VEILLER" + "_BLUETOOTH_SDK_VERSION__"
 
     private static func normalizedSdkVersion(_ value: String?) -> String? {
         guard let value else {

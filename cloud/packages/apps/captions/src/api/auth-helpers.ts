@@ -39,7 +39,7 @@ export function getAuthUserId(req: Request): string | null {
 }
 
 /**
- * Check if the request has an active MentraOS session
+ * Check if the request has an active Veiller session
  *
  * @param req - The Bun Request object
  * @returns true if there's an active session, false otherwise

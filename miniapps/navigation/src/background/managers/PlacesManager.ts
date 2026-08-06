@@ -16,7 +16,7 @@
 
 import {PlacesSession} from "../lib/places"
 import type {PlaceDetails, PlaceSuggestion} from "../lib/places"
-import type {MiniappSession} from "@mentra/miniapp"
+import type {MiniappSession} from "@veiller/miniapp"
 
 export class PlacesManager {
   private session: PlacesSession

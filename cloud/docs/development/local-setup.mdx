@@ -1,11 +1,11 @@
 ---
 title: "Local Development Setup"
-description: "Run MentraOS Cloud locally for development and testing"
+description: "Run Veiller Cloud locally for development and testing"
 ---
 
 ## Overview
 
-This guide helps you set up MentraOS Cloud on your local machine for development. You'll learn how to configure the environment, expose your local server using ngrok, and connect the mobile app to your development cloud instance.
+This guide helps you set up Veiller Cloud on your local machine for development. You'll learn how to configure the environment, expose your local server using ngrok, and connect the mobile app to your development cloud instance.
 
 ## Prerequisites
 
@@ -15,8 +15,8 @@ Before starting, ensure you have:
 - **Docker** and **Docker Compose** installed
 - **ngrok** account and CLI ([ngrok.com](https://ngrok.com))
 - **Git** for cloning the repository
-- **MentraOS mobile app** installed on your phone
-- A MentraOS account
+- **Veiller mobile app** installed on your phone
+- A Veiller account
 
 ## Step 1: Clone and Setup
 
@@ -24,7 +24,7 @@ Before starting, ensure you have:
 
 ```bash
 git clone https://github.com/Mentra-Community/MentraOS.git
-cd MentraOS/cloud
+cd Veiller/cloud
 ```
 
 ### Install Dependencies
@@ -63,9 +63,9 @@ CLOUD_LOCAL_HOST_NAME=cloud
 
 # MongoDB (required)
 # If running MongoDB locally, ensure it's bound to 127.0.0.1 only (see MongoDB Setup section below)
-MONGO_URL=mongodb://localhost:27017/mentraos
+MONGO_URL=mongodb://localhost:27017/veiller
 # For MongoDB Atlas (cloud):
-# MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/mentraos?retryWrites=true&w=majority
+# MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/veiller?retryWrites=true&w=majority
 
 # Supabase Auth (required for authentication)
 SUPABASE_URL=https://your-project.supabase.co
@@ -186,7 +186,7 @@ services:
     volumes:
       - mongo_data:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=mentraos
+      - MONGO_INITDB_DATABASE=veiller
 
 volumes:
   mongo_data:
@@ -244,7 +244,7 @@ volumes:
 The cloud runs in Docker with all dependencies:
 
 ```bash
-cd MentraOS/cloud/
+cd Veiller/cloud/
 # then
 bun install
 # then:
@@ -346,7 +346,7 @@ Forwarding                    https://abc123.ngrok.app -> http://localhost:8002
 
 ### Enable Developer Mode
 
-1. Open the MentraOS mobile app
+1. Open the Veiller mobile app
 2. Navigate to the **Account** page
 3. **Tap on your account section 10 times** quickly
 4. You'll see a toast: "Developer mode activated"
@@ -419,7 +419,7 @@ bun run dev:clean
 **MongoDB (Local)**
 ```bash
 # Connect to MongoDB
-mongosh mongodb://localhost:27017/mentraos
+mongosh mongodb://localhost:27017/veiller
 
 # Common queries
 show collections
@@ -477,9 +477,9 @@ bun run dev:rebuild
 
 ## Step 8: Run Web Portals (Store & Developer Console)
 
-MentraOS includes two web applications for app management:
+Veiller includes two web applications for app management:
 
-### MentraOS Store
+### Veiller Store
 
 The public app store where users discover and install apps:
 
@@ -556,7 +556,7 @@ Both portals use the same Supabase project as the cloud. They'll automatically u
 ### Access the Portals
 
 1. **Store**: http://localhost:5173
-   - Sign in with your MentraOS account
+   - Sign in with your Veiller account
    - Browse and install apps to your account
 
 2. **Developer Console**: http://localhost:5174
@@ -568,7 +568,7 @@ Both portals use the same Supabase project as the cloud. They'll automatically u
 
 ```javascript
 // Connect to MongoDB
-mongosh mongodb://localhost:27017/mentraos
+mongosh mongodb://localhost:27017/veiller
 
 // Create test app
 db.apps.insertOne({

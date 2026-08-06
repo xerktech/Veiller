@@ -2,11 +2,11 @@ import {AuthenticationClient, AuthenticationClientOptions} from "authing-js-sdk"
 
 // eslint-disable-next-line no-restricted-imports
 import {
-  MentraAuthSession,
-  MentraAuthSessionResponse,
-  MentraAuthStateChangeSubscriptionResponse,
-  MentraSigninResponse,
-  MentraSignOutResponse,
+  VeillerAuthSession,
+  VeillerAuthSessionResponse,
+  VeillerAuthStateChangeSubscriptionResponse,
+  VeillerSigninResponse,
+  VeillerSignOutResponse,
 } from "../authingProvider.types"
 
 // Browser-compatible EventEmitter
@@ -61,7 +61,7 @@ export class AuthingWrapperClient {
     this.eventEmitter = new EventEmitter()
   }
 
-  async getSession(): Promise<MentraAuthSessionResponse> {
+  async getSession(): Promise<VeillerAuthSessionResponse> {
     try {
       const currentUser = await this.authing.getCurrentUser()
       return {
@@ -90,10 +90,10 @@ export class AuthingWrapperClient {
     }
   }
 
-  async signInWithEmail(email: string, password: string): Promise<MentraSigninResponse> {
+  async signInWithEmail(email: string, password: string): Promise<VeillerSigninResponse> {
     try {
       const user = await this.authing.loginByEmail(email, password)
-      const authSession: MentraAuthSession = {
+      const authSession: VeillerAuthSession = {
         token: user.token!,
         user: {
           id: user.id,
@@ -124,7 +124,7 @@ export class AuthingWrapperClient {
     }
   }
 
-  async signUpWithEmail(email: string, password: string, _redirectTo?: string): Promise<MentraSigninResponse> {
+  async signUpWithEmail(email: string, password: string, _redirectTo?: string): Promise<VeillerSigninResponse> {
     try {
       const user = await this.authing.registerByEmail(email, password)
       return {
@@ -156,7 +156,7 @@ export class AuthingWrapperClient {
     }
   }
 
-  async signOut(): Promise<MentraSignOutResponse> {
+  async signOut(): Promise<VeillerSignOutResponse> {
     try {
       await this.authing.logout()
       this.eventEmitter.emit("SIGNED_OUT", null)
@@ -167,13 +167,13 @@ export class AuthingWrapperClient {
     }
   }
 
-  public onAuthStateChange(callback: AuthChangeCallback): MentraAuthStateChangeSubscriptionResponse {
-    const signedInHandler: EventCallback = (data) => callback("SIGNED_IN", data as MentraAuthSession)
-    const signedOutHandler: EventCallback = (data) => callback("SIGNED_OUT", data as MentraAuthSession)
-    const tokenRefreshedHandler: EventCallback = (data) => callback("TOKEN_REFRESHED", data as MentraAuthSession)
-    const userUpdatedHandler: EventCallback = (data) => callback("USER_UPDATED", data as MentraAuthSession)
-    const userDeletedHandler: EventCallback = (data) => callback("USER_DELETED", data as MentraAuthSession)
-    const passwordRecoveryHandler: EventCallback = (data) => callback("PASSWORD_RECOVERY", data as MentraAuthSession)
+  public onAuthStateChange(callback: AuthChangeCallback): VeillerAuthStateChangeSubscriptionResponse {
+    const signedInHandler: EventCallback = (data) => callback("SIGNED_IN", data as VeillerAuthSession)
+    const signedOutHandler: EventCallback = (data) => callback("SIGNED_OUT", data as VeillerAuthSession)
+    const tokenRefreshedHandler: EventCallback = (data) => callback("TOKEN_REFRESHED", data as VeillerAuthSession)
+    const userUpdatedHandler: EventCallback = (data) => callback("USER_UPDATED", data as VeillerAuthSession)
+    const userDeletedHandler: EventCallback = (data) => callback("USER_DELETED", data as VeillerAuthSession)
+    const passwordRecoveryHandler: EventCallback = (data) => callback("PASSWORD_RECOVERY", data as VeillerAuthSession)
 
     this.eventEmitter.on("SIGNED_IN", signedInHandler)
     this.eventEmitter.on("SIGNED_OUT", signedOutHandler)

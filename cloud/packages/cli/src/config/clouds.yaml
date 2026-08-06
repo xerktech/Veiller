@@ -1,5 +1,5 @@
-# Built-in Mentra clouds
-# Users can add custom clouds via ~/.mentra/config.json
+# Built-in Veiller clouds
+# Users can add custom clouds via ~/.veiller/config.json
 
 production:
   name: Production

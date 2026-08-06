@@ -353,7 +353,7 @@ Everything else the mini-app uses (`OPENAI_API_KEY`, `LLM_MODEL`, `LLM_PROVIDER`
 
 Vars that are **not** needed in the cloud (mini-app SDK bootstrap vars, irrelevant once the external process is gone):
 
-- `PACKAGE_NAME`, `MENTRAOS_API_KEY`, `PORT` — SDK connection vars, meaningless for a cloud-internal service
+- `PACKAGE_NAME`, `VEILLER_API_KEY`, `PORT` — SDK connection vars, meaningless for a cloud-internal service
 - `SERPAPI_API_KEY` — only used by agents being deleted (`MiraAgent`, `NewsAgent`, etc.)
 
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Quickstart"
-description: "Install the Mentra Bluetooth SDK and connect a mobile app to smart glasses."
+description: "Install the Veiller Bluetooth SDK and connect a mobile app to smart glasses."
 icon: "rocket"
 ---
 
@@ -20,7 +20,7 @@ This quickstart uses Bluetooth SDK `0.1.21-beta.3`. Before testing SDK features,
   <Tab title="React Native / Expo">
 
 ```bash
-bun add @mentra/bluetooth-sdk@0.1.21-beta.3
+bun add @veiller/bluetooth-sdk@0.1.21-beta.3
 bunx expo install expo-build-properties
 ```
 
@@ -31,7 +31,7 @@ Add the config plugin to your Expo app config. In most Expo apps this is the roo
   "expo": {
     "plugins": [
       [
-        "@mentra/bluetooth-sdk",
+        "@veiller/bluetooth-sdk",
         {
           "node": true
         }
@@ -112,7 +112,7 @@ In Xcode, add this package URL:
 https://github.com/Mentra-Community/mentra-bluetooth-sdk-ios.git
 ```
 
-Select version `0.1.21-beta.3`, then add the `MentraBluetoothSDK` product to your app target.
+Select version `0.1.21-beta.3`, then add the `VeillerBluetoothSDK` product to your app target.
 
 For `Package.swift` consumers:
 
@@ -126,7 +126,7 @@ For `Package.swift` consumers:
 Then add the product to your target:
 
 ```swift
-.product(name: "MentraBluetoothSDK", package: "mentra-bluetooth-sdk-ios")
+.product(name: "VeillerBluetoothSDK", package: "veiller-bluetooth-sdk-ios")
 ```
 
   </Tab>
@@ -200,7 +200,7 @@ Add usage descriptions to `Info.plist`:
   <Tab title="React Native / Expo">
 
 ```ts
-import BluetoothSdk, {DeviceModels} from '@mentra/bluetooth-sdk';
+import BluetoothSdk, {DeviceModels} from '@veiller/bluetooth-sdk';
 
 const devices = await BluetoothSdk.scan(DeviceModels.MentraLive, {
   timeoutMs: 10_000,
@@ -224,14 +224,14 @@ Use `Device.id` as the stable app-facing key for scan rows, selected devices, an
 
 `Device.rssi` is optional. A device can appear in scan results before the platform reports RSSI, so picker UI should handle `undefined` and avoid reordering rows just because RSSI metadata arrives later.
 
-In React components, use `useMentraBluetooth()` to render the current connection and status state:
+In React components, use `useVeillerBluetooth()` to render the current connection and status state:
 
 ```tsx
 import {Text} from 'react-native';
-import {useMentraBluetooth} from '@mentra/bluetooth-sdk/react';
+import {useVeillerBluetooth} from '@veiller/bluetooth-sdk/react';
 
 export function GlassesConnectionLabel() {
-  const mentra = useMentraBluetooth();
+  const veiller = useVeillerBluetooth();
 
   if (!mentra.glasses.connected) {
     return <Text>Disconnected</Text>;
@@ -246,14 +246,14 @@ export function GlassesConnectionLabel() {
 
 ```kotlin
 import android.content.Context
-import com.mentra.bluetoothsdk.Device
-import com.mentra.bluetoothsdk.DeviceModel
-import com.mentra.bluetoothsdk.GlassesRuntimeState
-import com.mentra.bluetoothsdk.MentraBluetoothSdk
-import com.mentra.bluetoothsdk.MentraBluetoothSdkCallback
+import com.veiller.bluetoothsdk.Device
+import com.veiller.bluetoothsdk.DeviceModel
+import com.veiller.bluetoothsdk.GlassesRuntimeState
+import com.veiller.bluetoothsdk.VeillerBluetoothSdk
+import com.veiller.bluetoothsdk.VeillerBluetoothSdkCallback
 
-class GlassesController(context: Context) : MentraBluetoothSdkCallback() {
-    private val sdk = MentraBluetoothSdk.create(
+class GlassesController(context: Context) : VeillerBluetoothSdkCallback() {
+    private val sdk = VeillerBluetoothSdk.create(
         context = context.applicationContext,
         listener = this,
     )
@@ -298,11 +298,11 @@ class GlassesController(context: Context) : MentraBluetoothSdkCallback() {
   <Tab title="iOS">
 
 ```swift
-import MentraBluetoothSDK
+import VeillerBluetoothSDK
 
 @MainActor
-final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
-    private let sdk = MentraBluetoothSDK()
+final class GlassesController: NSObject, VeillerBluetoothSDKDelegate {
+    private let sdk = VeillerBluetoothSDK()
     private var selectedDevice: Device?
 
     override init() {
@@ -332,7 +332,7 @@ final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
         }
     }
 
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState) {
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState) {
         // Keep app UI derived from SDK status.
         print("Glasses changed: \(glasses)")
     }

@@ -3,7 +3,7 @@
 Status: transfer-correctness implementation complete; hotspot/routing work deferred
 Audit date: 2026-07-16
 Audit baseline: `origin/dev` at `0944dafa28f73b3904cd08016392a1cb53d725aa`
-Primary owners: Mentra App gallery sync, `asg_client` camera server, Mentra Live system firmware networking
+Primary owners: Veiller App gallery sync, `asg_client` camera server, Mentra Live system firmware networking
 
 ## Purpose
 
@@ -26,7 +26,7 @@ It deliberately separates transfer correctness from hotspot/radio performance. A
 - [OS-1011](https://linear.app/mentralabs/issue/OS-1011/fix-mentra-live-gallery-sync-issues)
 - [OS-1177](https://linear.app/mentralabs/issue/OS-1177/gallery-sync-fails-with-decoding-errors)
 - [OS-1384](https://linear.app/mentralabs/issue/OS-1384/long-video-transfers-from-glasses-to-phone-fail-and-become-un-redownloadable-need-resumable-transfer)
-- [OS-1472](https://linear.app/mentralabs/issue/OS-1472/gallery-sync-shows-in-mentra-app-but-not-saved-to-phone-camera-roll)
+- [OS-1472](https://linear.app/mentralabs/issue/OS-1472/gallery-sync-shows-in-veiller-app-but-not-saved-to-phone-camera-roll)
 - [OS-1087](https://linear.app/mentralabs/issue/OS-1087/mentra-live-switch-hotspot-to-be-5ghz)
 
 ## Audit boundaries and confidence
@@ -49,10 +49,10 @@ One earlier suspicion was retracted: NanoHTTPD's five-minute accepted-socket tim
 
 When automatic camera-roll export is enabled, the required receipts are:
 
-1. A verified Mentra App file committed under a relative, portable path.
+1. A verified Veiller App file committed under a relative, portable path.
 2. A camera-roll asset identifier or URI proving export completed.
 
-When automatic camera-roll export is disabled, the verified and indexed Mentra App file may satisfy the destination requirement. Source removal must still use recoverable trash before garbage collection.
+When automatic camera-roll export is disabled, the verified and indexed Veiller App file may satisfy the destination requirement. Source removal must still use recoverable trash before garbage collection.
 
 ## Confirmed defects
 
@@ -336,7 +336,7 @@ The current `asg_client` only asks the firmware-owned SystemUI/tethering stack t
 - Mentra Live `asg_client` sends the vendor SystemUI an `ap_start` broadcast and later observes the AP interface. It does not construct the Soft AP or DHCP configuration itself.
 - The current glasses API calls the AP address `hotspot_gateway_ip` and hardcodes `192.168.43.1`. For compatibility, keep that field, but add an explicit `local_server_ip` in a future capability/version because the glasses should be the local HTTP server without necessarily being the phone's default router.
 - Android 11 AOSP's `IpServer` uses a shared DHCP path for tethered and local-only serving modes and supplies the AP address as both the default router and DNS server. Mentra Live's vendor fork may differ, but merely switching to an API named `LocalOnlyHotspot` is therefore not proof that iOS will preserve cellular as its default route. Inspect the actual Mentra Live DHCP offer and test iOS routing.
-- Android phone builds use `react-native-wifi-reborn` 4.13.6. On Android 10+, its `WifiNetworkSpecifier` request correctly removes the Internet capability, but its `onAvailable` callback then binds the entire Mentra App process to that network. All subsequently created sockets and DNS queries therefore use the no-Internet hotspot until the network is lost or explicitly unbound.
+- Android phone builds use `react-native-wifi-reborn` 4.13.6. On Android 10+, its `WifiNetworkSpecifier` request correctly removes the Internet capability, but its `onAvailable` callback then binds the entire Veiller App process to that network. All subsequently created sockets and DNS queries therefore use the no-Internet hotspot until the network is lost or explicitly unbound.
 - Fix Android by retaining the returned `Network`, leaving the process unbound, and constructing the gallery HTTP/downloader client with that network's `SocketFactory` or individually bound sockets. Cloud and unrelated app traffic then continue on the system default, normally cellular.
 - The existing JavaScript `fetch` and RNFS paths cannot receive an Android `Network`/`SocketFactory`. The scoped-routing fix should be part of the native resumable transfer module rather than another global network toggle.
 - On iOS, `react-native-wifi-reborn` uses `NEHotspotConfiguration` with `joinOnce = false`. iOS has no direct equivalent to Android's app-visible `Network` object for binding an ordinary `URLSession` to the selected local WiFi network.
@@ -380,7 +380,7 @@ The migration must run before gallery cleanup and be idempotent.
 1. Leave valid relative paths unchanged.
 2. Convert files under the current document directory to relative paths.
 3. For an old iOS container path, extract the suffix after `/Documents/` and test it under the current document directory.
-4. If necessary, locate the expected `MentraPhotos/...` suffix under the current root.
+4. If necessary, locate the expected `VeillerPhotos/...` suffix under the current root.
 5. Verify file identity using size and available hash before relinking.
 6. Rewrite recovered entries as relative.
 7. Quarantine unresolved records for later reconciliation rather than deleting them immediately.

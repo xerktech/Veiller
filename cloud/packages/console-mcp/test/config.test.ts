@@ -4,10 +4,10 @@ import { loadConfig, requireCapability } from "../src/config.ts";
 describe("loadConfig", () => {
   test("detects capabilities from env", () => {
     const prev = { ...process.env };
-    process.env.MENTRA_CLI_TOKEN = "cli-test";
-    process.env.MENTRA_AGENT_API_KEY = "agent-test";
-    delete process.env.MENTRA_ADMIN_JWT;
-    delete process.env.MENTRA_ADMIN_TOKEN;
+    process.env.VEILLER_CLI_TOKEN = "cli-test";
+    process.env.VEILLER_AGENT_API_KEY = "agent-test";
+    delete process.env.VEILLER_ADMIN_JWT;
+    delete process.env.VEILLER_ADMIN_TOKEN;
 
     const config = loadConfig();
     expect(config.capabilities.developer).toBe(true);
@@ -18,11 +18,11 @@ describe("loadConfig", () => {
     process.env = prev;
   });
 
-  test("admin alias from MENTRA_ADMIN_TOKEN", () => {
+  test("admin alias from VEILLER_ADMIN_TOKEN", () => {
     const prev = { ...process.env };
-    delete process.env.MENTRA_CLI_TOKEN;
-    delete process.env.MENTRA_AGENT_API_KEY;
-    process.env.MENTRA_ADMIN_TOKEN = "jwt-test";
+    delete process.env.VEILLER_CLI_TOKEN;
+    delete process.env.VEILLER_AGENT_API_KEY;
+    process.env.VEILLER_ADMIN_TOKEN = "jwt-test";
 
     const config = loadConfig();
     expect(config.capabilities.admin).toBe(true);
@@ -36,6 +36,6 @@ describe("requireCapability", () => {
   test("throws when capability missing", () => {
     const config = loadConfig();
     config.capabilities.developer = false;
-    expect(() => requireCapability(config, "developer")).toThrow(/MENTRA_CLI_TOKEN/);
+    expect(() => requireCapability(config, "developer")).toThrow(/VEILLER_CLI_TOKEN/);
   });
 });

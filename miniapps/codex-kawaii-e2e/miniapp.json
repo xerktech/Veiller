@@ -1,6 +1,6 @@
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.codex.devtestomega",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.codex.devtestomega",
   "version": "0.1.2",
   "name": "Codex Kawaii E2E",
   "description": "A tiny cute-face miniapp used to verify Cloud V2 preinstall and auto-update behavior.",

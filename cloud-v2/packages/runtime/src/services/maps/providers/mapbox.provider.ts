@@ -12,7 +12,7 @@
  * geometries=polyline6, overview=full, steps=true, banner_instructions=true;
  * Geocoding v6 reverse with types=address,street.
  */
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import type {
   DirectionsRequest,
   LatLng,
@@ -23,7 +23,7 @@ import type {
   RouteStep,
   RouteAvoidances,
   TravelMode,
-} from "@mentra/cloud-protocol/maps";
+} from "@veiller/cloud-protocol/maps";
 import type { MapsProvider } from "./provider";
 
 const logger = createLogger("maps").child({ service: "mapbox.maps.provider" });

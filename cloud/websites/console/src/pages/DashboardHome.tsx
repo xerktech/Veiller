@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { PlusIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
@@ -52,19 +52,19 @@ const DashboardHome: React.FC = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Getting Started</CardTitle>
               <CardDescription>
-                Learn how to build MiniApps for MentraOS
+                Learn how to build MiniApps for Veiller
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Welcome to the MentraOS Developer Portal! Here, you can create
-                and manage your MiniApps for the MentraOS smart glasses platform.
+                Welcome to the Veiller Developer Portal! Here, you can create
+                and manage your MiniApps for the Veiller smart glasses platform.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium mb-2">Quick Start Guide</h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Learn how to build your first MentraOS MiniApp in minutes.
+                    Learn how to build your first Veiller MiniApp in minutes.
                   </p>
                   <Button variant="outline" size="sm" asChild>
                     <a
@@ -79,7 +79,7 @@ const DashboardHome: React.FC = () => {
                 <div className="border rounded-md p-4">
                   <h3 className="font-medium mb-2">API Documentation</h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Explore the full MentraOS API reference.
+                    Explore the full Veiller API reference.
                   </p>
                   <Button variant="outline" size="sm" asChild>
                     <a

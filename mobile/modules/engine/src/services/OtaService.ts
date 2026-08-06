@@ -1,7 +1,7 @@
 /**
  * OTA service — engine-owned. Subscribes to the glasses' OTA BLE events and projects
  * them into the engine glasses store (otaStatus / otaProgress), so
- * the OTA read surface works for ANY host — not just the first-party Mentra app, where
+ * the OTA read surface works for ANY host — not just the first-party Veiller app, where
  * these handlers used to live in MantleManager.
  *
  * This is the inbound projection half of `engine.ota` (read/observe). The install
@@ -10,8 +10,8 @@
  *
  * Started by `engine.start()`. Idempotent.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {OtaStatus} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {OtaStatus} from "@veiller/bluetooth-sdk/internal"
 import GlobalEventEmitter from "../utils/GlobalEventEmitter"
 import {useGlassesStore} from "../stores/glasses"
 import {handleOtaClockSkewFromGlasses} from "./glassesClockSync"

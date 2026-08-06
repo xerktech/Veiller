@@ -1,5 +1,5 @@
 import { Logger } from "pino";
-import { VideoConfig, AudioConfig, StreamConfig } from "@mentra/sdk";
+import { VideoConfig, AudioConfig, StreamConfig } from "@veiller/sdk";
 import { LiveInputResult, CloudflareOutput } from "./CloudflareStreamService";
 
 /**

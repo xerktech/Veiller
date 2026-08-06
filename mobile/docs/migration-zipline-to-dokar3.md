@@ -1,6 +1,6 @@
 # Migration: Cash App Zipline → dokar3/quickjs-kt
 
-**Status:** Shipped on `mentra-miniapp-sdk-2` (commit `01d2b98a6`, follow-ups `60f4e1a78`/`d8f939fb5`).
+**Status:** Shipped on `veiller-miniapp-sdk-2` (commit `01d2b98a6`, follow-ups `60f4e1a78`/`d8f939fb5`).
 **Scope:** Android only. iOS (Apple JSC) unchanged.
 **Module:** `mobile/modules/crust/android/`
 **Shipped dep:** `io.github.dokar3:quickjs-kt-android:1.0.0-alpha13`
@@ -11,7 +11,7 @@
 
 ## Why
 
-Zipline's `bind<NativeBridge>("__mentraNativeBridge", impl)` does not expose the bridge as a JS global on `globalThis` — it only registers the service in an internal Kotlin map keyed by name for the Kotlin/JS-compiled `Zipline.take()` API. Our polyfill is hand-written JS; it reads `globalThis.__mentraNativeBridge`, finds undefined, and the GLUE_SCRIPT IIFE bails at `if (!bridge) return;`. Result: `__dispatch`, `__hostLog`, and every other host-callable global is missing on Android — confirmed by `pre-glue globals: bridge=undefined keys=[]` in logcat. Outbound JS→host traffic has been silently dropped since Android crust was written.
+Zipline's `bind<NativeBridge>("__veillerNativeBridge", impl)` does not expose the bridge as a JS global on `globalThis` — it only registers the service in an internal Kotlin map keyed by name for the Kotlin/JS-compiled `Zipline.take()` API. Our polyfill is hand-written JS; it reads `globalThis.__veillerNativeBridge`, finds undefined, and the GLUE_SCRIPT IIFE bails at `if (!bridge) return;`. Result: `__dispatch`, `__hostLog`, and every other host-callable global is missing on Android — confirmed by `pre-glue globals: bridge=undefined keys=[]` in logcat. Outbound JS→host traffic has been silently dropped since Android crust was written.
 
 dokar3/quickjs-kt exposes `QuickJs.function(name) { args -> ... }` which installs the lambda directly as a property of `globalThis` via QuickJS's `JS_SetPropertyStr(JS_NewCFunction(...))`. This matches iOS's `ctx.setObject(closure, forKeyedSubscript: "__dispatch" as NSString)` pattern point-for-point.
 
@@ -24,7 +24,7 @@ dokar3/quickjs-kt exposes `QuickJs.function(name) { args -> ... }` which install
 
 ## What the user-visible JS surface keeps
 
-The polyfill bundle (`modules/jspolyfill/assets/startup.js`) and the SDK (`@mentra/miniapp`) are unchanged. From the JS side, all of these must still be installed on `globalThis` before the polyfill evaluates:
+The polyfill bundle (`modules/jspolyfill/assets/startup.js`) and the SDK (`@veiller/miniapp`) are unchanged. From the JS side, all of these must still be installed on `globalThis` before the polyfill evaluates:
 
 | Global | Signature | Sync/Async | Notes |
 |---|---|---|---|
@@ -41,15 +41,15 @@ Same set iOS installs at `JSCRuntime.swift:497–574`. Migration parity check: r
 
 ### Modified
 - `mobile/modules/crust/android/build.gradle` — drop Zipline plugin + dep, add dokar3 dep.
-- `mobile/modules/crust/android/src/main/java/com/mentra/crust/jsc/JSCRuntime.kt` — full rewrite of engine ownership. ~40% of file lines change. Public API surface (`spawn`, `kill`, `evaluate`, `dispatchToJs`, `markReady`, `isAlive`, `alivePackages`, `debugForceGC`, `loadPolyfillBundle`, `onOutbound`, `OutboundMessage`, `MentraJSDispatchError`) is preserved so callers don't change.
+- `mobile/modules/crust/android/src/main/java/com/veiller/crust/jsc/JSCRuntime.kt` — full rewrite of engine ownership. ~40% of file lines change. Public API surface (`spawn`, `kill`, `evaluate`, `dispatchToJs`, `markReady`, `isAlive`, `alivePackages`, `debugForceGC`, `loadPolyfillBundle`, `onOutbound`, `OutboundMessage`, `VeillerJSDispatchError`) is preserved so callers don't change.
 
 ### Unchanged (verify after Phase 1; do not touch)
-- `mobile/modules/crust/android/src/main/java/com/mentra/crust/CrustModule.kt` — calls `JSCRuntime.shared(ctx).spawn/kill/evaluate/dispatchToJs/alivePackages/debugForceGC/loadPolyfillBundle` plus `JSCRuntime.shared(ctx).dispatcher.setManifest(...)`. Every signature stays exactly the same after the migration.
-- `mobile/modules/crust/android/src/main/java/com/mentra/crust/jsc/JSCDispatcher.kt` — engine-agnostic.
-- `mobile/modules/crust/android/src/main/java/com/mentra/crust/jsc/JSCPolyfillBridge.kt` — engine-agnostic.
+- `mobile/modules/crust/android/src/main/java/com/veiller/crust/CrustModule.kt` — calls `JSCRuntime.shared(ctx).spawn/kill/evaluate/dispatchToJs/alivePackages/debugForceGC/loadPolyfillBundle` plus `JSCRuntime.shared(ctx).dispatcher.setManifest(...)`. Every signature stays exactly the same after the migration.
+- `mobile/modules/crust/android/src/main/java/com/veiller/crust/jsc/JSCDispatcher.kt` — engine-agnostic.
+- `mobile/modules/crust/android/src/main/java/com/veiller/crust/jsc/JSCPolyfillBridge.kt` — engine-agnostic.
 - `mobile/modules/jspolyfill/assets/startup.js` — polyfill unchanged.
 - iOS `JSCRuntime.swift` — unchanged.
-- `MentraJSRouter.ts`, `LocalMiniappRuntime.ts`, the SDK `@mentra/miniapp` — unchanged.
+- `VeillerJSRouter.ts`, `LocalMiniappRuntime.ts`, the SDK `@veiller/miniapp` — unchanged.
 
 ### Deleted from `JSCRuntime.kt`
 - The `interface NativeBridge : ZiplineService` block.
@@ -58,7 +58,7 @@ Same set iOS installs at `JSCRuntime.swift:497–574`. Migration parity check: r
 - The diagnostic logging added during debugging: `pre-glue globals`, `post-init probe`, `dispatchToJs(...)` info log, `__deliver returned cleanly`.
 
 ### Kept in `JSCRuntime.kt`
-- `MentraJSDispatchError` — still thrown from the `__dispatch` binding lambda. Dokar3 surfaces Kotlin throwables as JS Errors (validated in Phase 0.5).
+- `VeillerJSDispatchError` — still thrown from the `__dispatch` binding lambda. Dokar3 surfaces Kotlin throwables as JS Errors (validated in Phase 0.5).
 - The production logs: `runtime installed`, `outbound dropped (no sink)`, `spawned`, `killed`, `NACK`, watchdog `__error.watchdog_kill`.
 
 ## Architecture parity (iOS ↔ Android after migration)
@@ -115,10 +115,10 @@ unzip -l ~/.gradle/caches/modules-2/files-2.1/io.github.dokar3/quickjs-kt-androi
 
 ### 0.3 Standalone spike
 
-Create `mobile/modules/crust/android/src/main/java/com/mentra/crust/jsc/DokarSpike.kt` (throwaway file, **do not commit**):
+Create `mobile/modules/crust/android/src/main/java/com/veiller/crust/jsc/DokarSpike.kt` (throwaway file, **do not commit**):
 
 ```kotlin
-package com.mentra.crust.jsc
+package com.veiller.crust.jsc
 
 import android.util.Log
 import com.dokar.quickjs.QuickJs
@@ -310,7 +310,7 @@ fun spawn(packageName: String, polyfillBundleOverride: String?, miniappJs: Strin
         kill(packageName)
     }
     val executor = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "MentraJS-$packageName").apply { isDaemon = true }
+        Thread(r, "VeillerJS-$packageName").apply { isDaemon = true }
     }
     // Local var renamed to avoid shadowing the class field `dispatcher: JSCDispatcher`.
     val jsDispatcher = executor.asCoroutineDispatcher()
@@ -350,10 +350,10 @@ fun spawn(packageName: String, polyfillBundleOverride: String?, miniappJs: Strin
             runBlocking(jsDispatcher) {
                 installGlobals(qjs, packageName)
                 if (bundle.isNotEmpty()) {
-                    qjs.evaluate<Any?>(bundle, filename = "mentrajs:startup.js")
+                    qjs.evaluate<Any?>(bundle, filename = "veillerjs:startup.js")
                 }
                 if (miniappJs.isNotEmpty()) {
-                    qjs.evaluate<Any?>(miniappJs, filename = "mentrajs:miniapp.js")
+                    qjs.evaluate<Any?>(miniappJs, filename = "veillerjs:miniapp.js")
                 }
             }
             Log.i(TAG, "spawned $packageName")
@@ -376,9 +376,9 @@ private fun installGlobals(qjs: QuickJs, packageName: String) {
     // __dispatch: sync. Returns JSON or null. Throws on dispatcher Error.
     qjs.function("__dispatch") { args ->
         val record = contexts[packageName] ?: return@function null
-        val iface = args[0] as? String ?: throw MentraJSDispatchError("INVALID_ARGS", "iface")
-        val method = args[1] as? String ?: throw MentraJSDispatchError("INVALID_ARGS", "method")
-        val argsJson = args[2] as? String ?: throw MentraJSDispatchError("INVALID_ARGS", "argsJson")
+        val iface = args[0] as? String ?: throw VeillerJSDispatchError("INVALID_ARGS", "iface")
+        val method = args[1] as? String ?: throw VeillerJSDispatchError("INVALID_ARGS", "method")
+        val argsJson = args[2] as? String ?: throw VeillerJSDispatchError("INVALID_ARGS", "argsJson")
         val parsed = parseArgsEnvelope(argsJson)
         val outcome = dispatcher.handle(
             packageName = packageName,
@@ -390,7 +390,7 @@ private fun installGlobals(qjs: QuickJs, packageName: String) {
         when (outcome) {
             is JSCDispatchOutcome.Sync -> outcome.json
             is JSCDispatchOutcome.Async -> null
-            is JSCDispatchOutcome.Error -> throw MentraJSDispatchError(outcome.code, outcome.message ?: outcome.code)
+            is JSCDispatchOutcome.Error -> throw VeillerJSDispatchError(outcome.code, outcome.message ?: outcome.code)
             is JSCDispatchOutcome.ForwardToRn -> {
                 val payload = HashMap<String, Any?>(outcome.payload)
                 payload["packageName"] = packageName
@@ -466,7 +466,7 @@ private fun scheduleTimer(packageName: String, token: Int, delayMs: Long) {
                     try {
                         record.qjs.evaluate<Any?>(
                             "globalThis.__deliverTimer && globalThis.__deliverTimer($token);",
-                            filename = "mentrajs:timer-$token.js",
+                            filename = "veillerjs:timer-$token.js",
                         )
                     } catch (e: Throwable) {
                         Log.w(TAG, "timer fire threw in $packageName: ${e.message}")
@@ -519,7 +519,7 @@ fun dispatchToJs(packageName: String, envelopeJson: String) {
             try {
                 val source = "globalThis.__deliver(${jsStringLiteral(envelopeJson)});"
                 runBlocking(record.jsDispatcher) {
-                    record.qjs.evaluate<Any?>(source, filename = "mentrajs:deliver.js")
+                    record.qjs.evaluate<Any?>(source, filename = "veillerjs:deliver.js")
                 }
                 record.readyNackTimer?.cancel(false)
                 record.readyNackTimer = null
@@ -545,7 +545,7 @@ fun evaluate(packageName: String, source: String): Any? {
     return try {
         record.executor.submit<Any?> {
             runBlocking(record.jsDispatcher) {
-                record.qjs.evaluate<Any?>(source, filename = "mentrajs:eval-${System.nanoTime()}.js")
+                record.qjs.evaluate<Any?>(source, filename = "veillerjs:eval-${System.nanoTime()}.js")
             }
         }.get()
     } catch (e: Throwable) {
@@ -617,7 +617,7 @@ In `JSCRuntime.kt`, remove:
   - `post-init probe in ...` block.
 
 Keep:
-- `MentraJSDispatchError` class — still thrown from the `__dispatch` binding lambda. dokar3 surfaces Kotlin throws as JS Errors.
+- `VeillerJSDispatchError` class — still thrown from the `__dispatch` binding lambda. dokar3 surfaces Kotlin throws as JS Errors.
 - `parseArgsEnvelope`, `jsonArrayToList`, `jsonValueToAny`, `jsStringLiteral`.
 - `OutboundMessage`, `onOutbound`, `deliverOrDrop`, `droppedOutboundCount`.
 - NACK and watchdog scaffolding.
@@ -678,13 +678,13 @@ Build must succeed. Look for any leftover Zipline references the compiler would 
 
 ### 3.2 Open the example miniapp
 
-Navigate to `com.mentra.example` via the dev miniapp catalog. Expected logcat (tag `MentraJS`) in order:
+Navigate to `com.veiller.example` via the dev miniapp catalog. Expected logcat (tag `VeillerJS`) in order:
 
-1. `spawned com.mentra.example` — context created, polyfill + miniapp.js evaluated cleanly.
+1. `spawned com.veiller.example` — context created, polyfill + miniapp.js evaluated cleanly.
 2. **No** `NACK: ... cold-start ready signal not received` — polyfill's `__dispatch("__runtime", "ready", ...)` succeeded.
-3. RN-side log `[LOCAL_MINIAPP] registerApp(com.mentra.example)` (this is unchanged).
+3. RN-side log `[LOCAL_MINIAPP] registerApp(com.veiller.example)` (this is unchanged).
 4. Outbound `__log` events as the example miniapp's `console.log` fires.
-5. Outbound `__bridge.send` envelopes carrying CONNECT / SUBSCRIBE frames. These should land in `MentraJSRouter`'s `mentrajs_message` handler.
+5. Outbound `__bridge.send` envelopes carrying CONNECT / SUBSCRIBE frames. These should land in `VeillerJSRouter`'s `veillerjs_message` handler.
 6. RN-side `MIC_COORDINATOR: local requirements updated — pcm=false→true` once the SUBSCRIBE for transcription is processed by `LocalMiniappRuntime`.
 7. Mic actually turning on (visible glasses-app indicator or via `adb shell dumpsys media.audio_policy`).
 
@@ -700,7 +700,7 @@ If any of these fail, capture logcat to a file and diagnose.
 
 Once smoke test passes:
 
-- **Reopen test:** back out of the miniapp, reopen. Verify the existing context is killed and respawned cleanly. Should see `killed com.mentra.example` then `spawned com.mentra.example`.
+- **Reopen test:** back out of the miniapp, reopen. Verify the existing context is killed and respawned cleanly. Should see `killed com.veiller.example` then `spawned com.veiller.example`.
 - **Dev reload test:** change one line in the example miniapp's source, save. The dev server should send `respawn-bg`. Verify the miniapp reloads and works again.
 - **Background test:** open the miniapp, then background the app, then foreground. The miniapp should keep working — no respawn, no broken state.
 - **Multiple miniapps test (if a second dev miniapp is available):** open A, then open B. Both contexts should be alive simultaneously. Outbound traffic from both should be routed correctly by `packageName`.
@@ -715,7 +715,7 @@ Once smoke test passes, do one final code review pass on `JSCRuntime.kt`:
 - No `GLUE_SCRIPT` constant.
 - No diagnostic-only logs from the debugging session (`pre-glue globals`, `post-init probe`, `dispatchToJs(...)` info log, `__deliver returned cleanly`).
 - All `runBlocking(record.jsDispatcher) { ... }` calls happen inside an `executor.submit { ... }` (to keep thread affinity).
-- `MentraJSDispatchError` still imported and thrown from `__dispatch`.
+- `VeillerJSDispatchError` still imported and thrown from `__dispatch`.
 
 ## Phase 4 — Documentation and follow-up
 
@@ -724,7 +724,7 @@ Once smoke test passes, do one final code review pass on `JSCRuntime.kt`:
 Add a section documenting the new architecture:
 
 ```markdown
-## MentraJS Android runtime
+## VeillerJS Android runtime
 
 Each miniapp gets its own QuickJs context via dokar3/quickjs-kt, owned by a
 dedicated single-thread executor. We install six host-callable globals
@@ -761,7 +761,7 @@ dokar3 1.0.5 does not expose `JS_SetInterruptHandler`. A miniapp that runs
 
 Create a tracking issue / TODO:
 
-> **MentraJS: add interrupt-handler support for runaway miniapp protection**
+> **VeillerJS: add interrupt-handler support for runaway miniapp protection**
 >
 > dokar3/quickjs-kt 1.0.5 does not expose `JS_SetInterruptHandler` from
 > QuickJS, so a miniapp that enters an infinite loop pins its executor
@@ -796,7 +796,7 @@ Body:
 Zipline.bind(name, service) registers services in an internal Kotlin map
 keyed by name for the Kotlin/JS-compiled Zipline.take() API — it does not
 install JS globals on globalThis. Our polyfill is hand-written JS and
-reads globalThis.__mentraNativeBridge, which was always undefined.
+reads globalThis.__veillerNativeBridge, which was always undefined.
 Outbound JS→host traffic (mic SUBSCRIBE, display calls, hostLog) has been
 silently dropped on Android since the crust module was written.
 
@@ -806,7 +806,7 @@ qjs.function(name) { args -> ... }, mirroring iOS Apple JSC's
 ctx.setObject(closure, forKeyedSubscript: ...) pattern point-for-point.
 
 - Same engine (QuickJS), different Kotlin wrapper.
-- iOS unchanged. Polyfill unchanged. SDK unchanged. MentraJSRouter unchanged.
+- iOS unchanged. Polyfill unchanged. SDK unchanged. VeillerJSRouter unchanged.
 - One context per miniapp on a dedicated single-thread executor (unchanged).
 - Memory cap + stack cap set per context.
 - Known limit (tracked separately): no interrupt-handler exposure → no
@@ -843,7 +843,7 @@ transcription reaches the example miniapp's UI.
 
 Before starting Phase 0:
 
-- [ ] On a clean branch off `mentra-miniapp-sdk-2`.
+- [ ] On a clean branch off `veiller-miniapp-sdk-2`.
 - [ ] Repo builds clean with current Zipline code (so any new break is from our edit).
 - [ ] An Android test device is paired and reachable via `adb`.
 - [ ] Phone has a recent example miniapp install path (dev server reachable, QR code or URL handy).

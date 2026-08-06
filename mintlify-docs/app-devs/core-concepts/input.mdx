@@ -9,7 +9,7 @@ touchpad gestures. The starter scaffold wires a button press to the display, so 
 short press shows a text wall.
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 
 registerMiniapp((session) => {
   session.input.onButtonPress((press) => {

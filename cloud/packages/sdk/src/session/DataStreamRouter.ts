@@ -16,7 +16,7 @@
  *    (e.g., "transcription:en", "translation:en-ja", "button_press",
  *    "phone_notification", etc.)
  *
- * MentraSession wires them together:
+ * VeillerSession wires them together:
  *   - Creates MessageHandlerRegistry
  *   - Creates DataStreamRouter
  *   - Registers DataStreamRouter.handle as the handler for "data_stream"
@@ -27,7 +27,7 @@
  * const messages = new MessageHandlerRegistry();
  * const streams = new DataStreamRouter();
  *
- * // MentraSession registers the bridge
+ * // VeillerSession registers the bridge
  * messages.register("data_stream", (msg) => streams.handle(msg));
  *
  * // TranscriptionManager registers for transcription streams
@@ -116,7 +116,7 @@ export class MessageHandlerRegistry {
         handler(message);
       } catch (err) {
         // Don't let one handler's error kill dispatch to other handlers.
-        // In production, MentraSession's logger will catch these via
+        // In production, VeillerSession's logger will catch these via
         // a global error boundary. Here we just ensure dispatch continues.
         console.error(`[MessageHandlerRegistry] Handler error for type="${message.type}":`, err);
       }
@@ -360,7 +360,7 @@ export class DataStreamRouter {
 
 /**
  * Derive the set of subscription strings from the DataStreamRouter's
- * registered handler keys. This is used by MentraSession to compute
+ * registered handler keys. This is used by VeillerSession to compute
  * the SUBSCRIPTION_UPDATE message payload.
  *
  * The logic:

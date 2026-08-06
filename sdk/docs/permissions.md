@@ -33,7 +33,7 @@ Source: [mobile/modules/miniapp/src/modules/permissions.ts](../../mobile/modules
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()

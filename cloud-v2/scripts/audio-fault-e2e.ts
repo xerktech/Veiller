@@ -14,8 +14,8 @@
  *   bun scripts/audio-fault-e2e.ts cloud-down-up --target porter \
  *     --core-url https://core.dev.example.com \
  *     --runtime-url https://runtime.dev.example.com \
- *     --down-command 'porter app stop mentra-runtime-dev' \
- *     --up-command 'porter app start mentra-runtime-dev'
+ *     --down-command 'porter app stop veiller-runtime-dev' \
+ *     --up-command 'porter app start veiller-runtime-dev'
  */
 
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
@@ -61,7 +61,7 @@ interface RunResult {
 }
 
 const CLOUD_V2_ROOT = new URL("..", import.meta.url).pathname;
-const DEFAULT_APP_ID = "com.mentra.mentra";
+const DEFAULT_APP_ID = "com.veiller.veiller";
 const DEFAULT_MINIAPP_PORT = 3100;
 const DEFAULT_CORE_PORT = 3000;
 const DEFAULT_RUNTIME_PORT = 3001;
@@ -466,30 +466,30 @@ function isFiniteNumber(value: number): boolean {
 async function loadConfig(): Promise<Config> {
   const args = parseArgs(Bun.argv.slice(2));
   const scenario = normalizeScenario(args._[0] ?? "cloud-down-up");
-  const target = normalizeTarget(args.target ?? process.env.MENTRA_FAULT_TARGET ?? "local");
-  const host = args.host ?? process.env.MENTRA_FAULT_HOST ?? (await detectHostIp()) ?? "127.0.0.1";
+  const target = normalizeTarget(args.target ?? process.env.VEILLER_FAULT_TARGET ?? "local");
+  const host = args.host ?? process.env.VEILLER_FAULT_HOST ?? (await detectHostIp()) ?? "127.0.0.1";
   const runtimePort = numberArg(args["runtime-port"], DEFAULT_RUNTIME_PORT);
   const corePort = numberArg(args["core-port"], DEFAULT_CORE_PORT);
   const miniappPort = numberArg(args["miniapp-port"], DEFAULT_MINIAPP_PORT);
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const artifactDir = resolve(
     args.artifacts ??
-      process.env.MENTRA_FAULT_ARTIFACTS ??
-      `/tmp/mentra-audio-faults/${timestamp}-${scenario}-${target}`,
+      process.env.VEILLER_FAULT_ARTIFACTS ??
+      `/tmp/veiller-audio-faults/${timestamp}-${scenario}-${target}`,
   );
   const coreUrl = trimSlash(
     args["core-url"] ??
-      process.env.MENTRA_FAULT_CORE_URL ??
+      process.env.VEILLER_FAULT_CORE_URL ??
       `http://${host}:${corePort}`,
   );
   const runtimeUrl = trimSlash(
     args["runtime-url"] ??
-      process.env.MENTRA_FAULT_RUNTIME_URL ??
+      process.env.VEILLER_FAULT_RUNTIME_URL ??
       `http://${host}:${runtimePort}`,
   );
   const miniappUrl = trimSlash(
     args["miniapp-url"] ??
-      process.env.MENTRA_FAULT_MINIAPP_URL ??
+      process.env.VEILLER_FAULT_MINIAPP_URL ??
       `http://${host}:${miniappPort}`,
   );
 
@@ -497,14 +497,14 @@ async function loadConfig(): Promise<Config> {
     scenario,
     target,
     serial: args.serial ?? process.env.ANDROID_SERIAL,
-    appId: args["app-id"] ?? process.env.MENTRA_FAULT_APP_ID ?? DEFAULT_APP_ID,
+    appId: args["app-id"] ?? process.env.VEILLER_FAULT_APP_ID ?? DEFAULT_APP_ID,
     host,
     coreUrl,
     corePort,
     runtimeUrl,
     miniappUrl,
     miniappPort,
-    launchUrl: args["launch-url"] ?? process.env.MENTRA_FAULT_LAUNCH_URL,
+    launchUrl: args["launch-url"] ?? process.env.VEILLER_FAULT_LAUNCH_URL,
     artifactDir,
     onlineMarkerA: args["online-a"] ?? "maple orbit",
     offlineMarkerB: args["offline-b"] ?? "quartz meadow",
@@ -518,9 +518,9 @@ async function loadConfig(): Promise<Config> {
     adbReverse: boolArg(args["adb-reverse"], true),
     manageLocalCloud: boolArg(args["manage-local-cloud"], target === "local"),
     keepManagedCloud: boolArg(args["keep-managed-cloud"], true),
-    localStartCommand: args["local-start-command"] ?? process.env.MENTRA_FAULT_LOCAL_START_CMD,
-    downCommand: args["down-command"] ?? process.env.MENTRA_FAULT_DOWN_CMD,
-    upCommand: args["up-command"] ?? process.env.MENTRA_FAULT_UP_CMD,
+    localStartCommand: args["local-start-command"] ?? process.env.VEILLER_FAULT_LOCAL_START_CMD,
+    downCommand: args["down-command"] ?? process.env.VEILLER_FAULT_DOWN_CMD,
+    upCommand: args["up-command"] ?? process.env.VEILLER_FAULT_UP_CMD,
   };
 
   return cfg;

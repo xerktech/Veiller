@@ -1,6 +1,6 @@
 # Isaiah's Style Guide
 
-Conventions for MentraOS mini apps. If it's not in here, do whatever makes sense — but if it IS in here, follow it.
+Conventions for Veiller mini apps. If it's not in here, do whatever makes sense — but if it IS in here, follow it.
 
 ## Folder Structure
 
@@ -137,7 +137,7 @@ import {sessions} from "../UserSession"
 If the same file gets imported via different paths (`"../UserSession"` vs `"@/backend/UserSession"`), Bun treats them as separate modules — each with its own static fields. Use `globalThis` with `Symbol.for()` to guarantee a single store:
 
 ```typescript
-const SESSIONS_KEY = Symbol.for("mentra.my-app.sessions")
+const SESSIONS_KEY = Symbol.for("veiller.my-app.sessions")
 ;(globalThis as any)[SESSIONS_KEY] ??= new Map<string, UserSession>()
 
 export class UserSession {
@@ -197,7 +197,7 @@ this.logger.info(`\n\n🛑 Received stop request for user ${userId}\n\n`)
 | `info`  | Server started. That's about it.                                                   |
 | `debug` | Everything else — session lifecycle, internal routing, cleanup, connection details |
 
-**Default log level is `warn`.** Developers only see warnings and errors unless they opt in to more with `MENTRA_LOG_LEVEL=debug` or `MENTRA_VERBOSE=true`.
+**Default log level is `warn`.** Developers only see warnings and errors unless they opt in to more with `VEILLER_LOG_LEVEL=debug` or `VEILLER_VERBOSE=true`.
 
 ## Frontend
 

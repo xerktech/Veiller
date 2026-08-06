@@ -19,7 +19,7 @@ export function createProxyFetch(): typeof fetch {
         : input instanceof URL
           ? input.toString()
           : String((input as { url?: string })?.url ?? input);
-    const res = await mentra.request("turma:fetch", {
+    const res = await veiller.request("turma:fetch", {
       url,
       method: init?.method ?? "GET",
       headers: (init?.headers as Record<string, string> | undefined) ?? undefined,

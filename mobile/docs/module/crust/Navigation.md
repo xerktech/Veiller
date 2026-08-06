@@ -32,6 +32,6 @@ Simulation mode replays a route at `speedMultiplier`× speed; a 1Hz polling time
 
 ### Android
 
-- [CrustModule.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/CrustModule.kt) — Expo module entry point; mirror of the iOS module.
-- [NavigationManager.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/navigation/NavigationManager.kt) — Google Nav SDK lifecycle, parity with `NavigationManager.swift`.
-- [NavInfoReceiverService.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/navigation/NavInfoReceiverService.kt) — receives `NavInfo` ticks from the SDK; source of step metadata.
+- [CrustModule.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/CrustModule.kt) — Expo module entry point; mirror of the iOS module.
+- [NavigationManager.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/navigation/NavigationManager.kt) — Google Nav SDK lifecycle, parity with `NavigationManager.swift`.
+- [NavInfoReceiverService.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/navigation/NavInfoReceiverService.kt) — receives `NavInfo` ticks from the SDK; source of step metadata.

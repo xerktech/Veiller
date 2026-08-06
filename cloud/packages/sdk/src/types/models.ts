@@ -1,4 +1,4 @@
-// @mentra/sdk
+// @veiller/sdk
 // packages/sdk/types/src/models.ts - Core models
 
 import { AppSettingType, AppType, HardwareType, HardwareRequirementLevel } from "./enums";

@@ -1,7 +1,7 @@
 // pages/IncidentDetail.tsx
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../components/DashboardLayout";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@mentra/shared";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@veiller/shared";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Loader2,

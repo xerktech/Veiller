@@ -1,7 +1,7 @@
 import { Logger } from "pino";
 import WebSocket from "ws";
 
-import { StreamType, TranslationData } from "@mentra/sdk";
+import { StreamType, TranslationData } from "@veiller/sdk";
 
 import { ResourceTracker } from "../../../../utils/resource-tracker";
 import {

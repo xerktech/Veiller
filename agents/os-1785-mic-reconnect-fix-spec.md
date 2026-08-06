@@ -2,13 +2,13 @@
 
 Linear: OS-1785. Observed live 2026-07-21 (Pixel 8 + Mentra Live, dev build).
 All file references are in
-`mobile/modules/bluetooth-sdk/android/src/main/java/com/mentra/bluetoothsdk/`.
+`mobile/modules/bluetooth-sdk/android/src/main/java/com/veiller/bluetoothsdk/`.
 
 ## How the state machine is supposed to work
 
 - The engine (JS) pushes standing audio requirements via
-  `MentraBluetoothSdk.setMicStates(sendPcm, sendTranscript, sendLc3)`
-  (`MentraBluetoothSdk.kt:695`), which writes three DURABLE DeviceStore flags
+  `VeillerBluetoothSdk.setMicStates(sendPcm, sendTranscript, sendLc3)`
+  (`VeillerBluetoothSdk.kt:695`), which writes three DURABLE DeviceStore flags
   (`should_send_pcm/lc3/transcript`) and calls `DeviceManager.setMicState()`.
 - `setMicState()` (`DeviceManager.kt:1828`) derives the master switch:
   `micEnabled = shouldSendPcm || shouldSendLc3 || shouldSendTranscript ||

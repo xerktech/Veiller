@@ -2,9 +2,9 @@
 
 **Date:** 2026-04-30
 **Author:** Aryan Farhang
-**Branch:** `mentra-miniapp-sdk-aryan`
+**Branch:** `veiller-miniapp-sdk-aryan`
 
-Everything here was driven by one user-visible symptom: text sent from the **Navigation miniapp** (`com.mentra.navigation`) via `session.display.showTextWall(...)` rendered correctly on **simulated glasses** but never reached **real Even Realities G2** glasses, and on graceful unmount the screen failed to clear (and once we fixed the clear, a stale frame flickered back).
+Everything here was driven by one user-visible symptom: text sent from the **Navigation miniapp** (`com.veiller.navigation`) via `session.display.showTextWall(...)` rendered correctly on **simulated glasses** but never reached **real Even Realities G2** glasses, and on graceful unmount the screen failed to clear (and once we fixed the clear, a stale frame flickered back).
 
 Walking the bug down the pipe surfaced four real defects spanning the SDK, the mobile React-Native client, and the Android native bridge. This doc lists them in order of root cause.
 
@@ -253,7 +253,7 @@ sdk/miniapp/src/protocol.ts                                          — WILL_DI
 sdk/miniapp/src/session.ts                                           — beforeDisconnect event, onBeforeDisconnect API, emit sites
 ```
 
-The SDK package was rebuilt (`bun run build` in `sdk/miniapp/`) and the freshly-built `dist/` was copied into `mobile/node_modules/@mentra/miniapp/dist/` so the mobile typechecker sees the new enum value.
+The SDK package was rebuilt (`bun run build` in `sdk/miniapp/`) and the freshly-built `dist/` was copied into `mobile/node_modules/@veiller/miniapp/dist/` so the mobile typechecker sees the new enum value.
 
 ## Earlier related commit
 
@@ -285,8 +285,8 @@ LOCAL_DISPLAY: request ... clear_view ... isCore=false
 LOCAL_DISPLAY: → CoreModule.displayEvent {... clear_view ...}
 MAN: displayEvent ENTER view=main layoutType=clear_view
 MAN: sendCurrentState dispatch layoutType=clear_view          ← glasses blank
-LOCAL_MINIAPP: unregisterApp(com.mentra.navigation)
-LOCAL_DISPLAY: onUnmount(com.mentra.navigation)               ← only ONE call
+LOCAL_MINIAPP: unregisterApp(com.veiller.navigation)
+LOCAL_DISPLAY: onUnmount(com.veiller.navigation)               ← only ONE call
 (no more "go left" re-pushes)
 ```
 

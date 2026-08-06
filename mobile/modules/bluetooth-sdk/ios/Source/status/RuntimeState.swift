@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MentraBluetoothState: CustomStringConvertible {
+public struct VeillerBluetoothState: CustomStringConvertible {
     public let glasses: GlassesRuntimeState
     public let sdk: PhoneSdkRuntimeState
     public let scan: BluetoothScanState
@@ -18,7 +18,7 @@ public struct MentraBluetoothState: CustomStringConvertible {
     }
 
     public var description: String {
-        "MentraBluetoothState(glasses: \(glasses), scan: \(scan))"
+        "VeillerBluetoothState(glasses: \(glasses), scan: \(scan))"
     }
 }
 

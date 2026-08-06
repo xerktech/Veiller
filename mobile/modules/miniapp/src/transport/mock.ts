@@ -2,9 +2,9 @@
  * @fileoverview MockTransport — browser-tab fallback so the SDK doesn't hang.
  *
  * Activates when:
- *   - `window.ReactNativeWebView` is undefined (not in MentraOS WebView), AND
+ *   - `window.ReactNativeWebView` is undefined (not in Veiller WebView), AND
  *   - The first LocalSocketTransport connection attempt fails fast, OR
- *   - The author opts in via `?mentra=mock` query param / `localStorage.MENTRA_MOCK = "1"`.
+ *   - The author opts in via `?veiller=mock` query param / `localStorage.VEILLER_MOCK = "1"`.
  *
  * Behaviors:
  *   - On `open()`: synthesize a CONNECT_ACK envelope so `session.connect()` resolves.
@@ -25,20 +25,20 @@ const LOG_PREFIX = "[mock-transport]"
 
 /**
  * Returns true if the current environment requested the mock transport
- * explicitly. Checks `?mentra=mock` query param and `localStorage.MENTRA_MOCK`.
+ * explicitly. Checks `?veiller=mock` query param and `localStorage.VEILLER_MOCK`.
  */
 export function isMockExplicitlyRequested(): boolean {
   if (typeof window === "undefined") return false
   try {
     if (typeof window.location !== "undefined" && window.location.search) {
       const params = new URLSearchParams(window.location.search)
-      if (params.get("mentra") === "mock") return true
+      if (params.get("veiller") === "mock") return true
     }
   } catch {
     // ignore
   }
   try {
-    if (typeof localStorage !== "undefined" && localStorage.getItem("MENTRA_MOCK") === "1") {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("VEILLER_MOCK") === "1") {
       return true
     }
   } catch {
@@ -52,7 +52,7 @@ export interface MockTransportOptions {
   userId?: string
   /** Override the synthetic miniapp auth token. Default "mock-miniapp-token". */
   authToken?: string
-  /** Override the synthetic packageName when window.MentraOS isn't set. */
+  /** Override the synthetic packageName when window.Veiller isn't set. */
   packageName?: string
   /** Suppress the [mock-transport] console logs. Default false. */
   silent?: boolean

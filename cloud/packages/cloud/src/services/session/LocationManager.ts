@@ -15,7 +15,7 @@
 
 import type { Logger } from "pino";
 
-import { CloudToAppMessageType, CloudToGlassesMessageType, DataStream, LocationUpdate, StreamType } from "@mentra/sdk";
+import { CloudToAppMessageType, CloudToGlassesMessageType, DataStream, LocationUpdate, StreamType } from "@veiller/sdk";
 
 import { User } from "../../models/user.model";
 import { WebSocketReadyState } from "../websocket/types";

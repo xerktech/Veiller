@@ -1,9 +1,10 @@
 {
-  "name": "@mentra/miniapp-cli",
+  "name": "@veiller/miniapp-cli",
   "version": "0.1.0-dev.1",
-  "description": "Dev tools for MentraOS miniapps",
+  "description": "Dev tools for Veiller miniapps",
   "type": "module",
   "bin": {
+    "veiller-miniapp": "./src/index.ts",
     "mentra-miniapp": "./src/index.ts"
   },
   "publishConfig": {
@@ -35,8 +36,8 @@
     "schema"
   ],
   "keywords": [
-    "mentra",
-    "mentraos",
+    "veiller",
+    "veiller",
     "miniapp",
     "cli"
   ],

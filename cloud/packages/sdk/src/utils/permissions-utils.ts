@@ -1,7 +1,7 @@
 /**
  * permissions-utils.ts
  *
- * Runtime permission validation utilities for the MentraOS SDK.
+ * Runtime permission validation utilities for the Veiller SDK.
  *
  * Queries the public permissions API endpoint to check if an app has declared
  * the required permission for a specific feature. If the permission is missing,
@@ -32,7 +32,7 @@ import type { PackagePermissions, Permission } from "../types/messages/cloud-to-
  * warning if the required permission is missing. The warning flows through
  * the SDK logger so it respects `logLevel` settings.
  *
- * @param cloudServerUrl - Base URL of the MentraOS Cloud server
+ * @param cloudServerUrl - Base URL of the Veiller Cloud server
  * @param packageName - The app's package name
  * @param permissionType - Permission type to check (e.g., "MICROPHONE", "CAMERA")
  * @param warnMessageFn - Function that generates the warning message string

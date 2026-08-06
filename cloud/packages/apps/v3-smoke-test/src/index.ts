@@ -1,16 +1,16 @@
-import { createAuthMiddleware, getMentraAuth, MiniAppServer, type MentraSession } from "@mentra/sdk";
+import { createAuthMiddleware, getVeillerAuth, MiniAppServer, type VeillerSession } from "@veiller/sdk";
 
 import { api as backendApi } from "./backend/api";
 import { UserSession } from "./backend/UserSession";
 import indexHtml from "./frontend/index.html";
 
 const PORT = Number.parseInt(process.env.PORT || "3335", 10);
-const PACKAGE_NAME = process.env.PACKAGE_NAME || "dev.mentra.v3-smoke-test";
-const API_KEY = process.env.MENTRAOS_API_KEY || "";
+const PACKAGE_NAME = process.env.PACKAGE_NAME || "dev.veiller.v3-smoke-test";
+const API_KEY = process.env.VEILLER_API_KEY || "";
 const COOKIE_SECRET = process.env.COOKIE_SECRET || API_KEY;
 
 if (!API_KEY) {
-  console.error("MENTRAOS_API_KEY environment variable is not set");
+  console.error("VEILLER_API_KEY environment variable is not set");
   process.exit(1);
 }
 
@@ -44,7 +44,7 @@ app.get("/api/health", (c) =>
 );
 
 app.get("/api/me", authMiddleware, (c) => {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   const userId = auth.userId;
   if (!userId) {
     return c.json({ error: "Unauthenticated" }, 401);
@@ -62,7 +62,7 @@ app.get("/api/me", authMiddleware, (c) => {
 });
 
 app.get("/api/me-via-token", authMiddleware, (c) => {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   const userId = auth.userId;
   if (!userId) {
     return c.json({ error: "Unauthenticated" }, 401);
@@ -79,7 +79,7 @@ app.get("/api/me-via-token", authMiddleware, (c) => {
   });
 });
 
-app.onSession((session: MentraSession) => {
+app.onSession((session: VeillerSession) => {
   wireSession(session);
 });
 
@@ -123,10 +123,10 @@ Bun.serve({
 
 console.log(`v3 smoke test mini app listening on http://localhost:${PORT}`);
 
-function wireSession(session: MentraSession): void {
+function wireSession(session: VeillerSession): void {
   const userId = session.userId;
   if (!userId) {
-    console.error("MentraSession connected without a userId");
+    console.error("VeillerSession connected without a userId");
     return;
   }
 
@@ -143,7 +143,7 @@ function wireSession(session: MentraSession): void {
       sessionId: session.sessionId,
       userId,
     },
-    `MentraSession connected for ${userId}, sessionId: ${session.sessionId}`,
+    `VeillerSession connected for ${userId}, sessionId: ${session.sessionId}`,
   );
 
   session.onReconnected(() => {
@@ -153,7 +153,7 @@ function wireSession(session: MentraSession): void {
         sessionId: session.sessionId,
         userId,
       },
-      `MentraSession reconnected for ${userId}, sessionId: ${session.sessionId}`,
+      `VeillerSession reconnected for ${userId}, sessionId: ${session.sessionId}`,
     );
     // console.log("Session reconnected", {
     //   sessionId: session.sessionId,
@@ -172,7 +172,7 @@ function wireSession(session: MentraSession): void {
         userId,
         reason,
       },
-      `MentraSession stopped for ${userId}, sessionId: ${session.sessionId}, reason: ${reason}`,
+      `VeillerSession stopped for ${userId}, sessionId: ${session.sessionId}, reason: ${reason}`,
     );
   });
 

@@ -1,4 +1,4 @@
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {useCallback, useEffect} from "react"
 import {View, ActivityIndicator} from "react-native"
 

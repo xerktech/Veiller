@@ -1,18 +1,18 @@
 {
   "name": "local-turma",
   "private": true,
-  "description": "Veiller port of the Turma Even G2 glasses app (self-hosted Claude Code session manager) as a local Mentra miniapp",
+  "description": "Veiller port of the Turma Even G2 glasses app (self-hosted Claude Code session manager) as a local Veiller miniapp",
   "scripts": {
-    "dev": "mentra-miniapp dev",
+    "dev": "veiller-miniapp dev",
     "build": "bun run build.ts",
-    "pack": "mentra-miniapp pack",
+    "pack": "veiller-miniapp pack",
     "test": "bun test"
   },
   "dependencies": {
-    "@mentra/miniapp": "workspace:*"
+    "@veiller/miniapp": "workspace:*"
   },
   "devDependencies": {
-    "@mentra/miniapp-cli": "workspace:*",
+    "@veiller/miniapp-cli": "workspace:*",
     "bun-types": "^1.3.14"
   }
 }

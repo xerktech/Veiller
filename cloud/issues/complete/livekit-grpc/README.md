@@ -62,19 +62,19 @@ Benefits:
 
 ```bash
 # 1. Install dependencies
-cd MentraOS-2/cloud/packages/cloud
+cd Veiller-2/cloud/packages/cloud
 bun install
 
 # 2. Set environment
 export LIVEKIT_GRPC_BRIDGE_URL=livekit-bridge:9090
 
 # 3. Start services
-cd MentraOS-2/cloud
+cd Veiller-2/cloud
 docker-compose -f docker-compose.dev.yml up --build
 
 # 4. Test health
 grpcurl -plaintext localhost:9090 \
-  mentra.livekit.bridge.LiveKitBridge/HealthCheck
+  veiller.livekit.bridge.LiveKitBridge/HealthCheck
 ```
 
 See **[QUICKSTART.md](QUICKSTART.md)** for complete instructions.
@@ -235,7 +235,7 @@ Simple and fast rollback path maintained.
 1. **Immediate**: Install dependencies and test locally
 
    ```bash
-   cd MentraOS-2/cloud/packages/cloud && bun install
+   cd Veiller-2/cloud/packages/cloud && bun install
    cd ../.. && docker-compose -f docker-compose.dev.yml up
    ```
 

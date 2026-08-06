@@ -1,12 +1,12 @@
 import type {AuthChangeEvent, Session, SupabaseClient} from "@supabase/supabase-js"
 import {supabase as supabaseClient} from "../../supabase"
 import {
-  MentraAuthSessionResponse,
-  MentraAuthStateChangeSubscriptionResponse,
-  MentraOauthProviderResponse,
-  MentraPasswordResetResponse,
-  MentraSigninResponse,
-  MentraSignOutResponse,
+  VeillerAuthSessionResponse,
+  VeillerAuthStateChangeSubscriptionResponse,
+  VeillerOauthProviderResponse,
+  VeillerPasswordResetResponse,
+  VeillerSigninResponse,
+  VeillerSignOutResponse,
 } from "../authingProvider.types"
 
 export class SupabaseWrapperClient {
@@ -16,7 +16,7 @@ export class SupabaseWrapperClient {
     this.supabase = supabaseClient
   }
 
-  async getSession(): Promise<MentraAuthSessionResponse> {
+  async getSession(): Promise<VeillerAuthSessionResponse> {
     try {
       const {data, error} = await this.supabase.auth.getSession()
       return {
@@ -53,7 +53,7 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async refreshUser(): Promise<MentraAuthSessionResponse> {
+  async refreshUser(): Promise<VeillerAuthSessionResponse> {
     try {
       return this.getSession()
     } catch (error) {
@@ -67,7 +67,7 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async signInWithEmail(email: string, password: string): Promise<MentraSigninResponse> {
+  async signInWithEmail(email: string, password: string): Promise<VeillerSigninResponse> {
     try {
       const {data, error} = await this.supabase.auth.signInWithPassword({
         email,
@@ -116,7 +116,7 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async signUpWithEmail(email: string, password: string, redirectTo?: string): Promise<MentraSigninResponse> {
+  async signUpWithEmail(email: string, password: string, redirectTo?: string): Promise<VeillerSigninResponse> {
     try {
       const {data, error} = await this.supabase.auth.signUp({
         email,
@@ -187,7 +187,7 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async resetPasswordForEmail(email: string, redirectTo?: string): Promise<MentraPasswordResetResponse> {
+  async resetPasswordForEmail(email: string, redirectTo?: string): Promise<VeillerPasswordResetResponse> {
     try {
       const {data, error} = await this.supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
@@ -211,12 +211,12 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async signOut(): Promise<MentraSignOutResponse> {
+  async signOut(): Promise<VeillerSignOutResponse> {
     const {error} = await this.supabase.auth.signOut()
     return {error}
   }
 
-  public onAuthStateChange(callback: (event: string, session: any) => void): MentraAuthStateChangeSubscriptionResponse {
+  public onAuthStateChange(callback: (event: string, session: any) => void): VeillerAuthStateChangeSubscriptionResponse {
     try {
       const wrappedCallback = (event: AuthChangeEvent, session: Session | null) => {
         // Only create modifiedSession if we have a real session with a user
@@ -255,7 +255,7 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async appleSignIn(redirectTo?: string): Promise<MentraOauthProviderResponse> {
+  async appleSignIn(redirectTo?: string): Promise<VeillerOauthProviderResponse> {
     try {
       const {data, error} = await this.supabase.auth.signInWithOAuth({
         provider: "apple",
@@ -286,7 +286,7 @@ export class SupabaseWrapperClient {
     }
   }
 
-  async googleSignIn(redirectTo?: string): Promise<MentraOauthProviderResponse> {
+  async googleSignIn(redirectTo?: string): Promise<VeillerOauthProviderResponse> {
     try {
       const {data, error} = await this.supabase.auth.signInWithOAuth({
         provider: "google",

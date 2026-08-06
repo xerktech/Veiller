@@ -49,7 +49,7 @@ adb push "$FIRMWARE_PATH" /storage/emulated/0/asg/bes_firmware.bin
 echo ""
 echo "🚀 Triggering BES OTA..."
 adb logcat -c
-adb shell am broadcast -a com.mentra.DEBUG_BES_OTA -n com.mentra.asg_client/.receiver.DebugBesOtaReceiver
+adb shell am broadcast -a com.veiller.DEBUG_BES_OTA -n com.mentra.asg_client/.receiver.DebugBesOtaReceiver
 
 echo ""
 echo "📋 Monitoring logs (Ctrl+C to exit)..."

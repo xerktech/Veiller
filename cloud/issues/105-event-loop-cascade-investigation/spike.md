@@ -28,7 +28,7 @@ There are four kinds of clues:
 | Traces/phase timings | "Where did one operation spend time?" | reconnect spent 310 ms in `refreshInstalledApps` |
 | Profiling | "What code burned CPU?" | CPU samples point at layout/rendering/JSON parsing |
 
-Better Stack is where we store, search, graph, and alert on these clues. But Better Stack cannot automatically know Mentra-specific concepts like `CONNECTION_INIT`, `RECONNECT`, `subscription_update`, `broadcastAppState`, or `com.mentra.captions.debug`. Our code has to emit those facts first.
+Better Stack is where we store, search, graph, and alert on these clues. But Better Stack cannot automatically know Veiller-specific concepts like `CONNECTION_INIT`, `RECONNECT`, `subscription_update`, `broadcastAppState`, or `com.veiller.captions.debug`. Our code has to emit those facts first.
 
 The core question is:
 
@@ -49,7 +49,7 @@ The picture that emerges is **more nuanced than any single hypothesis**, and ear
 
 - **Wrong Hypothesis #1:** "It's an lc3Decode cascade" — caught by Phase 1's `slow-audio-stage` warnings. Wrong: lc3Decode time inflation was a **measurement artifact**. The Phase 1 substage timer brackets the entire `decodeAudioChunk` call, including allocs and GC pauses landing inside it. When other work on the loop pressured GC, decode times appeared to spike. The actual time-eater was elsewhere.
 - **Wrong Hypothesis #2:** "It's heavy `op_appMessage_ms`" — confirmed at the gross level: every cascade across 4 events shows app_msg dominating opTotalMs at 95–98%. But high `op_appMessage_ms` alone doesn't trigger cascade — staging has spikes of 1500–2000 ms regularly without cascading.
-- **Wrong Hypothesis #3:** "It's `com.mentra.captions` display request volume" — staging right now is doing **2.4× more captions display requests** than during the cascade window, while remaining healthy. Volume isn't the trigger.
+- **Wrong Hypothesis #3:** "It's `com.veiller.captions` display request volume" — staging right now is doing **2.4× more captions display requests** than during the cascade window, while remaining healthy. Volume isn't the trigger.
 
 What the data **does** show:
 
@@ -110,11 +110,11 @@ In the 60-second window immediately preceding the loop block, **49 distinct app 
 
 | Package | Closes (code 1006) |
 |---|---|
-| com.mentra.captions | 16 |
-| com.mentra.ai | 10 |
+| com.veiller.captions | 16 |
+| com.veiller.ai | 10 |
 | cloud.augmentos.notify | 9 |
-| com.mentra.merge | 8 |
-| com.mentra.notes | 6 |
+| com.veiller.merge | 8 |
+| com.veiller.notes | 6 |
 
 Each close triggers cleanup work: close handler, grace-period timer, eventual reconnect (auth + session lookup + state sync + subscription re-establish + transcription re-attach), `mic state resync` (logged 20× in this minute), `app_state_change` broadcast to all glasses WSs.
 
@@ -192,12 +192,12 @@ Operational implication: if we want faster restart, adjust liveness timing/failu
 
 ### 2026-05-05 local harness findings
 
-A local-only harness was added under `cloud/tools/ws-storm-local/` to avoid deploying while still exercising the real Mentra session paths. It uses `com.mentra.captions.debug` whenever captions is included in a package pool.
+A local-only harness was added under `cloud/tools/ws-storm-local/` to avoid deploying while still exercising the real Veiller session paths. It uses `com.veiller.captions.debug` whenever captions is included in a package pool.
 
 Two harnesses exist:
 
 - `bun-ws-storm-harness.ts` — raw Bun native WebSocket server/client storm.
-- `mentra-path-storm-harness.ts` — exercises real `AppManager`, `AppSession`, `SubscriptionManager`, and optionally `handleAppMessage`, with fake sockets and stubbed external services.
+- `veiller-path-storm-harness.ts` — exercises real `AppManager`, `AppSession`, `SubscriptionManager`, and optionally `handleAppMessage`, with fake sockets and stubbed external services.
 
 Key results:
 
@@ -205,8 +205,8 @@ Key results:
 |---|---|---:|---|
 | Raw Bun WS, 112 simultaneous closes/reconnects | no artificial work | ~2ms | Bun WS close/reconnect alone did not reproduce stall |
 | Raw Bun WS, async reconnect delay 3000ms | awaits only | ~3ms | Huge wall-time without loop stall |
-| Real Mentra v3 reconnect, 56 apps × 10 rounds | `RECONNECT`, message handler on | 6ms | Clean |
-| Real Mentra legacy init, clean DB/resources | `CONNECTION_INIT` during grace | 5ms | Clean |
+| Real Veiller v3 reconnect, 56 apps × 10 rounds | `RECONNECT`, message handler on | 6ms | Clean |
+| Real Veiller legacy init, clean DB/resources | `CONNECTION_INIT` during grace | 5ms | Clean |
 | Legacy init + async 100ms DB-like delay, 56 apps × 3 rounds | fake async User/App queries | 12ms | Aggregate reconnect wall-time 69s, event loop responsive |
 | Legacy init + async 100ms DB-like delay, 112 apps × 2 rounds | fake async User/App queries | 11ms | Aggregate reconnect wall-time 92s, event loop responsive |
 | Legacy init + sync 5ms User/App DB-like work, 56 apps × 2 rounds | fake sync CPU around DB calls | 1120ms | Sync amplification visible |
@@ -324,7 +324,7 @@ This is **the open question for [issue 106](../106-app-ws-storm-multi-app/)**.
 | lc3Decode WASM execution | Caught by Phase 1 substage timer but the slowness is in the JS wrapper around the WASM call (alloc, GC interrupts), not the call itself. The WASM is fast. |
 | AKS node maintenance / cluster event | All 4 cascades happened without a cluster-event signature (no simultaneous staging/dev/debug restart). The 2026-05-01 12:01 restart WAS a cluster event and is excluded from this analysis. |
 | Raw Bun WS close/reconnect storm alone | Local Bun WS harness closed/reconnected 112–168 sockets simultaneously without meaningful heartbeat gaps. A storm needs additional sync work or another trigger to become fatal. |
-| Large `op_appMessage_ms` as proof of sync CPU | Local Mentra-path harness produced 69–92s aggregate reconnect wall-time with async DB-like delays while heartbeat gaps stayed ~11–12ms. `op_appMessage_ms` is wall-clock, not CPU. |
+| Large `op_appMessage_ms` as proof of sync CPU | Local Veiller-path harness produced 69–92s aggregate reconnect wall-time with async DB-like delays while heartbeat gaps stayed ~11–12ms. `op_appMessage_ms` is wall-clock, not CPU. |
 | Exit 137 means shutdown handler is missing | Staging code already has a SIGTERM handler with synchronous stderr logs. Kube/Porter data plus absent shutdown logs instead suggests the loop was too pinned to run the handler before SIGKILL. |
 | Staging WS storm as universal prod trigger | W4 prod back-test did not find staging-scale simultaneous 1006 storms in the three prior prod cascade windows. The storm is staging-proven, prod-unproven. |
 
@@ -358,7 +358,7 @@ What passed on 2026-05-05:
 - `https://debug.augmentos.cloud/livez` returned `ok`.
 - Pod logs and BetterStack show `process-lifecycle` startup and `event-loop-delay-histogram` startup.
 - BetterStack hot table `remote(t373499_mentracloud_prod_logs)` shows new `system-vitals` fields: `eventLoopDelayMaxMs`, `eventLoopDelayP99Ms`, and `eventLoopDelayMeanMs`.
-- Synthetic `/app-ws` reconnect smoke used `com.mentra.captions.debug`, not production captions.
+- Synthetic `/app-ws` reconnect smoke used `com.veiller.captions.debug`, not production captions.
 - The smoke produced `feature: "app-ws-close"` with `packageName`, `userIdHash`, close code/reason, inferred close source, and send counters.
 - The same smoke produced the expected vitals counter: `appProtocol_reconnect_count = 1` and `op_appProtocol_reconnect_ms = 17`.
 - A pre-existing raw API-key debug log was removed; BetterStack confirmed the synthetic key was not present in the new log row.

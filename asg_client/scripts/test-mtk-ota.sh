@@ -77,7 +77,7 @@ trigger_mtk_ota() {
     local attempt="$1"
     print_phase "🚀 Starting MTK OTA (attempt ${attempt}/${MAX_TRIGGER_ATTEMPTS})..."
     adb shell am broadcast \
-        -a com.mentra.DEBUG_MTK_OTA \
+        -a com.veiller.DEBUG_MTK_OTA \
         --es url "http://localhost:$PORT/version.json" \
         -n "$DEBUG_RECEIVER_COMPONENT" >/dev/null || fail "Failed to send MTK OTA trigger broadcast"
 }

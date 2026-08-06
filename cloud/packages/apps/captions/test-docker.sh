@@ -10,7 +10,7 @@ echo ""
 
 # Get the git commit hash (like Porter does)
 GIT_SHA=$(git rev-parse --short HEAD)
-IMAGE_NAME="mentra-captions-test"
+IMAGE_NAME="veiller-captions-test"
 IMAGE_TAG="${IMAGE_NAME}:${GIT_SHA}"
 
 echo "📦 Building Docker image..."
@@ -98,8 +98,8 @@ echo ""
 echo "🚀 Starting the container (press Ctrl+C to stop)..."
 echo "   Access at: http://localhost:8080"
 echo ""
-echo "Note: You need to provide MENTRAOS_API_KEY for the app to start:"
-echo "   export MENTRAOS_API_KEY=your-key-here"
+echo "Note: You need to provide VEILLER_API_KEY for the app to start:"
+echo "   export VEILLER_API_KEY=your-key-here"
 echo ""
 
 # Run with environment variables
@@ -108,8 +108,8 @@ docker run --rm -it \
   -e NODE_ENV=development \
   -e PORT=80 \
   -e HOST=0.0.0.0 \
-  -e MENTRAOS_API_KEY=${MENTRAOS_API_KEY:-""} \
-  -e PACKAGE_NAME=com.mentra.captions \
+  -e VEILLER_API_KEY=${VEILLER_API_KEY:-""} \
+  -e PACKAGE_NAME=com.veiller.captions \
   "${IMAGE_TAG}"
 
 echo ""

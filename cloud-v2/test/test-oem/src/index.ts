@@ -1,5 +1,5 @@
 /**
- * `@mentra/test-oem` — reference OEM implementation. Used by integration
+ * `@veiller/test-oem` — reference OEM implementation. Used by integration
  * tests and as a hand-runnable fixture for local exploration of the OEM
  * auth flow.
  *

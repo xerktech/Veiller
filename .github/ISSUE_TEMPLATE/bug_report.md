@@ -6,7 +6,7 @@ labels: bug
 assignees: ""
 ---
 
-Thank you for submitting a bug report to MentraOS! Please provide the following info as accurately as possible so that we can best assist you.
+Thank you for submitting a bug report to Veiller! Please provide the following info as accurately as possible so that we can best assist you.
 
 ### Bug Report
 

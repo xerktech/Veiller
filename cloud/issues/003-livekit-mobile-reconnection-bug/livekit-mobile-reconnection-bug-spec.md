@@ -97,7 +97,7 @@ Each Backend Instance:
 Multiple backends can exist in same environment (load balanced)
 
 Shared Across Backends:
-  - LiveKit Server URL (wss://mentraos-ixrso50o.livekit.cloud)
+  - LiveKit Server URL (wss://veiller-ixrso50o.livekit.cloud)
   - Database (userId is same across all backends)
 
 LiveKit Room Names:
@@ -543,7 +543,7 @@ func (s *LiveKitBridgeService) JoinRoom(req *pb.JoinRoomRequest) (*pb.JoinRoomRe
 - Users hitting "session already exists" on **FIRST connection** (not reconnection!)
 - Zombie sessions from cloud crashes/restarts never get cleaned up
 - Health checks would fail: zombie appears healthy but cloud is gone
-- Development users hit it constantly (212 failures for mentradevphone@gmail.com)
+- Development users hit it constantly (212 failures for veillerdevphone@gmail.com)
 
 **Edge cases handled**:
 

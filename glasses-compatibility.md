@@ -2,7 +2,7 @@
 
 ## Supported Devices
 
-MentraOS supports smart glasses through explicit device and project identifiers. A
+Veiller supports smart glasses through explicit device and project identifiers. A
 Bluetooth name or manufacturer-data prefix is a compatibility claim; do not add a
 prefix unless the hardware is validated and listed here.
 
@@ -12,7 +12,7 @@ prefix unless the hardware is validated and listed here.
 | --- | --- | --- | --- | --- | --- |
 | Even Realities G1 | Full | Full | Full | Not available | Not available |
 | Mentra Live | Not available | Not available | Full | Full | Full |
-| Mentra Mach 1 | Full | Not available | Partial* | Not available | Not available |
+| Veiller Mach 1 | Full | Not available | Partial* | Not available | Not available |
 | Vuzix Z100 | Full | Not available | Partial* | Not available | Not available |
 | Xingyi AR99 | Full | Not available | Full | Not available | Not available |
 
@@ -20,7 +20,7 @@ prefix unless the hardware is validated and listed here.
 
 ## AR99 Compatibility Matrix
 
-The Mentra App exposes validated Xingyi AR99 hardware as `DeviceTypes.AR99`.
+The Veiller App exposes validated Xingyi AR99 hardware as `DeviceTypes.AR99`.
 Only the exact BLE project identifier listed below is supported.
 
 | Manufacturer | Display model | Device type | BLE project identifier |
@@ -34,9 +34,9 @@ outside the matrix above.
 
 ## Getting Started
 
-1. Download the Mentra App from the [App Store](https://apps.apple.com/us/app/mentra-the-smart-glasses-app/id6747363193) or [Google Play](https://play.google.com/store/apps/details?id=com.mentra.mentra).
+1. Download the Veiller App from the [App Store](https://apps.apple.com/us/app/veiller-the-smart-glasses-app/id6747363193) or [Google Play](https://play.google.com/store/apps/details?id=com.veiller.veiller).
 2. Connect your smart glasses via Bluetooth.
-3. Start using miniapps from the [Mentra Miniapp Store](https://apps.mentra.glass).
+3. Start using miniapps from the [Veiller Miniapp Store](https://apps.mentra.glass).
 
 ## Need Help?
 

@@ -14,8 +14,8 @@ export class R2StorageService {
     const accountId = process.env.R2_ACCOUNT_ID;
     const accessKeyId = process.env.R2_ACCESS_KEY_ID;
     const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-    this.bucketName = process.env.R2_BUCKET_NAME || "mentra-store";
-    this.publicUrlBase = process.env.R2_PUBLIC_URL || "https://mentra-store-cdn.mentraglass.com";
+    this.bucketName = process.env.R2_BUCKET_NAME || "veiller-store";
+    this.publicUrlBase = process.env.R2_PUBLIC_URL || "https://veiller-store-cdn.mentraglass.com";
 
     if (!accountId || !accessKeyId || !secretAccessKey) {
       this.logger.error(
@@ -222,8 +222,8 @@ export class R2StorageService {
   }
 
   private constructPublicUrl(objectKey: string): string {
-    // Construct URL: https://mentra-store-cdn.mentraglass.com/mini_app_assets/...
-    // publicUrlBase = https://mentra-store-cdn.mentraglass.com
+    // Construct URL: https://veiller-store-cdn.mentraglass.com/mini_app_assets/...
+    // publicUrlBase = https://veiller-store-cdn.mentraglass.com
     // objectKey = mini_app_assets/orgs/.../file.jpg
     // Note: Custom domain is already configured to point to the bucket, so we don't include bucket name in URL
     return `${this.publicUrlBase}/${objectKey}`;

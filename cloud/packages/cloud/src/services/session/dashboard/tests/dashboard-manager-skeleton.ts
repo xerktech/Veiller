@@ -7,8 +7,8 @@
  */
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import { AppSession, StreamType, DashboardMode } from "@mentra/sdk";
-// Inline wrapText utility (previously from @mentra/utils)
+import { AppSession, StreamType, DashboardMode } from "@veiller/sdk";
+// Inline wrapText utility (previously from @veiller/utils)
 function wrapText(text: any, maxLength = 25): string {
   if (typeof text !== "string" || text.length === 0) {
     return "";
@@ -52,7 +52,7 @@ import { logger } from "../../../../services/logging/pino-logger";
 // Configuration
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 80;
 const CLOUD_HOST_NAME = process.env.CLOUD_LOCAL_HOST_NAME || "cloud";
-const PACKAGE_NAME = "com.mentra.os";
+const PACKAGE_NAME = "com.veiller.os";
 const API_KEY = process.env.AUGMENTOS_AUTH_JWT_SECRET;
 
 if (!API_KEY) {

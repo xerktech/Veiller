@@ -1,6 +1,6 @@
-import type {OtaProgress, OtaStatus} from "@mentra/bluetooth-sdk-internal"
+import type {OtaProgress, OtaStatus} from "@veiller/bluetooth-sdk-internal"
 
-import {OtaProgressMessages} from "@mentra/engine"
+import {OtaProgressMessages} from "@veiller/engine"
 
 import {getOtaErrorMessage, shouldShowChangeWifiForOtaDownloadFailure} from "@/utils/otaErrorMapping"
 

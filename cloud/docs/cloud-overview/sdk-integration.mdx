@@ -1,15 +1,15 @@
-# Building on MentraOS: SDK and Apps
+# Building on Veiller: SDK and Apps
 
-Third-party apps are what make MentraOS magical. They extend the glasses' capabilities from simple translation to AI assistants, note-taking, navigation, and more. Let's see how apps connect and interact with the system.
+Third-party apps are what make Veiller magical. They extend the glasses' capabilities from simple translation to AI assistants, note-taking, navigation, and more. Let's see how apps connect and interact with the system.
 
-## The MentraOS SDK
+## The Veiller SDK
 
-The SDK (`@mentraos/sdk`) is a TypeScript/JavaScript library that makes it easy for developers to build apps. Think of it as the translator between apps and our cloud.
+The SDK (`@veiller/sdk`) is a TypeScript/JavaScript library that makes it easy for developers to build apps. Think of it as the translator between apps and our cloud.
 
 ### Installation
 
 ```bash
-bun add @mentraos/sdk
+bun add @veiller/sdk
 ```
 
 ## How Apps Connect
@@ -32,12 +32,12 @@ When Alex says "Start translator", the cloud sends a webhook to the app:
 ### Step 2: App Creates Session
 
 ```typescript
-import { AppSession } from '@mentraos/sdk';
+import { AppSession } from '@veiller/sdk';
 
 const session = new AppSession({
   packageName: 'com.translator.app',
-  apiKey: process.env.MENTRAOS_API_KEY,
-  cloudUrl: 'wss://cloud.mentraos.com/app-ws'
+  apiKey: process.env.VEILLER_API_KEY,
+  cloudUrl: 'wss://cloud.veiller.com/app-ws'
 });
 
 // Connect using the sessionId from webhook
@@ -429,7 +429,7 @@ import {
   ButtonPress,
   TextWall,
   ReferenceCard
-} from '@mentraos/sdk';
+} from '@veiller/sdk';
 
 // Everything is typed!
 session.events.onTranscription((data: TranscriptionData) => {
@@ -528,4 +528,4 @@ session.events.onAppMessage((message) => {
 
 ## What's Next?
 
-Now you know how apps work! You're ready to build your own MentraOS applications using the SDK.
+Now you know how apps work! You're ready to build your own Veiller applications using the SDK.

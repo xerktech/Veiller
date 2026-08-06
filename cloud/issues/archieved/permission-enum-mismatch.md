@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The PermissionType enum definitions are inconsistent across the MentraOS codebase, causing TypeScript compilation errors and semantic confusion between notification reading and posting permissions. This document outlines a **backward-compatible solution** that resolves the inconsistencies without requiring database migration or breaking existing Apps.
+The PermissionType enum definitions are inconsistent across the Veiller codebase, causing TypeScript compilation errors and semantic confusion between notification reading and posting permissions. This document outlines a **backward-compatible solution** that resolves the inconsistencies without requiring database migration or breaking existing Apps.
 
 **Impact**: TypeScript compilation errors, confused permission semantics
 **Approach**: Enum extension with legacy mapping (no breaking changes)

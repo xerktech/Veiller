@@ -12,7 +12,7 @@ const NotFound: React.FC = () => {
         <p className="mt-4 text-gray-500">The page you are looking for doesn't exist or has been moved.</p>
         <div className="mt-8">
           <Button asChild>
-            <Link to="/">Back to MentraOS Store</Link>
+            <Link to="/">Back to Veiller Store</Link>
           </Button>
         </div>
       </div>

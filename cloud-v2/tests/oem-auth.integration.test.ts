@@ -5,10 +5,10 @@
  *   TEST OEM (in-process)
  *     ↓ signs JWT with its private key
  *   core's POST /api/client/auth/exchange (in-process via app.fetch)
- *     ↓ verifies, mints Mentra access + refresh
+ *     ↓ verifies, mints Veiller access + refresh
  *   assertions on response shape + downstream rejection paths
  *
- * Prereq: a running Mongo. Defaults to `mongodb://127.0.0.1:27017/mentra-cloud-v2-test`;
+ * Prereq: a running Mongo. Defaults to `mongodb://127.0.0.1:27017/veiller-cloud-v2-test`;
  * override via `MONGO_URL`. The test wipes its own collections between cases —
  * do NOT point this at a real database.
  *
@@ -32,15 +32,15 @@ import {
 {
   const { privateKey: nodePriv, publicKey: nodePub } =
     crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     nodePriv.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     nodePub.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-test";
 }
 
 // eslint-disable-next-line import/first
@@ -159,7 +159,7 @@ describe("OEM auth — token exchange", () => {
     const { jwt } = await mintJwt({
       keypair: oemKeypair,
       tenantId: TEST_OEM_ID,
-      options: { tenantUserId: "alice-3", audience: "not-mentra" },
+      options: { tenantUserId: "alice-3", audience: "not-veiller" },
     });
     const res = await exchange(jwt);
     expect(res.status).toBe(400);
@@ -186,7 +186,7 @@ describe("OEM auth — token exchange", () => {
   test("unknown OEM → unauthorized_client", async () => {
     const { jwt } = await mintJwt({
       keypair: oemKeypair,
-      tenantId: "not-registered-with-mentra",
+      tenantId: "not-registered-with-veiller",
       options: { tenantUserId: "alice-5" },
     });
     const res = await exchange(jwt);

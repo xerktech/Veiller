@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAuth, Button, Spinner, IMAGES } from "@mentra/shared";
+import { useAuth, Button, Spinner, IMAGES } from "@veiller/shared";
 import api, { AppDetails } from "../services/api.service";
 import { toast } from "sonner";
 
 /**
- * AuthFlowPage handles the OAuth-like authentication flow for MentraOS apps.
+ * AuthFlowPage handles the OAuth-like authentication flow for Veiller apps.
  *
  * Flow:
  * 1. Check if user is authenticated
@@ -122,7 +122,7 @@ const AuthFlowPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm mx-auto flex flex-col items-center">
-          <img src={IMAGES.iconOnly} alt="Mentra Logo" className="h-16 w-16 mb-6" />
+          <img src={IMAGES.iconOnly} alt="Veiller Logo" className="h-16 w-16 mb-6" />
           <Spinner size="lg" />
           <p className="text-muted-foreground mt-4">{progress}</p>
         </div>
@@ -135,9 +135,9 @@ const AuthFlowPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm mx-auto flex flex-col items-center">
-          <img src={IMAGES.iconOnly} alt="Mentra Logo" className="h-16 w-16 mb-6" />
+          <img src={IMAGES.iconOnly} alt="Veiller Logo" className="h-16 w-16 mb-6" />
           <p className="text-[46px] text-secondary-foreground text-center pb-4">
-            Mentra
+            Veiller
           </p>
 
           <div className="w-full p-4 mb-6 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -178,7 +178,7 @@ const AuthFlowPage: React.FC = () => {
               className="w-16 h-16 rounded-lg mb-6"
             />
           ) : (
-            <img src={IMAGES.iconOnly} alt="Mentra Logo" className="h-16 w-16 mb-6" />
+            <img src={IMAGES.iconOnly} alt="Veiller Logo" className="h-16 w-16 mb-6" />
           )}
 
           <Spinner size="lg" />
@@ -211,7 +211,7 @@ const AuthFlowPage: React.FC = () => {
               className="w-20 h-20 rounded-lg mb-4"
             />
           ) : (
-            <img src={IMAGES.iconOnly} alt="Mentra Logo" className="h-20 w-20 mb-4" />
+            <img src={IMAGES.iconOnly} alt="Veiller Logo" className="h-20 w-20 mb-4" />
           )}
 
           {/* App name */}
@@ -231,7 +231,7 @@ const AuthFlowPage: React.FC = () => {
             Authorization Request
           </p>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            <strong>{appDetails.name}</strong> wants to access your Mentra account.
+            <strong>{appDetails.name}</strong> wants to access your Veiller account.
           </p>
 
           {/* User info */}
@@ -244,7 +244,7 @@ const AuthFlowPage: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-secondary-foreground">{user?.email}</p>
-                <p className="text-xs text-muted-foreground">Signed in to Mentra</p>
+                <p className="text-xs text-muted-foreground">Signed in to Veiller</p>
               </div>
             </div>
           </div>

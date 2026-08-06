@@ -19,12 +19,12 @@ Phone mic → LC3 encode → UDP → Cloud AudioManager
                                      ↓ (Soniox SDK stream)
                               Soniox ASR
                                      ↓ transcript tokens
-                              com.mentra.captions (cloud app)
+                              com.veiller.captions (cloud app)
                                      ↓ display request
                               Glasses display
 ```
 
-Normal end-to-end latency is ~1 second. The `UDP audio stats in AudioManager` log fires every 10 seconds and is independent of transcription — it tracks packet counts, not transcript output. Display updates from `com.mentra.captions` are the observable proxy for "transcription is working."
+Normal end-to-end latency is ~1 second. The `UDP audio stats in AudioManager` log fires every 10 seconds and is independent of transcription — it tracks packet counts, not transcript output. Display updates from `com.veiller.captions` are the observable proxy for "transcription is working."
 
 There is also a separate path: if the phone has `enforce_local_transcription: true`, the phone runs Sherpa ONNX locally and sends transcript tokens to the cloud. Whether the captions app subscribes to that local stream or still goes through the cloud Soniox stream regardless is not confirmed — see Finding 5.
 
@@ -34,7 +34,7 @@ There is also a separate path: if the phone has `enforce_local_transcription: tr
 
 Three independent reports in the same 24-hour window:
 
-**User 1 (Discord):** Complete stop of both transcription and MentraOS 20 minutes into use of G1. Restarted 4 times with no recovery. Disconnected and used Even Realities native transcription — worked fine for 40 minutes. Filed bug report in-app. _(See also: issue 051 — BLE reconnect failure cascade compounded this experience specifically.)_
+**User 1 (Discord):** Complete stop of both transcription and Veiller 20 minutes into use of G1. Restarted 4 times with no recovery. Disconnected and used Even Realities native transcription — worked fine for 40 minutes. Filed bug report in-app. _(See also: issue 051 — BLE reconnect failure cascade compounded this experience specifically.)_
 
 **User 2 (Discord, "Connolly"):** 15–20 minute window of ~30-second latency under stable network conditions. Self-resolved after ~20 minutes. Latency returned to 5–6 seconds.
 

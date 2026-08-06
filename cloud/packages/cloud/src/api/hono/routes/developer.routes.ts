@@ -11,7 +11,7 @@ import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import appService from "../../../services/core/app.service";
 import { User, UserI } from "../../../models/user.model";
 import { OrganizationService } from "../../../services/core/organization.service";
-import { isMentraAdmin } from "../../../services/core/admin.utils";
+import { isVeillerAdmin } from "../../../services/core/admin.utils";
 import App from "../../../models/app.model";
 import { appCache } from "../../../services/core/app-cache.service";
 import UserSession from "../../../services/session/UserSession";
@@ -516,8 +516,8 @@ async function publishApp(c: AppContext) {
       return c.json({ error: "App has no owner" }, 409);
     }
 
-    // Mentra admins can publish directly; everyone else submits for review
-    const newStatus = isMentraAdmin(email) ? "PUBLISHED" : "SUBMITTED";
+    // Veiller admins can publish directly; everyone else submits for review
+    const newStatus = isVeillerAdmin(email) ? "PUBLISHED" : "SUBMITTED";
 
     const updatedApp = await App.findOneAndUpdate(
       { packageName },
@@ -528,7 +528,7 @@ async function publishApp(c: AppContext) {
 
     logger.info(
       { email, packageName, status: newStatus },
-      isMentraAdmin(email) ? "Mentra admin directly published app" : "App submitted for review",
+      isVeillerAdmin(email) ? "Veiller admin directly published app" : "App submitted for review",
     );
 
     return c.json(updatedApp);

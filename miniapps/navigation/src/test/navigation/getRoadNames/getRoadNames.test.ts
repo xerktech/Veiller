@@ -6,8 +6,8 @@
  */
 import {describe, expect, test} from "bun:test"
 
-import {MiniappStreamType} from "@mentra/miniapp"
-import type {NavRoute, NavStep} from "@mentra/miniapp"
+import {MiniappStreamType} from "@veiller/miniapp"
+import type {NavRoute, NavStep} from "@veiller/miniapp"
 
 import {connectedSession, pushEvent} from "../helpers"
 

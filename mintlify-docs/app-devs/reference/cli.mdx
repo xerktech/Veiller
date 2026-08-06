@@ -1,15 +1,15 @@
 ---
-title: "CLI reference (mentra-miniapp)"
-description: "The author CLI for developing, packing, and releasing Mentra miniapps."
+title: "CLI reference (veiller-miniapp)"
+description: "The author CLI for developing, packing, and releasing Veiller miniapps."
 icon: "terminal"
 ---
 
-`@mentra/miniapp-cli` provides the `mentra-miniapp` command. It's installed as a
+`@veiller/miniapp-cli` provides the `veiller-miniapp` command. It's installed as a
 dev dependency in every scaffolded project, so your `package.json` scripts call
-it directly (`"dev": "mentra-miniapp dev"`).
+it directly (`"dev": "veiller-miniapp dev"`).
 
 ```bash
-mentra-miniapp <command>
+veiller-miniapp <command>
 ```
 
 Run with no arguments to print the usage table.
@@ -32,7 +32,7 @@ The CLI is **Bun-only**: it ships as TypeScript and runs under Bun. Use `bun`
 ## `dev`
 
 ```bash
-mentra-miniapp dev
+veiller-miniapp dev
 ```
 
 Validates `miniapp.json`, builds both layers, serves them over your LAN, and
@@ -44,15 +44,15 @@ every 10 seconds and reprints the QR.
 The starting port comes from `"port"` in `miniapp.json` (default `3000`); if it or
 its sidecar neighbor is busy, the CLI scans upward for a free adjacent pair.
 
-**On the phone:** Mentra App → **Settings → Developer settings → Mini App
+**On the phone:** Veiller App → **Settings → Developer settings → Mini App
 Development → Scan Mini App QR Code**. Phone and laptop must share Wi-Fi. `Ctrl+C`
 stops everything.
 
 <Warning>
-`dev` is live and temporary. Keep the CLI and computer running: the Mentra App
+`dev` is live and temporary. Keep the CLI and computer running: the Veiller App
 loads the runtime bundle from that LAN server. Dev miniapps are keyed by their
 manifest package name, so you can scan and test several side by side; rescanning
-the same package updates only that entry. The Mentra App caches each entry's name
+the same package updates only that entry. The Veiller App caches each entry's name
 and icon. Use `bun run release` for an installed miniapp that works without the
 computer.
 </Warning>
@@ -60,8 +60,8 @@ computer.
 ## `release`
 
 ```bash
-mentra-miniapp release
-mentra-miniapp release --no-cache   # force rebuild even if the cached zip is fresh
+veiller-miniapp release
+veiller-miniapp release --no-cache   # force rebuild even if the cached zip is fresh
 ```
 
 The all-in-one path for putting a build on real devices: validate → build → pack
@@ -77,14 +77,14 @@ across restarts; no laptop needed after install.
 ## `pack`
 
 ```bash
-mentra-miniapp pack
-mentra-miniapp pack --no-build   # zip the existing dist/ as-is
+veiller-miniapp pack
+veiller-miniapp pack --no-build   # zip the existing dist/ as-is
 ```
 
 Produces the distributable artifact only (`release` calls this internally). It
 builds with `NODE_ENV=production`, verifies `dist/`, validates the manifest,
 copies `miniapp.json` + `icon.png` into `dist/`, and zips to
-`build/<pkg>-<version>.zip`. This ZIP is what you submit to the Mentra Miniapp Store.
+`build/<pkg>-<version>.zip`. This ZIP is what you submit to the Veiller Miniapp Store.
 
 <Note>
 `pack` requires the `zip` binary on `PATH` (preinstalled on macOS and most Linux;
@@ -94,7 +94,7 @@ on Windows use WSL). `build/` self-ignores from git.
 ## `manifest`
 
 ```bash
-mentra-miniapp manifest
+veiller-miniapp manifest
 ```
 
 An interactive wizard for `miniapp.json`: edit permissions and hardware
@@ -106,13 +106,13 @@ change, so `Ctrl+C` never loses a saved edit.
 Object-verb edits that share the wizard's validation:
 
 ```bash
-mentra-miniapp permission list
-mentra-miniapp permission add [TYPE]      # interactive if TYPE omitted
-mentra-miniapp permission remove [TYPE]
+veiller-miniapp permission list
+veiller-miniapp permission add [TYPE]      # interactive if TYPE omitted
+veiller-miniapp permission remove [TYPE]
 
-mentra-miniapp hardware list
-mentra-miniapp hardware add [TYPE] [LEVEL]
-mentra-miniapp hardware remove [TYPE]
+veiller-miniapp hardware list
+veiller-miniapp hardware add [TYPE] [LEVEL]
+veiller-miniapp hardware remove [TYPE]
 ```
 
 Permission `TYPE`: `MICROPHONE`, `CAMERA`, `CALENDAR`, `LOCATION`,
@@ -124,10 +124,10 @@ for what each means.
 ## `schema`
 
 ```bash
-mentra-miniapp schema print
+veiller-miniapp schema print
 ```
 
 Prints the canonical `miniapp.json` JSON Schema to stdout: useful for CI
 validation or IDE config. The same schema ships at
-`node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json`, which the `$schema`
+`node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json`, which the `$schema`
 line in a scaffolded `miniapp.json` references for editor autocomplete.

@@ -1,17 +1,17 @@
 /**
- * MentraOS SDK Error Classes
+ * Veiller SDK Error Classes
  *
  * Structured error hierarchy for programmatic error handling.
  * All classes extend Error so `instanceof Error` checks still work (backward compatible).
  *
  * Usage:
  * ```typescript
- * import { MentraAuthError, MentraConnectionError } from '@mentra/sdk';
+ * import { VeillerAuthError, VeillerConnectionError } from '@veiller/sdk';
  *
  * session.events.onError((error) => {
- *   if (error instanceof MentraAuthError) {
+ *   if (error instanceof VeillerAuthError) {
  *     console.log('Bad API key, check your config');
- *   } else if (error instanceof MentraConnectionError) {
+ *   } else if (error instanceof VeillerConnectionError) {
  *     console.log('Connection issue, will retry');
  *   }
  * });
@@ -19,18 +19,18 @@
  */
 
 /**
- * Base error class for all MentraOS SDK errors.
+ * Base error class for all Veiller SDK errors.
  *
  * Every SDK error has a `.code` string for programmatic matching
  * without relying on `.message` string parsing.
  */
-export class MentraError extends Error {
+export class VeillerError extends Error {
   constructor(
     message: string,
     public readonly code: string,
   ) {
     super(message);
-    this.name = "MentraError";
+    this.name = "VeillerError";
     // Fix prototype chain for instanceof checks in transpiled code.
     // TypeScript/Bun transpilation can break `instanceof` for subclassed builtins
     // without this. See: https://github.com/microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
@@ -46,10 +46,10 @@ export class MentraError extends Error {
  * - Token verification fails
  * - Cloud rejects credentials
  */
-export class MentraAuthError extends MentraError {
+export class VeillerAuthError extends VeillerError {
   constructor(message: string) {
     super(message, "AUTH_ERROR");
-    this.name = "MentraAuthError";
+    this.name = "VeillerAuthError";
   }
 }
 
@@ -62,10 +62,10 @@ export class MentraAuthError extends MentraError {
  * - All reconnection attempts are exhausted
  * - Server is unreachable
  */
-export class MentraConnectionError extends MentraError {
+export class VeillerConnectionError extends VeillerError {
   constructor(message: string, code: string = "CONNECTION_ERROR") {
     super(message, code);
-    this.name = "MentraConnectionError";
+    this.name = "VeillerConnectionError";
   }
 }
 
@@ -77,10 +77,10 @@ export class MentraConnectionError extends MentraError {
  * - Photo request times out
  * - Audio play request times out
  */
-export class MentraTimeoutError extends MentraError {
+export class VeillerTimeoutError extends VeillerError {
   constructor(message: string) {
     super(message, "TIMEOUT_ERROR");
-    this.name = "MentraTimeoutError";
+    this.name = "VeillerTimeoutError";
   }
 }
 
@@ -93,15 +93,15 @@ export class MentraTimeoutError extends MentraError {
  * - Invalid language code is provided
  * - Required config fields are absent
  */
-export class MentraValidationError extends MentraError {
+export class VeillerValidationError extends VeillerError {
   constructor(message: string) {
     super(message, "VALIDATION_ERROR");
-    this.name = "MentraValidationError";
+    this.name = "VeillerValidationError";
   }
 }
 
 /**
- * Permission denied by MentraOS Cloud.
+ * Permission denied by Veiller Cloud.
  *
  * Emitted when:
  * - App subscribes to a stream it lacks permission for
@@ -109,13 +109,13 @@ export class MentraValidationError extends MentraError {
  *
  * Includes the stream name and required permission for programmatic handling.
  */
-export class MentraPermissionError extends MentraError {
+export class VeillerPermissionError extends VeillerError {
   constructor(
     message: string,
     public readonly stream: string,
     public readonly requiredPermission: string,
   ) {
     super(message, "PERMISSION_ERROR");
-    this.name = "MentraPermissionError";
+    this.name = "VeillerPermissionError";
   }
 }

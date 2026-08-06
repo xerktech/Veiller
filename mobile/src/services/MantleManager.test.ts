@@ -11,12 +11,12 @@ import {
   useCoreStore,
   useDisplayStore,
   useSettingsStore,
-} from "@mentra/engine/internal"
+} from "@veiller/engine/internal"
 // This test resets the concrete glasses store; the package-level Jest mock does
-// not expose it through @mentra/engine.
+// not expose it through @veiller/engine.
 // eslint-disable-next-line no-restricted-imports
 import {isGlassesConnected, useGlassesStore} from "../../modules/engine/src/stores/glasses"
-import {engine, SETTINGS} from "@mentra/engine"
+import {engine, SETTINGS} from "@veiller/engine"
 import {crustModuleMock, emitCrustEvent, resetCrustModuleMock} from "@/test-utils/mockCrustModule"
 import {
   bluetoothSdkMock,
@@ -25,7 +25,7 @@ import {
   resetBluetoothSdkMock,
 } from "@/test-utils/mockBluetoothSdk"
 
-jest.mock("@mentra/bluetooth-sdk-internal", () => {
+jest.mock("@veiller/bluetooth-sdk-internal", () => {
   const {bluetoothSdkMock} = require("@/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,
@@ -33,7 +33,7 @@ jest.mock("@mentra/bluetooth-sdk-internal", () => {
   }
 })
 
-jest.mock("@mentra/crust", () => {
+jest.mock("@veiller/crust", () => {
   const {crustModuleMock} = require("@/test-utils/mockCrustModule")
   return {
     __esModule: true,
@@ -48,7 +48,7 @@ jest.mock("@/utils/AlertUtils", () => ({
   showAlert: (...args: unknown[]) => mockShowAlert(...args),
 }))
 
-// gallerySyncService moved into @mentra/engine; the global @mentra/engine jest mock
+// gallerySyncService moved into @veiller/engine; the global @veiller/engine jest mock
 // already supplies it (gallerySyncService.initialize), so no local mock is needed.
 
 jest.mock("@/services/Migrations", () => ({
@@ -254,14 +254,14 @@ describe("MantleManager", () => {
   it("keeps the running standard miniapp as display core when a background app runs", () => {
     useAppStatusStore.setState({
       apps: [
-        {packageName: "com.mentra.captions", type: "standard", running: true},
+        {packageName: "com.veiller.captions", type: "standard", running: true},
         {packageName: "com.example.background", type: "background", running: true},
       ] as any,
     })
 
     syncCoreDisplayOwner()
 
-    expect(localDisplayManager.onCoreAppChange).toHaveBeenLastCalledWith("com.mentra.captions")
+    expect(localDisplayManager.onCoreAppChange).toHaveBeenLastCalledWith("com.veiller.captions")
   })
 
   it("keeps non-SDK settings out of Bluetooth SDK sync", async () => {

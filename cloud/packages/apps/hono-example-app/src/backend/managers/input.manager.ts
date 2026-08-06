@@ -1,4 +1,4 @@
-import type { AppSession } from "@mentra/sdk"
+import type { AppSession } from "@veiller/sdk"
 import type { UserSession } from "../UserSession"
 
 /**

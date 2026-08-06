@@ -1,6 +1,6 @@
 /**
  * Bun plugin to deduplicate React by resolving all React imports to the app's node_modules.
- * This fixes the "Invalid hook call" error when using linked packages like @mentra/react
+ * This fixes the "Invalid hook call" error when using linked packages like @veiller/react
  * that have their own React in their node_modules.
  */
 import type { BunPlugin } from "bun";

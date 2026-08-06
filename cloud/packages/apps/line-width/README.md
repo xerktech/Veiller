@@ -28,8 +28,8 @@ Build a debug tool that:
 ### Prerequisites
 
 - [Bun](https://bun.sh) installed
-- MentraOS account at [console.mentra.glass](https://console.mentra.glass)
-- Smart glasses connected to MentraOS app
+- Veiller account at [console.mentra.glass](https://console.mentra.glass)
+- Smart glasses connected to Veiller app
 
 ### Installation
 
@@ -49,8 +49,8 @@ Edit `.env`:
 
 ```env
 PORT=3333
-PACKAGE_NAME=com.mentra.linewidth
-MENTRAOS_API_KEY=your_api_key_here
+PACKAGE_NAME=com.veiller.linewidth
+VEILLER_API_KEY=your_api_key_here
 NODE_ENV=development
 ```
 
@@ -63,13 +63,13 @@ bun run dev
 The app will start:
 
 - ✅ Bun server at `http://localhost:3334` (webview + API)
-- ✅ Express server at `http://localhost:3333` (MentraOS integration)
+- ✅ Express server at `http://localhost:3333` (Veiller integration)
 
 ## Usage
 
 1. Start the debug tool: `bun run dev`
 2. Open browser: `http://localhost:3333`
-3. Connect glasses via MentraOS app
+3. Connect glasses via Veiller app
 4. Use the UI to:
    - Generate test strings (narrow, average, wide characters)
    - Send text to glasses
@@ -102,7 +102,7 @@ line-width/
 │   │   ├── routes.ts      # Route definitions
 │   │   └── auth-helpers.ts
 │   ├── app/
-│   │   └── index.ts       # LineWidthApp (MentraOS integration)
+│   │   └── index.ts       # LineWidthApp (Veiller integration)
 │   └── webview/           # React frontend
 │       ├── App.tsx        # Main app component
 │       ├── components/
@@ -132,6 +132,6 @@ See the `issues/` folder for detailed specs:
 
 ## Resources
 
-- [MentraOS Documentation](https://docs.mentra.glass)
+- [Veiller Documentation](https://docs.mentra.glass)
 - [Developer Console](https://console.mentra.glass)
 - [Discord Community](https://discord.gg/5ukNvkEAqT)

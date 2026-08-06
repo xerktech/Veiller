@@ -29,9 +29,9 @@ public class ServerConfigUtil {
             Log.d("ServerConfigUtil", "Using override URL: " + overrideUrl);
             return overrideUrl;
         }
-        String host = BuildConfig.MENTRAOS_HOST;
-        String port = BuildConfig.MENTRAOS_PORT;
-        boolean secureServer = Boolean.parseBoolean(BuildConfig.MENTRAOS_SECURE);
+        String host = BuildConfig.VEILLER_HOST;
+        String port = BuildConfig.VEILLER_PORT;
+        boolean secureServer = Boolean.parseBoolean(BuildConfig.VEILLER_SECURE);
         
         if (host == null || port == null) {
             throw new IllegalStateException("AugmentOS Server Config Not Found");

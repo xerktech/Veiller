@@ -14,7 +14,7 @@ Our pipeline currently captures a single JPEG on the glasses and ships it unchan
 - **Stabilization delay (475ms)**: Already tuned through testing, do not reduce
 
 ### What Meta Does That We Don't
-| Step | Alternatives | MentraOS (Current) |
+| Step | Alternatives | Veiller (Current) |
 |---|---|---|
 | Raw capture | Fisheye, 3 bracketed exposures | Single JPEG, quality 90 |
 | HDR | 3-exposure stacking on phone | None |

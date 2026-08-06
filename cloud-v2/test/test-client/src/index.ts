@@ -1,5 +1,5 @@
 /**
- * `@mentra/test-client` — reference client for cloud-v2 end-to-end tests and
+ * `@veiller/test-client` — reference client for cloud-v2 end-to-end tests and
  * hand-driven exploration. Re-exports the `TestClient` class from `./client`.
  *
  * Hand-runnable form (when invoked directly):

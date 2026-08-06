@@ -6,16 +6,16 @@ import {TouchableOpacity, View} from "react-native"
 import {Icon, Text} from "@/components/ignite"
 import {Group} from "@/components/ui/Group"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {translate} from "@/i18n"
 
 const PRESET_BACKGROUNDS = [
-  "https://mentra-wallpapers.mentraglass.com/landscape1.jpeg",
-  "https://mentra-wallpapers.mentraglass.com/landscape2.jpeg",
-  "https://mentra-wallpapers.mentraglass.com/landscape3.jpeg",
-  "https://mentra-wallpapers.mentraglass.com/trees.jpg",
-  "https://mentra-wallpapers.mentraglass.com/clouds.jpeg",
-  "https://mentra-wallpapers.mentraglass.com/firewatch.jpg",
+  "https://veiller-wallpapers.mentraglass.com/landscape1.jpeg",
+  "https://veiller-wallpapers.mentraglass.com/landscape2.jpeg",
+  "https://veiller-wallpapers.mentraglass.com/landscape3.jpeg",
+  "https://veiller-wallpapers.mentraglass.com/trees.jpg",
+  "https://veiller-wallpapers.mentraglass.com/clouds.jpeg",
+  "https://veiller-wallpapers.mentraglass.com/firewatch.jpg",
 ]
 
 async function saveBackgroundImage(uri: string): Promise<string> {

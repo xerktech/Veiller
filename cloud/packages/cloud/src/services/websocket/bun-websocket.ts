@@ -22,7 +22,7 @@ import {
   AppToCloudMessage,
   AppToCloudMessageType,
   AppConnectionInit,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { logger as rootLogger } from "../logging/pino-logger";
 import { operationTimers, connectionChurnTracker } from "../metrics/SystemVitalsLogger";

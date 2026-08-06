@@ -1,4 +1,4 @@
-package com.mentra.otaupdater.worker;
+package com.veiller.otaupdater.worker;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,8 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import androidx.work.Data;
-import com.mentra.otaupdater.helper.OtaHelper;
-import com.mentra.otaupdater.helper.Constants;
+import com.veiller.otaupdater.helper.OtaHelper;
+import com.veiller.otaupdater.helper.Constants;
 
 public class RecoveryWorker extends Worker {
     private static final String TAG = "RecoveryWorker";

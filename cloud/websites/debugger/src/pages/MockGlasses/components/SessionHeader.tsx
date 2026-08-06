@@ -14,7 +14,7 @@ export const SessionHeader: React.FC<SessionHeaderProps> = ({
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-4">
-        <h2 className="font-bold text-green-600">Mentra.Glass Dev</h2>
+        <h2 className="font-bold text-green-600">Veiller.Glass Dev</h2>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${
             isConnected ? 'bg-green-500' : 'bg-gray-500'

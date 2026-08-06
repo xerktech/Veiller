@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/cloud-runtime",
+  "name": "@veiller/cloud-runtime",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@mentra/cloud-protocol": "^0.1.0-dev.0",
-    "@mentra/cloud-shared": "workspace:*",
+    "@veiller/cloud-protocol": "^0.1.0-dev.0",
+    "@veiller/cloud-shared": "workspace:*",
     "@soniox/node": "^2.1.0",
     "hono": "^4.11.1",
     "ioredis": "^5.4.1",

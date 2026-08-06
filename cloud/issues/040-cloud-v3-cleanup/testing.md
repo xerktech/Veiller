@@ -6,11 +6,11 @@
 
 ## What is this doc?
 
-This doc covers the testing strategy for MentraOS — specifically, the infrastructure needed to run automated end-to-end tests across the cloud, SDK, and client protocol layers.
+This doc covers the testing strategy for Veiller — specifically, the infrastructure needed to run automated end-to-end tests across the cloud, SDK, and client protocol layers.
 
 ## Why it matters
 
-MentraOS currently has no automated end-to-end testing. When a change is made to the cloud, the SDK, or the mobile client, the only way to know if things still work is to manually test with real glasses. This is slow, unreliable, and doesn't scale. Bugs ship to users, regressions go unnoticed, and confidence in making changes is low.
+Veiller currently has no automated end-to-end testing. When a change is made to the cloud, the SDK, or the mobile client, the only way to know if things still work is to manually test with real glasses. This is slow, unreliable, and doesn't scale. Bugs ship to users, regressions go unnoticed, and confidence in making changes is low.
 
 The goal is to build a test harness where the cloud, SDK, and client protocol are all exercised by real production code — not mocks, not separate test implementations, not reimplementations of the protocol. The same code that runs in production runs in tests. If the test passes, production works. If the test fails, production is broken.
 
@@ -22,14 +22,14 @@ See [overview.md](./overview.md) for full system architecture. The key insight f
 Glasses ←BLE→ Mobile Client ←WebSocket→ Cloud ←HTTP→ Mini Apps
 ```
 
-- The **Mini App side** already has a production library: `@mentra/sdk`. A test can spin up a real mini app using the real SDK. No simulation needed.
+- The **Mini App side** already has a production library: `@veiller/sdk`. A test can spin up a real mini app using the real SDK. No simulation needed.
 - The **Client side** has no reusable library. The WebSocket protocol, authentication, and message handling are embedded in the React Native mobile app. This needs to be extracted into a shared library.
 
-The missing piece is a **client-side protocol library** — a TypeScript package that any client (mobile, desktop, test harness) can use to connect to the cloud and speak the MentraOS protocol.
+The missing piece is a **client-side protocol library** — a TypeScript package that any client (mobile, desktop, test harness) can use to connect to the cloud and speak the Veiller protocol.
 
 ---
 
-## The Cloud Bridge (`@mentra/cloud-bridge`)
+## The Cloud Bridge (`@veiller/cloud-bridge`)
 
 ### What it is
 
@@ -48,7 +48,7 @@ A TypeScript library that encapsulates the client ↔ cloud protocol:
 | -------------------------------- | --------------- | ---------------------------------------------------------------------------- |
 | **Mobile client** (React Native) | Production      | The actual production client. Uses cloud-bridge for all cloud communication. |
 | **E2E test harness**             | CI / local dev  | Simulates a client connecting to the cloud. Exercises the full protocol.     |
-| **Future desktop client**        | Electron / Node | A desktop app for MentraOS (if built). Same protocol, same library.          |
+| **Future desktop client**        | Electron / Node | A desktop app for Veiller (if built). Same protocol, same library.          |
 
 ### Why it must be the same code
 
@@ -65,7 +65,7 @@ By using the same library, any protocol change that breaks the test also breaks 
 
 ### Where the code lives today
 
-The mobile client is React Native. The TypeScript/JavaScript layer in React Native already handles the WebSocket connection to the cloud. Extracting cloud-bridge means pulling that protocol logic out of the React Native app into a standalone package (`@mentra/cloud-bridge`) and having the React Native app import it.
+The mobile client is React Native. The TypeScript/JavaScript layer in React Native already handles the WebSocket connection to the cloud. Extracting cloud-bridge means pulling that protocol logic out of the React Native app into a standalone package (`@veiller/cloud-bridge`) and having the React Native app import it.
 
 This is an extraction, not a rewrite. The code already exists — it just needs to be decoupled from React Native UI concerns.
 
@@ -87,7 +87,7 @@ Together they form two clean abstraction layers. The mobile app's React Native c
 
 ### What it is
 
-A real mini app built with `@mentra/sdk` that exercises every SDK feature. It's the other half of the e2e harness — the cloud-bridge simulates a client on one end, and the test mini app is the real app on the other end.
+A real mini app built with `@veiller/sdk` that exercises every SDK feature. It's the other half of the e2e harness — the cloud-bridge simulates a client on one end, and the test mini app is the real app on the other end.
 
 ### What it covers
 
@@ -109,7 +109,7 @@ The test mini app should call every major SDK API so the e2e harness can verify 
 
 ### Why it must be a real mini app
 
-The test mini app uses `@mentra/sdk` — the actual production SDK. It receives real webhook calls from the cloud, processes them with real SDK code, and sends real responses back. If the test mini app works, any developer's app using the same SDK calls will work too.
+The test mini app uses `@veiller/sdk` — the actual production SDK. It receives real webhook calls from the cloud, processes them with real SDK code, and sends real responses back. If the test mini app works, any developer's app using the same SDK calls will work too.
 
 It's not a mock. It's not a stub. It's a real app that happens to exist for the purpose of testing.
 
@@ -129,7 +129,7 @@ The e2e test orchestrates three real components:
 ┌──────────────┐     ┌──────────┐     ┌────────────────┐
 │ Cloud Bridge  │◄───►│  Cloud   │◄───►│ Test Mini App   │
 │ (simulated    │ WS  │ (real)   │ HTTP│ (real, using    │
-│  client)      │     │          │     │  @mentra/sdk)   │
+│  client)      │     │          │     │  @veiller/sdk)   │
 └──────────────┘     └──────────┘     └────────────────┘
        ↑                                      ↑
        └──────────── Test Harness ────────────┘
@@ -202,8 +202,8 @@ The timeout is a safety net (fail if nothing arrives in 10 seconds), not an asse
 
 ### Phase 1 — Foundation
 
-1. **Extract cloud-bridge from mobile client** — pull the WebSocket protocol layer out of React Native into `@mentra/cloud-bridge`. Mobile client imports it.
-2. **Build the test mini app** — a simple app using `@mentra/sdk` that covers core features (transcription → display, lifecycle).
+1. **Extract cloud-bridge from mobile client** — pull the WebSocket protocol layer out of React Native into `@veiller/cloud-bridge`. Mobile client imports it.
+2. **Build the test mini app** — a simple app using `@veiller/sdk` that covers core features (transcription → display, lifecycle).
 3. **Write the first e2e test** — cloud-bridge connects, sends audio, verifies display update. Proves the harness works.
 
 This alone is a massive improvement — going from zero automated e2e tests to one that exercises the core path.

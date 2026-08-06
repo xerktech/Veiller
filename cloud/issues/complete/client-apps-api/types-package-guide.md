@@ -11,7 +11,7 @@ Creating `@mentra/types` package for shared TypeScript types between mobile clie
 **Current problem**: Types duplicated across mobile and cloud with drift.
 
 - Mobile: `AppletInterface` in `mobile/src/types/AppletTypes.ts`
-- Cloud SDK: `HardwareRequirement`, `Capabilities` in `@mentra/sdk/types`
+- Cloud SDK: `HardwareRequirement`, `Capabilities` in `@veiller/sdk/types`
 - Inconsistencies cause bugs and manual syncing
 
 **Solution**: Single source of truth for client-facing types.
@@ -48,7 +48,7 @@ cd types
 {
   "name": "@mentra/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for MentraOS client and cloud",
+  "description": "Shared TypeScript types for Veiller client and cloud",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -205,7 +205,7 @@ export interface AppletInterface {
 
 ```typescript
 /**
- * @mentra/types - Shared types for MentraOS
+ * @mentra/types - Shared types for Veiller
  *
  * IMPORTANT: Uses explicit exports for Bun compatibility
  * DO NOT use `export *` - Bun runtime can't handle type re-exports

@@ -7,4 +7,4 @@
 - tapOn:
     text: "Sign Out"
     index: 1 # Confirm dialog
-- assertVisible: "Welcome to MentraOS"
+- assertVisible: "Welcome to Veiller"

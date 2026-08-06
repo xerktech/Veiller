@@ -1,30 +1,30 @@
-# Spike: `mentra docs` CLI Command
+# Spike: `veiller docs` CLI Command
 
 ## Overview
 
-**What this doc covers:** A CLI command that lets developers (and LLMs) browse, search, and download MentraOS SDK documentation directly from the terminal.
-**Why this doc exists:** AI coding assistants waste context window searching for docs through file trees. A single `mentra docs <page>` command gives them (and humans) instant access to the right content.
+**What this doc covers:** A CLI command that lets developers (and LLMs) browse, search, and download Veiller SDK documentation directly from the terminal.
+**Why this doc exists:** AI coding assistants waste context window searching for docs through file trees. A single `veiller docs <page>` command gives them (and humans) instant access to the right content.
 **Who should read this:** CLI developers, SDK team.
 
 ## Background
 
-When an LLM helps a developer build a MentraOS mini app, it needs to know the API surface. Today that means grepping through `.mdx` files, reading `docs.json` to find paths, and parsing Mintlify frontmatter. This is slow, error-prone, and wastes context.
+When an LLM helps a developer build a Veiller mini app, it needs to know the API surface. Today that means grepping through `.mdx` files, reading `docs.json` to find paths, and parsing Mintlify frontmatter. This is slow, error-prone, and wastes context.
 
-The `mentra` CLI already exists at `cloud/packages/cli/`. Adding a `docs` subcommand gives both humans and LLMs a fast path to documentation.
+The `veiller` CLI already exists at `cloud/packages/cli/`. Adding a `docs` subcommand gives both humans and LLMs a fast path to documentation.
 
 ## Proposed Commands
 
-### `mentra docs`
+### `veiller docs`
 
 Lists all available documentation pages with their slug and description.
 
 ```
-$ mentra docs
+$ veiller docs
 
 v3 (SDK 3.x)
   mini-app-server          MiniAppServer (Hono, Bun, webhooks)
   webviews                 Webviews (Bun fullstack dev server, auth, bridge)
-  session                  MentraSession (per-user session, 14 managers)
+  session                  VeillerSession (per-user session, 14 managers)
   device                   Device (buttons, gestures, state, capabilities)
   display                  Display (AR text layouts)
   transcription            Transcription (speech to text)
@@ -41,12 +41,12 @@ v3 (SDK 3.x)
   time                     Time (timezone, formatting)
 ```
 
-### `mentra docs <page>`
+### `veiller docs <page>`
 
 Prints the full content of a documentation page as readable text in the terminal. Strips Mintlify frontmatter and MDX components. Renders markdown if the terminal supports it (Bun's markdown rendering), otherwise prints raw markdown.
 
 ```
-$ mentra docs device
+$ veiller docs device
 
 # Device
 
@@ -59,16 +59,16 @@ Buttons, gestures, head position, device state, and hardware events.
 Sub-pages work with slashes or dots:
 
 ```
-$ mentra docs camera/streaming
-$ mentra docs camera.streaming
+$ veiller docs camera/streaming
+$ veiller docs camera.streaming
 ```
 
-### `mentra docs search <query>`
+### `veiller docs search <query>`
 
 Searches across all pages for a query string. Returns matching snippets with page names.
 
 ```
-$ mentra docs search "button press"
+$ veiller docs search "button press"
 
 device (Device):
   session.device.onButtonPress(handler)
@@ -83,36 +83,36 @@ camera/photo-capture (Photo Capture):
       const photo = await session.camera.takePhoto();
 ```
 
-### `mentra docs download`
+### `veiller docs download`
 
 Downloads all documentation pages to a local directory for offline access. LLMs can then grep or read files directly without running CLI commands for each lookup.
 
 ```
-$ mentra docs download
+$ veiller docs download
 
-Downloaded 20 pages to ~/.mentra/docs/
-  ~/.mentra/docs/mini-app-server.md
-  ~/.mentra/docs/session.md
-  ~/.mentra/docs/device.md
-  ~/.mentra/docs/device/hardware-capabilities.md
+Downloaded 20 pages to ~/.veiller/docs/
+  ~/.veiller/docs/mini-app-server.md
+  ~/.veiller/docs/session.md
+  ~/.veiller/docs/device.md
+  ~/.veiller/docs/device/hardware-capabilities.md
   ...
 
-$ mentra docs path
-/Users/dev/.mentra/docs/
+$ veiller docs path
+/Users/dev/.veiller/docs/
 ```
 
 After download, an LLM can read files directly:
 ```
-$ cat ~/.mentra/docs/device.md
-$ grep -r "onButtonPress" ~/.mentra/docs/
+$ cat ~/.veiller/docs/device.md
+$ grep -r "onButtonPress" ~/.veiller/docs/
 ```
 
-### `mentra docs update`
+### `veiller docs update`
 
 Refreshes the local copy. Pulls the latest versions from the docs source.
 
 ```
-$ mentra docs update
+$ veiller docs update
 
 Updated 3 pages (17 unchanged)
   device.md (modified)
@@ -131,11 +131,11 @@ The docs content comes from the `.mdx` files in the `docs/` directory of the rep
 5. Bundle into a JSON manifest: `{ pages: [{ slug, title, description, content }] }`
 
 The manifest can be:
-- **Baked into the CLI package** at npm publish time (zero network needed for `mentra docs <page>`)
+- **Baked into the CLI package** at npm publish time (zero network needed for `veiller docs <page>`)
 - **Hosted on a CDN** and fetched on first use (smaller CLI package, always up to date)
-- **Downloaded locally** via `mentra docs download` (offline access for LLMs)
+- **Downloaded locally** via `veiller docs download` (offline access for LLMs)
 
-Recommendation: bake into the CLI package. Docs change with SDK versions, and the CLI is already versioned. A developer on `@mentra/sdk@3.0.0-alpha.1` should get docs that match that version, not the latest.
+Recommendation: bake into the CLI package. Docs change with SDK versions, and the CLI is already versioned. A developer on `@veiller/sdk@3.0.0-alpha.1` should get docs that match that version, not the latest.
 
 ## Implementation Location
 
@@ -152,11 +152,11 @@ The CLI already uses a command pattern (`app.ts`, etc.). The `docs` command foll
 
 ## Open Questions
 
-1. **Baked vs fetched:** Should the docs content ship inside the CLI npm package, or should `mentra docs` fetch from a CDN on first use? Baking in keeps it versioned and offline-ready. Fetching keeps the package small.
+1. **Baked vs fetched:** Should the docs content ship inside the CLI npm package, or should `veiller docs` fetch from a CDN on first use? Baking in keeps it versioned and offline-ready. Fetching keeps the package small.
 
-2. **Storage location for download:** `~/.mentra/docs/` (global) vs `.mentra/docs/` (per-project)? Global is simpler. Per-project lets different projects pin different doc versions.
+2. **Storage location for download:** `~/.veiller/docs/` (global) vs `.veiller/docs/` (per-project)? Global is simpler. Per-project lets different projects pin different doc versions.
 
-3. **Bun markdown rendering:** Bun has been working on terminal markdown rendering. If available, use it for `mentra docs <page>`. If not, print raw markdown (still readable, just no colors/formatting).
+3. **Bun markdown rendering:** Bun has been working on terminal markdown rendering. If available, use it for `veiller docs <page>`. If not, print raw markdown (still readable, just no colors/formatting).
 
 ## Next Steps
 

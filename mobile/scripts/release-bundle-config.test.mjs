@@ -9,7 +9,7 @@ test("xcodeEnvironmentExports exports public and pinned build values safely", ()
     {
       EXPO_PUBLIC_ASG_OTA_VERSION_URL: "https://example.test/it's-pinned.json",
       EXPO_PUBLIC_EMPTY: "",
-      MENTRAOS_PINNED_BUILD_NUMBER: "123",
+      VEILLER_PINNED_BUILD_NUMBER: "123",
       NODE_ENV: "production",
       PRIVATE_SECRET: "do-not-export",
     },
@@ -18,7 +18,7 @@ test("xcodeEnvironmentExports exports public and pinned build values safely", ()
 
   assert.deepEqual(lines, [
     `export EXPO_PUBLIC_ASG_OTA_VERSION_URL='https://example.test/it'"'"'s-pinned.json'`,
-    "export MENTRAOS_PINNED_BUILD_NUMBER='123'",
+    "export VEILLER_PINNED_BUILD_NUMBER='123'",
     "export NODE_ENV='production'",
     "export NODE_BINARY='/opt/node with spaces/bin/node'",
   ])
@@ -38,7 +38,7 @@ test("xcodeBuildSettings exposes the same public values to every build phase", (
     {
       EXPO_PUBLIC_ASG_OTA_VERSION_URL: "https://example.test/pin.json?channel=staging build",
       EXPO_PUBLIC_EMPTY: "",
-      MENTRAOS_PINNED_BUILD_NUMBER: 123,
+      VEILLER_PINNED_BUILD_NUMBER: 123,
       NODE_ENV: "production",
       PRIVATE_SECRET: "do-not-export",
     },
@@ -47,7 +47,7 @@ test("xcodeBuildSettings exposes the same public values to every build phase", (
 
   assert.deepEqual(settings, [
     "EXPO_PUBLIC_ASG_OTA_VERSION_URL=https://example.test/pin.json?channel=staging build",
-    "MENTRAOS_PINNED_BUILD_NUMBER=123",
+    "VEILLER_PINNED_BUILD_NUMBER=123",
     "NODE_ENV=production",
     "NODE_BINARY=/opt/node with spaces/bin/node",
   ])

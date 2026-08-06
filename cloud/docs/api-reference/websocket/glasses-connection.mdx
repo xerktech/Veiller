@@ -28,7 +28,7 @@ The glasses WebSocket requires a JWT token in the Authorization header. This tok
 ```typescript
 {
   "Authorization": "Bearer <coreToken>",
-  "Host": "cloud.mentraos.com",
+  "Host": "cloud.veiller.com",
   "Upgrade": "websocket",
   "Connection": "Upgrade"
 }
@@ -217,7 +217,7 @@ The server sends WebSocket ping frames every 10 seconds to check connection heal
 ## Example Connection
 
 ```typescript
-const ws = new WebSocket('wss://cloud.mentraos.com/glasses-ws', {
+const ws = new WebSocket('wss://cloud.veiller.com/glasses-ws', {
   headers: {
     'Authorization': `Bearer ${coreToken}`
   }

@@ -3,7 +3,7 @@
  * operational kill switch + config (`android_notification_listener_enabled`
  * and `notifications_blocklist`) to the native
  * NotificationListener via `CrustModule.setNotificationConfig`, so
- * the blocklist reaches the listener for ANY host — not just the Mentra App,
+ * the blocklist reaches the listener for ANY host — not just the Veiller App,
  * where this used to live in MantleManager. The Android service is desired by
  * default now that its cold start is isolated from React Native. Native code
  * keeps the component discoverable in Android's notification-access Settings,
@@ -13,7 +13,7 @@
  * Started by `engine.start()`.
  */
 import {shallow} from "zustand/shallow"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 import {useSettingsStore, SETTINGS} from "../stores/settings"
 

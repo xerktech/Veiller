@@ -1,4 +1,4 @@
-MentraOS — Install Docker on Ubuntu + start local livestream server
+Veiller — Install Docker on Ubuntu + start local livestream server
 ====================================================================
 
 These steps install Docker Engine + Compose on Ubuntu, then start the
@@ -87,8 +87,8 @@ sudo ufw status
 8. Start the local MediaMTX stream server
 --------------------------------------------------------------------
 
-# From the MentraOS repo root:
-cd /path/to/MentraOS
+# From the Veiller repo root:
+cd /path/to/Veiller
 ./scripts/local-stream/start-local-stream.sh
 
 # The script will:

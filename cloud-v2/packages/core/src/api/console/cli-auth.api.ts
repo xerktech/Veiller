@@ -27,11 +27,11 @@ import type { AppContext, AppEnv } from "../../types/hono.types";
 import { InvalidRequest, OauthServerError } from "../../types/oauth.types";
 
 const app = new Hono<AppEnv>();
-const SESSION_COOKIE = "mentra_console_session";
-const STATE_COOKIE = "mentra_console_state";
-const PKCE_VERIFIER_COOKIE = "mentra_console_pkce_verifier";
-const RETURN_TO_COOKIE = "mentra_console_return_to";
-const ORG_SELECTION_COOKIE = "mentra_console_org_selection";
+const SESSION_COOKIE = "veiller_console_session";
+const STATE_COOKIE = "veiller_console_state";
+const PKCE_VERIFIER_COOKIE = "veiller_console_pkce_verifier";
+const RETURN_TO_COOKIE = "veiller_console_return_to";
+const ORG_SELECTION_COOKIE = "veiller_console_org_selection";
 const developerOrgs = new DeveloperOrgService();
 const apiKeys = new DeveloperApiKeyService();
 const invitations = new DeveloperOrgInvitationService();
@@ -918,7 +918,7 @@ async function syncWorkosOrgName(org: DeveloperOrgRecord): Promise<void> {
 function workosOrgMetadata(org: DeveloperOrgRecord): Record<string, string> {
   return {
     packagePrefix: org.packagePrefix,
-    mentraConsole: "console2",
+    veillerConsole: "console2",
     coreEnvironment: consoleEnvironmentLabel(),
   };
 }
@@ -1465,7 +1465,7 @@ function normalizeUrl(value: string): string {
 }
 
 function redirectUriForRequest(c: AppContext): string {
-  const publicOrigin = safeAllowedOrigin(c.req.header("x-mentra-public-origin"));
+  const publicOrigin = safeAllowedOrigin(c.req.header("x-veiller-public-origin"));
   if (publicOrigin) return `${publicOrigin}/api/console/auth/callback`;
   return workosConfig().redirectUri;
 }

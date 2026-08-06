@@ -1,10 +1,10 @@
 /**
  * tapStrap facade — `engine.tapStrap.*`: status read-model for paired Tap Strap 2
- * devices plus the takeover toggle (MentraOS holding straps in controller mode so
+ * devices plus the takeover toggle (Veiller holding straps in controller mode so
  * they stop acting as phone keyboards). Pairing itself happens in the phone's
  * Bluetooth settings; glasses control from tap input is a follow-up.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 
 import {useTapStrapStore} from "../stores/tapStrap"
 import {useSettingsStore, SETTINGS} from "../stores/settings"

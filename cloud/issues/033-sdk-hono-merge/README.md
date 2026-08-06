@@ -35,4 +35,4 @@ The Hono branch already had partial ports of the photo reconnection fix (`c97fe6
 - [ ] Test photo capture flow end-to-end
 - [ ] Test session reconnection (disconnect/reconnect cycle)
 - [ ] Test clean shutdown + resurrection
-- [ ] Publish `@mentra/sdk@3.0.0-hono.3` for testing
+- [ ] Publish `@veiller/sdk@3.0.0-hono.3` for testing

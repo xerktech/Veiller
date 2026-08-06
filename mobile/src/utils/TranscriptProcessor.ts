@@ -1,4 +1,4 @@
-import {BgTimer} from "@mentra/engine"
+import {BgTimer} from "@veiller/engine"
 
 export class TranscriptProcessor {
   private maxCharsPerLine: number = 44

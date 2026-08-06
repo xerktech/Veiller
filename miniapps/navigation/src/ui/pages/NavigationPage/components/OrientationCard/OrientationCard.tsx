@@ -1,6 +1,6 @@
 import {AnimatePresence, motion} from "motion/react"
 import {useLayoutEffect, useRef, useState} from "react"
-import type {NavManeuver} from "@mentra/miniapp"
+import type {NavManeuver} from "@veiller/miniapp"
 
 import {useNavStore} from "@/ui/store/navStore"
 import {formatDistance} from "@/ui/lib/formatDistance"

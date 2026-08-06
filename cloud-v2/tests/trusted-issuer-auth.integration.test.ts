@@ -34,14 +34,14 @@ import {
     crypto.generateKeyPairSync("ed25519");
   const strip = (pem: string) =>
     pem.replace(/-----BEGIN [^-]+-----/, "").replace(/-----END [^-]+-----/, "").replace(/\s+/g, "");
-  process.env.MENTRA_JWT_PRIVATE_KEY = strip(
+  process.env.VEILLER_JWT_PRIVATE_KEY = strip(
     nodePriv.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = strip(
+  process.env.VEILLER_JWT_PUBLIC_KEY = strip(
     nodePub.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
-  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/mentra-cloud-v2-test";
+  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/veiller-cloud-v2-test";
 }
 
 // eslint-disable-next-line import/first
@@ -224,7 +224,7 @@ function mintRawJwt(args: { iss: string; extraClaims: Record<string, unknown> })
   const payload = {
     iss: args.iss,
     sub: "acme-user-1",
-    aud: "mentra",
+    aud: "veiller",
     jti: `jti-${crypto.randomUUID()}`,
     iat: now,
     exp: now + 300,

@@ -4,7 +4,7 @@
  * Custom assertions for testing DisplayManager.
  */
 
-import { DisplayRequest, ActiveDisplay } from '@mentra/sdk';
+import { DisplayRequest, ActiveDisplay } from '@veiller/sdk';
 import { strict as assert } from 'assert';
 
 /**

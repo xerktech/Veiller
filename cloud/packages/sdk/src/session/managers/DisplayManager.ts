@@ -40,7 +40,7 @@ import { AppToCloudMessageType } from "../../types/message-types";
 // ─── Dependencies ────────────────────────────────────────────────────────────
 
 /**
- * Shared dependency bag injected by MentraSession.
+ * Shared dependency bag injected by VeillerSession.
  * Keeps managers decoupled from the session implementation.
  */
 export interface ManagerDeps {

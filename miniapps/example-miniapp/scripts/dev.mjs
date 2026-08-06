@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Dev entry: ensure ElevenLabs signing server is up, then run mentra-miniapp dev.
- * Loads .env.local so ELEVENLABS_API_KEY / MENTRA_PUBLIC_* are available.
+ * Dev entry: ensure ElevenLabs signing server is up, then run veiller-miniapp dev.
+ * Loads .env.local so ELEVENLABS_API_KEY / VEILLER_PUBLIC_* are available.
  */
 
 import {spawn} from "node:child_process"
@@ -66,8 +66,8 @@ if (!(await signerHealthy())) {
 }
 
 // Use the workspace CLI bin (not bunx → npm), so LAN IP / QR updates match
-// the local @mentra/miniapp-cli sources in this monorepo.
-const miniapp = spawn("bun", [join(root, "node_modules/@mentra/miniapp-cli/src/index.ts"), "dev"], {
+// the local @veiller/miniapp-cli sources in this monorepo.
+const miniapp = spawn("bun", [join(root, "node_modules/@veiller/miniapp-cli/src/index.ts"), "dev"], {
   cwd: root,
   env: process.env,
   stdio: "inherit",

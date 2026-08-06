@@ -84,7 +84,7 @@ import {
   TextMeasurer, 
   TextWrapper, 
   G1_PROFILE 
-} from '@mentra/sdk/display-utils'
+} from '@veiller/sdk/display-utils'
 
 // Create measurer and wrapper
 const measurer = new TextMeasurer(G1_PROFILE)

@@ -5,14 +5,14 @@
 **Status:** Spike
 **Spec:** [`039-sdk-v3-api-surface/v2-v3-api-map.md`](../039-sdk-v3-api-surface/v2-v3-api-map.md)
 **Date:** 2026-03-17
-**Updated:** 2026-03-17 — `MentraSession` rename, local runtime, app distribution
+**Updated:** 2026-03-17 — `VeillerSession` rename, local runtime, app distribution
 **Updated:** 2026-03-18 — `MiniAppServer` naming decision
 
 ---
 
 ## Overview
 
-**What this doc covers:** Implementation plan for `@mentra/sdk` v3. The API surface design is already specced in [039](../039-sdk-v3-api-surface/v2-v3-api-map.md) — this doc is about how to build it, how to handle backward compat, and what order to do things in.
+**What this doc covers:** Implementation plan for `@veiller/sdk` v3. The API surface design is already specced in [039](../039-sdk-v3-api-surface/v2-v3-api-map.md) — this doc is about how to build it, how to handle backward compat, and what order to do things in.
 
 **What this doc does NOT cover:** The API design itself. If you need to understand _what_ the v3 API looks like, read the 039 API map first.
 
@@ -22,15 +22,15 @@
 - v2 apps already deployed must keep working with the current cloud.
 - v3 is a breaking change for SDK consumers, but we provide a v2 compat layer so `npm update` doesn't immediately break existing apps.
 - The compat layer is a separate object (`AppServer`) that wraps the new `MiniAppServer`. It ships in v3.0 with deprecation warnings and is removed in v3.1.
-- The session layer (`MentraSession` + managers) must be runtime-agnostic — no Node.js/Bun/server dependencies. It must run on a cloud server (via `MiniAppServer`) AND on-device (via a local runtime on the phone). Same API, different host environments.
+- The session layer (`VeillerSession` + managers) must be runtime-agnostic — no Node.js/Bun/server dependencies. It must run on a cloud server (via `MiniAppServer`) AND on-device (via a local runtime on the phone). Same API, different host environments.
 
 **Key naming:**
 
 - `MiniAppServer` — the HTTP server (Hono, creates sessions from webhooks). Cloud/server apps only.
-- `MentraSession` — one user's connection. The thing developers interact with. Same class everywhere — cloud, phone, webview.
+- `VeillerSession` — one user's connection. The thing developers interact with. Same class everywhere — cloud, phone, webview.
 - `AppServer` — deprecated v2 compat shim that wraps `MiniAppServer`.
 
-**Naming rationale:** the host class is intentionally `MiniAppServer`, not `MentraApp`, to avoid confusion once mini apps can also run locally on the phone without any server. `MentraSession` is the cross-runtime API; `MiniAppServer` is the cloud-only host.
+**Naming rationale:** the host class is intentionally `MiniAppServer`, not `VeillerApp`, to avoid confusion once mini apps can also run locally on the phone without any server. `VeillerSession` is the cross-runtime API; `MiniAppServer` is the cloud-only host.
 
 ---
 
@@ -75,19 +75,19 @@ If a developer was using `getExpressApp()` to add custom Express routes, the shi
 ┌──────────────────▼──────────────────────────────────┐
 │              MiniAppServer  (Hono server)            │
 │                                                      │
-│  Routes: /api/_mentraos/webhook                      │
-│          /api/_mentraos/tool                          │
-│          /api/_mentraos/health                        │
-│          /api/_mentraos/settings                      │
-│          /api/_mentraos/photo-upload                  │
-│          /api/_mentraos/auth                          │
+│  Routes: /api/_veiller/webhook                      │
+│          /api/_veiller/tool                          │
+│          /api/_veiller/health                        │
+│          /api/_veiller/settings                      │
+│          /api/_veiller/photo-upload                  │
+│          /api/_veiller/auth                          │
 │  + legacy aliases at root paths for cloud compat     │
 │                                                      │
-│  Session factory → creates MentraSession per user    │
+│  Session factory → creates VeillerSession per user    │
 └──────────────────┬──────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────┐
-│       MentraSession  (thin orchestrator, ~500 lines) │
+│       VeillerSession  (thin orchestrator, ~500 lines) │
 │                                                      │
 │  Transport: injectable (WebSocket, native bridge, etc)│
 │  Message dispatcher: Map<type, handler>              │
@@ -139,7 +139,7 @@ If a developer was using `getExpressApp()` to add custom Express routes, the shi
 └──────────────────┬──────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────┐
-│       MentraSession  (SAME class as cloud apps)      │
+│       VeillerSession  (SAME class as cloud apps)      │
 │                                                      │
 │  Transport: native bridge (not WebSocket)            │
 │  Same managers, same API, same message types         │
@@ -174,7 +174,7 @@ The shim is a **separate file** (`compat/AppServer.ts`) that wraps `MiniAppServe
 // compat/AppServer.ts — the entire v2 compat layer
 
 import { MiniAppServer } from "../MiniAppServer";
-import type { MentraSession } from "../session/MentraSession";
+import type { VeillerSession } from "../session/VeillerSession";
 
 /** @deprecated Use MiniAppServer instead. Will be removed in v3.1. */
 export class AppServer {
@@ -217,7 +217,7 @@ export class AppServer {
   }
 
   // Override hooks — subclasses implement these (same as v2)
-  protected async onSession(session: MentraSession, sessionId: string, userId: string): Promise<void> {}
+  protected async onSession(session: VeillerSession, sessionId: string, userId: string): Promise<void> {}
   protected async onStop(sessionId: string, userId: string, reason: string): Promise<void> {}
   protected async onToolCall(toolCall: any): Promise<any> {}
 
@@ -250,7 +250,7 @@ export class LiveCaptionsApp extends AppServer {
     super({packageName: config.packageName, apiKey: config.apiKey, port: config.port})
   }
 
-  protected async onSession(session: MentraSession, sessionId: string, userId: string) {
+  protected async onSession(session: VeillerSession, sessionId: string, userId: string) {
     // session.events.onTranscription() → still works via LegacyEventShim
     // session.layouts.showTextWall() → still works via alias
   }
@@ -277,7 +277,7 @@ And the exact same session code works as a local app on the phone:
 ```typescript
 // v3 way — local app (same session API, no MiniAppServer / no server)
 // The phone OS runtime creates the session and calls this:
-export default function onSession(session: MentraSession) {
+export default function onSession(session: VeillerSession) {
   session.transcription.on((data) => {
     session.display.showText(data.text)
   })
@@ -286,7 +286,7 @@ export default function onSession(session: MentraSession) {
 
 ### Session-Level Compat Shim
 
-`MentraSession` in v3 exposes new managers. But old code uses `session.events.*`, `session.layouts.*`, etc. The shim strategy:
+`VeillerSession` in v3 exposes new managers. But old code uses `session.events.*`, `session.layouts.*`, etc. The shim strategy:
 
 | Old accessor                                                 | Shim approach                                                                                                   |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
@@ -306,12 +306,12 @@ export default function onSession(session: MentraSession) {
 
 The `LegacyEventShim` is a single object exposed as `session.events` that maps every old `session.events.*` method to the corresponding v3 manager call. It's one file, ~200 lines of pure delegation, logs a deprecation warning on first access. Removed entirely in v3.1.
 
-**Key principle:** The v3 `MentraSession` implementation has NO awareness of the shim. The shim wraps the session from the outside. The new managers are the real implementation. The shim is applied in the `AppServer` compat constructor, not in `MiniAppServer`.
+**Key principle:** The v3 `VeillerSession` implementation has NO awareness of the shim. The shim wraps the session from the outside. The new managers are the real implementation. The shim is applied in the `AppServer` compat constructor, not in `MiniAppServer`.
 
-Actually — correction. The shim should be on `MentraSession` itself so that even `MiniAppServer` users who happen to use old method names get warnings. The session exposes both the new managers AND the deprecated accessors, but the deprecated ones are just getters that delegate. This means:
+Actually — correction. The shim should be on `VeillerSession` itself so that even `MiniAppServer` users who happen to use old method names get warnings. The session exposes both the new managers AND the deprecated accessors, but the deprecated ones are just getters that delegate. This means:
 
 ```typescript
-class MentraSession {
+class VeillerSession {
   // ─── v3 managers (the real API) ───────────────
   readonly transcription: TranscriptionManager
   readonly translation: TranslationManager
@@ -381,7 +381,7 @@ interface TranscriptionConfig {
   languageHints?: string[]
 
   /** Custom vocabulary for better recognition of domain-specific terms.
-   *  e.g., ['MentraOS', 'HIPAA', 'kubectl'] */
+   *  e.g., ['Veiller', 'HIPAA', 'kubectl'] */
   vocabulary?: string[]
 
   /** Enable/disable speaker diarization.
@@ -447,7 +447,7 @@ session.transcription.forLanguage(["en", "ja", "es"], (data) => {
 // Configure hints (applies to all active subscriptions)
 session.transcription.configure({
   languageHints: ["en", "ja"],
-  vocabulary: ["MentraOS", "Soniox"],
+  vocabulary: ["Veiller", "Soniox"],
 })
 
 // Stop everything
@@ -606,7 +606,7 @@ session.translation.fromTo("en", "es", handler)
 
 ## Transport Abstraction
 
-`MentraSession` doesn't care HOW messages are sent and received. On a cloud server, it's a WebSocket. On the phone, it's a native bridge. In tests, it's a mock. The session accepts an injectable transport:
+`VeillerSession` doesn't care HOW messages are sent and received. On a cloud server, it's a WebSocket. On the phone, it's a native bridge. In tests, it's a mock. The session accepts an injectable transport:
 
 ```typescript
 interface Transport {
@@ -618,7 +618,7 @@ interface Transport {
 }
 ```
 
-A real WebSocket satisfies this. A React Native bridge adapter satisfies this. A mock for testing satisfies this. `MentraSession` never imports `WebSocket` directly — it receives a `Transport` from the host environment.
+A real WebSocket satisfies this. A React Native bridge adapter satisfies this. A mock for testing satisfies this. `VeillerSession` never imports `WebSocket` directly — it receives a `Transport` from the host environment.
 
 For cloud apps, `MiniAppServer` creates a `WebSocketTransport` when the webhook arrives. For local apps, the phone OS runtime creates a `NativeBridgeTransport` when the app is loaded. The session doesn't know or care which one it got.
 
@@ -631,7 +631,7 @@ This also means the session layer has **zero Node.js/Bun/server dependencies** �
 The current `handleMessage()` is a 412-line if/else chain. Replace with a registry pattern:
 
 ```typescript
-// In MentraSession constructor:
+// In VeillerSession constructor:
 this.messageHandlers = new Map<string, (msg: CloudToAppMessage) => void>();
 
 // Each manager registers its handlers:
@@ -692,14 +692,14 @@ dataStreamRouter.register("phone_notification", (data) => this.notifications.emi
 
 ## Route Namespacing + Cloud Compat
 
-Per 039 §24, SDK endpoints move behind `/api/_mentraos/`. But the cloud currently sends webhooks to `${publicUrl}/webhook`, tool calls to `${publicUrl}/tool`, etc.
+Per 039 §24, SDK endpoints move behind `/api/_veiller/`. But the cloud currently sends webhooks to `${publicUrl}/webhook`, tool calls to `${publicUrl}/tool`, etc.
 
 **Strategy:** v3 SDK mounts both:
 
 ```typescript
 // Primary (v3)
-app.post("/api/_mentraos/webhook", webhookHandler)
-app.post("/api/_mentraos/tool", toolHandler)
+app.post("/api/_veiller/webhook", webhookHandler)
+app.post("/api/_veiller/tool", toolHandler)
 // ... etc.
 
 // Legacy aliases (for current cloud)
@@ -708,7 +708,7 @@ app.post("/tool", toolHandler)
 // ... etc.
 ```
 
-The cloud can migrate to the new paths at its own pace. Once all cloud deployments send to `/api/_mentraos/*`, the legacy aliases can be removed. This is a cloud-side change, not an SDK concern — the SDK just mounts both.
+The cloud can migrate to the new paths at its own pace. Once all cloud deployments send to `/api/_veiller/*`, the legacy aliases can be removed. This is a cloud-side change, not an SDK concern — the SDK just mounts both.
 
 ---
 
@@ -735,8 +735,8 @@ session.transcription.on((data) => {
 
 The only difference is WHERE it runs and HOW the session is established:
 
-- **Cloud app:** `MiniAppServer` receives a webhook → creates `MentraSession` with `WebSocketTransport`
-- **Local app:** Phone OS runtime loads the JS bundle → creates `MentraSession` with `NativeBridgeTransport`
+- **Cloud app:** `MiniAppServer` receives a webhook → creates `VeillerSession` with `WebSocketTransport`
+- **Local app:** Phone OS runtime loads the JS bundle → creates `VeillerSession` with `NativeBridgeTransport`
 
 The phone's OS runtime routes messages to the right place:
 
@@ -754,10 +754,10 @@ Two paths, like every app platform:
 
 **Store path (default, recommended):**
 
-1. Developer submits bundle to MentraOS dev console (already exists)
+1. Developer submits bundle to Veiller dev console (already exists)
 2. We host it on our CDN — fast, globally cached
 3. Review process can scan the bundle (permissions, no malicious code)
-4. Users install from the MentraOS app on their phone
+4. Users install from the Veiller app on their phone
 5. Updates: developer pushes new version → review → users get it automatically
 
 **Self-host / sideload path (development, enterprise, testing):**
@@ -779,9 +779,9 @@ Update model is like a PWA:
 
 The local runtime is a separate epic — it requires mobile team work for the JS engine, native bindings, bundle loader, and Bluetooth routing. But v3 must not block it. The architectural constraints:
 
-1. **`MentraSession` + all managers: zero server/Node.js/Bun dependencies.** No `ws`, `http`, `fs`, `Hono` imports. Pure JS that runs in any engine.
+1. **`VeillerSession` + all managers: zero server/Node.js/Bun dependencies.** No `ws`, `http`, `fs`, `Hono` imports. Pure JS that runs in any engine.
 2. **Transport is injectable** — `Transport` interface, not hardcoded `new WebSocket()`.
-3. **Package exports include a server-free entrypoint** — `@mentra/sdk/session` imports only the session + managers, no Hono.
+3. **Package exports include a server-free entrypoint** — `@veiller/sdk/session` imports only the session + managers, no Hono.
 4. **Same message types everywhere** — a `DataStream` with transcription data looks identical whether it came from cloud Soniox or on-device Whisper. A `DisplayRequest` is the same over WebSocket or native bridge.
 5. **Managers must not assume cloud** — e.g., `TranscriptionManager` doesn't know if transcription is running in the cloud or locally. It just sends/receives messages through the transport.
 
@@ -824,7 +824,7 @@ An app can be hybrid — run locally for low-latency features (display, camera, 
 
 |                                | Before       | After                         |
 | ------------------------------ | ------------ | ----------------------------- |
-| `AppSession` → `MentraSession` | ~2,423 lines | ~500 lines                    |
+| `AppSession` → `VeillerSession` | ~2,423 lines | ~500 lines                    |
 | `AppServer`                    | ~1,006 lines | ~150 lines (compat shim)      |
 | `MiniAppServer` (new)          | —            | ~400 lines                    |
 | Total new managers             | —            | ~1,200 lines across ~10 files |
@@ -857,17 +857,17 @@ An app can be hybrid — run locally for low-latency features (display, camera, 
 
 ### Phase 1: Foundation
 
-**Goal:** `MentraSession` exists with transport abstraction. `MiniAppServer` works. `AppServer` shim wraps it. Existing apps still run.
+**Goal:** `VeillerSession` exists with transport abstraction. `MiniAppServer` works. `AppServer` shim wraps it. Existing apps still run.
 
 1. Define `Transport` interface
-2. Rename `AppSession` → `MentraSession`, accept `Transport` in constructor
+2. Rename `AppSession` → `VeillerSession`, accept `Transport` in constructor
 3. Create `WebSocketTransport` (wraps `ws` — used by `MiniAppServer` only, not in session layer)
 4. Create `MiniAppServer` class (Hono server, callback hooks, route namespacing)
 5. Create `AppServer` compat shim (wraps `MiniAppServer`, maps overrides → callbacks)
 6. Slim config — remove deprecated fields
 7. Verify captions app runs with zero changes via `AppServer` shim
 8. Add `toErrorMessage()` utility, route namespacing with legacy aliases
-9. Set up `@mentra/sdk/session` entrypoint (no Hono, no server deps)
+9. Set up `@veiller/sdk/session` entrypoint (no Hono, no server deps)
 
 ### Phase 2: Manager extraction
 
@@ -891,7 +891,7 @@ An app can be hybrid — run locally for low-latency features (display, camera, 
 
 1. Create `DataStreamRouter`
 2. Each manager registers its handlers
-3. Wire up in `MentraSession` constructor
+3. Wire up in `VeillerSession` constructor
 4. Delete old `handleMessage`
 
 ### Phase 4: Compat shim layer
@@ -899,9 +899,9 @@ An app can be hybrid — run locally for low-latency features (display, camera, 
 **Goal:** `session.events.*`, `session.layouts.*`, `session.on*()` all still work with warnings.
 
 1. Create `LegacyEventShim` — maps every `session.events.*` call to the corresponding manager
-2. Add deprecated getters on `MentraSession` (`layouts`, `audio`, `simpleStorage`, `settings`, `capabilities`)
-3. Add deprecated direct methods on `MentraSession` (`onTranscription`, `onButtonPress`, etc.)
-4. Export `AppSession` as a type alias for `MentraSession` (so `import { AppSession }` still works)
+2. Add deprecated getters on `VeillerSession` (`layouts`, `audio`, `simpleStorage`, `settings`, `capabilities`)
+3. Add deprecated direct methods on `VeillerSession` (`onTranscription`, `onButtonPress`, etc.)
+4. Export `AppSession` as a type alias for `VeillerSession` (so `import { AppSession }` still works)
 5. Each deprecated path logs once-per-session warning with migration hint
 6. BCP-47 → ISO 639-1 auto-mapping in shim (strip `-US`, `-JP` suffixes)
 
@@ -933,7 +933,7 @@ An app can be hybrid — run locally for low-latency features (display, camera, 
 
 1. Delete `AppServer` compat shim
 2. Delete `LegacyEventShim`
-3. Delete all deprecated getters on `MentraSession`
+3. Delete all deprecated getters on `VeillerSession`
 4. Delete `AppSession` / `TpaSession` type aliases
 5. Delete legacy route aliases
 6. Publish `3.1.0`
@@ -950,10 +950,10 @@ An app can be hybrid — run locally for low-latency features (display, camera, 
 | 4   | **ISO 639-1 codes in wire protocol**                                       | 039 says v3 SDK sends `transcription:en` not `transcription:en-US`. Cloud needs to accept both. Is this cloud change already in place or do we need to add it?                                                                         |
 | 5   | **`publicDir` in AppServer shim**                                          | The shim uses `serveStatic` from Hono to support legacy `publicDir` config. Does this work with the same path semantics as the old Express static middleware? Need to test.                                                            |
 | 6   | **Captions app migration**                                                 | Should we migrate captions to v3 API as part of this PR, or keep it on the `AppServer` shim and migrate separately? Migrating it validates the new API; keeping it validates the shim.                                                 |
-| 7   | **Cloud route migration**                                                  | When does the cloud switch from `${publicUrl}/webhook` to `${publicUrl}/api/_mentraos/webhook`? Can be done independently, but should we coordinate?                                                                                   |
+| 7   | **Cloud route migration**                                                  | When does the cloud switch from `${publicUrl}/webhook` to `${publicUrl}/api/_veiller/webhook`? Can be done independently, but should we coordinate?                                                                                   |
 | 8   | **Local runtime JS engine**                                                | Which JS engine for on-device apps? JSC (already on iOS), Hermes (already in RN on Android), or QuickJS (lightweight, embeddable)? Need mobile team input.                                                                             |
 | 9   | **Local runtime API surface**                                              | Which cloud features need local equivalents? Transcription (on-device Whisper), display (Bluetooth), camera, audio are obvious. LLM, RTMP streaming probably stay cloud-only. Need to define the boundary.                             |
-| 10  | **Align with head of client**                                              | He's building something on the mobile side. Need to coordinate so we don't end up with two incompatible session APIs. The transport abstraction and `MentraSession` should be the shared contract.                                     |
+| 10  | **Align with head of client**                                              | He's building something on the mobile side. Need to coordinate so we don't end up with two incompatible session APIs. The transport abstraction and `VeillerSession` should be the shared contract.                                     |
 | 11  | **App store review process**                                               | What do we review in submitted bundles? Permissions match? No native API abuse? Bundle size limits? TBD — platform team concern, not SDK.                                                                                              |
 | 12  | **Hybrid app routing**                                                     | How does the phone OS decide whether to route a feature locally or to the cloud? Per-feature capability flags? Developer declares in manifest? Automatic based on connectivity? Needs its own spike.                                   |
 
@@ -975,7 +975,7 @@ packages/sdk/src/
 │   ├── Transport.ts                  # Transport interface (send, onMessage, close, etc.)
 │   └── WebSocketTransport.ts         # WebSocket implementation (used by MiniAppServer only)
 ├── session/
-│   ├── MentraSession.ts              # Slim orchestrator (~500 lines), accepts Transport
+│   ├── VeillerSession.ts              # Slim orchestrator (~500 lines), accepts Transport
 │   ├── DataStreamRouter.ts           # Message dispatch for DATA_STREAM subtypes
 │   └── managers/
 │       ├── TranscriptionManager.ts   # NEW — forLanguage(string | string[])
@@ -1011,8 +1011,8 @@ packages/sdk/src/
 }
 ```
 
-- `import { MiniAppServer, MentraSession } from "@mentra/sdk"` — full package, includes server
-- `import { MentraSession } from "@mentra/sdk/session"` — session only, zero server deps, runs anywhere JS runs
+- `import { MiniAppServer, VeillerSession } from "@veiller/sdk"` — full package, includes server
+- `import { VeillerSession } from "@veiller/sdk/session"` — session only, zero server deps, runs anywhere JS runs
 
 The `session` entrypoint is what the phone OS runtime would use to create sessions for local apps. It imports nothing from `server/` or `transport/WebSocketTransport.ts`. The phone runtime provides its own `NativeBridgeTransport` that implements the `Transport` interface.
 

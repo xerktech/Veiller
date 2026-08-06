@@ -1,5 +1,5 @@
 import {useState, useEffect, FC} from "react"
-import {Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label} from "@mentra/shared"
+import {Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label} from "@veiller/shared"
 import {Terminal, Copy, Trash2, Plus, CheckCircle2, AlertCircle, Loader2, Calendar, Key} from "lucide-react"
 import DashboardLayout from "../components/DashboardLayout"
 import api, {CLIKey, GenerateCLIKeyResponse} from "@/services/api.service"
@@ -18,7 +18,7 @@ import {
 /**
  * CLI Keys Management Page
  *
- * Allows users to generate, view, and revoke CLI API keys for the Mentra CLI tool.
+ * Allows users to generate, view, and revoke CLI API keys for the Veiller CLI tool.
  */
 const CLIKeys: FC = () => {
   const [keys, setKeys] = useState<CLIKey[]>([])
@@ -138,13 +138,13 @@ const CLIKeys: FC = () => {
               <Terminal className="w-5 h-5" />
               Getting Started
             </CardTitle>
-            <CardDescription>Install and authenticate the Mentra CLI tool</CardDescription>
+            <CardDescription>Install and authenticate the Veiller CLI tool</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label className="text-sm font-semibold">1. Install the CLI</Label>
               <div className="mt-2 p-3 bg-foreground text-background rounded-md font-mono text-sm">
-                npm install -g @mentra/cli
+                npm install -g @veiller/cli
               </div>
             </div>
             <div>
@@ -156,12 +156,12 @@ const CLIKeys: FC = () => {
             <div>
               <Label className="text-sm font-semibold">3. Authenticate</Label>
               <div className="mt-2 p-3 bg-foreground text-background rounded-md font-mono text-sm">
-                mentra auth &lt;your-api-key&gt;
+                veiller auth &lt;your-api-key&gt;
               </div>
             </div>
             <div>
               <Label className="text-sm font-semibold">4. Start using the CLI</Label>
-              <div className="mt-2 p-3 bg-foreground text-background rounded-md font-mono text-sm">mentra app list</div>
+              <div className="mt-2 p-3 bg-foreground text-background rounded-md font-mono text-sm">veiller app list</div>
             </div>
           </CardContent>
         </Card>
@@ -244,7 +244,7 @@ const CLIKeys: FC = () => {
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Generate New CLI Key</DialogTitle>
-              <DialogDescription>Create a new API key for the Mentra CLI tool</DialogDescription>
+              <DialogDescription>Create a new API key for the Veiller CLI tool</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
@@ -333,7 +333,7 @@ const CLIKeys: FC = () => {
                 <div>
                   <Label className="text-sm font-semibold">Authenticate with CLI</Label>
                   <div className="mt-2 p-3 bg-foreground text-background rounded-md font-mono text-xs break-all leading-relaxed">
-                    mentra auth {generatedKey.token}
+                    veiller auth {generatedKey.token}
                   </div>
                 </div>
                 {generatedKey.expiresAt && (

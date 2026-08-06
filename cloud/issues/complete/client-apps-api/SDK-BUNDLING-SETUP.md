@@ -63,7 +63,7 @@ bun run build
 ### Published Package
 
 ```
-npm install @mentra/sdk
+npm install @veiller/sdk
 ├─ dist/index.js → Contains bundled code (no @mentra/types imports)
 └─ dist/index.d.ts → Contains inlined type definitions
 ```
@@ -160,8 +160,8 @@ bun run build
 npm pack
 
 # Install locally and test
-npm install -g ./mentra-sdk-2.1.27.tgz
-node -e "const { HardwareType } = require('@mentra/sdk'); console.log(HardwareType);"
+npm install -g ./veiller-sdk-2.1.27.tgz
+node -e "const { HardwareType } = require('@veiller/sdk'); console.log(HardwareType);"
 ```
 
 ## Migration Strategy
@@ -190,7 +190,7 @@ export { HardwareType } from '@mentra/types';
 
 1. Build SDK: `bun run build`
 2. Verify bundling: `grep "@mentra/types" dist/index.js` (should be empty)
-3. Test locally: `npm pack && npm install -g ./mentra-sdk-*.tgz`
+3. Test locally: `npm pack && npm install -g ./veiller-sdk-*.tgz`
 4. Publish: `npm publish`
 
 ## Benefits

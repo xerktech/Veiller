@@ -65,7 +65,7 @@ orgCommand
 
         if (!orgId) {
           error("No organization ID provided and no default org set")
-          console.error("  Run: mentra org switch <org-id>")
+          console.error("  Run: veiller org switch <org-id>")
           process.exit(1)
         }
       }

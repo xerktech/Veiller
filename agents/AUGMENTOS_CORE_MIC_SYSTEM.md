@@ -1,8 +1,8 @@
-# MentraOS Core Microphone System Documentation
+# Veiller Core Microphone System Documentation
 
 ## Overview
 
-The MentraOS microphone system is a complex, multi-layered architecture that handles audio input from both phone microphones and smart glasses' onboard microphones. The system is designed to dynamically switch between different microphone sources based on device capabilities, user preferences, and system conflicts.
+The Veiller microphone system is a complex, multi-layered architecture that handles audio input from both phone microphones and smart glasses' onboard microphones. The system is designed to dynamically switch between different microphone sources based on device capabilities, user preferences, and system conflicts.
 
 ## Key Problems and Issues
 

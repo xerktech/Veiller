@@ -205,7 +205,7 @@ private updateSubscriptions(): void {
 
 ```
 sessionId = userId + "-" + packageName
-         = "isaiah@mentra.glass-com.mentra.captions.beta"
+         = "isaiah@mentra.glass-com.veiller.captions.beta"
 
 This is the SAME for:
   - Session on cloud-dev

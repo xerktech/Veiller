@@ -1,31 +1,31 @@
 /**
- * @mentra/sdk/session — Server-Free Entrypoint
+ * @veiller/sdk/session — Server-Free Entrypoint
  *
- * This entrypoint exports MentraSession and all managers WITHOUT any
+ * This entrypoint exports VeillerSession and all managers WITHOUT any
  * server/Node.js/Hono dependencies. It's designed for:
  *
  * 1. Local apps running on the phone (Hermes runtime + NativeBridgeTransport)
- * 2. Environments where you create MentraSession directly with your own Transport
+ * 2. Environments where you create VeillerSession directly with your own Transport
  * 3. Keeping bundle size small when you don't need MiniAppServer
  *
  * Usage:
- *   import { MentraSession } from "@mentra/sdk/session"
+ *   import { VeillerSession } from "@veiller/sdk/session"
  *
  * If you need the full server (webhooks, Hono, HTTP endpoints):
- *   import { MiniAppServer, MentraSession } from "@mentra/sdk"
+ *   import { MiniAppServer, VeillerSession } from "@veiller/sdk"
  *
  * @module
  */
 
 // ─── Core Session ───────────────────────────────────────────────────────────
 
-export { MentraSession } from "./session/MentraSession";
-export type { MentraSessionConfig } from "./session/MentraSession";
+export { VeillerSession } from "./session/VeillerSession";
+export type { VeillerSessionConfig } from "./session/VeillerSession";
 
 // ─── Transport Interface ────────────────────────────────────────────────────
 //
 // Consumers provide their own Transport implementation:
-//   - WebSocketTransport for cloud apps (provided by @mentra/sdk, NOT re-exported here)
+//   - WebSocketTransport for cloud apps (provided by @veiller/sdk, NOT re-exported here)
 //   - NativeBridgeTransport for local apps (provided by phone runtime)
 //   - MockTransport for tests
 
@@ -36,7 +36,7 @@ export { TransportState, isTransportOpen, isTransportClosed } from "./transport/
 //
 // Exported so consumers can type-annotate their code without importing
 // the full package. The managers themselves are created internally by
-// MentraSession — consumers access them via session.transcription, etc.
+// VeillerSession — consumers access them via session.transcription, etc.
 
 export type {
   TranscriptionManager,

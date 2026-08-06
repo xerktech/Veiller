@@ -10,7 +10,7 @@
 
 **Incidents:** `e8e10728`, `f41b82b2`
 
-G1 glasses connected and captions running, but the mantle (React Native native layer) stopped receiving PCM audio data. The phone logs show `MIC_UNAVAILABLE: UNKNOWN audio_route_changed` and `MIC_UNAVAILABLE: TRUE external_app_recording` — the native audio system thinks an external app is using the mic, blocking MentraOS from recording. Audio never recovered until the user manually switched from glasses mic to phone mic, at which point captions started working again. Lasted 20+ minutes with no auto-recovery.
+G1 glasses connected and captions running, but the mantle (React Native native layer) stopped receiving PCM audio data. The phone logs show `MIC_UNAVAILABLE: UNKNOWN audio_route_changed` and `MIC_UNAVAILABLE: TRUE external_app_recording` — the native audio system thinks an external app is using the mic, blocking Veiller from recording. Audio never recovered until the user manually switched from glasses mic to phone mic, at which point captions started working again. Lasted 20+ minutes with no auto-recovery.
 
 **Root cause hypothesis:** Android audio route detection on Pixel 8 / Android 14 is misidentifying the G1 BLE mic state as "external app recording", causing `systemMicUnavailable` to stay true. Switching to phone mic bypasses this because it uses the phone's built-in mic instead of the BLE audio path.
 
@@ -22,7 +22,7 @@ G1 glasses connected and captions running, but the mantle (React Native native l
 
 **Incident:** `2b8ab1d8` (4 screenshots attached)
 
-User reports captions are visibly running on the glasses (text appearing in FOV), but the mobile app UI shows no running apps and won't let them start any new apps. `runningApps` in the incident snapshot only shows `["com.mentra.feedback"]` — no captions listed despite them being visible on the glasses. The phone thinks nothing is running; the cloud thinks captions is running.
+User reports captions are visibly running on the glasses (text appearing in FOV), but the mobile app UI shows no running apps and won't let them start any new apps. `runningApps` in the incident snapshot only shows `["com.veiller.feedback"]` — no captions listed despite them being visible on the glasses. The phone thinks nothing is running; the cloud thinks captions is running.
 
 **Root cause hypothesis:** State desync between the cloud's app state and the mobile client's applet store. The cloud has apps running (captions visible on glasses), but the `app_state_change` messages from the cloud either aren't arriving or aren't being processed by the mobile client.
 
@@ -46,7 +46,7 @@ User was running Mentra AI. The app showed a "disconnected" banner. The banner e
 
 **Incident:** `5797e32a`
 
-Both `com.mentra.captions` and `com.mentra.captions.debug` fail to start with HTTP 401. Phone logs: `Failed to start applet com.mentra.captions: AxiosError: Request failed with status code 401`. Cloud logs confirm: `HTTP 401 POST /apps/com.mentra.captions/start`. G1 battery at 3% — possible the session expired or the auth token rotated during extended use.
+Both `com.veiller.captions` and `com.veiller.captions.debug` fail to start with HTTP 401. Phone logs: `Failed to start applet com.veiller.captions: AxiosError: Request failed with status code 401`. Cloud logs confirm: `HTTP 401 POST /apps/com.veiller.captions/start`. G1 battery at 3% — possible the session expired or the auth token rotated during extended use.
 
 **Root cause hypothesis:** Either the core token (JWT) expired and wasn't refreshed, or the app start endpoint is rejecting a stale session credential. Needs investigation into token refresh lifecycle during long sessions.
 

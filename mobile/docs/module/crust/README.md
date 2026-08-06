@@ -1,12 +1,12 @@
 # Crust
 
-Crust is MentraOS's catch-all native module on the mobile side — the place where features land when they need to call platform APIs that React Native or Expo doesn't expose directly.
+Crust is Veiller's catch-all native module on the mobile side — the place where features land when they need to call platform APIs that React Native or Expo doesn't expose directly.
 
 ## What it is
 
 A single Expo native module (`mobile/modules/crust/`) with parallel iOS (Swift) and Android (Kotlin) implementations. JS imports `crust` and calls into it through Expo's `AsyncFunction` and event bridges; the native side owns the lifecycle of whatever platform thing it's wrapping (sensors, system services, SDKs).
 
-The shared entry points are [CrustModule.swift](../../../modules/crust/ios/CrustModule.swift) and [CrustModule.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/CrustModule.kt). Each declares the JS-facing functions and events; the actual work is delegated to topic-specific managers (`NavigationManager`, `HeadingManager`, etc.) so the module file stays a thin dispatcher.
+The shared entry points are [CrustModule.swift](../../../modules/crust/ios/CrustModule.swift) and [CrustModule.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/CrustModule.kt). Each declares the JS-facing functions and events; the actual work is delegated to topic-specific managers (`NavigationManager`, `HeadingManager`, etc.) so the module file stays a thin dispatcher.
 
 ## What it is meant to be
 
@@ -32,7 +32,7 @@ The shared entry points are [CrustModule.swift](../../../modules/crust/ios/Crust
 
 ## Adding a new feature
 
-1. Pick a feature folder name; create `ios/<feature>/` and `android/src/main/java/com/mentra/crust/<feature>/`.
+1. Pick a feature folder name; create `ios/<feature>/` and `android/src/main/java/com/veiller/crust/<feature>/`.
 2. Write a `FeatureManager` on each side (singleton, main-thread-safe, with explicit `start`/`stop`).
 3. Add `AsyncFunction`s and `Events(...)` entries to `CrustModule.swift` and `CrustModule.kt` that delegate to the manager — keep the module file thin.
 4. Keep event names and payload shapes identical across platforms.
@@ -40,5 +40,5 @@ The shared entry points are [CrustModule.swift](../../../modules/crust/ios/Crust
 
 ## Files
 
-- Module entry points: [CrustModule.swift](../../../modules/crust/ios/CrustModule.swift), [CrustModule.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/CrustModule.kt)
+- Module entry points: [CrustModule.swift](../../../modules/crust/ios/CrustModule.swift), [CrustModule.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/CrustModule.kt)
 - Per-feature docs: [Navigation.md](Navigation.md), [Heading.md](Heading.md)

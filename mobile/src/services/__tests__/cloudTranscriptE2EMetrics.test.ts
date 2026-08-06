@@ -2,7 +2,7 @@ import {
   buildCloudV2TranscriptMetric,
   logCloudV2TranscriptMetric,
 } from "../../../modules/engine/src/services/CloudTranscriptE2EMetrics"
-import type {TranscriptionData} from "@mentra/cloud-runtime/protocol"
+import type {TranscriptionData} from "@veiller/cloud-runtime/protocol"
 
 const transcript: TranscriptionData = {
   userId: "user-1",

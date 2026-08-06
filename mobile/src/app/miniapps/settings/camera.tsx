@@ -11,7 +11,7 @@ import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import Toast from "react-native-toast-message"
-import {SETTINGS, useSetting, engine} from "@mentra/engine"
+import {SETTINGS, useSetting, engine} from "@veiller/engine"
 import {spacing, ThemedStyle} from "@/theme"
 
 type PhotoSize = "low" | "medium" | "high" | "max"

@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* Light theme is the DEFAULT. The `.dark` class (toggled from useColorScheme,
-   i.e. what the Mentra host reports) flips to the dark palette. */
+   i.e. what the Veiller host reports) flips to the dark palette. */
 :root {
   --radius: 0.875rem;
 

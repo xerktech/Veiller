@@ -1,9 +1,9 @@
 // components/dialogs/InstallDialog.tsx
 import {useState} from "react"
-import {Alert, AlertDescription, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, useAuth} from "@mentra/shared"
+import {Alert, AlertDescription, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, useAuth} from "@veiller/shared"
 import {Download, PackageX, Loader2, CheckCircle, Info} from "lucide-react"
 import api from "@/services/api.service"
-import {AppI} from "@mentra/sdk"
+import {AppI} from "@veiller/sdk"
 
 interface InstallDialogProps {
   app: AppI | null

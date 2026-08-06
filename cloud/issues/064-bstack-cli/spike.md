@@ -32,7 +32,7 @@ During the March 27-28 crash investigation:
 | Resource                                                                                 | Status                                                                 | Documented?         |
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------- |
 | AugmentOS log source (ID 1311181)                                                        | Active — receives dev/local + France/East Asia prod (until redeployed) | Only in CONTEXT.md  |
-| MentraCloud-Prod log source (ID 2324289)                                                 | Active — receives US Central/West/East prod + staging                  | Only in CONTEXT.md  |
+| VeillerCloud-Prod log source (ID 2324289)                                                 | Active — receives US Central/West/East prod + staging                  | Only in CONTEXT.md  |
 | Collectors on 5 clusters                                                                 | Running — container metrics                                            | Only in CONTEXT.md  |
 | SRE Dashboard (ID 973977)                                                                | Built — US Central collector metrics                                   | Not documented      |
 | Uptime monitors (7 total)                                                                | Active                                                                 | Not documented      |
@@ -130,7 +130,7 @@ Source IDs and table names are hardcoded in `config.ts`:
 export const SOURCES = {
   prod: {
     id: 2324289,
-    name: "MentraCloud - Prod",
+    name: "VeillerCloud - Prod",
     logsTable: "remote(t373499_mentracloud_prod_logs)",
     historicalTable: "s3Cluster(primary, t373499_mentracloud_prod_s3)",
     metricsTable: "remote(t373499_mentracloud_prod_metrics)",
@@ -143,11 +143,11 @@ export const SOURCES = {
     metricsTable: "remote(t373499_augmentos_metrics)",
   },
   collectors: {
-    usCentral: {id: 2321796, table: "remote(t373499_mentra_us_central_metrics)"},
-    france: {id: 2326580, table: "remote(t373499_mentra_france_metrics)"},
-    eastAsia: {id: 2326583, table: "remote(t373499_mentra_east_asia_metrics)"},
-    usWest: {id: 2326586, table: "remote(t373499_mentra_us_west_metrics)"},
-    usEast: {id: 2326589, table: "remote(t373499_mentra_us_east_metrics)"},
+    usCentral: {id: 2321796, table: "remote(t373499_veiller_us_central_metrics)"},
+    france: {id: 2326580, table: "remote(t373499_veiller_france_metrics)"},
+    eastAsia: {id: 2326583, table: "remote(t373499_veiller_east_asia_metrics)"},
+    usWest: {id: 2326586, table: "remote(t373499_veiller_us_west_metrics)"},
+    usEast: {id: 2326589, table: "remote(t373499_veiller_us_east_metrics)"},
   },
 }
 

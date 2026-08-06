@@ -71,7 +71,7 @@ export class DeveloperOrgService {
       workosOrgId: input.workosOrgId || undefined,
       displayName,
       packagePrefix,
-      packagePrefixStatus: packagePrefix === "com.mentra" ? "verified" : "unverified",
+      packagePrefixStatus: packagePrefix === "com.veiller" ? "verified" : "unverified",
     });
     // Seed the creator as the org's first owner. From here, ownership is a
     // membership role (owner|admin|member), not the ownerUserId scalar.
@@ -117,7 +117,7 @@ export class DeveloperOrgService {
         );
       }
       existing.packagePrefix = packagePrefix;
-      existing.packagePrefixStatus = packagePrefix === "com.mentra" ? "verified" : "unverified";
+      existing.packagePrefixStatus = packagePrefix === "com.veiller" ? "verified" : "unverified";
     }
 
     existing.displayName = displayName;
@@ -378,7 +378,7 @@ async function hasActiveMiniApps(orgId: string): Promise<boolean> {
 
 function reservedPackagePrefixes(): string[] {
   const raw = process.env.CLOUD_CORE_RESERVED_PACKAGE_PREFIXES;
-  const defaults = "com.mentra,com.google,com.apple,com.microsoft,com.meta,com.facebook,com.amazon";
+  const defaults = "com.veiller,com.google,com.apple,com.microsoft,com.meta,com.facebook,com.amazon";
   return (raw || defaults)
     .split(",")
     .map(prefix => prefix.trim().toLowerCase().replace(/\.+$/, ""))
@@ -386,7 +386,7 @@ function reservedPackagePrefixes(): string[] {
 }
 
 function canClaimReservedPrefix(prefix: string, user: ConsoleUserIdentity): boolean {
-  if (prefix !== "com.mentra") return false;
+  if (prefix !== "com.veiller") return false;
   return user.email.toLowerCase().endsWith("@mentraglass.com");
 }
 

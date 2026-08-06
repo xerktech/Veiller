@@ -10,7 +10,7 @@ We need to figure that out before we hit it.
 
 ## How the Cloud Works (30 second version)
 
-The MentraOS Cloud is a **single Bun process** that sits between phones and mini apps. When a phone connects, a `UserSession` is created **in memory**. Everything for that user — their WebSocket, UDP audio, miniapp connections, transcription streams — lives in that one process.
+The Veiller Cloud is a **single Bun process** that sits between phones and mini apps. When a phone connects, a `UserSession` is created **in memory**. Everything for that user — their WebSocket, UDP audio, miniapp connections, transcription streams — lives in that one process.
 
 ```
 Glasses ←BLE→ Phone ──WebSocket──→ Cloud Instance ──WebSocket──→ Mini App Server(s)

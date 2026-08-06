@@ -101,7 +101,7 @@ export function DevOnboarding() {
                 className="h-11 rounded-[12px] bg-white font-mono"
               />
               <p className="mt-1.5 text-xs leading-5 text-[#8a8d95]">
-                Lowercase reverse-DNS. Reserved prefixes like <span className="font-mono">com.mentra</span> cannot be claimed unless your account is allowed to own them.
+                Lowercase reverse-DNS. Reserved prefixes like <span className="font-mono">com.veiller</span> cannot be claimed unless your account is allowed to own them.
               </p>
             </div>
 
@@ -141,7 +141,7 @@ export function DevOnboarding() {
             </div>
             <h3 className="mt-3 font-display text-[16px] font-bold">Join an existing org</h3>
             <p className="mt-1.5 text-sm leading-6 text-[#747780]">
-              Already have a team on MentraOS? Ask an owner to invite <span className="font-medium text-[#1c1d22]">{email}</span>. Once they send it, the invite appears here automatically and you can accept it.
+              Already have a team on Veiller? Ask an owner to invite <span className="font-medium text-[#1c1d22]">{email}</span>. Once they send it, the invite appears here automatically and you can accept it.
             </p>
           </div>
           <div className="rounded-[18px] border border-[#e0e4de] bg-white p-5 shadow-[0_1px_2px_rgba(20,21,27,0.06)]">

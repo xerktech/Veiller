@@ -5,7 +5,7 @@
  * 3. Client automatically connects to LiveKit based on the info
  */
 
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 
 async function testLiveKitConnectionAck() {
@@ -18,7 +18,7 @@ async function testLiveKitConnectionAck() {
 
   // Step 2: Create client with LiveKit enabled
   console.log("2️⃣ Creating client with LiveKit audio enabled...");
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: credentials.email,
     serverUrl: "http://localhost:8002",
     coreToken: credentials.coreToken,

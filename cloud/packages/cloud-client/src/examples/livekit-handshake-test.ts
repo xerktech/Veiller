@@ -1,8 +1,8 @@
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 import { resolve } from "path";
 
-// const TRANSLATION_PACKAGE_NAME = 'com.mentra.translation';
+// const TRANSLATION_PACKAGE_NAME = 'com.veiller.translation';
 const APP_PACKAGE_NAME = "isaiah.augmentos.livecaptions";
 
 async function main() {
@@ -14,7 +14,7 @@ async function main() {
     process.env.CORE_TOKEN ||
     AccountService.generateTestAccount(email).coreToken;
 
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email,
     serverUrl: `${wsServer}`,
     coreToken: token,

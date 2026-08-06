@@ -9,13 +9,13 @@
  * on the `window` object, with `event.data` as the string payload. We listen
  * there.
  *
- * Old MentraOS builds injected a global `window.receiveNativeMessage` function;
+ * Old Veiller builds injected a global `window.receiveNativeMessage` function;
  * we also accept that path for compatibility by assigning our handler to it.
  */
 
 import {Transport, TransportDisconnectHandler, TransportMessageHandler} from "./types"
 
-// Note: window.MentraOS is declared in ../globals.ts. ReactNativeWebView and
+// Note: window.Veiller is declared in ../globals.ts. ReactNativeWebView and
 // receiveNativeMessage are local to this transport.
 declare global {
   interface Window {

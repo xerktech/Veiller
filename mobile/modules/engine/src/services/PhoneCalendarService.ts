@@ -1,6 +1,6 @@
 import * as Calendar from "expo-calendar"
 
-import {MiniappErrorCode, type CalendarListResult} from "@mentra/miniapp"
+import {MiniappErrorCode, type CalendarListResult} from "@veiller/miniapp"
 
 import {
   calendarEventOverlapsWindow,

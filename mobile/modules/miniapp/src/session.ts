@@ -15,7 +15,7 @@
 import {EventEmitter} from "eventemitter3"
 
 import {makeRequestId, MiniappEnvelope, parseEnvelope, serializeEnvelope} from "./envelope"
-import {getMentraOSGlobals, MiniappColorScheme} from "./globals"
+import {getVeillerGlobals, MiniappColorScheme} from "./globals"
 import {MiniappErrorCode, MiniappRequestType, MiniappResponseType} from "./protocol"
 import {createTransport, CreateTransportOptions} from "./transport/auto"
 import {Transport} from "./transport/types"
@@ -83,7 +83,7 @@ export interface GlassesCapabilities {
 export type MiniappVisibility = "foreground" | "background"
 
 export interface MiniappSessionOptions extends CreateTransportOptions {
-  /** Override auto-detected packageName. Normally provided via window.MentraOS. */
+  /** Override auto-detected packageName. Normally provided via window.Veiller. */
   packageName?: string
   /** Override the ready timeout. Default 10s. */
   connectTimeoutMs?: number
@@ -238,7 +238,7 @@ export class MiniappSession<TChannels extends object = any> {
   public readonly translation: TranslationModule
   /**
    * UI message bus to the bound WebView (when one is open).
-   * Background-only API surface; mirrors the WebView's `mentra` global
+   * Background-only API surface; mirrors the WebView's `veiller` global
    * with inverted buffering policy (background drops when no WebView is
    * bound; the WebView buffers until ready).
    */
@@ -259,7 +259,7 @@ export class MiniappSession<TChannels extends object = any> {
   public userId = ""
   public packageName = ""
   public visibility: MiniappVisibility = "foreground"
-  /** Host color scheme. Seeded from window.MentraOS, updated via session events. */
+  /** Host color scheme. Seeded from window.Veiller, updated via session events. */
   public colorScheme: MiniappColorScheme = "light"
 
   /** True after CONNECT_ACK. Observe with waitForReady() or the "ready" event. */
@@ -299,7 +299,7 @@ export class MiniappSession<TChannels extends object = any> {
     this.transport = createTransport(options)
     this.connectTimeoutMs = options.connectTimeoutMs ?? DEFAULT_CONNECT_TIMEOUT_MS
 
-    const injected = getMentraOSGlobals()
+    const injected = getVeillerGlobals()
     this.packageName = options.packageName ?? injected.packageName ?? ""
     if (injected.colorScheme === "light" || injected.colorScheme === "dark") {
       this.colorScheme = injected.colorScheme

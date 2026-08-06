@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 
 const CORE = process.env.CORE_URL ?? "http://127.0.0.1:3000";
-const secretValue = process.env.MENTRA_CORE_JWT_SECRET;
-if (!secretValue) throw new Error("MENTRA_CORE_JWT_SECRET missing");
+const secretValue = process.env.VEILLER_CORE_JWT_SECRET;
+if (!secretValue) throw new Error("VEILLER_CORE_JWT_SECRET missing");
 
 const b64 = (s: string | Buffer) => Buffer.from(s).toString("base64url");
 const now = Math.floor(Date.now() / 1000);

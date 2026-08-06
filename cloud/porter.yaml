@@ -51,8 +51,8 @@ services:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-    # Prometheus metrics scraping — exposes mentra_user_sessions, mentra_miniapp_sessions,
-    # mentra_event_loop_lag_ms, mentra_udp_packets_received_total, etc. to Porter's
+    # Prometheus metrics scraping — exposes veiller_user_sessions, veiller_miniapp_sessions,
+    # veiller_event_loop_lag_ms, veiller_udp_packets_received_total, etc. to Porter's
     # built-in metrics dashboard. The /metrics endpoint is already on port 80.
     metricsScraping:
       enabled: true

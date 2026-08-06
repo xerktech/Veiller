@@ -7,8 +7,8 @@
         android:name="com.mentra.asg_client.permission.RECOVERY_TELEMETRY"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.mentra.recovery.permission.HEARTBEAT" />
-    <uses-permission android:name="com.mentra.recovery.permission.CONTROL" />
+    <uses-permission android:name="com.veiller.recovery.permission.HEARTBEAT" />
+    <uses-permission android:name="com.veiller.recovery.permission.CONTROL" />
 
     <uses-feature
         android:name="android.hardware.telephony"
@@ -119,11 +119,11 @@
             android:name="com.mentra.asg_client.receiver.ServiceHeartbeatReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="com.mentra.recovery.permission.HEARTBEAT">
+            android:permission="com.veiller.recovery.permission.HEARTBEAT">
             <intent-filter>
-                <action android:name="com.mentra.recovery.ACTION_PING" />
+                <action android:name="com.veiller.recovery.ACTION_PING" />
                 <action android:name="com.mentra.asg_client.ACTION_HEARTBEAT" />
-                <action android:name="com.mentra.recovery.ACTION_DOWNGRADE_HANDOFF_RESULT" />
+                <action android:name="com.veiller.recovery.ACTION_DOWNGRADE_HANDOFF_RESULT" />
             </intent-filter>
         </receiver>
 
@@ -164,18 +164,18 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.mentra.DEBUG_BES_OTA" />
+                <action android:name="com.veiller.DEBUG_BES_OTA" />
             </intent-filter>
         </receiver>
 
-        <!-- Debug receiver for polling BES trace logs into MentraBleTrace via adb -->
+        <!-- Debug receiver for polling BES trace logs into VeillerBleTrace via adb -->
         <receiver
             android:name="com.mentra.asg_client.receiver.DebugBesTraceReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.DUMP">
             <intent-filter>
-                <action android:name="com.mentra.DEBUG_BES_TRACE" />
+                <action android:name="com.veiller.DEBUG_BES_TRACE" />
             </intent-filter>
         </receiver>
 
@@ -185,7 +185,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.mentra.DEBUG_APK_OTA" />
+                <action android:name="com.veiller.DEBUG_APK_OTA" />
             </intent-filter>
         </receiver>
 
@@ -195,7 +195,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.mentra.DEBUG_MTK_OTA" />
+                <action android:name="com.veiller.DEBUG_MTK_OTA" />
             </intent-filter>
         </receiver>
 
@@ -217,7 +217,7 @@
             android:exported="true"
             android:permission="com.mentra.asg_client.permission.RECOVERY_TELEMETRY">
             <intent-filter>
-                <action android:name="com.mentra.recovery.ACTION_TELEMETRY" />
+                <action android:name="com.veiller.recovery.ACTION_TELEMETRY" />
             </intent-filter>
         </receiver>
 
@@ -338,8 +338,8 @@
     </queries>
 
     <queries>
-        <package android:name="com.mentra.augmentos" />
-        <package android:name="com.mentra.recovery" />
+        <package android:name="com.veiller.augmentos" />
+        <package android:name="com.veiller.recovery" />
         <package android:name="com.augmentos.otaupdater" />
     </queries>
 

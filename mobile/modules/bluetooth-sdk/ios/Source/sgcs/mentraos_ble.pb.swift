@@ -1,4 +1,4 @@
-// Regenerated from Mentra-Zephyr-Glasses-Client proto/mentraos_ble.proto
+// Regenerated from Veiller-Zephyr-Glasses-Client proto/mentraos_ble.proto
 // branch ya/add-bitmap-rendering-support @ b2ffae8 (canvas system; NOT yet on fw main).
 // Toolchain: protoc 35.1 + protoc-gen-swift 1.38.1 (SwiftProtobuf 1.x, matches podspec ~> 1.0).
 // Android counterpart: sgcs/MentraosBle.java (protoc 4.29.6, same proto revision).
@@ -24,7 +24,7 @@ fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobu
   typealias Version = _2
 }
 
-nonisolated enum Mentraos_Ble_CanvasComponentType: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Veiller_Ble_CanvasComponentType: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
 
   /// 1-bit bitmap; pixels streamed via CanvasUpdateImage
@@ -60,7 +60,7 @@ nonisolated enum Mentraos_Ble_CanvasComponentType: SwiftProtobuf.Enum, Swift.Cas
   }
 
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static let allCases: [Mentraos_Ble_CanvasComponentType] = [
+  static let allCases: [Veiller_Ble_CanvasComponentType] = [
     .canvasBitmap,
     .canvasTextbox,
     .canvasScrollTextbox,
@@ -69,7 +69,7 @@ nonisolated enum Mentraos_Ble_CanvasComponentType: SwiftProtobuf.Enum, Swift.Cas
 }
 
 /// All messages from phone to glasses
-nonisolated struct Mentraos_Ble_PhoneToGlasses: Sendable {
+nonisolated struct Veiller_Ble_PhoneToGlasses: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -77,306 +77,306 @@ nonisolated struct Mentraos_Ble_PhoneToGlasses: Sendable {
   /// Optional message ID for request/response correlation
   var msgID: String = String()
 
-  var payload: Mentraos_Ble_PhoneToGlasses.OneOf_Payload? = nil
+  var payload: Veiller_Ble_PhoneToGlasses.OneOf_Payload? = nil
 
   /// Connection Management
-  var disconnect: Mentraos_Ble_DisconnectRequest {
+  var disconnect: Veiller_Ble_DisconnectRequest {
     get {
       if case .disconnect(let v)? = payload {return v}
-      return Mentraos_Ble_DisconnectRequest()
+      return Veiller_Ble_DisconnectRequest()
     }
     set {payload = .disconnect(newValue)}
   }
 
-  var batteryState: Mentraos_Ble_BatteryStateRequest {
+  var batteryState: Veiller_Ble_BatteryStateRequest {
     get {
       if case .batteryState(let v)? = payload {return v}
-      return Mentraos_Ble_BatteryStateRequest()
+      return Veiller_Ble_BatteryStateRequest()
     }
     set {payload = .batteryState(newValue)}
   }
 
-  var glassesInfo: Mentraos_Ble_GlassesInfoRequest {
+  var glassesInfo: Veiller_Ble_GlassesInfoRequest {
     get {
       if case .glassesInfo(let v)? = payload {return v}
-      return Mentraos_Ble_GlassesInfoRequest()
+      return Veiller_Ble_GlassesInfoRequest()
     }
     set {payload = .glassesInfo(newValue)}
   }
 
-  var pairingMode: Mentraos_Ble_PairingModeRequest {
+  var pairingMode: Veiller_Ble_PairingModeRequest {
     get {
       if case .pairingMode(let v)? = payload {return v}
-      return Mentraos_Ble_PairingModeRequest()
+      return Veiller_Ble_PairingModeRequest()
     }
     set {payload = .pairingMode(newValue)}
   }
 
-  var headPosition: Mentraos_Ble_HeadPositionRequest {
+  var headPosition: Veiller_Ble_HeadPositionRequest {
     get {
       if case .headPosition(let v)? = payload {return v}
-      return Mentraos_Ble_HeadPositionRequest()
+      return Veiller_Ble_HeadPositionRequest()
     }
     set {payload = .headPosition(newValue)}
   }
 
-  var headUpAngle: Mentraos_Ble_HeadUpAngleConfig {
+  var headUpAngle: Veiller_Ble_HeadUpAngleConfig {
     get {
       if case .headUpAngle(let v)? = payload {return v}
-      return Mentraos_Ble_HeadUpAngleConfig()
+      return Veiller_Ble_HeadUpAngleConfig()
     }
     set {payload = .headUpAngle(newValue)}
   }
 
   /// Audio System
-  var micState: Mentraos_Ble_MicStateConfig {
+  var micState: Veiller_Ble_MicStateConfig {
     get {
       if case .micState(let v)? = payload {return v}
-      return Mentraos_Ble_MicStateConfig()
+      return Veiller_Ble_MicStateConfig()
     }
     set {payload = .micState(newValue)}
   }
 
-  var vadEnabled: Mentraos_Ble_VadEnabledConfig {
+  var vadEnabled: Veiller_Ble_VadEnabledConfig {
     get {
       if case .vadEnabled(let v)? = payload {return v}
-      return Mentraos_Ble_VadEnabledConfig()
+      return Veiller_Ble_VadEnabledConfig()
     }
     set {payload = .vadEnabled(newValue)}
   }
 
-  var vadConfig: Mentraos_Ble_VadConfig {
+  var vadConfig: Veiller_Ble_VadConfig {
     get {
       if case .vadConfig(let v)? = payload {return v}
-      return Mentraos_Ble_VadConfig()
+      return Veiller_Ble_VadConfig()
     }
     set {payload = .vadConfig(newValue)}
   }
 
   /// Display System
-  var displayText: Mentraos_Ble_DisplayText {
+  var displayText: Veiller_Ble_DisplayText {
     get {
       if case .displayText(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayText()
+      return Veiller_Ble_DisplayText()
     }
     set {payload = .displayText(newValue)}
   }
 
-  var displayImage: Mentraos_Ble_DisplayImage {
+  var displayImage: Veiller_Ble_DisplayImage {
     get {
       if case .displayImage(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayImage()
+      return Veiller_Ble_DisplayImage()
     }
     set {payload = .displayImage(newValue)}
   }
 
-  var preloadImage: Mentraos_Ble_PreloadImage {
+  var preloadImage: Veiller_Ble_PreloadImage {
     get {
       if case .preloadImage(let v)? = payload {return v}
-      return Mentraos_Ble_PreloadImage()
+      return Veiller_Ble_PreloadImage()
     }
     set {payload = .preloadImage(newValue)}
   }
 
-  var displayCachedImage: Mentraos_Ble_DisplayCachedImage {
+  var displayCachedImage: Veiller_Ble_DisplayCachedImage {
     get {
       if case .displayCachedImage(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayCachedImage()
+      return Veiller_Ble_DisplayCachedImage()
     }
     set {payload = .displayCachedImage(newValue)}
   }
 
-  var clearCachedImage_p: Mentraos_Ble_ClearCachedImage {
+  var clearCachedImage_p: Veiller_Ble_ClearCachedImage {
     get {
       if case .clearCachedImage_p(let v)? = payload {return v}
-      return Mentraos_Ble_ClearCachedImage()
+      return Veiller_Ble_ClearCachedImage()
     }
     set {payload = .clearCachedImage_p(newValue)}
   }
 
-  var displayScrollingText: Mentraos_Ble_DisplayScrollingText {
+  var displayScrollingText: Veiller_Ble_DisplayScrollingText {
     get {
       if case .displayScrollingText(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayScrollingText()
+      return Veiller_Ble_DisplayScrollingText()
     }
     set {payload = .displayScrollingText(newValue)}
   }
 
-  var displayPower: Mentraos_Ble_DisplayPowerConfig {
+  var displayPower: Veiller_Ble_DisplayPowerConfig {
     get {
       if case .displayPower(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayPowerConfig()
+      return Veiller_Ble_DisplayPowerConfig()
     }
     set {payload = .displayPower(newValue)}
   }
 
-  var brightness: Mentraos_Ble_BrightnessConfig {
+  var brightness: Veiller_Ble_BrightnessConfig {
     get {
       if case .brightness(let v)? = payload {return v}
-      return Mentraos_Ble_BrightnessConfig()
+      return Veiller_Ble_BrightnessConfig()
     }
     set {payload = .brightness(newValue)}
   }
 
-  var autoBrightness: Mentraos_Ble_AutoBrightnessConfig {
+  var autoBrightness: Veiller_Ble_AutoBrightnessConfig {
     get {
       if case .autoBrightness(let v)? = payload {return v}
-      return Mentraos_Ble_AutoBrightnessConfig()
+      return Veiller_Ble_AutoBrightnessConfig()
     }
     set {payload = .autoBrightness(newValue)}
   }
 
-  var autoBrightnessMult: Mentraos_Ble_AutoBrightnessMultiplier {
+  var autoBrightnessMult: Veiller_Ble_AutoBrightnessMultiplier {
     get {
       if case .autoBrightnessMult(let v)? = payload {return v}
-      return Mentraos_Ble_AutoBrightnessMultiplier()
+      return Veiller_Ble_AutoBrightnessMultiplier()
     }
     set {payload = .autoBrightnessMult(newValue)}
   }
 
-  var drawLine: Mentraos_Ble_DrawLine {
+  var drawLine: Veiller_Ble_DrawLine {
     get {
       if case .drawLine(let v)? = payload {return v}
-      return Mentraos_Ble_DrawLine()
+      return Veiller_Ble_DrawLine()
     }
     set {payload = .drawLine(newValue)}
   }
 
-  var drawRect: Mentraos_Ble_DrawRect {
+  var drawRect: Veiller_Ble_DrawRect {
     get {
       if case .drawRect(let v)? = payload {return v}
-      return Mentraos_Ble_DrawRect()
+      return Veiller_Ble_DrawRect()
     }
     set {payload = .drawRect(newValue)}
   }
 
-  var drawCircle: Mentraos_Ble_DrawCircle {
+  var drawCircle: Veiller_Ble_DrawCircle {
     get {
       if case .drawCircle(let v)? = payload {return v}
-      return Mentraos_Ble_DrawCircle()
+      return Veiller_Ble_DrawCircle()
     }
     set {payload = .drawCircle(newValue)}
   }
 
-  var commit: Mentraos_Ble_CommitDisplay {
+  var commit: Veiller_Ble_CommitDisplay {
     get {
       if case .commit(let v)? = payload {return v}
-      return Mentraos_Ble_CommitDisplay()
+      return Veiller_Ble_CommitDisplay()
     }
     set {payload = .commit(newValue)}
   }
 
-  var displayDistance: Mentraos_Ble_DisplayDistanceConfig {
+  var displayDistance: Veiller_Ble_DisplayDistanceConfig {
     get {
       if case .displayDistance(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayDistanceConfig()
+      return Veiller_Ble_DisplayDistanceConfig()
     }
     set {payload = .displayDistance(newValue)}
   }
 
-  var displayHeight: Mentraos_Ble_DisplayHeightConfig {
+  var displayHeight: Veiller_Ble_DisplayHeightConfig {
     get {
       if case .displayHeight(let v)? = payload {return v}
-      return Mentraos_Ble_DisplayHeightConfig()
+      return Veiller_Ble_DisplayHeightConfig()
     }
     set {payload = .displayHeight(newValue)}
   }
 
-  var clearDisplay_p: Mentraos_Ble_ClearDisplay {
+  var clearDisplay_p: Veiller_Ble_ClearDisplay {
     get {
       if case .clearDisplay_p(let v)? = payload {return v}
-      return Mentraos_Ble_ClearDisplay()
+      return Veiller_Ble_ClearDisplay()
     }
     set {payload = .clearDisplay_p(newValue)}
   }
 
   /// User Input
-  var imuEnabled: Mentraos_Ble_ImuEnabledConfig {
+  var imuEnabled: Veiller_Ble_ImuEnabledConfig {
     get {
       if case .imuEnabled(let v)? = payload {return v}
-      return Mentraos_Ble_ImuEnabledConfig()
+      return Veiller_Ble_ImuEnabledConfig()
     }
     set {payload = .imuEnabled(newValue)}
   }
 
-  var imuSingle: Mentraos_Ble_ImuSingleRequest {
+  var imuSingle: Veiller_Ble_ImuSingleRequest {
     get {
       if case .imuSingle(let v)? = payload {return v}
-      return Mentraos_Ble_ImuSingleRequest()
+      return Veiller_Ble_ImuSingleRequest()
     }
     set {payload = .imuSingle(newValue)}
   }
 
-  var imuStream: Mentraos_Ble_ImuStreamConfig {
+  var imuStream: Veiller_Ble_ImuStreamConfig {
     get {
       if case .imuStream(let v)? = payload {return v}
-      return Mentraos_Ble_ImuStreamConfig()
+      return Veiller_Ble_ImuStreamConfig()
     }
     set {payload = .imuStream(newValue)}
   }
 
-  var headGesture: Mentraos_Ble_HeadGestureConfig {
+  var headGesture: Veiller_Ble_HeadGestureConfig {
     get {
       if case .headGesture(let v)? = payload {return v}
-      return Mentraos_Ble_HeadGestureConfig()
+      return Veiller_Ble_HeadGestureConfig()
     }
     set {payload = .headGesture(newValue)}
   }
 
   /// System Control
-  var restart: Mentraos_Ble_RestartRequest {
+  var restart: Veiller_Ble_RestartRequest {
     get {
       if case .restart(let v)? = payload {return v}
-      return Mentraos_Ble_RestartRequest()
+      return Veiller_Ble_RestartRequest()
     }
     set {payload = .restart(newValue)}
   }
 
-  var factoryReset: Mentraos_Ble_FactoryResetRequest {
+  var factoryReset: Veiller_Ble_FactoryResetRequest {
     get {
       if case .factoryReset(let v)? = payload {return v}
-      return Mentraos_Ble_FactoryResetRequest()
+      return Veiller_Ble_FactoryResetRequest()
     }
     set {payload = .factoryReset(newValue)}
   }
 
   /// Canvas System — retained components addressed by phone-assigned id
-  var canvasCreateComponent: Mentraos_Ble_CanvasCreateComponent {
+  var canvasCreateComponent: Veiller_Ble_CanvasCreateComponent {
     get {
       if case .canvasCreateComponent(let v)? = payload {return v}
-      return Mentraos_Ble_CanvasCreateComponent()
+      return Veiller_Ble_CanvasCreateComponent()
     }
     set {payload = .canvasCreateComponent(newValue)}
   }
 
-  var canvasUpdateText: Mentraos_Ble_CanvasUpdateText {
+  var canvasUpdateText: Veiller_Ble_CanvasUpdateText {
     get {
       if case .canvasUpdateText(let v)? = payload {return v}
-      return Mentraos_Ble_CanvasUpdateText()
+      return Veiller_Ble_CanvasUpdateText()
     }
     set {payload = .canvasUpdateText(newValue)}
   }
 
-  var canvasUpdateImage: Mentraos_Ble_CanvasUpdateImage {
+  var canvasUpdateImage: Veiller_Ble_CanvasUpdateImage {
     get {
       if case .canvasUpdateImage(let v)? = payload {return v}
-      return Mentraos_Ble_CanvasUpdateImage()
+      return Veiller_Ble_CanvasUpdateImage()
     }
     set {payload = .canvasUpdateImage(newValue)}
   }
 
-  var canvasDeleteComponent: Mentraos_Ble_CanvasDeleteComponent {
+  var canvasDeleteComponent: Veiller_Ble_CanvasDeleteComponent {
     get {
       if case .canvasDeleteComponent(let v)? = payload {return v}
-      return Mentraos_Ble_CanvasDeleteComponent()
+      return Veiller_Ble_CanvasDeleteComponent()
     }
     set {payload = .canvasDeleteComponent(newValue)}
   }
 
-  var canvasClear: Mentraos_Ble_CanvasClear {
+  var canvasClear: Veiller_Ble_CanvasClear {
     get {
       if case .canvasClear(let v)? = payload {return v}
-      return Mentraos_Ble_CanvasClear()
+      return Veiller_Ble_CanvasClear()
     }
     set {payload = .canvasClear(newValue)}
   }
@@ -385,48 +385,48 @@ nonisolated struct Mentraos_Ble_PhoneToGlasses: Sendable {
 
   nonisolated enum OneOf_Payload: Equatable, Sendable {
     /// Connection Management
-    case disconnect(Mentraos_Ble_DisconnectRequest)
-    case batteryState(Mentraos_Ble_BatteryStateRequest)
-    case glassesInfo(Mentraos_Ble_GlassesInfoRequest)
-    case pairingMode(Mentraos_Ble_PairingModeRequest)
-    case headPosition(Mentraos_Ble_HeadPositionRequest)
-    case headUpAngle(Mentraos_Ble_HeadUpAngleConfig)
+    case disconnect(Veiller_Ble_DisconnectRequest)
+    case batteryState(Veiller_Ble_BatteryStateRequest)
+    case glassesInfo(Veiller_Ble_GlassesInfoRequest)
+    case pairingMode(Veiller_Ble_PairingModeRequest)
+    case headPosition(Veiller_Ble_HeadPositionRequest)
+    case headUpAngle(Veiller_Ble_HeadUpAngleConfig)
     /// Audio System
-    case micState(Mentraos_Ble_MicStateConfig)
-    case vadEnabled(Mentraos_Ble_VadEnabledConfig)
-    case vadConfig(Mentraos_Ble_VadConfig)
+    case micState(Veiller_Ble_MicStateConfig)
+    case vadEnabled(Veiller_Ble_VadEnabledConfig)
+    case vadConfig(Veiller_Ble_VadConfig)
     /// Display System
-    case displayText(Mentraos_Ble_DisplayText)
-    case displayImage(Mentraos_Ble_DisplayImage)
-    case preloadImage(Mentraos_Ble_PreloadImage)
-    case displayCachedImage(Mentraos_Ble_DisplayCachedImage)
-    case clearCachedImage_p(Mentraos_Ble_ClearCachedImage)
-    case displayScrollingText(Mentraos_Ble_DisplayScrollingText)
-    case displayPower(Mentraos_Ble_DisplayPowerConfig)
-    case brightness(Mentraos_Ble_BrightnessConfig)
-    case autoBrightness(Mentraos_Ble_AutoBrightnessConfig)
-    case autoBrightnessMult(Mentraos_Ble_AutoBrightnessMultiplier)
-    case drawLine(Mentraos_Ble_DrawLine)
-    case drawRect(Mentraos_Ble_DrawRect)
-    case drawCircle(Mentraos_Ble_DrawCircle)
-    case commit(Mentraos_Ble_CommitDisplay)
-    case displayDistance(Mentraos_Ble_DisplayDistanceConfig)
-    case displayHeight(Mentraos_Ble_DisplayHeightConfig)
-    case clearDisplay_p(Mentraos_Ble_ClearDisplay)
+    case displayText(Veiller_Ble_DisplayText)
+    case displayImage(Veiller_Ble_DisplayImage)
+    case preloadImage(Veiller_Ble_PreloadImage)
+    case displayCachedImage(Veiller_Ble_DisplayCachedImage)
+    case clearCachedImage_p(Veiller_Ble_ClearCachedImage)
+    case displayScrollingText(Veiller_Ble_DisplayScrollingText)
+    case displayPower(Veiller_Ble_DisplayPowerConfig)
+    case brightness(Veiller_Ble_BrightnessConfig)
+    case autoBrightness(Veiller_Ble_AutoBrightnessConfig)
+    case autoBrightnessMult(Veiller_Ble_AutoBrightnessMultiplier)
+    case drawLine(Veiller_Ble_DrawLine)
+    case drawRect(Veiller_Ble_DrawRect)
+    case drawCircle(Veiller_Ble_DrawCircle)
+    case commit(Veiller_Ble_CommitDisplay)
+    case displayDistance(Veiller_Ble_DisplayDistanceConfig)
+    case displayHeight(Veiller_Ble_DisplayHeightConfig)
+    case clearDisplay_p(Veiller_Ble_ClearDisplay)
     /// User Input
-    case imuEnabled(Mentraos_Ble_ImuEnabledConfig)
-    case imuSingle(Mentraos_Ble_ImuSingleRequest)
-    case imuStream(Mentraos_Ble_ImuStreamConfig)
-    case headGesture(Mentraos_Ble_HeadGestureConfig)
+    case imuEnabled(Veiller_Ble_ImuEnabledConfig)
+    case imuSingle(Veiller_Ble_ImuSingleRequest)
+    case imuStream(Veiller_Ble_ImuStreamConfig)
+    case headGesture(Veiller_Ble_HeadGestureConfig)
     /// System Control
-    case restart(Mentraos_Ble_RestartRequest)
-    case factoryReset(Mentraos_Ble_FactoryResetRequest)
+    case restart(Veiller_Ble_RestartRequest)
+    case factoryReset(Veiller_Ble_FactoryResetRequest)
     /// Canvas System — retained components addressed by phone-assigned id
-    case canvasCreateComponent(Mentraos_Ble_CanvasCreateComponent)
-    case canvasUpdateText(Mentraos_Ble_CanvasUpdateText)
-    case canvasUpdateImage(Mentraos_Ble_CanvasUpdateImage)
-    case canvasDeleteComponent(Mentraos_Ble_CanvasDeleteComponent)
-    case canvasClear(Mentraos_Ble_CanvasClear)
+    case canvasCreateComponent(Veiller_Ble_CanvasCreateComponent)
+    case canvasUpdateText(Veiller_Ble_CanvasUpdateText)
+    case canvasUpdateImage(Veiller_Ble_CanvasUpdateImage)
+    case canvasDeleteComponent(Veiller_Ble_CanvasDeleteComponent)
+    case canvasClear(Veiller_Ble_CanvasClear)
 
   }
 
@@ -434,101 +434,101 @@ nonisolated struct Mentraos_Ble_PhoneToGlasses: Sendable {
 }
 
 /// All messages from glasses to phone
-nonisolated struct Mentraos_Ble_GlassesToPhone: Sendable {
+nonisolated struct Veiller_Ble_GlassesToPhone: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var payload: Mentraos_Ble_GlassesToPhone.OneOf_Payload? = nil
+  var payload: Veiller_Ble_GlassesToPhone.OneOf_Payload? = nil
 
   /// Connection Management
-  var batteryStatus: Mentraos_Ble_BatteryStatus {
+  var batteryStatus: Veiller_Ble_BatteryStatus {
     get {
       if case .batteryStatus(let v)? = payload {return v}
-      return Mentraos_Ble_BatteryStatus()
+      return Veiller_Ble_BatteryStatus()
     }
     set {payload = .batteryStatus(newValue)}
   }
 
-  var chargingState: Mentraos_Ble_ChargingState {
+  var chargingState: Veiller_Ble_ChargingState {
     get {
       if case .chargingState(let v)? = payload {return v}
-      return Mentraos_Ble_ChargingState()
+      return Veiller_Ble_ChargingState()
     }
     set {payload = .chargingState(newValue)}
   }
 
-  var deviceInfo: Mentraos_Ble_DeviceInfo {
+  var deviceInfo: Veiller_Ble_DeviceInfo {
     get {
       if case .deviceInfo(let v)? = payload {return v}
-      return Mentraos_Ble_DeviceInfo()
+      return Veiller_Ble_DeviceInfo()
     }
     set {payload = .deviceInfo(newValue)}
   }
 
-  var headPosition: Mentraos_Ble_HeadPosition {
+  var headPosition: Veiller_Ble_HeadPosition {
     get {
       if case .headPosition(let v)? = payload {return v}
-      return Mentraos_Ble_HeadPosition()
+      return Veiller_Ble_HeadPosition()
     }
     set {payload = .headPosition(newValue)}
   }
 
-  var headUpAngleSet: Mentraos_Ble_HeadUpAngleResponse {
+  var headUpAngleSet: Veiller_Ble_HeadUpAngleResponse {
     get {
       if case .headUpAngleSet(let v)? = payload {return v}
-      return Mentraos_Ble_HeadUpAngleResponse()
+      return Veiller_Ble_HeadUpAngleResponse()
     }
     set {payload = .headUpAngleSet(newValue)}
   }
 
   /// Audio System
-  var vadEvent: Mentraos_Ble_VadEvent {
+  var vadEvent: Veiller_Ble_VadEvent {
     get {
       if case .vadEvent(let v)? = payload {return v}
-      return Mentraos_Ble_VadEvent()
+      return Veiller_Ble_VadEvent()
     }
     set {payload = .vadEvent(newValue)}
   }
 
   /// Display System
-  var imageTransferComplete: Mentraos_Ble_ImageTransferComplete {
+  var imageTransferComplete: Veiller_Ble_ImageTransferComplete {
     get {
       if case .imageTransferComplete(let v)? = payload {return v}
-      return Mentraos_Ble_ImageTransferComplete()
+      return Veiller_Ble_ImageTransferComplete()
     }
     set {payload = .imageTransferComplete(newValue)}
   }
 
-  var canvasResult: Mentraos_Ble_CanvasResult {
+  var canvasResult: Veiller_Ble_CanvasResult {
     get {
       if case .canvasResult(let v)? = payload {return v}
-      return Mentraos_Ble_CanvasResult()
+      return Veiller_Ble_CanvasResult()
     }
     set {payload = .canvasResult(newValue)}
   }
 
   /// User Input
-  var imuData: Mentraos_Ble_ImuData {
+  var imuData: Veiller_Ble_ImuData {
     get {
       if case .imuData(let v)? = payload {return v}
-      return Mentraos_Ble_ImuData()
+      return Veiller_Ble_ImuData()
     }
     set {payload = .imuData(newValue)}
   }
 
-  var buttonEvent: Mentraos_Ble_ButtonEvent {
+  var buttonEvent: Veiller_Ble_ButtonEvent {
     get {
       if case .buttonEvent(let v)? = payload {return v}
-      return Mentraos_Ble_ButtonEvent()
+      return Veiller_Ble_ButtonEvent()
     }
     set {payload = .buttonEvent(newValue)}
   }
 
-  var headGesture: Mentraos_Ble_HeadGesture {
+  var headGesture: Veiller_Ble_HeadGesture {
     get {
       if case .headGesture(let v)? = payload {return v}
-      return Mentraos_Ble_HeadGesture()
+      return Veiller_Ble_HeadGesture()
     }
     set {payload = .headGesture(newValue)}
   }
@@ -537,27 +537,27 @@ nonisolated struct Mentraos_Ble_GlassesToPhone: Sendable {
 
   nonisolated enum OneOf_Payload: Equatable, Sendable {
     /// Connection Management
-    case batteryStatus(Mentraos_Ble_BatteryStatus)
-    case chargingState(Mentraos_Ble_ChargingState)
-    case deviceInfo(Mentraos_Ble_DeviceInfo)
-    case headPosition(Mentraos_Ble_HeadPosition)
-    case headUpAngleSet(Mentraos_Ble_HeadUpAngleResponse)
+    case batteryStatus(Veiller_Ble_BatteryStatus)
+    case chargingState(Veiller_Ble_ChargingState)
+    case deviceInfo(Veiller_Ble_DeviceInfo)
+    case headPosition(Veiller_Ble_HeadPosition)
+    case headUpAngleSet(Veiller_Ble_HeadUpAngleResponse)
     /// Audio System
-    case vadEvent(Mentraos_Ble_VadEvent)
+    case vadEvent(Veiller_Ble_VadEvent)
     /// Display System
-    case imageTransferComplete(Mentraos_Ble_ImageTransferComplete)
-    case canvasResult(Mentraos_Ble_CanvasResult)
+    case imageTransferComplete(Veiller_Ble_ImageTransferComplete)
+    case canvasResult(Veiller_Ble_CanvasResult)
     /// User Input
-    case imuData(Mentraos_Ble_ImuData)
-    case buttonEvent(Mentraos_Ble_ButtonEvent)
-    case headGesture(Mentraos_Ble_HeadGesture)
+    case imuData(Veiller_Ble_ImuData)
+    case buttonEvent(Veiller_Ble_ButtonEvent)
+    case headGesture(Veiller_Ble_HeadGesture)
 
   }
 
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisconnectRequest: Sendable {
+nonisolated struct Veiller_Ble_DisconnectRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -567,7 +567,7 @@ nonisolated struct Mentraos_Ble_DisconnectRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_BatteryStateRequest: Sendable {
+nonisolated struct Veiller_Ble_BatteryStateRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -577,7 +577,7 @@ nonisolated struct Mentraos_Ble_BatteryStateRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_BatteryStatus: Sendable {
+nonisolated struct Veiller_Ble_BatteryStatus: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -592,12 +592,12 @@ nonisolated struct Mentraos_Ble_BatteryStatus: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ChargingState: Sendable {
+nonisolated struct Veiller_Ble_ChargingState: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var state: Mentraos_Ble_ChargingState.State = .notCharging
+  var state: Veiller_Ble_ChargingState.State = .notCharging
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -628,7 +628,7 @@ nonisolated struct Mentraos_Ble_ChargingState: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_ChargingState.State] = [
+    static let allCases: [Veiller_Ble_ChargingState.State] = [
       .notCharging,
       .charging,
     ]
@@ -638,7 +638,7 @@ nonisolated struct Mentraos_Ble_ChargingState: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_GlassesInfoRequest: Sendable {
+nonisolated struct Veiller_Ble_GlassesInfoRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -648,7 +648,7 @@ nonisolated struct Mentraos_Ble_GlassesInfoRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DeviceInfo: Sendable {
+nonisolated struct Veiller_Ble_DeviceInfo: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -657,8 +657,8 @@ nonisolated struct Mentraos_Ble_DeviceInfo: Sendable {
 
   var hwModel: String = String()
 
-  var features: Mentraos_Ble_DeviceFeatures {
-    get {_features ?? Mentraos_Ble_DeviceFeatures()}
+  var features: Veiller_Ble_DeviceFeatures {
+    get {_features ?? Veiller_Ble_DeviceFeatures()}
     set {_features = newValue}
   }
   /// Returns true if `features` has been explicitly set.
@@ -670,10 +670,10 @@ nonisolated struct Mentraos_Ble_DeviceInfo: Sendable {
 
   init() {}
 
-  fileprivate var _features: Mentraos_Ble_DeviceFeatures? = nil
+  fileprivate var _features: Veiller_Ble_DeviceFeatures? = nil
 }
 
-nonisolated struct Mentraos_Ble_DeviceFeatures: Sendable {
+nonisolated struct Veiller_Ble_DeviceFeatures: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -700,7 +700,7 @@ nonisolated struct Mentraos_Ble_DeviceFeatures: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_PairingModeRequest: Sendable {
+nonisolated struct Veiller_Ble_PairingModeRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -710,7 +710,7 @@ nonisolated struct Mentraos_Ble_PairingModeRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_HeadPositionRequest: Sendable {
+nonisolated struct Veiller_Ble_HeadPositionRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -720,7 +720,7 @@ nonisolated struct Mentraos_Ble_HeadPositionRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_HeadPosition: Sendable {
+nonisolated struct Veiller_Ble_HeadPosition: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -733,7 +733,7 @@ nonisolated struct Mentraos_Ble_HeadPosition: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_HeadUpAngleConfig: Sendable {
+nonisolated struct Veiller_Ble_HeadUpAngleConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -746,7 +746,7 @@ nonisolated struct Mentraos_Ble_HeadUpAngleConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_HeadUpAngleResponse: Sendable {
+nonisolated struct Veiller_Ble_HeadUpAngleResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -758,7 +758,7 @@ nonisolated struct Mentraos_Ble_HeadUpAngleResponse: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_MicStateConfig: Sendable {
+nonisolated struct Veiller_Ble_MicStateConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -770,7 +770,7 @@ nonisolated struct Mentraos_Ble_MicStateConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_VadEnabledConfig: Sendable {
+nonisolated struct Veiller_Ble_VadEnabledConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -782,7 +782,7 @@ nonisolated struct Mentraos_Ble_VadEnabledConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_VadConfig: Sendable {
+nonisolated struct Veiller_Ble_VadConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -795,12 +795,12 @@ nonisolated struct Mentraos_Ble_VadConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_VadEvent: Sendable {
+nonisolated struct Veiller_Ble_VadEvent: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var state: Mentraos_Ble_VadEvent.State = .inactive
+  var state: Veiller_Ble_VadEvent.State = .inactive
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -831,7 +831,7 @@ nonisolated struct Mentraos_Ble_VadEvent: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_VadEvent.State] = [
+    static let allCases: [Veiller_Ble_VadEvent.State] = [
       .inactive,
       .active,
     ]
@@ -841,7 +841,7 @@ nonisolated struct Mentraos_Ble_VadEvent: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisplayText: Sendable {
+nonisolated struct Veiller_Ble_DisplayText: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -867,7 +867,7 @@ nonisolated struct Mentraos_Ble_DisplayText: Sendable {
 }
 
 /// Initiates bitmap transfer - actual data comes via binary protocol
-nonisolated struct Mentraos_Ble_DisplayImage: Sendable {
+nonisolated struct Veiller_Ble_DisplayImage: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -893,7 +893,7 @@ nonisolated struct Mentraos_Ble_DisplayImage: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_PreloadImage: Sendable {
+nonisolated struct Veiller_Ble_PreloadImage: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -916,7 +916,7 @@ nonisolated struct Mentraos_Ble_PreloadImage: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisplayCachedImage: Sendable {
+nonisolated struct Veiller_Ble_DisplayCachedImage: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -936,7 +936,7 @@ nonisolated struct Mentraos_Ble_DisplayCachedImage: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ClearCachedImage: Sendable {
+nonisolated struct Veiller_Ble_ClearCachedImage: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -948,7 +948,7 @@ nonisolated struct Mentraos_Ble_ClearCachedImage: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisplayScrollingText: Sendable {
+nonisolated struct Veiller_Ble_DisplayScrollingText: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -967,7 +967,7 @@ nonisolated struct Mentraos_Ble_DisplayScrollingText: Sendable {
 
   var height: UInt32 = 0
 
-  var align: Mentraos_Ble_DisplayScrollingText.Alignment = .left
+  var align: Veiller_Ble_DisplayScrollingText.Alignment = .left
 
   /// pixels between lines
   var lineSpacing: UInt32 = 0
@@ -1016,7 +1016,7 @@ nonisolated struct Mentraos_Ble_DisplayScrollingText: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_DisplayScrollingText.Alignment] = [
+    static let allCases: [Veiller_Ble_DisplayScrollingText.Alignment] = [
       .left,
       .center,
       .right,
@@ -1027,7 +1027,7 @@ nonisolated struct Mentraos_Ble_DisplayScrollingText: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ClearDisplay: Sendable {
+nonisolated struct Veiller_Ble_ClearDisplay: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1037,7 +1037,7 @@ nonisolated struct Mentraos_Ble_ClearDisplay: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisplayPowerConfig: Sendable {
+nonisolated struct Veiller_Ble_DisplayPowerConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1050,7 +1050,7 @@ nonisolated struct Mentraos_Ble_DisplayPowerConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_BrightnessConfig: Sendable {
+nonisolated struct Veiller_Ble_BrightnessConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1063,7 +1063,7 @@ nonisolated struct Mentraos_Ble_BrightnessConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_AutoBrightnessConfig: Sendable {
+nonisolated struct Veiller_Ble_AutoBrightnessConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1075,7 +1075,7 @@ nonisolated struct Mentraos_Ble_AutoBrightnessConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_AutoBrightnessMultiplier: Sendable {
+nonisolated struct Veiller_Ble_AutoBrightnessMultiplier: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1088,7 +1088,7 @@ nonisolated struct Mentraos_Ble_AutoBrightnessMultiplier: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DrawLine: Sendable {
+nonisolated struct Veiller_Ble_DrawLine: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1110,7 +1110,7 @@ nonisolated struct Mentraos_Ble_DrawLine: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DrawRect: Sendable {
+nonisolated struct Veiller_Ble_DrawRect: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1132,7 +1132,7 @@ nonisolated struct Mentraos_Ble_DrawRect: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DrawCircle: Sendable {
+nonisolated struct Veiller_Ble_DrawCircle: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1152,7 +1152,7 @@ nonisolated struct Mentraos_Ble_DrawCircle: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_CommitDisplay: Sendable {
+nonisolated struct Veiller_Ble_CommitDisplay: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1162,7 +1162,7 @@ nonisolated struct Mentraos_Ble_CommitDisplay: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisplayDistanceConfig: Sendable {
+nonisolated struct Veiller_Ble_DisplayDistanceConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1174,7 +1174,7 @@ nonisolated struct Mentraos_Ble_DisplayDistanceConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_DisplayHeightConfig: Sendable {
+nonisolated struct Veiller_Ble_DisplayHeightConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1186,14 +1186,14 @@ nonisolated struct Mentraos_Ble_DisplayHeightConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ImageTransferComplete: Sendable {
+nonisolated struct Veiller_Ble_ImageTransferComplete: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   var streamID: String = String()
 
-  var status: Mentraos_Ble_ImageTransferComplete.Status = .ok
+  var status: Veiller_Ble_ImageTransferComplete.Status = .ok
 
   /// List of missing chunk indices
   var missingChunks: [UInt32] = []
@@ -1227,7 +1227,7 @@ nonisolated struct Mentraos_Ble_ImageTransferComplete: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_ImageTransferComplete.Status] = [
+    static let allCases: [Veiller_Ble_ImageTransferComplete.Status] = [
       .ok,
       .incomplete,
     ]
@@ -1238,7 +1238,7 @@ nonisolated struct Mentraos_Ble_ImageTransferComplete: Sendable {
 }
 
 /// Create (or replace, if the id already exists) a component on the canvas.
-nonisolated struct Mentraos_Ble_CanvasCreateComponent: Sendable {
+nonisolated struct Veiller_Ble_CanvasCreateComponent: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1246,7 +1246,7 @@ nonisolated struct Mentraos_Ble_CanvasCreateComponent: Sendable {
   /// phone-assigned; must fall in the pool for `type`
   var id: UInt32 = 0
 
-  var type: Mentraos_Ble_CanvasComponentType = .canvasBitmap
+  var type: Veiller_Ble_CanvasComponentType = .canvasBitmap
 
   var x: UInt32 = 0
 
@@ -1271,7 +1271,7 @@ nonisolated struct Mentraos_Ble_CanvasCreateComponent: Sendable {
 }
 
 /// Set the text of a TEXTBOX / SCROLL_TEXTBOX component.
-nonisolated struct Mentraos_Ble_CanvasUpdateText: Sendable {
+nonisolated struct Veiller_Ble_CanvasUpdateText: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1290,7 +1290,7 @@ nonisolated struct Mentraos_Ble_CanvasUpdateText: Sendable {
 
 /// Begin streaming a 1-bit BMP into a BITMAP component. Pixels arrive as
 /// [0xB0][streamId_hi][streamId_lo][chunkIndex][data...] packets, same as DisplayImage.
-nonisolated struct Mentraos_Ble_CanvasUpdateImage: Sendable {
+nonisolated struct Veiller_Ble_CanvasUpdateImage: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1307,7 +1307,7 @@ nonisolated struct Mentraos_Ble_CanvasUpdateImage: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_CanvasDeleteComponent: Sendable {
+nonisolated struct Veiller_Ble_CanvasDeleteComponent: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1320,7 +1320,7 @@ nonisolated struct Mentraos_Ble_CanvasDeleteComponent: Sendable {
 }
 
 /// Delete all components and exit the canvas view.
-nonisolated struct Mentraos_Ble_CanvasClear: Sendable {
+nonisolated struct Veiller_Ble_CanvasClear: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1331,14 +1331,14 @@ nonisolated struct Mentraos_Ble_CanvasClear: Sendable {
 }
 
 /// Ack for CanvasCreateComponent (and CanvasClear). id echoes the component id (0 for clear).
-nonisolated struct Mentraos_Ble_CanvasResult: Sendable {
+nonisolated struct Veiller_Ble_CanvasResult: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   var id: UInt32 = 0
 
-  var code: Mentraos_Ble_CanvasResult.ResultCode = .ok
+  var code: Veiller_Ble_CanvasResult.ResultCode = .ok
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1381,7 +1381,7 @@ nonisolated struct Mentraos_Ble_CanvasResult: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_CanvasResult.ResultCode] = [
+    static let allCases: [Veiller_Ble_CanvasResult.ResultCode] = [
       .ok,
       .invalid,
       .oversize,
@@ -1393,7 +1393,7 @@ nonisolated struct Mentraos_Ble_CanvasResult: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ImuEnabledConfig: Sendable {
+nonisolated struct Veiller_Ble_ImuEnabledConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1405,7 +1405,7 @@ nonisolated struct Mentraos_Ble_ImuEnabledConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ImuSingleRequest: Sendable {
+nonisolated struct Veiller_Ble_ImuSingleRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1415,7 +1415,7 @@ nonisolated struct Mentraos_Ble_ImuSingleRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ImuStreamConfig: Sendable {
+nonisolated struct Veiller_Ble_ImuStreamConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1427,13 +1427,13 @@ nonisolated struct Mentraos_Ble_ImuStreamConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ImuData: Sendable {
+nonisolated struct Veiller_Ble_ImuData: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var accel: Mentraos_Ble_Vector3 {
-    get {_accel ?? Mentraos_Ble_Vector3()}
+  var accel: Veiller_Ble_Vector3 {
+    get {_accel ?? Veiller_Ble_Vector3()}
     set {_accel = newValue}
   }
   /// Returns true if `accel` has been explicitly set.
@@ -1441,8 +1441,8 @@ nonisolated struct Mentraos_Ble_ImuData: Sendable {
   /// Clears the value of `accel`. Subsequent reads from it will return its default value.
   mutating func clearAccel() {self._accel = nil}
 
-  var gyro: Mentraos_Ble_Vector3 {
-    get {_gyro ?? Mentraos_Ble_Vector3()}
+  var gyro: Veiller_Ble_Vector3 {
+    get {_gyro ?? Veiller_Ble_Vector3()}
     set {_gyro = newValue}
   }
   /// Returns true if `gyro` has been explicitly set.
@@ -1450,8 +1450,8 @@ nonisolated struct Mentraos_Ble_ImuData: Sendable {
   /// Clears the value of `gyro`. Subsequent reads from it will return its default value.
   mutating func clearGyro() {self._gyro = nil}
 
-  var mag: Mentraos_Ble_Vector3 {
-    get {_mag ?? Mentraos_Ble_Vector3()}
+  var mag: Veiller_Ble_Vector3 {
+    get {_mag ?? Veiller_Ble_Vector3()}
     set {_mag = newValue}
   }
   /// Returns true if `mag` has been explicitly set.
@@ -1463,12 +1463,12 @@ nonisolated struct Mentraos_Ble_ImuData: Sendable {
 
   init() {}
 
-  fileprivate var _accel: Mentraos_Ble_Vector3? = nil
-  fileprivate var _gyro: Mentraos_Ble_Vector3? = nil
-  fileprivate var _mag: Mentraos_Ble_Vector3? = nil
+  fileprivate var _accel: Veiller_Ble_Vector3? = nil
+  fileprivate var _gyro: Veiller_Ble_Vector3? = nil
+  fileprivate var _mag: Veiller_Ble_Vector3? = nil
 }
 
-nonisolated struct Mentraos_Ble_Vector3: Sendable {
+nonisolated struct Veiller_Ble_Vector3: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1484,14 +1484,14 @@ nonisolated struct Mentraos_Ble_Vector3: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_ButtonEvent: Sendable {
+nonisolated struct Veiller_Ble_ButtonEvent: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var button: Mentraos_Ble_ButtonEvent.Button = .center
+  var button: Veiller_Ble_ButtonEvent.Button = .center
 
-  var state: Mentraos_Ble_ButtonEvent.State = .up
+  var state: Veiller_Ble_ButtonEvent.State = .up
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1525,7 +1525,7 @@ nonisolated struct Mentraos_Ble_ButtonEvent: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_ButtonEvent.Button] = [
+    static let allCases: [Veiller_Ble_ButtonEvent.Button] = [
       .center,
       .left,
       .right,
@@ -1560,7 +1560,7 @@ nonisolated struct Mentraos_Ble_ButtonEvent: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_ButtonEvent.State] = [
+    static let allCases: [Veiller_Ble_ButtonEvent.State] = [
       .up,
       .down,
     ]
@@ -1570,12 +1570,12 @@ nonisolated struct Mentraos_Ble_ButtonEvent: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_HeadGesture: Sendable {
+nonisolated struct Veiller_Ble_HeadGesture: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var gesture: Mentraos_Ble_HeadGesture.Gesture = .nod
+  var gesture: Veiller_Ble_HeadGesture.Gesture = .nod
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1609,7 +1609,7 @@ nonisolated struct Mentraos_Ble_HeadGesture: Sendable {
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static let allCases: [Mentraos_Ble_HeadGesture.Gesture] = [
+    static let allCases: [Veiller_Ble_HeadGesture.Gesture] = [
       .nod,
       .shake,
       .headUp,
@@ -1620,12 +1620,12 @@ nonisolated struct Mentraos_Ble_HeadGesture: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_HeadGestureConfig: Sendable {
+nonisolated struct Veiller_Ble_HeadGestureConfig: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var gesture: Mentraos_Ble_HeadGesture.Gesture = .nod
+  var gesture: Veiller_Ble_HeadGesture.Gesture = .nod
 
   var enabled: Bool = false
 
@@ -1634,7 +1634,7 @@ nonisolated struct Mentraos_Ble_HeadGestureConfig: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_RestartRequest: Sendable {
+nonisolated struct Veiller_Ble_RestartRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1644,7 +1644,7 @@ nonisolated struct Mentraos_Ble_RestartRequest: Sendable {
   init() {}
 }
 
-nonisolated struct Mentraos_Ble_FactoryResetRequest: Sendable {
+nonisolated struct Veiller_Ble_FactoryResetRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -1656,13 +1656,13 @@ nonisolated struct Mentraos_Ble_FactoryResetRequest: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate nonisolated let _protobuf_package = "mentraos.ble"
+fileprivate nonisolated let _protobuf_package = "veiller.ble"
 
-nonisolated extension Mentraos_Ble_CanvasComponentType: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasComponentType: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CANVAS_BITMAP\0\u{1}CANVAS_TEXTBOX\0\u{1}CANVAS_SCROLL_TEXTBOX\0")
 }
 
-nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".PhoneToGlasses"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}msg_id\0\u{2}\u{9}disconnect\0\u{3}battery_state\0\u{3}glasses_info\0\u{3}pairing_mode\0\u{3}head_position\0\u{3}head_up_angle\0\u{4}\u{5}mic_state\0\u{3}vad_enabled\0\u{3}vad_config\0\u{4}\u{8}display_text\0\u{3}display_image\0\u{3}preload_image\0\u{3}display_cached_image\0\u{3}clear_cached_image\0\u{3}display_scrolling_text\0\u{3}display_power\0\u{1}brightness\0\u{3}auto_brightness\0\u{3}auto_brightness_mult\0\u{3}draw_line\0\u{3}draw_rect\0\u{3}draw_circle\0\u{1}commit\0\u{3}display_distance\0\u{3}display_height\0\u{3}clear_display\0\u{4}\u{4}imu_enabled\0\u{3}imu_single\0\u{3}imu_stream\0\u{3}head_gesture\0\u{2}\u{7}restart\0\u{3}factory_reset\0\u{3}canvas_create_component\0\u{3}canvas_update_text\0\u{3}canvas_update_image\0\u{3}canvas_delete_component\0\u{3}canvas_clear\0")
 
@@ -1674,7 +1674,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.msgID) }()
       case 10: try {
-        var v: Mentraos_Ble_DisconnectRequest?
+        var v: Veiller_Ble_DisconnectRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1687,7 +1687,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 11: try {
-        var v: Mentraos_Ble_BatteryStateRequest?
+        var v: Veiller_Ble_BatteryStateRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1700,7 +1700,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 12: try {
-        var v: Mentraos_Ble_GlassesInfoRequest?
+        var v: Veiller_Ble_GlassesInfoRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1713,7 +1713,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 13: try {
-        var v: Mentraos_Ble_PairingModeRequest?
+        var v: Veiller_Ble_PairingModeRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1726,7 +1726,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 14: try {
-        var v: Mentraos_Ble_HeadPositionRequest?
+        var v: Veiller_Ble_HeadPositionRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1739,7 +1739,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 15: try {
-        var v: Mentraos_Ble_HeadUpAngleConfig?
+        var v: Veiller_Ble_HeadUpAngleConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1752,7 +1752,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 20: try {
-        var v: Mentraos_Ble_MicStateConfig?
+        var v: Veiller_Ble_MicStateConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1765,7 +1765,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 21: try {
-        var v: Mentraos_Ble_VadEnabledConfig?
+        var v: Veiller_Ble_VadEnabledConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1778,7 +1778,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 22: try {
-        var v: Mentraos_Ble_VadConfig?
+        var v: Veiller_Ble_VadConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1791,7 +1791,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 30: try {
-        var v: Mentraos_Ble_DisplayText?
+        var v: Veiller_Ble_DisplayText?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1804,7 +1804,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 31: try {
-        var v: Mentraos_Ble_DisplayImage?
+        var v: Veiller_Ble_DisplayImage?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1817,7 +1817,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 32: try {
-        var v: Mentraos_Ble_PreloadImage?
+        var v: Veiller_Ble_PreloadImage?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1830,7 +1830,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 33: try {
-        var v: Mentraos_Ble_DisplayCachedImage?
+        var v: Veiller_Ble_DisplayCachedImage?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1843,7 +1843,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 34: try {
-        var v: Mentraos_Ble_ClearCachedImage?
+        var v: Veiller_Ble_ClearCachedImage?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1856,7 +1856,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 35: try {
-        var v: Mentraos_Ble_DisplayScrollingText?
+        var v: Veiller_Ble_DisplayScrollingText?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1869,7 +1869,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 36: try {
-        var v: Mentraos_Ble_DisplayPowerConfig?
+        var v: Veiller_Ble_DisplayPowerConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1882,7 +1882,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 37: try {
-        var v: Mentraos_Ble_BrightnessConfig?
+        var v: Veiller_Ble_BrightnessConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1895,7 +1895,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 38: try {
-        var v: Mentraos_Ble_AutoBrightnessConfig?
+        var v: Veiller_Ble_AutoBrightnessConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1908,7 +1908,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 39: try {
-        var v: Mentraos_Ble_AutoBrightnessMultiplier?
+        var v: Veiller_Ble_AutoBrightnessMultiplier?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1921,7 +1921,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 40: try {
-        var v: Mentraos_Ble_DrawLine?
+        var v: Veiller_Ble_DrawLine?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1934,7 +1934,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 41: try {
-        var v: Mentraos_Ble_DrawRect?
+        var v: Veiller_Ble_DrawRect?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1947,7 +1947,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 42: try {
-        var v: Mentraos_Ble_DrawCircle?
+        var v: Veiller_Ble_DrawCircle?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1960,7 +1960,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 43: try {
-        var v: Mentraos_Ble_CommitDisplay?
+        var v: Veiller_Ble_CommitDisplay?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1973,7 +1973,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 44: try {
-        var v: Mentraos_Ble_DisplayDistanceConfig?
+        var v: Veiller_Ble_DisplayDistanceConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1986,7 +1986,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 45: try {
-        var v: Mentraos_Ble_DisplayHeightConfig?
+        var v: Veiller_Ble_DisplayHeightConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -1999,7 +1999,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 46: try {
-        var v: Mentraos_Ble_ClearDisplay?
+        var v: Veiller_Ble_ClearDisplay?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2012,7 +2012,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 50: try {
-        var v: Mentraos_Ble_ImuEnabledConfig?
+        var v: Veiller_Ble_ImuEnabledConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2025,7 +2025,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 51: try {
-        var v: Mentraos_Ble_ImuSingleRequest?
+        var v: Veiller_Ble_ImuSingleRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2038,7 +2038,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 52: try {
-        var v: Mentraos_Ble_ImuStreamConfig?
+        var v: Veiller_Ble_ImuStreamConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2051,7 +2051,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 53: try {
-        var v: Mentraos_Ble_HeadGestureConfig?
+        var v: Veiller_Ble_HeadGestureConfig?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2064,7 +2064,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 60: try {
-        var v: Mentraos_Ble_RestartRequest?
+        var v: Veiller_Ble_RestartRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2077,7 +2077,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 61: try {
-        var v: Mentraos_Ble_FactoryResetRequest?
+        var v: Veiller_Ble_FactoryResetRequest?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2090,7 +2090,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 62: try {
-        var v: Mentraos_Ble_CanvasCreateComponent?
+        var v: Veiller_Ble_CanvasCreateComponent?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2103,7 +2103,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 63: try {
-        var v: Mentraos_Ble_CanvasUpdateText?
+        var v: Veiller_Ble_CanvasUpdateText?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2116,7 +2116,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 64: try {
-        var v: Mentraos_Ble_CanvasUpdateImage?
+        var v: Veiller_Ble_CanvasUpdateImage?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2129,7 +2129,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 65: try {
-        var v: Mentraos_Ble_CanvasDeleteComponent?
+        var v: Veiller_Ble_CanvasDeleteComponent?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2142,7 +2142,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 66: try {
-        var v: Mentraos_Ble_CanvasClear?
+        var v: Veiller_Ble_CanvasClear?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2321,7 +2321,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_PhoneToGlasses, rhs: Mentraos_Ble_PhoneToGlasses) -> Bool {
+  static func ==(lhs: Veiller_Ble_PhoneToGlasses, rhs: Veiller_Ble_PhoneToGlasses) -> Bool {
     if lhs.msgID != rhs.msgID {return false}
     if lhs.payload != rhs.payload {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -2329,7 +2329,7 @@ nonisolated extension Mentraos_Ble_PhoneToGlasses: SwiftProtobuf.Message, SwiftP
   }
 }
 
-nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GlassesToPhone"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{4}\u{a}battery_status\0\u{3}charging_state\0\u{3}device_info\0\u{3}head_position\0\u{3}head_up_angle_set\0\u{4}\u{6}vad_event\0\u{4}\u{a}image_transfer_complete\0\u{3}canvas_result\0\u{4}\u{9}imu_data\0\u{3}button_event\0\u{3}head_gesture\0")
 
@@ -2340,7 +2340,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 10: try {
-        var v: Mentraos_Ble_BatteryStatus?
+        var v: Veiller_Ble_BatteryStatus?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2353,7 +2353,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 11: try {
-        var v: Mentraos_Ble_ChargingState?
+        var v: Veiller_Ble_ChargingState?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2366,7 +2366,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 12: try {
-        var v: Mentraos_Ble_DeviceInfo?
+        var v: Veiller_Ble_DeviceInfo?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2379,7 +2379,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 13: try {
-        var v: Mentraos_Ble_HeadPosition?
+        var v: Veiller_Ble_HeadPosition?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2392,7 +2392,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 14: try {
-        var v: Mentraos_Ble_HeadUpAngleResponse?
+        var v: Veiller_Ble_HeadUpAngleResponse?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2405,7 +2405,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 20: try {
-        var v: Mentraos_Ble_VadEvent?
+        var v: Veiller_Ble_VadEvent?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2418,7 +2418,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 30: try {
-        var v: Mentraos_Ble_ImageTransferComplete?
+        var v: Veiller_Ble_ImageTransferComplete?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2431,7 +2431,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 31: try {
-        var v: Mentraos_Ble_CanvasResult?
+        var v: Veiller_Ble_CanvasResult?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2444,7 +2444,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 40: try {
-        var v: Mentraos_Ble_ImuData?
+        var v: Veiller_Ble_ImuData?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2457,7 +2457,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 41: try {
-        var v: Mentraos_Ble_ButtonEvent?
+        var v: Veiller_Ble_ButtonEvent?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2470,7 +2470,7 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
         }
       }()
       case 42: try {
-        var v: Mentraos_Ble_HeadGesture?
+        var v: Veiller_Ble_HeadGesture?
         var hadOneofValue = false
         if let current = self.payload {
           hadOneofValue = true
@@ -2542,14 +2542,14 @@ nonisolated extension Mentraos_Ble_GlassesToPhone: SwiftProtobuf.Message, SwiftP
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_GlassesToPhone, rhs: Mentraos_Ble_GlassesToPhone) -> Bool {
+  static func ==(lhs: Veiller_Ble_GlassesToPhone, rhs: Veiller_Ble_GlassesToPhone) -> Bool {
     if lhs.payload != rhs.payload {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DisconnectRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisconnectRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisconnectRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -2562,13 +2562,13 @@ nonisolated extension Mentraos_Ble_DisconnectRequest: SwiftProtobuf.Message, Swi
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisconnectRequest, rhs: Mentraos_Ble_DisconnectRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisconnectRequest, rhs: Veiller_Ble_DisconnectRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_BatteryStateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_BatteryStateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BatteryStateRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -2581,13 +2581,13 @@ nonisolated extension Mentraos_Ble_BatteryStateRequest: SwiftProtobuf.Message, S
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_BatteryStateRequest, rhs: Mentraos_Ble_BatteryStateRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_BatteryStateRequest, rhs: Veiller_Ble_BatteryStateRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_BatteryStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_BatteryStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BatteryStatus"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}level\0\u{1}charging\0")
 
@@ -2614,7 +2614,7 @@ nonisolated extension Mentraos_Ble_BatteryStatus: SwiftProtobuf.Message, SwiftPr
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_BatteryStatus, rhs: Mentraos_Ble_BatteryStatus) -> Bool {
+  static func ==(lhs: Veiller_Ble_BatteryStatus, rhs: Veiller_Ble_BatteryStatus) -> Bool {
     if lhs.level != rhs.level {return false}
     if lhs.charging != rhs.charging {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -2622,7 +2622,7 @@ nonisolated extension Mentraos_Ble_BatteryStatus: SwiftProtobuf.Message, SwiftPr
   }
 }
 
-nonisolated extension Mentraos_Ble_ChargingState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ChargingState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ChargingState"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0")
 
@@ -2645,18 +2645,18 @@ nonisolated extension Mentraos_Ble_ChargingState: SwiftProtobuf.Message, SwiftPr
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ChargingState, rhs: Mentraos_Ble_ChargingState) -> Bool {
+  static func ==(lhs: Veiller_Ble_ChargingState, rhs: Veiller_Ble_ChargingState) -> Bool {
     if lhs.state != rhs.state {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_ChargingState.State: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ChargingState.State: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0NOT_CHARGING\0\u{1}CHARGING\0")
 }
 
-nonisolated extension Mentraos_Ble_GlassesInfoRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_GlassesInfoRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GlassesInfoRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -2669,13 +2669,13 @@ nonisolated extension Mentraos_Ble_GlassesInfoRequest: SwiftProtobuf.Message, Sw
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_GlassesInfoRequest, rhs: Mentraos_Ble_GlassesInfoRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_GlassesInfoRequest, rhs: Veiller_Ble_GlassesInfoRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DeviceInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DeviceInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DeviceInfo"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}fw_version\0\u{3}hw_model\0\u{1}features\0")
 
@@ -2710,7 +2710,7 @@ nonisolated extension Mentraos_Ble_DeviceInfo: SwiftProtobuf.Message, SwiftProto
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DeviceInfo, rhs: Mentraos_Ble_DeviceInfo) -> Bool {
+  static func ==(lhs: Veiller_Ble_DeviceInfo, rhs: Veiller_Ble_DeviceInfo) -> Bool {
     if lhs.fwVersion != rhs.fwVersion {return false}
     if lhs.hwModel != rhs.hwModel {return false}
     if lhs._features != rhs._features {return false}
@@ -2719,7 +2719,7 @@ nonisolated extension Mentraos_Ble_DeviceInfo: SwiftProtobuf.Message, SwiftProto
   }
 }
 
-nonisolated extension Mentraos_Ble_DeviceFeatures: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DeviceFeatures: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DeviceFeatures"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}camera\0\u{1}display\0\u{3}audio_tx\0\u{3}audio_rx\0\u{1}imu\0\u{1}vad\0\u{3}mic_switching\0\u{3}image_chunk_buffer\0")
 
@@ -2770,7 +2770,7 @@ nonisolated extension Mentraos_Ble_DeviceFeatures: SwiftProtobuf.Message, SwiftP
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DeviceFeatures, rhs: Mentraos_Ble_DeviceFeatures) -> Bool {
+  static func ==(lhs: Veiller_Ble_DeviceFeatures, rhs: Veiller_Ble_DeviceFeatures) -> Bool {
     if lhs.camera != rhs.camera {return false}
     if lhs.display != rhs.display {return false}
     if lhs.audioTx != rhs.audioTx {return false}
@@ -2784,7 +2784,7 @@ nonisolated extension Mentraos_Ble_DeviceFeatures: SwiftProtobuf.Message, SwiftP
   }
 }
 
-nonisolated extension Mentraos_Ble_PairingModeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_PairingModeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".PairingModeRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -2797,13 +2797,13 @@ nonisolated extension Mentraos_Ble_PairingModeRequest: SwiftProtobuf.Message, Sw
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_PairingModeRequest, rhs: Mentraos_Ble_PairingModeRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_PairingModeRequest, rhs: Veiller_Ble_PairingModeRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_HeadPositionRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadPositionRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HeadPositionRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -2816,13 +2816,13 @@ nonisolated extension Mentraos_Ble_HeadPositionRequest: SwiftProtobuf.Message, S
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_HeadPositionRequest, rhs: Mentraos_Ble_HeadPositionRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_HeadPositionRequest, rhs: Veiller_Ble_HeadPositionRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_HeadPosition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadPosition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HeadPosition"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}angle\0")
 
@@ -2845,14 +2845,14 @@ nonisolated extension Mentraos_Ble_HeadPosition: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_HeadPosition, rhs: Mentraos_Ble_HeadPosition) -> Bool {
+  static func ==(lhs: Veiller_Ble_HeadPosition, rhs: Veiller_Ble_HeadPosition) -> Bool {
     if lhs.angle != rhs.angle {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_HeadUpAngleConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadUpAngleConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HeadUpAngleConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}angle\0")
 
@@ -2875,14 +2875,14 @@ nonisolated extension Mentraos_Ble_HeadUpAngleConfig: SwiftProtobuf.Message, Swi
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_HeadUpAngleConfig, rhs: Mentraos_Ble_HeadUpAngleConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_HeadUpAngleConfig, rhs: Veiller_Ble_HeadUpAngleConfig) -> Bool {
     if lhs.angle != rhs.angle {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_HeadUpAngleResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadUpAngleResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HeadUpAngleResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
 
@@ -2905,14 +2905,14 @@ nonisolated extension Mentraos_Ble_HeadUpAngleResponse: SwiftProtobuf.Message, S
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_HeadUpAngleResponse, rhs: Mentraos_Ble_HeadUpAngleResponse) -> Bool {
+  static func ==(lhs: Veiller_Ble_HeadUpAngleResponse, rhs: Veiller_Ble_HeadUpAngleResponse) -> Bool {
     if lhs.success != rhs.success {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_MicStateConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_MicStateConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".MicStateConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enabled\0")
 
@@ -2935,14 +2935,14 @@ nonisolated extension Mentraos_Ble_MicStateConfig: SwiftProtobuf.Message, SwiftP
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_MicStateConfig, rhs: Mentraos_Ble_MicStateConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_MicStateConfig, rhs: Veiller_Ble_MicStateConfig) -> Bool {
     if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_VadEnabledConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_VadEnabledConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".VadEnabledConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enabled\0")
 
@@ -2965,14 +2965,14 @@ nonisolated extension Mentraos_Ble_VadEnabledConfig: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_VadEnabledConfig, rhs: Mentraos_Ble_VadEnabledConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_VadEnabledConfig, rhs: Veiller_Ble_VadEnabledConfig) -> Bool {
     if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_VadConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_VadConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".VadConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}sensitivity\0")
 
@@ -2995,14 +2995,14 @@ nonisolated extension Mentraos_Ble_VadConfig: SwiftProtobuf.Message, SwiftProtob
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_VadConfig, rhs: Mentraos_Ble_VadConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_VadConfig, rhs: Veiller_Ble_VadConfig) -> Bool {
     if lhs.sensitivity != rhs.sensitivity {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_VadEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_VadEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".VadEvent"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0")
 
@@ -3025,18 +3025,18 @@ nonisolated extension Mentraos_Ble_VadEvent: SwiftProtobuf.Message, SwiftProtobu
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_VadEvent, rhs: Mentraos_Ble_VadEvent) -> Bool {
+  static func ==(lhs: Veiller_Ble_VadEvent, rhs: Veiller_Ble_VadEvent) -> Bool {
     if lhs.state != rhs.state {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_VadEvent.State: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_VadEvent.State: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0INACTIVE\0\u{1}ACTIVE\0")
 }
 
-nonisolated extension Mentraos_Ble_DisplayText: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayText: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayText"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}color\0\u{3}font_code\0\u{1}x\0\u{1}y\0\u{1}size\0")
 
@@ -3079,7 +3079,7 @@ nonisolated extension Mentraos_Ble_DisplayText: SwiftProtobuf.Message, SwiftProt
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayText, rhs: Mentraos_Ble_DisplayText) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayText, rhs: Veiller_Ble_DisplayText) -> Bool {
     if lhs.text != rhs.text {return false}
     if lhs.color != rhs.color {return false}
     if lhs.fontCode != rhs.fontCode {return false}
@@ -3091,7 +3091,7 @@ nonisolated extension Mentraos_Ble_DisplayText: SwiftProtobuf.Message, SwiftProt
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayImage"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}stream_id\0\u{1}x\0\u{1}y\0\u{1}width\0\u{1}height\0\u{1}encoding\0\u{3}total_chunks\0")
 
@@ -3138,7 +3138,7 @@ nonisolated extension Mentraos_Ble_DisplayImage: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayImage, rhs: Mentraos_Ble_DisplayImage) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayImage, rhs: Veiller_Ble_DisplayImage) -> Bool {
     if lhs.streamID != rhs.streamID {return false}
     if lhs.x != rhs.x {return false}
     if lhs.y != rhs.y {return false}
@@ -3151,7 +3151,7 @@ nonisolated extension Mentraos_Ble_DisplayImage: SwiftProtobuf.Message, SwiftPro
   }
 }
 
-nonisolated extension Mentraos_Ble_PreloadImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_PreloadImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".PreloadImage"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}stream_id\0\u{3}image_id\0\u{1}width\0\u{1}height\0\u{1}encoding\0\u{3}total_chunks\0")
 
@@ -3194,7 +3194,7 @@ nonisolated extension Mentraos_Ble_PreloadImage: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_PreloadImage, rhs: Mentraos_Ble_PreloadImage) -> Bool {
+  static func ==(lhs: Veiller_Ble_PreloadImage, rhs: Veiller_Ble_PreloadImage) -> Bool {
     if lhs.streamID != rhs.streamID {return false}
     if lhs.imageID != rhs.imageID {return false}
     if lhs.width != rhs.width {return false}
@@ -3206,7 +3206,7 @@ nonisolated extension Mentraos_Ble_PreloadImage: SwiftProtobuf.Message, SwiftPro
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayCachedImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayCachedImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayCachedImage"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}image_id\0\u{1}x\0\u{1}y\0\u{1}width\0\u{1}height\0")
 
@@ -3245,7 +3245,7 @@ nonisolated extension Mentraos_Ble_DisplayCachedImage: SwiftProtobuf.Message, Sw
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayCachedImage, rhs: Mentraos_Ble_DisplayCachedImage) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayCachedImage, rhs: Veiller_Ble_DisplayCachedImage) -> Bool {
     if lhs.imageID != rhs.imageID {return false}
     if lhs.x != rhs.x {return false}
     if lhs.y != rhs.y {return false}
@@ -3256,7 +3256,7 @@ nonisolated extension Mentraos_Ble_DisplayCachedImage: SwiftProtobuf.Message, Sw
   }
 }
 
-nonisolated extension Mentraos_Ble_ClearCachedImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ClearCachedImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClearCachedImage"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}image_id\0")
 
@@ -3279,14 +3279,14 @@ nonisolated extension Mentraos_Ble_ClearCachedImage: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ClearCachedImage, rhs: Mentraos_Ble_ClearCachedImage) -> Bool {
+  static func ==(lhs: Veiller_Ble_ClearCachedImage, rhs: Veiller_Ble_ClearCachedImage) -> Bool {
     if lhs.imageID != rhs.imageID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayScrollingText: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayScrollingText: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayScrollingText"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}text\0\u{1}color\0\u{3}font_code\0\u{1}x\0\u{1}y\0\u{1}width\0\u{1}height\0\u{1}align\0\u{3}line_spacing\0\u{1}speed\0\u{1}size\0\u{1}loop\0\u{3}pause_ms\0")
 
@@ -3357,7 +3357,7 @@ nonisolated extension Mentraos_Ble_DisplayScrollingText: SwiftProtobuf.Message, 
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayScrollingText, rhs: Mentraos_Ble_DisplayScrollingText) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayScrollingText, rhs: Veiller_Ble_DisplayScrollingText) -> Bool {
     if lhs.text != rhs.text {return false}
     if lhs.color != rhs.color {return false}
     if lhs.fontCode != rhs.fontCode {return false}
@@ -3376,11 +3376,11 @@ nonisolated extension Mentraos_Ble_DisplayScrollingText: SwiftProtobuf.Message, 
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayScrollingText.Alignment: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayScrollingText.Alignment: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0LEFT\0\u{1}CENTER\0\u{1}RIGHT\0")
 }
 
-nonisolated extension Mentraos_Ble_ClearDisplay: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ClearDisplay: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClearDisplay"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -3393,13 +3393,13 @@ nonisolated extension Mentraos_Ble_ClearDisplay: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ClearDisplay, rhs: Mentraos_Ble_ClearDisplay) -> Bool {
+  static func ==(lhs: Veiller_Ble_ClearDisplay, rhs: Veiller_Ble_ClearDisplay) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayPowerConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayPowerConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayPowerConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}on\0")
 
@@ -3422,14 +3422,14 @@ nonisolated extension Mentraos_Ble_DisplayPowerConfig: SwiftProtobuf.Message, Sw
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayPowerConfig, rhs: Mentraos_Ble_DisplayPowerConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayPowerConfig, rhs: Veiller_Ble_DisplayPowerConfig) -> Bool {
     if lhs.on != rhs.on {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_BrightnessConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_BrightnessConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BrightnessConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}value\0")
 
@@ -3452,14 +3452,14 @@ nonisolated extension Mentraos_Ble_BrightnessConfig: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_BrightnessConfig, rhs: Mentraos_Ble_BrightnessConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_BrightnessConfig, rhs: Veiller_Ble_BrightnessConfig) -> Bool {
     if lhs.value != rhs.value {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_AutoBrightnessConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_AutoBrightnessConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".AutoBrightnessConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enabled\0")
 
@@ -3482,14 +3482,14 @@ nonisolated extension Mentraos_Ble_AutoBrightnessConfig: SwiftProtobuf.Message, 
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_AutoBrightnessConfig, rhs: Mentraos_Ble_AutoBrightnessConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_AutoBrightnessConfig, rhs: Veiller_Ble_AutoBrightnessConfig) -> Bool {
     if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_AutoBrightnessMultiplier: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_AutoBrightnessMultiplier: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".AutoBrightnessMultiplier"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}multiplier\0")
 
@@ -3512,14 +3512,14 @@ nonisolated extension Mentraos_Ble_AutoBrightnessMultiplier: SwiftProtobuf.Messa
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_AutoBrightnessMultiplier, rhs: Mentraos_Ble_AutoBrightnessMultiplier) -> Bool {
+  static func ==(lhs: Veiller_Ble_AutoBrightnessMultiplier, rhs: Veiller_Ble_AutoBrightnessMultiplier) -> Bool {
     if lhs.multiplier != rhs.multiplier {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DrawLine: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DrawLine: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DrawLine"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}color\0\u{1}stroke\0\u{1}x1\0\u{1}y1\0\u{1}x2\0\u{1}y2\0")
 
@@ -3562,7 +3562,7 @@ nonisolated extension Mentraos_Ble_DrawLine: SwiftProtobuf.Message, SwiftProtobu
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DrawLine, rhs: Mentraos_Ble_DrawLine) -> Bool {
+  static func ==(lhs: Veiller_Ble_DrawLine, rhs: Veiller_Ble_DrawLine) -> Bool {
     if lhs.color != rhs.color {return false}
     if lhs.stroke != rhs.stroke {return false}
     if lhs.x1 != rhs.x1 {return false}
@@ -3574,7 +3574,7 @@ nonisolated extension Mentraos_Ble_DrawLine: SwiftProtobuf.Message, SwiftProtobu
   }
 }
 
-nonisolated extension Mentraos_Ble_DrawRect: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DrawRect: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DrawRect"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}color\0\u{1}stroke\0\u{1}x\0\u{1}y\0\u{1}width\0\u{1}height\0")
 
@@ -3617,7 +3617,7 @@ nonisolated extension Mentraos_Ble_DrawRect: SwiftProtobuf.Message, SwiftProtobu
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DrawRect, rhs: Mentraos_Ble_DrawRect) -> Bool {
+  static func ==(lhs: Veiller_Ble_DrawRect, rhs: Veiller_Ble_DrawRect) -> Bool {
     if lhs.color != rhs.color {return false}
     if lhs.stroke != rhs.stroke {return false}
     if lhs.x != rhs.x {return false}
@@ -3629,7 +3629,7 @@ nonisolated extension Mentraos_Ble_DrawRect: SwiftProtobuf.Message, SwiftProtobu
   }
 }
 
-nonisolated extension Mentraos_Ble_DrawCircle: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DrawCircle: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DrawCircle"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}color\0\u{1}stroke\0\u{1}x\0\u{1}y\0\u{1}radius\0")
 
@@ -3668,7 +3668,7 @@ nonisolated extension Mentraos_Ble_DrawCircle: SwiftProtobuf.Message, SwiftProto
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DrawCircle, rhs: Mentraos_Ble_DrawCircle) -> Bool {
+  static func ==(lhs: Veiller_Ble_DrawCircle, rhs: Veiller_Ble_DrawCircle) -> Bool {
     if lhs.color != rhs.color {return false}
     if lhs.stroke != rhs.stroke {return false}
     if lhs.x != rhs.x {return false}
@@ -3679,7 +3679,7 @@ nonisolated extension Mentraos_Ble_DrawCircle: SwiftProtobuf.Message, SwiftProto
   }
 }
 
-nonisolated extension Mentraos_Ble_CommitDisplay: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CommitDisplay: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CommitDisplay"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -3692,13 +3692,13 @@ nonisolated extension Mentraos_Ble_CommitDisplay: SwiftProtobuf.Message, SwiftPr
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CommitDisplay, rhs: Mentraos_Ble_CommitDisplay) -> Bool {
+  static func ==(lhs: Veiller_Ble_CommitDisplay, rhs: Veiller_Ble_CommitDisplay) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayDistanceConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayDistanceConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayDistanceConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}distance_cm\0")
 
@@ -3721,14 +3721,14 @@ nonisolated extension Mentraos_Ble_DisplayDistanceConfig: SwiftProtobuf.Message,
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayDistanceConfig, rhs: Mentraos_Ble_DisplayDistanceConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayDistanceConfig, rhs: Veiller_Ble_DisplayDistanceConfig) -> Bool {
     if lhs.distanceCm != rhs.distanceCm {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_DisplayHeightConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_DisplayHeightConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DisplayHeightConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}height\0")
 
@@ -3751,14 +3751,14 @@ nonisolated extension Mentraos_Ble_DisplayHeightConfig: SwiftProtobuf.Message, S
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_DisplayHeightConfig, rhs: Mentraos_Ble_DisplayHeightConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_DisplayHeightConfig, rhs: Veiller_Ble_DisplayHeightConfig) -> Bool {
     if lhs.height != rhs.height {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_ImageTransferComplete: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ImageTransferComplete: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ImageTransferComplete"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}stream_id\0\u{1}status\0\u{3}missing_chunks\0")
 
@@ -3789,7 +3789,7 @@ nonisolated extension Mentraos_Ble_ImageTransferComplete: SwiftProtobuf.Message,
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ImageTransferComplete, rhs: Mentraos_Ble_ImageTransferComplete) -> Bool {
+  static func ==(lhs: Veiller_Ble_ImageTransferComplete, rhs: Veiller_Ble_ImageTransferComplete) -> Bool {
     if lhs.streamID != rhs.streamID {return false}
     if lhs.status != rhs.status {return false}
     if lhs.missingChunks != rhs.missingChunks {return false}
@@ -3798,11 +3798,11 @@ nonisolated extension Mentraos_Ble_ImageTransferComplete: SwiftProtobuf.Message,
   }
 }
 
-nonisolated extension Mentraos_Ble_ImageTransferComplete.Status: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ImageTransferComplete.Status: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0OK\0\u{1}INCOMPLETE\0")
 }
 
-nonisolated extension Mentraos_Ble_CanvasCreateComponent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasCreateComponent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CanvasCreateComponent"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}type\0\u{1}x\0\u{1}y\0\u{1}width\0\u{1}height\0\u{3}border_width\0\u{3}border_radius\0\u{1}padding\0")
 
@@ -3857,7 +3857,7 @@ nonisolated extension Mentraos_Ble_CanvasCreateComponent: SwiftProtobuf.Message,
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CanvasCreateComponent, rhs: Mentraos_Ble_CanvasCreateComponent) -> Bool {
+  static func ==(lhs: Veiller_Ble_CanvasCreateComponent, rhs: Veiller_Ble_CanvasCreateComponent) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.type != rhs.type {return false}
     if lhs.x != rhs.x {return false}
@@ -3872,7 +3872,7 @@ nonisolated extension Mentraos_Ble_CanvasCreateComponent: SwiftProtobuf.Message,
   }
 }
 
-nonisolated extension Mentraos_Ble_CanvasUpdateText: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasUpdateText: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CanvasUpdateText"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}text\0\u{3}scroll_offset\0")
 
@@ -3903,7 +3903,7 @@ nonisolated extension Mentraos_Ble_CanvasUpdateText: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CanvasUpdateText, rhs: Mentraos_Ble_CanvasUpdateText) -> Bool {
+  static func ==(lhs: Veiller_Ble_CanvasUpdateText, rhs: Veiller_Ble_CanvasUpdateText) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.text != rhs.text {return false}
     if lhs.scrollOffset != rhs.scrollOffset {return false}
@@ -3912,7 +3912,7 @@ nonisolated extension Mentraos_Ble_CanvasUpdateText: SwiftProtobuf.Message, Swif
   }
 }
 
-nonisolated extension Mentraos_Ble_CanvasUpdateImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasUpdateImage: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CanvasUpdateImage"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}stream_id\0\u{3}total_chunks\0")
 
@@ -3943,7 +3943,7 @@ nonisolated extension Mentraos_Ble_CanvasUpdateImage: SwiftProtobuf.Message, Swi
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CanvasUpdateImage, rhs: Mentraos_Ble_CanvasUpdateImage) -> Bool {
+  static func ==(lhs: Veiller_Ble_CanvasUpdateImage, rhs: Veiller_Ble_CanvasUpdateImage) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.streamID != rhs.streamID {return false}
     if lhs.totalChunks != rhs.totalChunks {return false}
@@ -3952,7 +3952,7 @@ nonisolated extension Mentraos_Ble_CanvasUpdateImage: SwiftProtobuf.Message, Swi
   }
 }
 
-nonisolated extension Mentraos_Ble_CanvasDeleteComponent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasDeleteComponent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CanvasDeleteComponent"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0")
 
@@ -3975,14 +3975,14 @@ nonisolated extension Mentraos_Ble_CanvasDeleteComponent: SwiftProtobuf.Message,
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CanvasDeleteComponent, rhs: Mentraos_Ble_CanvasDeleteComponent) -> Bool {
+  static func ==(lhs: Veiller_Ble_CanvasDeleteComponent, rhs: Veiller_Ble_CanvasDeleteComponent) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_CanvasClear: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasClear: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CanvasClear"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -3995,13 +3995,13 @@ nonisolated extension Mentraos_Ble_CanvasClear: SwiftProtobuf.Message, SwiftProt
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CanvasClear, rhs: Mentraos_Ble_CanvasClear) -> Bool {
+  static func ==(lhs: Veiller_Ble_CanvasClear, rhs: Veiller_Ble_CanvasClear) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_CanvasResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CanvasResult"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}code\0")
 
@@ -4028,7 +4028,7 @@ nonisolated extension Mentraos_Ble_CanvasResult: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_CanvasResult, rhs: Mentraos_Ble_CanvasResult) -> Bool {
+  static func ==(lhs: Veiller_Ble_CanvasResult, rhs: Veiller_Ble_CanvasResult) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.code != rhs.code {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -4036,11 +4036,11 @@ nonisolated extension Mentraos_Ble_CanvasResult: SwiftProtobuf.Message, SwiftPro
   }
 }
 
-nonisolated extension Mentraos_Ble_CanvasResult.ResultCode: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_CanvasResult.ResultCode: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0OK\0\u{1}INVALID\0\u{1}OVERSIZE\0\u{1}OOM\0")
 }
 
-nonisolated extension Mentraos_Ble_ImuEnabledConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ImuEnabledConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ImuEnabledConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enabled\0")
 
@@ -4063,14 +4063,14 @@ nonisolated extension Mentraos_Ble_ImuEnabledConfig: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ImuEnabledConfig, rhs: Mentraos_Ble_ImuEnabledConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_ImuEnabledConfig, rhs: Veiller_Ble_ImuEnabledConfig) -> Bool {
     if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_ImuSingleRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ImuSingleRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ImuSingleRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -4083,13 +4083,13 @@ nonisolated extension Mentraos_Ble_ImuSingleRequest: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ImuSingleRequest, rhs: Mentraos_Ble_ImuSingleRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_ImuSingleRequest, rhs: Veiller_Ble_ImuSingleRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_ImuStreamConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ImuStreamConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ImuStreamConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enabled\0")
 
@@ -4112,14 +4112,14 @@ nonisolated extension Mentraos_Ble_ImuStreamConfig: SwiftProtobuf.Message, Swift
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ImuStreamConfig, rhs: Mentraos_Ble_ImuStreamConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_ImuStreamConfig, rhs: Veiller_Ble_ImuStreamConfig) -> Bool {
     if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_ImuData: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ImuData: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ImuData"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}accel\0\u{1}gyro\0\u{1}mag\0")
 
@@ -4154,7 +4154,7 @@ nonisolated extension Mentraos_Ble_ImuData: SwiftProtobuf.Message, SwiftProtobuf
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ImuData, rhs: Mentraos_Ble_ImuData) -> Bool {
+  static func ==(lhs: Veiller_Ble_ImuData, rhs: Veiller_Ble_ImuData) -> Bool {
     if lhs._accel != rhs._accel {return false}
     if lhs._gyro != rhs._gyro {return false}
     if lhs._mag != rhs._mag {return false}
@@ -4163,7 +4163,7 @@ nonisolated extension Mentraos_Ble_ImuData: SwiftProtobuf.Message, SwiftProtobuf
   }
 }
 
-nonisolated extension Mentraos_Ble_Vector3: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_Vector3: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Vector3"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}x\0\u{1}y\0\u{1}z\0")
 
@@ -4194,7 +4194,7 @@ nonisolated extension Mentraos_Ble_Vector3: SwiftProtobuf.Message, SwiftProtobuf
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_Vector3, rhs: Mentraos_Ble_Vector3) -> Bool {
+  static func ==(lhs: Veiller_Ble_Vector3, rhs: Veiller_Ble_Vector3) -> Bool {
     if lhs.x != rhs.x {return false}
     if lhs.y != rhs.y {return false}
     if lhs.z != rhs.z {return false}
@@ -4203,7 +4203,7 @@ nonisolated extension Mentraos_Ble_Vector3: SwiftProtobuf.Message, SwiftProtobuf
   }
 }
 
-nonisolated extension Mentraos_Ble_ButtonEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ButtonEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ButtonEvent"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}button\0\u{1}state\0")
 
@@ -4230,7 +4230,7 @@ nonisolated extension Mentraos_Ble_ButtonEvent: SwiftProtobuf.Message, SwiftProt
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_ButtonEvent, rhs: Mentraos_Ble_ButtonEvent) -> Bool {
+  static func ==(lhs: Veiller_Ble_ButtonEvent, rhs: Veiller_Ble_ButtonEvent) -> Bool {
     if lhs.button != rhs.button {return false}
     if lhs.state != rhs.state {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -4238,15 +4238,15 @@ nonisolated extension Mentraos_Ble_ButtonEvent: SwiftProtobuf.Message, SwiftProt
   }
 }
 
-nonisolated extension Mentraos_Ble_ButtonEvent.Button: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ButtonEvent.Button: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CENTER\0\u{1}LEFT\0\u{1}RIGHT\0")
 }
 
-nonisolated extension Mentraos_Ble_ButtonEvent.State: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_ButtonEvent.State: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0UP\0\u{1}DOWN\0")
 }
 
-nonisolated extension Mentraos_Ble_HeadGesture: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadGesture: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HeadGesture"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}gesture\0")
 
@@ -4269,18 +4269,18 @@ nonisolated extension Mentraos_Ble_HeadGesture: SwiftProtobuf.Message, SwiftProt
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_HeadGesture, rhs: Mentraos_Ble_HeadGesture) -> Bool {
+  static func ==(lhs: Veiller_Ble_HeadGesture, rhs: Veiller_Ble_HeadGesture) -> Bool {
     if lhs.gesture != rhs.gesture {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_HeadGesture.Gesture: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadGesture.Gesture: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0NOD\0\u{1}SHAKE\0\u{1}HEAD_UP\0")
 }
 
-nonisolated extension Mentraos_Ble_HeadGestureConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_HeadGestureConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HeadGestureConfig"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}gesture\0\u{1}enabled\0")
 
@@ -4307,7 +4307,7 @@ nonisolated extension Mentraos_Ble_HeadGestureConfig: SwiftProtobuf.Message, Swi
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_HeadGestureConfig, rhs: Mentraos_Ble_HeadGestureConfig) -> Bool {
+  static func ==(lhs: Veiller_Ble_HeadGestureConfig, rhs: Veiller_Ble_HeadGestureConfig) -> Bool {
     if lhs.gesture != rhs.gesture {return false}
     if lhs.enabled != rhs.enabled {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -4315,7 +4315,7 @@ nonisolated extension Mentraos_Ble_HeadGestureConfig: SwiftProtobuf.Message, Swi
   }
 }
 
-nonisolated extension Mentraos_Ble_RestartRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_RestartRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RestartRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -4328,13 +4328,13 @@ nonisolated extension Mentraos_Ble_RestartRequest: SwiftProtobuf.Message, SwiftP
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_RestartRequest, rhs: Mentraos_Ble_RestartRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_RestartRequest, rhs: Veiller_Ble_RestartRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-nonisolated extension Mentraos_Ble_FactoryResetRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Veiller_Ble_FactoryResetRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".FactoryResetRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -4347,7 +4347,7 @@ nonisolated extension Mentraos_Ble_FactoryResetRequest: SwiftProtobuf.Message, S
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Mentraos_Ble_FactoryResetRequest, rhs: Mentraos_Ble_FactoryResetRequest) -> Bool {
+  static func ==(lhs: Veiller_Ble_FactoryResetRequest, rhs: Veiller_Ble_FactoryResetRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

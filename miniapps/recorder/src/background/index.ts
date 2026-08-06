@@ -8,7 +8,7 @@
  * `session.speaker`, and talks to the UI over the typed session.ui channel bus.
  */
 
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 import {RecorderController} from "./controllers/RecorderController"
 

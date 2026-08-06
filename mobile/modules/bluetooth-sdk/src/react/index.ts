@@ -10,15 +10,15 @@ export {
 } from "./useBluetoothScan"
 export type {DefaultDeviceStorage} from "./useGlassesConnection"
 export {
-  useMentraBluetooth,
+  useVeillerBluetooth,
   type BatteryState,
   type ConnectedGlassesInfo,
   type FirmwareInfo,
   type GalleryModeState,
   type GlassesRuntimeState,
-  type MentraBluetoothSession,
+  type VeillerBluetoothSession,
   type PhoneSdkRuntimeState,
   type ScanController,
   type SignalState,
-  type UseMentraBluetoothOptions,
-} from "./useMentraBluetooth"
+  type UseVeillerBluetoothOptions,
+} from "./useVeillerBluetooth"

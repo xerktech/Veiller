@@ -72,6 +72,6 @@ export const evenRealitiesG2: Capabilities = {
   hasOta: false,
 
   // Dashboard - G2 renders Even Realities' native dashboard in firmware, so
-  // MentraOS does not manage the dashboard or expose dashboard settings for it
+  // Veiller does not manage the dashboard or expose dashboard settings for it
   hasNativeDashboard: true,
 };

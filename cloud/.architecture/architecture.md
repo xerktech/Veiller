@@ -1,9 +1,9 @@
-# MentraOS Cloud Architecture
+# Veiller Cloud Architecture
 
 - author: Isaiah Ballah
 - last updated: March 2, 2026
 
-> End-to-end architecture of MentraOS — from smart glasses hardware to developer mini apps.
+> End-to-end architecture of Veiller — from smart glasses hardware to developer mini apps.
 
 ---
 
@@ -64,7 +64,7 @@
      Hardware                     Bridge                      Central Hub                   Developer Code
 ```
 
-**MentraOS** is a smart glasses operating system. The architecture consists of four layers connected by two protocols (BLE and WebSocket/HTTP). The **cloud** acts as the central hub — it bridges data from the user's glasses to any number of third-party mini apps.
+**Veiller** is a smart glasses operating system. The architecture consists of four layers connected by two protocols (BLE and WebSocket/HTTP). The **cloud** acts as the central hub — it bridges data from the user's glasses to any number of third-party mini apps.
 
 ---
 
@@ -81,7 +81,7 @@
 
 The `asg_client` is an Android app running directly on the smart glasses hardware. It uses `android_core` as a library for common functionality (display rendering, BLE communication, sensor access).
 
-The phone runs the **MentraOS mobile app** (React Native/Expo) which connects to the glasses via **Bluetooth Low Energy**. The phone acts as a bridge — all sensor data (audio PCM, IMU/head position, button presses, touch gestures, camera photos, battery state) flows from glasses → phone.
+The phone runs the **Veiller mobile app** (React Native/Expo) which connects to the glasses via **Bluetooth Low Energy**. The phone acts as a bridge — all sensor data (audio PCM, IMU/head position, button presses, touch gestures, camera photos, battery state) flows from glasses → phone.
 
 ### Hop 2: Phone → Cloud (WebSocket)
 
@@ -289,7 +289,7 @@ for (const packageName of subscribedApps) {
 
 ## SDK Internals
 
-The SDK (`cloud/packages/sdk`) is published as `@mentra/sdk` on npm. Developers install it and subclass `AppServer`.
+The SDK (`cloud/packages/sdk`) is published as `@veiller/sdk` on npm. Developers install it and subclass `AppServer`.
 
 ### AppServer (Hono-based)
 
@@ -308,7 +308,7 @@ AppServer extends Hono
 │   ├── GET  /health          — Health check
 │   ├── POST /settings        — Settings update from cloud
 │   ├── POST /photo-upload    — Photo data upload from cloud
-│   ├── GET  /mentra-auth     — OAuth redirect for webview auth
+│   ├── GET  /veiller-auth     — OAuth redirect for webview auth
 │   └── /*   (publicDir)      — Static file serving
 │
 ├── Developer overrides:
@@ -750,7 +750,7 @@ These are the data streams apps can subscribe to. The SDK auto-subscribes when a
 
 ## Mentra Live: Camera-Equipped Glasses
 
-MentraOS supports two fundamentally different classes of smart glasses. Everything described in the sections above applies to both — the cloud, SDK, subscription system, and app lifecycle are the same. What differs is the **hardware path** between the glasses and the outside world, particularly for media-heavy operations like photos and video streaming.
+Veiller supports two fundamentally different classes of smart glasses. Everything described in the sections above applies to both — the cloud, SDK, subscription system, and app lifecycle are the same. What differs is the **hardware path** between the glasses and the outside world, particularly for media-heavy operations like photos and video streaming.
 
 ### Two Types of Glasses
 
@@ -810,7 +810,7 @@ This is the key architectural insight for Mentra Live:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    MENTRA LIVE DATA FLOW SPLIT                          │
+│                    VEILLER LIVE DATA FLOW SPLIT                          │
 │                                                                         │
 │  BLE (low bandwidth, ~1 Mbps):                                         │
 │    • JSON commands (take photo, start stream, stop, settings)           │
@@ -1046,7 +1046,7 @@ AsgCameraServer (NanoHTTPD-based, port 8089)
 └── File management via FileManager (secure, sandboxed)
 ```
 
-This allows the phone app to browse and download photos from the glasses over the local WiFi network — useful for gallery features in the MentraOS mobile app.
+This allows the phone app to browse and download photos from the glasses over the local WiFi network — useful for gallery features in the Veiller mobile app.
 
 ### asg_client Directory Map
 
@@ -1140,10 +1140,10 @@ The webhook POST to `{publicUrl}/webhook` carries the session info in the JSON b
 ### Webview Authentication
 
 For apps with web UIs (webviews), the SDK provides:
-1. `createMentraAuthRoutes()` — Sets up OAuth-like redirect flow
+1. `createVeillerAuthRoutes()` — Sets up OAuth-like redirect flow
 2. Temporary token exchange via `POST /api/auth/exchange-user-token`
 3. Session cookies signed with `cookieSecret`
-4. User token verification using the MentraOS Cloud public key (RSA)
+4. User token verification using the Veiller Cloud public key (RSA)
 
 ---
 
@@ -1263,7 +1263,7 @@ src/
 ├── display-utils/                    — Text measurement + display profiles
 ├── logging/
 │   ├── logger.ts                     — Pino logger factory
-│   └── errors.ts                     — MentraError class hierarchy
+│   └── errors.ts                     — VeillerError class hierarchy
 │
 └── constants/
     └── index.ts                      — SDK constants

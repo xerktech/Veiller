@@ -1490,8 +1490,8 @@
   "primary": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_10",
-      "dark mode": "mentra_green_9"
+      "light mode": "veiller_green_10",
+      "dark mode": "veiller_green_9"
     }
   },
   "primary-foreground": {
@@ -1504,8 +1504,8 @@
   "ring": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_10",
-      "dark mode": "mentra_green_9"
+      "light mode": "veiller_green_10",
+      "dark mode": "veiller_green_9"
     }
   },
   "input": {
@@ -1525,7 +1525,7 @@
   "secondary": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_5"
+      "light mode": "veiller_green_5"
     }
   },
   "secondary-foreground": {
@@ -1538,7 +1538,7 @@
   "muted": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_4"
+      "light mode": "veiller_green_4"
     }
   },
   "muted-foreground": {
@@ -1551,7 +1551,7 @@
   "accent": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_6"
+      "light mode": "veiller_green_6"
     }
   },
   "accent-foreground": {
@@ -1620,13 +1620,13 @@
   "chart-_1": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_10"
+      "light mode": "veiller_green_10"
     }
   },
   "chart-_2": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_9"
+      "light mode": "veiller_green_9"
     }
   },
   "chart-_3": {
@@ -1664,8 +1664,8 @@
   "sidebar-primary": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_10",
-      "dark mode": "mentra_green_9"
+      "light mode": "veiller_green_10",
+      "dark mode": "veiller_green_9"
     }
   },
   "sidebar-primary-foreground": {
@@ -1677,7 +1677,7 @@
   "sidebar-accent": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_5"
+      "light mode": "veiller_green_5"
     }
   },
   "sidebar-accent-foreground": {
@@ -1697,8 +1697,8 @@
   "sidebar-ring": {
     "type": "color",
     "modes": {
-      "light mode": "mentra_green_10",
-      "dark mode": "mentra_green_9"
+      "light mode": "veiller_green_10",
+      "dark mode": "veiller_green_9"
     }
   },
   "background-color": {
@@ -1707,84 +1707,84 @@
       "light mode": "black5"
     }
   },
-  "mentra green_1": {
+  "veiller green_1": {
     "type": "color",
     "modes": {
       "light mode": "#fbfefb",
       "dark mode": "#06150d"
     }
   },
-  "mentra green_2": {
+  "veiller green_2": {
     "type": "color",
     "modes": {
       "light mode": "#f5fbf7",
       "dark mode": "#092016"
     }
   },
-  "mentra green_3": {
+  "veiller green_3": {
     "type": "color",
     "modes": {
       "light mode": "#eaf9ef",
       "dark mode": "#0e2b1d"
     }
   },
-  "mentra green_4": {
+  "veiller green_4": {
     "type": "color",
     "modes": {
       "light mode": "#dafde6",
       "dark mode": "#123726"
     }
   },
-  "mentra green_5": {
+  "veiller green_5": {
     "type": "color",
     "modes": {
       "light mode": "#bff5d4",
       "dark mode": "#174430"
     }
   },
-  "mentra green_6": {
+  "veiller green_6": {
     "type": "color",
     "modes": {
       "light mode": "#a2efc3",
       "dark mode": "#1c523a"
     }
   },
-  "mentra green_7": {
+  "veiller green_7": {
     "type": "color",
     "modes": {
       "light mode": "#7ee8ad",
       "dark mode": "#216044"
     }
   },
-  "mentra green_8": {
+  "veiller green_8": {
     "type": "color",
     "modes": {
       "light mode": "#5ae096",
       "dark mode": "#267e57"
     }
   },
-  "mentra green_9": {
+  "veiller green_9": {
     "type": "color",
     "modes": {
       "light mode": "#36dd88",
       "dark mode": "#2b9b6a"
     }
   },
-  "mentra green_10": {
+  "veiller green_10": {
     "type": "color",
     "modes": {
       "light mode": "#00b869",
       "dark mode": "#36dd88"
     }
   },
-  "mentra green_11": {
+  "veiller green_11": {
     "type": "color",
     "modes": {
       "light mode": "#009258",
       "dark mode": "#63e9a3"
     }
   },
-  "mentra green_12": {
+  "veiller green_12": {
     "type": "color",
     "modes": {
       "light mode": "#006a3f",

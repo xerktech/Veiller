@@ -4,7 +4,7 @@ import {
   isBusyGlassesConnectionStatus,
   isConnectedGlassesConnectionStatus,
   isReadyGlassesConnectionStatus,
-} from "@mentra/bluetooth-sdk/types"
+} from "@veiller/bluetooth-sdk/types"
 
 type Listener = (payload: any) => void
 
@@ -29,7 +29,7 @@ export const emitLocalNetworkEvent = (eventName: string, payload: any) => {
   localNetworkListeners.get(eventName)?.forEach((listener) => listener(payload))
 }
 
-export const mentraLocalNetworkMock = {
+export const veillerLocalNetworkMock = {
   addListener: jest.fn((eventName: string, listener: Listener) => {
     if (!localNetworkListeners.has(eventName)) localNetworkListeners.set(eventName, new Set())
     localNetworkListeners.get(eventName)!.add(listener)

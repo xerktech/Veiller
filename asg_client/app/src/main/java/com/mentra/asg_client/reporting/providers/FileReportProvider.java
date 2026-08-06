@@ -157,7 +157,7 @@ public class FileReportProvider implements IReportProvider {
 
             // Header
             pw.println("================================================================================");
-            pw.println("MENTRA LIVE CRASH LOG");
+            pw.println("VEILLER LIVE CRASH LOG");
             pw.println("================================================================================");
             pw.println();
 

@@ -1,4 +1,4 @@
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { ulid } from "ulid";
 import { MiniAppAssetModel } from "../../models/miniapp-asset.model";
 import { MiniAppModel } from "../../models/miniapp.model";
@@ -377,7 +377,7 @@ function normalizePackageName(packageName: string): string {
   if (!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(normalized)) {
     throw new MiniAppServiceError(
       "invalid_package_name",
-      "package name must be lowercase reverse-DNS text, for example com.mentra.myapp",
+      "package name must be lowercase reverse-DNS text, for example com.veiller.myapp",
       400,
     );
   }

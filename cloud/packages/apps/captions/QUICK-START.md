@@ -1,4 +1,4 @@
-# Quick Start Guide - MentraOS Captions App
+# Quick Start Guide - Veiller Captions App
 
 Get up and running in 5 minutes!
 
@@ -20,8 +20,8 @@ Edit `.env` and add your API key:
 
 ```env
 PORT=3333
-PACKAGE_NAME=com.mentra.captions
-MENTRAOS_API_KEY=your_api_key_here
+PACKAGE_NAME=com.veiller.captions
+VEILLER_API_KEY=your_api_key_here
 NODE_ENV=development
 ```
 
@@ -35,7 +35,7 @@ bun run dev
 
 This starts:
 
-- ✅ Express server on port 3333 (MentraOS integration + auth)
+- ✅ Express server on port 3333 (Veiller integration + auth)
 - ✅ Bun server on port 3334 (React webview + API routes)
 - ✅ Automatic proxying between them
 
@@ -44,12 +44,12 @@ This starts:
 Visit this URL in your browser:
 
 ```
-http://localhost:3333/mentra-auth
+http://localhost:3333/veiller-auth
 ```
 
 This will:
 
-1. Redirect you to MentraOS login
+1. Redirect you to Veiller login
 2. Show a consent screen
 3. Redirect back with authentication
 4. Set a session cookie
@@ -186,7 +186,7 @@ curl http://localhost:3333/api/me
 ### Re-authenticate (if session expired)
 
 ```
-http://localhost:3333/mentra-auth
+http://localhost:3333/veiller-auth
 ```
 
 ### Change port
@@ -204,8 +204,8 @@ bun run dev
 # Terminal 2
 ngrok http 3333
 
-# Visit ngrok URL + /mentra-auth
-https://your-subdomain.ngrok.app/mentra-auth
+# Visit ngrok URL + /veiller-auth
+https://your-subdomain.ngrok.app/veiller-auth
 ```
 
 ## Architecture Overview
@@ -219,7 +219,7 @@ https://your-subdomain.ngrok.app/mentra-auth
 ┌─────────────────────────────────────────────────────────┐
 │ Express (Port 3333) - "Front Door"                      │
 │ • Auth middleware (handles tokens, sessions)            │
-│ • MentraOS webhooks (/session-start, /webhook)          │
+│ • Veiller webhooks (/session-start, /webhook)          │
 │ • Proxies to Bun for unmatched routes                   │
 │ • Forwards auth headers (x-auth-user-id)                │
 └────────────────────┬────────────────────────────────────┘
@@ -238,10 +238,10 @@ https://your-subdomain.ngrok.app/mentra-auth
 
 ### "Not authenticated" errors
 
-**Solution:** Visit `/mentra-auth` first:
+**Solution:** Visit `/veiller-auth` first:
 
 ```
-http://localhost:3333/mentra-auth
+http://localhost:3333/veiller-auth
 ```
 
 ### Port already in use
@@ -281,4 +281,4 @@ PORT=4000 bun run dev
 
 **You're all set!** 🎉
 
-Start building your MentraOS app with authentication working out of the box.
+Start building your Veiller app with authentication working out of the box.

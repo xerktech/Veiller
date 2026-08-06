@@ -1,10 +1,10 @@
-import {SETTINGS} from "@mentra/engine"
-import {useSettingsStore} from "@mentra/engine/internal"
+import {SETTINGS} from "@veiller/engine"
+import {useSettingsStore} from "@veiller/engine/internal"
 import {act, fireEvent, render} from "@testing-library/react-native"
 import type {ReactNode} from "react"
 import {Linking} from "react-native"
 
-import MentraOSOnboarding from "@/app/onboarding/os"
+import VeillerOnboarding from "@/app/onboarding/os"
 import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import showAlertMock from "@/utils/AlertUtils"
 
@@ -62,14 +62,14 @@ jest.mock("@/utils/AlertUtils", () => ({
   default: jest.fn(),
 }))
 
-describe("MentraOS onboarding", () => {
+describe("Veiller onboarding", () => {
   beforeEach(() => {
     jest.clearAllMocks()
     useSettingsStore.getState().resetAllSettingsLocally()
   })
 
   it("uses the shared Mentra Live onboarding preset for the full tutorial", () => {
-    render(<MentraOSOnboarding />)
+    render(<VeillerOnboarding />)
 
     expect(mockScreen).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -116,7 +116,7 @@ describe("MentraOS onboarding", () => {
     expect(steps[1]).toEqual(
       expect.objectContaining({
         type: "image",
-        testID: "mentraos-onboarding-hero-1",
+        testID: "veiller-onboarding-hero-1",
         details: [
           {
             title: "onboarding:osTapToLaunchTitle",
@@ -128,7 +128,7 @@ describe("MentraOS onboarding", () => {
     expect(steps[5]).toEqual(
       expect.objectContaining({
         type: "image",
-        testID: "mentraos-onboarding-hero-5",
+        testID: "veiller-onboarding-hero-5",
         details: expect.arrayContaining([
           expect.objectContaining({title: "onboarding:osMissingMiniappTitle"}),
           expect.objectContaining({title: "onboarding:osMentraOsLegacyTitle"}),
@@ -138,7 +138,7 @@ describe("MentraOS onboarding", () => {
   })
 
   it("confirms before persisting completion when the user skips", () => {
-    const {getByTestId} = render(<MentraOSOnboarding />)
+    const {getByTestId} = render(<VeillerOnboarding />)
 
     fireEvent.press(getByTestId("skip-os-onboarding"))
     expect(showAlertMock).toHaveBeenCalledWith(
@@ -155,7 +155,7 @@ describe("MentraOS onboarding", () => {
   })
 
   it("persists completion after the final page", () => {
-    const {getByTestId} = render(<MentraOSOnboarding />)
+    const {getByTestId} = render(<VeillerOnboarding />)
 
     fireEvent.press(getByTestId("finish-os-onboarding"))
 
@@ -165,14 +165,14 @@ describe("MentraOS onboarding", () => {
 
   it("opens the MentraOS Legacy page from the moved miniapps step", () => {
     const openUrl = jest.spyOn(Linking, "openURL").mockResolvedValueOnce(undefined)
-    render(<MentraOSOnboarding />)
+    render(<VeillerOnboarding />)
 
     const {steps} = mockOnboardingGuide.mock.calls[0][0]
     expect(steps[5].action).toBeUndefined()
 
     const {getByTestId, UNSAFE_getByType} = render(steps[5].content)
     expect(UNSAFE_getByType(VeillerLogo).props.colorOverride).toBe("#00B869")
-    fireEvent.press(getByTestId("mentraos-onboarding-open-legacy"))
+    fireEvent.press(getByTestId("veiller-onboarding-open-legacy"))
 
     expect(openUrl).toHaveBeenCalledWith("https://mentraglass.com/legacy")
   })

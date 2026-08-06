@@ -1,4 +1,4 @@
-import type { MentraSession } from "@mentra/sdk";
+import type { VeillerSession } from "@veiller/sdk";
 import { StreamManager } from "./StreamManager";
 import { StateManager } from "../state/StateManager";
 
@@ -12,7 +12,7 @@ export class UserSession {
   readonly userId: string;
   readonly stream: StreamManager;
   readonly state: StateManager;
-  private session: MentraSession | null = null;
+  private session: VeillerSession | null = null;
 
   private constructor(userId: string) {
     this.userId = userId;
@@ -45,7 +45,7 @@ export class UserSession {
 
   // ─── Session lifecycle ───────────────────────────────────────────────────
 
-  attachSession(session: MentraSession): void {
+  attachSession(session: VeillerSession): void {
     this.session = session;
     this.stream.attachSession(session);
   }
@@ -55,7 +55,7 @@ export class UserSession {
     this.session = null;
   }
 
-  get appSession(): MentraSession | null {
+  get appSession(): VeillerSession | null {
     return this.session;
   }
 

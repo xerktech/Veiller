@@ -5,21 +5,21 @@
 
 ## Purpose
 
-The Admin Console is an internal Mentra operations surface. It is not a
-developer console and not an enterprise customer portal. It exists so Mentra
+The Admin Console is an internal Veiller operations surface. It is not a
+developer console and not an enterprise customer portal. It exists so Veiller
 admins can review miniapp submissions, manage the preinstalled miniapp registry,
 and triage incidents.
 
 Normal developers publish miniapps through the CLI and view status in the
-Developer Console. Only Mentra admins can approve submissions, publish into the
+Developer Console. Only Veiller admins can approve submissions, publish into the
 public store, or modify the preinstalled registry.
 
 ## Primary Users
 
-- Mentra app reviewer.
-- Mentra registry/admin operator.
-- Mentra support or incident responder.
-- Mentra internal admin owner.
+- Veiller app reviewer.
+- Veiller registry/admin operator.
+- Veiller support or incident responder.
+- Veiller internal admin owner.
 
 ## Product Principles
 
@@ -59,7 +59,7 @@ rejected, or published for normal discovery/install.
 ### Preinstalled Miniapp Registry
 
 The preinstalled registry controls which miniapps come installed by default for
-MentraOS users, and lets Mentra update those miniapps without shipping a new
+Veiller users, and lets Veiller update those miniapps without shipping a new
 mobile app through iOS/Google Play.
 
 This registry is internal-only. Normal developers do not self-publish into it.
@@ -73,7 +73,7 @@ time. It can be partially designed now even if implementation is phased.
 
 ### Admin Auth
 
-- As a Mentra admin, I can sign in with an authorized admin account.
+- As a Veiller admin, I can sign in with an authorized admin account.
 - As a non-admin user, I cannot access admin pages.
 - As an admin, I can see my role/permission context.
 

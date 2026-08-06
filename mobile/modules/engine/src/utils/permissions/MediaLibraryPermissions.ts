@@ -1,7 +1,7 @@
 import {Platform} from "react-native"
 import {check, request, PERMISSIONS, RESULTS} from "react-native-permissions"
 
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 import {deriveGalleryDisplayName} from "./galleryDisplayName"
 
@@ -17,7 +17,7 @@ export interface MediaLibrarySaveReceipt {
  * MediaLibraryPermissions - Handles save-only permissions for camera roll
  *
  * Platform behavior:
- * - iOS: Uses PHOTO_LIBRARY (read-write) so we can manage the MentraOS album
+ * - iOS: Uses PHOTO_LIBRARY (read-write) so we can manage the Veiller album
  * - Android 10+ (API 29+): No permission needed to save your own files to MediaStore
  * - Android 9-: Uses WRITE_EXTERNAL_STORAGE (legacy)
  */
@@ -93,8 +93,8 @@ export class MediaLibraryPermissions {
   }
 
   /**
-   * Save a file to the photo library in a glasses-specific location (MentraOS album on iOS;
-   * Pictures/MentraOS or Movies/MentraOS on Android 10+).
+   * Save a file to the photo library in a glasses-specific location (Veiller album on iOS;
+   * Pictures/Veiller or Movies/Veiller on Android 10+).
    * On Android 10+, this works without any permission.
    *
    * IMPORTANT: This method sets the DATE_TAKEN (Android) or creation date (iOS)

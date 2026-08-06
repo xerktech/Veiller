@@ -64,14 +64,14 @@ In the minute 17:01:00 → 17:02:00 UTC, AppManager logged 104 `1006`-related ev
 
 | Package | Closes (code 1006) |
 |---|---|
-| com.mentra.captions | 16 |
-| com.mentra.ai | 10 |
+| com.veiller.captions | 16 |
+| com.veiller.ai | 10 |
 | cloud.augmentos.notify | 9 |
-| com.mentra.merge | 8 |
-| com.mentra.notes | 6 |
-| com.mentra.dash | 1 |
-| com.mentra.translation | 1 |
-| com.mentra.link | 1 |
+| com.veiller.merge | 8 |
+| com.veiller.notes | 6 |
+| com.veiller.dash | 1 |
+| com.veiller.translation | 1 |
+| com.veiller.link | 1 |
 | **Total unexpected app disconnect warnings** | **52** |
 
 Plus glasses-side WS disconnects in the same minute:
@@ -167,7 +167,7 @@ Bun's WebSocket server might have a behavior under specific load patterns where 
 
 ### Hypothesis D: A specific app's reconnect logic triggered cross-pod pressure
 
-If e.g. `com.mentra.captions` reconnects with a tight retry loop, and 16 simultaneous user sessions of captions are all reconnecting simultaneously, that's 16 connections being established at once on the cloud pod. Each opens a new TCP/WS connection, runs the upgrade handshake, attaches handlers — all on the main event loop.
+If e.g. `com.veiller.captions` reconnects with a tight retry loop, and 16 simultaneous user sessions of captions are all reconnecting simultaneously, that's 16 connections being established at once on the cloud pod. Each opens a new TCP/WS connection, runs the upgrade handshake, attaches handlers — all on the main event loop.
 
 **Supporting evidence:**
 
@@ -218,7 +218,7 @@ Bun's WS server may or may not expose these distinctions cleanly. Need to invest
 ```json
 {
   feature: "ws-close",
-  packageName: "com.mentra.captions",
+  packageName: "com.veiller.captions",
   code: 1006,
   closeSource: "ping-timeout-from-our-side",
   durationMs: 32100,  // how long this connection lived
@@ -287,12 +287,12 @@ Conclusion: the staging WS storm is real and large enough to be a plausible prox
 
 ### W5. Local storm harnesses
 
-A local-only harness was added under `cloud/tools/ws-storm-local/` to test whether a storm can be reproduced without deploying. Any captions package in the harness package pool is `com.mentra.captions.debug`; the harness rewrites accidental `com.mentra.captions` arguments to debug.
+A local-only harness was added under `cloud/tools/ws-storm-local/` to test whether a storm can be reproduced without deploying. Any captions package in the harness package pool is `com.veiller.captions.debug`; the harness rewrites accidental `com.veiller.captions` arguments to debug.
 
 Harnesses:
 
 - `bun-ws-storm-harness.ts`: raw Bun native WebSocket server/client storm.
-- `mentra-path-storm-harness.ts`: real `AppManager`, `AppSession`, `SubscriptionManager`, and optionally `handleAppMessage`, with fake sockets and stubbed services.
+- `veiller-path-storm-harness.ts`: real `AppManager`, `AppSession`, `SubscriptionManager`, and optionally `handleAppMessage`, with fake sockets and stubbed services.
 
 Results relevant to 106:
 
@@ -302,11 +302,11 @@ Results relevant to 106:
 | Raw Bun WS, 168 simultaneous multi-app closes/reconnects | No stall; max heartbeat gap ~6ms |
 | Raw Bun WS with high stdout/log pressure | No stall locally; log volume alone did not reproduce the silence window |
 | Raw Bun WS with 3000ms async reconnect delay | Huge wall-time per message, but event loop stayed responsive |
-| Real Mentra v3 reconnect storm, 56 app sessions × 10 rounds | Clean; max heartbeat gap 6ms |
-| Real Mentra legacy init + async DB-like delay | Tens of seconds aggregate reconnect wall-time, but event loop stayed responsive |
-| Real Mentra legacy init + small synchronous DB-like work | Multi-second heartbeat gaps; 20ms sync work crossed current `/livez` timeout |
+| Real Veiller v3 reconnect storm, 56 app sessions × 10 rounds | Clean; max heartbeat gap 6ms |
+| Real Veiller legacy init + async DB-like delay | Tens of seconds aggregate reconnect wall-time, but event loop stayed responsive |
+| Real Veiller legacy init + small synchronous DB-like work | Multi-second heartbeat gaps; 20ms sync work crossed current `/livez` timeout |
 
-Conclusion: raw Bun WS close/reconnect behavior is **not enough** to reproduce the staging stall on a laptop. The dangerous local reproduction requires the storm to amplify synchronous work in Mentra's reconnect/init/subscription paths.
+Conclusion: raw Bun WS close/reconnect behavior is **not enough** to reproduce the staging stall on a laptop. The dangerous local reproduction requires the storm to amplify synchronous work in Veiller's reconnect/init/subscription paths.
 
 ---
 

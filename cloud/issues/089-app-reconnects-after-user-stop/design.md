@@ -8,7 +8,7 @@
 
 ## Problem
 
-User stops a mini app from the Mentra phone app → the app restarts within 2–3
+User stops a mini app from the Veiller phone app → the app restarts within 2–3
 seconds. Two-layer failure:
 
 1. **SDK reconnects when it shouldn't.** `_ConnectionManager` sees the
@@ -38,7 +38,7 @@ covers all SDK versions, including v2 apps already deployed.
 
 ## Layer 1: SDK Fix (already applied)
 
-**File:** `cloud/packages/sdk/src/session/MentraSession.ts`
+**File:** `cloud/packages/sdk/src/session/VeillerSession.ts`
 
 When `APP_STOPPED` is received from the cloud, call
 `this._lifecycleManager.disconnect()` before emitting the stopped event. This
@@ -48,10 +48,10 @@ sets `explicitDisconnect = true` on `_ConnectionManager`, which prevents the
 ### Before (broken)
 
 ```typescript
-// MentraSession.ts — APP_STOPPED handler
+// VeillerSession.ts — APP_STOPPED handler
 register(CloudToAppMessageType.APP_STOPPED, (message) => {
     const reason = message.reason ?? "unknown";
-    this.logger.info({ reason }, "MentraSession received app_stopped");
+    this.logger.info({ reason }, "VeillerSession received app_stopped");
     this.emit("stopped", reason);  // ← emits event but doesn't prevent reconnect
 });
 ```
@@ -64,10 +64,10 @@ calls `scheduleReconnect()`. The app is back in 1–2 seconds.
 ### After (fixed)
 
 ```typescript
-// MentraSession.ts — APP_STOPPED handler
+// VeillerSession.ts — APP_STOPPED handler
 register(CloudToAppMessageType.APP_STOPPED, (message) => {
     const reason = message.reason ?? "unknown";
-    this.logger.info({ reason }, "MentraSession received app_stopped");
+    this.logger.info({ reason }, "VeillerSession received app_stopped");
     this._lifecycleManager.disconnect();  // ← prevents reconnect
     this.emit("stopped", reason);
 });
@@ -257,7 +257,7 @@ The app gives up.
 
 | File | Change | Layer |
 |------|--------|-------|
-| `sdk/src/session/MentraSession.ts` | Call `disconnect()` on APP_STOPPED | Layer 1 (**DONE**) |
+| `sdk/src/session/VeillerSession.ts` | Call `disconnect()` on APP_STOPPED | Layer 1 (**DONE**) |
 | `cloud/src/services/session/AppSession.ts` | Add `userStopped` flag, `markUserStopped()`, `wasUserStopped`, `clearUserStopped()` | Layer 2 |
 | `cloud/src/services/session/AppManager.ts` → `stopApp()` | Call `markUserStopped()` for user-initiated stops | Layer 2 |
 | `cloud/src/services/session/AppManager.ts` → `handleAppInit()` | Reject if `wasUserStopped` | Layer 2 |

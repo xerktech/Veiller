@@ -12,7 +12,7 @@
  *   - Recording accepted OEM JWT `jti` values after session creation.
  *
  * What it does NOT own:
- *   - Issuing Mentra access/refresh tokens (session.service).
+ *   - Issuing Veiller access/refresh tokens (session.service).
  *   - User row creation (user.service).
  *
  * Spec: docs/issues/001-oem-auth/design.md
@@ -21,7 +21,7 @@
 
 import crypto from "node:crypto";
 import * as jose from "jose";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { EnterpriseOrgModel } from "../models/enterprise-org.model";
 import { OemModel, type Oem } from "../models/oem.model";
 import { SeenJtiModel } from "../models/seen-jti.model";
@@ -35,7 +35,7 @@ import {
 
 const logger = createLogger("core").child({ service: "oem.service" });
 
-/** Algorithms Mentra accepts on OEM-signed JWTs. `none` is rejected. */
+/** Algorithms Veiller accepts on OEM-signed JWTs. `none` is rejected. */
 const SUPPORTED_ALGS = ["EdDSA", "RS256", "ES256"] as const;
 type SupportedAlg = (typeof SUPPORTED_ALGS)[number];
 
@@ -66,7 +66,7 @@ export async function getOem(tenantId: string): Promise<Oem | null> {
  *   3. Resolve public key (static PEM or JWKS URL).
  *   4. Verify signature + standard claims (aud, exp, iat skew).
  *   5. Return verified identity; session.service records `jti` only after
- *      the Mentra session is persisted.
+ *      the Veiller session is persisted.
  */
 export async function verifyTenantJwt(jwt: string): Promise<VerifiedTenantJwt> {
   // Step 1 — peek at iss without verifying. If the JWT is so malformed we
@@ -157,7 +157,7 @@ async function verifySignatureWithOemKey(
   oem: Oem,
 ): Promise<jose.JWTVerifyResult> {
   const verifyOpts: jose.JWTVerifyOptions = {
-    audience: "mentra",
+    audience: "veiller",
     algorithms: [...SUPPORTED_ALGS],
     // jose enforces `exp` and `iat` automatically. Allow 5 min clock skew
     // either side (matches spec's "5 min clock skew" allowance).
@@ -255,7 +255,7 @@ async function verifySignatureWithTrustedIssuer(
     const jwks = getJwksFetcher(trustedIssuer.jwksUrl);
     return await jose.jwtVerify(jwt, jwks, {
       issuer: trustedIssuer.issuer,
-      audience: ["cloud-core", "mentra"],
+      audience: ["cloud-core", "veiller"],
       algorithms: [...SUPPORTED_ALGS],
       clockTolerance: "5 minutes",
     });
@@ -331,7 +331,7 @@ function getJwksFetcher(url: string) {
 
 /**
  * Record a successful OEM JWT acceptance for replay protection. Call this
- * after the Mentra session is persisted, so a transient session-creation
+ * after the Veiller session is persisted, so a transient session-creation
  * failure does not consume the OEM JWT's one-time `jti`. Throws
  * `invalid_grant` if the same (jti, tenantId) was already recorded — that's a
  * replay attempt.

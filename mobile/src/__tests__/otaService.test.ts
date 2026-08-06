@@ -1,4 +1,4 @@
-// Exercises the real island OtaService by path (not via "@mentra/engine", which jest
+// Exercises the real island OtaService by path (not via "@veiller/engine", which jest
 // mocks): emitted OTA BLE events must project into the island glasses store, which is
 // the engine.ota read surface.
 import {startOtaService, stopOtaService} from "../../modules/engine/src/services/OtaService"

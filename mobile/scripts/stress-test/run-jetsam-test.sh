@@ -31,7 +31,7 @@ MB_PER_APP="${MB_PER_APP:-25}"
 MAX_MOUNTS="${MAX_MOUNTS:-25}"
 # Apple Team ID — required by maestro to build/sign its WebDriverAgent
 # driver onto a real iOS device. One-time setup: `maestro driver-setup
-# --apple-team-id <ID>`. Default is Mentra Labs.
+# --apple-team-id <ID>`. Default is Veiller Labs.
 APPLE_TEAM_ID="${APPLE_TEAM_ID:-T5XXXL6N36}"
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -62,7 +62,7 @@ echo "==> Device ID: ${DEVICE_ID}"
 # macOS `log stream` does NOT support real-device streaming via --device
 # (only Mac and Simulator). For real devices we use `idevicesyslog` from
 # libimobiledevice (`brew install libimobiledevice`). We filter to our app's
-# process name (Mentra) and to jetsam-related kernel messages.
+# process name (Veiller) and to jetsam-related kernel messages.
 #
 # Pre-flight: idevicesyslog needs the device to have been "Trusted" via the
 # lockdown protocol. If you see "ERROR: No device found!" but devicectl can
@@ -81,7 +81,7 @@ fi
 
 echo "==> Starting idevicesyslog → ${LOG_FILE}"
 # Capture jetsam/memorystatus kernel events (any process) plus everything
-# from our process (which the device tags as "Mentra(<pid>)") and our
+# from our process (which the device tags as "Veiller(<pid>)") and our
 # STRESS: tag in console output. idevicesyslog has no process-name filter,
 # so we use --match on the bracketed process tag form, which is reliable
 # (avoids false matches against the WiFi SSID also being called "Mentra").
@@ -91,7 +91,7 @@ echo "==> Starting idevicesyslog → ${LOG_FILE}"
 (
   while true; do
     idevicesyslog \
-      --match "Mentra(" \
+      --match "Veiller(" \
       --match "jetsam" \
       --match "memorystatus" \
       --match "STRESS:" \
@@ -154,7 +154,7 @@ esac
 
 if [[ "${SCENARIO}" == "background" || "${SCENARIO}" == "long" ]]; then
   echo "==> Sending app to background by activating Mobile Safari..."
-  # Launching a different app forces Mentra into the background. We pick
+  # Launching a different app forces Veiller into the background. We pick
   # Mobile Safari because every iOS device has it. iOS handles the
   # transition the same as if the user pressed Home / swiped up.
   xcrun devicectl device process launch \
@@ -168,12 +168,12 @@ fi
 
 echo "==> Dwelling ${DWELL}s while events accumulate..."
 # We confirm app death two ways and require BOTH before declaring it dead:
-#   1. devicectl process listing has no Mentra entry
-#   2. idevicesyslog has stopped emitting Mentra(*) lines for >15s
+#   1. devicectl process listing has no Veiller entry
+#   2. idevicesyslog has stopped emitting Veiller(*) lines for >15s
 # This avoids false positives during scene transitions or process probe lag.
 START_AT="$(date +%s)"
 END_AT=$(( START_AT + DWELL ))
-LAST_MENTRA_LINE_AT="${START_AT}"
+LAST_VEILLER_LINE_AT="${START_AT}"
 DEATH_CONFIRMED=0
 # Sleep up front so we don't probe during the launch-to-running window.
 sleep 15
@@ -181,20 +181,20 @@ while (( $(date +%s) < END_AT )); do
   # devicectl process info is slow + flaky; use it loosely.
   PROC_COUNT="$(xcrun devicectl device info processes \
     --device "${DEVICE_ID}" 2>/dev/null \
-    | grep -c "Mentra.app" || true)"
-  # Fresh Mentra log lines indicate liveness — but only count log lines
+    | grep -c "Veiller.app" || true)"
+  # Fresh Veiller log lines indicate liveness — but only count log lines
   # FROM our app process, not wifid noise where SSID happens to be 'Mentra'.
-  # Our app emits as `Mentra(<channel>)` like `Mentra(React)`, while wifid
-  # emits the SSID inline like `wifid(WiFiPolicy)... for Mentra(ba:28:...)`.
+  # Our app emits as `Veiller(<channel>)` like `Veiller(React)`, while wifid
+  # emits the SSID inline like `wifid(WiFiPolicy)... for Veiller(ba:28:...)`.
   # Tracking the per-iteration LINE COUNT and only resetting LAST when it
   # grows is what we actually want.
-  CURR_LINES="$(grep -E 'Mentra\((React|UIKitCore|Swift|libsystem|CoreFoundation|Foundation)' "${LOG_FILE}" 2>/dev/null | wc -l | tr -d ' ')"
+  CURR_LINES="$(grep -E 'Veiller\((React|UIKitCore|Swift|libsystem|CoreFoundation|Foundation)' "${LOG_FILE}" 2>/dev/null | wc -l | tr -d ' ')"
   if [[ -z "${PREV_LINES:-}" ]]; then PREV_LINES=0; fi
   if (( CURR_LINES > PREV_LINES )); then
-    LAST_MENTRA_LINE_AT="$(date +%s)"
+    LAST_VEILLER_LINE_AT="$(date +%s)"
     PREV_LINES="${CURR_LINES}"
   fi
-  STALE_S=$(( $(date +%s) - LAST_MENTRA_LINE_AT ))
+  STALE_S=$(( $(date +%s) - LAST_VEILLER_LINE_AT ))
   ELAPSED=$(( $(date +%s) - START_AT ))
   echo "    [$(date +%H:%M:%S)] elapsed=${ELAPSED}s procs=${PROC_COUNT} log_stale=${STALE_S}s"
   if (( PROC_COUNT == 0 && STALE_S > 15 )); then

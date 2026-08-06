@@ -56,11 +56,11 @@ PR: https://github.com/Mentra-Community/MentraOS/pull/3272
 - **Fix:** Unzip server-side and require the bundle's `miniapp.json` `packageName`/`version` to match the release metadata before storing. Needs a small unzip dependency in core (e.g. `fflate`); none exists today.
 - **PR thread:** https://github.com/Mentra-Community/MentraOS/pull/3272#discussion_r3500393754
 
-### 7. Publish `@mentra/auth` to npm
+### 7. Publish `@veiller/auth` to npm
 
 - **Severity:** Low (developer experience). **Source:** issue 017 / handoff.
-- **Problem:** External developers cannot install `@mentra/auth` yet. Today only the in-repo Merge backend picks it up from workspace source.
-- **Fix:** Publish `@mentra/auth` to npm (and host the JWKS, already done across all four environments).
+- **Problem:** External developers cannot install `@veiller/auth` yet. Today only the in-repo Merge backend picks it up from workspace source.
+- **Fix:** Publish `@veiller/auth` to npm (and host the JWKS, already done across all four environments).
 
 ## Fixed in PR #3272 (no follow-up needed)
 

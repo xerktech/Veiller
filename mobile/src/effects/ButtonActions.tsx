@@ -2,9 +2,9 @@ import {useEffect} from "react"
 
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {useApps, useStart, engine, SETTINGS, useSetting} from "@mentra/engine"
+import {useApps, useStart, engine, SETTINGS, useSetting} from "@veiller/engine"
 import {askPermissionsUI} from "@/utils/PermissionsUtils"
-import {ButtonPressEvent} from "@mentra/bluetooth-sdk"
+import {ButtonPressEvent} from "@veiller/bluetooth-sdk"
 
 import {shouldUseMentraLiveNativeCapture} from "@/effects/buttonCapturePolicy"
 
@@ -26,7 +26,7 @@ export function ButtonActions() {
       // 1. If camera app is available and compatible, ALWAYS prefer it
       // This ensures glasses with cameras always default to camera app
       const cameraApp = applets.find(
-        (app) => app.packageName === "com.mentra.camera" && app.compatibility?.isCompatible !== false,
+        (app) => app.packageName === "com.veiller.camera" && app.compatibility?.isCompatible !== false,
       )
 
       if (cameraApp) {

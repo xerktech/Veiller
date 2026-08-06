@@ -336,7 +336,7 @@ const server = serve({
   },
 })
 
-logger.info(`MentraOS Cloud Server running on port ${config.server.port}`)
+logger.info(`Veiller Cloud Server running on port ${config.server.port}`)
 ```
 
 ## Migration Strategy

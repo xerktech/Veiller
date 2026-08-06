@@ -1,4 +1,4 @@
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 const FACES = ["づ(^_^)づ", "ᕕ(^_^)ᕗ", "ᕙ(^_^)ᕗ", "٩(^‿^)۶", "\\(^o^)/", "b(^_^)d"]
 

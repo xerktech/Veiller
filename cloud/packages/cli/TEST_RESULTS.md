@@ -48,10 +48,10 @@ All Phase 2 CLI commands have been successfully tested end-to-end. All 9 app man
 
 ### 1. Cloud Management
 
-#### Test: `mentra cloud list`
+#### Test: `veiller cloud list`
 
 ```bash
-$ mentra cloud list
+$ veiller cloud list
 ```
 
 **Result:** ✅ PASS
@@ -87,10 +87,10 @@ $ mentra cloud list
 
 ### 2. Authentication
 
-#### Test: `mentra auth whoami`
+#### Test: `veiller auth whoami`
 
 ```bash
-$ mentra auth whoami
+$ veiller auth whoami
 ```
 
 **Result:** ✅ PASS
@@ -116,10 +116,10 @@ Stored:      11/5/2025, 9:25:41 PM
 
 ### 3. App Listing
 
-#### Test: `mentra app list`
+#### Test: `veiller app list`
 
 ```bash
-$ mentra app list
+$ veiller app list
 ```
 
 **Result:** ✅ PASS
@@ -150,10 +150,10 @@ $ mentra app list
 
 ### 4. App Retrieval
 
-#### Test: `mentra app get com.cli.testapp`
+#### Test: `veiller app get com.cli.testapp`
 
 ```bash
-$ mentra app get com.cli.testapp
+$ veiller app get com.cli.testapp
 ```
 
 **Result:** ✅ PASS
@@ -185,10 +185,10 @@ $ mentra app get com.cli.testapp
 
 ### 5. App Update (NEW COMMAND)
 
-#### Test: `mentra app update` (Non-interactive with flags)
+#### Test: `veiller app update` (Non-interactive with flags)
 
 ```bash
-$ mentra app update com.cli.testapp \
+$ veiller app update com.cli.testapp \
   --name "Updated CLI Test App" \
   --description "Updated from CLI with new command"
 ```
@@ -231,7 +231,7 @@ Updating app...
 #### Test A: Export to stdout
 
 ```bash
-$ mentra app export com.cli.testapp
+$ veiller app export com.cli.testapp
 ```
 
 **Result:** ✅ PASS
@@ -246,7 +246,7 @@ $ mentra app export com.cli.testapp
   "appType": "background",
   "publicUrl": "https://example.com",
   "exportedAt": "2025-11-06T06:05:04.325Z",
-  "exportedBy": "mentra-cli"
+  "exportedBy": "veiller-cli"
 }
 ```
 
@@ -261,7 +261,7 @@ $ mentra app export com.cli.testapp
 #### Test B: Export to file
 
 ```bash
-$ mentra app export com.cli.testapp -o /tmp/test-app.json
+$ veiller app export com.cli.testapp -o /tmp/test-app.json
 ```
 
 **Result:** ✅ PASS
@@ -282,7 +282,7 @@ $ mentra app export com.cli.testapp -o /tmp/test-app.json
   "appType": "background",
   "publicUrl": "https://example.com",
   "exportedAt": "2025-11-06T06:05:10.117Z",
-  "exportedBy": "mentra-cli"
+  "exportedBy": "veiller-cli"
 }
 ```
 
@@ -311,7 +311,7 @@ $ cat /tmp/new-app.json
   "publicUrl": "https://imported.example.com"
 }
 
-$ mentra app import /tmp/new-app.json --force
+$ veiller app import /tmp/new-app.json --force
 ```
 
 **Result:** ✅ PASS
@@ -360,7 +360,7 @@ Imported app details:
 **Verification:**
 
 ```bash
-$ mentra app list | grep imported
+$ veiller app list | grep imported
 │ com.cli.imported       │ Imported Test App    │ standard   │ DEVELOPMENT    │
 ```
 
@@ -370,10 +370,10 @@ $ mentra app list | grep imported
 
 ### 8. App Publish (NEW COMMAND)
 
-#### Test: `mentra app publish` with --force
+#### Test: `veiller app publish` with --force
 
 ```bash
-$ mentra app publish com.cli.imported --force
+$ veiller app publish com.cli.imported --force
 ```
 
 **Result:** ✅ PASS
@@ -407,10 +407,10 @@ New status: PUBLISHED
 
 ### 9. API Key Regeneration (NEW COMMAND)
 
-#### Test: `mentra app api-key` with --force
+#### Test: `veiller app api-key` with --force
 
 ```bash
-$ mentra app api-key com.cli.imported --force
+$ veiller app api-key com.cli.imported --force
 ```
 
 **Result:** ✅ PASS
@@ -453,10 +453,10 @@ Regenerating API key...
 
 ### 10. App Delete (NEW COMMAND)
 
-#### Test: `mentra app delete` with --force
+#### Test: `veiller app delete` with --force
 
 ```bash
-$ mentra app delete com.cli.imported --force
+$ veiller app delete com.cli.imported --force
 ```
 
 **Result:** ✅ PASS
@@ -487,7 +487,7 @@ Deleting app...
 **Verification:**
 
 ```bash
-$ mentra app list | grep imported
+$ veiller app list | grep imported
 App successfully deleted - not found in list
 ```
 
@@ -500,7 +500,7 @@ App successfully deleted - not found in list
 #### Test: Create with all flags
 
 ```bash
-$ mentra app create \
+$ veiller app create \
   --package-name com.cli.finaltest \
   --name "Final Test App" \
   --description "Testing CLI create command" \
@@ -546,10 +546,10 @@ App details:
 
 ### 12. Organization Management
 
-#### Test: `mentra org list`
+#### Test: `veiller org list`
 
 ```bash
-$ mentra org list
+$ veiller org list
 ```
 
 **Result:** ✅ PASS
@@ -792,9 +792,9 @@ $ mentra org list
 
 ## ✅ Conclusion
 
-**The Mentra CLI v1.0 is production-ready!**
+**The Veiller CLI v1.0 is production-ready!**
 
-All Phase 2 commands have been implemented, tested, and validated. The CLI provides a fast, secure, and user-friendly interface for managing MentraOS apps. No critical issues were found during testing.
+All Phase 2 commands have been implemented, tested, and validated. The CLI provides a fast, secure, and user-friendly interface for managing Veiller apps. No critical issues were found during testing.
 
 **Status:** 🚀 **READY FOR PRODUCTION RELEASE**
 

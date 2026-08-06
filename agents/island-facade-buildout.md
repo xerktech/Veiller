@@ -1,7 +1,7 @@
 # Island facade buildout — tracking spec
 
 Goal: build the OEM-facing `engine.*` typed facades by moving the backing logic
-into `@mentra/engine`, domain by domain, on branch `aisraelov/island-namespace-wifi`
+into `@veiller/engine`, domain by domain, on branch `aisraelov/island-namespace-wifi`
 (PR #3167). One branch, one commit per domain, green at every commit.
 
 ## Two move-patterns
@@ -18,25 +18,25 @@ into `@mentra/engine`, domain by domain, on branch `aisraelov/island-namespace-w
    `configureRuntime` bridge is a temporary means, not the destination; aim
    adapter-free. The one permanent seam is `auth.getSubjectToken`.
 
-Rule: stores are the Mentra-app escape hatch (`engine.stores.*`), NOT the OEM
+Rule: stores are the Veiller-app escape hatch (`engine.stores.*`), NOT the OEM
 contract. OEMs use the typed facade functions.
 
 ## cloud-v2 mobile-CI integration (was fully broken on dev)
 The cloud-v2 merge left the mobile CI red on dev (install died on a 404, so the
 typecheck never even ran). Three fixes, all on this branch (they un-red dev too):
 1. **Spurious dep** — `mobile/modules/engine/package.json` declared
-   `"@mentra/cloud-client": "*"`; cloud-client is resolved via metro+tsconfig path
+   `"@veiller/cloud-client": "*"`; cloud-client is resolved via metro+tsconfig path
    aliases, not npm, so the `*` 404'd. Removed it.
 2. **island standalone build** — `postinstall` builds island via `expo-module`
    (`build:module`), whose isolated tsconfig lacks the cloud-v2 aliases → fails on
    cloud-v2 imports. But island's `build/` is unused (metro + tsconfig resolve
-   `@mentra/engine` → src). Made it non-fatal in `mobile/scripts/postinstall.mjs`.
+   `@veiller/engine` → src). Made it non-fatal in `mobile/scripts/postinstall.mjs`.
 3. **cloud-v2 deps** — the mobile typecheck follows the aliases into cloud-v2
    SOURCE (`../cloud-v2/packages/*`), which import `zod`/`tweetnacl`; resolution is
    file-relative so they must be in `cloud-v2/node_modules`, never installed (cloud-v2
    is a separate bun workspace). Added a `bun install` in `../cloud-v2` to the mobile
    postinstall.
-Don't re-introduce island's `@mentra/cloud-client` package.json dep, and keep
+Don't re-introduce island's `@veiller/cloud-client` package.json dep, and keep
 `island/tsconfig.json`'s cloud-v2 `paths` (a local `build:module` regenerates and
 strips them — don't commit that).
 
@@ -58,7 +58,7 @@ nav-linked in `mintlify-docs/docs.json`; keep the public surface and its preview
 current as the engine evolves.
 
 ## Verification per commit
-`npx tsc --noEmit -p .` (resolves `@mentra/engine`→src, validates the real code) +
+`npx tsc --noEmit -p .` (resolves `@veiller/engine`→src, validates the real code) +
 `bun run test`. The island standalone build can't run locally (cloud-v2 `zod` not
 installed in this checkout) — CI confirms it; use the proven relative-`_internal`
 pattern for btsdk types.
@@ -70,7 +70,7 @@ pattern for btsdk types.
 | display.mirror | island display store | 1 | DONE (#3167) |
 | glasses (core) | glasses store + btsdk + ConnectionCoordinator | 1 | in progress |
 | speech | STT/TTSModelManager (already island) | 1 | DONE (#3167) |
-| ~~logs~~ | MentraJSLogPipeline (already island) | — | **NOT a facade** — island's pipeline is internal *miniapp*-log plumbing for MentraJSRouter; the app UI never reads it. The logging the UI uses (bug-report "send logs") is the HOST-side `logBuffer` (`mobile/src/utils/dev/logging.ts`) + `RestComms.uploadIncidentLogs` → belongs to the `incidents` domain, not a `logs` facade. Skip. |
+| ~~logs~~ | VeillerJSLogPipeline (already island) | — | **NOT a facade** — island's pipeline is internal *miniapp*-log plumbing for VeillerJSRouter; the app UI never reads it. The logging the UI uses (bug-report "send logs") is the HOST-side `logBuffer` (`mobile/src/utils/dev/logging.ts`) + `RestComms.uploadIncidentLogs` → belongs to the `incidents` domain, not a `logs` facade. Skip. |
 | permissions | `utils/PermissionsUtils.tsx` (host) | 1 | todo |
 | incidents | `services/bugReport/*` (host) | 1 | todo |
 | dev | `utils/cloudClient/devHost.ts` + core store | 1 | todo |

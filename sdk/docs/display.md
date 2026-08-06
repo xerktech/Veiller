@@ -19,7 +19,7 @@ Source: [mobile/modules/miniapp/src/modules/display.ts](../../mobile/modules/min
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()

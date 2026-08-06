@@ -14,20 +14,20 @@ Single source of truth for every SDK v3 decision. When someone asks "why is it c
 
 ## Naming Decisions
 
-### D-001: `MentraSession` is the per-user session class
+### D-001: `VeillerSession` is the per-user session class
 
 **Decided:** 2026-03-17 (spike session)
 **Rationale:** Replaces `AppSession`. "Mentra" prefix because this is the branded core experience — developers spend 95% of their time interacting with it. `Session` alone is too generic and could conflict with other libraries.
 
-### D-002: `MiniAppServer` is the cloud/server host class (not `MentraApp`)
+### D-002: `MiniAppServer` is the cloud/server host class (not `VeillerApp`)
 
 **Decided:** 2026-03-19 (implementation session)
-**Rationale:** Originally named `MentraApp` in the spikes. Renamed to `MiniAppServer` because:
+**Rationale:** Originally named `VeillerApp` in the spikes. Renamed to `MiniAppServer` because:
 
 - It IS a server — it listens on a port, handles webhooks, serves static files.
 - Avoids confusion when local apps arrive (v3.1+) — local apps don't need a server, so `MiniAppServer` makes it obvious it's cloud-only.
-- Frees up `MentraApp` for a potential future unified config object that works for both cloud and local.
-- `@mentra/sdk` package name already provides the brand context, so "Mentra" in every class name is redundant.
+- Frees up `VeillerApp` for a potential future unified config object that works for both cloud and local.
+- `@veiller/sdk` package name already provides the brand context, so "Mentra" in every class name is redundant.
 - The v2 class was `AppServer` — `MiniAppServer` is a natural evolution.
 
 ### D-003: `AppServer` is the v2 compat shim
@@ -43,7 +43,7 @@ Single source of truth for every SDK v3 decision. When someone asks "why is it c
 ### D-005: Internal class naming convention — `_Purpose` + role suffix
 
 **Decided:** 2026-03-19 (this conversation)
-**Rationale:** The other agent used verbose names like `_MiniAppServerRuntime`, `_MiniAppServerCallbackBridge`, `_CompatMentraSessionAdapter`. These were confusing because:
+**Rationale:** The other agent used verbose names like `_MiniAppServerRuntime`, `_MiniAppServerCallbackBridge`, `_CompatVeillerSessionAdapter`. These were confusing because:
 
 - "Runtime" is overloaded (could mean JS runtime, not "session lifecycle orchestrator")
 - "Bridge" doesn't say what it bridges
@@ -55,7 +55,7 @@ New convention:
 | ------------------------------ | ----------------------------- | --------------------------------------------------------------------------- |
 | `_MiniAppServerRuntime`        | `_SessionManager`             | Manages the collection of sessions for the server                           |
 | `_MiniAppServerCallbackBridge` | `_CallbackManager`            | Stores onSession/onStop/onToolCall handlers                                 |
-| `_MentraSessionServerFactory`  | Merged into `_SessionManager` | Was only used by the manager — not worth a separate class                   |
+| `_VeillerSessionServerFactory`  | Merged into `_SessionManager` | Was only used by the manager — not worth a separate class                   |
 | `_MiniAppSessionRegistry`      | Merged into `_SessionManager` | Two Maps with get/set/delete — not worth a separate class                   |
 | `_SessionLifecycleManager`     | `_ConnectionManager`          | Manages one session's connection lifecycle (connect, reconnect, ping, park) |
 | `_MessageRouter`               | `_MessageRouter`              | Unchanged — name was already clear                                          |
@@ -68,7 +68,7 @@ New convention:
 
 | Old name                          | New name              |
 | --------------------------------- | --------------------- |
-| `_CompatMentraSessionAdapter`     | `_V2SessionShim`      |
+| `_CompatVeillerSessionAdapter`     | `_V2SessionShim`      |
 | `_CompatEventManagerAdapter`      | `_V2EventManagerShim` |
 | `_CompatCameraAdapter`            | `_V2CameraShim`       |
 | `_CompatSettingsAdapter`          | `_V2SettingsShim`     |
@@ -83,7 +83,7 @@ New convention:
 
 ## Architecture Decisions
 
-### D-010: `MentraSession` depends on `Transport`, not `ws`
+### D-010: `VeillerSession` depends on `Transport`, not `ws`
 
 **Decided:** 2026-03-17 (spike session)
 **Rationale:** The session layer must run unchanged with `WebSocketTransport` (cloud), a future native bridge transport (local apps), or a mock (tests). This is the primary internal portability boundary. Only `WebSocketTransport.ts` imports `ws`.
@@ -113,10 +113,10 @@ New convention:
 **Decided:** 2026-03-19 (session-device-spike)
 **Rationale:** The existing `Observable<T>` implementation has the right semantics: synchronous read, reactive subscribe, cleanup function, change detection, error isolation. No reason to replace it with a simpler getter + onChange callback — that would double the API surface.
 
-### D-016: `MentraSession` and `MiniAppServer` stay thin — complex logic goes to `_`-prefixed internals
+### D-016: `VeillerSession` and `MiniAppServer` stay thin — complex logic goes to `_`-prefixed internals
 
 **Decided:** 2026-03-19 (this conversation)
-**Rationale:** The old `AppSession` became 2,423 lines because "session-level logic" is a gravity well. The rule: if the logic has its own state (timers, counters, maps, flags), extract it to an internal class. If it's pure dispatch with no state, keep it inline. `MentraSession` should be ~300-350 lines. `MiniAppServer` should be ~150 lines.
+**Rationale:** The old `AppSession` became 2,423 lines because "session-level logic" is a gravity well. The rule: if the logic has its own state (timers, counters, maps, flags), extract it to an internal class. If it's pure dispatch with no state, keep it inline. `VeillerSession` should be ~300-350 lines. `MiniAppServer` should be ~150 lines.
 
 ### D-017: The compat layer wraps the new runtime, not the other way around
 
@@ -178,14 +178,14 @@ These are explicitly NOT decided yet — they'll be resolved during implementati
 | D-100 | `_SubscriptionManager` batching                      | Currently sends SUBSCRIPTION_UPDATE per add/remove. Should batch/debounce. |
 | D-101 | `session.state<T>` typed shared state                | Spiked but not implemented. v3.1+ territory.                               |
 | D-102 | Local app runtime (Hermes, native bridge)            | Spiked but not implemented. v3.1+ territory.                               |
-| D-103 | `mentra` CLI tool                                    | Spiked but not implemented. v3.1+ territory.                               |
+| D-103 | `veiller` CLI tool                                    | Spiked but not implemented. v3.1+ territory.                               |
 | D-104 | `userId` email → MongoDB `_id` migration             | Spiked in reconnection spike. Needs cloud + SDK coordinated change.        |
 | D-105 | Audio priority system                                | Spiked in speaker spike. Deferred to v3.1 — last-writer-wins for now.      |
 | D-106 | Video recording                                      | Spiked in camera spike. Requires ASG client firmware support.              |
 | D-107 | SRT streaming support                                | Spiked in camera spike. Yash actively working on ASG client SRT.           |
 | D-108 | `session.display.wrap()` text formatting             | Spiked in 039 API map. Not yet implemented in DisplayManager.              |
 | D-109 | WebSocket path renames (`/ws/client`, `/ws/miniapp`) | Spiked. Requires coordinated cloud deploy.                                 |
-| D-110 | Route namespacing (`/api/_mentraos/`)                | Spiked. SDK mounts both old and new paths. Cloud migrates separately.      |
+| D-110 | Route namespacing (`/api/_veiller/`)                | Spiked. SDK mounts both old and new paths. Cloud migrates separately.      |
 
 ---
 
@@ -197,6 +197,6 @@ These were made in earlier spikes but have been overridden by later decisions.
 | --------------------------------------------- | ----------- | ------------------------------------------------------------------ | -------------------------------------------------------------------- |
 | 039 D14: Flatten `device.state`               | 039 API map | D-014: Do NOT flatten                                              | Too crowded with events/actions/capabilities at the same level       |
 | 039 D9: Translation in v3.1                   | 039 API map | D-024: Translation in v3.0                                         | Same pattern as transcription, no additional complexity              |
-| spike.md: `MentraApp` naming                  | Core spike  | D-002: `MiniAppServer`                                             | Avoids confusion with local apps, frees name for future use          |
-| spike.md: `server/MentraApp.ts` file location | Core spike  | Implementation: `src/MiniAppServer.ts`                             | Simpler — one file at root, not a directory with one file            |
+| spike.md: `VeillerApp` naming                  | Core spike  | D-002: `MiniAppServer`                                             | Avoids confusion with local apps, frees name for future use          |
+| spike.md: `server/VeillerApp.ts` file location | Core spike  | Implementation: `src/MiniAppServer.ts`                             | Simpler — one file at root, not a directory with one file            |
 | spike.md: `compat/AppServer.ts`               | Core spike  | Implementation: compat via `_V2*Shim` files in `session/internal/` | Compat is tightly coupled to session internals, not a separate layer |

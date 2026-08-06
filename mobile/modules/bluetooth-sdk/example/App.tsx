@@ -1,11 +1,11 @@
-import BluetoothSdk, {DeviceModels} from "@mentra/bluetooth-sdk"
+import BluetoothSdk, {DeviceModels} from "@veiller/bluetooth-sdk"
 import type {
   PhotoCaptureMetadata,
   PhotoRequestParams,
   PhotoSize,
   PhotoStatusEvent,
-} from "@mentra/bluetooth-sdk"
-import PhotoReceiver from "@mentra/bluetooth-sdk/photo-receiver"
+} from "@veiller/bluetooth-sdk"
+import PhotoReceiver from "@veiller/bluetooth-sdk/photo-receiver"
 import * as MediaLibrary from "expo-media-library"
 import type {ReactNode} from "react"
 import {useCallback, useEffect, useRef, useState} from "react"
@@ -222,7 +222,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Mentra Bluetooth SDK Example</Text>
+      <Text style={styles.header}>Veiller Bluetooth SDK Example</Text>
       <View style={styles.tabBar}>
         <TabButton label="Connection" active={tab === "connection"} onPress={() => setTab("connection")} />
         <TabButton label="Camera" active={tab === "camera"} onPress={() => setTab("camera")} />

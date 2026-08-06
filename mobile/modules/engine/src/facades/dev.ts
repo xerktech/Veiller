@@ -7,7 +7,7 @@
  * still lives host-side in `@/services/cloudClient` during the migration; this
  * facade manages the explicit overrides + reconnect.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {isGlassesReady} from "../services/GlassesReadiness"
 import {useCloudClientStatusStore} from "../stores/cloudClientStatus"
 import {useConnectionStore} from "../stores/connection"
@@ -123,7 +123,7 @@ export const dev = {
   },
 
   /**
-   * Side-load a miniapp being served from a dev machine (the `mentra dev` / CLI
+   * Side-load a miniapp being served from a dev machine (the `veiller dev` / CLI
    * flow) by its URL: probes `<url>/miniapp.json`, and on a reachable manifest
    * registers it under its manifest package so it appears in `engine.miniapps`
    * and can coexist with other dev miniapps. This is the OEM-host equivalent
@@ -148,7 +148,7 @@ export const dev = {
     // Persist the host that answered — not the stale input IP — so home-tile
     // relaunches skip a dead LAN address after mDNS/Metro failover.
     const resolvedUrl = result.resolvedUrl || devUrl
-    // The `mentra-miniapp dev` server puts the hot-reload/log sidecar on the
+    // The `veiller-miniapp dev` server puts the hot-reload/log sidecar on the
     // user port PLUS ONE — same convention as the first-party developer-URL
     // screen's deriveDevPort.
     let devPort: number | undefined

@@ -1,4 +1,4 @@
-// `mentra-miniapp permission <action>` subcommand handlers.
+// `veiller-miniapp permission <action>` subcommand handlers.
 //
 // Object-verb surface for the most common manifest edit. Both interactive
 // (no type arg → clack prompts) and non-interactive (type arg given) flows.

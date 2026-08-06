@@ -113,7 +113,7 @@ After shrinkage, cloud1's job is:
 **Decision:** extract types to `packages/types/` at the monorepo root (outside `cloud/`).
 
 - Current: `cloud/packages/types/` is owned by cloud; phone, SDK, cloud, cloud-client all depend on it transitively
-- New: `packages/types/` at repo root. Cloud, mobile, `@mentra/miniapp`, `@mentra/sdk` (during deprecation) all equal consumers
+- New: `packages/types/` at repo root. Cloud, mobile, `@veiller/miniapp`, `@veiller/sdk` (during deprecation) all equal consumers
 - Rationale: phone is the hub now. Types are a contract between phone and cloud, not a cloud implementation detail
 
 This is an independent task — can happen anytime, blocks nothing.

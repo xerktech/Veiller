@@ -14,7 +14,7 @@ import {
   ConnectionInit,
   GlassesToCloudMessage,
   GlassesToCloudMessageType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { logger as rootLogger } from "../logging/pino-logger";
 import { PosthogService } from "../logging/posthog.service";
@@ -219,7 +219,7 @@ export class GlassesWebSocketService {
   // - handleHeadPosition
   // - handleGlassesConnectionState
   // - handleRequestSettings
-  // - handleMentraOSSettingsUpdateRequest
+  // - handleVeillerSettingsUpdateRequest
   //
   // They are now called via UserSession.handleGlassesMessage() which delegates
   // to the glasses-message-handler module.

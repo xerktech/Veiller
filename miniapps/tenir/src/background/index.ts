@@ -10,7 +10,7 @@
  * over the typed session.ui channel bus (see shared/channels.ts).
  */
 
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 
 import { TenirController } from "./controllers/TenirController";
 

@@ -1,4 +1,4 @@
-import {engine, type WifiSearchResult} from "@mentra/engine"
+import {engine, type WifiSearchResult} from "@veiller/engine"
 import {useFocusEffect, useLocalSearchParams} from "expo-router"
 import {useCallback, useEffect, useMemo, useRef, useState} from "react"
 import {ActivityIndicator, ScrollView, TouchableOpacity, View} from "react-native"

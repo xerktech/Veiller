@@ -20,7 +20,7 @@ mock.module("../DisplayProcessor", () => ({
   },
 }))
 
-mock.module("@mentra/bluetooth-sdk/internal", () => ({
+mock.module("@veiller/bluetooth-sdk/internal", () => ({
   __esModule: true,
   default: {
     displayEvent: displayEventMock,

@@ -184,7 +184,7 @@ Meanwhile, the v2 CameraModule was properly updated for SRT with `startLocalLive
 ### One method: `session.camera.startStream()`
 
 ```typescript
-// Default — stream through the MentraOS cloud relay
+// Default — stream through the Veiller cloud relay
 // Best for most apps. Handles quality normalization, reconnection, multi-region.
 const stream = await session.camera.startStream();
 // Returns { hlsUrl, dashUrl, webrtcUrl, streamId }
@@ -305,7 +305,7 @@ The `StreamRequest` interface in `types/messages/app-to-cloud.ts` already uses `
 
 ## Why managed relay should be the default
 
-The MentraOS cloud relay provides:
+The Veiller cloud relay provides:
 
 - **Quality normalization.** Upstream services (YouTube, Twitch) reject streams with wrong quality/codec settings. The relay re-encodes so it just works.
 - **Reconnection handling.** If the glasses have a brief network blip, the relay maintains the outbound stream. Direct streaming would drop.
@@ -321,7 +321,7 @@ The cloud MUST continue to work with all three SDK versions that exist in the wi
 
 ### Three SDK versions the cloud must support
 
-**1. Published v2 SDK (`@mentra/sdk@2.1.29`, Jan 6 2026, npm `latest`)**
+**1. Published v2 SDK (`@veiller/sdk@2.1.29`, Jan 6 2026, npm `latest`)**
 
 What customers actually have installed. Express-based AppServer. RTMP-only streaming.
 
@@ -332,7 +332,7 @@ Sends:
 
 Cloud handler: catches `"rtmp_stream_request"` as a legacy alias at line 128 of `app-message-handler.ts`. `normalizeStreamRequest` copies `rtmpUrl` → `streamUrl`.
 
-**2. Hono experimental SDK (`@mentra/sdk@3.0.0-hono.8`, npm `hono` tag)**
+**2. Hono experimental SDK (`@veiller/sdk@3.0.0-hono.8`, npm `hono` tag)**
 
 Unpublished to `latest`. The SRT developer built against this. Hono-based, supports SRT/RTMP/WHIP.
 

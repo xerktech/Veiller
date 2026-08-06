@@ -51,7 +51,7 @@ const PUBLIC_EVENT_NAMES = new Set<BluetoothSdkEventName>([
 
 const addListener: BluetoothSdkPublicModule["addListener"] = (eventName, listener) => {
   if (!PUBLIC_EVENT_NAMES.has(eventName)) {
-    throw new Error(`Unsupported BluetoothSdk event "${eventName}". Use @mentra/bluetooth-sdk/react for status state.`)
+    throw new Error(`Unsupported BluetoothSdk event "${eventName}". Use @veiller/bluetooth-sdk/react for status state.`)
   }
   return PrivateBluetoothSdkModule.addListener(eventName, listener as BluetoothSdkEventListener<BluetoothSdkEventName>)
 }

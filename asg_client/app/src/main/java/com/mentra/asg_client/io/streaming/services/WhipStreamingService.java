@@ -1057,7 +1057,7 @@ public class WhipStreamingService extends Service {
 
   private Notification createNotification(String status) {
     return new NotificationCompat.Builder(this, CHANNEL_ID)
-        .setContentTitle("MentraOS WHIP Streaming")
+        .setContentTitle("Veiller WHIP Streaming")
         .setContentText(status)
         .setSmallIcon(android.R.drawable.ic_dialog_info)
         .setPriority(NotificationCompat.PRIORITY_LOW)

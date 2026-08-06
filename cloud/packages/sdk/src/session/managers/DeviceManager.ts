@@ -1,7 +1,7 @@
 /**
  * DeviceManager — Consolidated Device State, Hardware Events & Capabilities
  *
- * Owns all device-related concerns for a MentraSession:
+ * Owns all device-related concerns for a VeillerSession:
  *
  * - **Reactive state** — Observable properties for connection, battery, WiFi,
  *   hotspot, and case status (mirrors the legacy DeviceState pattern).
@@ -103,7 +103,7 @@ export interface BatteryUpdateEvent {
 // ─── Dependency Types ───────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession into the DeviceManager.
+ * Dependencies injected by VeillerSession into the DeviceManager.
  */
 export interface DeviceManagerDeps {
   /** DataStreamRouter — register for stream-type events. */
@@ -181,7 +181,7 @@ function normaliseTouchEvent(raw: any): TouchEventData {
 /**
  * Manages all device-related state, hardware events, capabilities, and actions.
  *
- * Created by MentraSession and exposed as `session.device`.
+ * Created by VeillerSession and exposed as `session.device`.
  */
 export class DeviceManager {
   // ─── Reactive State ───────────────────────────────────────────────────
@@ -473,7 +473,7 @@ export class DeviceManager {
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  // Internal — Called by MentraSession
+  // Internal — Called by VeillerSession
   // ═══════════════════════════════════════════════════════════════════════
 
   /**
@@ -539,7 +539,7 @@ export class DeviceManager {
   /**
    * Directly set the device capabilities.
    *
-   * Called by MentraSession from the CONNECTION_ACK payload, or by
+   * Called by VeillerSession from the CONNECTION_ACK payload, or by
    * {@link handleCapabilitiesUpdate} for mid-session updates.
    *
    * @param caps - The capabilities object (or null)
@@ -564,7 +564,7 @@ export class DeviceManager {
   /**
    * Remove all tracked handlers and clear listeners.
    *
-   * Called by MentraSession during disconnect/cleanup.
+   * Called by VeillerSession during disconnect/cleanup.
    *
    * @internal
    */

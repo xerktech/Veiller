@@ -3,9 +3,9 @@ import {type ConfigPlugin} from "expo/config-plugins"
 import {withCrustAndroidBuildContract} from "./withAndroid"
 
 /**
- * @mentra/crust config plugin — the module's own Android build contract, so
- * every host that embeds crust (the Mentra app, the example OEM app, real OEM
- * hosts) inherits it by listing "@mentra/crust" in `app.json` plugins instead
+ * @veiller/crust config plugin — the module's own Android build contract, so
+ * every host that embeds crust (the Veiller app, the example OEM app, real OEM
+ * hosts) inherits it by listing "@veiller/crust" in `app.json` plugins instead
  * of hand-mirroring gradle edits:
  *
  * - the authenticated Mapbox Downloads Maven repo (crust bundles the Mapbox

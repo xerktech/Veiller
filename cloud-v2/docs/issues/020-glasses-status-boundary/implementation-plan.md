@@ -7,7 +7,7 @@ implemented as a series of focused commits on the glasses-status boundary branch
 
 This is the PR-sized implementation plan for
 [`README.md`](./README.md). The architecture goal is stable: engine/island owns
-MentraOS runtime state and behavior; the host owns branded UI, navigation, copy,
+Veiller runtime state and behavior; the host owns branded UI, navigation, copy,
 alerts, and user choices.
 
 Each work package below should be independently reviewable. Prefer one focused
@@ -21,7 +21,7 @@ sub-packages because OTA failures are high risk.
 - Do not expose hotspot credentials or local IP through a public host/OEM
   facade.
 - Do not wrap the entire Bluetooth SDK in engine. Only add engine APIs where
-  the behavior is MentraOS runtime policy.
+  the behavior is Veiller runtime policy.
 - Keep host UI visually unchanged while replacing raw store reads.
 - Keep tests allowed to import raw stores when they are testing island/store
   behavior directly.
@@ -33,7 +33,7 @@ Before starting implementation, capture current leak counts:
 ```bash
 rg -n "from [\"']@/stores/glasses|useGlassesStore|waitForGlassesState|getGlasesInfoPartial|selectGlassesConnected|selectGlassesReady" mobile/src -g '*.ts' -g '*.tsx'
 rg -n "@/stores/gallerySync|useGallerySyncStore" mobile/src -g '*.ts' -g '*.tsx'
-rg -n "@mentra/bluetooth-sdk|@mentra/bluetooth-sdk-internal|BluetoothSdk" mobile/src -g '*.ts' -g '*.tsx'
+rg -n "@veiller/bluetooth-sdk|@veiller/bluetooth-sdk-internal|BluetoothSdk" mobile/src -g '*.ts' -g '*.tsx'
 rg -n "updateGlassesState|sendGlassesConnectionState|glasses_battery_update|/api/client/device/state" mobile/src mobile/modules/engine/src -g '*.ts' -g '*.tsx'
 ```
 
@@ -99,7 +99,7 @@ Changes:
 - Have it fail on new production host imports of:
   - `@/stores/glasses`
   - `@/stores/gallerySync`
-  - direct `useGlassesStore` imports from `@mentra/engine`
+  - direct `useGlassesStore` imports from `@veiller/engine`
 - Add an explicit temporary allowlist file, for example
   `mobile/boundary-allowlist.txt`, generated from the baseline inventory.
 - Make the script ignore:

@@ -1,5 +1,5 @@
 /**
- * `mentra-miniapp release` — build a release and install it on a phone.
+ * `veiller-miniapp release` — build a release and install it on a phone.
  *
  * Flow:
  *   1. Detect package manager, run `<pm> run build` so the user's bundler
@@ -33,7 +33,7 @@ import {validateManifest} from './manifest.js'
 
 const DEFAULT_PORT_START = 6789
 const PORT_SCAN_LIMIT = 10
-const HEALTH_PATH = '/__mentra_release/health'
+const HEALTH_PATH = '/__veiller_release/health'
 const MANIFEST_PATH = '/miniapp.json'
 const ICON_PATH = '/icon.png'
 const BUNDLE_PATH = '/bundle.zip'
@@ -148,7 +148,7 @@ export async function release(opts: ReleaseOptions = {}): Promise<void> {
   console.log('\n╔══════════════════════════════════════════════════════════════╗')
   console.log('║  Install your mini app on a phone:                           ║')
   console.log('║                                                              ║')
-  console.log('║    1. Open the Mentra app                                    ║')
+  console.log('║    1. Open the Veiller app                                    ║')
   console.log('║    2. Settings → Developer settings                          ║')
   console.log('║    3. Under "Mini App Development", tap                      ║')
   console.log('║       "Scan Mini App QR Code" and scan the QR below          ║')
@@ -158,7 +158,7 @@ export async function release(opts: ReleaseOptions = {}): Promise<void> {
   console.log('║  Ctrl+C to stop.                                             ║')
   console.log('╚══════════════════════════════════════════════════════════════╝\n')
 
-  const defaultQrPath = join(os.tmpdir(), `mentra-release-qr-${packageName}.png`)
+  const defaultQrPath = join(os.tmpdir(), `veiller-release-qr-${packageName}.png`)
   const qrOutputPath = resolve(opts.qrOutput ?? defaultQrPath)
   const cleanupQrOnExit = !opts.qrOutput
 

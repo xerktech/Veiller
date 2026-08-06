@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { Command } from "commander";
-import { buildProduction as buildMiniappProduction, dev as devMiniapp, pack as packMiniapp } from "@mentra/miniapp-cli";
+import { buildProduction as buildMiniappProduction, dev as devMiniapp, pack as packMiniapp } from "@veiller/miniapp-cli";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import {
@@ -36,13 +36,13 @@ import { encodeDevAttestation, ensureSigningKey, signBundleMetadata, signDevAtte
 const program = new Command();
 
 program
-  .name("mentra")
-  .description("Mentra developer CLI")
+  .name("veiller")
+  .description("Veiller developer CLI")
   .version("2.0.0-alpha.0");
 
 program
   .command("login")
-  .description("Sign in to Mentra Developer Console")
+  .description("Sign in to Veiller Developer Console")
   .option("--no-open", "print the login URL without opening a browser")
   .action(async (options: { open: boolean }) => {
     const config = getConfig();
@@ -55,7 +55,7 @@ program
       return;
     }
 
-    console.log("Sign in to Mentra Developer Console");
+    console.log("Sign in to Veiller Developer Console");
     console.log("");
     console.log(`Open: ${challenge.verification_uri_complete}`);
     console.log(`Code: ${challenge.user_code}`);
@@ -97,7 +97,7 @@ program
         });
         console.log(`Signed in as ${token.user.email}`);
         if (token.organization_id) console.log(`Organization: ${token.organization_id}`);
-        console.log(`Credentials stored in ${storage === "keychain" ? "OS keychain" : "~/.mentra/cli-v2"}`);
+        console.log(`Credentials stored in ${storage === "keychain" ? "OS keychain" : "~/.veiller/cli-v2"}`);
         return;
       }
 
@@ -106,7 +106,7 @@ program
     }
 
     process.stdout.write("\n");
-    console.error("Login timed out. Run `mentra login` to try again.");
+    console.error("Login timed out. Run `veiller login` to try again.");
     process.exitCode = 1;
   });
 
@@ -117,7 +117,7 @@ program
     const config = getConfig();
     const creds = await loadFreshCredentials(config);
     if (!creds) {
-      console.error("Not signed in. Run `mentra login`.");
+      console.error("Not signed in. Run `veiller login`.");
       process.exitCode = 1;
       return;
     }
@@ -141,7 +141,7 @@ org
     try {
       const { org: developerOrg } = await getOrg(creds);
       if (!developerOrg) {
-        console.log("No developer org yet. Run `mentra org init --name \"Your Org\" --prefix com.example`.");
+        console.log("No developer org yet. Run `veiller org init --name \"Your Org\" --prefix com.example`.");
         return;
       }
 
@@ -204,7 +204,7 @@ miniapps
 
 miniapps
   .command("create")
-  .argument("<packageName>", "stable package name, e.g. com.mentra.myminiapp")
+  .argument("<packageName>", "stable package name, e.g. com.veiller.myminiapp")
   .requiredOption("--name <name>", "display name")
   .option("--description <description>", "short miniapp description")
   .description("Reserve a miniapp package name")
@@ -283,7 +283,7 @@ releases
     }
   });
 
-const admin = program.command("admin").description("Internal Mentra admin operations");
+const admin = program.command("admin").description("Internal Veiller admin operations");
 
 admin
   .command("me")
@@ -509,9 +509,9 @@ program
           }));
         console.log(`Dev auto-auth enabled for ${packageName}`);
       } else if (options.auth) {
-        throw new Error("Not signed in. Run `mentra login` before `mentra dev --auth`.");
+        throw new Error("Not signed in. Run `veiller login` before `veiller dev --auth`.");
       } else {
-        console.log("Dev auto-auth disabled. Run `mentra login` if this miniapp uses session.auth.");
+        console.log("Dev auto-auth disabled. Run `veiller login` if this miniapp uses session.auth.");
       }
 
       await devMiniapp({ cwd, signDevAttestation: signer });
@@ -621,7 +621,7 @@ async function requireCredentials(): Promise<CliCredentials | null> {
   const config = getConfig();
   const creds = await loadFreshCredentials(config);
   if (!creds) {
-    console.error("Not signed in. Run `mentra login`.");
+    console.error("Not signed in. Run `veiller login`.");
     process.exitCode = 1;
     return null;
   }
@@ -634,7 +634,7 @@ async function loadFreshCredentials(config = getConfig()): Promise<CliCredential
   if (!shouldRefresh(creds)) return creds;
 
   if (!creds.refreshToken) {
-    console.error("Session expired. Run `mentra login`.");
+    console.error("Session expired. Run `veiller login`.");
     process.exitCode = 1;
     return null;
   }
@@ -861,9 +861,9 @@ function formatRegistry(registry: AdminRegistry): string {
 function commandNameForCoreUrl(coreUrl: string): string {
   const environment = inferEnvironment(coreUrl);
   const host = new URL(coreUrl).hostname;
-  if (host === "localhost" || host === "127.0.0.1") return "mentra:local";
-  if (environment === "prod") return "mentra:prod";
-  return `mentra:${environment}`;
+  if (host === "localhost" || host === "127.0.0.1") return "veiller:local";
+  if (environment === "prod") return "veiller:prod";
+  return `veiller:${environment}`;
 }
 
 function sleep(ms: number): Promise<void> {

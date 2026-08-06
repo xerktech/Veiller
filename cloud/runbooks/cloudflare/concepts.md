@@ -71,7 +71,7 @@ the origin IP directly (e.g. UDP).
 ## Zone
 
 A "zone" in Cloudflare is one DNS domain you control. We have
-zones for `mentra.glass`, `mentraglass.com`, `mentraos.com`,
+zones for `mentra.glass`, `mentraglass.com`, `veiller.com`,
 plus several brand redirects.
 
 Each zone has its own DNS records, its own TLS settings, its
@@ -210,10 +210,10 @@ Cloudflare's UI shows the record type in the table.
 
 Two tokens we use:
 
-- `CLOUDFLARE_LB_API_TOKEN` (Doppler `mentra-sre`): scoped to
+- `CLOUDFLARE_LB_API_TOKEN` (Doppler `veiller-sre`): scoped to
   load balancer read/write. Cannot read DNS zones or other
   account data.
-- `CLOUDFLARE_API_TOKEN` (Doppler `mentraos-cloud`): broader
+- `CLOUDFLARE_API_TOKEN` (Doppler `veiller-cloud`): broader
   account-level token. Used by services that need DNS or
   account access.
 

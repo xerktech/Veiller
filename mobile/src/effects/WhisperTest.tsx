@@ -1,7 +1,7 @@
 // import React, {useEffect, useState} from "react"
 // import {Text, Button, View} from "react-native"
 // import {useSpeechToText, WHISPER_TINY, WHISPER_TINY_EN} from "react-native-executorch"
-// import BluetoothSdk from "@mentra/bluetooth-sdk"
+// import BluetoothSdk from "@veiller/bluetooth-sdk"
 
 // // const decodePcm16Base64ToFloat32 = (base64: string): Float32Array => {
 // //   const binaryString = atob(base64)

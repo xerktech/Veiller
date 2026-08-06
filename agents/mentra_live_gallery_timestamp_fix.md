@@ -203,7 +203,7 @@ This timestamp represents when the file was captured on the glasses, not when it
 ## Files Modified
 
 1. **Native Modules** (NEW - Critical for proper metadata):
-   - `mobile/modules/core/android/src/main/java/com/mentra/core/CoreModule.kt` - Android MediaStore DATE_TAKEN
+   - `mobile/modules/core/android/src/main/java/com/veiller/core/CoreModule.kt` - Android MediaStore DATE_TAKEN
    - `mobile/modules/core/ios/CoreModule.swift` - iOS Photos creationDate
    - `mobile/modules/core/src/CoreModule.ts` - TypeScript interface
 

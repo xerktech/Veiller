@@ -1,21 +1,21 @@
 ---
 title: "AI IDE Integration"
-description: "Connect your AI coding assistant to MentraOS docs for smarter development"
+description: "Connect your AI coding assistant to Veiller docs for smarter development"
 icon: "robot"
 ---
 
 <Info>
-**TL;DR** - Get your AI coding assistant to understand MentraOS instantly. Works with Zed, Cursor, VS Code, Windsurf, Claude Code, and more.
+**TL;DR** - Get your AI coding assistant to understand Veiller instantly. Works with Zed, Cursor, VS Code, Windsurf, Claude Code, and more.
 </Info>
 
 ## Why Connect Your AI IDE?
 
-When you connect your AI coding assistant to MentraOS docs, it can:
+When you connect your AI coding assistant to Veiller docs, it can:
 
-- Answer questions about the MentraOS SDK
+- Answer questions about the Veiller SDK
 - Help you write smart glasses apps faster
 - Look up API references automatically
-- Debug your code with context about how MentraOS works
+- Debug your code with context about how Veiller works
 
 ## MCP Server URL
 
@@ -36,7 +36,7 @@ Add this to your `settings.json` (open with `Cmd+,` or `zed: open settings`):
 ```json
 {
   "context_servers": {
-    "mentraos-docs": {
+    "veiller-docs": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://docs.mentraglass.com/mcp"],
       "env": {}
@@ -60,7 +60,7 @@ Add this to your Cursor MCP config file at `~/.cursor/mcp.json` (create it if it
 ```json
 {
   "mcpServers": {
-    "mentraos-docs": {
+    "veiller-docs": {
       "url": "https://docs.mentraglass.com/mcp"
     }
   }
@@ -70,7 +70,7 @@ Add this to your Cursor MCP config file at `~/.cursor/mcp.json` (create it if it
 Then **restart Cursor** and approve the MCP server if prompted.
 
 <Accordion title="Alternative: Project-level config">
-You can also create `.cursor/mcp.json` in your project root to enable MentraOS docs only for that project.
+You can also create `.cursor/mcp.json` in your project root to enable Veiller docs only for that project.
 </Accordion>
 
 ---
@@ -83,7 +83,7 @@ VS Code 1.99+ has built-in MCP support with GitHub Copilot.
 2. Run **"MCP: Add Server"**
 3. Select **"HTTP"** as the transport type
 4. Enter URL: `https://docs.mentraglass.com/mcp`
-5. Name it `mentraos-docs`
+5. Name it `veiller-docs`
 
 <Accordion title="Manual configuration">
 Create `.vscode/mcp.json` in your project and add:
@@ -91,7 +91,7 @@ Create `.vscode/mcp.json` in your project and add:
 ```json
 {
   "servers": {
-    "mentraos-docs": {
+    "veiller-docs": {
       "type": "http",
       "url": "https://docs.mentraglass.com/mcp"
     }
@@ -112,7 +112,7 @@ Create `.vscode/mcp.json` in your project and add:
 ```json
 {
   "mcpServers": {
-    "mentraos-docs": {
+    "veiller-docs": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://docs.mentraglass.com/mcp"]
     }
@@ -134,11 +134,11 @@ Create `.vscode/mcp.json` in your project and add:
 Run this in your terminal:
 
 ```bash
-claude mcp add --transport http mentraos-docs https://docs.mentraglass.com/mcp
+claude mcp add --transport http veiller-docs https://docs.mentraglass.com/mcp
 ```
 
 <Accordion title="Verify it worked">
-Run `claude mcp list` to see your connected servers. You should see `mentraos-docs` in the list.
+Run `claude mcp list` to see your connected servers. You should see `veiller-docs` in the list.
 </Accordion>
 
 ---

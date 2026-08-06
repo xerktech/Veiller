@@ -1,4 +1,4 @@
-# MentraOS IMU Implementation Plan
+# Veiller IMU Implementation Plan
 
 ## Overview
 

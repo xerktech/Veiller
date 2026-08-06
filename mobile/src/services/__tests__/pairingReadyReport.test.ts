@@ -5,7 +5,7 @@ import {submitAutomaticReport} from "../../../modules/engine/src/facades/reports
 import {useGlassesStore} from "../../../modules/engine/src/stores/glasses"
 import {emitBluetoothSdkEvent, resetBluetoothSdkMock} from "@/test-utils/mockBluetoothSdk"
 
-jest.mock("@mentra/bluetooth-sdk", () => {
+jest.mock("@veiller/bluetooth-sdk", () => {
   const {bluetoothSdkMock} = require("@/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,

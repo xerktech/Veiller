@@ -126,7 +126,7 @@ The bug is triggered when the **SDK mini-app server shuts down gracefully** (red
 
 **Method 1: Redeploy the mini-app**
 
-1. Start an app (e.g., MentraAI) running on the cloud
+1. Start an app (e.g., VeillerAI) running on the cloud
 2. **Restart/redeploy the mini-app SDK server** (the app's backend)
 3. The SDK automatically sends `OWNERSHIP_RELEASE: clean_shutdown` before closing
 4. Wait for the SDK to come back online

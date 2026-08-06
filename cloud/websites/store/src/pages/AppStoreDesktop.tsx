@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { X, Building, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { useTheme } from "../hooks/useTheme";
 import { useSearch } from "../contexts/SearchContext";
 import api, { AppFilterOptions } from "../api";

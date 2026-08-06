@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { AppResponse } from '@/services/api.service';
 import api from '@/services/api.service';
 import { toast } from 'sonner';
@@ -102,7 +102,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Publish MiniApp to Store</DialogTitle>
           <DialogDescription>
-            Are you ready to publish "{app.name}" to the Mentra MiniApp Store?
+            Are you ready to publish "{app.name}" to the Veiller MiniApp Store?
           </DialogDescription>
         </DialogHeader>
 
@@ -126,7 +126,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
           ) : (
             <>
               <p className="text-sm text-muted-foreground mb-3">
-                Publishing your MiniApp will make it available for review. Once approved, it will be visible to all MentraOS users.
+                Publishing your MiniApp will make it available for review. Once approved, it will be visible to all Veiller users.
               </p>
               <p className="text-sm text-muted-foreground">
                 Your MiniApp will initially be submitted in a <strong>SUBMITTED</strong> state and will need to undergo review before being published.

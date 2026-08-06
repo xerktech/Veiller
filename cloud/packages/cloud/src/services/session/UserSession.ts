@@ -13,7 +13,7 @@ import {
   CloudToGlassesMessageType,
   ConnectionError,
   GlassesToCloudMessage,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { ResourceTracker } from "../../utils/resource-tracker";
 import appService from "../core/app.service";

@@ -31,9 +31,9 @@ function apkPrefix(version) {
 console.log('\n━━━ Step 1: Reading version from .env ━━━');
 await setBuildEnv();
 
-const version = process.env.EXPO_PUBLIC_MENTRAOS_VERSION;
+const version = process.env.EXPO_PUBLIC_VEILLER_VERSION;
 if (!version) {
-  console.error('EXPO_PUBLIC_MENTRAOS_VERSION not found in .env');
+  console.error('EXPO_PUBLIC_VEILLER_VERSION not found in .env');
   process.exit(1);
 }
 
@@ -48,7 +48,7 @@ console.log(`Version: ${version} → tag: ${tag}, prefix: ${prefix}`);
 // same number. Without pinning, the summary value can drift from the value
 // baked into the native project by a few seconds — small but real.
 const versionCode = getBuildNumber();
-process.env.MENTRAOS_PINNED_BUILD_NUMBER = String(versionCode);
+process.env.VEILLER_PINNED_BUILD_NUMBER = String(versionCode);
 console.log(`versionCode: ${versionCode}`);
 
 // ── Step 3: Prebuild + bundle ────────────────────────────────────────────────
@@ -62,7 +62,7 @@ await $({ stdio: 'inherit' })`bun expo prebuild --platform android`;
 await $({ stdio: 'inherit' })`bun expo export --platform android --clear`;
 
 // Prebuild can leave a stale autolinking.json with the wrong packageName
-// (com.mentra instead of com.xerktech.veiller), which makes the generated
+// (com.veiller instead of com.xerktech.veiller), which makes the generated
 // ReactNativeApplicationEntryPoint reference a non-existent BuildConfig.
 // Delete it so gradle's settings phase regenerates it against the final build.gradle.
 await $({ stdio: 'inherit' })`rm -rf android/build/generated/autolinking`;
@@ -192,7 +192,7 @@ console.log('AAB built successfully');
 
 console.log('\n━━━ Step 9: Uploading AAB to Google Play ━━━');
 
-const keyPath = process.env.GOOGLE_PLAY_JSON_KEY || path.join(os.homedir(), '.mentra', 'credentials', 'google-play-key.json');
+const keyPath = process.env.GOOGLE_PLAY_JSON_KEY || path.join(os.homedir(), '.veiller', 'credentials', 'google-play-key.json');
 
 // Track Play Store upload result so we can surface it in the release-status
 // JSON consumed by the staging-builds workflow Slack notification.
@@ -202,7 +202,7 @@ let playDetail = null;
 if (!existsSync(keyPath)) {
   console.log(`⚠️  Google Play key not found at ${keyPath}`);
   console.log('   Skipping Google Play upload.');
-  console.log('   To enable: place service account key at ~/.mentra/credentials/google-play-key.json');
+  console.log('   To enable: place service account key at ~/.veiller/credentials/google-play-key.json');
   console.log('   or set GOOGLE_PLAY_JSON_KEY env var.');
   playDetail = 'credentials missing on runner';
 } else {

@@ -1,6 +1,6 @@
-# Mentra asg_client
+# Veiller asg_client
 
-A MentraOS glasses client that runs on Android-based smart glasses such as Mentra Live.
+A Veiller glasses client that runs on Android-based smart glasses such as Mentra Live.
 
 ### Compatible Devices
 
@@ -75,9 +75,9 @@ Implications for development:
 2. By default, the example contains production settings:
 
    ```
-   MENTRAOS_HOST=api.mentra.glass
-   MENTRAOS_PORT=443
-   MENTRAOS_SECURE=true
+   VEILLER_HOST=api.mentra.glass
+   VEILLER_PORT=443
+   VEILLER_SECURE=true
    ```
 
 3. Initialize the RTMP streaming library submodule (skip if you cloned with
@@ -88,13 +88,13 @@ Implications for development:
 
 ### Development on Mentra Live
 
-Mentra Live ships with `com.mentra.asg_client` as a **system app** signed with Mentra's release key. To run your own build, `./scripts/dev-setup.sh` installs a fork alongside it under a separate package (`com.mentra.asg_client.thirdparty`), disables the stock app, and makes your build the default launcher; `./scripts/restore-stock.sh` reverses this.
+Mentra Live ships with `com.mentra.asg_client` as a **system app** signed with Veiller's release key. To run your own build, `./scripts/dev-setup.sh` installs a fork alongside it under a separate package (`com.mentra.asg_client.thirdparty`), disables the stock app, and makes your build the default launcher; `./scripts/restore-stock.sh` reverses this.
 
 ### Phone App Compatibility
 
-The MentraOS phone app must stay backward-compatible with older `asg_client` builds already in the field. When changing phone-to-glasses or glasses-to-phone protocol behavior, new phone app code should continue to accept old `asg_client` message shapes and unchunked responses.
+The Veiller phone app must stay backward-compatible with older `asg_client` builds already in the field. When changing phone-to-glasses or glasses-to-phone protocol behavior, new phone app code should continue to accept old `asg_client` message shapes and unchunked responses.
 
-The opposite direction is not a required compatibility target: a new `asg_client` build does not need to support older MentraOS phone apps. On startup, the phone app calls the cloud `GET /api/client/min-version` endpoint and compares its local app version with the cloud `required` and `recommended` versions. If the local app is below `required`, startup is blocked by the update flow instead of continuing into pairing or BLE use. The cloud values are defined in `cloud/packages/cloud/src/version.ts` and served by `cloud/packages/cloud/src/api/hono/client/min-version.api.ts`; the mobile startup check is in `mobile/src/app/index.tsx`.
+The opposite direction is not a required compatibility target: a new `asg_client` build does not need to support older Veiller phone apps. On startup, the phone app calls the cloud `GET /api/client/min-version` endpoint and compares its local app version with the cloud `required` and `recommended` versions. If the local app is below `required`, startup is blocked by the update flow instead of continuing into pairing or BLE use. The cloud values are defined in `cloud/packages/cloud/src/version.ts` and served by `cloud/packages/cloud/src/api/hono/client/min-version.api.ts`; the mobile startup check is in `mobile/src/app/index.tsx`.
 
 ### Connecting via ADB
 
@@ -104,7 +104,7 @@ Snap the Infinity Cable onto the contacts on the right temple, plug the other en
 
 #### WiFi ADB
 
-Find the glasses' Local IP Address in the MentraOS app (Glasses screen), then:
+Find the glasses' Local IP Address in the Veiller app (Glasses screen), then:
 
 ```bash
 adb connect <GLASSES_IP>:5555
@@ -123,7 +123,7 @@ This script will:
 2. Install it as `com.mentra.asg_client.thirdparty`, disable the stock app, and set your build as the default launcher
 3. Grant all required permissions
 
-**Warning:** Your fork will not receive OTA updates from Mentra.
+**Warning:** Your fork will not receive OTA updates from Veiller.
 
 ### Restoring Stock Firmware
 

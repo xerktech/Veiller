@@ -15,7 +15,7 @@
 ```
 SDK App Server (developer's app)
   → Cloud (WebSocket)
-    → Phone (MentraOS mobile app, WebSocket → native CoreModule)
+    → Phone (Veiller mobile app, WebSocket → native CoreModule)
       → Glasses (ASG client, BLE command: take_photo)
         → Camera HAL captures photo
         → [Path A] Direct HTTP upload to app's webhook URL (fastest)
@@ -32,10 +32,10 @@ When a photo request fails (camera busy, battery low, etc.), the developer's app
 
 ## Test Harness
 
-We built `cloud/packages/apps/photo-test/` — a fullstack MentraOS mini app for measuring photo request behavior:
+We built `cloud/packages/apps/photo-test/` — a fullstack Veiller mini app for measuring photo request behavior:
 
 - **Backend:** `PhotoTestApp` (extends `AppServer`) + Hono API routes for photo requests, SSE streaming, session status
-- **Frontend:** React webview using `@mentra/react` (proper webview auth — no manual user ID entry)
+- **Frontend:** React webview using `@veiller/react` (proper webview auth — no manual user ID entry)
 - **Measurements:** Per-request timing, status (SUCCESS/ERROR/TIMEOUT/PENDING), error messages, photo sizes, pass/fail verdicts for OS-947
 
 ---
@@ -48,10 +48,10 @@ One photo request, start to finish. Logcat cleared before request, captured imme
 
 ```
 16:52:51.529  ReactNativeJS: Received photo_request, requestId: photo_req_1772499170225_zo28oyx,
-              appId: com.mentra.phototest, webhookUrl: https://isaiah-tpa.ngrok.app/photo-upload,
+              appId: com.veiller.phototest, webhookUrl: https://isaiah-tpa.ngrok.app/photo-upload,
               size: medium, compress: none
 
-16:52:51.538  ReactNativeJS: 'CORE:', 'MAN: onPhotoRequest: photo_req_..._zo28oyx, com.mentra.phototest,
+16:52:51.538  ReactNativeJS: 'CORE:', 'MAN: onPhotoRequest: photo_req_..._zo28oyx, com.veiller.phototest,
               medium, compress=none'
 
 16:52:51.541  ReactNativeJS: 'CORE:', 'LIVE: Sending data to glasses:
@@ -377,7 +377,7 @@ For a typical 14-second photo:
 
 ## Measured Results Table
 
-All measurements from the `photo-test` app via the MentraOS phone app webview:
+All measurements from the `photo-test` app via the Veiller phone app webview:
 
 | # | Mode | Duration | Size | Status | Notes |
 |---|------|----------|------|--------|-------|

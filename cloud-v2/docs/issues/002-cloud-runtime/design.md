@@ -1,13 +1,13 @@
-# Mentra Cloud Runtime: package build map
+# Veiller Cloud Runtime: package build map
 
-**Status:** Design, the target structure. This is the `@mentra/cloud-runtime` file
+**Status:** Design, the target structure. This is the `@veiller/cloud-runtime` file
 layout we're refactoring toward: what each file owns and its key signatures, plus the
 data flow that ties them together. The big picture is in
 [`architecture.md`](./architecture.md); the audio architecture and the Redis/worker
 detail are in [`audio/spec.md`](./audio/spec.md) and [`audio/design.md`](./audio/design.md).
 The "Current state" section at the end says what's built and what's still moving.
 
-**TL;DR:** One package, `@mentra/cloud-runtime`, with a pure `/protocol` subpath the
+**TL;DR:** One package, `@veiller/cloud-runtime`, with a pure `/protocol` subpath the
 client also imports. The folders tell the story: **`net/`** is the connection edge
 (UDP + WebSocket), **`services/session/`** is the per-user cross-pod state in Redis
 (ownership, the audio stream, subscriptions), **`services/audio/`** is the
@@ -18,7 +18,7 @@ owns the audio pipeline.
 ## Package layout
 
 ```
-cloud-v2/packages/runtime/        # @mentra/cloud-runtime
+cloud-v2/packages/runtime/        # @veiller/cloud-runtime
   package.json                    # exports: "." (server) and "./protocol" (pure, client-safe types)
   src/
     index.ts                      # boot only: parse config, connect, start the services, serve
@@ -53,7 +53,7 @@ cloud-v2/packages/runtime/        # @mentra/cloud-runtime
           mock.ts                 # the deterministic test provider
       camera/                     # (later) managed photo + stream REST; no session state
 
-    protocol/                     # the pure, isomorphic v2 types (also @mentra/cloud-runtime/protocol)
+    protocol/                     # the pure, isomorphic v2 types (also @veiller/cloud-runtime/protocol)
       envelope.ts handshake.ts control.ts errors.ts audio.ts messages.ts index.ts
 ```
 
@@ -235,7 +235,7 @@ export function createSonioxProvider(opts: CreateSonioxProviderOptions): Promise
 export function createMockProvider(opts: CreateMockProviderOptions): Promise<TranscriptionProvider>
 ```
 
-**`src/protocol/`**: the pure v2 types, also published as `@mentra/cloud-runtime/protocol`
+**`src/protocol/`**: the pure v2 types, also published as `@veiller/cloud-runtime/protocol`
 and imported by the client (issue 004). No server imports, so it's safe in the RN
 bundle. `envelope.ts` (the `{ v, type, timestamp, payload }` wrapper), `handshake.ts`
 (`connection.init` / `connection.ack`), `control.ts` (ping/pong), `errors.ts`,

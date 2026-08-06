@@ -5,7 +5,7 @@
 
 ## Problem
 
-Enterprise and OEM admins need a way to log in to Mentra, manage their account,
+Enterprise and OEM admins need a way to log in to Veiller, manage their account,
 register trusted JWT issuers/JWKS URLs, test token exchange, invite teammates,
 and handle other administrative tasks.
 
@@ -13,10 +13,10 @@ This is a B2B admin surface, distinct from:
 
 - **The runtime OEM auth path** (specified in
   [`../../001-cloud-core/auth/oem-auth.md`](../../001-cloud-core/auth/oem-auth.md)). That doc covers how an
-  OEM's backend authenticates its *users* to Mentra cloud. This doc
+  OEM's backend authenticates its *users* to Veiller cloud. This doc
   is about how OEM employees log in to manage their company's
-  Mentra integration.
-- **The Mentra mobile app login**. That's consumer auth (currently
+  Veiller integration.
+- **The Veiller mobile app login**. That's consumer auth (currently
   Supabase) for the end users of glasses. Different security
   posture, different scale, different concerns.
 
@@ -80,9 +80,9 @@ What's in scope:
 
 What's not in scope:
 - The runtime token-exchange endpoint (in 001)
-- Mentra mobile app user auth (separate, Supabase for now)
+- Veiller mobile app user auth (separate, Supabase for now)
 - Dev console / Console2 (separate developer surface)
-- Internal admin site (separate Mentra operator surface)
+- Internal admin site (separate Veiller operator surface)
 - Miniapp store (separate; consumer surface)
 
 ## Cross-references

@@ -57,7 +57,7 @@ RETRIEVAL:
 | `createdAt`      | Date   | Auto-managed                                     |
 | `updatedAt`      | Date   | Auto-managed                                     |
 
-**Cloudflare R2 (`mentra-incidents` bucket)** — actual log payloads:
+**Cloudflare R2 (`veiller-incidents` bucket)** — actual log payloads:
 
 Path: `incidents/{incidentId}.json`
 
@@ -98,7 +98,7 @@ R2 operations use per-incident in-memory locks (promise queue) to prevent race c
 | POST   | `/api/incidents/:id/logs`        | Upload phone/glasses/firmware/app logs    |
 | POST   | `/api/incidents/:id/attachments` | Upload screenshots (max 5, max 10MB each) |
 
-**Console Admin API** (`/api/console/admin/incidents`) — web UI, auth: console session + isMentraAdmin
+**Console Admin API** (`/api/console/admin/incidents`) — web UI, auth: console session + isVeillerAdmin
 
 | Method | Path                         | Purpose                                  |
 | ------ | ---------------------------- | ---------------------------------------- |
@@ -175,9 +175,9 @@ New package at `cloud/packages/incidents/`. Separate from the cloud server — i
 
 ### Auth
 
-Reads `MENTRA_AGENT_API_KEY` from environment. The key should live in `cloud/.env` (gitignored). The CLI fails with a clear message if the key is missing. The key is never logged or included in output.
+Reads `VEILLER_AGENT_API_KEY` from environment. The key should live in `cloud/.env` (gitignored). The CLI fails with a clear message if the key is missing. The key is never logged or included in output.
 
-The API host defaults to `https://api.mentra.glass` but can be overridden via `MENTRA_API_HOST` env var (for testing against dev/staging).
+The API host defaults to `https://api.mentra.glass` but can be overridden via `VEILLER_API_HOST` env var (for testing against dev/staging).
 
 ### Commands
 
@@ -274,7 +274,7 @@ bun run incidents get c3f3e699
 ## Next Steps
 
 1. Build the CLI package — zero API changes, just the client tool
-2. Add `MENTRA_AGENT_API_KEY` to `cloud/.env.example` with a placeholder value
+2. Add `VEILLER_AGENT_API_KEY` to `cloud/.env.example` with a placeholder value
 3. Test against prod agent API with real incident data
 4. Separate issue for API-side filtering enhancements
 5. Separate issue for remote-triggered incident reports

@@ -10,7 +10,7 @@ import {
   PhotoRequest, // SDK type for App's request
   PhotoErrorCode,
   // Define AppPhotoResult in SDK or use a generic message structure
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 import { Logger } from "pino";
 import UserSession from "./UserSession";
 import { ConnectionValidator } from "../validators/ConnectionValidator";

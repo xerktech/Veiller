@@ -251,7 +251,7 @@ describe("startup bundle", () => {
     expect(atob("aGVsbG8=")).toBe("hello")
   })
 
-  test("__mentraSendRequest resolves on a matching response envelope", async () => {
+  test("__veillerSendRequest resolves on a matching response envelope", async () => {
     const stubs = freshStubs()
     let captured: string | undefined
     stubs.dispatchHandlers.set("display.showText", (_args, reqId) => {
@@ -259,7 +259,7 @@ describe("startup bundle", () => {
       return null
     })
     const sandbox = evalBundle(stubs)
-    const sendRequest = sandbox.__mentraSendRequest as (i: string, m: string, a: unknown[]) => Promise<unknown>
+    const sendRequest = sandbox.__veillerSendRequest as (i: string, m: string, a: unknown[]) => Promise<unknown>
     const p = sendRequest("display", "showText", ["hi"])
     expect(typeof captured).toBe("string")
     // Now deliver the response envelope back.
@@ -269,7 +269,7 @@ describe("startup bundle", () => {
     await expect(p).resolves.toBe(42)
   })
 
-  test("__mentraSendRequest rejects on an error envelope", async () => {
+  test("__veillerSendRequest rejects on an error envelope", async () => {
     const stubs = freshStubs()
     let captured: string | undefined
     stubs.dispatchHandlers.set("mic.start", (_a, r) => {
@@ -277,7 +277,7 @@ describe("startup bundle", () => {
       return null
     })
     const sandbox = evalBundle(stubs)
-    const p = (sandbox.__mentraSendRequest as (i: string, m: string, a: unknown[]) => Promise<unknown>)(
+    const p = (sandbox.__veillerSendRequest as (i: string, m: string, a: unknown[]) => Promise<unknown>)(
       "mic",
       "start",
       [],
@@ -293,11 +293,11 @@ describe("startup bundle", () => {
     await expect(p).rejects.toMatchObject({code: "PERMISSION_NOT_DECLARED"})
   })
 
-  test("__mentraSubscribe + event envelope fan-out", () => {
+  test("__veillerSubscribe + event envelope fan-out", () => {
     const sandbox = evalBundle()
     const received: unknown[] = []
     const unsub = (
-      sandbox.__mentraSubscribe as (i: string, cb: (p: unknown) => void) => () => void
+      sandbox.__veillerSubscribe as (i: string, cb: (p: unknown) => void) => () => void
     )("button", (p) => received.push(p))
     ;(sandbox.__deliver as (j: string) => void)(
       JSON.stringify({kind: "event", iface: "button", payload: {which: "main"}}),
@@ -318,16 +318,16 @@ describe("startup bundle", () => {
     expect(JSON.parse(readyCall!.argsJson)).toEqual([])
   })
 
-  test("__deliver init envelope stamps __mentraSessionId", () => {
+  test("__deliver init envelope stamps __veillerSessionId", () => {
     const sandbox = evalBundle()
     ;(sandbox.__deliver as (j: string) => void)(JSON.stringify({kind: "init", sessionId: "abc-123"}))
-    expect(sandbox.__mentraSessionId).toBe("abc-123")
+    expect(sandbox.__veillerSessionId).toBe("abc-123")
   })
 
-  test("__deliver init fires __mentraInitCallback if set", () => {
+  test("__deliver init fires __veillerInitCallback if set", () => {
     const sandbox = evalBundle()
     const seen: string[] = []
-    ;(sandbox as Record<string, unknown>).__mentraInitCallback = (sid: string) => seen.push(sid)
+    ;(sandbox as Record<string, unknown>).__veillerInitCallback = (sid: string) => seen.push(sid)
     ;(sandbox.__deliver as (j: string) => void)(JSON.stringify({kind: "init", sessionId: "callback-test"}))
     expect(seen).toEqual(["callback-test"])
   })
@@ -339,17 +339,17 @@ describe("startup bundle", () => {
     expect(stubs.hostErrorCalls.length).toBeGreaterThan(0)
   })
 
-  test("kind=bridge envelope forwards raw payload to __mentraDeliverBridgeRaw", () => {
+  test("kind=bridge envelope forwards raw payload to __veillerDeliverBridgeRaw", () => {
     const sandbox = evalBundle()
     const received: string[] = []
-    ;(sandbox as Record<string, unknown>).__mentraDeliverBridgeRaw = (raw: string) => received.push(raw)
+    ;(sandbox as Record<string, unknown>).__veillerDeliverBridgeRaw = (raw: string) => received.push(raw)
     ;(sandbox.__deliver as (j: string) => void)(
       JSON.stringify({kind: "bridge", raw: '{"type":"DISPLAY","text":"hi"}'}),
     )
     expect(received).toEqual(['{"type":"DISPLAY","text":"hi"}'])
   })
 
-  test("kind=bridge silently drops when __mentraDeliverBridgeRaw is not installed", () => {
+  test("kind=bridge silently drops when __veillerDeliverBridgeRaw is not installed", () => {
     const sandbox = evalBundle()
     expect(() =>
       (sandbox.__deliver as (j: string) => void)(JSON.stringify({kind: "bridge", raw: "x"})),

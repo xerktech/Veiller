@@ -8,7 +8,7 @@
 
 ## Background
 
-The v2 SDK (`@mentra/sdk` 2.x) has a flat API surface: `session.events.onX()`, `session.layouts.showX()`, `session.audio.playTTS()`, etc. The v3 SDK reorganizes everything into 14 typed managers on `MentraSession`. During this reorganization, some capabilities were intentionally simplified, some were accidentally dropped, and one has a real bug where the type signature promises functionality the implementation does not deliver.
+The v2 SDK (`@veiller/sdk` 2.x) has a flat API surface: `session.events.onX()`, `session.layouts.showX()`, `session.audio.playTTS()`, etc. The v3 SDK reorganizes everything into 14 typed managers on `VeillerSession`. During this reorganization, some capabilities were intentionally simplified, some were accidentally dropped, and one has a real bug where the type signature promises functionality the implementation does not deliver.
 
 This spike was produced by diffing every v2 module against its v3 replacement, checking the wire protocol support, and auditing every documentation page.
 

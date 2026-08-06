@@ -10,7 +10,7 @@ import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import mantle from "@/services/MantleManager"
-import {SETTINGS, engine, useSetting, BgTimer} from "@mentra/engine"
+import {SETTINGS, engine, useSetting, BgTimer} from "@veiller/engine"
 import {SplashVideo} from "@/components/splash/SplashVideo"
 import {APP_STORE_URL, PLAY_STORE_URL} from "@/constants/appConfig"
 import {fetchMinimumClientVersion} from "@/utils/cloudVersion"
@@ -61,7 +61,7 @@ export default function InitScreen() {
   // Helper Functions
   const getLocalVersion = (): string | null => {
     try {
-      return process.env.EXPO_PUBLIC_MENTRAOS_VERSION || null
+      return process.env.EXPO_PUBLIC_VEILLER_VERSION || null
     } catch (error) {
       console.error("Error getting local version:", error)
       return null

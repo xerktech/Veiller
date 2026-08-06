@@ -21,8 +21,8 @@ public class CameraDiagnosticsLogTest {
     @Test
     public void manualExposureDecision_preservesJsonShape() {
         CameraDiagnosticsLog.manualExposureDecision(true, "manual path engaged", 5_000_000L, true);
-        assertThat(ShadowLog.getLogsForTag("MentraDbg")).isNotEmpty();
-        String msg = ShadowLog.getLogsForTag("MentraDbg").get(0).msg;
+        assertThat(ShadowLog.getLogsForTag("VeillerDbg")).isNotEmpty();
+        String msg = ShadowLog.getLogsForTag("VeillerDbg").get(0).msg;
         assertThat(msg).contains("\"sessionId\":\"d2b1f4\"");
         assertThat(msg).contains("\"hypothesisId\":\"H0\"");
         assertThat(msg).contains("CameraNeo:shouldUseManualExposure");
@@ -33,7 +33,7 @@ public class CameraDiagnosticsLogTest {
     public void stillRequestKeysBeforeCapture_preservesHypothesisIds() {
         CameraDiagnosticsLog.stillRequestKeysBeforeCapture(
                 false, 1L, 400, 2L, 1, 2, 3, 4, false, false, 0, null);
-        String msg = ShadowLog.getLogsForTag("MentraDbg").get(0).msg;
+        String msg = ShadowLog.getLogsForTag("VeillerDbg").get(0).msg;
         assertThat(msg).contains("H1+H2+H3+H4");
         assertThat(msg).contains("CameraNeo:capturePhoto:beforeCapture");
     }

@@ -1,7 +1,7 @@
 import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom"
 import {Toaster} from "sonner"
 import {useState, useEffect} from "react"
-import {AuthProvider, useAuth, ForgotPasswordPage, ResetPasswordPage, Spinner} from "@mentra/shared"
+import {AuthProvider, useAuth, ForgotPasswordPage, ResetPasswordPage, Spinner} from "@veiller/shared"
 import LoginPage from "./pages/LoginPage"
 import AccountPage from "./pages/AccountPage"
 import DeleteAccountPage from "./pages/DeleteAccountPage"

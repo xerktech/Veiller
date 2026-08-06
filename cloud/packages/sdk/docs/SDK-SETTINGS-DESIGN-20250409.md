@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-Currently, App developers need to manually implement REST API calls to fetch and update settings from the MentraOS Cloud. This creates several issues:
+Currently, App developers need to manually implement REST API calls to fetch and update settings from the Veiller Cloud. This creates several issues:
 
 1. Developers are hard-coding server URLs, making apps fragile when users are on different servers
 2. Excessive boilerplate code for handling HTTP requests, authentication, and error handling

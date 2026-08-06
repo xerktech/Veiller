@@ -245,7 +245,7 @@ Output shows exact pixel widths and alignment errors for each line.
 
 ### Manual Test: Dashboard Alignment
 
-1. Connect glasses to MentraOS app
+1. Connect glasses to Veiller app
 2. Start line-width app: `cd cloud/packages/apps/line-width && bun run dev`
 3. Open http://localhost:3333
 4. Connect glasses to the app

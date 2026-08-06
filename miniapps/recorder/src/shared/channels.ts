@@ -5,7 +5,7 @@
  * cross-boundary resolution.
  */
 
-import type {MentraTyped} from "@mentra/miniapp/ui"
+import type {VeillerTyped} from "@veiller/miniapp/ui"
 
 import type {RecorderSnapshot, RecorderStatus, RecordingItem, Usage} from "./types"
 
@@ -45,5 +45,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: MentraTyped<Channels>
+  var veiller: VeillerTyped<Channels>
 }

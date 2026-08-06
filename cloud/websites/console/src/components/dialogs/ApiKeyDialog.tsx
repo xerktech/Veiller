@@ -10,10 +10,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { Copy, KeyRound, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
 import api from "@/services/api.service";
-import type { AppI } from "@mentra/sdk";
+import type { AppI } from "@veiller/sdk";
 import { App } from "@/types/app";
 
 interface ApiKeyDialogProps {
@@ -204,7 +204,7 @@ const ApiKeyDialog: FC<ApiKeyDialogProps> = ({ app, open, onOpenChange, apiKey, 
             <>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Your API key is used to authenticate your app with MentraOS cloud services. Keep it secure and never
+                  Your API key is used to authenticate your app with Veiller cloud services. Keep it secure and never
                   share it publicly.
                 </p>
                 {_apiKey ? (
@@ -236,7 +236,7 @@ const ApiKeyDialog: FC<ApiKeyDialogProps> = ({ app, open, onOpenChange, apiKey, 
                     : "No server URL defined"}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  This is the full webhook URL where MentraOS will send events
+                  This is the full webhook URL where Veiller will send events
                   to your app.
                 </p>
               </div>*/}

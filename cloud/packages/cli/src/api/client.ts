@@ -1,7 +1,7 @@
 /**
  * API Client
  *
- * HTTP client for communicating with Mentra cloud API
+ * HTTP client for communicating with Veiller cloud API
  */
 
 import axios, {AxiosInstance, AxiosError} from "axios"

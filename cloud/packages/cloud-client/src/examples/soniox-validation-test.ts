@@ -13,10 +13,10 @@
  */
 
 import { resolve } from 'path';
-import { MentraClient } from '../MentraClient';
+import { VeillerClient } from '../VeillerClient';
 import { AccountService } from '../services/AccountService';
 
-const LIVE_CAPTIONS_PACKAGE = 'com.mentra.livecaptions';
+const LIVE_CAPTIONS_PACKAGE = 'com.veiller.livecaptions';
 const AUDIO_FILE_PATH = resolve(__dirname, '../audio/short-test.wav');
 
 interface TranscriptionEvent {
@@ -41,7 +41,7 @@ async function main() {
   const account = accountService.getDefaultTestAccount();
 
   // Create client
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: account.email,
     coreToken: account.coreToken,
     serverUrl: process.env.DEFAULT_SERVER_URL || 'wss://testapi.mentra.glass/glasses-ws',
@@ -139,7 +139,7 @@ async function main() {
   }
 }
 
-function setupTranscriptionMonitoring(client: MentraClient) {
+function setupTranscriptionMonitoring(client: VeillerClient) {
   // Monitor display events for transcription results
   client.on('display_event', (event) => {
     const text = event.layout?.textData?.text || event.layout?.text;
@@ -147,7 +147,7 @@ function setupTranscriptionMonitoring(client: MentraClient) {
     
     // Only track transcription-related text
     if (text.trim().length < 2) return;
-    if (text.includes('Starting App') || text.includes('MentraOS')) return;
+    if (text.includes('Starting App') || text.includes('Veiller')) return;
     
     console.log(`📝 Transcription: "${text}"`);
     
@@ -283,7 +283,7 @@ function analyzeTranscriptionQuality() {
   console.log('='.repeat(60));
 }
 
-async function testDirectAudioStream(client: MentraClient) {
+async function testDirectAudioStream(client: VeillerClient) {
   console.log('🎤 Testing direct audio streaming (without Live Captions app)...');
   console.log('📝 This will test core transcription functionality...\n');
   

@@ -1,10 +1,10 @@
 # Dashboard Architecture
 
-> Part of the MentraOS `.architecture` series. See also: `architecture.md` (full system), `auth.md` (auth flows).
+> Part of the Veiller `.architecture` series. See also: `architecture.md` (full system), `auth.md` (auth flows).
 
 ## Overview
 
-The MentraOS dashboard is a **gesture-activated contextual overlay** — users see it when they tilt their head up past a configurable angle. It shows time, battery, weather, notifications, and calendar events. It occupies `ViewType.DASHBOARD`, a separate display buffer from `ViewType.MAIN`.
+The Veiller dashboard is a **gesture-activated contextual overlay** — users see it when they tilt their head up past a configurable angle. It shows time, battery, weather, notifications, and calendar events. It occupies `ViewType.DASHBOARD`, a separate display buffer from `ViewType.MAIN`.
 
 This document covers:
 
@@ -380,7 +380,7 @@ Rate: **~900–1,200 errors/minute** in production (>60% of all cloud errors). T
 | Weather         | `WeatherService.getWeather()` (OpenWeatherMap) | No — needs `OPEN_WEATHER_API_KEY` added to cloud env               |
 | Notifications   | `session.events.onPhoneNotification()`         | Yes — flows through notification endpoint                          |
 | Calendar events | `session.events.onCalendarEvent()`             | Yes — flows through calendar endpoint                              |
-| Metric pref     | `session.settings.getMentraosSetting(...)`     | Yes — `userSession.userSettingsManager.snapshot`                   |
+| Metric pref     | `session.settings.getVeillerSetting(...)`     | Yes — `userSession.userSettingsManager.snapshot`                   |
 
 ### Notification Ranking Agent
 

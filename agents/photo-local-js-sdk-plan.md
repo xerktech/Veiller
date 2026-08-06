@@ -81,7 +81,7 @@ async function handleRequest(c) {
   // simple — token is a tiny capability, not a slot identifier.
   const uploadToken = jwt.sign(
     {userId: email, purpose: "v2_photo_upload"},
-    process.env.MENTRA_PHOTO_UPLOAD_SECRET ?? "mentra-photo-dev-secret",
+    process.env.VEILLER_PHOTO_UPLOAD_SECRET ?? "veiller-photo-dev-secret",
     {expiresIn: "120s"},
   )
   const uploadUrl = `${publicBaseUrl(c)}/api/v2/client/photo/upload/${requestId}`
@@ -189,8 +189,8 @@ c.req.raw.signal.addEventListener("abort", () => {
 
 ### Reused from existing cloud code (no changes)
 
-- `miniappSdkPhotoStorage` (R2 wrapper) — re-export and use as-is. Same R2 bucket (`mentra-miniapp-sdk-photos`) per decision #5.
-- The HMAC secret env var becomes `MENTRA_PHOTO_UPLOAD_SECRET` (renamed from `MINIAPP_SDK_PHOTO_UPLOAD_SECRET`). One deployment-config update.
+- `miniappSdkPhotoStorage` (R2 wrapper) — re-export and use as-is. Same R2 bucket (`veiller-miniapp-sdk-photos`) per decision #5.
+- The HMAC secret env var becomes `VEILLER_PHOTO_UPLOAD_SECRET` (renamed from `MINIAPP_SDK_PHOTO_UPLOAD_SECRET`). One deployment-config update.
 
 ### Deletions (decision #3 — never used in prod, delete now)
 
@@ -200,7 +200,7 @@ c.req.raw.signal.addEventListener("abort", () => {
 - `cloud/packages/cloud/src/api/hono/client/index.ts` — remove `miniappSdkPhotoApi` export
 - `cloud/packages/cloud/src/hono-app.ts` — remove the `/api/client/miniapp-sdk-photo` mount + import
 - `phone_photo_ready` message type — only emitted by `MiniappSdkPhotoManager.handleUploadComplete`; nothing else sends it. Delete the type if defined anywhere.
-- `cloud/.env.example` — replace `MINIAPP_SDK_PHOTO_UPLOAD_SECRET=...` with `MENTRA_PHOTO_UPLOAD_SECRET=...`.
+- `cloud/.env.example` — replace `MINIAPP_SDK_PHOTO_UPLOAD_SECRET=...` with `VEILLER_PHOTO_UPLOAD_SECRET=...`.
 
 ## Phone changes
 
@@ -483,7 +483,7 @@ Internally the request type stays `MiniappRequestType.PHOTO`, the response shape
 |---|---|
 | Miniapp → phone SDK | (in-process) |
 | Phone → cloud `POST /request` | `Authorization: Bearer <coreToken>` (existing clientAuth middleware) |
-| Glasses or phone → cloud `POST /upload/:requestId` | `Authorization: Bearer <uploadToken>` (photo-agnostic capability JWT, ~120s TTL, HMAC-signed with `MENTRA_PHOTO_UPLOAD_SECRET`). The token payload is `{userId, purpose}` only — the `requestId` lives in the URL path, and cloud's in-memory map provides ownership-check against the slot. |
+| Glasses or phone → cloud `POST /upload/:requestId` | `Authorization: Bearer <uploadToken>` (photo-agnostic capability JWT, ~120s TTL, HMAC-signed with `VEILLER_PHOTO_UPLOAD_SECRET`). The token payload is `{userId, purpose}` only — the `requestId` lives in the URL path, and cloud's in-memory map provides ownership-check against the slot. |
 | Phone → cloud `GET /:requestId` | `Authorization: Bearer <coreToken>`; cloud verifies `userId == photos[requestId].userId` |
 
 Glasses never see `coreToken`. They only hold the single-use opaque `uploadToken`.
@@ -552,7 +552,7 @@ Glasses never see `coreToken`. They only hold the single-use opaque `uploadToken
 | EDIT | `cloud/packages/cloud/src/api/hono/client/index.ts` | drop `miniappSdkPhotoApi` export, add `v2PhotoApi` |
 | EDIT | `cloud/packages/cloud/src/hono-app.ts` | drop old mount, add `/api/v2/client/photo` |
 | EDIT | `cloud/packages/cloud/src/services/session/UserSession.ts` | drop `miniappSdkPhotoManager` field + ctor call + cleanup |
-| EDIT | `cloud/.env.example` | rename `MINIAPP_SDK_PHOTO_UPLOAD_SECRET` → `MENTRA_PHOTO_UPLOAD_SECRET` |
+| EDIT | `cloud/.env.example` | rename `MINIAPP_SDK_PHOTO_UPLOAD_SECRET` → `VEILLER_PHOTO_UPLOAD_SECRET` |
 | EDIT | `mobile/modules/engine/src/runtime/config.ts` | swap `requestMiniappSdkPhoto` → `photo` hook |
 | EDIT | `mobile/modules/engine/src/services/LocalMiniappRuntime.ts` | rewrite `handlePhoto`; drop `phone_photo_ready` case from `handleCloudMessage` + its doc-comment mention |
 | EDIT | `mobile/src/services/SocketComms.ts` | drop `phone_photo_ready` case from `handleCloudMessage` |
@@ -566,7 +566,7 @@ Total: ~5 new files, ~8 edits, 3 deletes. ~450 LOC net new, ~250 LOC deleted. Ze
 ## Cloud-2 port story
 
 The new route file is self-contained:
-- Reads only `MENTRA_PHOTO_UPLOAD_SECRET` env + the public base URL.
+- Reads only `VEILLER_PHOTO_UPLOAD_SECRET` env + the public base URL.
 - Uses `miniappSdkPhotoStorage` (also self-contained — R2 wrapper).
 - In-memory `Map` for ownership + waiters.
 - No `UserSession`, no WS, no DB.

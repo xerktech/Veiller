@@ -1,5 +1,5 @@
 /**
- * @fileoverview Integration tests for the Mentra account module (issue 019),
+ * @fileoverview Integration tests for the Veiller account module (issue 019),
  * with a mock GoTrue server so no real Supabase is needed. Prereq: a running
  * Mongo (override via MONGO_URL). Wipes its own collections.
  *
@@ -22,14 +22,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:tes
     };
   };
   const access = mk(), miniapp = mk(), account = mk();
-  process.env.MENTRA_JWT_PRIVATE_KEY = access.priv;
-  process.env.MENTRA_JWT_PUBLIC_KEY = access.pub;
-  process.env.MENTRA_MINIAPP_JWT_PRIVATE_KEY = miniapp.priv;
-  process.env.MENTRA_MINIAPP_JWT_PUBLIC_KEY = miniapp.pub;
-  process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY = account.priv;
-  process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY = account.pub;
+  process.env.VEILLER_JWT_PRIVATE_KEY = access.priv;
+  process.env.VEILLER_JWT_PUBLIC_KEY = access.pub;
+  process.env.VEILLER_MINIAPP_JWT_PRIVATE_KEY = miniapp.priv;
+  process.env.VEILLER_MINIAPP_JWT_PUBLIC_KEY = miniapp.pub;
+  process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY = account.priv;
+  process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY = account.pub;
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
-  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/mentra-cloud-v2-test";
+  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/veiller-cloud-v2-test";
 }
 
 // eslint-disable-next-line import/first
@@ -130,11 +130,11 @@ beforeAll(async () => {
     AccountCodeModel.syncIndexes(),
     SeenJtiModel.syncIndexes(),
   ]);
-  // Seed the mentra OEM row with the account public key (the startup migration
+  // Seed the veiller OEM row with the account public key (the startup migration
   // does this in prod).
-  const pub = `-----BEGIN PUBLIC KEY-----\n${process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY}\n-----END PUBLIC KEY-----`;
+  const pub = `-----BEGIN PUBLIC KEY-----\n${process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY}\n-----END PUBLIC KEY-----`;
   await OemModel.updateOne(
-    { tenantId: "mentra" },
+    { tenantId: "veiller" },
     { $set: { displayName: "Mentra", publicKeyMode: "static", publicKey: pub, disabled: false } },
     { upsert: true },
   );
@@ -153,7 +153,7 @@ beforeEach(async () => {
   lastEmailConfirmFlag = null;
   resetAccountRateLimits();
   await Promise.all([
-    UserModel.deleteMany({ tenantId: "mentra" }),
+    UserModel.deleteMany({ tenantId: "veiller" }),
     RefreshTokenModel.deleteMany({}),
     AccountCodeModel.deleteMany({}),
     SeenJtiModel.deleteMany({}),
@@ -182,8 +182,8 @@ describe("account auth", () => {
     expect(body.refresh_token).toBeTruthy();
 
     // The session was minted through the OEM path, so a user row exists under
-    // tenant "mentra" keyed on the Supabase id.
-    const user = await UserModel.findOne({ tenantId: "mentra", tenantUserId: SUPABASE_USER_ID }).lean();
+    // tenant "veiller" keyed on the Supabase id.
+    const user = await UserModel.findOne({ tenantId: "veiller", tenantUserId: SUPABASE_USER_ID }).lean();
     expect(user).toBeTruthy();
 
     // And refresh works (regression for the enterprise-refresh bug class).
@@ -252,11 +252,11 @@ describe("account auth", () => {
     expect(await RefreshTokenModel.countDocuments({})).toBe(2);
   });
 
-  test("OEM parity: the mentra subject token works through the PUBLIC exchange endpoint", async () => {
-    // Issue 019 requirement: Mentra must be just another OEM. The account
+  test("OEM parity: the veiller subject token works through the PUBLIC exchange endpoint", async () => {
+    // Issue 019 requirement: Veiller must be just another OEM. The account
     // module's subject token has to be exchangeable at the same public RFC 8693
     // endpoint any external OEM uses, with no special path. If this test fails,
-    // Mentra has grown a privileged backdoor.
+    // Veiller has grown a privileged backdoor.
     const { mintAccountSubjectToken } = await import("../packages/core/src/services/session.service");
     const subjectToken = await mintAccountSubjectToken({ tenantUserId: SUPABASE_USER_ID });
 
@@ -276,8 +276,8 @@ describe("account auth", () => {
     expect(body.access_token).toBeTruthy();
     expect(body.refresh_token).toBeTruthy();
 
-    // And the resulting session refreshes via the oems-row check (no mentra
-    // special case), because the seeded `mentra` row authorizes it.
+    // And the resulting session refreshes via the oems-row check (no veiller
+    // special case), because the seeded `veiller` row authorizes it.
     const refresh = await app.fetch(
       new Request("http://localhost/api/client/auth/refresh", {
         method: "POST",
@@ -288,11 +288,11 @@ describe("account auth", () => {
     expect(refresh.status).toBe(200);
   });
 
-  test("OEM parity: a DISABLED mentra oems row blocks refresh like any OEM", async () => {
+  test("OEM parity: a DISABLED veiller oems row blocks refresh like any OEM", async () => {
     const login = (await (await post("/api/account/login", { email: TEST_EMAIL, password: TEST_PASSWORD })).json()) as {
       refresh_token: string;
     };
-    await OemModel.updateOne({ tenantId: "mentra" }, { $set: { disabled: true } });
+    await OemModel.updateOne({ tenantId: "veiller" }, { $set: { disabled: true } });
     try {
       const refresh = await app.fetch(
         new Request("http://localhost/api/client/auth/refresh", {
@@ -303,7 +303,7 @@ describe("account auth", () => {
       );
       expect(refresh.status).toBe(401);
     } finally {
-      await OemModel.updateOne({ tenantId: "mentra" }, { $set: { disabled: false } });
+      await OemModel.updateOne({ tenantId: "veiller" }, { $set: { disabled: false } });
     }
   });
 
@@ -381,7 +381,7 @@ describe("account auth", () => {
     const now = Math.floor(Date.now() / 1000);
     const header = b64u(JSON.stringify({ alg: "EdDSA", typ: "JWT" }));
     const claims = b64u(
-      JSON.stringify({ iss: "acme-test", aud: "mentra", sub: "acme-user-42", jti: "acme-jti-1", iat: now, exp: now + 60 }),
+      JSON.stringify({ iss: "acme-test", aud: "veiller", sub: "acme-user-42", jti: "acme-jti-1", iat: now, exp: now + 60 }),
     );
     const sig = crypto.sign(null, Buffer.from(`${header}.${claims}`), acme.privateKey);
     const subjectToken = `${header}.${claims}.${b64u(sig)}`;
@@ -402,7 +402,7 @@ describe("account auth", () => {
     const { access_token } = (await ex.json()) as { access_token: string };
 
     // ...but the first-party account surface must reject it. Without the gate,
-    // /subject-token would mint this OEM user a `mentra` session.
+    // /subject-token would mint this OEM user a `veiller` session.
     const st = await post("/api/account/subject-token", {}, access_token);
     expect(st.status).toBe(403);
     expect((await st.json()).error).toBe("unauthorized_client");
@@ -448,24 +448,24 @@ describe("account auth", () => {
   });
 
   test("JWKS omits the account kid (and does not 500) when account keys are unset", async () => {
-    const priv = process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY;
-    const pub = process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY;
+    const priv = process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY;
+    const pub = process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY;
     try {
-      delete process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY;
-      delete process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY;
+      delete process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY;
+      delete process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY;
       resetSigningKeyCache();
       const jwks = await getPublicJwks();
       const kids = jwks.keys.map((k) => k.kid);
-      expect(kids).toContain("mentra-access-1");
-      expect(kids).toContain("mentra-miniapp-1");
-      expect(kids).not.toContain("mentra-account-1");
+      expect(kids).toContain("veiller-access-1");
+      expect(kids).toContain("veiller-miniapp-1");
+      expect(kids).not.toContain("veiller-account-1");
     } finally {
-      process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY = priv;
-      process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY = pub;
+      process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY = priv;
+      process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY = pub;
       resetSigningKeyCache();
     }
     // With the keys restored the account kid is published again.
     const jwks = await getPublicJwks();
-    expect(jwks.keys.map((k) => k.kid)).toContain("mentra-account-1");
+    expect(jwks.keys.map((k) => k.kid)).toContain("veiller-account-1");
   });
 });

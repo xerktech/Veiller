@@ -83,7 +83,7 @@ To verify the fix:
 
 ## Files Changed
 
-- `MentraOS/cloud/packages/cloud/src/services/session/UserSession.ts`
+- `Veiller/cloud/packages/cloud/src/services/session/UserSession.ts`
   - Added `forceResync()` call in `updateWebSocket()` method
 
 ## Related Bugs

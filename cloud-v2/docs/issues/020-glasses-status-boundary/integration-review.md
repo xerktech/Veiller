@@ -3,7 +3,7 @@
 Date: 2026-07-02
 Scope: `integration/engine-boundary` vs `dev` (278 files, +14.5k/−10.9k), reviewed
 against [README.md](./README.md), [implementation-plan.md](./implementation-plan.md),
-and the overall product intent: **host = OEM-brandable views; engine = MentraOS
+and the overall product intent: **host = OEM-brandable views; engine = Veiller
 runtime**. Constraint for all follow-up work: **behavior unchanged**.
 
 ## Verdict
@@ -32,11 +32,11 @@ end of this doc.
 
 | WP | Goal | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | Devtools boundary | **Mostly done** | CoreStatusBar renders `engine.dev.runtimeStatus()`; stress-test/super still call `bluetooth-sdk-internal` debug hooks host-side; no `@mentra/engine/devtools` export exists; dead debug links remain |
+| 1 | Devtools boundary | **Mostly done** | CoreStatusBar renders `engine.dev.runtimeStatus()`; stress-test/super still call `bluetooth-sdk-internal` debug hooks host-side; no `@veiller/engine/devtools` export exists; dead debug links remain |
 | 2 | Guardrail | **Done (narrow)** | `check-mobile-runtime-boundary.sh` passes, allowlist empty — but it only patterns glasses/gallery stores |
 | 3 | Facade deltas | **Done** | glasses/controller/pairing/ota/gallery/dev facades + `useEngineSnapshot` |
 | 4 | Product UI conversion | **Done** | home/settings/status components read facades |
-| 5 | BT-SDK types subpath | **Done** | `@mentra/bluetooth-sdk/types` exists; `GlassesReadiness` + test mock consume it |
+| 5 | BT-SDK types subpath | **Done** | `@veiller/bluetooth-sdk/types` exists; `GlassesReadiness` + test mock consume it |
 | 6 | Pairing/reconnect | **Done** | screens/effects use `engine.pairing`; `decideReconnect` in island |
 | 7 | Network/gallery plumbing | **Done** | `NetworkMonitoring.tsx` deleted; `DeviceEventRouter` owns hotspot→asgCameraApi |
 | 8A | OTA check orchestration | **Done** | `engine.ota.checkForUpdates()` owns waits/manifest/clock/mtk-filter |
@@ -81,7 +81,7 @@ Consequences visible elsewhere:
   `legacyProgress` inside the public snapshot ([ota.ts:33,59,61,77,90,95](../../../../mobile/modules/engine/src/facades/ota.ts)).
   An OEM could call any of these out of order.
 - Host OTA UI types come from the SDK's internal surface
-  (`OtaProgress`/`OtaStatus` from `@mentra/bluetooth-sdk-internal` in
+  (`OtaProgress`/`OtaStatus` from `@veiller/bluetooth-sdk-internal` in
   `progress.tsx`, `deriveOtaDisplayState.ts`, `otaErrorMapping.ts`,
   `OtaProgressSection.tsx`) instead of from `engine.ota`.
 - Timer policy lives in host (`otaProgressTimeouts.ts`).
@@ -126,12 +126,12 @@ that asserts snapshot mutation never reaches the store, so the class dies.
 > **Status (2026-07-03):** ✅ **Phase 4 (entry-point split) is done** on
 > `codex/island-entrypoint-split`:
 >
-> - [x] `@mentra/engine` main = `engine` + contract/read-model types + pure
+> - [x] `@veiller/engine` main = `engine` + contract/read-model types + pure
 >       helpers host UI renders with (judgment rule: read models, commands,
 >       pure functions, types = main; store/service-shaped = not main)
-> - [x] `@mentra/engine/internal` = raw stores + service singletons; all
+> - [x] `@veiller/engine/internal` = raw stores + service singletons; all
 >       `@/stores/*` / `@/utils/*` shims and host services repointed
-> - [x] `@mentra/engine/devtools` = `miniappRunningRegistry`, `devServerBridge`
+> - [x] `@veiller/engine/devtools` = `miniappRunningRegistry`, `devServerBridge`
 > - [x] `engine.stores.*` deleted (its 2 remaining mentions were shim comments)
 > - [x] guardrail counts `/internal` (39 files) + `/devtools` (2 files)
 >       imports report-only; raw-store count unchanged at 41 files
@@ -148,8 +148,8 @@ state. Present at review time (phase-4 disposition in brackets):
   `asgCameraApi`, `localStorageService`, `mediaProcessingQueue`,
   `miniappRunningRegistry`, `localMiniappRuntime`, `miniappLauncher`,
   OTA check helpers, clock-fix helpers…). [**Moved off the main entry** in
-  phase 4: stores + services on `@mentra/engine/internal`, debug singletons on
-  `@mentra/engine/devtools`; the main barrel keeps engine + types + pure
+  phase 4: stores + services on `@veiller/engine/internal`, debug singletons on
+  `@veiller/engine/devtools`; the main barrel keeps engine + types + pure
   helpers.]
 - Host shim files `@/stores/{core, connection, display, settings,
   cloudClientStatus}` re-exporting island stores; ~36 host files /
@@ -160,9 +160,9 @@ state. Present at review time (phase-4 disposition in brackets):
 Not a regression — these predate the PR and plan 020 scoped them out — but they
 are the reason the host still can't be handed to an OEM. Recommended shape:
 
-1. Split island entry points: `@mentra/engine` (engine + types only),
-   `@mentra/engine/internal` (stores + service singletons, for the host's own
-   runtime-adjacent services during migration), `@mentra/engine/devtools`
+1. Split island entry points: `@veiller/engine` (engine + types only),
+   `@veiller/engine/internal` (stores + service singletons, for the host's own
+   runtime-adjacent services during migration), `@veiller/engine/devtools`
    (stress-test store, running registry, debug BLE hooks).
 2. Point the existing shims at `/internal`, freeze new uses via the guardrail,
    then burn down per store: `useCoreStore` reads → `engine.pairing`
@@ -197,12 +197,12 @@ Actions, all behavior-safe:
 
 ### F. Consistency and hygiene (cheap, high polish value)
 
-- **Facade import idiom:** `ota.ts` uses `@mentra/bluetooth-sdk/internal`;
+- **Facade import idiom:** `ota.ts` uses `@veiller/bluetooth-sdk/internal`;
   `glasses.ts`, `speech.ts`, `dev.ts`, `reports.ts` use the relative
   `../../../bluetooth-sdk/build/_internal` path. Standardize on the package
   subpath (this was an explicit babysitting decision).
 - **Guardrail growth:** extend `check-mobile-runtime-boundary.sh` with
-  (report-only at first): the remaining store hooks, `@mentra/engine/internal`
+  (report-only at first): the remaining store hooks, `@veiller/engine/internal`
   (once split), `bluetooth-sdk-internal` in `mobile/src` outside an allowlisted
   devtools set, and the flat OTA helpers.
 - **Dead debug routes:** `/test/switcher`, `/miniapps/settings/buffer-debug`
@@ -244,11 +244,11 @@ as superseded by this section.
 Done or superseded by the landed work:
 
 - **`engine.stores.*` escape hatch** — deleted by the entry-point split
-  (#3342): explicit `@mentra/engine/internal` + `/devtools` entries replaced the
+  (#3342): explicit `@veiller/engine/internal` + `/devtools` entries replaced the
   documented escape hatch; the guardrail keeps `engine.stores` at zero.
 - **`REQUEST_WIFI_SETUP_TYPE` literal** — replaced with the
   `MiniappRequestType` enum.
-- **`mentraJsBootstrap`** — island owns the engine (`ensureMiniappEngine`); the
+- **`veillerJsBootstrap`** — island owns the engine (`ensureMiniappEngine`); the
   host shim attaches only Sentry tags + alert copy via `router.onCrashloop` /
   `onRestartToast`.
 - **Bluetooth SDK passthrough** — public entry exports event *types* only; the

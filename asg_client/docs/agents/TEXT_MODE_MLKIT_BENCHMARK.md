@@ -279,7 +279,7 @@ that missed text is inside the crop.
 
 ## Remaining validation before production rollout
 
-Build and annotate at least 150-300 real Mentra captures spanning documents, product labels,
+Build and annotate at least 150-300 real Veiller captures spanning documents, product labels,
 screens, street/store signs, handwriting, multiple scripts, rotations, blur, glare, low light,
 text at every edge/corner, spatially separated text, and no-text scenes.
 

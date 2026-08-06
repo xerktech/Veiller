@@ -119,7 +119,7 @@ BluetoothSdk.addListener("mic_pcm", (event: MicPcmEvent) => {
 
 - Stream name is `"audio_chunk"` (matches `MiniappStreamType.AUDIO_CHUNK`;
   `normalizeStreamType` leaves it unchanged).
-- `localMiniappRuntime` is already imported in MantleManager (`@mentra/engine`,
+- `localMiniappRuntime` is already imported in MantleManager (`@veiller/engine`,
   ~ln 33) and used for other `forwardEvent` calls (button_press, head_up, …) —
   this follows the established template exactly.
 - Delete the stale commented `"audio_chunk"` block (~ln 927–931) to avoid

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document logs all identified issues and failure points in the MentraOS photo capture system that can cause SDK timeouts without proper error reporting.
+This document logs all identified issues and failure points in the Veiller photo capture system that can cause SDK timeouts without proper error reporting.
 
 ## 1. Silent Failures with No Error Propagation
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth, LoginUI } from '@mentra/shared';
+import { useAuth, LoginUI } from '@veiller/shared';
 
 const LoginPage: React.FC = () => {
   const location = useLocation();

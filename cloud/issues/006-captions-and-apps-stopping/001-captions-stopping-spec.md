@@ -25,7 +25,7 @@ When a user switches between backend environments (e.g., `cloud-dev` → `cloud-
 | 00:36:30     | cloud-debug | Transcription working: "Testing, testing, one, two, three..." |
 | 00:36:32     | cloud-debug | Display requests successful                                   |
 | 00:37:03.800 | cloud-dev   | Grace period expired                                          |
-| 00:37:03.802 | cloud-dev   | WebSocket closed to `com.mentra.captions.beta` (code 1000)    |
+| 00:37:03.802 | cloud-dev   | WebSocket closed to `com.veiller.captions.beta` (code 1000)    |
 | 00:37:03.824 | cloud-debug | Received subscription update from Captions app                |
 | 00:37:03.843 | cloud-debug | `App removed from transcription set`                          |
 | 00:37:03.844 | cloud-debug | `No active subscriptions - closing Soniox stream`             |

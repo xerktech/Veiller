@@ -1,7 +1,7 @@
 /**
  * CaptionsFormatter
  *
- * Formats transcription text for display on smart glasses using @mentra/display-utils.
+ * Formats transcription text for display on smart glasses using @veiller/display-utils.
  * Handles speaker labels, history management, and proper text wrapping.
  *
  * This is the app-specific layer that sits on top of the generic display-utils.
@@ -9,7 +9,7 @@
  */
 
 // All profiles and utilities from the vendored display-utils. In the cloud app
-// this came from "@mentra/sdk/display-utils"; here we bundle a verbatim copy of
+// this came from "@veiller/sdk/display-utils"; here we bundle a verbatim copy of
 // cloud/packages/display-utils under src/vendor so it loads inside the on-device
 // JSContext (no native deps, only relative imports).
 import {

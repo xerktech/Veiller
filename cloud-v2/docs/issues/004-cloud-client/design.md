@@ -1,6 +1,6 @@
 # Cloud Client: implementation design
 
-**Status:** Design, ready to build against. This is how `@mentra/cloud-client` works
+**Status:** Design, ready to build against. This is how `@veiller/cloud-client` works
 behind the public API: the three modules (`cloud.auth`, `cloud.runtime`,
 `cloud.core`), the pieces that get passed in per platform, and the mechanics behind
 each method (connecting, refreshing tokens, reconnecting, sending audio). The public
@@ -18,12 +18,12 @@ storage) are passed in, so the same core code runs on the phone and on a server.
 
 The package is split so platform-only code never leaks into the shared logic:
 
-- `@mentra/cloud-client`: the root import. All the logic, no phone-only or
+- `@veiller/cloud-client`: the root import. All the logic, no phone-only or
   browser-only imports. You pass the platform pieces in yourself.
-- `@mentra/cloud-client/react-native`: a thin wrapper that supplies the phone's
+- `@veiller/cloud-client/react-native`: a thin wrapper that supplies the phone's
   WebSocket, UDP socket, and secure storage, then re-exports `CloudClient`. This is
   what the mobile app imports.
-- `@mentra/cloud-client/node`: the same wrapper for a server, a Node WebSocket, a
+- `@veiller/cloud-client/node`: the same wrapper for a server, a Node WebSocket, a
   `dgram` UDP socket, and an in-memory or file-backed store. This is what the test
   harness imports.
 
@@ -36,9 +36,9 @@ to the protocol types and the test harness; the mobile app depends on it).
 
 ```
 cloud-v2/packages/cloud-client/
-  package.json                 # @mentra/cloud-client; exports . ./react-native ./node
+  package.json                 # @veiller/cloud-client; exports . ./react-native ./node
   tsconfig.json
-  src/                         # the shared logic; the root import @mentra/cloud-client
+  src/                         # the shared logic; the root import @veiller/cloud-client
     index.ts                   # public entry: re-exports CloudClient + the public types
     client.ts                  # the CloudClient class (wiring only)
     config.ts                  # CloudClientConfig + the public config types
@@ -69,13 +69,13 @@ cloud-v2/packages/cloud-client/
 ```
 
 (There's no `/core` import path, on purpose: it would read like the cloud-core
-service. The root `@mentra/cloud-client` is the shared build, and `cloud.core` is just
+service. The root `@veiller/cloud-client` is the shared build, and `cloud.core` is just
 the module under `src/modules/core/`.)
 
 The signatures, file by file. The public ones (`AuthModule`, `RuntimeModule`,
 `CoreModule`, the transport types) come from [`spec.md`](./spec.md); the rest are the
 internal pieces behind them. Wire types (`AudioSubscription`, `TranscriptionData`,
-the message unions) are imported from `@mentra/cloud-runtime/protocol`.
+the message unions) are imported from `@veiller/cloud-runtime/protocol`.
 
 **`src/client.ts`**: the top-level object. It only wires things together: resolves
 the addresses (proxy-aware), builds the HTTP helper, then builds the three modules in
@@ -111,7 +111,7 @@ export type AuthConfig = {
   runtime: RuntimeAuthConfig
   core?: CoreBackedAuthConfig
 }
-export type SubjectTokenType = "oem-jwt" | "mentra-core" | "supabase"
+export type SubjectTokenType = "oem-jwt" | "veiller-core" | "supabase"
 ```
 
 **`src/transports.ts`**: the three things each platform supplies. The core only ever
@@ -335,7 +335,7 @@ pre-wired with them, so the caller just passes `{ endpoints, auth }`.
 
 ```ts
 // node/index.ts
-import { CloudClient as Base, CloudClientConfig } from "@mentra/cloud-client"
+import { CloudClient as Base, CloudClientConfig } from "@veiller/cloud-client"
 import { nodeTransports } from "./transports"
 export class CloudClient extends Base {
   constructor(config: Omit<CloudClientConfig, "transports">) {
@@ -378,7 +378,7 @@ hands Core or Runtime bearer tokens to a miniapp (see
 [`architecture.md`](./architecture.md) section 6).
 
 **Getting the first Core token.** In Core-backed mode, it's constructed with a
-**subject token** (the OEM's signed JWT, or a Mentra core token / Supabase session,
+**subject token** (the OEM's signed JWT, or a Veiller core token / Supabase session,
 or a `getSubjectToken()` callback that fetches one). On first use it calls
 `POST /api/client/auth/exchange` with that subject token and gets back a Core token
 (good for ~1h) and a refresh token, which it saves.
@@ -457,7 +457,7 @@ implements the locked protocol in
   reconnect.)
 
 **Incoming messages.** Every WebSocket message is parsed and checked against the
-shared `cloudToClientMessage` definition from `@mentra/cloud-runtime/protocol` before
+shared `cloudToClientMessage` definition from `@veiller/cloud-runtime/protocol` before
 anything acts on it. A message that doesn't match is dropped with a log, not crashed
 on. A valid one is handed to the typed event emitter (below). An unknown `type` is
 non-fatal by the protocol, so it's logged and ignored.

@@ -10,13 +10,13 @@ import {
   useBluetoothScan,
   useBluetoothStatus,
   useGlassesConnection,
-} from '@mentra/bluetooth-sdk/react';
+} from '@veiller/bluetooth-sdk/react';
 ```
 
 It is based on the current React Native starter app in the Partner Kit:
 
 ```text
-Mentra-Bluetooth-SDK-Partner-Kit/examples/react-native/src/useMentraSdk.ts
+Veiller-Bluetooth-SDK-Partner-Kit/examples/react-native/src/useVeillerSdk.ts
 ```
 
 The starter app is useful as a complete demo, but it is also evidence that
@@ -26,7 +26,7 @@ building blocks.
 
 ## Current Pain Points
 
-- The example app has one large `useMentraSdk()` hook that owns unrelated
+- The example app has one large `useVeillerSdk()` hook that owns unrelated
   concerns: SDK status, scan results, default-device persistence, photo upload,
   streaming, Wi-Fi, hotspot, mic recording, audio playback, RGB LED controls,
   and console logging.
@@ -49,9 +49,9 @@ building blocks.
 ## Design Principles
 
 - Keep the root SDK imperative and language-neutral:
-  `import BluetoothSdk from '@mentra/bluetooth-sdk'`.
+  `import BluetoothSdk from '@veiller/bluetooth-sdk'`.
 - Add React helpers under an explicit subpath:
-  `import {useGlassesConnection} from '@mentra/bluetooth-sdk/react'`.
+  `import {useGlassesConnection} from '@veiller/bluetooth-sdk/react'`.
 - Hooks should be thin lifecycle helpers, not a full application framework.
 - Hooks should compose. A developer can use only `useBluetoothStatus()` or use a
   higher-level `useGlassesConnection()` that composes scan and connect state.
@@ -228,8 +228,8 @@ own persistence.
 Basic customer usage:
 
 ```tsx
-import {DeviceModels} from '@mentra/bluetooth-sdk';
-import {useGlassesConnection} from '@mentra/bluetooth-sdk/react';
+import {DeviceModels} from '@veiller/bluetooth-sdk';
+import {useGlassesConnection} from '@veiller/bluetooth-sdk/react';
 
 function DevicePicker() {
   const glasses = useGlassesConnection({
@@ -364,7 +364,7 @@ should stay in the starter kit because they are app-platform choices.
 3. Replace default-device restore/autoconnect logic with
    `useGlassesConnection({defaultDeviceStorage, autoConnectDefault: true})`.
 4. Replace photo request ID/timeout/listener code with `usePhotoRequest()`, but
-   keep `MentraDirectReceiver` setup in the starter app.
+   keep `VeillerDirectReceiver` setup in the starter app.
 5. Replace stream keep-alive timer code with `useStreamSession()`, but keep
    MediaMTX/direct receiver preview logic in the starter app.
 6. Replace PCM listener and start/stop mic state with `useMicPcmRecorder()`,
@@ -379,8 +379,8 @@ should stay in the starter kit because they are app-platform choices.
   a default Mentra Live name-based dedupe for iOS BLE/audio duplicate rows?
 - Should `useGlassesConnection` own Android Bluetooth permission checks, or is
   a separate `useBluetoothPermissions()` hook cleaner?
-- Should hooks live in `@mentra/bluetooth-sdk/react`, or should they be root
-  exports from `@mentra/bluetooth-sdk` for discoverability?
+- Should hooks live in `@veiller/bluetooth-sdk/react`, or should they be root
+  exports from `@veiller/bluetooth-sdk` for discoverability?
 - Should `useStreamSession` stop the stream automatically on unmount by default?
   This is safer for demos but could surprise an app that intentionally wants a
   stream to survive screen navigation.

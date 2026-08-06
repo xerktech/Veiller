@@ -1,5 +1,5 @@
 #!/bin/bash
-# MentraOS Log Filter - Focus on specific subsystems
+# Veiller Log Filter - Focus on specific subsystems
 # Usage: bun run start 2>&1 | ./scripts/log-filter.sh [SUBSYSTEM]
 # Examples:
 #   ./scripts/log-filter.sh CORE

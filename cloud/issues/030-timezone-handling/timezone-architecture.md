@@ -107,7 +107,7 @@ POST /user/settings ─────────► UserSettings.timezone = "Amer
                                { metricSystemEnabled, brightness,   to all subscribed apps
                                  userTimezone, ... }                      │
                                                                           ▼
-                                                                   settings.onMentraosChange()
+                                                                   settings.onVeillerChange()
                                                                           │
                                                                           ▼
                                                                    userTimezone = "America/New_York"
@@ -324,7 +324,7 @@ interface SessionInfo {
 // On session start:
 protected async onSession(session: AppSession, sessionId: string) {
   // Get timezone from settings
-  const userTimezone = session.settings.getMentraOS<string>("userTimezone");
+  const userTimezone = session.settings.getVeiller<string>("userTimezone");
 
   const sessionInfo = {
     // ... existing fields ...
@@ -332,7 +332,7 @@ protected async onSession(session: AppSession, sessionId: string) {
   };
 
   // Subscribe to timezone changes
-  session.settings.onMentraosChange<string>("userTimezone", (newTz) => {
+  session.settings.onVeillerChange<string>("userTimezone", (newTz) => {
     const info = this._activeSessions.get(sessionId);
     if (info) {
       info.userTimezone = newTz;
@@ -478,7 +478,7 @@ export enum StreamType {
 // cloud/packages/sdk/src/app/session/events.ts
 
 /**
- * @deprecated Use settings.onMentraosChange() instead. Will be removed in future version.
+ * @deprecated Use settings.onVeillerChange() instead. Will be removed in future version.
  */
 onCustomMessage(action: string, handler: (payload: any) => void): () => void {
   // ... existing implementation ...

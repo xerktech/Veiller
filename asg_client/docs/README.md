@@ -1,6 +1,6 @@
 # ASG Client documentation
 
-Android application that runs on Mentra Live smart glasses, bridging hardware and the MentraOS ecosystem.
+Android application that runs on Mentra Live smart glasses, bridging hardware and the Veiller ecosystem.
 
 ## Getting started
 

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronRight, Settings, Folder } from "lucide-react";
 import { Setting } from "@/types/app";
 import {

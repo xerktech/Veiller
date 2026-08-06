@@ -8,7 +8,7 @@ import { Hono } from "hono";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import appService from "../../../services/core/app.service";
 import { User } from "../../../models/user.model";
-import { ToolCall } from "@mentra/sdk";
+import { ToolCall } from "@veiller/sdk";
 import type { AppEnv, AppContext } from "../../../types/hono";
 
 const logger = rootLogger.child({ service: "tools.routes" });

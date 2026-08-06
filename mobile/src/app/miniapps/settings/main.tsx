@@ -13,7 +13,7 @@ import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import {useRef} from "react"
 import {useRegisterCapsule} from "@/stores/capsule"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 
 export default function MainSettingsPage() {
   const {theme} = useAppTheme()
@@ -25,7 +25,7 @@ export default function MainSettingsPage() {
   ).supported
 
   useRegisterCapsule({
-    packageName: "com.mentra.settings",
+    packageName: "com.veiller.settings",
     viewShotRef,
     visibleOnRoutes: ["/miniapps/settings/"],
     offsetRight: theme.spacing.s2,

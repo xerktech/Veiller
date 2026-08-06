@@ -52,20 +52,20 @@ config.resolver.nodeModulesPaths = [path.resolve(__dirname, "node_modules"), pat
 // normal dependency would hit cloud-client's `workspace:*` refs; aliasing the
 // exact import specifiers to their source files sidesteps that and the package
 // `exports` map. Only the pure client + protocol are bundled here; the runtime
-// server root (`@mentra/cloud-runtime`) is never imported, so its node-only
+// server root (`@veiller/cloud-runtime`) is never imported, so its node-only
 // deps never reach the bundle.
 const CLOUD_V2_PACKAGES = path.resolve(__dirname, "../cloud-v2/packages")
 const CLOUD_V2_ALIASES = {
-  "@mentra/cloud-client": path.join(CLOUD_V2_PACKAGES, "cloud-client/src/index.ts"),
-  "@mentra/cloud-client/react-native": path.join(CLOUD_V2_PACKAGES, "cloud-client/react-native/index.ts"),
+  "@veiller/cloud-client": path.join(CLOUD_V2_PACKAGES, "cloud-client/src/index.ts"),
+  "@veiller/cloud-client/react-native": path.join(CLOUD_V2_PACKAGES, "cloud-client/react-native/index.ts"),
   // The wire protocol lives in its own leaf package now; the old
   // cloud-runtime/protocol entry is a shim that re-exports it, so both
   // specifiers must resolve.
-  "@mentra/cloud-protocol": path.join(CLOUD_V2_PACKAGES, "protocol/src/index.ts"),
-  "@mentra/cloud-runtime/protocol": path.join(CLOUD_V2_PACKAGES, "runtime/src/protocol/index.ts"),
+  "@veiller/cloud-protocol": path.join(CLOUD_V2_PACKAGES, "protocol/src/index.ts"),
+  "@veiller/cloud-runtime/protocol": path.join(CLOUD_V2_PACKAGES, "runtime/src/protocol/index.ts"),
 }
 
-// Resolve @mentra/engine to its TypeScript SOURCE instead of its compiled
+// Resolve @veiller/engine to its TypeScript SOURCE instead of its compiled
 // build/. The engine package's "main" points at build/index.js (it ships as an
 // expo-module), so by default Metro bundles the LAST `expo-module build` output,
 // not what's in src/. That means a dev edits modules/engine/src, runs the app,
@@ -76,9 +76,9 @@ const CLOUD_V2_ALIASES = {
 //
 // This is safe because the engine src is plain TS that Metro can bundle
 // directly -- it has no native android/ios dirs and no codegen/requireNativeModule
-// in src, and its workspace deps (@mentra/bluetooth-sdk via its own
-// react-native:src field, @mentra/miniapp, @mentra/cloud-runtime/protocol above)
-// already resolve for Metro. It mirrors how @mentra/cloud-client is aliased to
+// in src, and its workspace deps (@veiller/bluetooth-sdk via its own
+// react-native:src field, @veiller/miniapp, @veiller/cloud-runtime/protocol above)
+// already resolve for Metro. It mirrors how @veiller/cloud-client is aliased to
 // source just above. modules/engine is already in watchFolders, so edits trigger
 // fast refresh. (The build/ output is still what gets published for consumers;
 // only local dev bundling is redirected here.)
@@ -86,11 +86,11 @@ const ENGINE_SRC = path.resolve(__dirname, "./modules/engine/src")
 const CRUST_SRC = path.resolve(__dirname, "./modules/crust/src")
 const MINIAPP_SRC = path.resolve(__dirname, "./modules/miniapp/src")
 const MINIAPP_ALIASES = {
-  "@mentra/miniapp": path.join(MINIAPP_SRC, "index"),
-  "@mentra/miniapp/background": path.join(MINIAPP_SRC, "background/index"),
-  "@mentra/miniapp/ui": path.join(MINIAPP_SRC, "ui/index"),
-  "@mentra/miniapp/react": path.join(MINIAPP_SRC, "react/index"),
-  "@mentra/miniapp/protocol": path.join(MINIAPP_SRC, "protocol"),
+  "@veiller/miniapp": path.join(MINIAPP_SRC, "index"),
+  "@veiller/miniapp/background": path.join(MINIAPP_SRC, "background/index"),
+  "@veiller/miniapp/ui": path.join(MINIAPP_SRC, "ui/index"),
+  "@veiller/miniapp/react": path.join(MINIAPP_SRC, "react/index"),
+  "@veiller/miniapp/protocol": path.join(MINIAPP_SRC, "protocol"),
 }
 
 // Singleton packages that must NEVER resolve to a nested copy. bun installs
@@ -111,11 +111,11 @@ const baseResolveRequest = config.resolver.resolveRequest
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   const aliased = CLOUD_V2_ALIASES[moduleName]
   if (aliased) return {type: "sourceFile", filePath: aliased}
-  // Subpath imports into the protocol package ("@mentra/cloud-protocol/languages")
+  // Subpath imports into the protocol package ("@veiller/cloud-protocol/languages")
   // mirror its package.json "./*": "./src/*.ts" exports map, which Metro does
   // not read. Resolve them to the source file directly.
-  if (moduleName.startsWith("@mentra/cloud-protocol/")) {
-    const rest = moduleName.slice("@mentra/cloud-protocol/".length)
+  if (moduleName.startsWith("@veiller/cloud-protocol/")) {
+    const rest = moduleName.slice("@veiller/cloud-protocol/".length)
     return {type: "sourceFile", filePath: path.join(CLOUD_V2_PACKAGES, "protocol/src", `${rest}.ts`)}
   }
   for (const name of SINGLETONS) {
@@ -124,14 +124,14 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       return (baseResolveRequest ?? context.resolveRequest)(context, target, platform)
     }
   }
-  // @mentra/engine -> src/index.ts. Keep this limited to the public root export
+  // @veiller/engine -> src/index.ts. Keep this limited to the public root export
   // so future engine internals do not become implicit app import surface area.
-  if (moduleName === "@mentra/engine") {
+  if (moduleName === "@veiller/engine") {
     return (baseResolveRequest ?? context.resolveRequest)(context, path.join(ENGINE_SRC, "index"), platform)
   }
   const miniappAlias = MINIAPP_ALIASES[moduleName]
   if (miniappAlias) return (baseResolveRequest ?? context.resolveRequest)(context, miniappAlias, platform)
-  if (moduleName === "@mentra/crust") {
+  if (moduleName === "@veiller/crust") {
     return (baseResolveRequest ?? context.resolveRequest)(context, path.join(CRUST_SRC, "index"), platform)
   }
   return (baseResolveRequest ?? context.resolveRequest)(context, moduleName, platform)

@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react"
-import {useAuth} from "@mentra/shared"
+import {useAuth} from "@veiller/shared"
 import AccountLayout from "../components/AccountLayout"
 import {toast} from "sonner"
 

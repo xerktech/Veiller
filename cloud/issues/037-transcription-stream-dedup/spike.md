@@ -2,7 +2,7 @@
 
 ## Overview
 
-**What this doc covers:** Investigation into why `com.mentra.captions.debug` stopped receiving transcriptions after a subscription update, plus related bugs found in stream deduplication, subscription aggregation, SDK-side event matching, and reconnect grace window handling.
+**What this doc covers:** Investigation into why `com.veiller.captions.debug` stopped receiving transcriptions after a subscription update, plus related bugs found in stream deduplication, subscription aggregation, SDK-side event matching, and reconnect grace window handling.
 
 **Why this doc exists:** On Feb 14 2026, captions.debug went silent on the dev server despite the user session being fully alive. The root cause is a set of interacting bugs in how `TranscriptionManager` manages streams, how `SubscriptionManager` aggregates subscriptions across apps, and how the SDK matches incoming data to registered handlers. These bugs affect all environments.
 
@@ -245,7 +245,7 @@ This is normally fine — but during the transition, there's a window where no s
 | 20:03:33.790 | captions.debug sends subscription update.                                                                                                                                                                             |
 | 20:03:33.809 | `updateSubscriptions()`: **Stream B killed** (`en-US?hints=ja`).                                                                                                                                                      |
 | 20:03:33.810 | "Started VAD audio buffering" then "All required streams already exist and are healthy" — Stream A satisfies the new `activeSubscriptions`. No new stream created.                                                    |
-| 20:03:33.810 | "Language subscriptions changed for com.mentra.captions.debug"                                                                                                                                                        |
+| 20:03:33.810 | "Language subscriptions changed for com.veiller.captions.debug"                                                                                                                                                        |
 | 20:03:34.310 | Debounced transcription stream update fires → `microphoneManager.handleSubscriptionChange()`.                                                                                                                         |
 | 20:03:34+    | **Only "Updated cached subscription state" logs every 5s.** No more transcription relay, no display requests. captions.debug is silent. Mic state unchanged (`hasMedia: true`).                                       |
 | ~20:13       | User restarts captions.debug to fix it.                                                                                                                                                                               |

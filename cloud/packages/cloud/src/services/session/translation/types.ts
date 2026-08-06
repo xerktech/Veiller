@@ -2,7 +2,7 @@
  * @fileoverview Type definitions for the TranslationManager system
  */
 
-import { ExtendedStreamType, TranslationData } from "@mentra/sdk";
+import { ExtendedStreamType, TranslationData } from "@veiller/sdk";
 import { Logger } from "pino";
 import UserSession from "../UserSession";
 import dotenv from "dotenv";

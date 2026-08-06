@@ -14,12 +14,12 @@ import {
   WebhookRequestType,
   AppSetting,
   AppSettingType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 // TODO(isaiah): Consider splitting this into multiple services (appstore.service, developer.service, tools.service)
 import axios, { AxiosError } from "axios";
 // import { systemApps } from './system-apps';
 import App, { AppI } from "../../models/app.model";
-import { ToolSchema, ToolParameterSchema } from "@mentra/sdk";
+import { ToolSchema, ToolParameterSchema } from "@veiller/sdk";
 import { User } from "../../models/user.model";
 import crypto from "crypto";
 import { logger as rootLogger } from "../logging/pino-logger";
@@ -47,11 +47,11 @@ export const DEPRECATED_APPS: string[] = [
   "system.augmentos.dashboard", // Replaced by cloud-internal DashboardManager (issue #047)
 ];
 export const PRE_INSTALLED_DEBUG = [
-  // "com.mentra.link",
-  // "com.mentra.notes",
-  // "com.mentra.soundy",
-  // "com.mentra.cactusai",
-  // "com.mentra.hive",
+  // "com.veiller.link",
+  // "com.veiller.notes",
+  // "com.veiller.soundy",
+  // "com.veiller.cactusai",
+  // "com.veiller.hive",
   // "com.augmentos.calendarreminder",
   // "com.augmentos.xstats",
   // "com.augmentos.tictactoe",

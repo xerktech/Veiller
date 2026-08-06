@@ -1,7 +1,7 @@
 # iOS Jetsam Stress Test
 
 End-to-end harness for measuring how many local miniapp WebViews the
-MentraOS app can hold mounted before iOS jetsam starts killing things.
+Veiller app can hold mounted before iOS jetsam starts killing things.
 
 ## What this test answers
 
@@ -107,8 +107,8 @@ STRESS: sample {"at":1715291130000,"residentMB":412.3,"mounted":7,"terminated":2
 And one line per event:
 
 ```
-STRESS: event {"packageName":"com.mentra.stress.dummy.3","at":1715291131500,"kind":"terminate","residentMB":405.1,"memWarnCount":1}
-STRESS: mount {"pkg":"com.mentra.stress.dummy.4","mb":25,"at":1715291132000}
+STRESS: event {"packageName":"com.veiller.stress.dummy.3","at":1715291131500,"kind":"terminate","residentMB":405.1,"memWarnCount":1}
+STRESS: mount {"pkg":"com.veiller.stress.dummy.4","mb":25,"at":1715291132000}
 ```
 
 The CSV produced after the run has one row per STRESS line.

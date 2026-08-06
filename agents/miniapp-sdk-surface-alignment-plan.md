@@ -184,7 +184,7 @@ Tester pages and the controller (when the less-Reacty-example spec lands) get th
 
 `sdk/miniapp/package.json`: `0.1.0` → `0.2.0`. Clean break, no deprecation aliases.
 
-`sdk/miniapp-cli/package.json`, `sdk/create-mentra-miniapp/package.json`: leave at `0.1.0` — they don't expose the SDK API surface.
+`sdk/miniapp-cli/package.json`, `sdk/create-veiller-miniapp/package.json`: leave at `0.1.0` — they don't expose the SDK API surface.
 
 ## Documentation
 

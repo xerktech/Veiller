@@ -4,7 +4,7 @@
  * Consolidated server-level session orchestrator. Merges the responsibilities
  * of the previous four separate classes into one:
  *
- *   _MentraSessionServerFactory  → createSession()
+ *   _VeillerSessionServerFactory  → createSession()
  *   _MiniAppSessionRegistry      → session tracking (bySessionId, byUserId maps)
  *   _MiniAppServerCallbackBridge → callback storage (onSession, onStop, onToolCall)
  *   _MiniAppServerRuntime        → webhook handling (handleSessionRequest, handleStopRequest)
@@ -19,8 +19,8 @@
 
 import type { Logger } from "pino";
 import type { WebhookResponse, SessionWebhookRequest, StopWebhookRequest, ToolCall } from "../types";
-import type { MentraSessionConfig } from "../session";
-import { MentraSession } from "../session";
+import type { VeillerSessionConfig } from "../session";
+import { VeillerSession } from "../session";
 import { WebSocketTransport } from "../transport/WebSocketTransport";
 import { _V2SessionShim } from "../session/internal/_V2SessionShim";
 import type { _V2PhotoRequestBridge } from "../session/internal/_V2CameraShim";
@@ -32,8 +32,8 @@ export interface _SessionManagerConfig {
   apiKey: string;
   logger: Logger;
   serverUrl?: string;
-  logLevel?: MentraSessionConfig["logLevel"];
-  verbose?: MentraSessionConfig["verbose"];
+  logLevel?: VeillerSessionConfig["logLevel"];
+  verbose?: VeillerSessionConfig["verbose"];
   photoRequestBridge?: _V2PhotoRequestBridge;
 }
 
@@ -42,7 +42,7 @@ export type _StopHandler = (session: _V2SessionShim | null, reason: string) => v
 export type _ToolCallHandler = (toolCall: ToolCall) => string | undefined | Promise<string | undefined>;
 
 interface SessionRecord {
-  session: MentraSession;
+  session: VeillerSession;
   compatSession: _V2SessionShim;
   userId: string;
   sessionId: string;
@@ -118,7 +118,7 @@ export class _SessionManager {
       this.stopSuppression.delete(request.sessionId);
     }
 
-    // Create new session (was _MentraSessionServerFactory.create)
+    // Create new session (was _VeillerSessionServerFactory.create)
     const created = this.createSession(request);
 
     // Register in maps
@@ -202,10 +202,10 @@ export class _SessionManager {
     this.stopSuppression.clear();
   }
 
-  // ─── Session Factory (was _MentraSessionServerFactory) ────────────────
+  // ─── Session Factory (was _VeillerSessionServerFactory) ────────────────
 
   private createSession(request: SessionWebhookRequest): {
-    session: MentraSession;
+    session: VeillerSession;
     compatSession: _V2SessionShim;
   } {
     const websocketUrl = request.websocketUrl || request.mentraOSWebsocketUrl || request.augmentOSWebsocketUrl;
@@ -223,7 +223,7 @@ export class _SessionManager {
       },
     });
 
-    const session = new MentraSession({
+    const session = new VeillerSession({
       packageName: this.config.packageName,
       apiKey: this.config.apiKey,
       sessionId: request.sessionId,
@@ -260,7 +260,7 @@ export class _SessionManager {
     return record;
   }
 
-  private deleteIfSameSession(sessionId: string, session: MentraSession): SessionRecord | null {
+  private deleteIfSameSession(sessionId: string, session: VeillerSession): SessionRecord | null {
     const record = this.bySessionId.get(sessionId) ?? null;
     if (!record || record.session !== session) return null;
     return this.registryDeleteBySessionId(sessionId);

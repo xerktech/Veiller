@@ -26,7 +26,7 @@ import sttModelManager from "../services/STTModelManager"
 import {miniappLauncher} from "../services/MiniappLauncher"
 import {miniappRunningRegistry} from "../services/MiniappRunningRegistry"
 import {SETTINGS, useSettingsStore} from "./settings"
-import BluetoothSdk from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
 
 // ---------------------------------------------------------------------------
 // Configuration / hooks

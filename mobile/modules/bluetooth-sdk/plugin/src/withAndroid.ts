@@ -12,9 +12,9 @@ import {
 
 import {type BluetoothSdkPluginProps} from "./index"
 
-const META_ANALYTICS_DISABLED = "com.mentra.bluetoothsdk.analytics.disabled"
-const STALE_META_POSTHOG_API_KEY = "com.mentra.bluetoothsdk.analytics.posthog_api_key"
-const STALE_META_POSTHOG_HOST = "com.mentra.bluetoothsdk.analytics.posthog_host"
+const META_ANALYTICS_DISABLED = "com.veiller.bluetoothsdk.analytics.disabled"
+const STALE_META_POSTHOG_API_KEY = "com.veiller.bluetoothsdk.analytics.posthog_api_key"
+const STALE_META_POSTHOG_HOST = "com.veiller.bluetoothsdk.analytics.posthog_host"
 const ANALYTICS_META_NAMES = [META_ANALYTICS_DISABLED, STALE_META_POSTHOG_API_KEY, STALE_META_POSTHOG_HOST]
 
 function getBluetoothSdkRoot(): string {
@@ -32,12 +32,12 @@ function withSettingsGradleModifications(config: any) {
   return withSettingsGradle(config, (config) => {
     let settingsGradle = config.modResults.contents
     const bluetoothSdkRoot = getBluetoothSdkRoot()
-    const bluetoothSdkRootExpression = `System.getenv("MENTRA_BLUETOOTH_SDK_PACKAGE_PATH") ?: ${toGroovyString(bluetoothSdkRoot)}`
+    const bluetoothSdkRootExpression = `System.getenv("VEILLER_BLUETOOTH_SDK_PACKAGE_PATH") ?: ${toGroovyString(bluetoothSdkRoot)}`
 
-    if (!settingsGradle.includes("project(':mentra-bluetooth-sdk').projectDir")) {
+    if (!settingsGradle.includes("project(':veiller-bluetooth-sdk').projectDir")) {
       const bluetoothSdkProjectBlock = `
-  if (findProject(':mentra-bluetooth-sdk') != null) {
-    project(':mentra-bluetooth-sdk').projectDir = new File(${bluetoothSdkRootExpression}, 'android')
+  if (findProject(':veiller-bluetooth-sdk') != null) {
+    project(':veiller-bluetooth-sdk').projectDir = new File(${bluetoothSdkRootExpression}, 'android')
   }
 `
       const lc3Include = "  include ':lc3Lib'"
@@ -134,7 +134,7 @@ function withSherpaOnnxLocalMavenRepo(config: any) {
 
     let contents = config.modResults.contents
     const fallbackRoot = toGroovyString(getBluetoothSdkRoot())
-    const repoDirExpression = `new File(System.getenv("MENTRA_BLUETOOTH_SDK_PACKAGE_PATH") ?: ${fallbackRoot}, "android/libs/maven")`
+    const repoDirExpression = `new File(System.getenv("VEILLER_BLUETOOTH_SDK_PACKAGE_PATH") ?: ${fallbackRoot}, "android/libs/maven")`
     const marker = "// bluetooth-sdk: sherpa-onnx local maven repo"
 
     if (contents.includes(marker)) {

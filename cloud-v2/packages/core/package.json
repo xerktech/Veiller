@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/cloud-core",
+  "name": "@veiller/cloud-core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@mentra/cloud-shared": "workspace:*",
+    "@veiller/cloud-shared": "workspace:*",
     "@workos-inc/node": "^10.3.0",
     "hono": "^4.11.1",
     "jose": "^5.9.6",

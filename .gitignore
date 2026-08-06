@@ -14,7 +14,7 @@ mcu_client/**/esp32**/.pio/
 
 local/*
 imx681_mipi_raw/
-K900Server_mentra/
+K900Server_veiller/
 K900_server_sdk/*
 AugmentOS-Cloud-Example-App/*
 RtmpStreamExampleBasic/*
@@ -22,7 +22,7 @@ server/config.json
 K900_server_sdk/*
 K900_android_sdk/*
 K900Server_open/*
-K900Server_mentra/*
+K900Server_veiller/*
 k900_android_sdk/*
 K900ServerPlus/*
 K900_server/*
@@ -377,8 +377,8 @@ mobile/ios/Packages/SherpaOnnx/sherpa-onnx.xcframework/
 mobile/ios/Packages/SherpaOnnx/Model/*
 nicelogs.txt
 
-# mentra-miniapp install cache (built+packed zips ready to serve)
-**/.mentra/
+# veiller-miniapp install cache (built+packed zips ready to serve)
+**/.veiller/
 
 
 issues
@@ -413,10 +413,10 @@ graphify-out/
 mobile/agents/
 
 # Nested starter-kit repo (separate git history)
-Mentra-Bluetooth-SDK-Starter-Kit/
+Veiller-Bluetooth-SDK-Starter-Kit/
 
 # Nested Zephyr glasses client repo (separate git history)
-Mentra-Zephyr-Glasses-Client/
+Veiller-Zephyr-Glasses-Client/
 
 # Navigation miniapp build output
 miniapps/navigation/build/

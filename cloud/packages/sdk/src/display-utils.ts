@@ -4,7 +4,7 @@
  * Glasses-agnostic, pixel-accurate text measurement and wrapping library
  * for smart glasses displays.
  *
- * This module re-exports from the shared @mentra/display-utils package.
+ * This module re-exports from the shared @veiller/display-utils package.
  *
  * @example
  * ```typescript
@@ -15,7 +15,7 @@
  *   ScrollView,
  *   G1_PROFILE,
  *   createG1Toolkit
- * } from '@mentra/sdk/display-utils'
+ * } from '@veiller/sdk/display-utils'
  *
  * // Quick start
  * const { wrapper } = createG1Toolkit()
@@ -30,4 +30,4 @@
  */
 
 // Re-export everything from the shared package
-export * from "@mentra/display-utils"
+export * from "@veiller/display-utils"

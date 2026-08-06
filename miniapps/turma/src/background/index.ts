@@ -4,9 +4,9 @@
  *
  * Plays the role of upstream's main.ts boot: load the persisted config,
  * and — once the device is signed in — wire the hardware-agnostic App
- * (core/app.ts, ported verbatim) to the Mentra backends:
+ * (core/app.ts, ported verbatim) to the Veiller backends:
  *
- *   GlassesDisplay  -> display/mentra.ts   (session.display.render scenes)
+ *   GlassesDisplay  -> display/veiller.ts   (session.display.render scenes)
  *   Dictation       -> audio/dictation.ts + audio/audio.ts (unchanged) over
  *                      audio/mic-bridge.ts (session.mic) + the polyfill's
  *                      binary-capable WebSocket to the hub's /audio socket
@@ -20,7 +20,7 @@
  * tail observers out, commands + proxied fetch + config storage RPCs in.
  */
 
-import { registerMiniapp, type TypedMiniappSession } from "@mentra/miniapp/background";
+import { registerMiniapp, type TypedMiniappSession } from "@veiller/miniapp/background";
 
 import { App } from "../core/app.ts";
 import { DEFAULT_POLL_MS, isConfigured, loadConfig, type Config } from "../core/config.ts";
@@ -29,12 +29,12 @@ import { LiveTail } from "../core/live.ts";
 import { setDefaultMeasure } from "../core/text-wrap.ts";
 import { AudioRecorder } from "../audio/audio.ts";
 import { HubAudioDictation } from "../audio/dictation.ts";
-import { MentraMicBridge } from "../audio/mic-bridge.ts";
-import { MentraDisplay } from "../display/mentra.ts";
+import { VeillerMicBridge } from "../audio/mic-bridge.ts";
+import { VeillerDisplay } from "../display/veiller.ts";
 import { createG2Measure } from "../display/measure.ts";
 import type { BackgroundPhase, Channels } from "../shared/channels.ts";
 import { serializePhoneState } from "../shared/phone-state.ts";
-import { MentraStorage } from "./storage.ts";
+import { VeillerStorage } from "./storage.ts";
 
 type Session = TypedMiniappSession<Channels>;
 
@@ -44,16 +44,16 @@ setDefaultMeasure(createG2Measure());
 
 class TurmaBackground {
   private readonly session: Session;
-  private readonly storage: MentraStorage;
+  private readonly storage: VeillerStorage;
 
   private app: App | null = null;
-  private display: MentraDisplay | null = null;
+  private display: VeillerDisplay | null = null;
   // Serialized against overlapping config-changed RPCs / the initial start.
   private transition: Promise<void> = Promise.resolve();
 
   constructor(session: Session) {
     this.session = session;
-    this.storage = new MentraStorage(session);
+    this.storage = new VeillerStorage(session);
     this.registerUiHandlers();
     this.registerLifecycle();
   }
@@ -96,9 +96,9 @@ class TurmaBackground {
     const dictation = new HubAudioDictation({
       hubClient: client,
       hubUrl: config.hubUrl,
-      recorder: new AudioRecorder({ bridge: new MentraMicBridge(this.session) }),
+      recorder: new AudioRecorder({ bridge: new VeillerMicBridge(this.session) }),
     });
-    const display = new MentraDisplay(this.session);
+    const display = new VeillerDisplay(this.session);
     const app = new App({
       client,
       display,

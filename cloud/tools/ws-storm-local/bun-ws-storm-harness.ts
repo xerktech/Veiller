@@ -20,14 +20,14 @@ interface ServerData {
 }
 
 const DEFAULT_PACKAGES = [
-  "com.mentra.captions.debug",
-  "com.mentra.ai",
+  "com.veiller.captions.debug",
+  "com.veiller.ai",
   "cloud.augmentos.notify",
-  "com.mentra.merge",
-  "com.mentra.notes",
-  "com.mentra.translation",
-  "com.mentra.dash",
-  "com.mentra.link",
+  "com.veiller.merge",
+  "com.veiller.notes",
+  "com.veiller.translation",
+  "com.veiller.dash",
+  "com.veiller.link",
 ];
 
 const args = new Map<string, string>();
@@ -54,7 +54,7 @@ const logsPerSubscription = numberArg("logs-per-subscription", 0);
 const logBytes = numberArg("log-bytes", 256);
 const runLabel = args.get("label") ?? "local-bun-ws-storm";
 const packages = (args.get("packages")?.split(",").filter(Boolean) ?? DEFAULT_PACKAGES).map((p) =>
-  p === "com.mentra.captions" ? "com.mentra.captions.debug" : p,
+  p === "com.veiller.captions" ? "com.veiller.captions.debug" : p,
 );
 
 const metrics = {
@@ -328,7 +328,7 @@ function mimicCloseFanout(data: ServerData, code: number, reason: string): void 
 }
 
 function mimicSubscriptionFanout(message: any): void {
-  const packageName = message.packageName === "com.mentra.captions" ? "com.mentra.captions.debug" : message.packageName;
+  const packageName = message.packageName === "com.veiller.captions" ? "com.veiller.captions.debug" : message.packageName;
   const snapshot = {
     packageName,
     subscriptions: message.subscriptions,

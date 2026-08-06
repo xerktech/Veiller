@@ -125,13 +125,13 @@ src/index.ts                         requestPhoto bound to native module
 src/_private/BluetoothSdkModule.ts   requestPhoto(params: PhotoRequestParams)
 ──────── Expo native bridge ────────
 BluetoothSdkModule.kt   AsyncFunction("requestPhoto") { params -> ... }
-MentraBluetoothSdk.kt   fun requestPhoto(request) -> deviceManager.requestPhoto(...)
+VeillerBluetoothSdk.kt   fun requestPhoto(request) -> deviceManager.requestPhoto(...)
 DeviceManager.kt        activeSgc.requestPhoto(requestId, appId, size, webhookUrl, authToken, ...)
 SGCManager.kt           abstract fun requestPhoto(...)        ← interface
 MentraLive.java         builds the BLE JSON command           ← only real impl
 ```
 
-iOS mirrors this 1:1: `BluetoothSdkModule.swift` → `MentraBluetoothSDK.swift` →
+iOS mirrors this 1:1: `BluetoothSdkModule.swift` → `VeillerBluetoothSDK.swift` →
 `DeviceManager.swift` → `SGCManager.swift` → `MentraLive.swift`.
 
 ### Files changed for video
@@ -160,7 +160,7 @@ was added to the existing rich `startVideoRecording` overload.
     `maxRecordingTimeMinutes` in the request.
   - `AsyncFunction("stopVideoRecording")` (~L506): currently takes only
     `requestId: String`; accept `webhookUrl` + `authToken` too.
-- `MentraBluetoothSdk.kt`
+- `VeillerBluetoothSdk.kt`
   - `startVideoRecording(request: VideoRecordingRequest)` (~L772): add
     `maxRecordingTimeMinutes` to `VideoRecordingRequest`.
   - `stopVideoRecording(requestId)` (~L797): thread `webhookUrl` + `authToken`.
@@ -184,7 +184,7 @@ was added to the existing rich `startVideoRecording` overload.
 
 **iOS (Swift) — mirror every Android change:**
 
-- `BluetoothSdkModule.swift`, `MentraBluetoothSDK.swift`, `DeviceManager.swift`,
+- `BluetoothSdkModule.swift`, `VeillerBluetoothSDK.swift`, `DeviceManager.swift`,
   `sgcs/SGCManager.swift`, `sgcs/MentraLive.swift` (JSON build at ~L5282 start /
   ~L5316 stop), and the other SGC impls (`G1`, `G2`, `Mach1`, `MentraNex`,
   `Simulated`, `Frame`).

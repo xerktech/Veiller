@@ -1,6 +1,6 @@
 // cloud/src/models/user.model.ts
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
-import { type AppSetting } from "@mentra/sdk";
+import { type AppSetting } from "@veiller/sdk";
 import { MongoSanitizer } from "../utils/mongoSanitizer";
 import { logger } from "../services/logging/pino-logger";
 

@@ -1,5 +1,5 @@
 /**
- * MMKV-backed KeyValueStore for @mentra/cloud-client — moved into engine so
+ * MMKV-backed KeyValueStore for @veiller/cloud-client — moved into engine so
  * engine owns the cloud-v2 credential storage (the v2 refresh token, so a
  * relaunch does not force a new login). A dedicated MMKV instance keeps
  * cloud-v2 credentials out of the app's general store. Re-exported through the
@@ -10,9 +10,9 @@
  * (react-native-keychain). It is fine for dev / simulator e2e.
  */
 import {createMMKV, type MMKV} from "react-native-mmkv"
-import type {KeyValueStore} from "@mentra/cloud-client"
+import type {KeyValueStore} from "@veiller/cloud-client"
 
-const store: MMKV = createMMKV({id: "mentra-cloud-v2"})
+const store: MMKV = createMMKV({id: "veiller-cloud-v2"})
 
 export const cloudSecureStore: KeyValueStore = {
   async get(key: string): Promise<string | null> {

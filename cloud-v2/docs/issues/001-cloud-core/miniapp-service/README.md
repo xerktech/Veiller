@@ -40,7 +40,7 @@ Review state does not live here. A MiniApp can keep serving an older published
 release while a newer release is draft, in review, rejected, or suspended.
 
 Package names must live under the developer org's package prefix. In dev the
-default prefix is `com.mentra`; production should configure prefixes per WorkOS
+default prefix is `com.veiller`; production should configure prefixes per WorkOS
 org or enterprise org record. Core enforces this for both Console2 and CLI
 requests, so UI prefix rendering is not trusted as the only guard.
 
@@ -63,7 +63,7 @@ interface MiniAppRelease {
 ```
 
 The release bundle is the installable zip produced by the miniapp packer. Today
-`mentra publish` uploads it directly to Core as base64 for local/dev simplicity.
+`veiller publish` uploads it directly to Core as base64 for local/dev simplicity.
 The storage model is already separate so this can move to presigned uploads
 without changing the data model.
 
@@ -128,5 +128,5 @@ All routes accept the Console browser session cookie or the CLI bearer token.
 ## Related specs
 
 - [`../../011-miniapp-registry/`](../../011-miniapp-registry/)
-- [`../../012-mentra-cli-v2/`](../../012-mentra-cli-v2/)
+- [`../../012-veiller-cli-v2/`](../../012-veiller-cli-v2/)
 - [`preinstalled-local-miniapps.md`](./preinstalled-local-miniapps.md)

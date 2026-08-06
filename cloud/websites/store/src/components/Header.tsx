@@ -1,12 +1,12 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { usePlatform } from "../hooks/usePlatform";
 import { useTheme } from "../hooks/useTheme";
 import { useIsDesktop, useIsMobile } from "../hooks/useMediaQuery";
 import { useSearch } from "../contexts/SearchContext";
 import { Button } from "./ui/button";
-import GetMentraOSButton from "./GetMentraOSButton";
+import GetVeillerButton from "./GetVeillerButton";
 import SearchBar from "./SearchBar";
 
 interface HeaderProps {
@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onSearchClear }) => {
             <Link to="/" className="flex items-center gap-3 select-none hover:opacity-80 transition-opacity">
               <img
                 src={theme === "light" ? "/icon_black.svg" : "/icon_white.svg"}
-                alt="Mentra Logo"
+                alt="Veiller Logo"
                 className="h-8 w-8"
               />
               <span
@@ -62,15 +62,15 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onSearchClear }) => {
                   letterSpacing: "0.06em",
                   color: "var(--text-primary)",
                 }}>
-                Mentra MiniApp Store
+                Veiller MiniApp Store
               </span>
             </Link>
 
             {/* Buttons container - only visible on mobile/tablet in top row */}
             <div className="flex items-center gap-3 lg:hidden">
-              {/* Get MentraOS Button - Only visible on small screens and up */}
+              {/* Get Veiller Button - Only visible on small screens and up */}
               {/* <div className="hidden sm:block">
-                <GetMentraOSButton size="small" />
+                <GetVeillerButton size="small" />
               </div> */}
 
               {/* Authentication */}
@@ -121,8 +121,8 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onSearchClear }) => {
 
           {/* Buttons for large screens - in the same row */}
           <div className="hidden lg:flex items-center gap-4">
-            {/* Get MentraOS Button */}
-            <GetMentraOSButton size="small" />
+            {/* Get Veiller Button */}
+            <GetVeillerButton size="small" />
 
             {/* Authentication */}
             {isAuthenticated ? (

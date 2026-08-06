@@ -2,7 +2,7 @@
  * @fileoverview Hono SDK authentication middleware.
  *
  * Authenticates requests using Authorization header:
- * Authorization: Bearer <packageName>:<MENTRAOS_APP_API_KEY>
+ * Authorization: Bearer <packageName>:<VEILLER_APP_API_KEY>
  *
  * Usage:
  * - Apply to /api/sdk/* routes that require authentication

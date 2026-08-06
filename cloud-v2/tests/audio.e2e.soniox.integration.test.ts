@@ -39,10 +39,10 @@ if (!RUN) {
 // === Env setup BEFORE any package imports ===
 {
   const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
@@ -51,13 +51,13 @@ if (!RUN) {
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS ??= JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       oemIdClaim: "oem_id",
     },
   ]);
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-audio-e2e-soniox-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-audio-e2e-soniox-test";
   // Own Redis DB so this suite doesn't stomp the other audio suites.
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/3";
   process.env.AUDIO_UDP_ADVERTISED_HOST = "127.0.0.1";
@@ -88,11 +88,11 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 beforeAll(async () => {
   if (!RUN) return;
 
-  const { resetMentraKeyCache } = await import("../packages/shared/src/auth");
+  const { resetVeillerKeyCache } = await import("../packages/shared/src/auth");
   const { resetSigningKeyCache } = await import(
     "../packages/core/src/services/session.service"
   );
-  resetMentraKeyCache();
+  resetVeillerKeyCache();
   resetSigningKeyCache();
 
   testOemHandle = await startTestOem({ port: TEST_OEM_PORT, tenantId: TEST_OEM_ID });
@@ -226,8 +226,8 @@ async function runAudio(
 /** macOS `say` -> 16 kHz mono signed-16 PCM, returned as an Int16Array. */
 function generateSpeechPcm(phrase: string): Int16Array {
   const stamp = `${process.pid}-${phrase.replace(/\W+/g, "").slice(0, 12)}`;
-  const aiff = join(tmpdir(), `mentra-e2e-say-${stamp}.aiff`);
-  const wav = join(tmpdir(), `mentra-e2e-say-${stamp}.wav`);
+  const aiff = join(tmpdir(), `veiller-e2e-say-${stamp}.aiff`);
+  const wav = join(tmpdir(), `veiller-e2e-say-${stamp}.wav`);
 
   const say = Bun.spawnSync(["/usr/bin/say", "-o", aiff, phrase]);
   if (say.exitCode !== 0) throw new Error(`say failed: ${say.stderr}`);

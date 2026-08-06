@@ -8,7 +8,7 @@
  * to the UI WebView over the typed session.ui channel bus.
  */
 
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 import {TeleprompterController} from "./controllers/TeleprompterController"
 

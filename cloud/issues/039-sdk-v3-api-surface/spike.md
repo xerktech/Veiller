@@ -175,7 +175,7 @@ export class AppServer extends Hono<{Variables: AuthVariables}> {
 
 **Why `extends` over composition:**
 
-- `class MyApp extends AppServer` is already the established pattern — devs subclass AppServer. With `extends Hono`, their subclass is also a Hono app. This means they CAN add custom HTTP endpoints alongside MentraOS webhook/session machinery if they need to (OAuth callbacks, webview serving, status pages, etc.)
+- `class MyApp extends AppServer` is already the established pattern — devs subclass AppServer. With `extends Hono`, their subclass is also a Hono app. This means they CAN add custom HTTP endpoints alongside Veiller webhook/session machinery if they need to (OAuth callbacks, webview serving, status pages, etc.)
 - Composition (`AppServer has a .hono` property) would require devs to go through an accessor to add routes — more boilerplate for the same result
 - Route collisions are unlikely — SDK routes are namespaced (`/webhook`, `/health`, `/tool-call`, `/settings`, `/photo-upload`)
 
@@ -357,7 +357,7 @@ v3 could keep v2 methods as deprecated wrappers:
 ```typescript
 // Deprecated — use session.transcription.on() instead
 session.events.onTranscription = (handler) => {
-  console.warn("[MentraOS] session.events.onTranscription() is deprecated. Use session.transcription.on()")
+  console.warn("[Veiller] session.events.onTranscription() is deprecated. Use session.transcription.on()")
   return session.transcription.on(handler)
 }
 ```

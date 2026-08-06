@@ -158,7 +158,7 @@ Captions App
 
 ```
 sessionId = userId + "-" + packageName
-         = "isaiah@mentra.glass-com.mentra.captions.beta"
+         = "isaiah@mentra.glass-com.veiller.captions.beta"
 ```
 
 **Problem**: This is deterministic, NOT unique per session instance. Multiple concurrent sessions (on different cloud servers) have the SAME sessionId.

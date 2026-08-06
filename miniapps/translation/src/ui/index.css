@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* Class-based dark mode: `dark:` utilities apply when `<html class="dark">` is
-   set (synced from the host color scheme by MentraProvider). */
+   set (synced from the host color scheme by VeillerProvider). */
 @custom-variant dark (&:is(.dark *));
 
 /* CSS Variables (ported verbatim from the cloud webview) */

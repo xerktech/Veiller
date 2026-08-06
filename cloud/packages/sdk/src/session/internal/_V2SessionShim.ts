@@ -1,5 +1,5 @@
 import type { AppSettings, AppConfig, AppSetting, Capabilities, ExtendedStreamType } from "../../types";
-import { MentraSession } from "../MentraSession";
+import { VeillerSession } from "../VeillerSession";
 import { _V2AudioStreamShim } from "./_V2AudioStreamShim";
 import { _V2CameraShim, type _V2PhotoRequestBridge } from "./_V2CameraShim";
 import { _V2EventManagerShim } from "./_V2EventManagerShim";
@@ -8,7 +8,7 @@ import { _V2SettingsShim } from "./_V2SettingsShim";
 /**
  * V2 Session Shim
  *
- * Wraps a v3 MentraSession in the v2 AppSession-shaped API so that
+ * Wraps a v3 VeillerSession in the v2 AppSession-shaped API so that
  * existing mini apps continue to work without code changes.
  *
  * This is the primary backward-compatibility surface. It exposes:
@@ -26,23 +26,23 @@ import { _V2SettingsShim } from "./_V2SettingsShim";
  * @internal
  */
 export class _V2SessionShim {
-  readonly session: MentraSession;
+  readonly session: VeillerSession;
 
   // ─── V2 Module Surfaces ─────────────────────────────────────────────────
 
   readonly layouts: {
-    showText: MentraSession["display"]["showText"];
-    showTextWall: MentraSession["display"]["showTextWall"];
-    showDoubleTextWall: MentraSession["display"]["showDoubleTextWall"];
-    showReferenceCard: MentraSession["display"]["showReferenceCard"];
-    showDashboardCard: MentraSession["display"]["showDashboardCard"];
-    showBitmap: MentraSession["display"]["showBitmap"];
-    clear: MentraSession["display"]["clear"];
+    showText: VeillerSession["display"]["showText"];
+    showTextWall: VeillerSession["display"]["showTextWall"];
+    showDoubleTextWall: VeillerSession["display"]["showDoubleTextWall"];
+    showReferenceCard: VeillerSession["display"]["showReferenceCard"];
+    showDashboardCard: VeillerSession["display"]["showDashboardCard"];
+    showBitmap: VeillerSession["display"]["showBitmap"];
+    clear: VeillerSession["display"]["clear"];
     updateText: (payload: { text: string }) => void;
   };
-  readonly simpleStorage: MentraSession["storage"];
+  readonly simpleStorage: VeillerSession["storage"];
   readonly audio: {
-    speak: MentraSession["speaker"]["speak"];
+    speak: VeillerSession["speaker"]["speak"];
     playAudio: (options: {
       url: string;
       volume?: number;
@@ -53,15 +53,15 @@ export class _V2SessionShim {
     createOutputStream: (options?: Record<string, any>) => Promise<_V2AudioStreamShim>;
   };
   readonly camera: _V2CameraShim;
-  readonly led: MentraSession["led"];
-  readonly location: MentraSession["location"];
-  readonly device: MentraSession["device"];
-  readonly dashboard: MentraSession["dashboard"];
+  readonly led: VeillerSession["led"];
+  readonly location: VeillerSession["location"];
+  readonly device: VeillerSession["device"];
+  readonly dashboard: VeillerSession["dashboard"];
   readonly settings: _V2SettingsShim;
   readonly events: _V2EventManagerShim;
 
   constructor(
-    session: MentraSession,
+    session: VeillerSession,
     options?: {
       photoRequestBridge?: _V2PhotoRequestBridge;
     },
@@ -189,7 +189,7 @@ export class _V2SessionShim {
    */
   subscribe(sub: string | { stream: string; rate?: string }): void {
     const stream = typeof sub === "string" ? sub : sub.stream;
-    // Delegate to the internal subscription manager via MentraSession.
+    // Delegate to the internal subscription manager via VeillerSession.
     // This is a manual override — the developer is explicitly asking to subscribe.
     (this.session as any)._subscriptions?.add(stream);
   }

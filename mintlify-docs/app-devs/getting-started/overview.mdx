@@ -1,15 +1,15 @@
 ---
 title: "Overview"
-description: "Build on-device apps for smart glasses with the Mentra Miniapp SDK."
+description: "Build on-device apps for smart glasses with the Veiller Miniapp SDK."
 ---
 
 import LegacyCloudNote from '/snippets/legacy-cloud-note.mdx'
 import BetaNote from '/snippets/beta-note.mdx'
 
-MentraOS is the operating system for smart glasses. A **miniapp** is an app that
-runs on the user's phone, inside the Mentra App, and drives the glasses through the
-Mentra Miniapp SDK (`@mentra/miniapp`). You write a bundle, the user installs it
-from the Mentra Miniapp Store, and it runs on their device.
+Veiller is the operating system for smart glasses. A **miniapp** is an app that
+runs on the user's phone, inside the Veiller App, and drives the glasses through the
+Veiller Miniapp SDK (`@veiller/miniapp`). You write a bundle, the user installs it
+from the Veiller Miniapp Store, and it runs on their device.
 
 <Info>
 Building a mobile app that connects directly to glasses over Bluetooth? Use the
@@ -41,7 +41,7 @@ full picture.
 This background entry shows text on the glasses when the user presses a button:
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 
 registerMiniapp((session) => {
   // Runs once the miniapp connects. `session` is your handle to the glasses.
@@ -49,7 +49,7 @@ registerMiniapp((session) => {
   // place. Boxes are raw device px — see session.capabilities.display.
   const hud = { x: 0, y: 0, w: 576, h: 288 };
   session.input.onButtonPress(() => {
-    session.display.render([{ type: "text", id: "hud", box: hud, text: "Hello from MentraOS!" }]);
+    session.display.render([{ type: "text", id: "hud", box: hud, text: "Hello from Veiller!" }]);
   });
 
   // React to what the user says.
@@ -69,11 +69,11 @@ Three npm packages, but you only ever invoke one of them directly:
 
 | Package | Role | Where it lives |
 |---|---|---|
-| [`create-mentra-miniapp`](https://www.npmjs.com/package/create-mentra-miniapp) | Scaffolds a new project. Run once via `bunx`, never installed. | N/A |
-| [`@mentra/miniapp`](https://www.npmjs.com/package/@mentra/miniapp) | The runtime SDK you `import` (`session.*`, React hooks). | your `dependencies` |
-| [`@mentra/miniapp-cli`](https://www.npmjs.com/package/@mentra/miniapp-cli) | The `mentra-miniapp` CLI (`dev` / `pack` / `release`). | your `devDependencies` |
+| [`create-veiller-miniapp`](https://www.npmjs.com/package/create-veiller-miniapp) | Scaffolds a new project. Run once via `bunx`, never installed. | N/A |
+| [`@veiller/miniapp`](https://www.npmjs.com/package/@veiller/miniapp) | The runtime SDK you `import` (`session.*`, React hooks). | your `dependencies` |
+| [`@veiller/miniapp-cli`](https://www.npmjs.com/package/@veiller/miniapp-cli) | The `veiller-miniapp` CLI (`dev` / `pack` / `release`). | your `devDependencies` |
 
-`create-mentra-miniapp` writes a `package.json` that already pins the other two,
+`create-veiller-miniapp` writes a `package.json` that already pins the other two,
 so a single `bun install` brings everything down.
 
 ## What you could build

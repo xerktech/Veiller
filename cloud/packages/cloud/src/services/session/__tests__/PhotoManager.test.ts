@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CloudToGlassesMessageType } from "@mentra/sdk";
+import { CloudToGlassesMessageType } from "@veiller/sdk";
 import { WebSocketReadyState } from "../../websocket/types";
 import { PhotoManager } from "../PhotoManager";
 

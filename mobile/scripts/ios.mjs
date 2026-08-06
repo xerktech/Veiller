@@ -86,7 +86,7 @@ console.log(`Using device: ${deviceName} (${deviceUdid})`)
 // So we drive the build with xcodebuild and install/launch with Apple's
 // `devicectl` — the same tool the device-detection above already relies on.
 // The workspace/scheme follow the app name from app.config.ts (variant
-// dependent — "MentraOS" on this branch), so derive them from what prebuild
+// dependent — "Veiller" on this branch), so derive them from what prebuild
 // actually generated instead of hardcoding a name that goes stale on rename.
 const workspaces = await glob("ios/*.xcworkspace", {onlyDirectories: true})
 if (workspaces.length !== 1) {
@@ -108,7 +108,7 @@ await $({stdio: "inherit"})`xcodebuild \
   build`
 
 // The bundle is named after PRODUCT_NAME ("Mentra"), not the scheme/project
-// ("MentraOS" on this branch) — glob the products dir instead of assuming.
+// ("Veiller" on this branch) — glob the products dir instead of assuming.
 const appBundles = await glob(`${derivedData}/Build/Products/Debug-iphoneos/*.app`, {onlyDirectories: true})
 if (appBundles.length === 0) {
   throw new Error(`Expected a built .app bundle under ${derivedData}/Build/Products/Debug-iphoneos, found none`)

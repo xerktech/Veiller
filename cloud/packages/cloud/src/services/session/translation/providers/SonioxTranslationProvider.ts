@@ -6,7 +6,7 @@
 import { Logger } from "pino";
 import WebSocket from "ws";
 
-import { TranslationData, StreamType } from "@mentra/sdk";
+import { TranslationData, StreamType } from "@veiller/sdk";
 
 import { MemoryOwnerStat } from "../../../metrics/memory-census";
 import { estimateArrayBufferBytes, estimateStringBytes, sumEstimatedBytes } from "../../../metrics/memory-estimate";

@@ -2,7 +2,7 @@
  * Types for testing utilities
  */
 
-import type { MentraClient } from '../MentraClient';
+import type { VeillerClient } from '../VeillerClient';
 
 export interface BenchmarkResult {
   averageLatency: number;

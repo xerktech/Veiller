@@ -99,7 +99,7 @@ The `SUBSCRIPTION_GRACE_MS = 8000` hack: if an empty `SUBSCRIPTION_UPDATE` arriv
 
 ### Session Identity
 
-**`sessionId` format:** `{email}-{packageName}` (e.g., `isaiahballah@gmail.com-com.mentra.captions`)
+**`sessionId` format:** `{email}-{packageName}` (e.g., `isaiahballah@gmail.com-com.veiller.captions`)
 
 Problems:
 
@@ -212,7 +212,7 @@ interface SDKSessionState {
 
 **Key invariant:** `subscriptions` is ALWAYS derived from `handlers`. When a handler is added, the subscription is added. When a handler is removed, the subscription is removed. They cannot drift. This is the Bug 007 fix made structural.
 
-**Additional invariant:** `parked` means "preserve the in-memory MentraSession state, stop active reconnect attempts, and wait for the cloud to explicitly start/reattach the app." It is not a fresh start and it is not a terminal stop.
+**Additional invariant:** `parked` means "preserve the in-memory VeillerSession state, stop active reconnect attempts, and wait for the cloud to explicitly start/reattach the app." It is not a fresh start and it is not a terminal stop.
 
 ### State: Cloud Side
 
@@ -284,7 +284,7 @@ That means:
 
 - mini apps should **not** keep blindly racing to reconnect while the cloud is rebuilding user/app state
 - the restarted cloud should be able to tell a reconnecting mini app: "do not attach yet; preserve your state and wait for me to explicitly start you"
-- the mini app should preserve `MentraSession` state during that hold window, rather than destroying it immediately
+- the mini app should preserve `VeillerSession` state during that hold window, rather than destroying it immediately
 
 This is a different case from normal transport reconnect. It is a cloud recovery / reattach problem.
 
@@ -579,7 +579,7 @@ Cloud                                         SDK
  │                                              │
  │  (Cloud process crashes / restarts)          │  (WebSocket drops)
  │                                              │
- │                                              │  MentraSession enters reconnect flow
+ │                                              │  VeillerSession enters reconnect flow
  │                                              │  Has in-memory state, session handlers, subscriptions
  │                                              │
  │←─── SDK reconnect attempt ──────────────────│
@@ -591,7 +591,7 @@ Cloud                                         SDK
  │     { reason: "booting" }                    │
  │                                              │
  │                                              │ SDK transitions to PARKED
- │                                              │ - preserve MentraSession state
+ │                                              │ - preserve VeillerSession state
  │                                              │ - stop active reconnect attempts
  │                                              │ - wait for start webhook
  │                                              │ - start bounded grace timer
@@ -603,14 +603,14 @@ Cloud                                         SDK
  │──── Start Webhook ─────────────────────────→ │
  │                                              │
  │                                              │ SDK still has preserved runtime
- │                                              │ → reattach existing MentraSession
+ │                                              │ → reattach existing VeillerSession
  │                                              │ → do NOT destroy app state
  │                                              │
  │←─── RECONNECT / CONNECTION_INIT ────────────│
  │                                              │
  │──── ACK / RECONNECT_ACK ──────────────────→ │
  │                                              │
- │                                              │ MentraSession resumes RUNNING
+ │                                              │ VeillerSession resumes RUNNING
 ```
 
 If the cloud later determines the app should **not** be running, it must give a terminal rejection (`not_running`, stop webhook, or equivalent) and the parked session may then be destroyed.
@@ -661,7 +661,7 @@ This registry should be process-local and live outside `UserSession`, because it
 Default timeout decisions:
 
 - cloud holds deferred sockets for up to **30 seconds**
-- SDK parks the corresponding `MentraSession` for up to **30 seconds**
+- SDK parks the corresponding `VeillerSession` for up to **30 seconds**
 
 Default terminal timeout behavior:
 
@@ -863,7 +863,7 @@ The SDK uses `cloudHostname` to derive all URLs:
 
 The `sessionId` in the webhook tells the SDK: "I have a preserved session with this ID. If you still have it, send RECONNECT. If not, send CONNECTION_INIT." This is how the SDK decides whether to reconnect or start fresh.
 
-**Default implementation decision:** when the SDK receives a start webhook while it already has a parked preserved runtime for the same app, it should prefer reusing that existing `MentraSession` instance rather than constructing a new one.
+**Default implementation decision:** when the SDK receives a start webhook while it already has a parked preserved runtime for the same app, it should prefer reusing that existing `VeillerSession` instance rather than constructing a new one.
 
 ### Stop Webhook (unchanged)
 
@@ -949,7 +949,7 @@ Cloud accepted the transport connection but is not yet ready to attach the app l
 SDK behavior on `RECONNECT_DEFERRED`:
 
 - transition to `parked`
-- preserve the current `MentraSession` object and all in-memory state
+- preserve the current `VeillerSession` object and all in-memory state
 - stop active reconnect attempts
 - keep the current WebSocket open as an unattached control channel until:
   - the cloud later attaches it and sends `RECONNECT_ACK` / `CONNECTION_ACK`, or
@@ -1081,7 +1081,7 @@ It does **not** fire on a true fresh start.
   - Parse `sessionId` from message
   - Delegate to `appManager.handleReconnect(ws, message)`
 
-### SDK: MentraSession (v3)
+### SDK: VeillerSession (v3)
 
 - Store `sessionId` from `CONNECTION_ACK`
 - Store `cloudHostname` from webhook
@@ -1112,7 +1112,7 @@ It does **not** fire on a true fresh start.
 - Expose `session.wasResurrected` (from `CONNECTION_ACK.resurrected`)
 - Expose `session.onReconnected()`
 
-### SDK: MentraApp / AppServer
+### SDK: VeillerApp / AppServer
 
 - `onSession`: only called on fresh starts and resurrections (not reconnects)
 - `session.wasResurrected: boolean` available in `onSession` callback

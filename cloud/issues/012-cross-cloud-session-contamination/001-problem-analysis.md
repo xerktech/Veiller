@@ -10,11 +10,11 @@ From logs (2025-12-10 00:36-00:37 UTC):
 
 | Time         | Source      | Event                                                             |
 | ------------ | ----------- | ----------------------------------------------------------------- |
-| 00:36:04.684 | cloud-debug | Webhook triggered for com.mentra.captions.beta                    |
+| 00:36:04.684 | cloud-debug | Webhook triggered for com.veiller.captions.beta                    |
 | 00:36:04.971 | cloud-debug | App connected and authenticated                                   |
 | 00:36:05.019 | cloud-debug | Subscription update received (subscribe)                          |
-| 00:37:03.803 | cloud-dev   | Dispose: "Closed connection for com.mentra.captions.beta"         |
-| 00:37:03.824 | cloud-debug | "Received subscription update from App: com.mentra.captions.beta" |
+| 00:37:03.803 | cloud-dev   | Dispose: "Closed connection for com.veiller.captions.beta"         |
+| 00:37:03.824 | cloud-debug | "Received subscription update from App: com.veiller.captions.beta" |
 | 00:37:03.843 | cloud-debug | "App removed from transcription set"                              |
 | 00:37:03.844 | cloud-debug | "No active subscriptions - closing Soniox stream"                 |
 
@@ -87,7 +87,7 @@ Two fundamental design issues:
 sessionId: this.userSession.userId + "-" + packageName;
 ```
 
-`sessionId` is `"isaiah@mentra.glass-com.mentra.captions.beta"` for BOTH sessions. It's deterministic, not a UUID. So when a second webhook comes in, the SDK's `activeSessions` map entry is overwritten.
+`sessionId` is `"isaiah@mentra.glass-com.veiller.captions.beta"` for BOTH sessions. It's deterministic, not a UUID. So when a second webhook comes in, the SDK's `activeSessions` map entry is overwritten.
 
 **Issue 2: Captions app uses `userId` as key, not `sessionId`**
 
@@ -108,7 +108,7 @@ The Captions app tracks one session per user, not per session instance. When a n
 Current Design:
 ┌─────────────────────────────────────────────────────────────────────┐
 │ sessionId = userId + "-" + packageName                              │
-│           = "isaiah@mentra.glass-com.mentra.captions.beta"          │
+│           = "isaiah@mentra.glass-com.veiller.captions.beta"          │
 │                                                                     │
 │ This is the SAME for:                                               │
 │   - Session on cloud-dev                                            │

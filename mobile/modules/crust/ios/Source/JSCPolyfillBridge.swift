@@ -1,6 +1,6 @@
 //
 //  JSCPolyfillBridge.swift
-//  MentraJS — native handlers for the browser-flavoured polyfills that
+//  VeillerJS — native handlers for the browser-flavoured polyfills that
 //  can't be implemented in pure JS (fetch, WebSocket).
 //
 //  Built-in JS shims (console, timers, localStorage, crypto.randomUUID)
@@ -81,7 +81,7 @@ public enum JSCPolyfillBridge {
             JSCPolyfillBridge.dropSocket(sid: wrapper.sid)
         }
     }
-    private static let log = OSLog(subsystem: "com.xerktech.veiller", category: "MentraJS.fetch")
+    private static let log = OSLog(subsystem: "com.xerktech.veiller", category: "VeillerJS.fetch")
 
     public static func install(into dispatcher: JSCDispatcher) {
         installFetch(dispatcher)
@@ -96,7 +96,7 @@ public enum JSCPolyfillBridge {
                 return .error(code: "INVALID_ARGS", message: "fetch.request expects {url, method, headers, body}")
             }
             guard let reqId else {
-                return .error(code: "INVALID_ARGS", message: "fetch.request requires reqId (use __mentraSendRequest)")
+                return .error(code: "INVALID_ARGS", message: "fetch.request requires reqId (use __veillerSendRequest)")
             }
 
             var urlRequest = URLRequest(url: url)

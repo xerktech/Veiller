@@ -3,13 +3,13 @@
  * the UI WebView. Both bundlers inline this file at build time, so
  * there's no runtime resolution across the boundary.
  *
- * Rule: anything that crosses the `mentra.send` / `session.ui.send`
+ * Rule: anything that crosses the `veiller.send` / `session.ui.send`
  * channel boundary needs its payload shape declared here so each side
  * sees the same TypeScript type.
  */
 
 /** Per-tester event payload. The tester subscribes to a specific iface
- * via `mentra.send("tester:start", {iface})` and gets back a stream of
+ * via `veiller.send("tester:start", {iface})` and gets back a stream of
  * `{iface, kind, payload}` events from background. `kind` distinguishes
  * the event sub-type (e.g. "transcript", "button", "location"). */
 export interface TesterEventPayload {
@@ -61,7 +61,7 @@ export interface TesterInvoke {
 }
 
 /** Result of `tester:invoke`. Handlers return the raw call result; errors
- *  propagate via the RPC error path so callers see `MentraRpcError`. */
+ *  propagate via the RPC error path so callers see `VeillerRpcError`. */
 export type TesterInvokeResult = unknown
 
 export interface CalendarSnapshotEvent {

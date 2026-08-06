@@ -1,7 +1,7 @@
 /**
  * TenirController — the session state machine behind the glasses HUD, ported
  * from the upstream Even Hub app (`even/src/lens/controller.ts` +
- * `even/src/config.ts` + `even/src/state/*`), rebuilt on the Mentra miniapp
+ * `even/src/config.ts` + `even/src/state/*`), rebuilt on the Veiller miniapp
  * SDK. Lives inside the per-miniapp JSContext (NOT the WebView) and survives
  * WebView open/close cycles.
  *
@@ -36,8 +36,8 @@
  * clean stop (or clean host shutdown) clears it.
  */
 
-import type { MiniappSession, TouchData, UnsubscribeFn } from "@mentra/miniapp/background";
-import { base64ToBytes } from "@mentra/miniapp/background";
+import type { MiniappSession, TouchData, UnsubscribeFn } from "@veiller/miniapp/background";
+import { base64ToBytes } from "@veiller/miniapp/background";
 
 import {
   ApiError,

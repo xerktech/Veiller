@@ -15,7 +15,7 @@
 
 import { createMiddleware } from "hono/factory";
 import { ulid } from "ulid";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import type { AppEnv } from "../../types/hono.types";
 
 const rootLogger = createLogger("core");

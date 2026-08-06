@@ -18,7 +18,7 @@
 
 import { Logger } from "pino";
 
-import { CloudToGlassesMessageType, MicrophoneStateChange } from "@mentra/sdk";
+import { CloudToGlassesMessageType, MicrophoneStateChange } from "@veiller/sdk";
 
 import { WebSocketReadyState } from "../websocket/types";
 

@@ -191,7 +191,7 @@ Maintain support for the existing message-based authentication flow while encour
 - `/packages/sdk/src/app/token/index.ts`: Add JWT support
 
 **New Methods**:
-- `connectWithJwt(jwt, sessionId)`: Connect to MentraOS using JWT token
+- `connectWithJwt(jwt, sessionId)`: Connect to Veiller using JWT token
 - `parseConnectionError(error)`: Helper to extract meaningful information from connection errors
 
 ### 5. Documentation

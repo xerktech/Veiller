@@ -5,7 +5,7 @@
  * This client provides a clean, production-ready interface that mirrors the cloud architecture.
  */
 
-export { MentraClient } from "./MentraClient";
+export { VeillerClient } from "./VeillerClient";
 export { AccountService } from "./services/AccountService";
 export { LiveKitManager } from "./managers/LiveKitManager";
 export type { LiveKitManagerOptions } from "./managers/LiveKitManager";

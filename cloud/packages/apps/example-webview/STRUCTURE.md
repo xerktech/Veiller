@@ -5,7 +5,7 @@ This document explains how the Captions app is structured as a unified Bun proje
 ## Overview
 
 The Captions app combines:
-1. **MentraOS AppServer** - Handles smart glasses sessions
+1. **Veiller AppServer** - Handles smart glasses sessions
 2. **Bun Web Server** - Serves React webview + API routes
 3. **No build step** - Bun serves JSX/Tailwind directly
 
@@ -45,7 +45,7 @@ captions/
 **What it does:**
 - Creates `CaptionsApp` instance
 - Starts Bun web server (serves webview + API)
-- Starts MentraOS AppServer (handles glasses)
+- Starts Veiller AppServer (handles glasses)
 - Exports `captionsApp` for programmatic use
 
 ```typescript
@@ -107,7 +107,7 @@ export const routes = {
 ```
 User launches app
     ↓
-MentraOS Cloud calls /session-start
+Veiller Cloud calls /session-start
     ↓
 AppServer.onStart() triggered
     ↓
@@ -123,7 +123,7 @@ Display initial layout on glasses
 ```
 Glasses microphone captures speech
     ↓
-MentraOS Cloud sends transcription via WebSocket
+Veiller Cloud sends transcription via WebSocket
     ↓
 session.events.onTranscription() triggered
     ↓
@@ -160,8 +160,8 @@ React app loads in browser
 Required in `.env`:
 
 ```env
-PACKAGE_NAME=com.mentra.captions
-MENTRAOS_API_KEY=your_api_key
+PACKAGE_NAME=com.veiller.captions
+VEILLER_API_KEY=your_api_key
 PORT=3333
 NODE_ENV=development
 ```
@@ -236,7 +236,7 @@ import { CaptionList } from './components/CaptionList';
 ### Import and control from other code
 
 ```typescript
-import { captionsApp } from "@mentra/captions";
+import { captionsApp } from "@veiller/captions";
 
 // App is already running
 const sessions = captionsApp.getActiveSessions();
@@ -248,7 +248,7 @@ const session = captionsApp.getSession("user@example.com");
 ### Create new instance
 
 ```typescript
-import { CaptionsApp } from "@mentra/captions";
+import { CaptionsApp } from "@veiller/captions";
 
 const app = new CaptionsApp({
   packageName: "com.custom.captions",
@@ -266,7 +266,7 @@ await app.stop();
 1. **Start dev server:** `bun run dev`
 2. **Edit code:** Changes reload automatically
 3. **Test in browser:** Navigate to `http://localhost:3333`
-4. **Test on glasses:** Start app from MentraOS
+4. **Test on glasses:** Start app from Veiller
 5. **View logs:** Console shows both servers
 
 ## Architecture Diagram
@@ -289,7 +289,7 @@ await app.stop();
 └──────────┼──────────────────┼──────────┘
            │                  │
            ↓                  ↓
-    Browser/Client      MentraOS Cloud
+    Browser/Client      Veiller Cloud
 ```
 
 ## Summary

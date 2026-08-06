@@ -348,7 +348,7 @@ End-to-end ~1 week of focused work. Steps 1-5 can land as separate PRs if useful
 - `session.permissions.has("camera")` returns `true` when `CAMERA` is declared in `miniapp.json`, `false` otherwise.
 - `session.permissions.onUpdate(handler)` fires on launch with the current set, and again if the manifest changes.
 - `session.transcription.forLanguage(["en", "ja"], handler)` delivers events for both languages to the same handler.
-- `session.transcription.configure({vocabulary: ["MentraOS"]})` produces a wire-level `miniapp_transcription_config` envelope.
+- `session.transcription.configure({vocabulary: ["Veiller"]})` produces a wire-level `miniapp_transcription_config` envelope.
 - `session.phone.notifications.hasPermission` returns the right value.
 - `session.input.onTouch("click", handler)` fires only for click events; multi-gesture variant works.
 - `session.transcription.stop()` tears down every active transcription subscription.

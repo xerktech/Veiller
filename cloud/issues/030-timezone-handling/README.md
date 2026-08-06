@@ -50,8 +50,8 @@ The fix: just send the timezone name once, use the existing settings system.
   - [x] Deleted API documentation for set-datetime
 - [x] Dashboard app update
   - [x] Replaced `userDatetime` with `userTimezone` in session info
-  - [x] Read timezone from `session.settings.getMentraOS("userTimezone")`
-  - [x] Subscribe to timezone changes via `onMentraosChange`
+  - [x] Read timezone from `session.settings.getVeiller("userTimezone")`
+  - [x] Subscribe to timezone changes via `onVeillerChange`
   - [x] Removed `extractTimezoneFromISO()` function
   - [x] Removed `custom_message` event handler
   - [x] Fixed `formatTimeSection()` to use IANA timezone

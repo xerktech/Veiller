@@ -6,10 +6,10 @@
  * against the remote cloud without doing heavy audio streaming.
  */
 
-import { MentraClient } from '../MentraClient';
+import { VeillerClient } from '../VeillerClient';
 import { AccountService } from '../services/AccountService';
 
-const LIVE_CAPTIONS_PACKAGE = 'com.mentra.livecaptions';
+const LIVE_CAPTIONS_PACKAGE = 'com.veiller.livecaptions';
 
 async function main() {
   console.log('🔍 Quick Soniox Validation Test');
@@ -21,7 +21,7 @@ async function main() {
   const account = accountService.getDefaultTestAccount();
 
   // Create client with status updates disabled
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: account.email,
     coreToken: account.coreToken,
     serverUrl: process.env.DEFAULT_SERVER_URL || 'wss://testapi.mentra.glass/glasses-ws',

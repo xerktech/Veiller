@@ -4,12 +4,12 @@
 
 ## What We Are Doing
 
-We are separating the public OEM-facing engine API from MentraOS/runtime
+We are separating the public OEM-facing engine API from Veiller/runtime
 automatic diagnostics.
 
 ## Grounding: Engine vs Host
 
-The engine is the reusable MentraOS runtime layer that an OEM host app embeds.
+The engine is the reusable Veiller runtime layer that an OEM host app embeds.
 It should provide the smartglasses operating-system primitives: device
 connection, pairing state, miniapp runtime, gallery/device coordination, cloud
 session plumbing, settings sync, diagnostic context collection, log/artifact
@@ -18,10 +18,10 @@ collection, and Cloud V2 client calls.
 The host is the OEM-branded app shell around that runtime. It should provide
 screens, navigation, wording, alerts, visual states, branded support flows,
 rating controls, screenshot picker UX, and host-specific telemetry sinks such
-as Sentry. A Mentra-branded host may have extra internal screens or test
+as Sentry. A Veiller-branded host may have extra internal screens or test
 harnesses, but those are still not part of the public OEM engine contract.
 
-This separation matters because OEMs should not need to understand MentraOS
+This separation matters because OEMs should not need to understand Veiller
 internal state in order to brand or render the app. If the host pulls runtime
 state out of engine, constructs an internal diagnostic payload, then pushes it
 back into engine/cloud, the boundary has failed. The clean API should let the
@@ -66,24 +66,24 @@ before changing the public engine surface.
 
 | Area | Current location | Trigger | What it observes |
 | --- | --- | --- | --- |
-| MentraJS crashloop | `mobile/src/services/mentraJsBootstrap.ts` | `miniapp_crashloop` / `mentrajs_crashloop_disabled` | Miniapp JS runtime enters crashloop-disabled state. |
+| VeillerJS crashloop | `mobile/src/services/veillerJsBootstrap.ts` | `miniapp_crashloop` / `veillerjs_crashloop_disabled` | Miniapp JS runtime enters crashloop-disabled state. |
 | Miniapp start failure | `mobile/src/services/bugReport/miniappStartBugReport.ts` | `miniapp_launch` / `miniapp_start_failed` | A miniapp start request fails with an Axios/HTTP/runtime error. |
 | Pairing boot timeout | `mobile/src/app/pairing/loading.tsx` | `pairing_loading` / `glasses_connect_timeout` | Pairing screen waits 35s and glasses never report fully booted. |
 | Gallery video playback | `mobile/src/services/bugReport/galleryVideoPlaybackBugReport.ts` | `gallery_video` / `gallery_video_on_error` | Host gallery video player gets a playback error. |
 | Captions tester laptop report | `mobile/e2e-tests/scripts/live_word_monitor.py` -> internal Crust receiver -> island engine service | external monitor alert / `captions_tester_incident` | Laptop e2e harness decides a captions test failed and asks the app runtime to file a report. |
 
-## 1. MentraJS Crashloop
+## 1. VeillerJS Crashloop
 
 Original behavior:
 
-- `bootstrapMentraJS()` calls `ensureMiniappEngine()`.
+- `bootstrapVeillerJS()` calls `ensureMiniappEngine()`.
 - It attaches `router.onCrashloop` and `router.onRestartToast`.
 - On crashloop it snapshots recent miniapp logs, sends a Sentry event, files an
   automatic report, and shows a user alert.
 
 Original ownership:
 
-- Island already owns the MentraJS engine, crash controller, JS router, UI
+- Island already owns the VeillerJS engine, crash controller, JS router, UI
   router, Crust binding, and log ring.
 - The host shim owns Sentry tags/breadcrumbs and alert copy.
 - The automatic report was filed from host code through the public
@@ -92,7 +92,7 @@ Original ownership:
 Judgment:
 
 - Automatic crashloop report filing belongs in island, next to
-  `MiniappEngine` / `MentraJSRouter`.
+  `MiniappEngine` / `VeillerJSRouter`.
 - Host-specific Sentry reporting and branded/user-facing alert copy can remain
   host-owned.
 - The router should support island internal reporting and host callbacks without
@@ -102,11 +102,11 @@ Judgment:
 Implemented move:
 
 - Add an island-internal automatic report service.
-- Have `MentraJSRouter` or `MiniappEngine` file the automatic report when the
+- Have `VeillerJSRouter` or `MiniappEngine` file the automatic report when the
   crash controller surfaces crashloop-disabled.
-- Keep or replace the host callback so the Mentra app can still send Sentry
+- Keep or replace the host callback so the Veiller app can still send Sentry
   events and show an alert.
-- Remove `submitAutomaticBugReport` from `mentraJsBootstrap.ts`.
+- Remove `submitAutomaticBugReport` from `veillerJsBootstrap.ts`.
 
 ## 2. Miniapp Start Failure
 
@@ -266,7 +266,7 @@ Original behavior:
 - It extracts failure/test metadata, files an automatic report, and logs a
   `CAPTIONS_TESTER_INCIDENT_RESULT` JSON line for the test harness.
 - The Android internal Crust module registers a
-  `com.mentra.CAPTIONS_TESTER_INCIDENT` broadcast receiver. The e2e live-word
+  `com.veiller.CAPTIONS_TESTER_INCIDENT` broadcast receiver. The e2e live-word
   monitor sends that broadcast when its own alert thresholds trip.
 - That means the laptop test harness owns the failure decision, but the current
   implementation routes report submission through host `MantleManager`.
@@ -274,7 +274,7 @@ Original behavior:
   it primarily consumes `display_store_update` metrics, not raw Cloud V2
   transcript events.
 - Cloud V2 transcript delivery is already inside island/engine:
-  `@mentra/cloud-client` receives `stream.transcript`, `CloudClientService`
+  `@veiller/cloud-client` receives `stream.transcript`, `CloudClientService`
   re-emits it via `onTranscript`, and `LocalMiniappRuntime` forwards it to
   subscribed local miniapps as `transcription:<lang>`.
 - Legacy Cloud V1 transcript/data-stream delivery is intentionally not used for
@@ -360,7 +360,7 @@ Cloud V2/core:
 
 ## Suggested Review Order
 
-1. MentraJS crashloop: clearest island-owned runtime diagnostic with host-owned
+1. VeillerJS crashloop: clearest island-owned runtime diagnostic with host-owned
    Sentry/alert side effects.
 2. Miniapp start failure: likely delete or move into island miniapp lifecycle.
 3. Pairing boot timeout: move reporting into island pairing lifecycle while

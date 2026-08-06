@@ -8,11 +8,11 @@ import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import type { CookieOptions } from "hono/utils/cookie";
 import { KEYUTIL, KJUR, RSAKey } from "jsrsasign";
 
-import { AuthVariables, AuthenticatedRequest, MentraAuthContext, MentraAuthHonoContext } from "../../types";
+import { AuthVariables, AuthenticatedRequest, VeillerAuthContext, VeillerAuthHonoContext } from "../../types";
 import { AppSession } from "../session";
 
 const userTokenPublicKey =
-  process.env.MENTRAOS_CLOUD_USER_TOKEN_PUBLIC_KEY ||
+  process.env.VEILLER_CLOUD_USER_TOKEN_PUBLIC_KEY ||
   "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Yt2RtNOdeKQxWMY0c84\nADpY1Jy58YWZhaEgP2A5tBwFUKgy/TH9gQLWZjQ3dQ/6XXO8qq0kluoYFqM7ZDRF\nzJ0E4Yi0WQncioLRcCx4q8pDmqY9vPKgv6PruJdFWca0l0s3gZ3BqSeWum/C23xK\nFPHPwi8gvRdc6ALrkcHeciM+7NykU8c0EY8PSitNL+Tchti95kGu+j6APr5vNewi\nzRpQGOdqaLWe+ahHmtj6KtUZjm8o6lan4f/o08C6litizguZXuw2Nn/Kd9fFI1xF\nIVNJYMy9jgGaOi71+LpGw+vIpwAawp/7IvULDppvY3DdX5nt05P1+jvVJXPxMKzD\nTQIDAQAB\n-----END PUBLIC KEY-----";
 
 /**
@@ -31,9 +31,9 @@ export function extractTempToken(url: string): string | null {
 }
 
 /**
- * Exchanges a temporary token for a user ID with the MentraOS Cloud.
+ * Exchanges a temporary token for a user ID with the Veiller Cloud.
  * This should be called from the App's backend server.
- * @param cloudApiUrl The base URL of the MentraOS Cloud API.
+ * @param cloudApiUrl The base URL of the Veiller Cloud API.
  * @param tempToken The temporary token obtained from the webview URL.
  * @param apiKey Your App's secret API key.
  * @returns A Promise that resolves with an object containing the userId.
@@ -233,7 +233,7 @@ export function createAuthMiddleware(options: {
   const {
     apiKey,
     packageName,
-    // Default to packageName-session to match createMentraAuthRoutes.
+    // Default to packageName-session to match createVeillerAuthRoutes.
     // "aos_session" was the old default — we fall back to it below for
     // backwards compatibility with 2.x apps that may have existing cookies.
     cookieName = `${packageName}-session`,
@@ -384,12 +384,12 @@ export function createAuthMiddleware(options: {
 }
 
 /**
- * Read the authenticated Mentra context from a Hono request context.
+ * Read the authenticated Veiller context from a Hono request context.
  *
  * This helper intentionally hides the underlying context variable names so
  * app code does not depend on implementation details like `authUserId`.
  */
-export function getMentraAuth(c: MentraAuthHonoContext): MentraAuthContext {
+export function getVeillerAuth(c: VeillerAuthHonoContext): VeillerAuthContext {
   return {
     userId: c.get("authUserId") ?? null,
     session: c.get("activeSession") ?? null,
@@ -397,17 +397,17 @@ export function getMentraAuth(c: MentraAuthHonoContext): MentraAuthContext {
 }
 
 /**
- * Read the authenticated Mentra context and throw if no authenticated user
+ * Read the authenticated Veiller context and throw if no authenticated user
  * is present. Intended for SDK-owned middleware / helpers that want a strict
  * contract after authentication has been enforced.
  */
-export function requireMentraAuth(c: MentraAuthHonoContext): {
+export function requireVeillerAuth(c: VeillerAuthHonoContext): {
   userId: string;
   session: AppSession | null;
 } {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   if (!auth.userId) {
-    throw new Error("Unauthenticated Mentra request");
+    throw new Error("Unauthenticated Veiller request");
   }
 
   return {
@@ -431,25 +431,25 @@ export function generateFrontendToken(userId: string, apiKey: string): string {
 
 /**
  * Creates a Hono sub-app with authentication routes for frontend token exchange.
- * Mount this at /api/mentra/auth to enable frontend-initiated authentication.
+ * Mount this at /api/veiller/auth to enable frontend-initiated authentication.
  *
  * This is required for apps using Bun's fullstack dev server where the HTML
  * is served directly by Bun's routes (bypassing Hono middleware).
  *
  * @example
  * ```typescript
- * import { createMentraAuthRoutes } from "@mentra/sdk";
+ * import { createVeillerAuthRoutes } from "@veiller/sdk";
  *
  * const app = new MyAppServer({...});
  *
- * app.route("/api/mentra/auth", createMentraAuthRoutes({
+ * app.route("/api/veiller/auth", createVeillerAuthRoutes({
  *   apiKey: API_KEY,
  *   packageName: PACKAGE_NAME,
  *   cookieSecret: COOKIE_SECRET,
  * }));
  * ```
  */
-export function createMentraAuthRoutes(options: {
+export function createVeillerAuthRoutes(options: {
   apiKey: string;
   packageName: string;
   cookieSecret: string;
@@ -475,7 +475,7 @@ export function createMentraAuthRoutes(options: {
   } = options;
 
   if (!apiKey) {
-    throw new Error("API Key is required for Mentra auth routes.");
+    throw new Error("API Key is required for Veiller auth routes.");
   }
 
   if (!cookieSecret || typeof cookieSecret !== "string" || cookieSecret.length < 8) {
@@ -488,7 +488,7 @@ export function createMentraAuthRoutes(options: {
   /**
    * GET /init - Exchange aos_temp_token for session
    * Query params:
-   *   - aos_temp_token: The temporary token from MentraOS Cloud
+   *   - aos_temp_token: The temporary token from Veiller Cloud
    *   - cloudApiUrl: (optional) Custom cloud API URL
    *   - cloudApiUrlChecksum: (optional) Checksum for custom cloud URL
    */
@@ -504,7 +504,7 @@ export function createMentraAuthRoutes(options: {
         const signedSession = signSession(userId, cookieSecret);
         setCookie(c, cookieName, signedSession, cookieOptions as CookieOptions);
 
-        console.log("[mentra/auth/init] User authenticated via signed user token:", userId);
+        console.log("[veiller/auth/init] User authenticated via signed user token:", userId);
         return c.json({ success: true, userId, frontendToken });
       }
       return c.json({ success: false, error: "Invalid signed user token" }, 401);
@@ -527,10 +527,10 @@ export function createMentraAuthRoutes(options: {
         const signedSession = signSession(userId, cookieSecret);
         setCookie(c, cookieName, signedSession, cookieOptions as CookieOptions);
 
-        console.log("[mentra/auth/init] User authenticated via temp token:", userId);
+        console.log("[veiller/auth/init] User authenticated via temp token:", userId);
         return c.json({ success: true, userId, frontendToken });
       } catch (error) {
-        console.error("[mentra/auth/init] Token exchange failed:", error);
+        console.error("[veiller/auth/init] Token exchange failed:", error);
         return c.json({ success: false, error: "Token exchange failed" }, 401);
       }
     }

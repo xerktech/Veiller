@@ -57,7 +57,7 @@ import {photoRequestParamsForNative} from "./photoRequestPayload"
  * Private React Native native-module facade.
  *
  * This file intentionally lives under `_private` so the package root can expose
- * a small SDK surface while MentraOS uses its monorepo-only internal alias
+ * a small SDK surface while Veiller uses its monorepo-only internal alias
  * during migration. Raw status getters/listeners stay here so React hooks can
  * shape native store snapshots before app code sees them.
  */
@@ -95,7 +95,7 @@ declare class BluetoothSdkNativeModule extends NativeModule<BluetoothSdkModuleEv
   disconnectController(): Promise<void>
   /** Tap Strap paired/connected snapshot (supported:false on iOS for now). */
   getTapStrapStatus(): Promise<TapStrapStatus>
-  /** Toggle MentraOS controller-mode takeover of paired Tap Straps. */
+  /** Toggle Veiller controller-mode takeover of paired Tap Straps. */
   setTapStrapTakeover(enabled: boolean): Promise<void>
   connectSimulated(): Promise<void>
   disconnect(): Promise<void>
@@ -209,7 +209,7 @@ declare class BluetoothSdkNativeModule extends NativeModule<BluetoothSdkModuleEv
   // Used to suspend LC3 mic during audio playback to avoid MCU overload
   setOwnAppAudioPlaying(playing: boolean): Promise<void>
 
-  // Live PCM output stream (miniapp speaker.createStream). MentraOS-internal
+  // Live PCM output stream (miniapp speaker.createStream). Veiller-internal
   // ? 16-bit LE PCM chunks into a streaming AudioTrack (USAGE_MEDIA, so it
   // follows the phone's media route, e.g. A2DP to glasses). Implemented with
   // AudioTrack on Android and AVAudioEngine on iOS.

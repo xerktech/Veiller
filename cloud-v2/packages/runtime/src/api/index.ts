@@ -15,7 +15,7 @@
  */
 
 import { Hono } from "hono";
-import { createHealthApp, type ReadinessCheck } from "@mentra/cloud-shared";
+import { createHealthApp, type ReadinessCheck } from "@veiller/cloud-shared";
 import { audioApi } from "./audio.api";
 import { cameraApi } from "./camera.api";
 import { mapsApi } from "./maps.api";

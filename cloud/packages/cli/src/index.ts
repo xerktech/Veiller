@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /**
- * Mentra CLI
+ * Veiller CLI
  *
- * Command-line tool for managing Mentra apps and organizations
+ * Command-line tool for managing Veiller apps and organizations
  */
 
 import {Command} from "commander"
@@ -13,7 +13,7 @@ import {orgCommand} from "./commands/org"
 
 const program = new Command()
 
-program.name("mentra").description("Mentra CLI - Manage apps and organizations").version("1.0.0")
+program.name("veiller").description("Veiller CLI - Manage apps and organizations").version("1.0.0")
 
 // Add commands
 program.addCommand(authCommand)

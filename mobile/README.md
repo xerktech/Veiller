@@ -4,7 +4,7 @@
 
 **⚠️ Physical Device Required**
 
-MentraOS relies heavily on BLE/Bluetooth connectivity to communicate with smart glasses. **Android Emulator and iOS Simulator do not support Bluetooth**, so you **must use a physical device** for testing MentraOS.
+Veiller relies heavily on BLE/Bluetooth connectivity to communicate with smart glasses. **Android Emulator and iOS Simulator do not support Bluetooth**, so you **must use a physical device** for testing Veiller.
 
 ### Windows Setup
 
@@ -156,4 +156,4 @@ Follow our [Maestro Setup](https://ignitecookbook.com/docs/recipes/MaestroSetup)
 
 ### Development Guidelines
 
-For detailed coding standards and best practices for MentraOS Manager development, please see our [MentraOS Manager Development Guidelines](https://docs.mentraos.com/contributing/mentraos-manager-guidelines).
+For detailed coding standards and best practices for Veiller Manager development, please see our [Veiller Manager Development Guidelines](https://docs.veiller.com/contributing/veiller-manager-guidelines).

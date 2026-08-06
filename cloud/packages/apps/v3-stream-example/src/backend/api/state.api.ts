@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { getMentraAuth } from "@mentra/sdk";
+import { getVeillerAuth } from "@veiller/sdk";
 import { UserSession } from "../session/UserSession";
 
 const app = new Hono();
@@ -9,7 +9,7 @@ const app = new Hono();
  * Client connects with EventSource("/api/state/stream").
  */
 app.get("/stream", (c: any) => {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   const userId = auth?.userId;
   if (!userId) {
     return c.json({ error: "Not authenticated" }, 401);

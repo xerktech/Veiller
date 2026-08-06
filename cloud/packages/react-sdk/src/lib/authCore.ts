@@ -1,7 +1,7 @@
 // react-sdk/src/lib/authCore.ts
 import { KEYUTIL, KJUR, RSAKey } from "jsrsasign"; // Assuming jsrsasign is available
 
-// This should be the MentraOS Cloud's public key for verifying aos_signed_user_token
+// This should be the Veiller Cloud's public key for verifying aos_signed_user_token
 const userTokenPublicKeyPEM = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Yt2RtNOdeKQxWMY0c84
 ADpY1Jy58YWZhaEgP2A5tBwFUKgy/TH9gQLWZjQ3dQ/6XXO8qq0kluoYFqM7ZDRF
@@ -12,10 +12,10 @@ IVNJYMy9jgGaOi71+LpGw+vIpwAawp/7IvULDppvY3DdX5nt05P1+jvVJXPxMKzD
 TQIDAQAB
 -----END PUBLIC KEY-----`;
 
-const USER_ID_KEY = "mentraos_userId";
-const FRONTEND_TOKEN_KEY = "mentraos_frontendToken";
-const DEFAULT_AUTH_INIT_PATH = "/api/_mentraos/auth/init";
-const LEGACY_AUTH_INIT_PATH = "/api/mentra/auth/init";
+const USER_ID_KEY = "veiller_userId";
+const FRONTEND_TOKEN_KEY = "veiller_frontendToken";
+const DEFAULT_AUTH_INIT_PATH = "/api/_veiller/auth/init";
+const LEGACY_AUTH_INIT_PATH = "/api/veiller/auth/init";
 
 interface SignedUserTokenPayload {
   sub: string; // This is the userId
@@ -40,7 +40,7 @@ export interface AuthState {
 }
 
 /**
- * Verifies and parses a signed user token using the MentraOS Cloud public key
+ * Verifies and parses a signed user token using the Veiller Cloud public key
  * @param signedUserToken - The JWT token to verify and parse
  * @returns Promise that resolves to the parsed payload or null if invalid
  */

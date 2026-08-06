@@ -1,4 +1,4 @@
-# Mentra Recovery Worker
+# Veiller Recovery Worker
 
 `recovery_worker` is a headless Android sidecar (recovery worker APK) that keeps `com.mentra.asg_client` alive.
 
@@ -11,8 +11,8 @@
 
 ## Package identity
 
-- App id: `com.mentra.recovery`
-- Service: `com.mentra.recovery.service.RecoveryService`
+- App id: `com.veiller.recovery`
+- Service: `com.veiller.recovery.service.RecoveryService`
 
 ## Build and bundle
 
@@ -32,13 +32,13 @@ The ASG app deploys this asset through `RecoveryWorkerManager`.
 1. Verify package is installed:
 
 ```bash
-adb shell pm list packages | rg "com.mentra.recovery|com.augmentos.otaupdater"
+adb shell pm list packages | rg "com.veiller.recovery|com.augmentos.otaupdater"
 ```
 
 2. Verify service running:
 
 ```bash
-adb shell dumpsys activity services | rg "com.mentra.recovery"
+adb shell dumpsys activity services | rg "com.veiller.recovery"
 ```
 
 3. Verify backup file exists:
@@ -51,5 +51,5 @@ adb shell ls -lh /storage/emulated/0/asg/asg_client_backup.apk
 
 ```bash
 adb shell am force-stop com.mentra.asg_client
-adb logcat | rg "MentraRecovery|RecoveryWorker|RecoveryService"
+adb logcat | rg "VeillerRecovery|RecoveryWorker|RecoveryService"
 ```

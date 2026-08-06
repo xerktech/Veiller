@@ -1,4 +1,4 @@
-import { CloudToAppMessageType } from "@mentra/sdk";
+import { CloudToAppMessageType } from "@veiller/sdk";
 
 import { logger as rootLogger } from "../logging/pino-logger";
 

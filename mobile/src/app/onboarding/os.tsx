@@ -1,4 +1,4 @@
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {LinearGradient} from "expo-linear-gradient"
 import {useCallback, useMemo} from "react"
 import {Linking, Pressable, View, ViewStyle} from "react-native"
@@ -22,7 +22,7 @@ const $legacyHero: ViewStyle = {
   paddingHorizontal: 28,
 }
 
-export default function MentraOSOnboarding() {
+export default function VeillerOnboarding() {
   const pushPrevious = usePushPrevious()
   const {theme} = useAppTheme()
   const [, setOnboardingOsCompleted] = useSetting<boolean>(SETTINGS.onboarding_os_completed.key)
@@ -37,7 +37,7 @@ export default function MentraOSOnboarding() {
     () => [
       {
         type: "image",
-        name: "Welcome to Mentra",
+        name: "Welcome to Veiller",
         transition: true,
         duration: 500,
         title: translate("onboarding:osWelcomeTitle"),
@@ -45,7 +45,7 @@ export default function MentraOSOnboarding() {
         titleCentered: true,
         subtitleCentered: true,
         content: (
-          <View className="flex-1 items-center justify-center" testID="mentraos-onboarding-welcome-logo">
+          <View className="flex-1 items-center justify-center" testID="veiller-onboarding-welcome-logo">
             <VeillerLogo width={118} height={64} />
           </View>
         ),
@@ -55,7 +55,7 @@ export default function MentraOSOnboarding() {
         source: require("@assets/onboarding/os/figma/start-miniapp.png"),
         name: "Start using a miniapp",
         transition: false,
-        testID: "mentraos-onboarding-hero-1",
+        testID: "veiller-onboarding-hero-1",
         title: translate("onboarding:osStartMiniappTitle"),
         compactHeader: true,
         compactBody: true,
@@ -71,7 +71,7 @@ export default function MentraOSOnboarding() {
         source: require("@assets/onboarding/os/figma/minimize-close.png"),
         name: "Minimize or close",
         transition: false,
-        testID: "mentraos-onboarding-hero-2",
+        testID: "veiller-onboarding-hero-2",
         title: translate("onboarding:osMinimizeCloseTitle"),
         compactHeader: true,
         compactBody: true,
@@ -91,7 +91,7 @@ export default function MentraOSOnboarding() {
         source: require("@assets/onboarding/os/figma/running-miniapps.png"),
         name: "Switch between miniapps",
         transition: false,
-        testID: "mentraos-onboarding-hero-3",
+        testID: "veiller-onboarding-hero-3",
         title: translate("onboarding:osSwitchMiniappsTitle"),
         compactHeader: true,
         compactBody: true,
@@ -111,7 +111,7 @@ export default function MentraOSOnboarding() {
         source: require("@assets/onboarding/os/figma/miniapp-drawer.png"),
         name: "The miniapp drawer",
         transition: false,
-        testID: "mentraos-onboarding-hero-4",
+        testID: "veiller-onboarding-hero-4",
         title: translate("onboarding:osMiniappDrawerTitle"),
         compactHeader: true,
         compactBody: true,
@@ -130,7 +130,7 @@ export default function MentraOSOnboarding() {
         type: "image",
         name: "MentraOS Legacy",
         transition: false,
-        testID: "mentraos-onboarding-hero-5",
+        testID: "veiller-onboarding-hero-5",
         title: translate("onboarding:osMovedMiniappsTitle"),
         compactHeader: true,
         compactBody: true,
@@ -140,7 +140,7 @@ export default function MentraOSOnboarding() {
             start={{x: 0, y: 0}}
             end={{x: 0, y: 1}}
             style={$legacyHero}
-            testID="mentraos-onboarding-hero-5">
+            testID="veiller-onboarding-hero-5">
             <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-white/70">
               <VeillerLogo width={52} height={28} colorOverride="#00B869" />
             </View>
@@ -150,7 +150,7 @@ export default function MentraOSOnboarding() {
               className="w-full flex-row items-center rounded-2xl border border-border bg-card px-4 py-3"
               onPress={openLegacyPage}
               style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}
-              testID="mentraos-onboarding-open-legacy">
+              testID="veiller-onboarding-open-legacy">
               <View className="flex-1">
                 <Text className="text-base font-semibold text-card-foreground" text="MentraOS Legacy" />
                 <Text className="text-sm text-muted-foreground" text="mentraglass.com/legacy" />

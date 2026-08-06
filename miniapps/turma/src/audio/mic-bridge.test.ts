@@ -1,8 +1,8 @@
-// Tests for the Mentra AudioBridge (Veiller port — new module). The bridge
+// Tests for the Veiller AudioBridge (Veiller port — new module). The bridge
 // is what audio.ts's teardown discipline leans on: audioControl must be an
 // idempotent subscribe/unsubscribe, and frames must decode base64 -> bytes.
 import { describe, expect, it } from "bun:test";
-import { base64ToBytes, MentraMicBridge, type AudioChunkLike, type MicSessionLike } from "./mic-bridge.ts";
+import { base64ToBytes, VeillerMicBridge, type AudioChunkLike, type MicSessionLike } from "./mic-bridge.ts";
 
 class FakeMicSession implements MicSessionLike {
   handler: ((data: AudioChunkLike) => void) | null = null;
@@ -29,10 +29,10 @@ describe("base64ToBytes", () => {
   });
 });
 
-describe("MentraMicBridge", () => {
+describe("VeillerMicBridge", () => {
   it("audioControl(true) subscribes once, audioControl(false) unsubscribes — both idempotent", async () => {
     const session = new FakeMicSession();
-    const bridge = new MentraMicBridge(session);
+    const bridge = new VeillerMicBridge(session);
 
     await bridge.audioControl(true);
     await bridge.audioControl(true); // second on: no double subscription
@@ -49,7 +49,7 @@ describe("MentraMicBridge", () => {
 
   it("decodes chunks and fans them out to every onAudioFrame subscriber", async () => {
     const session = new FakeMicSession();
-    const bridge = new MentraMicBridge(session);
+    const bridge = new VeillerMicBridge(session);
     const got1: Uint8Array[] = [];
     const got2: Uint8Array[] = [];
     bridge.onAudioFrame((pcm) => got1.push(pcm));
@@ -69,7 +69,7 @@ describe("MentraMicBridge", () => {
 
   it("drops malformed/empty chunks instead of throwing", async () => {
     const session = new FakeMicSession();
-    const bridge = new MentraMicBridge(session);
+    const bridge = new VeillerMicBridge(session);
     const got: Uint8Array[] = [];
     bridge.onAudioFrame((pcm) => got.push(pcm));
     await bridge.audioControl(true);
@@ -81,7 +81,7 @@ describe("MentraMicBridge", () => {
 
   it("no frames are delivered after audioControl(false) even if a stale chunk arrives", async () => {
     const session = new FakeMicSession();
-    const bridge = new MentraMicBridge(session);
+    const bridge = new VeillerMicBridge(session);
     const got: Uint8Array[] = [];
     bridge.onAudioFrame((pcm) => got.push(pcm));
     await bridge.audioControl(true);

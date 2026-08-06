@@ -1,6 +1,6 @@
 import {Platform} from "react-native"
 
-import {appRegistry} from "@mentra/engine/internal"
+import {appRegistry} from "@veiller/engine/internal"
 
 import {notifyPackageName, settingsPackageName} from "@/constants/miniapps"
 

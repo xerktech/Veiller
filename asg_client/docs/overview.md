@@ -2,7 +2,7 @@
 
 ## What is ASG Client?
 
-ASG Client is the Android application that runs on Android-based smart glasses (primarily **Mentra Live**). It bridges the physical glasses hardware and the MentraOS ecosystem — handling button presses, the camera and microphone, BLE communication with the phone app, WiFi/hotspot, OTA updates, and media uploads.
+ASG Client is the Android application that runs on Android-based smart glasses (primarily **Mentra Live**). It bridges the physical glasses hardware and the Veiller ecosystem — handling button presses, the camera and microphone, BLE communication with the phone app, WiFi/hotspot, OTA updates, and media uploads.
 
 ## A naming note: K900 = Mentra Live
 
@@ -26,7 +26,7 @@ The handler pattern (see [features/command-processor.md](features/command-proces
 ## Communication flow
 
 ```
-Physical hardware → BES MCU (UART) → AsgClientService → BLE → Phone app → MentraOS Cloud
+Physical hardware → BES MCU (UART) → AsgClientService → BLE → Phone app → Veiller Cloud
                                           ↓
                                    Local actions
                               (photo, video, stream, LED)
@@ -39,7 +39,7 @@ Physical hardware → BES MCU (UART) → AsgClientService → BLE → Phone app 
 3. `K900CommandHandler.processK900Command` forwards every press to the phone as a `button_press` event.
 4. The gallery/save-mode gate decides whether ASG Client also captures locally.
 5. If local capture happened, it lands in the gallery and is exposed via the [camera web server](features/camera-web-server.md) for the phone to download.
-6. The phone uploads the photo/video to MentraOS Cloud over its own connection.
+6. The phone uploads the photo/video to Veiller Cloud over its own connection.
 
 ## Key components
 
@@ -78,7 +78,7 @@ Selected at runtime by `HardwareManagerFactory`.
 
 ### OTA and recovery (`io/ota/`, `io/bes/`, `recovery_worker/`)
 
-- `RecoveryWorkerManager` — deploys and starts the `com.mentra.recovery` recovery worker sidecar that revives ASG if it crashes
+- `RecoveryWorkerManager` — deploys and starts the `com.veiller.recovery` recovery worker sidecar that revives ASG if it crashes
 - `BesOtaManager` — pushes new BES MCU firmware over UART. See [features/bes-ota.md](features/bes-ota.md).
 
 ## Configuration
@@ -95,4 +95,4 @@ Persisted via `AsgSettings` (SharedPreferences). User-tunable through the phone 
 
 1. **Phone app ↔ ASG Client** — BLE GATT, custom characteristics implemented by `K900BluetoothManager`. Wire format documented in [ASG Client Command API](ASG_CLIENT_API.md).
 2. **MCU ↔ ASG Client** — UART; framed as `{"C": "<cmd>", "B": {...}, "V": 1}`. Inbound K900 commands are routed by `K900CommandHandler`.
-3. **MentraOS Cloud** — indirect; phone app proxies media and events.
+3. **Veiller Cloud** — indirect; phone app proxies media and events.

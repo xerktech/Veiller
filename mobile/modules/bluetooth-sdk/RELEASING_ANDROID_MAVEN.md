@@ -22,35 +22,35 @@ branch unless that branch intentionally contains every Android source file and
 companion library expected in the public artifacts. In CI, that branch is `dev`
 after the SDK package version bump has merged.
 
-The commands below assume the full MentraOS Android Gradle build layout, where
-the SDK module is included under `mobile/android` as `:mentra-bluetooth-sdk`.
+The commands below assume the full Veiller Android Gradle build layout, where
+the SDK module is included under `mobile/android` as `:veiller-bluetooth-sdk`.
 That is the layout used for Maven Central releases. In a fresh
 checkout where `mobile/android` is not present yet, run
 `cd mobile && cp .env.example .env && bun expo prebuild --platform android`
 after installing dependencies.
 
 For a local Android compile check without publishing, run this from the
-MentraOS repo root:
+Veiller repo root:
 
 ```bash
 ./scripts/check-android-compile.sh bluetooth-sdk
 ```
 
 The script prepares `mobile/android` when needed and uses the generated Gradle
-wrapper with `-PmentraPublicSdk=true`. Do not run `gradle` directly from
+wrapper with `-PveillerPublicSdk=true`. Do not run `gradle` directly from
 `mobile/modules/bluetooth-sdk/android`; that directory is included as a module
 by the Expo Android project and does not carry its own wrapper or Android Gradle
 plugin classpath.
 
-The public SDK publication uses `-PmentraPublicSdk=true`. Leave this property
-off for normal MentraOS Android app builds so the app keeps the optional local
+The public SDK publication uses `-PveillerPublicSdk=true`. Leave this property
+off for normal Veiller Android app builds so the app keeps the optional local
 STT, VAD, and Vuzix integrations it needs. With the property enabled, those
-MentraOS-only integrations are compile-only for the SDK artifact and are not
+Veiller-only integrations are compile-only for the SDK artifact and are not
 published as runtime transitive dependencies.
 
 ## Prerequisites
 
-- A clean MentraOS checkout on the release source branch.
+- A clean Veiller checkout on the release source branch.
 - Java 17 and the Android SDK installed.
 - Push or release approval for publishing `com.mentraglass` artifacts.
 - Sonatype Central credentials and GPG signing configured locally or in CI. For
@@ -78,21 +78,21 @@ version=$(node -p "require('./mobile/modules/bluetooth-sdk/package.json').versio
 
 ## Publish to Maven Local
 
-From the MentraOS repo root:
+From the Veiller repo root:
 
 ```bash
 cd mobile/android
 
-MENTRA_MAVEN_VERSION="${version}" ./gradlew \
+VEILLER_MAVEN_VERSION="${version}" ./gradlew \
   :lc3Lib:publishToMavenLocal \
-  :mentra-bluetooth-sdk:publishToMavenLocal \
-  -PmentraPublicSdk=true
+  :veiller-bluetooth-sdk:publishToMavenLocal \
+  -PveillerPublicSdk=true
 ```
 
 Use this only as a local smoke check. Consumer validation for a Central release
 should not rely on stale `mavenLocal()` artifacts.
 
-`MENTRA_MAVEN_VERSION` is passed explicitly in the commands below to keep the
+`VEILLER_MAVEN_VERSION` is passed explicitly in the commands below to keep the
 shell's `version` variable and Gradle's publication version locked together. If
 it is omitted, Gradle falls back to the same package metadata version.
 
@@ -101,11 +101,11 @@ it is omitted, Gradle falls back to the same package metadata version.
 From `mobile/android`:
 
 ```bash
-MENTRA_MAVEN_VERSION="${version}" ./gradlew \
+VEILLER_MAVEN_VERSION="${version}" ./gradlew \
   :lc3Lib:publishReleasePublicationToSonatypeCentralRepository \
-  :mentra-bluetooth-sdk:publishReleasePublicationToSonatypeCentralRepository \
-  :mentra-bluetooth-sdk:uploadSonatypeCentralDeployment \
-  -PmentraPublicSdk=true
+  :veiller-bluetooth-sdk:publishReleasePublicationToSonatypeCentralRepository \
+  :veiller-bluetooth-sdk:uploadSonatypeCentralDeployment \
+  -PveillerPublicSdk=true
 ```
 
 The upload task requests a Sonatype Central deployment upload for the

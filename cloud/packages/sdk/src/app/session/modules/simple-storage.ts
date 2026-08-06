@@ -1,5 +1,5 @@
 /**
- * Simple Storage SDK Module for MentraOS Apps
+ * Simple Storage SDK Module for Veiller Apps
  * Provides localStorage-like API with cloud synchronization
  *
  * Mental Model: App server RAM = source of truth, MongoDB = crash recovery backup

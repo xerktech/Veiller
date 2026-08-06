@@ -76,9 +76,9 @@ export default function SelectGlassesModelScreen() {
     // ...ar99Options,
     // {deviceModel: DeviceTypes.G1, key: "evenrealities_g1"},
     {deviceModel: DeviceTypes.G2, key: "evenrealities_g2"},
-    // {deviceModel: DeviceTypes.MACH1, key: "mentra_mach1"},
+    // {deviceModel: DeviceTypes.MACH1, key: "veiller_mach1"},
     // {deviceModel: DeviceTypes.Z100, key: "vuzix-z100"},
-    // {deviceModel: DeviceTypes.NEX, key: "mentra_nex"},
+    // {deviceModel: DeviceTypes.NEX, key: "veiller_nex"},
     // {deviceModel: DeviceTypes.NIMO, key: "nimo"},
   ]
 

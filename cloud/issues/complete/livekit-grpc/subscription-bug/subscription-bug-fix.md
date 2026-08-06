@@ -25,8 +25,8 @@ applyDelta(packageName, oldSet, newSet) {
 **What happens:**
 
 1. `com.augmentos.livecaptions` subscribes to `transcription:en-US` → count = 1 ✅
-2. `com.mentra.merge` subscribes to `transcription:en-US` → count = 2 ✅
-3. User stops `com.mentra.merge` → it removes `transcription:en-US` → count = 1 ✅
+2. `com.veiller.merge` subscribes to `transcription:en-US` → count = 2 ✅
+3. User stops `com.veiller.merge` → it removes `transcription:en-US` → count = 1 ✅
 4. `com.augmentos.livecaptions` reconnects (empty subs during reconnect) → removes `transcription:en-US` → **count = 0** ❌
 5. Microphone turns off because count is 0 ❌
 6. `com.augmentos.livecaptions` finishes reconnecting → adds `transcription:en-US` → count = 1 ✅
@@ -36,7 +36,7 @@ applyDelta(packageName, oldSet, newSet) {
 
 ```
 22:31:10 - com.augmentos.livecaptions adds ["transcription:en-US"] → count: 0→1
-22:31:25 - com.mentra.merge removes ["transcription:en-US"] → count: 2→1 (why was it 2? other user?)
+22:31:25 - com.veiller.merge removes ["transcription:en-US"] → count: 2→1 (why was it 2? other user?)
 22:31:35 - com.augmentos.livecaptions removes ["transcription:en-US"] → count: 1→0 (GOES TO ZERO!)
 22:31:38 - com.augmentos.livecaptions adds ["transcription:en-US"] → count: 0→1
 ```

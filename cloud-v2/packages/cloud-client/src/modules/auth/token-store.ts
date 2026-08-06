@@ -26,7 +26,7 @@ import { decodeClaims } from "./jwt";
  * Namespaced so it cannot collide with anything else a host keeps in the same
  * secure store.
  */
-const REFRESH_TOKEN_KEY = "mentra.cloud-client.refreshToken";
+const REFRESH_TOKEN_KEY = "veiller.cloud-client.refreshToken";
 
 /** The access token plus its Unix-seconds expiry, held in memory only. */
 interface AccessTokenState {

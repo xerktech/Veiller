@@ -12,7 +12,7 @@
     "declarationMap": true,
     "baseUrl": ".",
     "paths": {
-      "@mentra/sdk": ["../sdk/dist"],
+      "@veiller/sdk": ["../sdk/dist"],
     }
   },
   "include": ["src/**/*"],

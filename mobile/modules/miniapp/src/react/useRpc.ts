@@ -1,5 +1,5 @@
 /**
- * useRpc — React hook around `mentra.request(channel, ...)`.
+ * useRpc — React hook around `veiller.request(channel, ...)`.
  *
  * Returns a stable callable plus an `.abort()` method. The internal
  * AbortController is recreated per call and bound to component lifecycle:
@@ -18,12 +18,12 @@ import type {RpcReq, RpcRes, RpcRequestOptions} from "../modules/ui"
 
 type RequestFn = (channel: string, payload: unknown, options?: RpcRequestOptions) => Promise<unknown>
 
-/** Walk to the global `mentra.request` (typed). */
-function getMentraRequest(): RequestFn {
-  const m = (globalThis as unknown as {mentra?: {request?: RequestFn}}).mentra
+/** Walk to the global `veiller.request` (typed). */
+function getVeillerRequest(): RequestFn {
+  const m = (globalThis as unknown as {veiller?: {request?: RequestFn}}).veiller
   if (!m || typeof m.request !== "function") {
     throw new Error(
-      "useRpc: window.mentra.request is not available — is this miniapp running in a UI WebView with the shim injected?",
+      "useRpc: window.veiller.request is not available — is this miniapp running in a UI WebView with the shim injected?",
     )
   }
   return m.request
@@ -90,7 +90,7 @@ export function useRpc<
       const signals: AbortSignal[] = [ctrl.signal, mountRef.current!.signal]
       if (options?.signal) signals.push(options.signal)
       const signal = mergeSignals(signals)
-      return getMentraRequest()(channel, payload, {signal, timeout: options?.timeout}) as Promise<
+      return getVeillerRequest()(channel, payload, {signal, timeout: options?.timeout}) as Promise<
         RpcRes<TChannels[C]>
       >
     },

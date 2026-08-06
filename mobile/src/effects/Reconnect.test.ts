@@ -1,10 +1,10 @@
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 
 import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
-import {useCoreStore} from "@mentra/engine/internal"
+import {useCoreStore} from "@veiller/engine/internal"
 import {useGlassesStore} from "../../modules/engine/src/stores/glasses"
-import {SETTINGS} from "@mentra/engine"
-import {useSettingsStore} from "@mentra/engine/internal"
+import {SETTINGS} from "@veiller/engine"
+import {useSettingsStore} from "@veiller/engine/internal"
 import {resetBluetoothSdkMock} from "@/test-utils/mockBluetoothSdk"
 
 jest.mock("@/utils/PermissionsUtils", () => ({

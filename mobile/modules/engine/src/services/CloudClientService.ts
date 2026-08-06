@@ -1,5 +1,5 @@
 /**
- * Owns the singleton `@mentra/cloud-client` (CloudClient) for the engine runtime
+ * Owns the singleton `@veiller/cloud-client` (CloudClient) for the engine runtime
  * — the keystone move that pulls backend comms INTO engine.
  *
  * engine constructs the client from engine-owned pieces (the native UDP socket,
@@ -13,14 +13,14 @@
  * The local-miniapp path drives the cloud's transcription/translation through
  * this service.
  */
-import {CloudClient, setNativeHttp, setNativeUdp, setSecureStorage} from "@mentra/cloud-client/react-native"
-import type {PreinstalledMiniappRegistry, RuntimeSnapshot} from "@mentra/cloud-client/react-native"
-import type {SubjectTokenType} from "@mentra/cloud-client"
+import {CloudClient, setNativeHttp, setNativeUdp, setSecureStorage} from "@veiller/cloud-client/react-native"
+import type {PreinstalledMiniappRegistry, RuntimeSnapshot} from "@veiller/cloud-client/react-native"
+import type {SubjectTokenType} from "@veiller/cloud-client"
 import {Platform} from "react-native"
-import type {AudioSubscription, TranscriptionData, TranslationData} from "@mentra/cloud-protocol"
+import type {AudioSubscription, TranscriptionData, TranslationData} from "@veiller/cloud-protocol"
 
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import CrustModule from "@mentra/crust"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import CrustModule from "@veiller/crust"
 import {getAuth, getConfigValues} from "../runtime/bootstrap"
 import {useSettingsStore, SETTINGS} from "../stores/settings"
 import {type CloudClientStatusSnapshot, type MiniappAuthToken} from "../runtime/config"
@@ -42,7 +42,7 @@ type CloudCore = NonNullable<CloudClient["core"]>
 // been continuously NOT connected for this long. A quick reconnect cancels it; brief
 // flaps that recover don't fire. Raised as engine.notifications(connection_failed_persistent).
 const CLOUD_PERSISTENT_FAILURE_MS = 60_000
-const LOCAL_MINIAPP_USER_ID_KEY = "mentra.localMiniapp.userId"
+const LOCAL_MINIAPP_USER_ID_KEY = "veiller.localMiniapp.userId"
 
 /** Cancel the pending persistent-failure alarm + re-arm for the next outage. */
 function clearPersistentFailureAlarm(): void {
@@ -97,7 +97,7 @@ const localMiniappUserIdentity = new LocalMiniappUserIdentity({
  * Generate a stable, non-secret device-scoped identity for local-only mode.
  * There is no account to own the local-miniapp namespace, so a random id is
  * minted once and persisted (via localMiniappUserIdentity's MMKV backend). The
- * `local:` prefix keeps it from ever colliding with a Core-owned Mentra user id.
+ * `local:` prefix keeps it from ever colliding with a Core-owned Veiller user id.
  */
 function newLocalDeviceUserId(): string {
   const bytes = new Uint8Array(16)
@@ -118,7 +118,7 @@ function newLocalDeviceUserId(): string {
 /**
  * Local-only mode has no backend identity to resolve, so seed a persisted
  * synthetic device id up front. Local miniapp storage/blob namespaces key off
- * this, and seeding it here means resolveMentraUserId()/getMentraUserId() never
+ * this, and seeding it here means resolveVeillerUserId()/getVeillerUserId() never
  * fall through to the (unreachable) Core identity path. Idempotent: a previously
  * persisted id is kept across restarts.
  */
@@ -228,7 +228,7 @@ async function getLocalDevRuntimeToken(runtimeEndpoint: string, opts?: {forceRef
   const base = new URL(runtimeEndpoint)
   base.port = String(LOCAL_AUTH_PORT)
   base.pathname = "/api/dev/runtime-token"
-  base.search = new URLSearchParams({userId: "local-phone-user", tenantId: "mentra"}).toString()
+  base.search = new URLSearchParams({userId: "local-phone-user", tenantId: "veiller"}).toString()
 
   const res = await fetch(base.toString())
   if (!res.ok) {
@@ -592,7 +592,7 @@ export const cloudClientService = {
   },
 
   /**
-   * Resolve the stable Core-owned Mentra user id.
+   * Resolve the stable Core-owned Veiller user id.
    *
    * Storage must use this identity rather than the short-lived Core access
    * token. A previously verified id is restored from MMKV so local miniapps
@@ -600,7 +600,7 @@ export const cloudClientService = {
    * callers join the auth module's single-flight exchange/refresh instead of
    * falling back to an anonymous namespace.
    */
-  async resolveMentraUserId(): Promise<string> {
+  async resolveVeillerUserId(): Promise<string> {
     return localMiniappUserIdentity.resolve(async () => {
       if (!client) this.init()
       const c = client
@@ -612,10 +612,10 @@ export const cloudClientService = {
     })
   },
 
-  /** Read the stable Mentra user id after async identity resolution. */
-  getMentraUserId(): string {
+  /** Read the stable Veiller user id after async identity resolution. */
+  getVeillerUserId(): string {
     const userId = localMiniappUserIdentity.get()
-    if (!userId) throw new Error("Mentra user identity is unavailable")
+    if (!userId) throw new Error("Veiller user identity is unavailable")
     return userId
   },
 

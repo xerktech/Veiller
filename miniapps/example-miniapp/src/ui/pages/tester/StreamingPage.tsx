@@ -15,7 +15,7 @@
 
 import {useMemo, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"
@@ -155,7 +155,7 @@ export default function StreamingPage() {
             <ul className="divide-y divide-border">
               {statusEvents.map((ev, i) => (
                 <li key={i} className="px-3 py-2 font-mono text-[12px]">
-                  <span className="text-mentra-green">{ev.source ?? "?"}</span>{" "}
+                  <span className="text-veiller-green">{ev.source ?? "?"}</span>{" "}
                   <span className="text-foreground">{ev.status}</span>
                   {ev.streamId && (
                     <span className="ml-2 text-muted-foreground">{String(ev.streamId)}</span>

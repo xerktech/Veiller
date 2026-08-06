@@ -1,5 +1,5 @@
 /**
- * MentraJS polyfill bundle entry point.
+ * VeillerJS polyfill bundle entry point.
  *
  * This file gets compiled (via scripts/build.mjs) into a single IIFE that
  * is `evaluateScript`-ed inside every per-miniapp JSContext at spawn
@@ -35,7 +35,7 @@ declare const __hostUnhandledRejection: (payloadJson: string) => void
 declare const __nativeSetTimeout: (token: number, delayMs: number) => void
 declare const __nativeClearTimer: (token: number) => void
 
-;(function installMentraJSRuntime(): void {
+;(function installVeillerJSRuntime(): void {
   const g = globalThis as Record<string, unknown> & {
     console?: Console
     setTimeout?: typeof setTimeout
@@ -192,7 +192,7 @@ declare const __nativeClearTimer: (token: number) => void
       }
     }
 
-    const installSetTimeout = (g.setTimeout == null) || (g as Record<string, unknown>).__mentraOwnsSetTimeout
+    const installSetTimeout = (g.setTimeout == null) || (g as Record<string, unknown>).__veillerOwnsSetTimeout
     if (installSetTimeout) {
       g.setTimeout = ((fn: (...args: unknown[]) => void, delayMs?: number, ...rest: unknown[]) => {
         const token = nextToken++
@@ -219,7 +219,7 @@ declare const __nativeClearTimer: (token: number) => void
           /* native may already have evicted */
         }
       }) as typeof clearTimeout
-      ;(g as Record<string, unknown>).__mentraOwnsSetTimeout = true
+      ;(g as Record<string, unknown>).__veillerOwnsSetTimeout = true
     }
 
     g.setInterval = ((fn: (...args: unknown[]) => void, delayMs?: number, ...rest: unknown[]) => {
@@ -278,7 +278,7 @@ declare const __nativeClearTimer: (token: number) => void
   // ---------- AbortController / AbortSignal --------------------------------
   // JSC + QuickJS don't ship the DOM AbortController. The miniapp SDK
   // uses it for RPC cancellation (`session.ui.handle`'s ctx.signal and
-  // `mentra.request`'s options.signal). We install a minimal polyfill
+  // `veiller.request`'s options.signal). We install a minimal polyfill
   // covering the surface that ships in the SDK:
   //   - new AbortController()
   //   - ctrl.signal, ctrl.abort(reason?)
@@ -291,7 +291,7 @@ declare const __nativeClearTimer: (token: number) => void
     if (typeof (g as Record<string, unknown>).AbortController === "function") return
 
     type Listener = () => void
-    class MentraAbortSignal {
+    class VeillerAbortSignal {
       aborted = false
       reason: unknown = undefined
       private listeners: Set<Listener> = new Set()
@@ -318,18 +318,18 @@ declare const __nativeClearTimer: (token: number) => void
         this.listeners.clear()
       }
     }
-    class MentraAbortController {
-      readonly signal: MentraAbortSignal = new MentraAbortSignal()
+    class VeillerAbortController {
+      readonly signal: VeillerAbortSignal = new VeillerAbortSignal()
       abort(reason?: unknown): void {
         this.signal.__fire(reason ?? new Error("aborted"))
       }
     }
     // `AbortSignal.any([signals])` — composes a single signal that aborts
     // when any input does. Used by useRpc's mergeSignals fallback.
-    ;(MentraAbortSignal as unknown as {any: (signals: MentraAbortSignal[]) => MentraAbortSignal}).any =
-      (signals: MentraAbortSignal[]): MentraAbortSignal => {
-        const out = new MentraAbortSignal()
-        const onAbort = (s: MentraAbortSignal): void => {
+    ;(VeillerAbortSignal as unknown as {any: (signals: VeillerAbortSignal[]) => VeillerAbortSignal}).any =
+      (signals: VeillerAbortSignal[]): VeillerAbortSignal => {
+        const out = new VeillerAbortSignal()
+        const onAbort = (s: VeillerAbortSignal): void => {
           if (!out.aborted) out.__fire(s.reason)
         }
         for (const s of signals) {
@@ -341,8 +341,8 @@ declare const __nativeClearTimer: (token: number) => void
         }
         return out
       }
-    ;(g as Record<string, unknown>).AbortController = MentraAbortController
-    ;(g as Record<string, unknown>).AbortSignal = MentraAbortSignal
+    ;(g as Record<string, unknown>).AbortController = VeillerAbortController
+    ;(g as Record<string, unknown>).AbortSignal = VeillerAbortSignal
   }
   installAbortController()
 
@@ -388,7 +388,7 @@ declare const __nativeClearTimer: (token: number) => void
     if (env.kind === "event" && typeof env.iface === "string") {
       // Fan-out is handled by the SDK side. We just publish on a
       // well-known global the SDK listens to.
-      const listeners = ((g as Record<string, unknown>).__mentraEventListeners ?? new Map()) as Map<
+      const listeners = ((g as Record<string, unknown>).__veillerEventListeners ?? new Map()) as Map<
         string,
         Set<(p: unknown) => void>
       >
@@ -415,7 +415,7 @@ declare const __nativeClearTimer: (token: number) => void
       return
     }
     if (env.kind === "ws-event") {
-      const wsHook = (g as Record<string, unknown>).__mentraDeliverWebSocketEvent as
+      const wsHook = (g as Record<string, unknown>).__veillerDeliverWebSocketEvent as
         | ((sid: string, type: string, payload: Record<string, unknown>) => void)
         | undefined
       const sid = (env as {sid?: string}).sid
@@ -429,7 +429,7 @@ declare const __nativeClearTimer: (token: number) => void
       // Host pushes a raw SDK envelope (DISPLAY / SUBSCRIBE /
       // STATE_FOR_BRIDGE / etc.) to be delivered into DispatchTransport's
       // onMessage handler. The transport installs this hook on open().
-      const deliver = (g as Record<string, unknown>).__mentraDeliverBridgeRaw as ((raw: string) => void) | undefined
+      const deliver = (g as Record<string, unknown>).__veillerDeliverBridgeRaw as ((raw: string) => void) | undefined
       if (typeof deliver === "function") {
         deliver((env as {raw: string}).raw)
       }
@@ -438,14 +438,14 @@ declare const __nativeClearTimer: (token: number) => void
     if (env.kind === "init" && typeof env.sessionId === "string") {
       // Stamp the global; the SDK's session factory consumes this to build
       // the typed MiniappSession.
-      ;(g as Record<string, unknown>).__mentraSessionId = env.sessionId
-      const initCb = (g as Record<string, unknown>).__mentraInitCallback as ((sid: string) => void) | undefined
+      ;(g as Record<string, unknown>).__veillerSessionId = env.sessionId
+      const initCb = (g as Record<string, unknown>).__veillerInitCallback as ((sid: string) => void) | undefined
       if (initCb) initCb(env.sessionId)
     }
   }
 
   // SDK helpers exposed for the typed wrappers. The SDK is the only caller.
-  ;(g as Record<string, unknown>).__mentraSendOneShot = (iface: string, method: string, args: unknown[]) => {
+  ;(g as Record<string, unknown>).__veillerSendOneShot = (iface: string, method: string, args: unknown[]) => {
     try {
       __dispatch(iface, method, JSON.stringify(args ?? []))
     } catch (e) {
@@ -462,7 +462,7 @@ declare const __nativeClearTimer: (token: number) => void
     }
   }
 
-  ;(g as Record<string, unknown>).__mentraSendRequest = (
+  ;(g as Record<string, unknown>).__veillerSendRequest = (
     iface: string,
     method: string,
     args: unknown[],
@@ -482,9 +482,9 @@ declare const __nativeClearTimer: (token: number) => void
   // Event subscribe / unsubscribe helpers — the SDK's session._subscribe()
   // path calls these. We keep the map on globalThis so __deliver can fan
   // out without re-importing this module.
-  ;(g as Record<string, unknown>).__mentraEventListeners = new Map<string, Set<(p: unknown) => void>>()
-  ;(g as Record<string, unknown>).__mentraSubscribe = (iface: string, cb: (p: unknown) => void) => {
-    const map = (g as Record<string, unknown>).__mentraEventListeners as Map<string, Set<(p: unknown) => void>>
+  ;(g as Record<string, unknown>).__veillerEventListeners = new Map<string, Set<(p: unknown) => void>>()
+  ;(g as Record<string, unknown>).__veillerSubscribe = (iface: string, cb: (p: unknown) => void) => {
+    const map = (g as Record<string, unknown>).__veillerEventListeners as Map<string, Set<(p: unknown) => void>>
     let set = map.get(iface)
     if (!set) {
       set = new Set()
@@ -514,7 +514,7 @@ declare const __nativeClearTimer: (token: number) => void
       return null
     }
   }
-  ;(g as Record<string, unknown>).__mentraDispatchSync = dispatchSyncOrNull as DispatchLike
+  ;(g as Record<string, unknown>).__veillerDispatchSync = dispatchSyncOrNull as DispatchLike
 
   const localStorage = {
     getItem(key: string): string | null {
@@ -584,8 +584,8 @@ declare const __nativeClearTimer: (token: number) => void
   if (!cryptoNs.subtle) {
     const notImplemented = () => {
       throw new Error(
-        "crypto.subtle is not yet implemented in MentraJS — see " +
-          "agents/mentrajs-two-layer-miniapp-architecture.md (Polyfill " +
+        "crypto.subtle is not yet implemented in VeillerJS — see " +
+          "agents/veillerjs-two-layer-miniapp-architecture.md (Polyfill " +
           "strategy section). Use a pure-JS hash/encrypt library for now.",
       )
     }
@@ -723,7 +723,7 @@ declare const __nativeClearTimer: (token: number) => void
   }
 
   // ---------- fetch (thin native bridge) -----------------------------------
-  // Async — uses __mentraSendRequest under the hood with iface "fetch". The
+  // Async — uses __veillerSendRequest under the hood with iface "fetch". The
   // native handler is expected to return {status, statusText, headers, body}
   // where body is either a JSON-encodable value or a base64 string.
   if (typeof (g as Record<string, unknown>).fetch !== "function") {
@@ -755,7 +755,7 @@ declare const __nativeClearTimer: (token: number) => void
           }
         }
       }
-      const sendRequest = (g as Record<string, unknown>).__mentraSendRequest as (
+      const sendRequest = (g as Record<string, unknown>).__veillerSendRequest as (
         iface: string,
         method: string,
         args: unknown[],
@@ -823,12 +823,12 @@ declare const __nativeClearTimer: (token: number) => void
   if (typeof (g as Record<string, unknown>).WebSocket !== "function") {
     type WSListener = (ev: Record<string, unknown>) => void
 
-    const sockets = new Map<string, MentraWebSocket>()
+    const sockets = new Map<string, VeillerWebSocket>()
 
     // __deliver fans out ws-event envelopes here. Installed once; the
     // existing __deliver dispatcher (event/response/bridge/init) walks
     // its kind-switch and falls through to this hook for ws-event.
-    ;(g as Record<string, unknown>).__mentraDeliverWebSocketEvent = (
+    ;(g as Record<string, unknown>).__veillerDeliverWebSocketEvent = (
       sid: string,
       type: "open" | "message" | "error" | "close",
       payload: Record<string, unknown> | undefined,
@@ -838,7 +838,7 @@ declare const __nativeClearTimer: (token: number) => void
       sock._deliver(type, payload ?? {})
     }
 
-    class MentraWebSocket {
+    class VeillerWebSocket {
       static readonly CONNECTING = 0
       static readonly OPEN = 1
       static readonly CLOSING = 2
@@ -1046,7 +1046,7 @@ declare const __nativeClearTimer: (token: number) => void
       else g.Promise.resolve().then(fn)
     }
 
-    ;(g as Record<string, unknown>).WebSocket = MentraWebSocket
+    ;(g as Record<string, unknown>).WebSocket = VeillerWebSocket
   }
 
   // ---------- signal ready --------------------------------------------------

@@ -48,7 +48,7 @@ together.
 | Path | Direction | Disposition | Notes |
 | --- | --- | --- | --- |
 | `connectWebsocket` / `setAuthCreds` (core_token) | — | keep-until-V2-port | V1 session bootstrap; V2 auth is island-owned |
-| `display_event` | cloud→device | **keep-until-V2-port (LIVE infrastructure)** | The V1 cloud's OS dashboard (`com.mentra.os`) still pushes these every few seconds — found on-device 2026-07-03 after tier 3 deleted the handler; restored. Retires with the websocket (tier 5), not with V1 apps. |
+| `display_event` | cloud→device | **keep-until-V2-port (LIVE infrastructure)** | The V1 cloud's OS dashboard (`com.veiller.os`) still pushes these every few seconds — found on-device 2026-07-03 after tier 3 deleted the handler; restored. Retires with the websocket (tier 5), not with V1 apps. |
 | `connection_error` / `auth_error` | cloud→host | keep-until-V2-port | V1 session error surface (websocket status UI) |
 | `data_stream` | cloud→(blocked) | keep comment | deliberately not forwarded to local miniapps |
 

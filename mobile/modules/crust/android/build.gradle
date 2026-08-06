@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 
-group = 'com.mentra.crust'
+group = 'com.veiller.crust'
 version = '0.1.0'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
@@ -9,12 +9,12 @@ applyKotlinExpoModulesCorePlugin()
 useCoreDependencies()
 useExpoPublishing()
 
-// MentraJS Android runtime: QuickJS via dokar3/quickjs-kt.
+// VeillerJS Android runtime: QuickJS via dokar3/quickjs-kt.
 //
 // Zipline's `bind(name, service)` registers services in an internal Kotlin
 // map keyed by name for the Kotlin/JS-compiled `Zipline.take()` API; it does
 // not install JS globals on globalThis. Our polyfill is hand-written JS that
-// reads `globalThis.__mentraNativeBridge`, so the Zipline path silently
+// reads `globalThis.__veillerNativeBridge`, so the Zipline path silently
 // dropped every JS→host dispatch on Android.
 //
 // dokar3/quickjs-kt exposes `QuickJs.function(name) { args -> ... }` which
@@ -45,13 +45,13 @@ if (useManagedAndroidSdkVersions) {
 }
 
 android {
-  namespace "com.mentra.crust"
+  namespace "com.veiller.crust"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
     multiDexEnabled true
   }
-  // Pull the MentraJS polyfill bundle from the sibling @mentra/jspolyfill
+  // Pull the VeillerJS polyfill bundle from the sibling @veiller/jspolyfill
   // module's `assets/` directory — single committed source of truth. The
   // file is read at runtime via `appContext.assets.open("startup.js")`.
   // Cross-module sourceSet entry beats checking the same artifact into git
@@ -112,7 +112,7 @@ dependencies {
 }
 
 dependencies {
-  // MentraJS — QuickJS for per-miniapp JS contexts. dokar3/quickjs-kt is a
+  // VeillerJS — QuickJS for per-miniapp JS contexts. dokar3/quickjs-kt is a
   // KMP wrapper around Bellard QuickJS that exposes `function(name) { ... }`
   // for installing Kotlin lambdas as JS globals via `JS_SetPropertyStr`.
   // Mirrors iOS Apple JSC's `setObject(_, forKeyedSubscript:)` pattern.
@@ -125,7 +125,7 @@ dependencies {
   // Bump only when the host Kotlin compiler clears 2.3.0 metadata.
   implementation 'io.github.dokar3:quickjs-kt-android:1.0.0-alpha13'
 
-  // OkHttp for fetch / WebSocket — already used elsewhere in MentraOS;
+  // OkHttp for fetch / WebSocket — already used elsewhere in Veiller;
   // pinned here so the gradle plugin doesn't downgrade us.
   implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 

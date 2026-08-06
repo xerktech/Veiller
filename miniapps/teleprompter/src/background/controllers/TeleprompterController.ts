@@ -21,7 +21,7 @@
  * flooding the glasses. (See the project's iOS background-pacing notes.)
  */
 
-import type {MiniappSession, TranscriptionData, UnsubscribeFn} from "@mentra/miniapp/background"
+import type {MiniappSession, TranscriptionData, UnsubscribeFn} from "@veiller/miniapp/background"
 
 import {ScriptEngine, normalizeWords} from "../core/ScriptEngine"
 import type {DisplayProfile} from "../core/ScriptEngine"

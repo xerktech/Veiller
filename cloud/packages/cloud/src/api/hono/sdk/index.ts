@@ -1,6 +1,6 @@
 /**
  * @fileoverview Barrel export for Hono SDK APIs.
- * These APIs are used by third-party apps running the MentraOS SDK.
+ * These APIs are used by third-party apps running the Veiller SDK.
  * Mounted at: /api/sdk/*
  */
 

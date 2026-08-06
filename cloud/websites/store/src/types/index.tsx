@@ -1,6 +1,6 @@
 // src/types/app.types.ts
 
-import { HardwareRequirement } from "@mentra/sdk";
+import { HardwareRequirement } from "@veiller/sdk";
 import { HardwareRequirementLevel, HardwareType } from "../types/enums";
 
 // Define App type enum

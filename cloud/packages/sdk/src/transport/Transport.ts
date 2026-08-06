@@ -1,9 +1,9 @@
 /**
  * Transport Interface
  *
- * Runtime-agnostic message transport contract for MentraSession.
+ * Runtime-agnostic message transport contract for VeillerSession.
  * On a cloud server, this is a WebSocket. On a phone, it's a native bridge.
- * In tests, it's a mock. MentraSession never imports WebSocket directly —
+ * In tests, it's a mock. VeillerSession never imports WebSocket directly —
  * it receives a Transport from the host environment.
  *
  * This interface has ZERO Node.js/Bun/server dependencies.
@@ -31,26 +31,26 @@ export type TransportState = (typeof TransportState)[keyof typeof TransportState
 // ─── Transport Interface ────────────────────────────────────────────────────
 
 /**
- * The Transport interface is the only bridge between MentraSession
+ * The Transport interface is the only bridge between VeillerSession
  * and the outside world. Everything else (managers, message dispatch,
  * subscription logic) is pure TypeScript that runs identically
  * regardless of which Transport implementation is in use.
  *
  * Implementations:
- * - `WebSocketTransport` — wraps `ws` for cloud/server apps (used by MentraApp)
- * - `NativeBridgeTransport` — wraps `globalThis.__mentraTransport` for local apps
+ * - `WebSocketTransport` — wraps `ws` for cloud/server apps (used by VeillerApp)
+ * - `NativeBridgeTransport` — wraps `globalThis.__veillerTransport` for local apps
  * - `MockTransport` — for unit tests
  *
  * @example
  * ```ts
- * // Cloud app — MentraApp creates this automatically
+ * // Cloud app — VeillerApp creates this automatically
  * const transport = new WebSocketTransport(wsUrl);
  *
  * // Local app — phone runtime provides this
- * const transport = new NativeBridgeTransport(globalThis.__mentraTransport);
+ * const transport = new NativeBridgeTransport(globalThis.__veillerTransport);
  *
- * // Either way, MentraSession works the same
- * const session = new MentraSession({ transport, ... });
+ * // Either way, VeillerSession works the same
+ * const session = new VeillerSession({ transport, ... });
  * ```
  */
 export interface Transport {

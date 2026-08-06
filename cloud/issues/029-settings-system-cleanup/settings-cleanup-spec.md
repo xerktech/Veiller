@@ -103,7 +103,7 @@ The entire `augmentosSettings` field and related methods are dead code:
 
 ```typescript
 // apps/Dashboard/src/index.ts:235-240
-const useMetric = session.settings.getMentraosSetting("metricSystemEnabled") // Get from session settings
+const useMetric = session.settings.getVeillerSetting("metricSystemEnabled") // Get from session settings
 logger.info(`[Dashboard] Metric system enabled: ${useMetric}`)
 // ^ Always logs 'false' regardless of user's actual setting
 ```
@@ -112,7 +112,7 @@ logger.info(`[Dashboard] Metric system enabled: ${useMetric}`)
 
 ```typescript
 // apps/Dashboard/src/index.ts:264-272
-session.settings.onMentraosSettingChange("metricSystemEnabled", (newValue, oldValue) => {
+session.settings.onVeillerSettingChange("metricSystemEnabled", (newValue, oldValue) => {
   logger.info(`AugmentOS metricSystemEnabled changed from ${oldValue} to ${newValue}`)
   // ^ This never fires because of key mismatch
 })

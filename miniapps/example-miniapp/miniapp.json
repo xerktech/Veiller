@@ -1,9 +1,9 @@
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.example",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.example",
   "version": "1.0.0",
-  "name": "Mentra Example",
-  "description": "Reference miniapp for the @mentra/miniapp SDK. Demonstrates transcription, text wall display, TTS, button events, and the full per-iface SDK Tester surface.",
+  "name": "Veiller Example",
+  "description": "Reference miniapp for the @veiller/miniapp SDK. Demonstrates transcription, text wall display, TTS, button events, and the full per-iface SDK Tester surface.",
   "icon": "icon.png",
   "type": "standard",
   "sdkVersion": "0.3.0",

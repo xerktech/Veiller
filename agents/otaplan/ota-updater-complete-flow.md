@@ -87,7 +87,7 @@ This document shows how all the pieces work together for the new OTA update syst
       "apkUrl": "https://...",
       "sha256": "..."
     },
-    "com.mentra.recovery": {
+    "com.veiller.recovery": {
       "versionCode": 2,
       "apkUrl": "https://...",
       "sha256": "..."

@@ -2,21 +2,21 @@
 import PackageDescription
 
 let package = Package(
-  name: "MentraBluetoothSDK",
+  name: "VeillerBluetoothSDK",
   platforms: [
     .iOS("15.1")
   ],
   products: [
     .library(
-      name: "MentraBluetoothSDK",
-      targets: ["MentraBluetoothSDK"]
+      name: "VeillerBluetoothSDK",
+      targets: ["VeillerBluetoothSDK"]
     )
   ],
   targets: [
     .target(
-      name: "MentraBluetoothSDK",
+      name: "VeillerBluetoothSDK",
       dependencies: [
-        "MentraBluetoothSDKCoreObjC"
+        "VeillerBluetoothSDKCoreObjC"
       ],
       path: "ios/Source",
       exclude: [
@@ -33,7 +33,7 @@ let package = Package(
       ]
     ),
     .target(
-      name: "MentraBluetoothSDKCoreObjC",
+      name: "VeillerBluetoothSDKCoreObjC",
       path: "ios/Packages/CoreObjC",
       exclude: [
         "CoreObjC.xcodeproj",

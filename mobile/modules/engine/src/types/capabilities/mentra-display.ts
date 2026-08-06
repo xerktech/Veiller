@@ -10,7 +10,7 @@ import type { Capabilities } from "../hardware";
 /**
  * Mentra Display capability profile
  */
-export const mentraDisplay: Capabilities = {
+export const veillerDisplay: Capabilities = {
   modelName: "Mentra Display",
 
   // Camera capabilities - Mentra Display does not have a camera

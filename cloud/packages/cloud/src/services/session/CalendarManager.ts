@@ -11,7 +11,7 @@
 
 import type { Logger } from "pino";
 
-import { StreamType, CloudToAppMessageType, type CalendarEvent, type DataStream } from "@mentra/sdk";
+import { StreamType, CloudToAppMessageType, type CalendarEvent, type DataStream } from "@veiller/sdk";
 
 import { MemoryOwnerStat } from "../metrics/memory-census";
 import { estimateStringBytes, sumEstimatedBytes } from "../metrics/memory-estimate";

@@ -1,6 +1,6 @@
-# MentraOS Maestro Tests
+# Veiller Maestro Tests
 
-This directory contains Maestro E2E tests for the MentraOS mobile app.
+This directory contains Maestro E2E tests for the Veiller mobile app.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This directory contains Maestro E2E tests for the MentraOS mobile app.
 curl -Ls "https://get.maestro.mobile.dev" | bash
 ```
 
-2. Ensure you have a device/emulator running with the MentraOS app installed
+2. Ensure you have a device/emulator running with the Veiller app installed
 
 ## Running Tests
 

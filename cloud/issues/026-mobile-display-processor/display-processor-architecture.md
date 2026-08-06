@@ -66,7 +66,7 @@ The Display Processor intercepts all display events in the React Native layer an
 
 ## Package Structure
 
-### @mentra/display-utils (Shared Package)
+### @veiller/display-utils (Shared Package)
 
 Location: `cloud/packages/display-utils/`
 
@@ -144,7 +144,7 @@ class DisplayProcessor {
 Hardware-specific configurations for different glasses.
 
 ```typescript
-// @mentra/display-utils/src/profiles/types.ts
+// @veiller/display-utils/src/profiles/types.ts
 
 interface DisplayProfile {
   id: string                    // e.g., "even-realities-g1"
@@ -370,7 +370,7 @@ case "version_info":
 {
   "compilerOptions": {
     "paths": {
-      "@mentra/display-utils": ["../cloud/packages/display-utils/src"]
+      "@veiller/display-utils": ["../cloud/packages/display-utils/src"]
     }
   }
 }
@@ -379,7 +379,7 @@ case "version_info":
 **mobile/babel.config.cts:**
 ```typescript
 alias: {
-  "@mentra/display-utils": "../cloud/packages/display-utils/src"
+  "@veiller/display-utils": "../cloud/packages/display-utils/src"
 }
 ```
 

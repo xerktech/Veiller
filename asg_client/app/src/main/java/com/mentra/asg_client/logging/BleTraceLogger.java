@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 public final class BleTraceLogger {
-    private static final String TAG = "MentraBleTrace";
+    private static final String TAG = "VeillerBleTrace";
     private static final int MAX_PAYLOAD_CHARS = 3000;
     private static final String SOURCE = "asg_client";
     private static final String K900_TYPE = "k900";

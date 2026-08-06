@@ -1,5 +1,5 @@
-import BluetoothSdk from "@mentra/bluetooth-sdk"
-import CrustModule from "@mentra/crust"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
+import CrustModule from "@veiller/crust"
 import {Linking, Platform} from "react-native"
 
 /**

@@ -18,7 +18,7 @@ Found during live debugging on 2025-12-10 ~21:30 UTC while investigating why cap
 | ------------------- | -------------------------------------------------------------------------------------------- |
 | 21:30:43.800        | Transcription working: "Has H." (FINAL)                                                      |
 | 21:30:45.762        | App WebSocket closed (code 1006)                                                             |
-| 21:30:45.763        | "App com.mentra.captions.beta unexpectedly disconnected (code: 1006), starting grace period" |
+| 21:30:45.763        | "App com.veiller.captions.beta unexpectedly disconnected (code: 1006), starting grace period" |
 | 21:30:46.179-46.797 | Multiple "Failed to send transcription data to App" warnings                                 |
 | 21:30:47.095        | App reconnected, API key validated                                                           |
 | 21:30:47.126        | **"App connected (not from startApp) - moved to runningApps"**                               |
@@ -44,9 +44,9 @@ The cloud logged the exact message received from the SDK:
 ```json
 {
   "type": "subscription_update",
-  "packageName": "com.mentra.captions.beta",
+  "packageName": "com.veiller.captions.beta",
   "subscriptions": [],
-  "sessionId": "isaiah@mentra.glass-com.mentra.captions.beta",
+  "sessionId": "isaiah@mentra.glass-com.veiller.captions.beta",
   "timestamp": "2025-12-10T21:30:47.162Z"
 }
 ```
@@ -57,7 +57,7 @@ The cloud logged the exact message received from the SDK:
 
 ```
 applyDelta called:
-  packageName: com.mentra.captions.beta
+  packageName: com.veiller.captions.beta
   oldCount: 1
   newCount: 0
   oldSubs: ["transcription:en-US"]

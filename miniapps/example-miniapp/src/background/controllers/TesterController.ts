@@ -1,4 +1,4 @@
-import type {MiniappSession} from "@mentra/miniapp/background"
+import type {MiniappSession} from "@veiller/miniapp/background"
 
 import type {Channels} from "../../shared/channels"
 
@@ -15,7 +15,7 @@ import type {Channels} from "../../shared/channels"
  *      UI sends `tester:stop` to release.
  *
  *   2. **Imperative testers** (Display / Led / Speaker / Phone fire /
- *      Storage gets). UI calls `await mentra.request("tester:invoke", ...)`
+ *      Storage gets). UI calls `await veiller.request("tester:invoke", ...)`
  *      and we dispatch to `session[iface][method](...args)` via the new
  *      `session.ui.handle` API. The return value flows back through the
  *      SDK's RPC reply; errors throw on the UI side automatically.

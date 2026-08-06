@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth, LoginUI } from '@mentra/shared';
+import { useAuth, LoginUI } from '@veiller/shared';
 import api from '../services/api.service';
 import { toast } from 'sonner';
 

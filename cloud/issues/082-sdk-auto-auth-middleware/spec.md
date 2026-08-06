@@ -43,9 +43,9 @@ const app = new MiniAppServer({
   port: 3000,
 });
 
-// Auth middleware is applied automatically. Just use getMentraAuth(c).
+// Auth middleware is applied automatically. Just use getVeillerAuth(c).
 app.get("/api/me", (c) => {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   return c.json({ userId: auth.userId });
 });
 ```
@@ -88,19 +88,19 @@ interface MiniAppServerConfig {
 
 It remains available for advanced use cases (applying auth to only specific routes, using custom options). But the docs teach the auto path. Most developers never need to call it.
 
-**4. `getMentraAuth(c)` works on any route without setup.**
+**4. `getVeillerAuth(c)` works on any route without setup.**
 
-Since the middleware is applied globally, `getMentraAuth(c)` returns the auth context on every route. If the user isn't authenticated, `auth.userId` is `null`. No middleware application needed per-route.
+Since the middleware is applied globally, `getVeillerAuth(c)` returns the auth context on every route. If the user isn't authenticated, `auth.userId` is `null`. No middleware application needed per-route.
 
 ### Backward Compatibility
 
 - Existing apps that pass `cookieSecret` continue to work. The value overrides `apiKey` for signing.
 - Existing apps that call `createAuthMiddleware` manually continue to work. The auto middleware and manual middleware coexist (the manual one just re-validates the same cookie).
-- Apps that don't use webviews are unaffected. The middleware runs but `getMentraAuth(c)` returns `{ userId: null }` when no token is present.
+- Apps that don't use webviews are unaffected. The middleware runs but `getVeillerAuth(c)` returns `{ userId: null }` when no token is present.
 
 ### What about apps that don't want auth on every route?
 
-The auto middleware doesn't block requests. It just reads the cookie/token if present and makes `getMentraAuth(c)` available. Unauthenticated requests still pass through. It's the route handler's job to check `auth.userId` and return 401 if needed.
+The auto middleware doesn't block requests. It just reads the cookie/token if present and makes `getVeillerAuth(c)` available. Unauthenticated requests still pass through. It's the route handler's job to check `auth.userId` and return 401 if needed.
 
 This is the same behavior as the current manual middleware — it doesn't reject requests, it just populates the auth context.
 
@@ -130,8 +130,8 @@ What's already true:
 - Auth middleware is applied globally to all routes (`"*"`)
 - `cookieSecret` is optional (line 93: `cookieSecret?: string`)
 - When not provided, it defaults to `apiKey` (line 189: `this.config.cookieSecret || this.config.apiKey`)
-- `getMentraAuth(c)` works on every route without any setup
-- `createMentraAuthRoutes` is also set up automatically (line 1031)
+- `getVeillerAuth(c)` works on every route without any setup
+- `createVeillerAuthRoutes` is also set up automatically (line 1031)
 
 This means developers can already do:
 
@@ -144,14 +144,14 @@ const app = new MiniAppServer({
 
 // Auth just works. No createAuthMiddleware call needed.
 app.get("/api/me", (c) => {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   return c.json({ userId: auth.userId });
 });
 ```
 
 ## What still needs to happen
 
-1. **Update the docs.** The webview-authentication.mdx page still shows the manual `createAuthMiddleware` pattern. It should show the simple path (just use `getMentraAuth(c)`, auth is already set up).
+1. **Update the docs.** The webview-authentication.mdx page still shows the manual `createAuthMiddleware` pattern. It should show the simple path (just use `getVeillerAuth(c)`, auth is already set up).
 2. **Add `@deprecated` JSDoc to `cookieSecret` in `MiniAppServerConfig`.** It works but is unnecessary since `apiKey` is used as the default.
 3. **Update the migration guide** to note that auth middleware is automatic.
 

@@ -1,4 +1,4 @@
-MentraOS local stream — Ubuntu setup
+Veiller local stream — Ubuntu setup
 ====================================
 
 Same Wi-Fi for glasses, phone, and this Ubuntu machine.
@@ -55,7 +55,7 @@ sudo ufw status
 5) Start the local MediaMTX server
 ----------------------------------
 
-From the MentraOS repo root:
+From the Veiller repo root:
 
 ./scripts/local-stream/start-local-stream.sh
 

@@ -13,7 +13,7 @@ import {
 } from "../../../modules/engine/src/services/asg/localNetworkTransport"
 import {
   emitLocalNetworkEvent,
-  mentraLocalNetworkMock as mockNativeModule,
+  veillerLocalNetworkMock as mockNativeModule,
 } from "../../test-utils/mockBluetoothSdk"
 
 describe("localNetworkTransport", () => {

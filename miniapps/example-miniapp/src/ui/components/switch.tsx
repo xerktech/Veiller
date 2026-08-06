@@ -16,7 +16,7 @@ function Switch({
         "peer inline-flex h-7 w-[46px] shrink-0 items-center rounded-full transition-all outline-none",
         // OFF state: gray track (matching mobile sidebar_border)
         "data-[state=unchecked]:bg-border",
-        // ON state: Mentra green (primary color from mobile)
+        // ON state: Veiller green (primary color from mobile)
         "data-[state=checked]:bg-[#00b869]",
         // Focus styles
         "focus-visible:ring-ring/50 focus-visible:ring-[3px]",

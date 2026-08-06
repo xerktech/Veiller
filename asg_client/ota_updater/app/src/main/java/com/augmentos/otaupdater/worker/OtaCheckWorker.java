@@ -1,4 +1,4 @@
-package com.mentra.otaupdater.worker;
+package com.veiller.otaupdater.worker;
 
 /**
  * Created by markiyurtdas on 21.05.2025.
@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.mentra.otaupdater.helper.Constants;
-import com.mentra.otaupdater.helper.OtaHelper;
+import com.veiller.otaupdater.helper.Constants;
+import com.veiller.otaupdater.helper.OtaHelper;
 
 public class OtaCheckWorker extends Worker {
         private static final String TAG = OtaCheckWorker.TAG;

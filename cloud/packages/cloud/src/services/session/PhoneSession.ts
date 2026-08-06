@@ -1,7 +1,7 @@
 /**
  * @fileoverview PhoneSession — synthetic session for the `__phone__` subscriber.
  *
- * The phone (MentraOS mobile app) subscribes to cloud streams (transcription,
+ * The phone (Veiller mobile app) subscribes to cloud streams (transcription,
  * translation) on behalf of local miniapps. From the cloud's perspective this
  * is "just another subscriber" that sits alongside real AppSessions in the
  * subscription delivery path.
@@ -12,7 +12,7 @@
  */
 
 import { Logger } from "pino";
-import { ExtendedStreamType, StreamType } from "@mentra/sdk";
+import { ExtendedStreamType, StreamType } from "@veiller/sdk";
 
 import { AppConnectionState, LocationRate } from "./AppSession";
 import { AppLikeSession } from "./AppLikeSession";

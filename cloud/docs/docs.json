@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "MentraOS Cloud",
+  "name": "Veiller Cloud",
   "colors": {
     "primary": "#0EA5E9",
     "light": "#38BDF8",
@@ -136,7 +136,7 @@
         },
         {
           "anchor": "SDK Package",
-          "href": "https://www.npmjs.com/package/@mentraos/sdk",
+          "href": "https://www.npmjs.com/package/@veiller/sdk",
           "icon": "npm"
         }
       ]

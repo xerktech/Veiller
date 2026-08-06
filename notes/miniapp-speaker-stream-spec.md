@@ -1,7 +1,7 @@
 # `speaker.createStream()` — live PCM output
 
 Implementation and release contract for cross-platform live speaker audio in
-the Mentra Miniapp SDK.
+the Veiller Miniapp SDK.
 
 ## Contract
 
@@ -59,7 +59,7 @@ stops or disconnects.
 ## Compatibility
 
 Miniapps that require live PCM must declare `minHostVersion: "2.13.0"` or
-newer. Earlier Mentra App builds do not implement the four native stream
+newer. Earlier Veiller App builds do not implement the four native stream
 requests. Speaker-capable hardware should also be a required hardware
 capability when live output is core functionality.
 
@@ -70,7 +70,7 @@ capability when live output is core functionality.
 - Runtime tests cover native adapter routing, stop-for-app cleanup, and active
   playback accounting.
 - Android compiles through `./scripts/check-android-compile.sh bluetooth-sdk`.
-- iOS compiles the Mentra Bluetooth SDK in an Xcode simulator build.
+- iOS compiles the Veiller Bluetooth SDK in an Xcode simulator build.
 
 ## Hardware acceptance before release
 
@@ -85,9 +85,9 @@ capability when live output is core functionality.
    confirm playback resumes or fails clearly so the producer can reopen.
 6. Start `speak()` / `play()` during a live stream and exercise both values of
    `stopOtherAudio`.
-7. Stop the miniapp and kill/relaunch the Mentra App; confirm no zombie native
+7. Stop the miniapp and kill/relaunch the Veiller App; confirm no zombie native
    player remains.
-8. Run the Mentra Call Recall mixed-audio loop on Meet, Teams, and Zoom and
+8. Run the Veiller Call Recall mixed-audio loop on Meet, Teams, and Zoom and
    check end-to-end latency, echo, mute, and Wi-Fi recovery.
 
 Native simulator/compile checks prove API shape and lifecycle safety, but the

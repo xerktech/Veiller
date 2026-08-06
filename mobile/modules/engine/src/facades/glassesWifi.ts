@@ -2,7 +2,7 @@
  * glasses.wifi facade — the first typed engine facade over the bluetooth-sdk
  * passthrough, and the reference pattern the rest of the (A) host API copies.
  *
- * A facade wraps the raw `@mentra/bluetooth-sdk` surface into a small, typed,
+ * A facade wraps the raw `@veiller/bluetooth-sdk` surface into a small, typed,
  * device-agnostic API (the `doX()` action shape here; `getX()`/`onX()` read-models
  * come with domains that own their state). The host UI calls `engine.glasses.wifi.*`
  * instead of importing bluetooth-sdk directly — that's the native-import boundary
@@ -13,8 +13,8 @@
  * glasses-state store engine now owns (wifi status is derived there from the
  * device's connection info).
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk"
-import type {WifiSearchResult, WifiStatus} from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
+import type {WifiSearchResult, WifiStatus} from "@veiller/bluetooth-sdk"
 import {useGlassesStore} from "../stores/glasses"
 
 export type {WifiSearchResult, WifiStatus}

@@ -544,7 +544,7 @@ export class EventManager {
    * @param action - The action identifier to filter by
    * @param handler - Function to handle the message
    * @returns Cleanup function to remove the handler
-   * @deprecated Use settings.onMentraosChange() instead for system settings.
+   * @deprecated Use settings.onVeillerChange() instead for system settings.
    * This method was used for datetime updates but is no longer needed.
    * Will be removed in a future version.
    */

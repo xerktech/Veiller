@@ -2,9 +2,9 @@ import { spawnSync } from "node:child_process";
 
 const environments = ["dev", "staging", "prod"] as const;
 const sites = {
-  console: "mentra-console2",
-  admin: "mentra-admin",
-  portal: "mentra-enterprise-portal",
+  console: "veiller-console2",
+  admin: "veiller-admin",
+  portal: "veiller-enterprise-portal",
 } as const;
 
 type Environment = typeof environments[number];

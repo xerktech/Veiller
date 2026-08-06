@@ -1,6 +1,6 @@
 // LandingPage.tsx
 import React from 'react';
-import { Button, IMAGES } from '@mentra/shared';
+import { Button, IMAGES } from '@veiller/shared';
 import { Link, useNavigate } from 'react-router-dom';
 
 const LandingPage: React.FC = () => {
@@ -12,7 +12,7 @@ const LandingPage: React.FC = () => {
         <div className=" mx-auto px-5 py-4 flex items-center justify-between">
           <div className='select-none'>
             <div className="flex items-end gap-0">
-              <img src={IMAGES.logoLight} alt="Mentra Logo" className="h-6" />
+              <img src={IMAGES.logoLight} alt="Veiller Logo" className="h-6" />
             </div>
             <h2 className="text-sm text-muted-foreground pb-1 ">Developer Portal</h2>
           </div>
@@ -30,7 +30,7 @@ const LandingPage: React.FC = () => {
             <img src="/g1.webp" alt="Hero" className="w-96" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            MentraOS is the best way to build MiniApps for smart glasses.
+            Veiller is the best way to build MiniApps for smart glasses.
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto">
             Build and deploy your own MiniApps for smart glasses in minutes, not months.
@@ -57,7 +57,7 @@ const LandingPage: React.FC = () => {
           <div className="mt-4 flex items-center justify-center">
             <Link to="https://github.com/Mentra-Community/MentraOS" className='flex items-center gap-2 mb-2 px-6 py-3 rounded-md border border-border font-medium hover:bg-secondary'>
               <img src="/github/github-mark.svg" alt="GitHub Logo" className="h-6 w-6" />
-              <span className="text-foreground text-lg font-bold">MentraOS GitHub</span>
+              <span className="text-foreground text-lg font-bold">Veiller GitHub</span>
             </Link>
           </div>
         </div>
@@ -155,7 +155,7 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between">
             <div className="mb-6 md:mb-0">
               <div className="flex items-center gap-2">
-                <span className="font-bold">MentraOS</span>
+                <span className="font-bold">Veiller</span>
               </div>
               <p className="mt-2 text-sm text-muted-foreground max-w-xs">
                 The open source operating system for smart glasses.
@@ -174,7 +174,7 @@ const LandingPage: React.FC = () => {
                 <ul className="space-y-2 text-sm">
                   <li><a href="https://docs.mentra.glass" className="text-muted-foreground hover:text-foreground">Documentation</a></li>
                   <li><a href="https://github.com/Mentra-Community/MentraOS-Cloud-Example-App" className="text-muted-foreground hover:text-foreground">Example App</a></li>
-                  <li><a href="https://github.com/Mentra-Community/MentraOS" className="text-muted-foreground hover:text-foreground">MentraOS Repo</a></li>
+                  <li><a href="https://github.com/Mentra-Community/MentraOS" className="text-muted-foreground hover:text-foreground">Veiller Repo</a></li>
                 </ul>
               </div>
               {/* <div>
@@ -187,7 +187,7 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} MentraOS. All rights reserved.
+            &copy; {new Date().getFullYear()} Veiller. All rights reserved.
           </div>
         </div>
       </footer >

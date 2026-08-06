@@ -3,7 +3,7 @@ import type { ToolCall } from "./types";
 import type { AuthVariables, SessionWebhookRequest, StopWebhookRequest, WebhookResponse } from "./types";
 import { AppServer, type AppServerConfig } from "./app/server";
 import { AppSession } from "./app/session";
-import { MentraSession } from "./session";
+import { VeillerSession } from "./session";
 import { _SessionManager, type _ToolCallHandler } from "./internal/_SessionManager";
 
 /**
@@ -15,24 +15,24 @@ class V2BridgeSession extends AppSession {}
 
 export type MiniAppServerConfig = AppServerConfig;
 
-export type SessionHandler = (session: MentraSession) => void | Promise<void>;
-export type StopHandler = (session: MentraSession | null, reason: string) => void | Promise<void>;
+export type SessionHandler = (session: VeillerSession) => void | Promise<void>;
+export type StopHandler = (session: VeillerSession | null, reason: string) => void | Promise<void>;
 export type ToolCallHandler = _ToolCallHandler;
 
 /**
- * v3 cloud/server host for Mentra mini apps.
+ * v3 cloud/server host for Veiller mini apps.
  *
  * `MiniAppServer` is the cloud-only entry point. It handles HTTP endpoints
- * (webhooks, tools, settings, health, photo-upload) and creates MentraSession
+ * (webhooks, tools, settings, health, photo-upload) and creates VeillerSession
  * instances for each connected user.
  *
  * Naming:
  * - `MiniAppServer` is cloud/server-specific (not needed for local apps).
- * - `MentraSession` is the per-user session abstraction (same everywhere).
+ * - `VeillerSession` is the per-user session abstraction (same everywhere).
  *
  * This class extends the v2 `AppServer` during the transition period.
  * When a v3-style callback is registered via `app.onSession((session) => {...})`,
- * webhook lifecycle flows through `_SessionManager` → `MentraSession` → v3 runtime.
+ * webhook lifecycle flows through `_SessionManager` → `VeillerSession` → v3 runtime.
  * When a v2-style subclass overrides `onSession(session, sessionId, userId)`,
  * it goes through the old `AppServer` path entirely.
  *
@@ -82,8 +82,8 @@ export class MiniAppServer extends AppServer {
     }
 
     // v2 path: developer subclassed and overrode onSession(session, sessionId, userId)
-    const mentraSession = arg1 as V2BridgeSession;
-    return super.onSession(mentraSession, sessionId!, userId!);
+    const veillerSession = arg1 as V2BridgeSession;
+    return super.onSession(veillerSession, sessionId!, userId!);
   }
 
   public onStop(handler: StopHandler): this;

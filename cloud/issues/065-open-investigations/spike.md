@@ -168,7 +168,7 @@ The mobile app uses `api.mentra.glass` which has a different Cloudflare LB confi
 All manual Porter env vars deleted from France (4696) and East Asia (4754). They now use Doppler exclusively. BUT they need a redeploy to pick up the new Doppler values including the new BetterStack source token.
 
 - [ ] Redeploy France and East Asia
-- [ ] Verify logs flow to MentraCloud-Prod source (ID 2324289)
+- [ ] Verify logs flow to VeillerCloud-Prod source (ID 2324289)
 
 ### 5. Our Forced GC Is Making Crashes Worse
 
@@ -234,7 +234,7 @@ Set `MEMORY_TELEMETRY_ENABLED=true` in Doppler prod base. Shows per-session memo
 
 ### 14. BetterStack Log Source Split Incomplete
 
-US Central, US West, US East → new MentraCloud-Prod source (working).
+US Central, US West, US East → new VeillerCloud-Prod source (working).
 France, East Asia → still on old AugmentOS source (need redeploy).
 Debug, dev, local → old AugmentOS source (correct).
 
@@ -251,24 +251,24 @@ Available for the next session:
 | BetterStack Management API | `BETTERSTACK_API_TOKEN` in `.env`                                           | Uptime monitors, sources, dashboards                                                                                                                                                 |
 | MongoDB Atlas API          | `MONGODB_ATLAS_PUBLIC_KEY` / `MONGODB_ATLAS_PRIVATE_KEY` in `.env`          | Cluster health, connection pools, slow query logs, Performance Advisor. Use digest auth. Project ID: `67aeb2349c20fd24351c5392`. Cluster: `AugmentOS` (Azure US North Central, M10). |
 | Cloudflare API             | `CLOUDFLARE_LB_API_TOKEN` in `.env`                                         | Load balancer config, pool health, DNS. Account: `3c764e987404b8a1199ce5fdc3544a94`.                                                                                                 |
-| Doppler CLI                | Authenticated                                                               | Env var management. Project: `mentraos-cloud`.                                                                                                                                       |
+| Doppler CLI                | Authenticated                                                               | Env var management. Project: `veiller-cloud`.                                                                                                                                       |
 | Porter CLI                 | Authenticated, cluster configs in 058 CONTEXT.md                            | Cluster/pod management.                                                                                                                                                              |
 | GitHub CLI                 | Authenticated                                                               | PRs, issues, deployments.                                                                                                                                                            |
 | `mongosh`                  | Installed, connection string in Doppler `MONGO_URL`                         | Direct MongoDB queries.                                                                                                                                                              |
-| `analyze-heap.ts`          | `cloud/packages/cloud/src/scripts/analyze-heap.ts`                          | Live memory tracking, needs `MENTRA_ADMIN_JWT` env var.                                                                                                                              |
-| Incident logs              | `scripts/fetch-incident-logs.sh`                                            | Fetch mobile client logs for bug reports. Needs `MENTRA_AGENT_API_KEY`.                                                                                                              |
+| `analyze-heap.ts`          | `cloud/packages/cloud/src/scripts/analyze-heap.ts`                          | Live memory tracking, needs `VEILLER_ADMIN_JWT` env var.                                                                                                                              |
+| Incident logs              | `scripts/fetch-incident-logs.sh`                                            | Fetch mobile client logs for bug reports. Needs `VEILLER_AGENT_API_KEY`.                                                                                                              |
 
 ### Key BetterStack Sources
 
 | Source               | ID      | Table (recent)                              | What's in it                                |
 | -------------------- | ------- | ------------------------------------------- | ------------------------------------------- |
-| MentraCloud-Prod     | 2324289 | `remote(t373499_mentracloud_prod_logs)`     | US Central, US West, US East prod + staging |
+| VeillerCloud-Prod     | 2324289 | `remote(t373499_mentracloud_prod_logs)`     | US Central, US West, US East prod + staging |
 | AugmentOS (legacy)   | 1311181 | `remote(t373499_augmentos_logs)`            | France, East Asia prod + dev/local/debug    |
-| US Central collector | 2321796 | `remote(t373499_mentra_us_central_metrics)` | Container CPU, memory, restarts             |
-| France collector     | 2326580 | `remote(t373499_mentra_france_metrics)`     | Container metrics                           |
-| East Asia collector  | 2326583 | `remote(t373499_mentra_east_asia_metrics)`  | Container metrics                           |
-| US West collector    | 2326586 | `remote(t373499_mentra_us_west_metrics)`    | Container metrics                           |
-| US East collector    | 2326589 | `remote(t373499_mentra_us_east_metrics)`    | Container metrics                           |
+| US Central collector | 2321796 | `remote(t373499_veiller_us_central_metrics)` | Container CPU, memory, restarts             |
+| France collector     | 2326580 | `remote(t373499_veiller_france_metrics)`     | Container metrics                           |
+| East Asia collector  | 2326583 | `remote(t373499_veiller_east_asia_metrics)`  | Container metrics                           |
+| US West collector    | 2326586 | `remote(t373499_veiller_us_west_metrics)`    | Container metrics                           |
+| US East collector    | 2326589 | `remote(t373499_veiller_us_east_metrics)`    | Container metrics                           |
 
 For historical logs, use `s3Cluster(primary, t373499_mentracloud_prod_s3) WHERE _row_type = 1`.
 

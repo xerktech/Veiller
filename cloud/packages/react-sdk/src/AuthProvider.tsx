@@ -2,16 +2,16 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { initializeAuth, clearStoredAuth, AuthState } from './lib/authCore';
 
-export interface MentraAuthContextType extends AuthState {
+export interface VeillerAuthContextType extends AuthState {
   isLoading: boolean;
   error: string | null;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
-export const MentraAuthContext = createContext<MentraAuthContextType | undefined>(undefined);
+export const VeillerAuthContext = createContext<VeillerAuthContextType | undefined>(undefined);
 
-export const MentraAuthProvider = ({ children }: { children: ReactNode }) => {
+export const VeillerAuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [frontendToken, setFrontendToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +25,7 @@ export const MentraAuthProvider = ({ children }: { children: ReactNode }) => {
       setUserId(auth.userId);
       setFrontendToken(auth.frontendToken);
     } catch (e) {
-      console.error("MentraOS Auth Initialization Error:", e);
+      console.error("Veiller Auth Initialization Error:", e);
       setError((e as Error).message || 'Unknown authentication error');
       clearStoredAuth(); // Clear any potentially bad stored state
       setUserId(null);
@@ -48,8 +48,8 @@ export const MentraAuthProvider = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = !!userId && !!frontendToken;
 
   return (
-    <MentraAuthContext.Provider value={{ userId, frontendToken, isLoading, error, logout, isAuthenticated }}>
+    <VeillerAuthContext.Provider value={{ userId, frontendToken, isLoading, error, logout, isAuthenticated }}>
       {children}
-    </MentraAuthContext.Provider>
+    </VeillerAuthContext.Provider>
   );
 };

@@ -30,7 +30,7 @@ The current health monitor service for WebSocket connections has several limitat
 
 1. **Manager Style Pattern**:
    - Each user session should have its own health monitor instance
-   - Follows the standard MentraOS Mobile App pattern
+   - Follows the standard Veiller Mobile App pattern
    - Consistent with other session-scoped services
 
 2. **Enhanced Connection Identity**:
@@ -222,4 +222,4 @@ The new design enables much richer diagnostics:
 
 ## Conclusion
 
-This redesign of the health monitor service will significantly improve the reliability and observability of WebSocket connections in MentraOS. By moving to a session-scoped model with proper connection identification and coordinated state management, we'll address the core issues seen in the current system.
+This redesign of the health monitor service will significantly improve the reliability and observability of WebSocket connections in Veiller. By moving to a session-scoped model with proper connection identification and coordinated state management, we'll address the core issues seen in the current system.

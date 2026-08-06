@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { useMentraAuth, isInMentraOS, getMentraOSPlatform } from "@mentra/react";
+import { useVeillerAuth, isInVeiller, getVeillerPlatform } from "@veiller/react";
 
 import type { AppState } from "../shared/state";
 import {
-  useMentraActions,
-  useMentraConnection,
-  useMentraRuntime,
-  useMentraState,
-  useMentraStateError,
-} from "./mentra-state";
+  useVeillerActions,
+  useVeillerConnection,
+  useVeillerRuntime,
+  useVeillerState,
+  useVeillerStateError,
+} from "./veiller-state";
 
 interface ProbeResult {
   userId: string | null;
@@ -32,16 +32,16 @@ async function fetchProbe(path: string, frontendToken?: string | null): Promise<
 }
 
 export default function App() {
-  const { userId, frontendToken, isLoading, error, isAuthenticated } = useMentraAuth();
-  const { setMentraState } = useMentraActions();
-  const connection = useMentraConnection();
-  const runtime = useMentraRuntime();
-  const stateError = useMentraStateError();
-  const lastTranscript = useMentraState("lastTranscript");
-  const transcriptCount = useMentraState("transcriptCount");
-  const transcriptMode = useMentraState("transcriptMode");
-  const webviewNote = useMentraState("webviewNote");
-  const lastUpdatedAt = useMentraState("lastUpdatedAt");
+  const { userId, frontendToken, isLoading, error, isAuthenticated } = useVeillerAuth();
+  const { setVeillerState } = useVeillerActions();
+  const connection = useVeillerConnection();
+  const runtime = useVeillerRuntime();
+  const stateError = useVeillerStateError();
+  const lastTranscript = useVeillerState("lastTranscript");
+  const transcriptCount = useVeillerState("transcriptCount");
+  const transcriptMode = useVeillerState("transcriptMode");
+  const webviewNote = useVeillerState("webviewNote");
+  const lastUpdatedAt = useVeillerState("lastUpdatedAt");
   const [cookieProbe, setCookieProbe] = useState<ProbeResult | null>(null);
   const [tokenProbe, setTokenProbe] = useState<ProbeResult | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
@@ -91,7 +91,7 @@ export default function App() {
         <section className="panel hero">
           <p className="eyebrow">SDK v3 Webview</p>
           <h1>Initializing webview auth</h1>
-          <p className="muted">Waiting for the React SDK to resolve the Mentra session.</p>
+          <p className="muted">Waiting for the React SDK to resolve the Veiller session.</p>
         </section>
       </main>
     );
@@ -104,7 +104,7 @@ export default function App() {
           <p className="eyebrow">SDK v3 Webview</p>
           <h1>Authentication failed</h1>
           <p className="error">{error}</p>
-          <p className="muted">Open this page from Mentra so the signed user token or temp token is present.</p>
+          <p className="muted">Open this page from Veiller so the signed user token or temp token is present.</p>
         </section>
       </main>
     );
@@ -123,7 +123,7 @@ export default function App() {
           </button>
         </div>
         <p className="muted">
-          This page validates the `@mentra/react` auth bootstrap, cookie-backed backend auth, frontend-token auth,
+          This page validates the `@veiller/react` auth bootstrap, cookie-backed backend auth, frontend-token auth,
           authenticated shared state streaming, and Bun HMR under the same v3 mini app.
         </p>
       </section>
@@ -186,7 +186,7 @@ export default function App() {
           <button
             className="refresh"
             onClick={async () => {
-              await setMentraState("webviewNote", noteDraft as AppState["webviewNote"]);
+              await setVeillerState("webviewNote", noteDraft as AppState["webviewNote"]);
             }}
             type="button">
             Save note to shared state
@@ -221,11 +221,11 @@ export default function App() {
           <dl className="facts">
             <div>
               <dt>Platform</dt>
-              <dd>{getMentraOSPlatform() ?? "browser"}</dd>
+              <dd>{getVeillerPlatform() ?? "browser"}</dd>
             </div>
             <div>
-              <dt>In Mentra webview</dt>
-              <dd>{isInMentraOS() ? "yes" : "no"}</dd>
+              <dt>In Veiller webview</dt>
+              <dd>{isInVeiller() ? "yes" : "no"}</dd>
             </div>
             <div>
               <dt>Cookie probe</dt>

@@ -70,10 +70,10 @@ writeManifest(path: string, manifest: Manifest): Result<void, ManifestWriteError
 ## `permission.ts` — object-verb subcommand
 
 ```bash
-mentra-miniapp permission list
-mentra-miniapp permission add               # interactive: prompt for type
-mentra-miniapp permission add MICROPHONE    # non-interactive
-mentra-miniapp permission remove MICROPHONE
+veiller-miniapp permission list
+veiller-miniapp permission add               # interactive: prompt for type
+veiller-miniapp permission add MICROPHONE    # non-interactive
+veiller-miniapp permission remove MICROPHONE
 ```
 
 Each entry function:
@@ -99,10 +99,10 @@ Flow for `listPermissionsCmd`: load, print as table.
 
 Hardware module mirrors the structure (`hardware.ts`):
 ```bash
-mentra-miniapp hardware list
-mentra-miniapp hardware add               # interactive: type then level
-mentra-miniapp hardware add CAMERA REQUIRED
-mentra-miniapp hardware remove CAMERA
+veiller-miniapp hardware list
+veiller-miniapp hardware add               # interactive: type then level
+veiller-miniapp hardware add CAMERA REQUIRED
+veiller-miniapp hardware remove CAMERA
 ```
 
 ---
@@ -110,7 +110,7 @@ mentra-miniapp hardware remove CAMERA
 ## `manifest-wizard.ts` — interactive top-level
 
 ```bash
-mentra-miniapp manifest
+veiller-miniapp manifest
 ```
 
 Single entry: `runManifestWizard()`. Built on `@clack/prompts`.
@@ -118,7 +118,7 @@ Single entry: `runManifestWizard()`. Built on `@clack/prompts`.
 Prompt sequence (intro, then a top-level loop):
 
 ```
-intro: "Mentra miniapp manifest editor"
+intro: "Veiller miniapp manifest editor"
 
 [load manifest, error out cleanly if invalid]
 
@@ -250,8 +250,8 @@ Estimated 2-3 days. Steps 1-2 land first as a separate small commit; remainder a
 
 ## Open during implementation
 
-- Whether `mentra-miniapp manifest` should also offer to edit `name` / `description` / `version` (the non-array manifest fields). V1: no — keep wizard scoped to permissions and hardware, which is where the friction is. Editing name/version is fine to do in an editor.
-- Whether to add a `mentra-miniapp permission required MICROPHONE` flag toggle for the rare case of changing the `required` boolean without removing-and-re-adding. V1: skip — re-add is fine.
+- Whether `veiller-miniapp manifest` should also offer to edit `name` / `description` / `version` (the non-array manifest fields). V1: no — keep wizard scoped to permissions and hardware, which is where the friction is. Editing name/version is fine to do in an editor.
+- Whether to add a `veiller-miniapp permission required MICROPHONE` flag toggle for the rare case of changing the `required` boolean without removing-and-re-adding. V1: skip — re-add is fine.
 - Whether the wizard's "Show current manifest" should pretty-print with colors. V1: plain JSON; clack doesn't natively color it.
 
 Defer all three; resolve during work.

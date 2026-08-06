@@ -1,4 +1,4 @@
-# RTMP Relay for MentraOS
+# RTMP Relay for Veiller
 
 This relay accepts RTMP streams from Android smart glasses and cleans them before forwarding to Cloudflare Live.
 
@@ -12,7 +12,7 @@ This relay accepts RTMP streams from Android smart glasses and cleans them befor
 
 - **MediaMTX**: Lightweight RTMP server that accepts incoming streams
 - **FFmpeg**: Transcodes streams to ensure Cloudflare compatibility
-- **API Integration**: Queries MentraOS Cloud API for Cloudflare URLs
+- **API Integration**: Queries Veiller Cloud API for Cloudflare URLs
 
 ## Configuration
 
@@ -72,7 +72,7 @@ This ensures Cloudflare always receives a consistent 30fps stream regardless of 
 
 ## Environment Variables
 
-- `CLOUD_API_URL`: URL of MentraOS Cloud API (default: https://api.mentra.glass)
+- `CLOUD_API_URL`: URL of Veiller Cloud API (default: https://api.mentra.glass)
 
 ## Troubleshooting
 

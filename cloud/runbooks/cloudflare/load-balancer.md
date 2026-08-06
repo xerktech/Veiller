@@ -192,7 +192,7 @@ It bites in two cases:
 
 If WebSockets disconnect clustered exactly at 100 seconds,
 application-level pings are misconfigured. Look at
-`@mentra/sdk` and the cloud heartbeat logic.
+`@veiller/sdk` and the cloud heartbeat logic.
 
 ## Porter clusters not in any LB
 
@@ -228,7 +228,7 @@ removed from the legacy LB after the cutover.
 The Porter CLI does not create clusters. Use the dashboard:
 
 1. Open https://dashboard.porter.run/
-2. Project: `mentra` -> Add Cluster.
+2. Project: `veiller` -> Add Cluster.
 3. Pick Azure -> AKS -> the Azure region you want
    (e.g. South-East Asia, Brazil South, etc.).
 4. Use the standard node SKU and node count we use elsewhere
@@ -328,7 +328,7 @@ curl -I https://<region>api.mentraglass.com/health
 
 ```bash
 CF_TOKEN=$(doppler secrets get CLOUDFLARE_LB_API_TOKEN \
-  --project mentra-sre --config dev --plain)
+  --project veiller-sre --config dev --plain)
 ACCOUNT_ID=3c764e987404b8a1199ce5fdc3544a94
 
 # Create the monitor first (the pool references it)
@@ -514,7 +514,7 @@ unlocks the proximity steering benefit for real users.
      tgt=$(echo "$tuple" | awk '{print $2}')
      echo "--- cluster $cid ---"
      porter app yaml cloud-prod --cluster $cid --target $tgt 2>/dev/null \
-       | grep -E "name: api\\.mentra\\.glass|name: api\\.mentraglass\\.com" || \
+       | grep -E "name: api\\.veiller\\.glass|name: api\\.mentraglass\\.com" || \
        echo "  MISSING ONE OR BOTH LB HOSTNAMES"
    done
    ```

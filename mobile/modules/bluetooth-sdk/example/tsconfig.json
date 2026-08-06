@@ -3,8 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@mentra/bluetooth-sdk": ["../src/index"],
-      "@mentra/bluetooth-sdk/*": ["../src/*"]
+      "@veiller/bluetooth-sdk": ["../src/index"],
+      "@veiller/bluetooth-sdk/*": ["../src/*"]
     }
   }
 }

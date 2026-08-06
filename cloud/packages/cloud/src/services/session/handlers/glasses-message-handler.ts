@@ -34,7 +34,7 @@ import {
   StreamStopRequest,
   ManagedStreamRequest,
   ManagedStreamStopRequest,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { PosthogService } from "../../logging/posthog.service";
 import { WebSocketReadyState } from "../../websocket/types";
@@ -98,7 +98,7 @@ export async function handleGlassesMessage(userSession: UserSession, message: Gl
       // NOTE: The following message types were removed in 009-005 (dead code cleanup)
       // because mobile no longer sends them after core→mantle migration:
       // - REQUEST_SETTINGS (mobile uses REST /api/client/user/settings now)
-      // - MENTRAOS_SETTINGS_UPDATE_REQUEST (mobile uses REST now)
+      // - VEILLER_SETTINGS_UPDATE_REQUEST (mobile uses REST now)
       // - CORE_STATUS_UPDATE (mobile uses REST for settings, device state via GLASSES_CONNECTION_STATE)
 
       // Streaming

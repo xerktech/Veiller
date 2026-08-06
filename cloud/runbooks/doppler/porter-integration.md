@@ -44,7 +44,7 @@ This means:
 ## Per-app config mapping
 
 Naming convention: each `cloud-prod` regional app pulls from
-`mentraos-cloud:prod_<region>` (e.g. central US pulls from
+`veiller-cloud:prod_<region>` (e.g. central US pulls from
 `prod_central-us`, France from `prod_france`). `cloud-staging`
 and `cloud-dev` pull from the matching `staging` and `dev`
 configs in the same project.
@@ -58,7 +58,7 @@ If you need to know what a specific app is wired to, look there.
 1. In Porter, open the app -> Environment.
 2. Click "Sync environment group" and pick the Doppler-managed
    group whose name matches the project + config you want
-   (e.g. `mentraos-cloud` / `prod_brazil-south` for a new
+   (e.g. `veiller-cloud` / `prod_brazil-south` for a new
    region; the env group is created automatically by the
    integration once that Doppler config exists).
 3. Save. Porter writes the group's secrets into the next deploy.
@@ -102,7 +102,7 @@ For local dev that needs the same secrets prod has, use the
 local-dev pattern with the Doppler CLI directly:
 
 ```bash
-doppler run --project mentraos-cloud --config prod_central-us -- \
+doppler run --project veiller-cloud --config prod_central-us -- \
   bun src/index.ts
 ```
 
@@ -113,7 +113,7 @@ resources (DB, third-party APIs).
 For dev-config local runs:
 
 ```bash
-doppler run --project mentraos-cloud --config dev -- \
+doppler run --project veiller-cloud --config dev -- \
   bun src/index.ts
 ```
 

@@ -64,7 +64,7 @@ Button Press Event:
 
 Settings:
 - default_button_action_enabled: boolean (default: true)
-- default_button_action_app: string (default: "com.mentra.camera")
+- default_button_action_app: string (default: "com.veiller.camera")
 
 Glasses Capabilities:
 - has_button: boolean (from glasses model config)
@@ -92,11 +92,11 @@ Current behavior:
 ```typescript
 // Auto-start camera app when glasses with camera capability connect
 if (hasCamera(glassesModelName)) {
-  const cameraApp = appStatus.find(app => app.packageName === "com.mentra.camera")
+  const cameraApp = appStatus.find(app => app.packageName === "com.veiller.camera")
 
   if (cameraApp && !cameraApp.is_running) {
     console.log(`📸 Glasses with camera connected - auto-starting camera app`)
-    optimisticallyStartApp("com.mentra.camera", "standard")
+    optimisticallyStartApp("com.veiller.camera", "standard")
   }
 }
 ```
@@ -106,12 +106,12 @@ New behavior:
 ```typescript
 // Only auto-start camera if NO foreground app is running
 if (hasCamera(glassesModelName)) {
-  const cameraApp = appStatus.find(app => app.packageName === "com.mentra.camera")
+  const cameraApp = appStatus.find(app => app.packageName === "com.veiller.camera")
   const activeForegroundApp = appStatus.find(app => app.type === "standard" && app.is_running)
 
   if (cameraApp && !cameraApp.is_running && !activeForegroundApp) {
     console.log(`📸 No foreground app running - auto-starting camera app`)
-    optimisticallyStartApp("com.mentra.camera", "standard")
+    optimisticallyStartApp("com.veiller.camera", "standard")
   } else if (activeForegroundApp) {
     console.log(`📸 Foreground app already running (${activeForegroundApp.name}) - not auto-starting camera`)
   }
@@ -125,11 +125,11 @@ Current behavior:
 ```typescript
 } else {
   // Glasses disconnected - auto-close camera app
-  const cameraApp = appStatus.find(app => app.packageName === "com.mentra.camera")
+  const cameraApp = appStatus.find(app => app.packageName === "com.veiller.camera")
 
   if (cameraApp && cameraApp.is_running) {
     console.log("📸 Glasses disconnected - auto-stopping camera app")
-    optimisticallyStopApp("com.mentra.camera")
+    optimisticallyStopApp("com.veiller.camera")
   }
 }
 ```
@@ -184,7 +184,7 @@ const DEFAULT_SETTINGS = {
 
   // Button action defaults
   default_button_action_enabled: true,
-  default_button_action_app: "com.mentra.camera",
+  default_button_action_app: "com.veiller.camera",
 }
 ```
 

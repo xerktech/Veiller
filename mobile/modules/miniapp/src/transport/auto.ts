@@ -24,12 +24,12 @@ export interface CreateTransportOptions {
  *
  * 1. **DispatchTransport** — when running in a per-miniapp JSContext
  *    (no DOM, but `__dispatch` is installed on `globalThis` by the
- *    MentraJS runtime). This is the production path.
- * 2. **PostMessageTransport** — inside a MentraOS WebView
+ *    VeillerJS runtime). This is the production path.
+ * 2. **PostMessageTransport** — inside a Veiller WebView
  *    (`window.ReactNativeWebView` defined). This is the existing UI
  *    layer path and the only transport miniapp UI bundles need.
- * 3. **MockTransport** — explicit opt-in via `?mentra=mock` or
- *    `localStorage.MENTRA_MOCK=1`. Useful for Storybook / unit tests.
+ * 3. **MockTransport** — explicit opt-in via `?veiller=mock` or
+ *    `localStorage.VEILLER_MOCK=1`. Useful for Storybook / unit tests.
  * 4. **LocalSocketWithMockFallback** — external browser, races a
  *    `ws://127.0.0.1` LocalSocketTransport open against a 500ms timeout
  *    and falls back to MockTransport so the page doesn't hang.
@@ -109,8 +109,8 @@ class LocalSocketWithMockFallback implements Transport {
       // eslint-disable-next-line no-console
       console.log(
         timedOut
-          ? "[mentra-miniapp] No phone WebSocket reachable; using MockTransport so the page can render."
-          : "[mentra-miniapp] LocalSocketTransport failed; using MockTransport.",
+          ? "[veiller-miniapp] No phone WebSocket reachable; using MockTransport so the page can render."
+          : "[veiller-miniapp] LocalSocketTransport failed; using MockTransport.",
       )
     }
 

@@ -16,7 +16,7 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
      String injectedJSBeforeContentLoaded;
 +    /**
 +     * Handle to the document-start script registered via
-+     * WebViewCompat.addDocumentStartJavaScript (MentraOS patch). When this is
++     * WebViewCompat.addDocumentStartJavaScript (Veiller patch). When this is
 +     * non-null the before-content JS is injected deterministically at document
 +     * start by WebKit/Chromium — the same guarantee iOS gets from
 +     * WKUserScriptInjectionTimeAtDocumentStart — so callInjectedJavaScriptBeforeContentLoaded()
@@ -32,7 +32,7 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
      @Override
      public void onHostResume() {
 -        // do nothing
-+        // MentraOS patch: explicit resume keeps the WebView's JS scheduler
++        // Veiller patch: explicit resume keeps the WebView's JS scheduler
 +        // running across host lifecycle transitions.
 +        onResume();
 +        resumeTimers();
@@ -41,7 +41,7 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
      @Override
      public void onHostPause() {
 -        // do nothing
-+        // MentraOS patch: do NOT propagate the host pause to the WebView.
++        // Veiller patch: do NOT propagate the host pause to the WebView.
 +        // Local miniapps must keep rendering and emitting display updates
 +        // even when the host activity is hidden (lock screen, recents),
 +        // because the glasses are still attached and the foreground
@@ -52,7 +52,7 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
 +
 +    @Override
 +    protected void onWindowVisibilityChanged(int visibility) {
-+        // MentraOS patch: lie to Chromium about window visibility. The WebView's
++        // Veiller patch: lie to Chromium about window visibility. The WebView's
 +        // internal JS scheduler pauses when its window goes INVISIBLE/GONE.
 +        super.onWindowVisibilityChanged(View.VISIBLE);
 +        onResume();
@@ -61,14 +61,14 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
 +
 +    @Override
 +    public void dispatchWindowVisibilityChanged(int visibility) {
-+        // MentraOS patch: belt-and-suspenders. The activity calls this when it
++        // Veiller patch: belt-and-suspenders. The activity calls this when it
 +        // transitions to STOPPED; force VISIBLE before super.
 +        super.dispatchWindowVisibilityChanged(View.VISIBLE);
 +    }
 +
 +    @Override
 +    protected void onVisibilityChanged(View changedView, int visibility) {
-+        // MentraOS patch: same logic for view-visibility (parent View hidden).
++        // Veiller patch: same logic for view-visibility (parent View hidden).
 +        super.onVisibilityChanged(changedView, View.VISIBLE);
      }
  
@@ -77,7 +77,7 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
      }
  
      public void callInjectedJavaScriptBeforeContentLoaded() {
-+        // MentraOS patch: when the document-start script is registered, WebKit
++        // Veiller patch: when the document-start script is registered, WebKit
 +        // injects the before-content JS deterministically at document start, so
 +        // re-running it here (from the racy onPageStarted callback) would
 +        // double-inject. Skip the legacy path in that case. We still need to
@@ -97,7 +97,7 @@ index 80c68034b193a47bedb56ca527352de9548e8ac6..449ce7deb5cd39012420c63ce7334152
      }
  
 +    /**
-+     * MentraOS patch: register `injectedJSBeforeContentLoaded` as a
++     * Veiller patch: register `injectedJSBeforeContentLoaded` as a
 +     * document-start script via WebViewCompat, so it runs BEFORE any of the
 +     * page's own scripts — deterministically, on every navigation. This closes
 +     * the Android-only injection race where the page bundle could execute
@@ -157,7 +157,7 @@ index f83033b3597a425da159555233bacce250ccfce0..56ab60c0628e103d30d127b5c91f30c1
      fun setInjectedJavaScriptBeforeContentLoaded(viewWrapper: RNCWebViewWrapper, value: String?) {
          val view = viewWrapper.webView
 -        view.injectedJSBeforeContentLoaded = value
-+        // MentraOS patch: route through the view setter so the script is
++        // Veiller patch: route through the view setter so the script is
 +        // registered as a WebViewCompat document-start script (deterministic
 +        // pre-content injection) rather than only stashing the field for the
 +        // racy onPageStarted path.

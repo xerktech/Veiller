@@ -1,4 +1,4 @@
-import type {WifiSearchResult} from "@mentra/engine"
+import type {WifiSearchResult} from "@veiller/engine"
 
 /** Append streamed scan chunks while preserving the first result for each SSID. */
 export function mergeWifiScanResults(current: WifiSearchResult[], incoming: WifiSearchResult[]): WifiSearchResult[] {

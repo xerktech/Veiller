@@ -1,10 +1,10 @@
-// Hardware-agnostic key/value persistence. The Mentra port swaps in a
+// Hardware-agnostic key/value persistence. The Veiller port swaps in a
 // `session.storage`-backed implementation (background/storage.ts) on the
 // background side and an RPC-proxied one (ui/rpc-storage.ts) on the phone
 // WebView side; this app only ever depends on the interface below.
 //
 // not ported: upstream's BridgeStorage (Even Hub `bridge.setLocalStorage`) —
-// Even-runtime specific; MentraStorage (background/storage.ts) replaces it.
+// Even-runtime specific; VeillerStorage (background/storage.ts) replaces it.
 export interface KeyValueStorage {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;

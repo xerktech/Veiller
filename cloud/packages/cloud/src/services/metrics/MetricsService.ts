@@ -222,61 +222,61 @@ export class MetricsService {
     };
 
     // -- Sessions --
-    gauge("mentra_user_sessions", "Current number of connected UserSessions", this._userSessions);
-    gauge("mentra_miniapp_sessions", "Current number of mini app WebSocket sessions", this._miniappSessions);
+    gauge("veiller_user_sessions", "Current number of connected UserSessions", this._userSessions);
+    gauge("veiller_miniapp_sessions", "Current number of mini app WebSocket sessions", this._miniappSessions);
 
     // -- Event loop --
-    gauge("mentra_event_loop_lag_ms", "Event loop lag in milliseconds (current sample)", this._eventLoopLagCurrent);
-    gauge("mentra_event_loop_lag_avg_ms", "Event loop lag rolling average in milliseconds", this.eventLoopLagAvgMs);
-    gauge("mentra_event_loop_lag_p99_ms", "Event loop lag p99 in milliseconds", this.eventLoopLagP99Ms);
+    gauge("veiller_event_loop_lag_ms", "Event loop lag in milliseconds (current sample)", this._eventLoopLagCurrent);
+    gauge("veiller_event_loop_lag_avg_ms", "Event loop lag rolling average in milliseconds", this.eventLoopLagAvgMs);
+    gauge("veiller_event_loop_lag_p99_ms", "Event loop lag p99 in milliseconds", this.eventLoopLagP99Ms);
 
     // -- UDP (pulled from UdpAudioServer) --
-    counter("mentra_udp_packets_received_total", "Total UDP audio packets received", udp.received);
-    counter("mentra_udp_packets_dropped_total", "Total UDP packets dropped (no session)", udp.dropped);
-    counter("mentra_udp_pings_received_total", "Total UDP ping packets received", udp.pings);
-    counter("mentra_udp_packets_decrypted_total", "Total UDP packets decrypted", udp.decrypted);
-    counter("mentra_udp_decryption_failures_total", "Total UDP decryption failures", udp.decryptionFailures);
-    gauge("mentra_udp_registered_sessions", "UDP sessions currently registered", udp.sessions);
+    counter("veiller_udp_packets_received_total", "Total UDP audio packets received", udp.received);
+    counter("veiller_udp_packets_dropped_total", "Total UDP packets dropped (no session)", udp.dropped);
+    counter("veiller_udp_pings_received_total", "Total UDP ping packets received", udp.pings);
+    counter("veiller_udp_packets_decrypted_total", "Total UDP packets decrypted", udp.decrypted);
+    counter("veiller_udp_decryption_failures_total", "Total UDP decryption failures", udp.decryptionFailures);
+    gauge("veiller_udp_registered_sessions", "UDP sessions currently registered", udp.sessions);
 
     // -- WebSocket messages --
     counter(
-      "mentra_ws_client_messages_in_total",
+      "veiller_ws_client_messages_in_total",
       "Total WebSocket messages received from mobile client",
       this._wsClientMessagesIn,
     );
     counter(
-      "mentra_ws_client_messages_out_total",
+      "veiller_ws_client_messages_out_total",
       "Total WebSocket messages sent to mobile client",
       this._wsClientMessagesOut,
     );
     counter(
-      "mentra_ws_miniapp_messages_in_total",
+      "veiller_ws_miniapp_messages_in_total",
       "Total WebSocket messages received from mini apps",
       this._wsMiniappMessagesIn,
     );
     counter(
-      "mentra_ws_miniapp_messages_out_total",
+      "veiller_ws_miniapp_messages_out_total",
       "Total WebSocket messages sent to mini apps",
       this._wsMiniappMessagesOut,
     );
 
     // -- HTTP requests --
-    lines.push("# HELP mentra_http_requests_total Total HTTP requests by status code group");
-    lines.push("# TYPE mentra_http_requests_total counter");
-    lines.push(`mentra_http_requests_total{status="2xx"} ${this._httpRequests2xx}`);
-    lines.push(`mentra_http_requests_total{status="3xx"} ${this._httpRequests3xx}`);
-    lines.push(`mentra_http_requests_total{status="4xx"} ${this._httpRequests4xx}`);
-    lines.push(`mentra_http_requests_total{status="5xx"} ${this._httpRequests5xx}`);
+    lines.push("# HELP veiller_http_requests_total Total HTTP requests by status code group");
+    lines.push("# TYPE veiller_http_requests_total counter");
+    lines.push(`veiller_http_requests_total{status="2xx"} ${this._httpRequests2xx}`);
+    lines.push(`veiller_http_requests_total{status="3xx"} ${this._httpRequests3xx}`);
+    lines.push(`veiller_http_requests_total{status="4xx"} ${this._httpRequests4xx}`);
+    lines.push(`veiller_http_requests_total{status="5xx"} ${this._httpRequests5xx}`);
 
     // -- Memory --
-    gauge("mentra_heap_used_bytes", "V8 heap used in bytes", mem.heapUsed);
-    gauge("mentra_heap_total_bytes", "V8 heap total in bytes", mem.heapTotal);
-    gauge("mentra_rss_bytes", "Resident set size in bytes", mem.rss);
-    gauge("mentra_external_bytes", "External memory in bytes (C++ objects bound to JS)", mem.external);
-    gauge("mentra_array_buffers_bytes", "ArrayBuffers memory in bytes", mem.arrayBuffers);
+    gauge("veiller_heap_used_bytes", "V8 heap used in bytes", mem.heapUsed);
+    gauge("veiller_heap_total_bytes", "V8 heap total in bytes", mem.heapTotal);
+    gauge("veiller_rss_bytes", "Resident set size in bytes", mem.rss);
+    gauge("veiller_external_bytes", "External memory in bytes (C++ objects bound to JS)", mem.external);
+    gauge("veiller_array_buffers_bytes", "ArrayBuffers memory in bytes", mem.arrayBuffers);
 
     // -- Process --
-    gauge("mentra_uptime_seconds", "Process uptime in seconds", process.uptime());
+    gauge("veiller_uptime_seconds", "Process uptime in seconds", process.uptime());
 
     return lines.join("\n") + "\n";
   }

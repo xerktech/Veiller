@@ -7,7 +7,7 @@
  * manage their own state.
  */
 
-import type {LocationData, MiniappSession} from "@mentra/miniapp"
+import type {LocationData, MiniappSession} from "@veiller/miniapp"
 
 export type Coords = {lat: number; lng: number; accuracy?: number; ts: number}
 

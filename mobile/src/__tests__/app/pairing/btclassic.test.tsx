@@ -57,13 +57,13 @@ jest.mock("@/components/onboarding/OnboardingGuide", () => {
 import {act, render, waitFor} from "@testing-library/react-native"
 import type {ReactNode} from "react"
 
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {useRoute} from "@react-navigation/native"
 import BtClassicPairingScreen from "@/app/pairing/btclassic"
 import {usePushPrevious} from "@/contexts/NavigationHistoryContext"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS} from "@mentra/engine"
-import {useSettingsStore} from "@mentra/engine/internal"
+import {SETTINGS} from "@veiller/engine"
+import {useSettingsStore} from "@veiller/engine/internal"
 import {useGlassesStore} from "../../../../modules/engine/src/stores/glasses"
 
 const device = {id: "a", model: "Mentra Live", name: "MENTRA_LIVE_BLE_001", address: "a"}

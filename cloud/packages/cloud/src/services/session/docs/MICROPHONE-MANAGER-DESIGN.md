@@ -2,7 +2,7 @@
 
 ## Overview
 
-MicrophoneManager handles all microphone state management for user sessions in MentraOS. It controls when the glasses' microphone is enabled/disabled based on app subscriptions and provides a keep-alive mechanism to ensure the client maintains microphone access.
+MicrophoneManager handles all microphone state management for user sessions in Veiller. It controls when the glasses' microphone is enabled/disabled based on app subscriptions and provides a keep-alive mechanism to ensure the client maintains microphone access.
 
 ## Core Responsibilities
 

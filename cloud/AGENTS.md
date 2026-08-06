@@ -1,4 +1,4 @@
-# MentraOS Cloud Development Guide
+# Veiller Cloud Development Guide
 
 ## Build Commands
 
@@ -36,7 +36,7 @@
 - **Error Handling**: Use try/catch with appropriate logger.error calls
 - **Formatting**: 2-space indentation, semicolons
 - **Documentation**: JSDoc comments for functions/classes
-- **Logging**: Use logger from @mentra/utils package
+- **Logging**: Use logger from @veiller/utils package
 - **WebSockets**: Follow the message type patterns from the SDK
 
 ## Communication Architecture
@@ -60,7 +60,7 @@ The following improvements have been implemented to enhance system reliability:
 
 ### App Server Registration System
 
-- Apps can register their servers with MentraOS Cloud
+- Apps can register their servers with Veiller Cloud
 - Tracks sessions by App server to enable recovery after restarts
 - Provides automatic reconnection when App servers restart
 - Current reference: `/cloud/packages/cloud/src/services/core/docs/current-websocket-implementation.md` (App Server Registration) and `/cloud/packages/cloud/src/services/layout/docs/websocket-reliability-design.md` (session recovery)

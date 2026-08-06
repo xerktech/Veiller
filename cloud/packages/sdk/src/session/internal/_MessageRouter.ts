@@ -17,18 +17,18 @@ export class _MessageRouter {
     try {
       message = JSON.parse(raw);
     } catch (error) {
-      this.logger.warn({ raw }, "MentraSession received invalid JSON");
+      this.logger.warn({ raw }, "VeillerSession received invalid JSON");
       throw error instanceof Error ? error : new Error(String(error));
     }
 
     if (!message?.type) {
-      this.logger.debug({ message }, "MentraSession ignored message without type");
+      this.logger.debug({ message }, "VeillerSession ignored message without type");
       return false;
     }
 
     const handled = this.messageHandlers.dispatch(message);
     if (!handled && message.type !== "pong") {
-      this.logger.debug({ type: message.type }, "MentraSession received unhandled message type");
+      this.logger.debug({ type: message.type }, "VeillerSession received unhandled message type");
     }
 
     return handled;

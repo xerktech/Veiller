@@ -1,4 +1,4 @@
-import { GlassesToCloudMessage, AppI } from '@mentra/sdk';
+import { GlassesToCloudMessage, AppI } from '@veiller/sdk';
 import { useState, useEffect, useCallback } from 'react';
 
 interface ActiveApp {

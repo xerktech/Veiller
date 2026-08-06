@@ -3,7 +3,7 @@ import {withAppBuildGradle, withMainApplication, withProjectBuildGradle, type Co
 // Marker comments double as idempotency checks: each injection looks for its
 // OWN unique marker (never a shared substring — a marker one block contains
 // can silently mask another block's check).
-const MAPBOX_REPO_MARKER = "mapbox: navigation sdk downloads repo (injected by @mentra/crust)"
+const MAPBOX_REPO_MARKER = "mapbox: navigation sdk downloads repo (injected by @veiller/crust)"
 const MAPBOX_REPO = [
   "    maven {",
   `      // ${MAPBOX_REPO_MARKER}`,
@@ -41,7 +41,7 @@ function withCrustProjectGradle(config: Parameters<ConfigPlugin>[0]) {
     if (!gradle.includes(PROTOBUF_EXCLUDE)) {
       gradle += `
 // Exclude protobuf-javalite in every project to avoid duplicate classes with
-// protobuf-java (injected by @mentra/crust).
+// protobuf-java (injected by @veiller/crust).
 allprojects {
   configurations.all {
     ${PROTOBUF_EXCLUDE}
@@ -76,7 +76,7 @@ function withCrustAppGradle(config: Parameters<ConfigPlugin>[0]) {
         /(implementation\("com\.facebook\.react:react-android"\))/,
         `$1
 
-    // Required by :mentra-crust (Mapbox Navigation SDK uses newer core libs).
+    // Required by :veiller-crust (Mapbox Navigation SDK uses newer core libs).
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'`,
       )
     }
@@ -99,18 +99,18 @@ function withNotificationProcessGuard(config: Parameters<ConfigPlugin>[0]) {
         ? `public void onCreate() {
     super.onCreate();
     // ${NOTIFICATION_PROCESS_GUARD}
-    if (com.mentra.crust.services.NotificationProcess.isCurrent(this)) {
+    if (com.veiller.crust.services.NotificationProcess.isCurrent(this)) {
       return;
     }`
         : `override fun onCreate() {
     super.onCreate()
     // ${NOTIFICATION_PROCESS_GUARD}
-    if (com.mentra.crust.services.NotificationProcess.isCurrent(this)) {
+    if (com.veiller.crust.services.NotificationProcess.isCurrent(this)) {
       return
     }`
 
       if (!pattern.test(source)) {
-        throw new Error("@mentra/crust could not add the notification-process guard to MainApplication")
+        throw new Error("@veiller/crust could not add the notification-process guard to MainApplication")
       }
       source = source.replace(pattern, replacement)
     }
@@ -123,13 +123,13 @@ function withNotificationProcessGuard(config: Parameters<ConfigPlugin>[0]) {
         ? `public void onConfigurationChanged(Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     // ${NOTIFICATION_CONFIG_GUARD}
-    if (com.mentra.crust.services.NotificationProcess.isCurrent(this)) {
+    if (com.veiller.crust.services.NotificationProcess.isCurrent(this)) {
       return;
     }`
         : `override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
     // ${NOTIFICATION_CONFIG_GUARD}
-    if (com.mentra.crust.services.NotificationProcess.isCurrent(this)) {
+    if (com.veiller.crust.services.NotificationProcess.isCurrent(this)) {
       return
     }`
 

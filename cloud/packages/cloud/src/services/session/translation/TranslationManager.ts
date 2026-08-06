@@ -10,7 +10,7 @@ import {
   DataStream,
   TranslationData,
   parseLanguageStream,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 import UserSession from "../UserSession";
 import { classifySonioxCredentialFailure } from "../soniox/SonioxKeyPool";
 import { PosthogService } from "../../logging/posthog.service";

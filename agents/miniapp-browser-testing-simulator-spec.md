@@ -4,7 +4,7 @@
 
 **Stub. Stage-1 stopgap (MockTransport) has moved to [`miniapp-quick-fixes-spec.md`](./miniapp-quick-fixes-spec.md) as section #6.** This doc now covers only the full simulator (Stage 2), which is a multi-week project that needs its own dedicated brainstorm + spec pass before any implementation.
 
-The decision to keep this short on purpose: the full simulator is roughly a multi-week effort that affects three packages (`@mentra/miniapp`, `@mentra/miniapp-cli`, a new simulator package), and several distinct user workflows. Trying to design it inline alongside the smaller dev-ex fixes would either undersize it or bury the smaller fixes. So we capture the goal here, list the architectural questions, and treat the full design as a follow-up.
+The decision to keep this short on purpose: the full simulator is roughly a multi-week effort that affects three packages (`@veiller/miniapp`, `@veiller/miniapp-cli`, a new simulator package), and several distinct user workflows. Trying to design it inline alongside the smaller dev-ex fixes would either undersize it or bury the smaller fixes. So we capture the goal here, list the architectural questions, and treat the full design as a follow-up.
 
 ## What's already shipped (in quick-fixes spec)
 
@@ -29,7 +29,7 @@ This is closer to **iOS Simulator + Xcode** than to React Native dev mode. It's 
 A real simulator host process — architecturally **a mock of the phone**, runnable as a CLI command:
 
 ```bash
-mentra-miniapp simulate
+veiller-miniapp simulate
 ```
 
 …which spawns:
@@ -46,8 +46,8 @@ This is a big architectural surface. Open questions below.
 ## Open architectural questions (need full brainstorm)
 
 1. **Where does the simulator live?**
-   - Subcommand of `@mentra/miniapp-cli` (`mentra-miniapp simulate`)?
-   - Standalone npm package `@mentra/simulator`?
+   - Subcommand of `@veiller/miniapp-cli` (`veiller-miniapp simulate`)?
+   - Standalone npm package `@veiller/simulator`?
    - Subcommand is more discoverable; standalone package is cleaner separation. Trade-off depends on simulator complexity.
 
 2. **What does the simulator simulate vs. proxy?**
@@ -64,7 +64,7 @@ This is a big architectural surface. Open questions below.
 
 5. **Auth.** A real session needs a `userId` from auth. Does the simulator stub a userId, or does it require login? (Stub probably for the dev workflow; require login if proxying to real services.)
 
-6. **Hot reload integration.** The simulator should integrate cleanly with the live-reload work in [`miniapp-quick-fixes-spec.md`](./miniapp-quick-fixes-spec.md) #1 + #5 — likely sharing the `__mentra_dev` WebSocket channel.
+6. **Hot reload integration.** The simulator should integrate cleanly with the live-reload work in [`miniapp-quick-fixes-spec.md`](./miniapp-quick-fixes-spec.md) #1 + #5 — likely sharing the `__veiller_dev` WebSocket channel.
 
 7. **Multi-miniapp testing.** Does the simulator support running multiple miniapps simultaneously to test inter-miniapp interactions? Probably not for V1, but worth flagging.
 

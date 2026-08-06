@@ -2,8 +2,8 @@ import CryptoKit
 import ExpoModulesCore
 import Foundation
 
-public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
-    private var sdk: MentraBluetoothSDK?
+public class BluetoothSdkModule: Module, VeillerBluetoothSDKDelegate {
+    private var sdk: VeillerBluetoothSDK?
 
     public func definition() -> ModuleDefinition {
         Name("BluetoothSdk")
@@ -755,13 +755,13 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
     }
 
     @MainActor
-    private func bluetoothSdk() -> MentraBluetoothSDK {
+    private func bluetoothSdk() -> VeillerBluetoothSDK {
         if let sdk {
             return sdk
         }
 
-        let sdk = MentraBluetoothSDK(
-            configuration: MentraBluetoothSDKConfiguration(
+        let sdk = VeillerBluetoothSDK(
+            configuration: VeillerBluetoothSDKConfiguration(
                 analytics: BluetoothSdkAnalyticsConfiguration().withSurface("react_native")
             )
         )
@@ -785,22 +785,22 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateGlasses _: GlassesRuntimeState) {
+    public func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateGlasses _: GlassesRuntimeState) {
         sendEvent("glasses_status", sdk.glassesStatus.dictionary)
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateSdkState _: PhoneSdkRuntimeState) {
+    public func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateSdkState _: PhoneSdkRuntimeState) {
         sendEvent("bluetooth_status", sdk.bluetoothStatus.values)
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didDiscover device: Device) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didDiscover device: Device) {
         sendEvent("device_discovered", device.dictionary)
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didStopScan reason: ScanStopReason) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didStopScan reason: ScanStopReason) {
         guard reason == .completed else { return }
         let status = bluetoothSdk().bluetoothStatus
         let deviceModel = status.pendingWearable.isEmpty ? status.defaultWearable : status.pendingWearable
@@ -814,7 +814,7 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didReceive event: BluetoothEvent) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didReceive event: BluetoothEvent) {
         switch event {
         case let .buttonPress(button):
             sendEvent(
@@ -871,17 +871,17 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didReceiveMicPcm event: MicPcmEvent) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didReceiveMicPcm event: MicPcmEvent) {
         sendEvent("mic_pcm", event.values)
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didReceiveMicLc3 event: MicLc3Event) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didReceiveMicLc3 event: MicLc3Event) {
         sendEvent("mic_lc3", event.values)
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didChangeDefaultDevice device: Device?) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didChangeDefaultDevice device: Device?) {
         var event: [String: Any] = [:]
         if let device {
             event["device"] = device.dictionary
@@ -890,12 +890,12 @@ public class BluetoothSdkModule: Module, MentraBluetoothSDKDelegate {
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didLog message: String) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didLog message: String) {
         sendEvent("log", ["message": message])
     }
 
     @MainActor
-    public func mentraBluetoothSDK(_: MentraBluetoothSDK, didFail error: BluetoothSdkError) {
+    public func veillerBluetoothSDK(_: VeillerBluetoothSDK, didFail error: BluetoothSdkError) {
         sendEvent("pair_failure", ["error": error.message])
     }
 }

@@ -1,4 +1,4 @@
-# MentraOS Log Viewing Operations Manual
+# Veiller Log Viewing Operations Manual
 
 ## Mission: Enhanced Battlefield Visibility for Development Logs
 

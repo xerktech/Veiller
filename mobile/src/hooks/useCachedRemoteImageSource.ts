@@ -28,7 +28,7 @@ async function resolveCachedPath(url: string): Promise<string | null> {
         return fileUri
       }
       // Prefetch succeeded but the image isn't on disk. This is the dev-miniapp
-      // case: `mentra dev`'s static server serves the tile icon with
+      // case: `veiller dev`'s static server serves the tile icon with
       // `Cache-Control: no-store`, so expo-image downloads it (prefetch → true)
       // but never persists it, leaving getCachePathAsync null forever. Returning
       // null here would (mis)mark the icon as failed and the dev tile would show

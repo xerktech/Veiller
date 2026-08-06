@@ -38,7 +38,7 @@ These tests should use fake WS and UDP transports and run under Bun.
 
 ## Runtime integration tests
 
-Add tests in `@mentra/cloud-runtime`:
+Add tests in `@veiller/cloud-runtime`:
 
 - UDP liveness probe validates and emits WS ack;
 - probe packets are not written to Redis audio stream;

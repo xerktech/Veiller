@@ -18,7 +18,7 @@ export function useTranslations() {
   useEffect(() => {
     mountedRef.current = true
     const offs: Array<() => void> = []
-    const on = mentra.on as (c: string, cb: (p: unknown) => void) => () => void
+    const on = veiller.on as (c: string, cb: (p: unknown) => void) => () => void
 
     offs.push(
       on("translation:snapshot", (payload) => {
@@ -65,7 +65,7 @@ export function useTranslations() {
       }),
     )
 
-    mentra.send("translation:request-snapshot", {})
+    veiller.send("translation:request-snapshot", {})
 
     return () => {
       mountedRef.current = false
@@ -77,7 +77,7 @@ export function useTranslations() {
 
   const clearTranslations = () => {
     setTranslations([])
-    mentra.send("translation:clear", {})
+    veiller.send("translation:clear", {})
   }
 
   const reconnect = () => {}

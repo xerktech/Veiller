@@ -18,11 +18,11 @@
  */
 
 import { resolve } from 'path';
-import { MentraClient } from '../MentraClient';
+import { VeillerClient } from '../VeillerClient';
 import { AccountService } from '../services/AccountService';
 
 // Test configuration
-const LIVE_CAPTIONS_PACKAGE = 'com.mentra.livecaptions';
+const LIVE_CAPTIONS_PACKAGE = 'com.veiller.livecaptions';
 const AUDIO_FILE_PATH = resolve(__dirname, '../audio/good-morning-2033.wav');
 const NUM_ACCOUNTS = 100;
 const BATCH_SIZE = 20; // Start accounts in batches to control ramp-up
@@ -102,7 +102,7 @@ async function main() {
   console.log(`✅ Created ${accounts.length} test accounts\n`);
 
   // Track all clients for cleanup
-  const clients: MentraClient[] = [];
+  const clients: VeillerClient[] = [];
   const testPromises: Promise<void>[] = [];
 
   try {
@@ -166,7 +166,7 @@ async function main() {
 async function runSingleAccountTest(
   account: { email: string; coreToken: string }, 
   accountIndex: number,
-  clients: MentraClient[]
+  clients: VeillerClient[]
 ): Promise<void> {
   const accountId = `Soniox-${accountIndex.toString().padStart(3, '0')}`;
   
@@ -188,7 +188,7 @@ async function runSingleAccountTest(
   
   try {
     // Create client
-    const client = new MentraClient({
+    const client = new VeillerClient({
       email: account.email,
       coreToken: account.coreToken,
       serverUrl: process.env.DEFAULT_SERVER_URL || 'ws://localhost:8002',
@@ -304,7 +304,7 @@ async function runSingleAccountTest(
 }
 
 function setupTranscriptionMonitoring(
-  client: MentraClient, 
+  client: VeillerClient, 
   qualityData: TranscriptionQuality, 
   accountId: string
 ): void {

@@ -73,7 +73,7 @@ const TOKEN_EXCHANGE_GRANT = "urn:ietf:params:oauth:grant-type:token-exchange";
  * Map a config `SubjectTokenType` to the RFC 8693 `subject_token_type` URN the
  * cloud expects.
  *
- * All three supported subject tokens (an OEM-signed JWT, a Mentra core token, a
+ * All three supported subject tokens (an OEM-signed JWT, a Veiller core token, a
  * Supabase session) are presented as a JWT and verified by their own `iss` /
  * verification path on the cloud, so they share the one JWT token-type URN. The
  * mapping is kept explicit (rather than hard-coding one URN) so that if the
@@ -81,7 +81,7 @@ const TOKEN_EXCHANGE_GRANT = "urn:ietf:params:oauth:grant-type:token-exchange";
  */
 const SUBJECT_TOKEN_TYPE_URN: Record<SubjectTokenType, string> = {
   "oem-jwt": "urn:ietf:params:oauth:token-type:jwt",
-  "mentra-core": "urn:ietf:params:oauth:token-type:jwt",
+  "veiller-core": "urn:ietf:params:oauth:token-type:jwt",
   supabase: "urn:ietf:params:oauth:token-type:jwt",
 };
 

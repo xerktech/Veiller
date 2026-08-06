@@ -1,6 +1,6 @@
 import { Cpu } from "lucide-react";
 import HardwareRequirementsForm from "./HardwareRequirementsForm";
-import { HardwareRequirement } from "@mentra/sdk";
+import { HardwareRequirement } from "@veiller/sdk";
 import { ExternalLinkIcon } from "@/components/ui/icons";
 
 interface HardwareRequirementsSectionProps {

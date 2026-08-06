@@ -30,7 +30,7 @@ export {
   evenRealitiesG2,
   mentraLive,
   vuzixZ100,
-  mentraDisplay,
+  veillerDisplay,
 } from "./hardware"
 
 // Applet types

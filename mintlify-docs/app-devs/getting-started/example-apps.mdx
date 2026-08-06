@@ -9,20 +9,20 @@ that ship in this repo.
 
 ## Start from the scaffolder
 
-The fastest path is `create-mentra-miniapp`. It writes a ready-to-run project
+The fastest path is `create-veiller-miniapp`. It writes a ready-to-run project
 with both layers wired together. The [Quickstart](/app-devs/getting-started/quickstart)
 walks through it end to end.
 
 ```bash
-bunx create-mentra-miniapp my-app
+bunx create-veiller-miniapp my-app
 ```
 
 It asks for a project name and the kind of glasses you're targeting. You can skip
 the prompt with a flag:
 
 ```bash
-bunx create-mentra-miniapp my-app --type=display   # Even Realities G1/G2, Vuzix Z100
-bunx create-mentra-miniapp my-app --type=camera    # Mentra Live
+bunx create-veiller-miniapp my-app --type=display   # Even Realities G1/G2, Vuzix Z100
+bunx create-veiller-miniapp my-app --type=camera    # Mentra Live
 ```
 
 The `--type` choice only changes the manifest's `hardwareRequirements` (display
@@ -34,7 +34,7 @@ That gives you a button-to-display path and a UI-to-background path to edit from
 ## The in-repo reference miniapp
 
 If you've cloned the monorepo, `miniapps/example-miniapp` is the reference app
-that consumes the SDK. Its manifest names it "Mentra Example", and it exercises
+that consumes the SDK. Its manifest names it "Veiller Example", and it exercises
 more of the surface than the starter does: transcription, text-wall display, TTS,
 button events, and an "SDK Tester" UI that drives each session module
 (`session.camera`, `session.location`, notifications, calendar) page by page.
@@ -48,13 +48,13 @@ bun dev
 ```
 
 `bun dev` validates the manifest, builds both layers, serves them over your LAN,
-and prints a QR code. Scan it from **Mentra App → Settings → Developer settings →
+and prints a QR code. Scan it from **Veiller App → Settings → Developer settings →
 Mini App Development → Scan Mini App QR Code** (phone and laptop on the same
 Wi-Fi).
 
 ## First-party miniapps in this repo
 
-These are apps Mentra ships, all under `miniapps/`. Read them when you want a
+These are apps Veiller ships, all under `miniapps/`. Read them when you want a
 real feature rather than a demo. Each builds with `bun dev` the same way the
 example does.
 
@@ -63,7 +63,7 @@ example does.
     `miniapps/teleprompter`: paste a script and read it off the glasses;
     scrolling follows your voice or runs at a set speed.
   </Card>
-  <Card title="Mentra Maps" icon="map">
+  <Card title="Veiller Maps" icon="map">
     `miniapps/navigation`: turn-by-turn walking navigation with compass heading
     and Google Maps, driven by `session.location`.
   </Card>

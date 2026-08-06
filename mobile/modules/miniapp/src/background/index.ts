@@ -1,5 +1,5 @@
 /**
- * @mentra/miniapp/background — background-side SDK entry point.
+ * @veiller/miniapp/background — background-side SDK entry point.
  *
  * Imported from a miniapp's `src/background/index.ts` to access the
  * per-miniapp `MiniappSession` and its typed `session.*` module
@@ -7,8 +7,8 @@
  * miniapp.
  *
  * What's NOT in this entry point:
- *   - `mentra` WebView global (UI-only — import from `@mentra/miniapp/ui`).
- *   - `MentraProvider` / React hooks (UI-only).
+ *   - `veiller` WebView global (UI-only — import from `@veiller/miniapp/ui`).
+ *   - `VeillerProvider` / React hooks (UI-only).
  *   - Any DOM-bound API. The JSContext has no DOM.
  *
  * Importing the wrong sub-path is caught at compile time by the
@@ -95,12 +95,12 @@ export type {TranscriptionModule} from "../modules/transcription"
 export type {TranslationModule} from "../modules/translation"
 export type {UIModule, UIChannelHandler, UIUnsubscribe} from "../modules/ui"
 export type {Rpc, IsRpc, RpcReq, RpcRes, RpcRequestOptions, RpcHandlerContext} from "../modules/ui"
-export {MentraRpcError, MentraRpcTimeoutError} from "../modules/ui"
+export {VeillerRpcError, VeillerRpcTimeoutError} from "../modules/ui"
 
 // Argument enums + option types — for authors writing controllers that pass
 // these into session.* method calls (or that build typed helpers around them).
-// Intentionally NOT re-exported from `@mentra/miniapp/ui` — the WebView half
-// never touches these directly. UI talks to background via mentra.send with
+// Intentionally NOT re-exported from `@veiller/miniapp/ui` — the WebView half
+// never touches these directly. UI talks to background via veiller.send with
 // the author's own `Channels` registry; background is where these enums show
 // up as method args.
 export type {LedColor, LedControlOptions} from "../modules/led"

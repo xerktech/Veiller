@@ -10,9 +10,9 @@ The latest matching pair is:
 
 | Mobile app dependency | Required glasses software |
 | --- | --- |
-| React Native `@mentra/bluetooth-sdk@0.1.21-beta.3` | Mentra Live software `0.1.21-beta.3` |
+| React Native `@veiller/bluetooth-sdk@0.1.21-beta.3` | Mentra Live software `0.1.21-beta.3` |
 | Android `com.mentraglass:bluetooth-sdk:0.1.21-beta.3` | Mentra Live software `0.1.21-beta.3` |
-| iOS `MentraBluetoothSDK` version `0.1.21-beta.3` | Mentra Live software `0.1.21-beta.3` |
+| iOS `VeillerBluetoothSDK` version `0.1.21-beta.3` | Mentra Live software `0.1.21-beta.3` |
 
 <Warning>
 Bluetooth connection alone does not confirm version compatibility. Glasses running an older software release may connect to an app using SDK `0.1.21-beta.3`, but SDK features may fail or behave incorrectly. Install the matching `0.1.21-beta.3` glasses software before testing SDK features.
@@ -26,9 +26,9 @@ When you upgrade your app to a new Bluetooth SDK release, run the OTA check agai
 
 ## Recommended: Update With An Example App
 
-The [Mentra Bluetooth SDK Starter Kit](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit) includes the complete OTA flow. You can build an example app from source or install the recommended prebuilt React Native Android app.
+The [Veiller Bluetooth SDK Starter Kit](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit) includes the complete OTA flow. You can build an example app from source or install the recommended prebuilt React Native Android app.
 
-- [Download the React Native example APK for SDK `0.1.21-beta.3`](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit/releases/download/sdk-0.1.21-beta.3/mentra-example-react-native.apk)
+- [Download the React Native example APK for SDK `0.1.21-beta.3`](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit/releases/download/sdk-0.1.21-beta.3/veiller-example-react-native.apk)
 
 For another SDK version, open the [Starter Kit tags page](https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit/tags), choose the matching `sdk-<version>` tag, and select **Downloads** to find its React Native example APK.
 
@@ -45,7 +45,7 @@ You can alternatively install the APK from a computer. Install [ADB](https://dev
 
 ```bash
 adb devices
-adb -s <phone-serial> install -r "$HOME/Downloads/mentra-example-react-native.apk"
+adb -s <phone-serial> install -r "$HOME/Downloads/veiller-example-react-native.apk"
 ```
 
 Use the serial shown by `adb devices`. If only one Android device is connected, you can omit `-s <phone-serial>`.

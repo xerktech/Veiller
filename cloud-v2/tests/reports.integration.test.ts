@@ -7,10 +7,10 @@
  * the router-wide body cap).
  *
  * Wires the core in-process via app.fetch and authenticates through the real
- * Supabase-subject token exchange, mirroring auth.mentra-user-exchange tests.
+ * Supabase-subject token exchange, mirroring auth.veiller-user-exchange tests.
  *
  * Prereq: a running Mongo. Defaults to
- * `mongodb://127.0.0.1:27017/mentra-cloud-v2-test`; override via `MONGO_URL`.
+ * `mongodb://127.0.0.1:27017/veiller-cloud-v2-test`; override via `MONGO_URL`.
  * The test wipes its own collections between cases — do NOT point at a real DB.
  *
  * Run: `bun test tests/reports.integration.test.ts`
@@ -25,18 +25,18 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } fr
 // Crypto material and the storage root must be set BEFORE core reads them.
 // Signing keys are loaded lazily and the report service creates its storage
 // provider on first use, so setting env at module evaluation is early enough.
-const STORAGE_DIR = join(tmpdir(), `mentra-reports-test-${process.pid}`);
+const STORAGE_DIR = join(tmpdir(), `veiller-reports-test-${process.pid}`);
 {
   const { privateKey: nodePriv, publicKey: nodePub } =
     crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     nodePriv.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     nodePub.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
-  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/mentra-cloud-v2-test";
+  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/veiller-cloud-v2-test";
   process.env.SUPABASE_JWT_SECRET = "test-supabase-secret-not-for-production";
   process.env.SUPABASE_URL = "https://testproj.supabase.co";
   process.env.CLOUD_CORE_LOCAL_STORAGE_DIR = STORAGE_DIR;

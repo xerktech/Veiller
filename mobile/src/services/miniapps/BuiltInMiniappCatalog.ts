@@ -1,11 +1,11 @@
-import {HardwareRequirementLevel, HardwareType, engine, type ClientApp} from "@mentra/engine"
-import {appRegistry, installAppStoreHooks} from "@mentra/engine/internal"
+import {HardwareRequirementLevel, HardwareType, engine, type ClientApp} from "@veiller/engine"
+import {appRegistry, installAppStoreHooks} from "@veiller/engine/internal"
 
 import {isOfflineHosted} from "@/components/miniapp/offlineHostedPackages"
 import {showAlert} from "@/contexts/ModalContext"
 import {translate} from "@/i18n"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS} from "@mentra/engine"
+import {SETTINGS} from "@veiller/engine"
 import {getDefaultMenuApps, type GlassesMenuItem} from "@/utils/glassesMenu"
 
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/constants/miniapps"
 
 /**
- * Registers the Mentra app's built-in/offline miniapps.
+ * Registers the Veiller app's built-in/offline miniapps.
  *
  * The cloud-v1 app catalog has been removed from the runtime app list. This
  * service intentionally does not fetch cloud applets or send v1 start/stop

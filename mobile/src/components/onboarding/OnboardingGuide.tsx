@@ -9,7 +9,7 @@ import {focusEffectPreventBack} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n/translate"
-import {BgTimer} from "@mentra/engine"
+import {BgTimer} from "@veiller/engine"
 
 interface BaseStep {
   name: string

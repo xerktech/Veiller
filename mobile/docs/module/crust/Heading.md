@@ -22,5 +22,5 @@ Heading exposes the device's magnetic compass as a stream of degree values. Runs
 
 ### Android
 
-- [CrustModule.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/CrustModule.kt) — Expo module entry point; mirror of the iOS module.
-- [HeadingManager.kt](../../../modules/crust/android/src/main/java/com/mentra/crust/heading/HeadingManager.kt) — `SensorManager`-based compass, parity with `HeadingManager.swift`.
+- [CrustModule.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/CrustModule.kt) — Expo module entry point; mirror of the iOS module.
+- [HeadingManager.kt](../../../modules/crust/android/src/main/java/com/veiller/crust/heading/HeadingManager.kt) — `SensorManager`-based compass, parity with `HeadingManager.swift`.

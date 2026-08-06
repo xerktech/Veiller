@@ -1,12 +1,12 @@
 /**
  * `engine` — the namespaced OEM-facing engine API (the "(A) host API" from the
  * Phase-1 contract). Host UI calls `engine.<domain>.<method>()`; each domain is a
- * typed facade over the runtime. (Exported from the `@mentra/engine` module, whose
+ * typed facade over the runtime. (Exported from the `@veiller/engine` module, whose
  * name stays `engine` in code; the public API surface is `engine`.)
  *
  * It grows one facade at a time. The migration-era flat store/service exports
- * live on the `@mentra/engine/internal` entry (and the debug singletons on
- * `@mentra/engine/devtools`); they shrink as screens move onto `engine.*`.
+ * live on the `@veiller/engine/internal` entry (and the debug singletons on
+ * `@veiller/engine/devtools`); they shrink as screens move onto `engine.*`.
  */
 import {configure, start as bootstrapStart, stop as bootstrapStop} from "./runtime/bootstrap"
 import {cloudClientService} from "./services/CloudClientService"
@@ -20,9 +20,9 @@ import {startTapStrapCoordinator, stopTapStrapCoordinator} from "./services/TapS
 import {startPhoneNotificationsSync, stopPhoneNotificationsSync} from "./services/PhoneNotificationsSync"
 import {startCaptionsTesterReportService, stopCaptionsTesterReportService} from "./services/CaptionsTesterReportService"
 import {
-  startMentraJSCrashloopReportService,
-  stopMentraJSCrashloopReportService,
-} from "./services/MentraJSCrashloopReportService"
+  startVeillerJSCrashloopReportService,
+  stopVeillerJSCrashloopReportService,
+} from "./services/VeillerJSCrashloopReportService"
 import {ensureMiniappEngine, stopMiniappEngine} from "./services/MiniappEngine"
 import localMiniappRuntime from "./services/LocalMiniappRuntime"
 import displayProcessor from "./services/DisplayProcessor"
@@ -52,7 +52,7 @@ export const engine = {
    * syncing device settings to the glasses. */
   async start() {
     // Reports attach recent phone logs, so engine owns console interception for
-    // OEM hosts too. Idempotent; the Mentra host may start it earlier.
+    // OEM hosts too. Idempotent; the Veiller host may start it earlier.
     logBuffer.startConsoleInterception()
     await bootstrapStart()
     // Construct + connect the cloud client so the documented configure()+start()
@@ -66,7 +66,7 @@ export const engine = {
     // Route the rest of the inbound device events (wifi/hotspot/gallery -> stores+bus,
     // photo/stream -> coordinators, button/touch/accel/head -> miniapps, save_setting ->
     // store, miniapp_selected -> launcher) so a bare OEM gets device data, not just the
-    // Mentra app's MantleManager.
+    // Veiller app's MantleManager.
     startDeviceEventRouter()
     // Tap Strap status → store, and seed native takeover from the persisted toggle.
     startTapStrapCoordinator()
@@ -91,7 +91,7 @@ export const engine = {
     // Project the glasses' OTA events into the store for the engine.ota read surface.
     startOtaService()
     // Forward glasses mic_lc3 frames to the v2 cloud session so cloud transcription
-    // works for any host (not just the Mentra app's host-side MantleManager fork).
+    // works for any host (not just the Veiller app's host-side MantleManager fork).
     startAudioCloudUplink()
     try {
       await cloudClientService.syncCoreTokenToBluetooth()
@@ -102,23 +102,23 @@ export const engine = {
       )
     }
     // Push device-setting changes to the glasses for ANY host, so
-    // engine.glasses.settings.set() reaches the device (not just the Mentra app).
+    // engine.glasses.settings.set() reaches the device (not just the Veiller app).
     startGlassesSettingsSync()
     // Same for phone-notification config -> the native listener (Android).
     startPhoneNotificationsSync()
     // Android internal/e2e: laptop captions tester can broadcast a failure intent;
     // engine owns turning that into a Cloud V2 report.
     startCaptionsTesterReportService()
-    // MentraJS crashloop-disabled is runtime state; engine owns filing the
+    // VeillerJS crashloop-disabled is runtime state; engine owns filing the
     // automatic report while hosts only render alert/telemetry side effects.
-    startMentraJSCrashloopReportService()
-    // Bring up the local-miniapp engine so a bare OEM can run MentraJS miniapps:
-    // the LocalMiniappRuntime (registry + WebView bridge), the MentraJS router
+    startVeillerJSCrashloopReportService()
+    // Bring up the local-miniapp engine so a bare OEM can run VeillerJS miniapps:
+    // the LocalMiniappRuntime (registry + WebView bridge), the VeillerJS router
     // (crust-bound spawn/dispatch pump + launcher wiring), the DisplayProcessor
     // (layout arbitration over the engine stores), and the gallery-sync service.
-    // All idempotent — when the Mentra app's host bootstrap also calls these, the
+    // All idempotent — when the Veiller app's host bootstrap also calls these, the
     // second call is a no-op. Host-only crashloop telemetry is attached
-    // separately by the Mentra app.
+    // separately by the Veiller app.
     localMiniappRuntime.initialize()
     ensureMiniappEngine()
     displayProcessor.attachToRuntime()
@@ -144,7 +144,7 @@ export const engine = {
     await safely("audio cloud uplink", stopAudioCloudUplink)
     await safely("phone notifications sync", stopPhoneNotificationsSync)
     await safely("captions tester report service", stopCaptionsTesterReportService)
-    await safely("mentrajs crashloop report service", stopMentraJSCrashloopReportService)
+    await safely("veillerjs crashloop report service", stopVeillerJSCrashloopReportService)
     await safely("miniapp engine", stopMiniappEngine)
     await safely("local miniapp runtime", () => localMiniappRuntime.cleanup())
     await safely("display processor", () => displayProcessor.detachFromRuntime())

@@ -540,7 +540,7 @@ async downloadFile(
 
       let headers = {
         "Accept": "*/*",
-        "User-Agent": "MentraOS-Mobile/1.0",
+        "User-Agent": "Veiller-Mobile/1.0",
       };
 
       let resumeBytes = 0;

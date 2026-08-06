@@ -11,7 +11,7 @@ import * as path from "path"
 import * as os from "os"
 
 describe("Credentials Management", () => {
-  const testConfigDir = path.join(os.tmpdir(), ".mentra-test")
+  const testConfigDir = path.join(os.tmpdir(), ".veiller-test")
 
   beforeEach(async () => {
     // Create test directory
@@ -92,21 +92,21 @@ describe("Credentials Management", () => {
   })
 
   describe("Environment Variable Override", () => {
-    test("should use MENTRA_CLI_TOKEN when available", async () => {
+    test("should use VEILLER_CLI_TOKEN when available", async () => {
       // Save original env var
-      const originalToken = process.env.MENTRA_CLI_TOKEN
+      const originalToken = process.env.VEILLER_CLI_TOKEN
 
       // Set test token
-      process.env.MENTRA_CLI_TOKEN = "env_test_token"
+      process.env.VEILLER_CLI_TOKEN = "env_test_token"
 
       // Test would verify this token is used
-      expect(process.env.MENTRA_CLI_TOKEN).toBe("env_test_token")
+      expect(process.env.VEILLER_CLI_TOKEN).toBe("env_test_token")
 
       // Restore original
       if (originalToken) {
-        process.env.MENTRA_CLI_TOKEN = originalToken
+        process.env.VEILLER_CLI_TOKEN = originalToken
       } else {
-        delete process.env.MENTRA_CLI_TOKEN
+        delete process.env.VEILLER_CLI_TOKEN
       }
     })
   })

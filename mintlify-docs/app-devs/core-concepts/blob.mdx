@@ -11,7 +11,7 @@ keys never collide with another miniapp's, and the files survive restarts. Where
 holds binary data.
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 
 registerMiniapp(async (session) => {
   await session.blob.set("logo", pngBytes, { mimeType: "image/png" });

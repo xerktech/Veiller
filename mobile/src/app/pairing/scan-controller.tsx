@@ -1,5 +1,5 @@
-import {type Device, type DeviceModel} from "@mentra/bluetooth-sdk-internal"
-import {engine} from "@mentra/engine"
+import {type Device, type DeviceModel} from "@veiller/bluetooth-sdk-internal"
+import {engine} from "@veiller/engine"
 import {useLocalSearchParams} from "expo-router"
 import {useEffect, useState} from "react"
 import {ActivityIndicator, Image, Platform, ScrollView, TouchableOpacity, View} from "react-native"

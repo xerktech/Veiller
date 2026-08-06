@@ -24,11 +24,11 @@ The SDK currently exposes both `verbose: boolean` and `logLevel: string` in the 
 - `"info"` shows developer's own `session.logger.info()` calls.
 - `"debug"` shows everything including SDK internals.
 - Deprecate `verbose` internally (keep it working, map to `logLevel: "debug"`). Remove from docs.
-- `MENTRA_LOG_LEVEL` env var stays as an override. Config takes priority over env var.
+- `VEILLER_LOG_LEVEL` env var stays as an override. Config takes priority over env var.
 
 ### `createAuthMiddleware` -- remove from v3 docs
 
-Developers should NOT be told to call `createAuthMiddleware` manually. It is built into `MiniAppServer`. The webview-authentication page should only show `getMentraAuth(c)` for reading the authenticated user in route handlers.
+Developers should NOT be told to call `createAuthMiddleware` manually. It is built into `MiniAppServer`. The webview-authentication page should only show `getVeillerAuth(c)` for reading the authenticated user in route handlers.
 
 ### `subscribeToGestures` -- deprecate, add array overload to `onTouchEvent`
 
@@ -147,7 +147,7 @@ The language pair configuration is implicit in the `to()`/`fromTo()` call, not i
 The v2 sidebar section is messy:
 - Some items have icons, some don't
 - Some are postfixed with "(v2)", some aren't
-- "MentraOS SDK Reference" is the first item but it's unclear what it is
+- "Veiller SDK Reference" is the first item but it's unclear what it is
 - "Dashboard API", "Token Utilities", "Utilities" are miscellaneous items that aren't clearly v2 or v3
 
 **Decision:**
@@ -167,7 +167,7 @@ This is a conceptual "what is a mini app" page, not an API reference. It belongs
 
 Webviews are part of the server architecture story. The developer needs to understand: "I run a Bun server, it serves my webview AND connects to the cloud." Webviews right after MiniAppServer tells that story.
 
-### Device -- placed right after MentraSession
+### Device -- placed right after VeillerSession
 
 The device is the physical glasses in front of them. After learning "you get a session," the next thing to learn is "here is the hardware you are talking to." Device before any specific feature (display, transcription, etc.).
 
@@ -184,7 +184,7 @@ It was listed under the v3 section. It is a v2 API. It belongs in v2 Legacy.
 - "Speech to Text" becomes "Transcription" (it is `session.transcription`)
 - "Audio Chunks" stays as "Microphone" (it is `session.mic`)
 - "Speakers" becomes "Speaker" (singular, it is `session.speaker`)
-- Every sidebar entry maps 1:1 to a `MentraSession` property
+- Every sidebar entry maps 1:1 to a `VeillerSession` property
 
 ### Icons -- every entry gets one
 
@@ -235,8 +235,8 @@ No more visual imbalance. Device gets a glasses icon. Every manager entry has an
 - Link to Bun fullstack docs for the dev server. Explain why we use it.
 - Every code example uses v3 callback pattern: `app.onSession((session) => {...})`
 - No class inheritance patterns anywhere in v3 docs.
-- No `AppSession` type. Only `MentraSession`.
-- Import pattern: `import { MiniAppServer, type MentraSession } from "@mentra/sdk"`
+- No `AppSession` type. Only `VeillerSession`.
+- Import pattern: `import { MiniAppServer, type VeillerSession } from "@veiller/sdk"`
 - Every manager page follows: what it is, quick example, full API, common patterns.
 
 ### Variable naming in examples
@@ -372,13 +372,13 @@ These are specific issues found while manually reviewing the published docs:
 
 ### `react-webviews.mdx`
 - Entire CORS section is Express-era, wrong for v3 (remove)
-- `npm install @mentra/react` should be `bun add @mentra/react`
-- `yarn add @mentra/react` should be removed
+- `npm install @veiller/react` should be `bun add @veiller/react`
+- `yarn add @veiller/react` should be removed
 - Prerequisites mention "different domain that allows CORS requests" (not applicable in v3)
 - Description meta tag mentions "CORS configuration" (remove)
 
 ### `bridge-api.mdx`
-- `npm install @mentra/react` should be `bun add @mentra/react`
+- `npm install @veiller/react` should be `bun add @veiller/react`
 
 ### `webview-authentication.mdx`
 - Shows manual `createAuthMiddleware` setup (automatic in v3, remove)
@@ -412,7 +412,7 @@ These are code changes to the SDK itself (not docs) that were decided during thi
 | 6 | `PhoneManager.ts` | Remove `battery` getter and `onBatteryUpdate()`. Never implemented by any client. | Low | Not started |
 | 7 | `PermissionsManager.ts` | Restore `onPermissionError(handler)` and `onPermissionDenied(handler)` events. Register handlers for cloud `permission_error` and `permission_denied` messages. | Medium | Not started |
 | 8 | `app/server/index.ts` | Deprecate `verbose` config option (map to `logLevel: "debug"` internally). Change `logLevel` default from `"info"` to `"warn"`. Remove `verbose` from docs. | Low | Not started |
-| 9 | `MentraSession.ts` | Remove `onPhotoTaken` registration from core handlers. | Low | Not started |
+| 9 | `VeillerSession.ts` | Remove `onPhotoTaken` registration from core handlers. | Low | Not started |
 | 10 | `_V2SessionShim.ts` | Keep `onPhotoTaken` in v2 compat shim (deprecated but functional for v2 apps). | Low | Not started |
 
 ### Priority order
@@ -430,4 +430,4 @@ These are code changes to the SDK itself (not docs) that were decided during thi
 |-------|-------------|
 | 082 | Auth middleware is automatic (confirmed, drives cookieSecret removal) |
 | 092 | Parent issue for all regressions and doc gaps |
-| 093 | `mentra docs` CLI command for LLM doc access |
+| 093 | `veiller docs` CLI command for LLM doc access |

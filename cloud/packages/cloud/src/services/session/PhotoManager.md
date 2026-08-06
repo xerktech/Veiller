@@ -2,7 +2,7 @@
 
 ## Overview
 
-The PhotoManager is a session-level service that handles photo capture requests for Mentra Live glasses within the MentraOS ecosystem. It manages the complete flow from app-initiated photo requests through glasses capture to response delivery, utilizing a direct upload architecture for optimal performance.
+The PhotoManager is a session-level service that handles photo capture requests for Mentra Live glasses within the Veiller ecosystem. It manages the complete flow from app-initiated photo requests through glasses capture to response delivery, utilizing a direct upload architecture for optimal performance.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ case AppToCloudMessageType.PHOTO_REQUEST:
 ```
 
 **Dependencies:**
-- Imports: `PhotoRequest` from `@mentra/sdk`
+- Imports: `PhotoRequest` from `@veiller/sdk`
 - Imports: `UserSession` from `../session/UserSession`
 
 ### 2. UserSession Integration
@@ -120,7 +120,7 @@ private async _sendPhotoResultToApp(pendingPhotoRequest, photoResponse) {
 
 **Imports:**
 ```typescript
-import { PhotoRequest, PhotoResponse, CloudToGlassesMessageType } from '@mentra/sdk';
+import { PhotoRequest, PhotoResponse, CloudToGlassesMessageType } from '@veiller/sdk';
 import UserSession from './UserSession';
 import WebSocket from 'ws';
 import crypto from 'crypto';

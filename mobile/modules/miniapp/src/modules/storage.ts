@@ -4,7 +4,7 @@
  *
  * All operations round-trip to LocalMiniappRuntime, which reads/writes
  * the phone's storage with a namespaced key format:
- *   mentraos_localstorage_{userId}_{packageName}_{key}
+ *   veiller_localstorage_{userId}_{packageName}_{key}
  *
  * Values are plain strings. Callers serialize structured data with
  * JSON.stringify themselves (matching cloud's SimpleStorage shape).

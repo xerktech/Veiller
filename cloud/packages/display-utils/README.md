@@ -1,4 +1,4 @@
-# @mentra/display-utils
+# @veiller/display-utils
 
 Pixel-accurate text measurement and wrapping library for smart glasses displays. This package is shared between the cloud SDK and mobile app to ensure consistent text rendering across all platforms.
 
@@ -17,13 +17,13 @@ Pixel-accurate text measurement and wrapping library for smart glasses displays.
 bun install
 
 # Or add as a dependency
-bun add @mentra/display-utils
+bun add @veiller/display-utils
 ```
 
 ## Quick Start
 
 ```typescript
-import { createG1Toolkit } from '@mentra/display-utils'
+import { createG1Toolkit } from '@veiller/display-utils'
 
 // Create a toolkit configured for G1 glasses
 const { wrapper, measurer } = createG1Toolkit()
@@ -55,7 +55,7 @@ const { measurer, wrapper, helpers, profile } = createG1Toolkit()
 Creates a toolkit with a custom profile and options.
 
 ```typescript
-import { createDisplayToolkit, G1_PROFILE } from '@mentra/display-utils'
+import { createDisplayToolkit, G1_PROFILE } from '@veiller/display-utils'
 
 const toolkit = createDisplayToolkit(G1_PROFILE, {
   breakMode: 'word',
@@ -112,7 +112,7 @@ const lines = wrapper.wrapToLines("Long text here...")
 Pre-configured profiles for different glasses hardware:
 
 ```typescript
-import { G1_PROFILE, G1_PROFILE_LEGACY } from '@mentra/display-utils'
+import { G1_PROFILE, G1_PROFILE_LEGACY } from '@veiller/display-utils'
 
 // G1_PROFILE - Standard Even Realities G1 profile
 // - Display width: 576px
@@ -189,15 +189,15 @@ interface DisplayProfile {
 ### Cloud SDK
 
 ```typescript
-// In @mentra/sdk, re-export from display-utils
-export * from '@mentra/display-utils'
+// In @veiller/sdk, re-export from display-utils
+export * from '@veiller/display-utils'
 ```
 
 ### React Native Mobile
 
 ```typescript
 // In mobile app
-import { createG1Toolkit, TextWrapper } from '@mentra/display-utils'
+import { createG1Toolkit, TextWrapper } from '@veiller/display-utils'
 
 const { wrapper } = createG1Toolkit()
 const lines = wrapper.wrapToLines(transcriptionText)
@@ -207,7 +207,7 @@ const lines = wrapper.wrapToLines(transcriptionText)
 
 ```typescript
 // Works directly in browser environments
-import { createG1Toolkit } from '@mentra/display-utils'
+import { createG1Toolkit } from '@veiller/display-utils'
 ```
 
 ## Development

@@ -3,7 +3,7 @@
  *
  * Wires to cloud streaming extensions via the __phone__ subscriber path.
  *
- * One entry point: `startStream`. By default it provisions a Mentra-hosted
+ * One entry point: `startStream`. By default it provisions a Veiller-hosted
  * stream and returns playback URLs (managed). Pass `direct` to publish straight
  * to your own ingest URL with no relay.
  */
@@ -56,7 +56,7 @@ export interface RestreamDestination {
 export interface StartStreamOptions {
   /**
    * Publish straight to your own ingest URL (rtmp/rtmps/srt/whip). The glasses
-   * connect to it directly with no Mentra relay, so no playback URLs come back.
+   * connect to it directly with no Veiller relay, so no playback URLs come back.
    * Omit this to use the managed relay (the default, best for most apps).
    */
   direct?: string
@@ -128,7 +128,7 @@ export class StreamModule {
   /**
    * Start a live video stream from the glasses camera.
    *
-   * Managed (default) -- Mentra hosts the stream and the result carries
+   * Managed (default) -- Veiller hosts the stream and the result carries
    * `hlsUrl`/`dashUrl`/`webrtcUrl` for playback. Optionally fan out to your own
    * `destinations`.
    *

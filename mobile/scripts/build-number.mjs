@@ -10,7 +10,7 @@
 //
 // Same number is used for both iOS CFBundleVersion and Android versionCode.
 //
-// Pinning: release scripts set MENTRAOS_PINNED_BUILD_NUMBER before invoking
+// Pinning: release scripts set VEILLER_PINNED_BUILD_NUMBER before invoking
 // `bun expo prebuild`, so the value baked into the native projects matches
 // what the script logs in its summary. Without pinning, app.config.ts is
 // evaluated multiple times during a single release (script summary, then
@@ -26,7 +26,7 @@ const EPOCH_OFFSET_MS = Date.UTC(2025, 0, 1);
 const BASELINE = 100_000;
 
 export function getBuildNumber() {
-  const pinned = process.env.MENTRAOS_PINNED_BUILD_NUMBER;
+  const pinned = process.env.VEILLER_PINNED_BUILD_NUMBER;
   if (pinned) {
     const n = parseInt(pinned, 10);
     if (Number.isFinite(n) && n > 0) return n;

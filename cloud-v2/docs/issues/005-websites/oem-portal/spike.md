@@ -10,14 +10,14 @@ We're building OEM auth (specified in
 
 - Sign up and log in
 - Manage their account
-- Register/rotate the public key Mentra uses to verify their JWTs
+- Register/rotate the public key Veiller uses to verify their JWTs
 - View active sessions and revoke when needed
 - Invite teammates
 
 That "somewhere" is a portal — a web app with its own auth surface
 for OEM employees. It's distinct from the runtime OEM auth specced
 in 001 (which is server-to-server, no user UI), and distinct from
-the Mentra mobile app login (consumer auth on Supabase).
+the Veiller mobile app login (consumer auth on Supabase).
 
 This spike captures research on auth providers, prior-art portal
 designs, and decisions still pending before we can spec the portal.
@@ -120,7 +120,7 @@ build-yourself math doesn't work. Vendor is right.
 
 ### Why we're not using Supabase for this
 
-Supabase is fine for B2C consumer auth (Mentra mobile app) but
+Supabase is fine for B2C consumer auth (Veiller mobile app) but
 isn't built for the B2B admin patterns. Specifically:
 
 - Org/member as first-class concepts: not native
@@ -149,7 +149,7 @@ when we write the spec.
                                 │
               ┌─────────────────┼──────────────┐
               ▼                 ▼              ▼
-         WorkOS API         Mentra DB     Mentra /api/oem/*
+         WorkOS API         Veiller DB     Veiller /api/oem/*
          (org/member/    (portal data:   (managing OEM
           session/SSO)    org metadata,   runtime config)
                           audit logs)
@@ -171,9 +171,9 @@ Plain English of each piece:
   authority.
 - **WorkOS API.** What we call to manage orgs, members, sessions,
   invitations.
-- **Mentra DB.** Stores portal-specific things WorkOS doesn't track
+- **Veiller DB.** Stores portal-specific things WorkOS doesn't track
   (e.g., audit logs we want, custom fields).
-- **Mentra `/api/oem/*`.** The runtime cloud's OEM endpoints
+- **Veiller `/api/oem/*`.** The runtime cloud's OEM endpoints
   (specified in 001). The portal calls these on behalf of the
   authenticated admin to manage public keys, list sessions, revoke
   sessions, etc.
@@ -197,7 +197,7 @@ Member (User)
   - role (WorkOS roles)
 ```
 
-In Mentra's DB:
+In Veiller's DB:
 
 ```
 oems (already in 001)
@@ -215,9 +215,9 @@ portalAuditLog                  (new for the portal)
   - details (JSON blob)
 ```
 
-The link between an OEM (Mentra-side) and a WorkOS Organization is
+The link between an OEM (Veiller-side) and a WorkOS Organization is
 the `workosOrgId` field. When a new OEM signs up, we create a
-WorkOS org and a Mentra `oems` document, link them.
+WorkOS org and a Veiller `oems` document, link them.
 
 ## Open questions
 
@@ -264,13 +264,13 @@ These are the things that need team input before the spec can land.
      long?
    - Open: retention policy (90 days hot, archive after?).
 
-8. **Mentra admin access to OEM portal.** Mentra internal admins
+8. **Veiller admin access to OEM portal.** Veiller internal admins
    need to be able to see and act on OEM data (for support, for
    terminating OEMs that violate terms).
-   - How does Mentra admin auth into the portal? Via the same
-     WorkOS, with a special Mentra-org role? Or a separate admin
+   - How does Veiller admin auth into the portal? Via the same
+     WorkOS, with a special Veiller-org role? Or a separate admin
      surface entirely?
-   - Lean: separate `/admin` surface with Mentra-internal SSO
+   - Lean: separate `/admin` surface with Veiller-internal SSO
      (probably the same SSO we use for everything else internal),
      calling the same `/api/oem/*` endpoints with admin auth.
 

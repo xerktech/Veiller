@@ -1,5 +1,5 @@
 import {useState} from "react"
-import {useColorScheme, useSafeArea} from "@mentra/miniapp/ui"
+import {useColorScheme, useSafeArea} from "@veiller/miniapp/ui"
 
 import {BottomNav} from "./components/BottomNav"
 import {Header} from "./components/Header"
@@ -15,8 +15,8 @@ import {useTranslations} from "./hooks/useTranslations"
  *
  * Identical layout/behavior to the cloud app's webview, with the transport
  * seam swapped: useSettings/useTranslations now read/write the background
- * channel bus (mentra.on / mentra.send) instead of SSE + REST. The
- * @mentra/react useMentraAuth/frontendToken plumbing is gone — there is no
+ * channel bus (veiller.on / veiller.send) instead of SSE + REST. The
+ * @veiller/react useVeillerAuth/frontendToken plumbing is gone — there is no
  * cross-origin backend to authenticate against in the local runtime.
  */
 export function App() {

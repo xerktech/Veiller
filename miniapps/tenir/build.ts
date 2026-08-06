@@ -6,12 +6,12 @@
  *                                evaluate this as a classic script, so ESM
  *                                `export` keywords are syntax errors there;
  *                                we emit an IIFE and bundle
- *                                `@mentra/miniapp/background` in (the
+ *                                `@veiller/miniapp/background` in (the
  *                                JSContext has no module resolver).
  *   dist/ui/index.html + ...  — the WebView entry (plain DOM, no React or
  *                                Tailwind, so no build plugins are needed).
  *
- * Env vars whose name starts with `MENTRA_PUBLIC_` are inlined into both
+ * Env vars whose name starts with `VEILLER_PUBLIC_` are inlined into both
  * bundles via `define`.
  */
 
@@ -23,7 +23,7 @@ await rm(distDir, {recursive: true, force: true})
 
 const define: Record<string, string> = {}
 for (const [k, v] of Object.entries(process.env)) {
-  if (k.startsWith("MENTRA_PUBLIC_") && typeof v === "string") {
+  if (k.startsWith("VEILLER_PUBLIC_") && typeof v === "string") {
     define[`process.env.${k}`] = JSON.stringify(v)
   }
 }

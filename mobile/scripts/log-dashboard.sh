@@ -1,5 +1,5 @@
 #!/bin/bash
-# MentraOS Log Dashboard - Real-time statistics and monitoring
+# Veiller Log Dashboard - Real-time statistics and monitoring
 # Usage: bun run start 2>&1 | ./scripts/log-dashboard.sh
 
 # Counters
@@ -30,7 +30,7 @@ CLEAR='\033[2J\033[H'
 print_dashboard() {
   echo -e "${CLEAR}"
   echo "╔════════════════════════════════════════════════════════════════╗"
-  echo "║           MentraOS Development Log Dashboard                  ║"
+  echo "║           Veiller Development Log Dashboard                  ║"
   echo "║                  Real-time Mission Status                     ║"
   echo "╚════════════════════════════════════════════════════════════════╝"
   echo ""

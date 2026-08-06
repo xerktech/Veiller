@@ -1,6 +1,6 @@
 import type { PhotoData as LegacyPhotoData } from "../../types/photo-data";
 import { AppToCloudMessageType } from "../../types";
-import type { MentraSession } from "../MentraSession";
+import type { VeillerSession } from "../VeillerSession";
 import type {
   ExistingStreamInfo,
   ManagedStreamOptions,
@@ -56,10 +56,10 @@ function generateRequestId(): string {
 }
 
 export class _V2CameraShim {
-  private readonly session: MentraSession;
+  private readonly session: VeillerSession;
   private readonly config: _V2CameraShimConfig;
 
-  constructor(session: MentraSession, config: _V2CameraShimConfig = {}) {
+  constructor(session: VeillerSession, config: _V2CameraShimConfig = {}) {
     this.session = session;
     this.config = config;
   }

@@ -10,7 +10,7 @@ export function registerResources(server: McpServer, config: ConsoleMcpConfig): 
   if (config.capabilities.developer) {
     server.registerResource(
       "apps-list",
-      "mentra://apps",
+      "veiller://apps",
       {
         title: "Developer Apps",
         description: "List of MiniApps for the authenticated developer",
@@ -19,7 +19,7 @@ export function registerResources(server: McpServer, config: ConsoleMcpConfig): 
       async () => ({
         contents: [
           {
-            uri: "mentra://apps",
+            uri: "veiller://apps",
             mimeType: "application/json",
             text: JSON.stringify(
               redactSecrets(unwrapData(await createCliClient(config).listApps())),
@@ -33,7 +33,7 @@ export function registerResources(server: McpServer, config: ConsoleMcpConfig): 
 
     server.registerResource(
       "app-config",
-      new ResourceTemplate("mentra://apps/{packageName}", { list: undefined }),
+      new ResourceTemplate("veiller://apps/{packageName}", { list: undefined }),
       {
         title: "App Config",
         description: "MiniApp configuration by package name",
@@ -57,7 +57,7 @@ export function registerResources(server: McpServer, config: ConsoleMcpConfig): 
   if (config.capabilities.incidents) {
     server.registerResource(
       "incidents-recent",
-      "mentra://incidents/recent",
+      "veiller://incidents/recent",
       {
         title: "Recent Incidents",
         description: "Recent bug report incident summaries",
@@ -68,7 +68,7 @@ export function registerResources(server: McpServer, config: ConsoleMcpConfig): 
         return {
           contents: [
             {
-              uri: "mentra://incidents/recent",
+              uri: "veiller://incidents/recent",
               mimeType: "application/json",
               text: JSON.stringify(res.data, null, 2),
             },
@@ -79,7 +79,7 @@ export function registerResources(server: McpServer, config: ConsoleMcpConfig): 
 
     server.registerResource(
       "incident-summary",
-      new ResourceTemplate("mentra://incidents/{incidentId}/summary", {
+      new ResourceTemplate("veiller://incidents/{incidentId}/summary", {
         list: undefined,
       }),
       {

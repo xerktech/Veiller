@@ -7,7 +7,7 @@
 
 import {StrictMode} from "react"
 import {createRoot} from "react-dom/client"
-import {MentraAuthProvider} from "@mentra/react"
+import {VeillerAuthProvider} from "@veiller/react"
 
 import "./index.css"
 import App from "./App"
@@ -16,9 +16,9 @@ const elem = document.getElementById("root")!
 
 const app = (
   <StrictMode>
-    <MentraAuthProvider>
+    <VeillerAuthProvider>
       <App />
-    </MentraAuthProvider>
+    </VeillerAuthProvider>
   </StrictMode>
 )
 

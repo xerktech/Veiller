@@ -3,7 +3,7 @@
  * WebView. Both bundlers inline this file at build time, so there's no runtime
  * resolution across the boundary.
  *
- * Rule: anything that crosses the `mentra.send` / `session.ui.send` channel
+ * Rule: anything that crosses the `veiller.send` / `session.ui.send` channel
  * boundary needs its payload shape declared here so each side sees the same
  * TypeScript type.
  *

@@ -14,7 +14,7 @@
  * never delay or fail the report API response. Callers fire-and-forget.
  */
 
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { createHmac } from "node:crypto";
 
 const logger = createLogger("core").child({ service: "report-slack.service" });

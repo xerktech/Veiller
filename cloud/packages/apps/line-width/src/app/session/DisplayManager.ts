@@ -1,4 +1,4 @@
-import {ViewType} from "@mentra/sdk"
+import {ViewType} from "@veiller/sdk"
 import {TranscriptProcessor} from "../utils"
 import {UserSession} from "./UserSession"
 

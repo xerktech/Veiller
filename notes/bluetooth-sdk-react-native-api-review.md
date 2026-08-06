@@ -12,10 +12,10 @@ At the start of this review, the package exposed two layers:
 The current publish target narrows that React Native surface:
 
 - Root `BluetoothSdk` remains the imperative command surface plus typed hardware events.
-- `@mentra/bluetooth-sdk/react` exposes `useMentraBluetooth`, `useBluetoothScan`, and `useBluetoothEvent`.
+- `@veiller/bluetooth-sdk/react` exposes `useVeillerBluetooth`, `useBluetoothScan`, and `useBluetoothEvent`.
 - Raw native/store status snapshots remain internal implementation details, not the primary partner API.
 
-The example app still has a large app-local `useMentraSdk` hook. That hook currently owns a lot more than basic SDK lifecycle:
+The example app still has a large app-local `useVeillerSdk` hook. That hook currently owns a lot more than basic SDK lifecycle:
 
 - Initial status loading and event subscription.
 - Default-device persistence.
@@ -131,7 +131,7 @@ Pattern to avoid exposing directly to partners:
 - Requiring every app to manually coordinate scan cancellation and connect lifecycle.
 - Requiring users to know low-level BLE quirks for common flows.
 
-This raw style is useful as a lower-level escape hatch, but our SDK should hide more because Mentra glasses have higher-level product semantics than generic BLE devices.
+This raw style is useful as a lower-level escape hatch, but our SDK should hide more because Veiller glasses have higher-level product semantics than generic BLE devices.
 
 Why the raw shape exists:
 
@@ -195,7 +195,7 @@ React hooks should be the recommended app-building API for lifecycle-heavy flows
 - Potentially microphone PCM lifecycle.
 - Potentially Wi-Fi provisioning lifecycle.
 
-The example app should eventually prove this division. Its app-local `useMentraSdk` can still exist, but it should become a composition layer over SDK hooks plus demo-specific helpers. If it continues to duplicate generic scan/status/default-device/event lifecycle, then the SDK hooks are not doing enough.
+The example app should eventually prove this division. Its app-local `useVeillerSdk` can still exist, but it should become a composition layer over SDK hooks plus demo-specific helpers. If it continues to duplicate generic scan/status/default-device/event lifecycle, then the SDK hooks are not doing enough.
 
 ## Hook Design Principles For This SDK
 
@@ -240,7 +240,7 @@ For React Native, options objects are usually friendlier and safer for commands 
 
 ## What The Example App Tells Us
 
-The example app's large `useMentraSdk` should be split, but not all of it belongs in the SDK.
+The example app's large `useVeillerSdk` should be split, but not all of it belongs in the SDK.
 
 Generic lifecycle that probably belongs in SDK hooks:
 
@@ -280,15 +280,15 @@ Potential feature hooks to consider:
 - `useGalleryMode()` if the current state/toggle lifecycle remains tricky.
 - `useWifiProvisioning()` if Wi-Fi scan/connect/disconnect state remains boilerplate-heavy.
 
-Do not add a giant `useMentraSdk` hook to the SDK. That would just move the example app's kitchen sink into the package. The better shape is small composable hooks plus one example app hook that composes them for the demo UI.
+Do not add a giant `useVeillerSdk` hook to the SDK. That would just move the example app's kitchen sink into the package. The better shape is small composable hooks plus one example app hook that composes them for the demo UI.
 
 ## Suggested North-Star Example
 
 The getting-started path should look closer to this:
 
 ```tsx
-import BluetoothSdk, {DeviceModels} from '@mentra/bluetooth-sdk';
-import {useGlassesConnection} from '@mentra/bluetooth-sdk/react';
+import BluetoothSdk, {DeviceModels} from '@veiller/bluetooth-sdk';
+import {useGlassesConnection} from '@veiller/bluetooth-sdk/react';
 
 export function DeviceCard() {
   const glasses = useGlassesConnection({
@@ -332,7 +332,7 @@ await BluetoothSdk.connect(devices[0]);
 - Should public event names remain snake_case for continuity with native/protocol events, or should React Native expose camelCase event aliases?
 - Should `BluetoothStatus` be renamed or reframed in docs as "phone-side SDK state" to avoid implying it only contains Bluetooth adapter state?
 - Should `requestPhoto`, `rgbLedControl`, and `setMicState` move to options-object signatures before publishing?
-- Should we offer a provider, such as `MentraBluetoothProvider`, to prevent duplicate subscriptions if several screens use hooks independently?
+- Should we offer a provider, such as `VeillerBluetoothProvider`, to prevent duplicate subscriptions if several screens use hooks independently?
 - Which feature hooks belong in the SDK versus only in the example app?
 
 ## Rethought SDK Plan
@@ -372,11 +372,11 @@ The example app should prove the SDK API by using a React session hook for gener
 Proposed usage:
 
 ```tsx
-import {DeviceModels} from '@mentra/bluetooth-sdk';
-import {useMentraBluetooth} from '@mentra/bluetooth-sdk/react';
+import {DeviceModels} from '@veiller/bluetooth-sdk';
+import {useVeillerBluetooth} from '@veiller/bluetooth-sdk/react';
 
 export function DeviceTab() {
-  const mentra = useMentraBluetooth({
+  const veiller = useVeillerBluetooth({
     defaultModel: DeviceModels.MentraLive,
     autoConnectDefault: true,
   });
@@ -384,15 +384,15 @@ export function DeviceTab() {
   return (
     <>
       <Text>{mentra.glasses.connection.state}</Text>
-      <Button disabled={mentra.scan.active} onPress={() => mentra.scan.start()}>
+      <Button disabled={veiller.scan.active} onPress={() => veiller.scan.start()}>
         Scan
       </Button>
-      {mentra.scan.devices.map((device) => (
-        <Button key={device.id} onPress={() => mentra.connect(device)}>
+      {veiller.scan.devices.map((device) => (
+        <Button key={device.id} onPress={() => veiller.connect(device)}>
           Connect {device.name}
         </Button>
       ))}
-      <Button disabled={!mentra.glasses.connected} onPress={mentra.disconnect}>
+      <Button disabled={!mentra.glasses.connected} onPress={veiller.disconnect}>
         Disconnect
       </Button>
     </>
@@ -403,7 +403,7 @@ export function DeviceTab() {
 Possible shape:
 
 ```ts
-type MentraBluetoothSession = {
+type VeillerBluetoothSession = {
   error: unknown | null;
   busy: boolean;
   glasses: GlassesRuntimeState;
@@ -416,16 +416,16 @@ type MentraBluetoothSession = {
 };
 ```
 
-This is not a proposal to move the whole example app's `useMentraSdk` into the package. It is a proposal to move only generic Bluetooth lifecycle into the package.
+This is not a proposal to move the whole example app's `useVeillerSdk` into the package. It is a proposal to move only generic Bluetooth lifecycle into the package.
 
 Rejected alternative:
 
-- Do not add a giant `useMentraSdk()` SDK hook that owns photo demo servers, local WebRTC receiver setup, WAV writing, UI copy, and example-specific state. That would just move app complexity into the SDK.
+- Do not add a giant `useVeillerSdk()` SDK hook that owns photo demo servers, local WebRTC receiver setup, WAV writing, UI copy, and example-specific state. That would just move app complexity into the SDK.
 
 Pattern link:
 
 - Apollo and Ably show why hooks should return state plus actions. The component should see `loading/error/data` or `presence/actions`, not wire up listeners itself.
-- BLE PLX shows the lower-level alternative: raw scan callbacks, duplicate devices, explicit stop calls. That is useful as an escape hatch, but our product SDK can do better because it knows Mentra device models and readiness semantics.
+- BLE PLX shows the lower-level alternative: raw scan callbacks, duplicate devices, explicit stop calls. That is useful as an escape hatch, but our product SDK can do better because it knows Veiller device models and readiness semantics.
 
 ### Decision 3: Make Status State Discriminated Where It Prevents Impossible UI
 
@@ -488,7 +488,7 @@ Public contract:
 Example:
 
 ```tsx
-await mentra.connect(device);
+await veiller.connect(device);
 
 // Do not assume ready here.
 // Render from mentra.glasses.ready instead.
@@ -544,7 +544,7 @@ Pattern link:
 Good candidates:
 
 ```ts
-function useMentraBluetooth(options?: UseMentraBluetoothOptions): MentraBluetoothSession;
+function useVeillerBluetooth(options?: UseVeillerBluetoothOptions): VeillerBluetoothSession;
 function useBluetoothEvent<EventName extends BluetoothSdkEventName>(...): void;
 function usePhotoCapture(options?: UsePhotoCaptureOptions): PhotoCaptureController;
 function useStreamSession(options?: UseStreamSessionOptions): StreamSessionController;
@@ -613,7 +613,7 @@ Pattern link:
 ### Example App Migration Plan
 
 1. Introduce the new public hook shape without removing low-level APIs.
-2. Update the React Native example app's `useMentraSdk` to consume the SDK hook for:
+2. Update the React Native example app's `useVeillerSdk` to consume the SDK hook for:
    - Initial glasses/sdk/default-device snapshot loading.
    - Native listener cleanup.
    - Scan device list, selected device, stop-on-unmount, and connect actions.
@@ -626,7 +626,7 @@ Pattern link:
    - PCM-to-WAV file writing and playback UI.
    - Console event formatting.
 4. Rewrite docs so the first examples use hooks and root imperative commands.
-5. Do not publish raw React Native `BluetoothStatus` / `GlassesStatus` snapshots as the main partner surface. They can stay inside the internal bridge used by MentraOS and by the hooks.
+5. Do not publish raw React Native `BluetoothStatus` / `GlassesStatus` snapshots as the main partner surface. They can stay inside the internal bridge used by Veiller and by the hooks.
 
 Success criterion:
 
@@ -639,14 +639,14 @@ Success criterion:
 
 Implemented first:
 
-- Added `useMentraBluetooth()` as a React session hook that composes the existing scan/status/connection hooks.
+- Added `useVeillerBluetooth()` as a React session hook that composes the existing scan/status/connection hooks.
 - Moved the React Native example app's generic lifecycle to that hook:
   - Initial glasses/sdk/default-device snapshot loading.
   - Default-device storage synchronization.
   - Scan result state and selected device state.
   - Connect, connect-default, disconnect, and clear-default actions.
   - Gallery-mode desired setting state.
-- Removed raw status listeners from the example app and stopped exporting raw status hooks from `@mentra/bluetooth-sdk/react`.
+- Removed raw status listeners from the example app and stopped exporting raw status hooks from `@veiller/bluetooth-sdk/react`.
 - Kept native/store snapshots in the private bridge only, so the public React Native hook returns shaped `glasses`, `sdk`, and `scan` state.
 - Kept demo-specific logic in the example app: local photo receiver, direct stream receiver, stream preview polling, PCM WAV writing, playback, UI copy, and event formatting.
 

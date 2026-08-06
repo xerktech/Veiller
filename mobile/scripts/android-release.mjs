@@ -10,21 +10,21 @@ process.env.ORG_GRADLE_PROJECT_reactNativeArchitectures = 'arm64-v8a'
 
 // Optional --name <suffix> — produces a parallel-installable build with a
 // suffixed package name and matching app label. Validation lives in
-// app.config.ts (which reads MENTRAOS_BUILD_NAME). e.g.
+// app.config.ts (which reads VEILLER_BUILD_NAME). e.g.
 //   bun android-release --name stable
 //   → applicationId: com.xerktech.veiller.stable
 //   → app label:     stable
 const nameSuffix = argv.name ? String(argv.name).trim() : null
 if (nameSuffix) {
-  process.env.MENTRAOS_BUILD_NAME = nameSuffix
+  process.env.VEILLER_BUILD_NAME = nameSuffix
 }
 
 console.log('Building Android release...');
 if (nameSuffix) {
-  console.log(`  Variant: MENTRAOS_BUILD_NAME=${nameSuffix}`)
+  console.log(`  Variant: VEILLER_BUILD_NAME=${nameSuffix}`)
 }
 
-// Prebuild Android (reads MENTRAOS_BUILD_NAME via app.config.ts)
+// Prebuild Android (reads VEILLER_BUILD_NAME via app.config.ts)
 await $({ stdio: 'inherit' })`bun expo prebuild --platform android`;
 
 // Patch the build-time copy of google-services.json to include a client entry

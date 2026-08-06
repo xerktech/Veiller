@@ -124,7 +124,7 @@ Headers:
    - Return consistent response envelope
 
 4. **Type migration**:
-   - Move from `@mentra/sdk/types` to `@mentra/types`:
+   - Move from `@veiller/sdk/types` to `@mentra/types`:
      - `Capabilities`, `HardwareRequirement`, `HardwareType`, `HardwareRequirementLevel`
    - Mobile already has `AppletInterface` - move to shared package
    - Cloud `AppI` stays in model (internal only)

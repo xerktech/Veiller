@@ -1,4 +1,4 @@
-import type { MentraSession } from "@mentra/sdk";
+import type { VeillerSession } from "@veiller/sdk";
 import type { StateManager } from "../state/StateManager";
 import type { StreamState } from "../../shared/state";
 
@@ -32,7 +32,7 @@ const VIDEO_CONFIG = {
  * Owned by UserSession — one StreamManager per user.
  */
 export class StreamManager {
-  private session: MentraSession | null = null;
+  private session: VeillerSession | null = null;
   private statusCleanup: (() => void) | null = null;
   private stateManager: StateManager;
 
@@ -52,7 +52,7 @@ export class StreamManager {
 
   // ─── Session binding ─────────────────────────────────────────────────────
 
-  attachSession(session: MentraSession): void {
+  attachSession(session: VeillerSession): void {
     this.detachSession();
     this.session = session;
 
@@ -130,7 +130,7 @@ export class StreamManager {
    * Ask the cloud if there's already an active stream for this user.
    * If yes, adopt it — populate our state with the stream info and push to SSE.
    */
-  private async checkForExistingStream(session: MentraSession): Promise<void> {
+  private async checkForExistingStream(session: VeillerSession): Promise<void> {
     try {
       const existing = await (session.camera as any).checkExistingStream();
 

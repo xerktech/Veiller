@@ -21,7 +21,7 @@ What's NOT derivable from filesystem state and needs separate storage:
 
 That's two MMKV keys per dev package: `<packageName>_dev_url` and `<packageName>_dev_last_reachable`. No parallel "PersistedDevApplet" registry.
 
-**Rule on packageName collision:** dev re-scan replaces the entire package directory. Dev and store-installed of the same packageName are mutually exclusive. If a developer needs both, they can use a different packageName (e.g. `com.mentra.example.dev`). Cleaner mental model than maintaining a "preferred version selector" between dev-* and semver versions.
+**Rule on packageName collision:** dev re-scan replaces the entire package directory. Dev and store-installed of the same packageName are mutually exclusive. If a developer needs both, they can use a different packageName (e.g. `com.veiller.example.dev`). Cleaner mental model than maintaining a "preferred version selector" between dev-* and semver versions.
 
 ---
 
@@ -29,12 +29,12 @@ That's two MMKV keys per dev package: `<packageName>_dev_url` and `<packageName>
 
 ```
 ┌─────────────────── DEVELOPER LAPTOP ───────────────────┐
-│  mentra-miniapp dev (CLI)                              │
+│  veiller-miniapp dev (CLI)                              │
 │   ├── user's server.ts          (port 3000, miniapp)   │
 │   └── sidecar dev-server.ts     (port 3001)            │
-│         ├── /__mentra_dev (WebSocket — live reload)    │
-│         ├── /__mentra_dev/health                       │
-│         └── /__mentra_dev/files  ← NEW: file manifest  │
+│         ├── /__veiller_dev (WebSocket — live reload)    │
+│         ├── /__veiller_dev/health                       │
+│         └── /__veiller_dev/files  ← NEW: file manifest  │
 └────────────────────────┬───────────────────────────────┘
                          │ HTTP/WS over LAN
 ┌────────────────────────┴───────────────────────────────┐
@@ -101,7 +101,7 @@ mobile/src/
 └── i18n/en.ts                       EXISTING — new copy strings
 
 sdk/miniapp-cli/src/
-└── dev-server.ts                    EXISTING — add /__mentra_dev/files endpoint
+└── dev-server.ts                    EXISTING — add /__veiller_dev/files endpoint
 ```
 
 10 files touched, 3 new. The new "DevMiniappBundleCache.ts" is a thin functional module — not a singleton service with state.
@@ -213,7 +213,7 @@ Drop the `RECENT_KEY` MMKV usage in `miniapp-developer-url.tsx` — the "Recent"
 
 #### Sidecar endpoint — `sdk/miniapp-cli/src/dev-server.ts`
 
-Add `GET /__mentra_dev/files` returning:
+Add `GET /__veiller_dev/files` returning:
 ```json
 {
   "files": [
@@ -229,7 +229,7 @@ Add `GET /__mentra_dev/files` returning:
 
 Generate by walking the project root. Exclude:
 - `node_modules/`, `dist/` (unless served), `.git/`, `.env*`
-- `__mentra_dev` paths themselves.
+- `__veiller_dev` paths themselves.
 
 Walk strategy: BFS from project root, breadth limit ~5 levels, file count limit ~500. Beyond that warn and truncate.
 
@@ -269,7 +269,7 @@ export async function snapshotDevBundle(
 
 async function doSnapshot(packageName: string, devUrl: string, devPort: number): Promise<string | null> {
   const sidecarBase = buildSidecarUrl(devUrl, devPort)  // ws://host:port → http://host:port
-  const manifestRes = await fetch(`${sidecarBase}/__mentra_dev/files`)
+  const manifestRes = await fetch(`${sidecarBase}/__veiller_dev/files`)
   if (!manifestRes.ok) return null
   const {files} = (await manifestRes.json()) as {files: string[]}
 
@@ -518,7 +518,7 @@ Same guard in `retryStartApp`.
 
 ## Wire-protocol changes
 
-**None.** All work is at the SDK + phone layer; the existing wire protocol is sufficient. The new `/__mentra_dev/files` endpoint is HTTP-on-the-laptop, not part of the phone-miniapp protocol.
+**None.** All work is at the SDK + phone layer; the existing wire protocol is sufficient. The new `/__veiller_dev/files` endpoint is HTTP-on-the-laptop, not part of the phone-miniapp protocol.
 
 ## Test plan
 

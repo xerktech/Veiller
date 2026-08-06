@@ -22,7 +22,7 @@ within a second after about 10 of them were spawned. The fix:
 ## Background runtime contract
 
 The background is not a browser and not Node. Do not rely on an API just
-because TypeScript or Bun accepts it during a build. MentraOS explicitly
+because TypeScript or Bun accepts it during a build. Veiller explicitly
 provides `console`, timers (`setTimeout`, `setInterval`, and
 `queueMicrotask`), `fetch`, `WebSocket`, per-miniapp `localStorage`,
 `crypto.getRandomValues`, `crypto.randomUUID`, `TextEncoder`, `TextDecoder`,
@@ -48,7 +48,7 @@ my-miniapp/
 │   │   └── controllers/      # optional — split logic here as it grows
 │   ├── ui/                   # WebView entry — opens on demand
 │   │   ├── index.html
-│   │   ├── main.tsx          # mounts <App/>, calls mentra.ready()
+│   │   ├── main.tsx          # mounts <App/>, calls veiller.ready()
 │   │   └── App.tsx
 │   └── shared/
 │       ├── channels.ts       # typed channel registry — both sides import
@@ -76,20 +76,20 @@ my-miniapp/
 }
 ```
 
-## Sub-paths in @mentra/miniapp
+## Sub-paths in @veiller/miniapp
 
 The SDK ships two sub-paths under one package:
 
-- **`@mentra/miniapp/background`** — `MiniappSession` + every
+- **`@veiller/miniapp/background`** — `MiniappSession` + every
   `session.*` module type. Import this in `src/background/`.
-- **`@mentra/miniapp/ui`** — `mentra` global declaration + React
-  adapters (`MentraProvider`, `useSafeArea`, `useVisibility`,
+- **`@veiller/miniapp/ui`** — `veiller` global declaration + React
+  adapters (`VeillerProvider`, `useSafeArea`, `useVisibility`,
   `MiniappHeader`, ...). Import this in `src/ui/`.
 
-There is no bare `@mentra/miniapp` import. Sub-paths only. Picking the
-wrong side fails at compile time — the `mentra` global isn't visible
-from `@mentra/miniapp/background`, and `MiniappSession` isn't visible
-from `@mentra/miniapp/ui`.
+There is no bare `@veiller/miniapp` import. Sub-paths only. Picking the
+wrong side fails at compile time — the `veiller` global isn't visible
+from `@veiller/miniapp/background`, and `MiniappSession` isn't visible
+from `@veiller/miniapp/ui`.
 
 ## Typed channels
 
@@ -97,7 +97,7 @@ from `@mentra/miniapp/ui`.
 name + payload shape that crosses the WebView ↔ background boundary.
 
 ```typescript
-import type {MentraTyped} from "@mentra/miniapp/ui"
+import type {VeillerTyped} from "@veiller/miniapp/ui"
 
 export interface Channels {
   // background → UI
@@ -107,7 +107,7 @@ export interface Channels {
 }
 
 declare global {
-  var mentra: MentraTyped<Channels>
+  var veiller: VeillerTyped<Channels>
 }
 ```
 
@@ -122,15 +122,15 @@ bun run build
 ```
 
 Produces `dist/background/index.js` and `dist/ui/*` in a single pass.
-The CLI's `mentra-miniapp pack` zips both folders into one bundle.
+The CLI's `veiller-miniapp pack` zips both folders into one bundle.
 
 ## Lifecycle
 
 1. **Install** — host downloads bundle, unzips, validates manifest,
    spawns the JSContext, runs `init(session)`. Background is alive.
 2. **User opens UI tile** — host creates a fresh WebView, injects the
-   `mentra` shim, loads `dist/ui/index.html`. WebView calls
-   `mentra.ready()`. `session.ui.onOpen` handlers fire in background.
+   `veiller` shim, loads `dist/ui/index.html`. WebView calls
+   `veiller.ready()`. `session.ui.onOpen` handlers fire in background.
 3. **User navigates away** — host destroys the WebView. JSContext
    stays alive. `session.ui.onClose` fires.
 4. **Disable / uninstall** — host calls `session.onBeforeDisconnect`
@@ -150,7 +150,7 @@ A clean 60s window in `RUNNING` resets the retry counter.
 ## See also
 
 - [session.ui](./ui.md) — the background-side message bus reference.
-- [agents/mentrajs-two-layer-miniapp-architecture.md](../../agents/mentrajs-two-layer-miniapp-architecture.md)
+- [agents/veillerjs-two-layer-miniapp-architecture.md](../../agents/veillerjs-two-layer-miniapp-architecture.md)
   — full architecture spec, including memory profile and engine choice.
 - The example miniapp (`sdk/example-miniapp/`) — canonical
   implementation following Appendix A of the architecture spec.

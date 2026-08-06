@@ -32,7 +32,7 @@ SKIP_REDEPLOYS=false
 DRY_RUN=false
 
 # Doppler project name
-DOPPLER_PROJECT="mentraos-cloud"
+DOPPLER_PROJECT="veiller-cloud"
 
 get_cluster_name() {
     case $1 in
@@ -88,7 +88,7 @@ usage() {
     echo "  $0 --status"
     echo ""
     echo "Known clusters:"
-    echo "  4689 - US Central (mentra-cluster-central-us)"
+    echo "  4689 - US Central (veiller-cluster-central-us)"
     echo "  4696 - France"
     echo "  4754 - East Asia"
     echo "  4753 - Canada Central"

@@ -6,7 +6,7 @@ import Animated, {useSharedValue, useAnimatedStyle, withSpring} from "react-nati
 import {Button} from "@/components/ignite"
 import {Text} from "@/components/ignite/Text"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {ThemedStyle} from "@/theme"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 

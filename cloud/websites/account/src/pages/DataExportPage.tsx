@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import AccountLayout from "../components/AccountLayout";
 import { toast } from "sonner";
 // import api from '../services/api.service';
@@ -205,7 +205,7 @@ const DataExportPage: React.FC = () => {
       <div>
         <h1 className="text-2xl font-bold mb-4">Export Your Data</h1>
         <p className="mb-6">
-          You can export all your Mentra data for your records. The export will
+          You can export all your Veiller data for your records. The export will
           include your profile information, preferences, and usage data.
         </p>
 

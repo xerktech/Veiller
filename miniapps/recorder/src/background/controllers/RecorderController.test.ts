@@ -35,7 +35,7 @@ function makeHarness(stopTailDrainMs = 0, hasMic = true, closeMs = 0) {
           ? [
               {
                 key: "rec-test",
-                name: "Mentra Recording.wav",
+                name: "Veiller Recording.wav",
                 uri: "file:///rec-test.wav",
                 createdAt: 1,
                 bytes: 44,
@@ -153,7 +153,7 @@ describe("RecorderController recording edges", () => {
       status: "stopped",
       recording: {
         id: "rec-test",
-        name: "Mentra Recording.wav",
+        name: "Veiller Recording.wav",
         createdAt: 1,
         bytes: 44,
         durationMs: 0,

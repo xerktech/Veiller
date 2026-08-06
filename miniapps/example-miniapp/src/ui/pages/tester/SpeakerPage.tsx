@@ -2,7 +2,7 @@
 
 import {useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader, useRpc} from "@mentra/miniapp/ui"
+import {MiniappHeader, useRpc} from "@veiller/miniapp/ui"
 
 import "../../../shared/channels"
 import type {Channels} from "../../../shared/channels"
@@ -17,7 +17,7 @@ export default function SpeakerPage() {
   const navigate = useNavigate()
   const {invoke, lastError} = useTester("speaker")
   const streamTone = useRpc<Channels, "tester:speaker-stream-tone">("tester:speaker-stream-tone")
-  const [phrase, setPhrase] = useState("Hello from MentraJS")
+  const [phrase, setPhrase] = useState("Hello from VeillerJS")
   const [audioUrl, setAudioUrl] = useState(
     "https://file-examples.com/storage/fe0e2ffd1867594d0d2b0f2/2017/11/file_example_MP3_700KB.mp3",
   )

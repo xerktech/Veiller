@@ -34,7 +34,7 @@ import {
   type ConnectionInit,
   type ConnectionAck,
   type AudioSubscription,
-} from "@mentra/cloud-protocol";
+} from "@veiller/cloud-protocol";
 
 /** A scriptable WebSocket the test drives by hand (peer = the test). */
 class FakeSocket implements WebSocketLike {
