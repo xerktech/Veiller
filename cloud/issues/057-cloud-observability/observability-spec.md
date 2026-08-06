@@ -469,7 +469,7 @@ Cloud-prod generates **11.3 million logs per day** (after filtering — debug is
 
 ### What to do
 
-1. **Separate BetterStack source for prod** — `MentraCloud - Prod` (ID 2324289) is created. Point prod and staging Porter env vars at this source. The existing `AugmentOS` source becomes the dev/local dumping ground. No developer `.env` changes needed.
+1. **Separate BetterStack source for prod** — `VeillerCloud - Prod` (ID 2324289) is created. Point prod and staging Porter env vars at this source. The existing `AugmentOS` source becomes the dev/local dumping ground. No developer `.env` changes needed.
 
 2. **Set staging log level to `info`** — match prod. Eliminates 1.5M debug logs/day from staging.
 

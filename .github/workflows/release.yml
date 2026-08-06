@@ -177,7 +177,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          # Pinned: bun 1.3.x fails to resolve the file: @mentra/miniapp-cli
+          # Pinned: bun 1.3.x fails to resolve the file: @veiller/miniapp-cli
           # dep when installing mobile/ (resolver regression); 1.2.x works.
           # (Also preinstalled on the runner; this pins the job regardless.)
           bun-version: "1.2.22"
@@ -224,8 +224,8 @@ jobs:
         run: |
           set -euo pipefail
           cp .env.example .env
-          sed "s|^EXPO_PUBLIC_MENTRAOS_VERSION=.*|EXPO_PUBLIC_MENTRAOS_VERSION=$VERSION|" .env > .env.tmp && mv .env.tmp .env
-          grep "^EXPO_PUBLIC_MENTRAOS_VERSION=" .env
+          sed "s|^EXPO_PUBLIC_VEILLER_VERSION=.*|EXPO_PUBLIC_VEILLER_VERSION=$VERSION|" .env > .env.tmp && mv .env.tmp .env
+          grep "^EXPO_PUBLIC_VEILLER_VERSION=" .env
 
       - name: Run Expo prebuild
         working-directory: ./mobile

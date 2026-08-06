@@ -1,4 +1,4 @@
-import {useAuth, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Spinner} from "@mentra/shared"
+import {useAuth, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Spinner} from "@veiller/shared"
 import DashboardLayout from "../components/DashboardLayout"
 
 const AccountPage: React.FC = () => {
@@ -56,14 +56,14 @@ const AccountPage: React.FC = () => {
             <CardHeader>
               <CardTitle>Connected Services</CardTitle>
               <CardDescription>
-                Manage your connections to Mentra services
+                Manage your connections to Veiller services
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-2 border-b">
                   <div>
-                    <h3 className="font-medium">Mentra App Store</h3>
+                    <h3 className="font-medium">Veiller App Store</h3>
                     <p className="text-sm text-gray-500">Access apps for your smart glasses</p>
                   </div>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -73,8 +73,8 @@ const AccountPage: React.FC = () => {
 
                 <div className="flex items-center justify-between py-2 border-b">
                   <div>
-                    <h3 className="font-medium">Mentra Developer Portal</h3>
-                    <p className="text-sm text-gray-500">Develop apps for Mentra</p>
+                    <h3 className="font-medium">Veiller Developer Portal</h3>
+                    <p className="text-sm text-gray-500">Develop apps for Veiller</p>
                   </div>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                     Not Connected
@@ -83,7 +83,7 @@ const AccountPage: React.FC = () => {
 
                 <div className="flex items-center justify-between py-2">
                   <div>
-                    <h3 className="font-medium">Mentra Mobile App</h3>
+                    <h3 className="font-medium">Veiller Mobile App</h3>
                     <p className="text-sm text-gray-500">Manage your smart glasses</p>
                   </div>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -137,7 +137,7 @@ const AccountPage: React.FC = () => {
                       Account Created
                     </p>
                     <p className="text-sm text-gray-500">
-                      Welcome to Mentra!
+                      Welcome to Veiller!
                     </p>
                   </div>
                   <div className="ml-4 flex-shrink-0">

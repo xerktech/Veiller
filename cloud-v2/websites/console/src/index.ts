@@ -10,7 +10,7 @@ async function proxyCoreRequest(req: Request) {
   headers.delete("host");
   // Match the deployed Pages proxy so local /api/* auth redirects target the
   // correct origin instead of falling back to CORE_URL.
-  headers.set("x-mentra-public-origin", sourceUrl.origin);
+  headers.set("x-veiller-public-origin", sourceUrl.origin);
 
   return fetch(upstreamUrl, {
     method: req.method,

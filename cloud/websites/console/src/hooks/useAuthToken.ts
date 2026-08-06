@@ -1,6 +1,6 @@
 // src/hooks/useAuthToken.ts
 import { useEffect, useState } from 'react'
-import { supabase } from '@mentra/shared'
+import { supabase } from '@veiller/shared'
 
 export function useAuthToken() {
   const [token, setToken] = useState<string | null>(null)

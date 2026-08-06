@@ -1,6 +1,6 @@
-// Imports the real glasses facade by path (not via "@mentra/engine", which jest
+// Imports the real glasses facade by path (not via "@veiller/engine", which jest
 // mocks) so the actual projection + delegation run under the mobile jest runner.
-import BluetoothSdk from "@mentra/bluetooth-sdk-internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk-internal"
 import {dev} from "../../modules/engine/src/facades/dev"
 import {glasses} from "../../modules/engine/src/facades/glasses"
 import {useCloudClientStatusStore} from "../../modules/engine/src/stores/cloudClientStatus"

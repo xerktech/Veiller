@@ -1,6 +1,6 @@
 //
 //  Ar99.swift
-//  MentraBluetoothSDK
+//  VeillerBluetoothSDK
 //
 //  Native iOS implementation for AR99 glasses.
 //

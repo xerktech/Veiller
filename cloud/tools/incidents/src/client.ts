@@ -94,14 +94,14 @@ export function createClient(config: ClientConfig) {
 export type Client = ReturnType<typeof createClient>;
 
 export function resolveConfig(): ClientConfig {
-  const apiKey = process.env.MENTRA_AGENT_API_KEY;
+  const apiKey = process.env.VEILLER_AGENT_API_KEY;
   if (!apiKey) {
-    console.error("Error: MENTRA_AGENT_API_KEY environment variable is not set.");
+    console.error("Error: VEILLER_AGENT_API_KEY environment variable is not set.");
     console.error("Set it in cloud/.env or export it in your shell.");
     process.exit(1);
   }
 
-  const host = process.env.MENTRA_API_HOST || "https://api.mentra.glass";
+  const host = process.env.VEILLER_API_HOST || "https://api.mentra.glass";
 
   return { apiKey, host };
 }

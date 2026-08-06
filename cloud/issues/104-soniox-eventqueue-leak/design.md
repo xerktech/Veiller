@@ -12,7 +12,7 @@
 
 ## Branch Plan
 
-One PR for the MentraOS-side change (S1 + S2 from spec). The upstream PR (S3) is an independent submission to `soniox/soniox-js` and doesn't block this PR's merge.
+One PR for the Veiller-side change (S1 + S2 from spec). The upstream PR (S3) is an independent submission to `soniox/soniox-js` and doesn't block this PR's merge.
 
 Branch: `cloud/104-soniox-eventqueue-leak-fix` off `origin/dev`. Already created.
 
@@ -29,7 +29,7 @@ Branch: `cloud/104-soniox-eventqueue-leak-fix` off `origin/dev`. Already created
 
 Estimated diff in this repo: 3 files modified (`cloud/package.json`, `cloud/packages/cloud/package.json`, `cloud/bun.lock`), 1 file added (`cloud/patches/@soniox%2Fnode@2.0.0.patch`). The patch file is ~80 lines (covers both `.mjs` and `.cjs`).
 
-No changes to MentraOS source code.
+No changes to Veiller source code.
 
 ---
 
@@ -291,13 +291,13 @@ Track whether `[Symbol.asyncIterator]()` has been called via a new
 
 ````
 
-The PR's URL goes back into our MentraOS commit message and into the patch's leading comment line.
+The PR's URL goes back into our Veiller commit message and into the patch's leading comment line.
 
 ---
 
 ## Constants and Imports
 
-None added in MentraOS source. The patch-package change is in `node_modules/`. The MentraOS source code is unchanged.
+None added in Veiller source. The patch-package change is in `node_modules/`. The Veiller source code is unchanged.
 
 The upstream PR adds one private field to `RealtimeSttSession`. No imports change.
 
@@ -312,9 +312,9 @@ The upstream PR adds one private field to `RealtimeSttSession`. No imports chang
 3. Inspect `node_modules/.bun/@soniox+node@2.0.0/.../dist/index.mjs` — confirm patch applied (search for `iteratorAttached`).
 4. Programmatic check on `cloud-debug` after deploy:
    ```bash
-   doppler run --project mentra-sre --config dev -- \
+   doppler run --project veiller-sre --config dev -- \
      curl -sS -o /tmp/heap-after.heapsnapshot \
-       -H "Authorization: Bearer $MENTRA_ADMIN_JWT" \
+       -H "Authorization: Bearer $VEILLER_ADMIN_JWT" \
        https://debug.augmentos.cloud/api/admin/memory/heap-snapshot-v8
    python3 /tmp/heap-compare/heap-diff.py /tmp/heap-debug.heapsnapshot /tmp/heap-after.heapsnapshot
 ````
@@ -339,11 +339,11 @@ Add `cloud/104-soniox-eventqueue-leak-fix` to the `branches:` list in `.github/w
 1. Branch `cloud/104-soniox-eventqueue-leak-fix` off `dev`. Done.
 2. S1: bump version, run `bun install`, `bunx tsc --noEmit`.
 3. S2: install patch-package, modify SDK files, generate patch, wire postinstall, verify clean reinstall.
-4. Open MentraOS PR against `dev`.
+4. Open Veiller PR against `dev`.
 5. Open upstream PR against `soniox/soniox-js` in parallel (S3).
 6. Add `cloud/104-soniox-eventqueue-leak-fix` to porter-debug.yml triggers, auto-deploy, soak ≥1h.
 7. Pull post-fix heap snapshot from debug. Compare against `dev-2.heapsnapshot`. Confirm `AsyncEventQueue.queue` size collapsed.
-8. Merge MentraOS PR → auto-deploys to cloud-dev.
+8. Merge Veiller PR → auto-deploys to cloud-dev.
 9. Watch us-central-dev memory floor for 24h.
 10. Cherry-pick to main → prod regions.
 11. When upstream ships the fix in a new release: bump version, delete patch, remove postinstall hook, close issue 104.
@@ -366,6 +366,6 @@ Add `cloud/104-soniox-eventqueue-leak-fix` to the `branches:` list in `.github/w
 
 ## Summary
 
-Three small changes (one version bump, one dev dep, one patch file). Zero MentraOS source-code changes. The upstream PR is parallel and independent. When upstream ships the fix, removing the patch is a 1-line PR.
+Three small changes (one version bump, one dev dep, one patch file). Zero Veiller source-code changes. The upstream PR is parallel and independent. When upstream ships the fix, removing the patch is a 1-line PR.
 
 The fix at the SDK layer (rather than as a wrapper-side workaround) means every Soniox SDK consumer eventually benefits and our codebase stays free of compensatory hacks.

@@ -1,6 +1,6 @@
 # Example OEM App
 
-A minimal Expo app that demonstrates consuming the **`@mentra/engine`** SDK —
+A minimal Expo app that demonstrates consuming the **`@veiller/engine`** SDK —
 the on-device miniapp registry and runtime — the way an OEM integrator would.
 
 The screen exposes the core miniapp controls:
@@ -8,15 +8,15 @@ The screen exposes the core miniapp controls:
 - **Start miniapp** — launches the first registered app (`useStart`).
 - **Stop miniapp** — stops the running miniapp (`useStop`).
 - **List running miniapps** — reads `miniappRunningRegistry` (from
-  `@mentra/engine/devtools`) and the app registry.
+  `@veiller/engine/devtools`) and the app registry.
 
 Every button routes through an on-screen console (bottom of the screen) so you
 can see each call's result or error without a Metro terminal attached.
 
-> Engine depends on `@mentra/bluetooth-sdk` (its native module + Expo config
+> Engine depends on `@veiller/bluetooth-sdk` (its native module + Expo config
 > plugin), so that package is still installed and wired into the native build —
-> but the app's own code imports only `@mentra/engine` (plus the
-> `@mentra/engine/devtools` entry for the running-list demo).
+> but the app's own code imports only `@veiller/engine` (plus the
+> `@veiller/engine/devtools` entry for the running-list demo).
 
 ## Layout
 

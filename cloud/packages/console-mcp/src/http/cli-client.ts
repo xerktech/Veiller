@@ -18,7 +18,7 @@ function buildUrl(host: string, path: string, query?: QueryParams): string {
 export function createCliClient(config: ConsoleMcpConfig) {
   const token = config.cliToken;
   if (!token) {
-    throw new Error("CLI client requires MENTRA_CLI_TOKEN");
+    throw new Error("CLI client requires VEILLER_CLI_TOKEN");
   }
 
   async function request<T>(

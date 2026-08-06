@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react"
-import {useColorScheme, useSafeArea} from "@mentra/miniapp/ui"
+import {useColorScheme, useSafeArea} from "@veiller/miniapp/ui"
 
 import {BottomNav, type Tab} from "./components/BottomNav"
 import {Header} from "./components/Header"

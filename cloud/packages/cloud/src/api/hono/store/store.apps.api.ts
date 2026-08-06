@@ -1,11 +1,11 @@
 /**
  * @fileoverview Hono store apps API routes.
- * Store app management endpoints for the MentraOS Store website.
+ * Store app management endpoints for the Veiller Store website.
  * Mounted at: /api/store
  */
 
 import { Hono } from "hono";
-import { Capabilities } from "@mentra/sdk";
+import { Capabilities } from "@veiller/sdk";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import type { AppEnv, AppContext } from "../../../types/hono";
 import { User } from "../../../models/user.model";

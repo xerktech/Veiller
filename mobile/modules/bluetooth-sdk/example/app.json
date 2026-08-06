@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mentra.bluetoothsdk.example"
+      "bundleIdentifier": "com.veiller.bluetoothsdk.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mentra.bluetoothsdk.example"
+      "package": "com.veiller.bluetoothsdk.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

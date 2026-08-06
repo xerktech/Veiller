@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document details the current WebSocket reliability design and App session lifecycle in the MentraOS cloud system. It covers how Apps connect, maintain connections, and recover from disconnections.
+This document details the current WebSocket reliability design and App session lifecycle in the Veiller cloud system. It covers how Apps connect, maintain connections, and recover from disconnections.
 
 ## Current App Session Lifecycle
 

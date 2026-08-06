@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { Plus, Trash2, Brain, ChevronDown, ChevronRight, Settings, GripVertical } from "lucide-react";
 import { Tool } from "@/types/app";
 

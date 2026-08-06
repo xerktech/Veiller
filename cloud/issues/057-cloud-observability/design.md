@@ -517,7 +517,7 @@ Pushing to this branch now deploys to `cloud-debug` for testing before PR to `ma
 | Deploy Slack annotations | Requires `SLACK_DEPLOY_WEBHOOK` secret in GitHub. Infrastructure change, not code. |
 | BetterStack response-time uptime monitor | Configuration change in BetterStack, not code. |
 | `MEMORY_TELEMETRY_ENABLED=true` | Porter env var change, not code. |
-| Separate BetterStack source for prod | Porter env var change, not code. New source `MentraCloud - Prod` (ID 2324289) is created but not yet pointed to. |
+| Separate BetterStack source for prod | Porter env var change, not code. New source `VeillerCloud - Prod` (ID 2324289) is created but not yet pointed to. |
 | Error tracking (`@sentry/bun`) | Separate feature, separate PR. |
 | Collector on other 4 clusters | Infrastructure change, repeatable process from US Central. |
 

@@ -40,7 +40,7 @@ import type {
   TranscriptionData,
   TranscriptionLanguage,
   UnsubscribeFn,
-} from "@mentra/miniapp/background"
+} from "@veiller/miniapp/background"
 
 import {
   CaptionsFormatter,
@@ -106,7 +106,7 @@ function getProfileForModel(modelName: string | null | undefined): DisplayProfil
   if (lower.includes("z100") || lower.includes("vuzix") || lower.includes("mach1") || lower.includes("mach 1")) {
     return Z100_PROFILE
   }
-  if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("mentra_nex")) {
+  if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("veiller_nex")) {
     return NEX_PROFILE
   }
   return G1_PROFILE

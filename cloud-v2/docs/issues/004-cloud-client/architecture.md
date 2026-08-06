@@ -2,7 +2,7 @@
 
 **Status:** Alignment doc for the on-device runtime and the cloud-v2 work. Read it
 to get the whole picture: how a local miniapp runs on the phone and reaches the
-cloud, what `@mentra/cloud-client` is and why it exists, how auth works for Mentra
+cloud, what `@veiller/cloud-client` is and why it exists, how auth works for Veiller
 and for OEMs, and the decisions behind building the new connection once, typed, with
 no tech debt.
 
@@ -16,10 +16,10 @@ cloud.
 runs the miniapp (a background JSContext plus an optional WebView UI), handles most
 things on the phone, and passes a few services through to the cloud on the miniapps'
 behalf. Today that pass-through goes through the v1 transport, `SocketComms` /
-`RestComms`. We're adding a second transport for v2, `@mentra/cloud-client`, plugged
+`RestComms`. We're adding a second transport for v2, `@veiller/cloud-client`, plugged
 in the same way (the host's `configureRuntime` hook). On the v2 path the on-device
 runtime speaks the typed v2 protocol directly (typed values, not magic strings),
-using the same `@mentra/cloud-runtime/protocol` types as the cloud server and the
+using the same `@veiller/cloud-runtime/protocol` types as the cloud server and the
 test harness, so on-device and cloud can't drift.
 
 This doc spans three codebases at different stages; keep them straight:
@@ -28,7 +28,7 @@ This doc spans three codebases at different stages; keep them straight:
 | --- | --- | --- |
 | base mobile app (`mobile/`, on `dev`) | live | v1 transport: `SocketComms`, `RestComms`, the `configureRuntime` hook |
 | PR #3086 `fixes-navigation-bitmaps` | in flight, not merged | the two-layer local miniapp runtime (background JSContext + UI WebView) |
-| `cloud-v2/` (this repo area) | in progress | the v2 cloud, `@mentra/cloud-client`, `@mentra/cloud-runtime/protocol` |
+| `cloud-v2/` (this repo area) | in progress | the v2 cloud, `@veiller/cloud-client`, `@veiller/cloud-runtime/protocol` |
 
 Paths below are monorepo-root-relative.
 
@@ -46,7 +46,7 @@ Two clouds, with the phone sitting between glasses and cloud:
 
 - **Cloud v1** (today): the phone holds one authenticated WebSocket plus REST.
 - **Cloud v2** (in progress): a separate cloud, separate domain, v2-native
-  protocol, reached through `@mentra/cloud-client`.
+  protocol, reached through `@veiller/cloud-client`.
 
 The key thing: a local miniapp never opens its own cloud connection. It talks to the
 phone, and the phone is the only thing holding a cloud link. So swapping the cloud
@@ -70,7 +70,7 @@ A local miniapp bundle (a ZIP) ships two entry points
 The **`MiniappSession`** (`mobile/modules/miniapp/src/session.ts`, the
 `session.display` / `session.transcription.on(...)` / `session.storage` API) lives
 **only in the background JSContext**. The UI has no session of its own; it talks to
-the background over an **RPC bridge** (`window.mentra` / the `ui` module) and the
+the background over an **RPC bridge** (`window.veiller` / the `ui` module) and the
 background does the actual session work. So all the cloud-facing calls come from one
 place, the background.
 
@@ -78,14 +78,14 @@ Three bridges wire it together (all `mobile/modules/engine/src/services/`):
 
 | Bridge | Connects | File |
 | --- | --- | --- |
-| **MentraJSRouter** | phone host <-> background JSContext | `MentraJSRouter.ts` |
-| **MentraUIRouter** + `window.mentra` shim | UI WebView <-> its background JSContext | `MentraUIRouter.ts`, `mentraUiShim.ts` |
+| **VeillerJSRouter** | phone host <-> background JSContext | `VeillerJSRouter.ts` |
+| **VeillerUIRouter** + `window.veiller` shim | UI WebView <-> its background JSContext | `VeillerUIRouter.ts`, `veillerUiShim.ts` |
 | **LocalMiniappRuntime** | the phone-side hub everything funnels into | `LocalMiniappRuntime.ts` |
 
-Then the lifecycle pieces: `MentraJSCrashController` (respawn on crash),
-`MentraJSLogPipeline` (logs out of the JSContext), `MiniappRunningRegistry`
+Then the lifecycle pieces: `VeillerJSCrashController` (respawn on crash),
+`VeillerJSLogPipeline` (logs out of the JSContext), `MiniappRunningRegistry`
 ("running" means the background JSContext is alive). Starting and killing those
-JSContexts is done by native code the runtime calls (`MentraJSCrustBinding`); on iOS
+JSContexts is done by native code the runtime calls (`VeillerJSCrustBinding`); on iOS
 the engine is `JSContext`.
 
 So the "two JS contexts" the auth docs talk about are real here: a background
@@ -161,9 +161,9 @@ Here's what actually travels over it:
 v2 changes two things here: those subscription strings (`"transcription:en-US"`) and
 those untyped `type`-tagged objects both become typed values.
 
-## 5. What `@mentra/cloud-client` is, and why it exists
+## 5. What `@veiller/cloud-client` is, and why it exists
 
-`@mentra/cloud-client` is a TypeScript library, just code, no screen or UI, that
+`@veiller/cloud-client` is a TypeScript library, just code, no screen or UI, that
 handles the phone's whole connection to Cloud v2. The same library also runs on a
 server (in Node), and that's the trick: our backend test harness drives the exact
 same client the phone runs, so anything the tests prove also holds on the phone. It
@@ -180,7 +180,7 @@ Why a separate library instead of more methods on `SocketComms`:
   auth. Bolting that onto the same class just rebuilds the tech debt we're trying to
   leave behind.
 - **One contract, shared by everyone.** The cloud-client speaks only the shared type
-  definitions in `@mentra/cloud-runtime/protocol`: the same types the **cloud server**
+  definitions in `@veiller/cloud-runtime/protocol`: the same types the **cloud server**
   checks every message against, and the ones the **test harness** builds its requests
   from. (That test harness is just this same library running on a server.) So:
 
@@ -200,7 +200,7 @@ Why a separate library instead of more methods on `SocketComms`:
 ## 6. Auth: how the device and miniapps authenticate
 
 `cloud.auth` is the one owner of credentials on the device. It's a module of the
-cloud-client, so the same code authenticates the phone for Mentra and for OEMs,
+cloud-client, so the same code authenticates the phone for Veiller and for OEMs,
 while allowing Runtime and Core to use different token providers. The Runtime token
 is sent as the Bearer to Cloud Runtime Services (`aud = "cloud-runtime"`). When Core
 is configured, the Core token is sent to Core-owned APIs (`aud = "cloud-core"`) and
@@ -219,11 +219,11 @@ from an OEM backend, local/dev issuer, or already-issued token and do not config
 What the subject token is depends on who's running the app:
 
 - **OEM users.** The OEM's own backend mints a short-lived signed JWT for the
-  signed-in user (the OEM owns its accounts; there's no Mentra login screen). The
-  OEM's host app hands that JWT to the cloud-client at construction. Mentra verifies
+  signed-in user (the OEM owns its accounts; there's no Veiller login screen). The
+  OEM's host app hands that JWT to the cloud-client at construction. Veiller verifies
   it against the OEM's registered public key and maps `(tenantId, tenantUserId)` to a
   `mentraUserId`.
-- **Mentra users.** Mentra is "OEM zero" (`tenantId = "mentra"`). The subject token is
+- **Veiller users.** Veiller is "OEM zero" (`tenantId = "veiller"`). The subject token is
   the existing core token during the transition, a Supabase session at the end
   state, same endpoint.
 
@@ -244,14 +244,14 @@ credentials). Instead:
    `sub = mentraUserId`, `tenantId`, and `aud = <packageName>`, short-lived, scoped to
    that one miniapp.
 2. The runtime hands that token to the **background JSContext** (via
-   `MentraJSRouter`), which owns the session. The background's `useMentraAuth()`
+   `VeillerJSRouter`), which owns the session. The background's `useVeillerAuth()`
    exposes `{ mentraUserId, token }`. If the UI needs them too, it gets them from the
-   background over the RPC bridge (`window.mentra`), since the UI has no session of
+   background over the RPC bridge (`window.veiller`), since the UI has no session of
    its own.
 3. The miniapp calls its developer backend with
    `Authorization: Bearer <miniapp-scoped-token>`. The backend verifies it against
-   Mentra's published public keys (JWKS), checks `aud == its packageName`, and applies
-   its trust policy on `tenantId`. No per-request call to Mentra.
+   Veiller's published public keys (JWKS), checks `aud == its packageName`, and applies
+   its trust policy on `tenantId`. No per-request call to Veiller.
 4. The runtime re-mints and re-injects before expiry (`cloud.auth` caches per
    packageName).
 
@@ -262,7 +262,7 @@ is just one more message over them.
 
 Common questions this answers:
 
-- **"How does an OEM's user reach our cloud with no Mentra account?"** Their backend
+- **"How does an OEM's user reach our cloud with no Veiller account?"** Their backend
   vouches with a signed JWT; Core/Auth can exchange that into Core credentials and,
   for hosted Runtime, broker a normalized `cloud-runtime` token.
 - **"How does a miniapp know who the user is and call my backend safely?"** A
@@ -290,7 +290,7 @@ asked for it.
 `socketComms` hook (`sendMessage(object)`, `updatePhoneSubscriptions(string[])`) is
 replaced by a typed v2 surface, and the handful of `LocalMiniappRuntime` call sites
 that build v1 shapes are updated to build typed values from
-`@mentra/cloud-runtime/protocol` and call typed `cloud.runtime.*` methods. Why: no
+`@veiller/cloud-runtime/protocol` and call typed `cloud.runtime.*` methods. Why: no
 tech debt, real TypeScript safety, and it matches the cloud and the test harness by
 construction. The alternative (keep the v1 signatures and translate on the host side)
 would keep the magic-string surface alive inside the runtime and reintroduce a drift
@@ -330,7 +330,7 @@ interface SocketCommsAdapter {
   updatePhoneSubscriptions: (subscriptions: string[]) => void
 }
 
-// v2 (typed against @mentra/cloud-runtime/protocol)
+// v2 (typed against @veiller/cloud-runtime/protocol)
 interface CloudRuntimeAdapter {
   setSubscriptions: (subs: AudioSubscription[]) => Promise<void>
   onTranscript: (cb: (d: TranscriptionData) => void) => () => void
@@ -391,11 +391,11 @@ subscriptions are built. After that the value is typed all the way to the cloud.
 
 A miniapp's background JSContext runs `session.transcription.on(cb)`.
 
-- **Today (v1):** the message -> `MentraJSRouter` -> `LocalMiniappRuntime`
+- **Today (v1):** the message -> `VeillerJSRouter` -> `LocalMiniappRuntime`
   (`streamSubscribers += this app`) -> `updateCloudSubscriptions()` ->
   `socketComms.updatePhoneSubscriptions(["transcription:en-US"])` -> `SocketComms`
   WS `phone_subscription_update` -> v1 cloud. Transcript comes back as `data_stream`
-  -> `LocalMiniappRuntime.forwardEvent()` -> back through `MentraJSRouter` to the
+  -> `LocalMiniappRuntime.forwardEvent()` -> back through `VeillerJSRouter` to the
   JSContext's `cb`.
 - **v2:** same up to `LocalMiniappRuntime`, which builds
   `[{ kind: "transcription", language: { mode: "specific", code: "en-US" } }]` and
@@ -428,7 +428,7 @@ Moving the local SDK onto cloud-client is a sequence, not a switch you flip:
 
 1. Build the **cloud-runtime** (the v2 cloud, issue 002) until the audio path works
    end to end.
-2. Build **`@mentra/cloud-client`**.
+2. Build **`@veiller/cloud-client`**.
 3. Use cloud-client as the **integration-test harness** for the runtime: the node
    build drives the real connection (auth, connect, subscribe, send audio, receive
    transcripts) against the runtime, so the runtime gets exercised by the exact client
@@ -451,7 +451,7 @@ from the start; the legacy v1 stack stays on its own separate path until it's re
 - On-device code (base + PR #3086 `fixes-navigation-bitmaps`):
   `mobile/modules/engine/src/services/LocalMiniappRuntime.ts`,
   `mobile/modules/engine/src/runtime/config.ts`,
-  `mobile/modules/engine/src/services/MentraJSRouter.ts`,
+  `mobile/modules/engine/src/services/VeillerJSRouter.ts`,
   `mobile/modules/miniapp/src/session.ts`,
   `mobile/src/services/{MantleManager,SocketComms,RestComms,WebSocketManager}.ts`,
   `agents/local-app-runtime-plan.md`.

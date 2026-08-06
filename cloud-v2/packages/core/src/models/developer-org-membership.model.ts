@@ -10,7 +10,7 @@ import { registerModel } from "./register-model";
  *
  * Keyed by WorkOS userId. A user with no row resolves to `member` by default.
  * WorkOS is not consulted for roles — it remains identity/login + the member
- * roster only. The permission tier is a Mentra console concept.
+ * roster only. The permission tier is a Veiller console concept.
  */
 export const DEVELOPER_ORG_ROLES = ["owner", "admin", "member"] as const;
 export type DeveloperOrgRole = (typeof DEVELOPER_ORG_ROLES)[number];

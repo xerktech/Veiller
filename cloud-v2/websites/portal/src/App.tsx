@@ -5,7 +5,7 @@ import { AppShell, type NavItem } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import mentraLogo from "./assets/mentra-logo.svg";
+import veillerLogo from "./assets/mentra-logo.svg";
 
 type EnterpriseOrg = {
   id: string;
@@ -101,7 +101,7 @@ function PortalPage() {
   }
 
   // Onboarding (no org) and pending approval are focused, nav-free states —
-  // the issuer/environment pages stay locked until a Mentra admin approves.
+  // the issuer/environment pages stay locked until a Veiller admin approves.
   if (!org) {
     return (
       <FocusShell userLabel={displayName} onSignOut={signOut} signingOut={signingOut}>
@@ -181,10 +181,10 @@ function FocusShell({
       <header className="border-b border-[#e4e6e2] bg-white">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
           <div className="flex items-center gap-3">
-            <img src={mentraLogo} alt="" className="h-[22px] w-[41px]" />
+            <img src={veillerLogo} alt="" className="h-[22px] w-[41px]" />
             <div>
               <div className="font-display text-[15px] font-bold leading-5 text-[#14151b]">Enterprise Portal</div>
-              <div className="text-xs leading-4 text-[#8a8d95]">MentraOS · {userLabel}</div>
+              <div className="text-xs leading-4 text-[#8a8d95]">Veiller · {userLabel}</div>
             </div>
           </div>
           <button
@@ -213,7 +213,7 @@ function EnterpriseOnboarding({ user, onSaved }: { user: PortalUser; onSaved: ()
         </div>
         <h1 className="mt-4 font-display text-[28px] font-bold leading-tight text-[#14151b]">Create your enterprise organization</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#68746d]">
-          Register your organization to manage the trusted identity issuers Mentra accepts for your runtime. New orgs are reviewed by a Mentra admin before configuration unlocks — or accept an invite if your company already has an account.
+          Register your organization to manage the trusted identity issuers Veiller accepts for your runtime. New orgs are reviewed by a Veiller admin before configuration unlocks — or accept an invite if your company already has an account.
         </p>
       </div>
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
@@ -240,7 +240,7 @@ function ApprovalPending({ org }: { org: EnterpriseOrg }) {
             <span className="inline-flex rounded-full border border-[#f0e2b6] bg-[#fff7df] px-3 py-1 text-xs font-semibold text-[#a66a00]">Request submitted</span>
             <h2 className="mt-3 text-2xl font-bold tracking-[-0.03em]">Waiting for admin approval</h2>
             <p className="mt-2 leading-7 text-[#68746d]">
-              <span className="font-medium text-[#1c1d22]">{org.name}</span> is in the review queue. Trusted issuer and JWKS management unlocks as soon as a Mentra admin approves your enterprise account, and we'll email you when it's ready.
+              <span className="font-medium text-[#1c1d22]">{org.name}</span> is in the review queue. Trusted issuer and JWKS management unlocks as soon as a Veiller admin approves your enterprise account, and we'll email you when it's ready.
             </p>
             <div className="mt-5 rounded-[18px] bg-[#f5f7f4] p-4">
               <div className="text-xs font-medium uppercase tracking-[0.08em] text-[#a0a3aa]">Your tenant ID</div>
@@ -253,13 +253,13 @@ function ApprovalPending({ org }: { org: EnterpriseOrg }) {
       <div className="grid gap-6 md:grid-cols-2">
         <InfoCard
           icon={<ShieldCheck className="size-5" />}
-          title="What Mentra is reviewing"
+          title="What Veiller is reviewing"
           body="We confirm your organization details and that you're authorized to manage auth issuers for this company before unlocking configuration."
         />
         <InfoCard
           icon={<Mail className="size-5" />}
           title="Need it sooner?"
-          body="Reply to your Mentra onboarding thread or reach your Mentra representative to expedite review."
+          body="Reply to your Veiller onboarding thread or reach your Veiller representative to expedite review."
         />
       </div>
     </div>
@@ -643,7 +643,7 @@ function LoginGate() {
         <div className="relative w-full max-w-[440px] overflow-hidden rounded-[24px] p-9 shadow-[0_16px_40px_-8px_rgba(20,20,26,0.07),0_0_0_1px_rgba(20,20,26,0.07),inset_0_1px_0_rgba(255,255,255,0.9)]">
           <div className="absolute inset-0 rounded-[24px] bg-[rgba(255,255,255,0.82)] backdrop-blur-[14px]" />
           <div className="relative text-center">
-            <img src={mentraLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
+            <img src={veillerLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
 
             <div className="h-[22px]" />
             <div className="mx-auto flex h-11 w-fit items-center gap-2 rounded-full bg-[#f0faf5] px-4 text-[12px] font-bold uppercase tracking-[0.14em] text-[#087d50] shadow-[0_0_0_1px_rgba(8,125,80,0.12)]">
@@ -653,7 +653,7 @@ function LoginGate() {
 
             <div className="h-[18px]" />
             <h1 className="font-display text-[28px] font-bold leading-[32px] tracking-[-0.64px] text-[#14141a]">
-              Sign into Mentra Enterprise Portal
+              Sign into Veiller Enterprise Portal
             </h1>
 
             <div className="h-2.5" />
@@ -666,7 +666,7 @@ function LoginGate() {
               className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#14141a] px-[18px] font-display text-sm font-semibold text-white shadow-[0_18px_44px_-10px_rgba(20,20,26,0.25),inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-[#24242b] focus:outline-none focus:ring-4 focus:ring-[#14141a]/10"
               href={loginUrl}
             >
-              Continue with Mentra login
+              Continue with Veiller login
             </a>
 
             <div className="h-5" />

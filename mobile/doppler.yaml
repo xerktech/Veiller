@@ -20,5 +20,5 @@
 # contains NO secrets — only the project pointer.
 
 setup:
-  - project: mentra-mobile-client
+  - project: veiller-mobile-client
     config: dev

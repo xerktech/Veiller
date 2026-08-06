@@ -51,15 +51,15 @@ Pod::Spec.new do |s|
 
   s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
 
-  # Ship the MentraJS polyfill bundle inside the pod's resource bundle so
+  # Ship the VeillerJS polyfill bundle inside the pod's resource bundle so
   # JSCRuntime can read it at runtime via Bundle.main. The source of
-  # truth lives at `@mentra/jspolyfill/assets/startup.js`, but
+  # truth lives at `@veiller/jspolyfill/assets/startup.js`, but
   # CocoaPods silently drops `..` paths from `resource_bundles` — so the
   # runtime's build script mirrors the file to `ios/Resources/startup.js`
   # (gitignored) and we point the glob at that local path. Run
-  # `bun run --filter @mentra/jspolyfill build` (or just `bun install`
+  # `bun run --filter @veiller/jspolyfill build` (or just `bun install`
   # at the repo root) to regenerate it after editing the polyfill source.
   s.resource_bundles = {
-    'MentraJSRuntime' => ['Resources/startup.js']
+    'VeillerJSRuntime' => ['Resources/startup.js']
   }
 end

@@ -35,25 +35,25 @@ const RELAY_PORT = 13042;
 // === Env setup BEFORE any package imports ===
 {
   const access = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     access.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     access.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS = JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       tenantIdClaim: "tenant_id",
     },
   ]);
   const miniapp = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_MINIAPP_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_MINIAPP_JWT_PRIVATE_KEY = stripPemWrap(
     miniapp.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_MINIAPP_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_MINIAPP_JWT_PUBLIC_KEY = stripPemWrap(
     miniapp.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
@@ -62,13 +62,13 @@ const RELAY_PORT = 13042;
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS ??= JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       oemIdClaim: "oem_id",
     },
   ]);
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-cloudclient-reconnect-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-cloudclient-reconnect-test";
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/6";
   process.env.AUDIO_UDP_ADVERTISED_HOST = "127.0.0.1";
   process.env.AUDIO_UDP_ADVERTISED_PORT = String(AUDIO_UDP_PORT);
@@ -96,11 +96,11 @@ let relay: WsRelay;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 beforeAll(async () => {
-  const { resetMentraKeyCache } = await import("../packages/shared/src/auth");
+  const { resetVeillerKeyCache } = await import("../packages/shared/src/auth");
   const { resetSigningKeyCache } = await import(
     "../packages/core/src/services/session.service"
   );
-  resetMentraKeyCache();
+  resetVeillerKeyCache();
   resetSigningKeyCache();
 
   testOemHandle = await startTestOem({ port: TEST_OEM_PORT, tenantId: TEST_OEM_ID });

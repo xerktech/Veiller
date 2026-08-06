@@ -39,7 +39,7 @@ describe("checkManifestVersions", () => {
     )
     expect(r.ok).toBe(false)
     if (!r.ok) {
-      expect(r.reason).toContain("Requires MentraOS 1.45.0")
+      expect(r.reason).toContain("Requires Veiller 1.45.0")
       expect(r.reason).toContain("host is 1.42.0")
     }
   })
@@ -70,7 +70,7 @@ describe("checkManifestVersions", () => {
       {hostVersion, supportedSdkRange},
     )
     expect(r.ok).toBe(false)
-    if (!r.ok) expect(r.reason).toContain("MentraOS")
+    if (!r.ok) expect(r.reason).toContain("Veiller")
   })
 
   test("semver-coerced shorthand versions are accepted (0.3 → 0.3.0)", () => {

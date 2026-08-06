@@ -10,7 +10,7 @@ jest.mock("react-native-ble-manager", () => ({
   },
 }))
 
-jest.mock("@mentra/bluetooth-sdk", () => {
+jest.mock("@veiller/bluetooth-sdk", () => {
   const {bluetoothSdkMock} = require("./src/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,
@@ -19,7 +19,7 @@ jest.mock("@mentra/bluetooth-sdk", () => {
   }
 })
 
-jest.mock("@mentra/bluetooth-sdk-internal", () => {
+jest.mock("@veiller/bluetooth-sdk-internal", () => {
   const {bluetoothSdkMock} = require("./src/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,
@@ -28,13 +28,13 @@ jest.mock("@mentra/bluetooth-sdk-internal", () => {
   }
 })
 
-jest.mock("@mentra/bluetooth-sdk/internal", () => {
-  const {bluetoothSdkMock, mentraLocalNetworkMock} = require("./src/test-utils/mockBluetoothSdk")
+jest.mock("@veiller/bluetooth-sdk/internal", () => {
+  const {bluetoothSdkMock, veillerLocalNetworkMock} = require("./src/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,
     default: bluetoothSdkMock,
     ...bluetoothSdkMock,
-    MentraLocalNetwork: mentraLocalNetworkMock,
+    VeillerLocalNetwork: veillerLocalNetworkMock,
     BLUETOOTH_SDK_VERSION: "0.0.0-test",
     sdkPinnedOtaManifestUrl: () =>
       "https://github.com/Mentra-Community/MentraOS/releases/download/bluetooth-sdk-ota/bluetooth-sdk-0.0.0-test-version.json",
@@ -207,7 +207,7 @@ jest.mock("react-native-nitro-bg-timer", () => ({
   },
 }))
 
-// Mock react-native-zip-archive — pulled in transitively by @mentra/engine
+// Mock react-native-zip-archive — pulled in transitively by @veiller/engine
 jest.mock("react-native-zip-archive", () => ({
   unzip: jest.fn(() => Promise.resolve("")),
   zip: jest.fn(() => Promise.resolve("")),
@@ -247,7 +247,7 @@ jest.mock("./modules/engine/src/services/LocalMiniappRuntime", () => ({
   default: {forwardEvent: jest.fn()},
 }))
 
-// Mock the three @mentra/engine entry points (main, /internal, /devtools) —
+// Mock the three @veiller/engine entry points (main, /internal, /devtools) —
 // the package pulls in many native modules (react-native-share,
 // expo-battery/clipboard/location, etc.). Tests that only need a handful of
 // exports get stubs here; specific tests can override. The builder runs
@@ -283,7 +283,7 @@ const mockIslandEntries = () => {
   // exercise the actual three-state read-model, not a parallel stub.
   const realPairingIdentity = jest.requireActual("./modules/engine/src/services/PairingIdentity")
   // Clock-skew utils moved into island; the host gallery sync + OTA checker import them
-  // from @mentra/engine, so expose the real (pure) implementations through the mock.
+  // from @veiller/engine, so expose the real (pure) implementations through the mock.
   const realGlassesClockSync = jest.requireActual("./modules/engine/src/services/glassesClockSync")
   const realGallerySyncClock = jest.requireActual("./modules/engine/src/services/gallerySyncClock")
   const realOtaManifestUrl = jest.requireActual("./modules/engine/src/services/otaManifestUrl")
@@ -340,7 +340,7 @@ const mockIslandEntries = () => {
     }
   }
 
-  // --- "@mentra/engine" (main): engine + the pure helper/constant surface ---
+  // --- "@veiller/engine" (main): engine + the pure helper/constant surface ---
   const main = {
     __esModule: true,
     // OTA install policy (timings + failure copy) + deriveDisplayState — real (pure)
@@ -740,7 +740,7 @@ const mockIslandEntries = () => {
     ISLAND_SETTINGS_KEYS: {},
   }
 
-  // --- "@mentra/engine/internal": raw stores + service singletons ---
+  // --- "@veiller/engine/internal": raw stores + service singletons ---
   const internal = {
     __esModule: true,
     // Real glasses store + its selectors/helpers (useGlassesStore, selectors,
@@ -778,7 +778,7 @@ const mockIslandEntries = () => {
     // one tests listen on across the boundary.
     GlobalEventEmitter: jest.requireActual("./modules/engine/src/utils/GlobalEventEmitter").default,
     // Gallery cluster moved into island; host consumers (GalleryScreen, gallery-settings,
-    // NetworkMonitoring, MantleManager) import these from @mentra/engine/internal. Stub
+    // NetworkMonitoring, MantleManager) import these from @veiller/engine/internal. Stub
     // them here so those screens/services load under the mock without native deps. The
     // gallery service's own jest test imports the REAL implementations by relative path.
     gallerySyncService: {
@@ -830,7 +830,7 @@ const mockIslandEntries = () => {
       onConnectionChange: jest.fn(() => () => {}),
       getPreinstalledMiniappRegistry: jest.fn(() => Promise.resolve({entries: []})),
     },
-    // Bluetooth SDK passthrough — the same mock singleton @mentra/bluetooth-sdk
+    // Bluetooth SDK passthrough — the same mock singleton @veiller/bluetooth-sdk
     // is mocked with, so emitBluetoothSdkEvent/resetBluetoothSdkMock still drive
     // screens that import BluetoothSdk through island.
     BluetoothSdk: require("./src/test-utils/mockBluetoothSdk").bluetoothSdkMock,
@@ -921,7 +921,7 @@ const mockIslandEntries = () => {
     saveLocalAppRunningState: jest.fn(),
   }
 
-  // --- "@mentra/engine/devtools": debug-only singletons ---
+  // --- "@veiller/engine/devtools": debug-only singletons ---
   const devtools = {
     __esModule: true,
     miniappRunningRegistry: {
@@ -934,12 +934,12 @@ const mockIslandEntries = () => {
   return mockIslandEntriesCache
 }
 
-jest.mock("@mentra/engine", () => mockIslandEntries().main)
-jest.mock("@mentra/engine/internal", () => mockIslandEntries().internal)
-jest.mock("@mentra/engine/devtools", () => mockIslandEntries().devtools)
+jest.mock("@veiller/engine", () => mockIslandEntries().main)
+jest.mock("@veiller/engine/internal", () => mockIslandEntries().internal)
+jest.mock("@veiller/engine/devtools", () => mockIslandEntries().devtools)
 
 // Mock crust native module to avoid native bridge errors
-jest.mock("@mentra/crust", () => ({
+jest.mock("@veiller/crust", () => ({
   default: {
     addListener: jest.fn(() => ({remove: jest.fn()})),
     showAVRoutePicker: jest.fn(),
@@ -960,7 +960,7 @@ jest.mock("@mentra/crust", () => ({
 // Silence the warning: Animated: `useNativeDriver` is not supported
 global.__reanimatedWorkletInit = jest.fn()
 
-// The @mentra/engine mock above delegates engine.ota.installSession to the REAL
+// The @veiller/engine mock above delegates engine.ota.installSession to the REAL
 // OtaInstallCoordinator singleton. attach() is idempotent (`if (this.attached)
 // return`), so a test that leaves it attached would leak its timers, store
 // subscription, and session state into the next test in the same file. detach()

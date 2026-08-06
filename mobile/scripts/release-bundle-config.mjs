@@ -19,7 +19,7 @@ export const RELEASE_BUNDLE_ENV_KEYS = [
   "EXPO_PUBLIC_CLOUD_RUNTIME_URL",
   "EXPO_PUBLIC_DEPLOYMENT_REGION",
   "EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN",
-  "EXPO_PUBLIC_MENTRAOS_VERSION",
+  "EXPO_PUBLIC_VEILLER_VERSION",
   "EXPO_PUBLIC_POSTHOG_API_KEY",
   "EXPO_PUBLIC_SENTRY_DSN",
 ]
@@ -34,8 +34,8 @@ function xcodeEnvironmentEntries(env, nodeBinary) {
     .map(([key, value]) => [key, String(value)])
     .sort(([left], [right]) => left.localeCompare(right))
 
-  if (env.MENTRAOS_PINNED_BUILD_NUMBER) {
-    entries.push(["MENTRAOS_PINNED_BUILD_NUMBER", String(env.MENTRAOS_PINNED_BUILD_NUMBER)])
+  if (env.VEILLER_PINNED_BUILD_NUMBER) {
+    entries.push(["VEILLER_PINNED_BUILD_NUMBER", String(env.VEILLER_PINNED_BUILD_NUMBER)])
   }
   if (env.NODE_ENV) {
     entries.push(["NODE_ENV", String(env.NODE_ENV)])

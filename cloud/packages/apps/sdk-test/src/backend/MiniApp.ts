@@ -1,10 +1,10 @@
 /**
- * SdkTestApp — MentraOS AppServer for testing SDK features end-to-end.
+ * SdkTestApp — Veiller AppServer for testing SDK features end-to-end.
  *
  * Exercises: session lifecycle, transcription, audio, photos, errors, version check.
  */
 
-import {AppServer, AppSession} from "@mentra/sdk"
+import {AppServer, AppSession} from "@veiller/sdk"
 import {UserSession} from "./UserSession"
 
 export interface SdkTestAppConfig {

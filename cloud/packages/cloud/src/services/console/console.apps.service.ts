@@ -3,7 +3,7 @@ import App from "../../models/app.model";
 import { User, UserI } from "../../models/user.model";
 import { OrganizationService } from "../core/organization.service";
 import { generateApiKey, hashApiKey } from "../core/developer.service";
-import { isMentraAdmin } from "../core/admin.utils";
+import { isVeillerAdmin } from "../core/admin.utils";
 import { slackService } from "../notifications/slack.service";
 import { logger as rootLogger } from "../logging/pino-logger";
 import { appCache } from "../core/app-cache.service";
@@ -354,9 +354,9 @@ export async function deleteApp(email: string, packageName: string): Promise<voi
 }
 
 /**
- * Publish an app to the MentraOS Store.
+ * Publish an app to the Veiller Store.
  *
- * - Mentra admins (@mentra.glass / @mentraglass.com / ADMIN_EMAILS)
+ * - Veiller admins (@mentra.glass / @mentraglass.com / ADMIN_EMAILS)
  *   bypass review and set the app directly to "PUBLISHED".
  * - All other org admins submit the app for review ("SUBMITTED").
  *
@@ -376,11 +376,11 @@ export async function publishApp(email: string, packageName: string): Promise<an
     throw new ApiError(409, "App has no organizationId");
   }
 
-  // Only Mentra platform admins can publish directly; everyone else
+  // Only Veiller platform admins can publish directly; everyone else
   // submits for review.
-  if (isMentraAdmin(email)) {
+  if (isVeillerAdmin(email)) {
     appDoc.appStoreStatus = "PUBLISHED";
-    logger.info({ email, packageName }, "Mentra admin directly published app");
+    logger.info({ email, packageName }, "Veiller admin directly published app");
   } else {
     appDoc.appStoreStatus = "SUBMITTED";
     logger.info({ email, packageName }, "App submitted for review");

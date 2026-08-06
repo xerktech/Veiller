@@ -1,4 +1,4 @@
-import type {WifiSearchResult} from "@mentra/engine"
+import type {WifiSearchResult} from "@veiller/engine"
 
 import {mergeWifiScanResults} from "@/utils/wifi/WifiScanUtils"
 

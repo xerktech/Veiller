@@ -6,7 +6,7 @@
 # and installs your version as the default launcher.
 #
 # How it works:
-#   - Stock asg_client is a system app signed with Mentra's key
+#   - Stock asg_client is a system app signed with Veiller's key
 #   - Your build uses package name com.mentra.asg_client.thirdparty
 #   - Stock app is disabled (not deleted) so your app becomes the launcher
 #   - To restore stock: ./scripts/restore-stock.sh
@@ -27,12 +27,12 @@ echo "╔═══════════════════════�
 echo "║                         ⚠️  WARNING                            ║"
 echo "╠════════════════════════════════════════════════════════════════╣"
 echo "║  This script will:                                             ║"
-echo "║    • Disable Mentra's stock asg_client                         ║"
+echo "║    • Disable Veiller's stock asg_client                         ║"
 echo "║    • Install your build as com.mentra.asg_client.thirdparty    ║"
 echo "║    • Set your build as the default launcher                    ║"
 echo "║                                                                ║"
 echo "║  After running this:                                           ║"
-echo "║    • You will NOT receive OTA updates from Mentra              ║"
+echo "║    • You will NOT receive OTA updates from Veiller              ║"
 echo "║    • You are responsible for your own builds                   ║"
 echo "║                                                                ║"
 echo "║  DO NOT interrupt this script once it starts.                  ║"

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/libs/utils";
-import { Button } from "@mentra/shared";
+import { Button } from "@veiller/shared";
 
 interface DatePickerProps {
   className?: string;

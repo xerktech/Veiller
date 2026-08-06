@@ -1,10 +1,10 @@
 // components/dialogs/DeleteDialog.tsx
 import { useState } from 'react';
-import { Alert, AlertDescription, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@mentra/shared";
+import { Alert, AlertDescription, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@veiller/shared";
 import { AlertTriangle, Trash2, Loader2 } from "lucide-react";
 // import { App } from "@/types/app";
 import api from '@/services/api.service';
-import { AppI } from '@mentra/sdk';
+import { AppI } from '@veiller/sdk';
 
 interface DeleteDialogProps {
   app: AppI | null;

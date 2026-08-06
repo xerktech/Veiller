@@ -36,7 +36,7 @@ Contains all stability work from issues 055–072:
 ### `cloud/issues-048` (v3 branch)
 
 Contains all SDK v3 work:
-- **SDK runtime** ✅ — MentraSession, 14 managers, transport abstraction, v2 compat shims
+- **SDK runtime** ✅ — VeillerSession, 14 managers, transport abstraction, v2 compat shims
 - **SDK _ConnectionManager** ✅ — ping/pong every 15s, reconnect logic, parked state
 - **SDK _SubscriptionManager** ✅ — microtask batching, sync(), handler-derived subscriptions
 - **SDK MiniAppServer** ✅ — webhook handling, session lifecycle, v2 compat via AppServer
@@ -241,19 +241,19 @@ From the implementation status doc, 3 must-fix bugs:
 
 1. Merge `cloud/issues-048` → `dev`
 2. Deploy to staging, then production (all regions)
-3. `npm publish @mentra/sdk@3.0.0 --tag latest` (promote from `hono` tag to `latest`)
-4. Keep `@mentra/sdk@2.1.29` available (don't unpublish — existing apps need it)
+3. `npm publish @veiller/sdk@3.0.0 --tag latest` (promote from `hono` tag to `latest`)
+4. Keep `@veiller/sdk@2.1.29` available (don't unpublish — existing apps need it)
 5. Update app templates / starter kits to use v3 API
 6. Update developer documentation (spec exists: `docs-update-spec.md` on 048 branch)
 
 ### Phase 7: Upgrade Internal Apps
 
-Upgrade Mentra's own mini apps to SDK v3:
-- `com.mentra.translation`
+Upgrade Veiller's own mini apps to SDK v3:
+- `com.veiller.translation`
 - Live captions
-- Any other Mentra Store apps running on 2.x
+- Any other Veiller Store apps running on 2.x
 
-This is critical — `com.mentra.translation` is the exact app that failed in 073. Upgrading it to v3 means it gets ping/pong (Bug A fix) AND the v3 reconnection protocol. It becomes resilient to the exact failure pattern Cayden experienced.
+This is critical — `com.veiller.translation` is the exact app that failed in 073. Upgrading it to v3 means it gets ping/pong (Bug A fix) AND the v3 reconnection protocol. It becomes resilient to the exact failure pattern Cayden experienced.
 
 **Estimated effort:** 1 day per app (mostly mechanical — change class inheritance to callback pattern, rename session.audio → session.speaker, etc.). The v2 compat shim means apps can upgrade incrementally.
 
@@ -321,5 +321,5 @@ If we get through 1-2 today and start 3, we're in good shape. The v2 hotfix alon
 |---|----------|-------|
 | 1 | **Should we deploy the v2 hotfix to prod independently?** | We could cherry-pick the `stopApp` subscription fix to `dev` and deploy it today, without waiting for the full v3 merge. This fixes 073 for all users immediately. |
 | 2 | **v3 SDK version number — 3.0.0 or 3.0.0-rc.1?** | Current `hono` tag is `3.0.0-hono.8`. Do we go straight to `3.0.0` for the `latest` promotion, or do an RC first? |
-| 3 | **Do we need to notify third-party developers?** | When we promote v3 to `latest`, any `npm install @mentra/sdk` gets v3. The v2 compat shim (AppServer class inheritance still works) should make this non-breaking, but worth a changelog / migration guide. |
+| 3 | **Do we need to notify third-party developers?** | When we promote v3 to `latest`, any `npm install @veiller/sdk` gets v3. The v2 compat shim (AppServer class inheritance still works) should make this non-breaking, but worth a changelog / migration guide. |
 | 4 | **Deferred attach registry — ship in v3.0.0 or defer?** | The `DeferredAppConnectionRegistry` handles cloud restart gracefully, but it's a complex new subsystem. Could ship v3.0.0 without it and add in v3.1 if we want to reduce risk. |

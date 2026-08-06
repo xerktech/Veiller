@@ -11,7 +11,7 @@ import dagger.hilt.android.EntryPointAccessors;
 /**
  * Debug receiver for testing APK OTA updates via adb.
  *
- * <p>Usage: adb shell am broadcast -a com.mentra.DEBUG_APK_OTA \ --es url
+ * <p>Usage: adb shell am broadcast -a com.veiller.DEBUG_APK_OTA \ --es url
  * "http://localhost:8080/version.json" \ -n com.mentra.asg_client/.receiver.DebugApkOtaReceiver
  *
  * <p>The version JSON URL should point to a server hosting both the JSON and APK. Use
@@ -21,7 +21,7 @@ import dagger.hilt.android.EntryPointAccessors;
  */
 public class DebugApkOtaReceiver extends BroadcastReceiver {
     private static final String TAG = "DebugApkOtaReceiver";
-    public static final String ACTION_DEBUG_APK_OTA = "com.mentra.DEBUG_APK_OTA";
+    public static final String ACTION_DEBUG_APK_OTA = "com.veiller.DEBUG_APK_OTA";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -38,7 +38,7 @@ public class DebugApkOtaReceiver extends BroadcastReceiver {
             Log.e(TAG, "❌ Missing 'url' extra. Usage:");
             Log.e(
                     TAG,
-                    "  adb shell am broadcast -a com.mentra.DEBUG_APK_OTA "
+                    "  adb shell am broadcast -a com.veiller.DEBUG_APK_OTA "
                             + "--es url \"http://localhost:8080/version.json\" "
                             + "-n com.mentra.asg_client/.receiver.DebugApkOtaReceiver");
             return;

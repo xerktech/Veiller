@@ -6,7 +6,7 @@
  * updates and a separate Opus microphone channel.
  */
 
-import type { Capabilities } from "@mentra/sdk";
+import type { Capabilities } from "@veiller/sdk";
 
 /**
  * Nimo Glasses capability profile

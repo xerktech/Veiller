@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react"
 import {AnimatePresence, motion} from "motion/react"
 import {Loader2} from "lucide-react"
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 
 import "@/shared/channels"
 import type {Channels} from "@/shared/channels"
@@ -73,11 +73,11 @@ export function LocationSearch({selected, onSelect, onClear, disabled, devFrozen
   // Fetch recent searches + saved places whenever the user focuses the empty input
   useEffect(() => {
     if (!focused || query.trim() || selected) return
-    mentra
+    veiller
       .request("storage:list-recent", undefined as never)
       .then(setRecentSearches)
       .catch(() => {})
-    mentra
+    veiller
       .request("storage:list-saved", undefined as never)
       .then((all: SavedPlace[]) => {
         setSavedPlaces(
@@ -139,7 +139,7 @@ export function LocationSearch({selected, onSelect, onClear, disabled, devFrozen
     inputRef.current?.blur()
     try {
       const place = await details({placeId: s.placeId})
-      await mentra.request("storage:add-recent", place)
+      await veiller.request("storage:add-recent", place)
       onSelect(place)
     } catch (err) {
       setError((err as Error).message)
@@ -152,7 +152,7 @@ export function LocationSearch({selected, onSelect, onClear, disabled, devFrozen
     setOpen(false)
     setFocused(false)
     inputRef.current?.blur()
-    await mentra.request("storage:add-recent", place)
+    await veiller.request("storage:add-recent", place)
     onSelect(place)
   }
 

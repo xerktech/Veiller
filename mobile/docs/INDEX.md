@@ -1,6 +1,6 @@
 # Mobile Docs
 
-This folder holds the durable documentation for the **MentraOS mobile app** — the React Native / Expo client that runs on the user's phone and bridges the smart glasses to the cloud.
+This folder holds the durable documentation for the **Veiller mobile app** — the React Native / Expo client that runs on the user's phone and bridges the smart glasses to the cloud.
 
 ## What this folder is for
 

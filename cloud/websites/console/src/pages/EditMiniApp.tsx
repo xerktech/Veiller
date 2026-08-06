@@ -1,6 +1,6 @@
 // pages/EditMiniApp.tsx
 import { useState, useEffect, useRef } from "react";
-import { Alert, AlertDescription, Button, Input, Label, Spinner, Textarea } from "@mentra/shared";
+import { Alert, AlertDescription, Button, Input, Label, Spinner, Textarea } from "@veiller/shared";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeftIcon,
@@ -19,10 +19,10 @@ import DashboardLayout from "../components/DashboardLayout";
 import { useAppStore } from "@/stores/apps.store";
 import { useOrgStore } from "@/stores/orgs.store";
 import { App, Permission, Setting, Tool } from "@/types/app";
-import { HardwareRequirement } from "@mentra/sdk";
+import { HardwareRequirement } from "@veiller/sdk";
 import { PhotoOrientation } from "@/components/ui/multi-photo-upload";
 
-// Locally defined until PreviewImage/PhotoOrientation are published to @mentra/sdk@latest
+// Locally defined until PreviewImage/PhotoOrientation are published to @veiller/sdk@latest
 interface PreviewImage {
   url: string;
   imageId: string;
@@ -50,7 +50,7 @@ import ImageUpload from "../components/forms/ImageUpload";
 import api, { Organization } from "@/services/api.service";
 import { useAccountStore } from "@/stores/account.store";
 import { MultiPhotoUpload, PhotoUploadItem } from "@/components/ui/multi-photo-upload";
-// import { AppType } from '@mentra/sdk';
+// import { AppType } from '@veiller/sdk';
 
 enum AppType {
   STANDARD = "standard",
@@ -1170,7 +1170,7 @@ export default function EditMiniApp() {
                 {/* MiniApp Distribution Section */}
                 <FormSection
                   title="MiniApp Distribution"
-                  description="Core details for your MiniApp listing in the Mentra MiniApp Store"
+                  description="Core details for your MiniApp listing in the Veiller MiniApp Store"
                   helpLink={{
                     text: "Publishing Guide",
                     href: "https://docs.mentraglass.com/app-devs/getting-started/overview",
@@ -1197,7 +1197,7 @@ export default function EditMiniApp() {
                       placeholder="e.g., My Awesome MiniApp"
                     />
                     <p className="text-xs text-muted-foreground">
-                      The name that will be displayed to users in the Mentra MiniApp Store.
+                      The name that will be displayed to users in the Veiller MiniApp Store.
                     </p>
                   </div>
 
@@ -1249,7 +1249,7 @@ export default function EditMiniApp() {
                 {/* MiniApp Configuration Section */}
                 <FormSection
                   title="MiniApp Configuration"
-                  description="Configure how MentraOS connects to your MiniApp server"
+                  description="Configure how Veiller connects to your MiniApp server"
                   helpLink={{
                     text: "Server Setup Guide",
                     href: "https://docs.mentraglass.com/app-devs/getting-started/deployment/overview",
@@ -1295,8 +1295,8 @@ export default function EditMiniApp() {
                     </div>
                   )}
 
-                  {/* Mentra AI Tools - only show if app already has tools or user is from Mentra */}
-                  {(hasExistingTools || accountEmail?.toLowerCase().includes("mentra")) && (
+                  {/* Mentra AI Tools - only show if app already has tools or user is from Veiller */}
+                  {(hasExistingTools || accountEmail?.toLowerCase().includes("veiller")) && (
                     <ToolsSection tools={formData.tools || []} onChange={handleToolsChange} />
                   )}
                 </FormSection>
@@ -1352,7 +1352,7 @@ export default function EditMiniApp() {
                       API Key
                     </h4>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Your API key is used to authenticate your app with MentraOS cloud services. Keep it secure and
+                      Your API key is used to authenticate your app with Veiller cloud services. Keep it secure and
                       never share it publicly.
                     </p>
                     <div className="flex items-center justify-end">
@@ -1361,10 +1361,10 @@ export default function EditMiniApp() {
                   </div>
                 </FormSection>
 
-                {/* Publish to Mentra MiniApp Store Section */}
+                {/* Publish to Veiller MiniApp Store Section */}
                 <FormSection
-                  title="Publish to Mentra MiniApp Store"
-                  description="Manage your MiniApp's status in the Mentra MiniApp Store"
+                  title="Publish to Veiller MiniApp Store"
+                  description="Manage your MiniApp's status in the Veiller MiniApp Store"
                   helpLink={{ text: "Store Guidelines", href: "/store-guidelines" }}>
                   <div className="border rounded-md p-4">
                     <h4 className="text-sm font-medium mb-2 flex items-center">
@@ -1385,10 +1385,10 @@ export default function EditMiniApp() {
                       {formData.appStoreStatus === "DEVELOPMENT"
                         ? "Your MiniApp is currently in development. Publish it when ready to submit for review."
                         : formData.appStoreStatus === "SUBMITTED"
-                          ? "Your MiniApp has been submitted for review. Once approved, it will be published to the Mentra MiniApp Store."
+                          ? "Your MiniApp has been submitted for review. Once approved, it will be published to the Veiller MiniApp Store."
                           : formData.appStoreStatus === "REJECTED"
                             ? "Your MiniApp has been rejected. Please review the feedback and make the necessary changes before resubmitting."
-                            : "Your MiniApp is published and available to all MentraOS users in the Mentra MiniApp Store."}
+                            : "Your MiniApp is published and available to all Veiller users in the Veiller MiniApp Store."}
                     </p>
 
                     {formData.appStoreStatus === "REJECTED" && formData.reviewNotes && (
@@ -1409,8 +1409,8 @@ export default function EditMiniApp() {
                         <Button onClick={handleOpenPublishDialog} className="gap-2" type="button">
                           <Upload className="h-4 w-4" />
                           {formData.appStoreStatus === "REJECTED"
-                            ? "Resubmit to Mentra MiniApp Store"
-                            : "Publish to Mentra MiniApp Store"}
+                            ? "Resubmit to Veiller MiniApp Store"
+                            : "Publish to Veiller MiniApp Store"}
                         </Button>
                       </div>
                     )}

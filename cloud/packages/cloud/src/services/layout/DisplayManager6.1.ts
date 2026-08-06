@@ -1,11 +1,11 @@
 import { Logger } from "pino";
 import { operationTimers } from "../metrics/SystemVitalsLogger";
 
-import { AppToCloudMessageType, DisplayRequest, LayoutType, ViewType } from "@mentra/sdk";
+import { AppToCloudMessageType, DisplayRequest, LayoutType, ViewType } from "@veiller/sdk";
 
 // Internal package name used for OS-generated display requests (boot screen, clear).
 // Not exported — only DisplayManager itself generates these requests.
-const OS_PACKAGE_NAME = "com.mentra.os" as const;
+const OS_PACKAGE_NAME = "com.veiller.os" as const;
 import UserSession from "../session/UserSession";
 import { ConnectionValidator } from "../validators/ConnectionValidator";
 import { IWebSocket } from "../websocket/types";
@@ -931,7 +931,7 @@ class DisplayManager {
       packageName: OS_PACKAGE_NAME,
       layout: {
         layoutType: LayoutType.REFERENCE_CARD,
-        title: `// MentraOS - Starting App${this.bootingApps.size > 1 ? "s" : ""}`,
+        title: `// Veiller - Starting App${this.bootingApps.size > 1 ? "s" : ""}`,
         text: bootingAppNames.join(", "),
       },
       timestamp: new Date(),

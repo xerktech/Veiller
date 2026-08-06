@@ -105,7 +105,7 @@ Enterprise subject tokens must carry:
 tenantId  -> EnterpriseOrg.tenantId (the id shown in the portal) — the lookup key
 env    -> a registered TrustedIssuer.environmentName (e.g. sandbox, prod)
 iss    -> the exact registered TrustedIssuer.issuer URL (validated, not the key)
-aud    -> cloud-core or mentra
+aud    -> cloud-core or veiller
 sub    -> the user id (or whichever claim `subjectClaim` names)
 exp, iat, jti
 ```
@@ -118,7 +118,7 @@ decode JWT without trusting it
   -> lookup EnterpriseOrg whose tenantId == the tenantId claim; require it to be active
   -> lookup TrustedIssuer by (enterpriseOrgId, environmentName == env); require enabled
   -> verify signature using jwksUrl, pinning iss == TrustedIssuer.issuer
-  -> verify aud=cloud-core or mentra
+  -> verify aud=cloud-core or veiller
   -> read subjectClaim, usually sub
   -> map (enterpriseOrg.tenantId, trustedIssuer.environmentName, subject) to user
   -> mint normalized cloud-core/cloud-runtime tokens
@@ -182,19 +182,19 @@ interface RuntimeHostingConfig {
   id: string
   enterpriseOrgId: string
   environmentName: string
-  mode: "mentra_hosted" | "self_hosted" | "proxy"
+  mode: "veiller_hosted" | "self_hosted" | "proxy"
   runtimeBaseUrl?: string
   coreProxyBaseUrl?: string
 }
 ```
 
 This is intentionally not the center of the MVP. An enterprise can use its own
-issuer and still use Mentra-hosted runtime.
+issuer and still use Veiller-hosted runtime.
 
 ## Open Decisions
 
 - `environmentName` is unique per EnterpriseOrg in the first implementation.
-- Whether `tenantId` is chosen by the customer, assigned by Mentra, or both with
+- Whether `tenantId` is chosen by the customer, assigned by Veiller, or both with
   approval.
 - Exact WorkOS role mapping.
 - Whether portal and Console2 share one WorkOS project or separate projects.

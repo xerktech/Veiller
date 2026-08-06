@@ -1,5 +1,5 @@
 /**
- * @fileoverview MentraOS Cloud Server entry point (Hono + Bun native).
+ * @fileoverview Veiller Cloud Server entry point (Hono + Bun native).
  * Initializes core services and sets up HTTP/WebSocket servers using Bun.serve().
  *
  * This is the new entry point using Hono for native Bun HTTP handling.
@@ -195,7 +195,7 @@ if (process.env.UPTIME_SERVICE_RUNNING === "true") {
 logger.info(`\n
     ☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️
     ☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️
-    ☁️☁️☁️      😎 MentraOS Cloud Server 🚀
+    ☁️☁️☁️      😎 Veiller Cloud Server 🚀
     ☁️☁️☁️      🌐 Listening on port ${PORT} 🌐
     ☁️☁️☁️      ⚡ Pure Hono + Bun Native ⚡
     ☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️☁️

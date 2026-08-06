@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 /**
- * Integration smoke test for mentra-console MCP HTTP clients.
+ * Integration smoke test for veiller-console MCP HTTP clients.
  * Run with cloud API up and credentials in the environment.
  *
  * Usage:
- *   export MENTRA_API_HOST=http://localhost:8002
- *   export MENTRA_CLI_TOKEN=...
- *   export MENTRA_AGENT_API_KEY=...  # must match cloud .env
+ *   export VEILLER_API_HOST=http://localhost:8002
+ *   export VEILLER_CLI_TOKEN=...
+ *   export VEILLER_AGENT_API_KEY=...  # must match cloud .env
  *   bun run scripts/smoke-test.ts
  */
 
@@ -67,7 +67,7 @@ async function main(): Promise<void> {
   loadCloudDotenv();
   const config = loadConfig();
 
-  console.log("\nMentra Console MCP — smoke test\n");
+  console.log("\nVeiller Console MCP — smoke test\n");
   console.log(`Host: ${config.host}`);
   console.log(
     `Capabilities: developer=${config.capabilities.developer} incidents=${config.capabilities.incidents} admin=${config.capabilities.admin}\n`,
@@ -110,7 +110,7 @@ async function main(): Promise<void> {
       pass("confirm gate (app_delete without confirm)");
     }
   } else {
-    skip("CLI tests", "MENTRA_CLI_TOKEN not set");
+    skip("CLI tests", "VEILLER_CLI_TOKEN not set");
   }
 
   // Incidents / agent
@@ -137,7 +137,7 @@ async function main(): Promise<void> {
       fail("Agent incident_list", e instanceof Error ? e.message : String(e));
     }
   } else {
-    skip("Agent tests", "MENTRA_AGENT_API_KEY not set");
+    skip("Agent tests", "VEILLER_AGENT_API_KEY not set");
   }
 
   // Admin
@@ -150,7 +150,7 @@ async function main(): Promise<void> {
       fail("Admin admin_check", e instanceof Error ? e.message : String(e));
     }
   } else {
-    skip("Admin tests", "MENTRA_ADMIN_JWT / MENTRA_ADMIN_TOKEN not set");
+    skip("Admin tests", "VEILLER_ADMIN_JWT / VEILLER_ADMIN_TOKEN not set");
   }
 
   printSummary();

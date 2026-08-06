@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from "react"
 import {AudioWaveform, Mic, Search, Trash2} from "lucide-react"
-import {useColorScheme, useSafeArea} from "@mentra/miniapp/ui"
+import {useColorScheme, useSafeArea} from "@veiller/miniapp/ui"
 
 import type {RecordingItem} from "../shared/types"
 import {Header} from "./components/Header"

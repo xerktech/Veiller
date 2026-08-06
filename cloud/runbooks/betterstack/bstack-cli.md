@@ -23,12 +23,12 @@ bstack help
 ## Doppler setup
 
 `bstack` reads ClickHouse credentials and other secrets from
-Doppler. The credentials live in the `mentra-sre` project.
+Doppler. The credentials live in the `veiller-sre` project.
 
 You need:
 
 - `doppler` CLI installed (see [../doppler/README.md](../doppler/README.md))
-- A Doppler login that has been added to the `mentra-sre`
+- A Doppler login that has been added to the `veiller-sre`
   project. Ask Isaiah or Israelov.
 
 The CLI auto-detects Doppler when env vars are missing. If your
@@ -39,7 +39,7 @@ prints instructions and exits.
 Manual fallback (one-off):
 
 ```bash
-doppler run --project mentra-sre --config dev -- bstack health
+doppler run --project veiller-sre --config dev -- bstack health
 ```
 
 ## The commands

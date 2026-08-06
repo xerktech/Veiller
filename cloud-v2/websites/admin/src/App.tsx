@@ -3,7 +3,7 @@ import { AlertCircle, Bug, Check, ClipboardList, CloudUpload, FileText, History,
 import { useEffect, useMemo, useState } from "react";
 import { AppShell, type NavItem } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import mentraLogo from "./assets/mentra-logo.svg";
+import veillerLogo from "./assets/mentra-logo.svg";
 
 type Environment = "debug" | "dev" | "staging" | "prod";
 type InstallPolicy = "install_once" | "keep_updated" | "mandatory";
@@ -300,14 +300,14 @@ function AdminPage() {
   const pageMeta: Record<AdminPageKey, { title: string; body: string }> = {
     home: { title: "Operations home", body: "Pending review, the active preinstall list, and recent admin actions." },
     review: { title: "Miniapp review", body: "Review developer-submitted releases before they are published to the store." },
-    preinstalled: { title: "Preinstalled miniapps", body: "The managed default set MentraOS installs and keeps updated without a mobile app release." },
+    preinstalled: { title: "Preinstalled miniapps", body: "The managed default set Veiller installs and keeps updated without a mobile app release." },
     audit: { title: "Audit log", body: "Every admin mutation: who approved, rejected, published, or promoted something." },
-    incidents: { title: "Incident system", body: "Bug reports and feedback filed from the Mentra App, with their screenshots and log bundles." },
+    incidents: { title: "Incident system", body: "Bug reports and feedback filed from the Veiller App, with their screenshots and log bundles." },
   };
 
   if (me.isLoading) return <Splash label="Checking admin session" />;
   if (me.isError) {
-    // A 403 means the Mentra login itself worked but the account isn't on the
+    // A 403 means the Veiller login itself worked but the account isn't on the
     // admin allowlist; offering the login button again would be misleading.
     return <LoginGate denied={me.error instanceof ApiError && me.error.status === 403} />;
   }
@@ -315,7 +315,7 @@ function AdminPage() {
   return (
     <AppShell
       brandTitle="Admin"
-      brandSubtitle="MentraOS"
+      brandSubtitle="Veiller"
       badge={<EnvBadge env={env} />}
       nav={ADMIN_NAV}
       activeKey={page}
@@ -866,7 +866,7 @@ function ReportsPage({ initialReportId = null }: { initialReportId?: string | nu
           <div>
             <h2 className="text-xl font-bold">User reports</h2>
             <p className="mt-1 text-sm text-[#68746d]">
-              Everything filed through the Mentra App reporting flow — open a report for its context, screenshots, and logs.
+              Everything filed through the Veiller App reporting flow — open a report for its context, screenshots, and logs.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -897,7 +897,7 @@ function ReportsPage({ initialReportId = null }: { initialReportId?: string | nu
         ) : reports.isError ? (
           <div className="p-5"><ErrorText error={reports.error} /></div>
         ) : rows.length === 0 ? (
-          <EmptyState title="No reports" body="Bug reports and feedback submitted from the Mentra App will appear here." />
+          <EmptyState title="No reports" body="Bug reports and feedback submitted from the Veiller App will appear here." />
         ) : (
           <div className="divide-y divide-[#eceeeb]">
             {rows.map(report => (
@@ -1258,7 +1258,7 @@ function LoginGate({ denied = false }: { denied?: boolean }) {
         <div className="relative w-full max-w-[420px] overflow-hidden rounded-[24px] p-9 shadow-[0_16px_40px_-8px_rgba(20,20,26,0.07),0_0_0_1px_rgba(20,20,26,0.07),inset_0_1px_0_rgba(255,255,255,0.9)]">
           <div className="absolute inset-0 rounded-[24px] bg-[rgba(255,255,255,0.82)] backdrop-blur-[14px]" />
           <div className="relative text-center">
-            <img src={mentraLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
+            <img src={veillerLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
 
             <div className="h-[22px]" />
             <div className="mx-auto flex h-11 w-fit items-center gap-2 rounded-full bg-[#f0faf5] px-4 text-[12px] font-bold uppercase tracking-[0.14em] text-[#087d50] shadow-[0_0_0_1px_rgba(8,125,80,0.12)]">
@@ -1268,7 +1268,7 @@ function LoginGate({ denied = false }: { denied?: boolean }) {
 
             <div className="h-[18px]" />
             <h1 className="font-display text-[26px] font-bold leading-[30px] tracking-[-0.52px] text-[#14141a]">
-              {denied ? "No admin access" : "Sign into Mentra Admin"}
+              {denied ? "No admin access" : "Sign into Veiller Admin"}
             </h1>
 
             <div className="h-2.5" />
@@ -1292,7 +1292,7 @@ function LoginGate({ denied = false }: { denied?: boolean }) {
                 className="flex h-[48px] w-full items-center justify-center rounded-full bg-[#14141a] px-[18px] font-display text-sm font-semibold text-white shadow-[0_18px_44px_-10px_rgba(20,20,26,0.25),inset_0_1px_0_rgba(255,255,255,0.14)] transition hover:bg-[#24242b] focus:outline-none focus:ring-4 focus:ring-[#14141a]/10"
                 href={loginUrl}
               >
-                Continue with Mentra login
+                Continue with Veiller login
               </a>
             )}
 

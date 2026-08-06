@@ -24,7 +24,7 @@ import {
   SelectValue,
   Spinner,
   Textarea,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { CheckCircle2, AlertCircle, Loader2, Building, Globe, Mail, FileText, Image, Trash, Plus } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
 import api from "@/services/api.service";
@@ -423,7 +423,7 @@ const OrganizationSettings: React.FC = () => {
                   <CardTitle className="text-2xl">Organization Settings</CardTitle>
                   <CardDescription>
                     {isAdmin
-                      ? "Update your organization information which will be displayed on your MiniApp's page in the Mentra MiniApp Store."
+                      ? "Update your organization information which will be displayed on your MiniApp's page in the Veiller MiniApp Store."
                       : "View organization information (read-only). Only administrators can update these settings."}
                   </CardDescription>
                 </CardHeader>

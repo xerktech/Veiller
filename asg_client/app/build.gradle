@@ -54,7 +54,7 @@ def asgBuildBaseline = 100000
 def pinnedAsgVersionCode = (
         project.findProperty("ASG_VERSION_CODE")
                 ?: System.getenv("ASG_VERSION_CODE")
-                ?: System.getenv("MENTRAOS_PINNED_BUILD_NUMBER")
+                ?: System.getenv("VEILLER_PINNED_BUILD_NUMBER")
 )
 def isPinnedCiBuild = pinnedAsgVersionCode != null && !pinnedAsgVersionCode.toString().trim().isEmpty()
 
@@ -89,7 +89,7 @@ def asgKeyPassword = project.hasProperty("ASG_KEY_PASSWORD") ? project.property(
 def asgKeyAlias = project.hasProperty("ASG_KEY_ALIAS") ? project.property("ASG_KEY_ALIAS") : "asg"
 
 // Find keystore: check shared location first, then local
-def sharedKeystoreFile = new File(System.getProperty("user.home"), ".mentra/credentials/asg-keystore.jks")
+def sharedKeystoreFile = new File(System.getProperty("user.home"), ".veiller/credentials/asg-keystore.jks")
 def localKeystoreFile = file("../credentials/asg-keystore.jks")
 def productionKeystoreFile = sharedKeystoreFile.exists() ? sharedKeystoreFile : localKeystoreFile
 def useReleaseKey = productionKeystoreFile.exists() && asgStorePassword ? true : false
@@ -286,9 +286,9 @@ android {
         //    Using them as strings for simplicity.
         //    If you want a boolean, see the note below.
 
-        buildConfigField "String", "MENTRAOS_HOST", "\"${envProperties['MENTRAOS_HOST'] ?: ""}\""
-        buildConfigField "String", "MENTRAOS_PORT", "\"${envProperties['MENTRAOS_PORT'] ?: ""}\""
-        buildConfigField "String", "MENTRAOS_SECURE", "\"${envProperties['MENTRAOS_SECURE'] ?: ""}\""
+        buildConfigField "String", "VEILLER_HOST", "\"${envProperties['VEILLER_HOST'] ?: ""}\""
+        buildConfigField "String", "VEILLER_PORT", "\"${envProperties['VEILLER_PORT'] ?: ""}\""
+        buildConfigField "String", "VEILLER_SECURE", "\"${envProperties['VEILLER_SECURE'] ?: ""}\""
 
         // Sentry configuration
         buildConfigField "String", "SENTRY_DSN", "\"${envProperties['SENTRY_DSN'] ?: ""}\""
@@ -309,7 +309,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            // Third-party developers (without Mentra's signing key) get a different
+            // Third-party developers (without Veiller's signing key) get a different
             // package name so their build can coexist with the stock system app.
             // This is required because Android won't allow installing a differently-signed
             // APK with the same package name as a system app.
@@ -424,7 +424,7 @@ def sentryAuthToken = System.getenv("SENTRY_AUTH_TOKEN") ?:
 
 sentry {
     org = "mentra-labs"
-    projectName = "mentra-asg-client"
+    projectName = "veiller-asg-client"
 
     // Only enable Sentry features if auth token is present
     if (sentryAuthToken) {
@@ -445,10 +445,10 @@ sentry {
     }
 }
 
-tasks.register('checkNoFullyQualifiedMentraTypes') {
+tasks.register('checkNoFullyQualifiedVeillerTypes') {
     doLast {
         def violations = []
-        def fqcnTypePattern = ~/com\.mentra\.asg_client\.(\w+\.)+[A-Z]\w*/
+        def fqcnTypePattern = ~/com\.veiller\.asg_client\.(\w+\.)+[A-Z]\w*/
         fileTree(dir: 'src/main/java', include: '**/*.java').each { File f ->
             boolean inBlockComment = false
             f.readLines().eachWithIndex { line, int idx ->
@@ -497,7 +497,7 @@ tasks.register('checkNoFullyQualifiedMentraTypes') {
 // Disable Sentry tasks when auth token is not present
 afterEvaluate {
     tasks.matching { it.name == 'preBuild' }.configureEach {
-        dependsOn('checkNoFullyQualifiedMentraTypes')
+        dependsOn('checkNoFullyQualifiedVeillerTypes')
     }
     if (!sentryAuthToken) {
         tasks.matching { it.name.contains("sentry") || it.name.contains("Sentry") }.configureEach {

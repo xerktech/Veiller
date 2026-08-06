@@ -6,7 +6,7 @@ exists to brief the team before we lock a spec.
 ## Why this spike
 
 The client team has been moving developer code off cloud miniapp
-servers and onto the phone via the Local JS SDK (`@mentra/miniapp`).
+servers and onto the phone via the Local JS SDK (`@veiller/miniapp`).
 That effort predates cloud v2 and was built against cloud v1 with
 the stated intent of being "stateless and portable to cloud-2." The
 v1 cloud-side code has not been independently reviewed for
@@ -17,9 +17,9 @@ as a port target.
 Cloud v2 inherits the new architecture cleanly:
 [OS-1446](https://linear.app/mentralabs/issue/OS-1446) defines v2 by
 the **absence** of the cloud-miniapp stack (no app sessions, no
-heartbeat, no webhooks, no `@mentra/sdk` server protocol).
+heartbeat, no webhooks, no `@veiller/sdk` server protocol).
 [OS-1450](https://linear.app/mentralabs/issue/OS-1450) tracks the
-formal archival of cloud SDK code and `@mentra/sdk`.
+formal archival of cloud SDK code and `@veiller/sdk`.
 
 The job of this spike is to map exactly what v1 added for Local SDK,
 identify which pieces are "already v2-shaped," and surface the open
@@ -31,8 +31,8 @@ without a fork in the mobile codebase?**
 Terms used throughout. Skim once, refer back as needed.
 
 - **Cloud miniapp (v1).** A third-party developer service running
-  outside MentraOS. It connects to cloud v1 over a WebSocket using
-  `@mentra/sdk`, declares subscriptions (`transcription`,
+  outside Veiller. It connects to cloud v1 over a WebSocket using
+  `@veiller/sdk`, declares subscriptions (`transcription`,
   `translation`, …), receives stream events, and sends back display
   commands. This whole model is going away.
 - **Local miniapp (v2 model).** A third-party app shipped as a
@@ -63,7 +63,7 @@ Terms used throughout. Skim once, refer back as needed.
 ## v1 prior art — surfaces already built for Local SDK
 
 Everything below is **already in code** on the v1 integration branch
-`mentra-miniapp-sdk-2` (draft parent PR
+`veiller-miniapp-sdk-2` (draft parent PR
 [#2767](https://github.com/Mentra-Community/MentraOS/pull/2767)).
 
 **Treat this as a behavioral spec, not a port target.** The v1
@@ -297,7 +297,7 @@ deliberately; where v1's design is incidental, v2 picks its own.
 
 1. **Capture the v1 wire contract as a fixture set.** Pull v1's
    request/response bodies, WS envelopes, and message-type enums
-   from `mentra-miniapp-sdk-2` into `cloud-v2/tests/v1-contract/`
+   from `veiller-miniapp-sdk-2` into `cloud-v2/tests/v1-contract/`
    as JSON fixtures (not code imports). These fixtures are what
    v2 round-trips against; v1 source code is reference, not a
    dependency.
@@ -344,7 +344,7 @@ deliberately; where v1's design is incidental, v2 picks its own.
 5. **Streaming control loop.** v1's `StreamLifecycleController` has
    a phone copy and (until 2841 merges) a cloud copy. Does cloud v2
    keep a copy, or is it phone-only for v2?
-6. **When does `mentra-miniapp-sdk-2` stabilize?** v2 doesn't port
+6. **When does `veiller-miniapp-sdk-2` stabilize?** v2 doesn't port
    from it, but v2's wire-contract fixtures (step 1) snapshot from
    it. If the wire shapes are still in flux on that branch we need
    a snapshot point we both agree on, or the parity test becomes a
@@ -364,7 +364,7 @@ deliberately; where v1's design is incidental, v2 picks its own.
   (cloud-v2 deploy = no cloud SDK), [OS-1450](https://linear.app/mentralabs/issue/OS-1450)
   (archive cloud SDK)
 - PRs: [#2767](https://github.com/Mentra-Community/MentraOS/pull/2767)
-  (parent draft, `mentra-miniapp-sdk-2`),
+  (parent draft, `veiller-miniapp-sdk-2`),
   [#2839](https://github.com/Mentra-Community/MentraOS/pull/2839)
   (phone VAD + local STT routing, MERGED),
   [#2841](https://github.com/Mentra-Community/MentraOS/pull/2841)

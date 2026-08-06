@@ -1,10 +1,10 @@
-import BluetoothSdk from "@mentra/bluetooth-sdk-internal"
-import CrustModule from "@mentra/crust"
+import BluetoothSdk from "@veiller/bluetooth-sdk-internal"
+import CrustModule from "@veiller/crust"
 import * as Calendar from "expo-calendar"
 import {router} from "expo-router"
 import {AppState} from "react-native"
 
-import {bootstrapMentraJS} from "@/services/mentraJsBootstrap"
+import {bootstrapVeillerJS} from "@/services/veillerJsBootstrap"
 import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
 import {veillerMiniappSync} from "@/services/miniapps/veillerMiniappSync"
 import builtInMiniappCatalog from "@/services/miniapps/BuiltInMiniappCatalog"
@@ -13,7 +13,7 @@ import {migrate} from "@/services/Migrations"
 import {buildSpokenNotification} from "@/services/notifications/spokenNotification"
 import {shapeCalendarEventsForGlasses, type GlassesCalendarEvent} from "@/services/calendar/shapeCalendarEvents"
 import {cloudConfigValues} from "@/services/cloudClient"
-import {engine, BgTimer, SETTINGS} from "@mentra/engine"
+import {engine, BgTimer, SETTINGS} from "@veiller/engine"
 import {
   appRegistry,
   audioPlaybackService,
@@ -28,7 +28,7 @@ import {
   phoneLocationService,
   ttsModelManager,
   useAppStatusStore,
-} from "@mentra/engine/internal"
+} from "@veiller/engine/internal"
 import GlobalEventEmitter from "@/utils/GlobalEventEmitter"
 import {useDebugStore} from "@/stores/debug"
 import {checkFeaturePermissions, PermissionFeatures} from "@/utils/PermissionsUtils"
@@ -318,7 +318,7 @@ class MantleManager {
     this.initialized = true
 
     // Island front door: hand island the host's auth provider and config, then
-    // start the runtime. The remaining work below is Mentra-app UI/v1-cloud
+    // start the runtime. The remaining work below is Veiller-app UI/v1-cloud
     // startup, not an island configuration seam.
     engine.configure({
       auth: {
@@ -462,13 +462,13 @@ class MantleManager {
     // XERK-200/XERK-206: ASG gallery parked — no gallery-sync service at boot.
     // gallerySyncService.initialize()
 
-    // Bootstrap MentraJS — wires MentraJSRouter + MentraUIRouter +
-    // MentraJSCrashController. The /applet/local route binds the UI
-    // router to its inline WebView via getMentraJS().uiRouter directly.
+    // Bootstrap VeillerJS — wires VeillerJSRouter + VeillerUIRouter +
+    // VeillerJSCrashController. The /applet/local route binds the UI
+    // router to its inline WebView via getVeillerJS().uiRouter directly.
     try {
-      bootstrapMentraJS()
+      bootstrapVeillerJS()
     } catch (e) {
-      console.warn("mentraJsBootstrap failed:", e)
+      console.warn("veillerJsBootstrap failed:", e)
     }
   }
 

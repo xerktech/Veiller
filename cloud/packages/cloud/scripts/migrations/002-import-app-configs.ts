@@ -25,7 +25,7 @@ import http from "http";
 import { URL } from "url";
 import App, { AppI } from "../../src/models/app.model";
 import { logger as rootLogger } from "../../src/services/logging/pino-logger";
-import { AppSetting, ToolSchema } from "@mentra/sdk";
+import { AppSetting, ToolSchema } from "@veiller/sdk";
 
 // Configure environment
 dotenv.config();

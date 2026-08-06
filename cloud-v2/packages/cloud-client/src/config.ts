@@ -40,12 +40,12 @@ export interface CloudClientConfig {
 }
 
 /**
- * Which kind of subject token the host is exchanging for a Mentra access token.
+ * Which kind of subject token the host is exchanging for a Veiller access token.
  *
  * The cloud's `/exchange` endpoint needs to know how to verify the incoming
  * token, so the type travels alongside the token itself.
  */
-export type SubjectTokenType = "oem-jwt" | "mentra-core" | "supabase";
+export type SubjectTokenType = "oem-jwt" | "veiller-core" | "supabase";
 
 /**
  * The three ways a host can give the client its credentials.

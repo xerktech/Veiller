@@ -1,5 +1,5 @@
 /**
- * @fileoverview User auth — Mentra access-token middleware.
+ * @fileoverview User auth — Veiller access-token middleware.
  *
  * Applied to routes that require an authenticated end-user (mobile client).
  * Reads `Authorization: Bearer <jwt>`, verifies the token via
@@ -7,7 +7,7 @@
  * `c.var.user` for downstream handlers.
  *
  * Verification covers:
- *   - signature against Mentra's public key
+ *   - signature against Veiller's public key
  *   - audience + issuer
  *   - expiry
  *   - revocation blacklist (`revokedJtis`)

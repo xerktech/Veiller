@@ -1,15 +1,15 @@
-# MentraOS CLI Architecture
+# Veiller CLI Architecture
 
 Technical implementation plan for CLI tool.
 
 ## Naming Conventions
 
-- **Package:** `@mentra/cli` (npm)
-- **Binary:** `mentra` (command)
-- **Config directory:** `~/.mentra/` (not `~/.mentraos/`)
-- **Credentials:** OS keychain via `Bun.secrets` (service: `mentra-cli`)
-- **Per-project config:** `.mentrarc` (not `.mentraosrc`)
-- **Environment variables:** `MENTRA_CLI_TOKEN`, `MENTRA_API_URL`
+- **Package:** `@veiller/cli` (npm)
+- **Binary:** `veiller` (command)
+- **Config directory:** `~/.veiller/` (not `~/.veiller/`)
+- **Credentials:** OS keychain via `Bun.secrets` (service: `veiller-cli`)
+- **Per-project config:** `.veillerrc` (not `.veillerrc`)
+- **Environment variables:** `VEILLER_CLI_TOKEN`, `VEILLER_API_URL`
 
 ## Core Design Pattern: Middleware at Mount Point
 
@@ -42,7 +42,7 @@ This enables:
 │                       Developer Machine                      │
 │                                                              │
 │  ┌────────────────┐         ┌─────────────────────────┐    │
-│  │   CLI Tool     │────────▶│ ~/.mentraos/            │    │
+│  │   CLI Tool     │────────▶│ ~/.veiller/            │    │
 │  │   (Bun)        │         │   credentials.json      │    │
 │  │                │         │   config.json           │    │
 │  └────────┬───────┘         └─────────────────────────┘    │
@@ -52,7 +52,7 @@ This enables:
             │
             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                      MentraOS Cloud                          │
+│                      Veiller Cloud                          │
 │                                                              │
 │  ┌─────────────────┐      ┌──────────────────────────┐     │
 │  │ /api/cli/*      │─────▶│ authenticateCLI          │     │
@@ -758,7 +758,7 @@ cloud/packages/cli/
 │   │   ├── credentials.ts   # Bun.secrets + file fallback
 │   │   ├── clouds.ts        # Cloud management
 │   │   ├── clouds.yaml      # Built-in clouds
-│   │   └── settings.ts      # Read/write ~/.mentra/config.json
+│   │   └── settings.ts      # Read/write ~/.veiller/config.json
 │   ├── utils/
 │   │   ├── output.ts        # Table/JSON formatting
 │   │   ├── prompt.ts        # Interactive prompts
@@ -784,7 +784,7 @@ import {configCommand} from "./commands/config"
 
 const program = new Command()
 
-program.name("mentra").description("MentraOS CLI - Manage apps and organizations").version("1.0.0")
+program.name("veiller").description("Veiller CLI - Manage apps and organizations").version("1.0.0")
 
 // Commands
 program.addCommand(authCommand)
@@ -817,7 +817,7 @@ export class APIClient {
     const creds = loadCredentials()
 
     this.client = axios.create({
-      baseURL: getApiUrl(), // Uses current cloud or MENTRA_API_URL
+      baseURL: getApiUrl(), // Uses current cloud or VEILLER_API_URL
       timeout: 30000,
       headers: {
         "Content-Type": "application/json",
@@ -889,8 +889,8 @@ import {readFileSync, writeFileSync, mkdirSync, unlinkSync, existsSync} from "fs
 import {CLICredentials} from "@mentra/types"
 import jwt from "jsonwebtoken"
 
-const MENTRA_DIR = join(homedir(), ".mentra")
-const CREDS_FILE = join(MENTRA_DIR, "credentials.json")
+const VEILLER_DIR = join(homedir(), ".veiller")
+const CREDS_FILE = join(VEILLER_DIR, "credentials.json")
 
 /**
  * Save credentials using Bun.secrets (primary) with file fallback
@@ -913,7 +913,7 @@ export async function saveCredentials(token: string): Promise<void> {
   try {
     if (typeof Bun?.secrets !== "undefined") {
       await Bun.secrets.set({
-        service: "mentra-cli",
+        service: "veiller-cli",
         name: "credentials",
         value: JSON.stringify(creds),
       })
@@ -925,9 +925,9 @@ export async function saveCredentials(token: string): Promise<void> {
   }
 
   // Fallback to file-based storage
-  mkdirSync(MENTRA_DIR, {recursive: true})
+  mkdirSync(VEILLER_DIR, {recursive: true})
   writeFileSync(CREDS_FILE, JSON.stringify(creds, null, 2), {mode: 0o600})
-  console.log("✓ Credentials saved to ~/.mentra/credentials.json")
+  console.log("✓ Credentials saved to ~/.veiller/credentials.json")
 }
 
 /**
@@ -938,7 +938,7 @@ export async function loadCredentials(): Promise<CLICredentials | null> {
   try {
     if (typeof Bun?.secrets !== "undefined") {
       const value = await Bun.secrets.get({
-        service: "mentra-cli",
+        service: "veiller-cli",
         name: "credentials",
       })
       if (value) {
@@ -960,8 +960,8 @@ export async function loadCredentials(): Promise<CLICredentials | null> {
   }
 
   // Try environment variable (for CI/CD)
-  if (process.env.MENTRA_CLI_TOKEN) {
-    const token = process.env.MENTRA_CLI_TOKEN
+  if (process.env.VEILLER_CLI_TOKEN) {
+    const token = process.env.VEILLER_CLI_TOKEN
     const decoded = jwt.decode(token) as any
     if (decoded) {
       return {
@@ -987,7 +987,7 @@ export async function clearCredentials(): Promise<void> {
     if (typeof Bun?.secrets !== "undefined") {
       // Bun.secrets doesn't have a delete method yet, so we set to empty
       await Bun.secrets.set({
-        service: "mentra-cli",
+        service: "veiller-cli",
         name: "credentials",
         value: "",
       })
@@ -1013,8 +1013,8 @@ export async function requireAuth(): Promise<CLICredentials> {
   const creds = await loadCredentials()
   if (!creds) {
     console.error("✗ Not authenticated")
-    console.error("  Run: mentra auth <token>")
-    console.error("  Or set: MENTRA_CLI_TOKEN=<token>")
+    console.error("  Run: veiller auth <token>")
+    console.error("  Or set: VEILLER_CLI_TOKEN=<token>")
     process.exit(3)
   }
 
@@ -1109,12 +1109,12 @@ export function getCurrentCloud(): {key: string; cloud: Cloud} {
 
 /**
  * Get API URL for current cloud
- * Priority: MENTRA_API_URL env var > current cloud > production
+ * Priority: VEILLER_API_URL env var > current cloud > production
  */
 export function getApiUrl(): string {
   // Environment variable takes precedence
-  if (process.env.MENTRA_API_URL) {
-    return process.env.MENTRA_API_URL
+  if (process.env.VEILLER_API_URL) {
+    return process.env.VEILLER_API_URL
   }
 
   const {cloud} = getCurrentCloud()
@@ -1188,7 +1188,7 @@ import {getAllClouds, getCurrentCloud, switchCloud, addCloud, removeCloud} from 
 import {displayTable} from "../utils/output"
 import {input} from "../utils/prompt"
 
-export const cloudCommand = new Command("cloud").description("Manage Mentra clouds")
+export const cloudCommand = new Command("cloud").description("Manage Veiller clouds")
 
 // List clouds
 cloudCommand
@@ -1642,12 +1642,12 @@ appCommand
 
 ```json
 {
-  "name": "@mentra/cli",
+  "name": "@veiller/cli",
   "version": "1.0.0",
-  "description": "MentraOS CLI tool",
+  "description": "Veiller CLI tool",
   "type": "module",
   "bin": {
-    "mentra": "./dist/index.js"
+    "veiller": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -1769,8 +1769,8 @@ export default function CLIKeys() {
         <Alert className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            CLI API keys allow you to use the MentraOS CLI tool from your terminal. Generate a key, then run:{" "}
-            <code className="bg-gray-100 px-2 py-1 rounded">mentra auth &lt;token&gt;</code>
+            CLI API keys allow you to use the Veiller CLI tool from your terminal. Generate a key, then run:{" "}
+            <code className="bg-gray-100 px-2 py-1 rounded">veiller auth &lt;token&gt;</code>
           </AlertDescription>
         </Alert>
 
@@ -2062,8 +2062,8 @@ bun run build
 npm publish --access public
 
 # Verify
-npm install -g @mentra/cli
-mentra --version
+npm install -g @veiller/cli
+veiller --version
 ```
 
 ### 3. Console UI Deployment
@@ -2111,8 +2111,8 @@ logger.error({error}, "CLI key generation failed")
 
 1. **Token Storage**:
    - Primary: OS keychain via `Bun.secrets` (encrypted at rest)
-   - Fallback: `chmod 600` on `~/.mentra/credentials.json`
-   - CI/CD: `MENTRA_CLI_TOKEN` environment variable
+   - Fallback: `chmod 600` on `~/.veiller/credentials.json`
+   - CI/CD: `VEILLER_CLI_TOKEN` environment variable
 2. **Token Exposure**: Never log tokens, only keyId
 3. **Revocation**: Immediate via database check
 4. **Rate Limiting**: Limit key generation to 10/hour per user

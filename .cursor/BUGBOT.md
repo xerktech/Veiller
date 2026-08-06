@@ -1,4 +1,4 @@
-# Bugbot rules for MentraOS
+# Bugbot rules for Veiller
 
 When reviewing pull requests (including when triggered via `bugbot run` from the PR agent orchestrator):
 

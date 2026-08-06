@@ -297,9 +297,9 @@ if [[ -f "$SCRIPT_DIR/offline/images/mediamtx-1-linux-amd64.tar" || -f "$SCRIPT_
   fi
 fi
 
-docker rm -f mentra-local-stream >/dev/null 2>&1 || true
-echo "Building mentra-local-mediamtx:1 (config baked in, no bind-mount)…"
-docker build -t mentra-local-mediamtx:1 "$SCRIPT_DIR"
+docker rm -f veiller-local-stream >/dev/null 2>&1 || true
+echo "Building veiller-local-mediamtx:1 (config baked in, no bind-mount)…"
+docker build -t veiller-local-mediamtx:1 "$SCRIPT_DIR"
 
 echo "Starting MediaMTX (RTMP primary, SRT + WHIP available)…"
 docker compose -f "$SCRIPT_DIR/docker-compose.yml" up -d --pull never --no-build

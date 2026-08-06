@@ -1874,46 +1874,46 @@
       "source": "cloud, cloud/packages/sdk, cloud/packages/cloud, cloud/packages/utils, cloud/websites/console, cloud/websites/store"
     },
     {
-      "name": "@mentra/appstore-webview",
+      "name": "@veiller/appstore-webview",
       "version": "0.0.0",
       "license": "UNLICENSED",
       "source": "cloud/websites/store"
     },
     {
-      "name": "@mentra/cli",
+      "name": "@veiller/cli",
       "version": "1.0.0",
       "license": "MIT",
       "publisher": "Mentra",
       "source": "cloud/packages/cli"
     },
     {
-      "name": "@mentra/cloud",
+      "name": "@veiller/cloud",
       "version": "1.0.0",
       "license": "UNLICENSED",
       "publisher": "Mentra",
       "source": "cloud/packages/cloud"
     },
     {
-      "name": "@mentra/display-utils",
+      "name": "@veiller/display-utils",
       "version": "1.0.0",
       "license": "MIT",
       "source": "mobile"
     },
     {
-      "name": "@mentra/react",
+      "name": "@veiller/react",
       "version": "2.0.2",
       "license": "MIT",
-      "publisher": "Mentra Labs",
+      "publisher": "Veiller Labs",
       "source": "cloud/packages/react-sdk"
     },
     {
-      "name": "@mentra/sdk",
+      "name": "@veiller/sdk",
       "version": "2.1.29",
       "license": "MIT*",
       "source": "cloud, cloud/packages/sdk, cloud/packages/cloud, cloud/packages/utils, cloud/websites/console, cloud/websites/store"
     },
     {
-      "name": "@mentra/shared",
+      "name": "@veiller/shared",
       "version": "1.0.0",
       "license": "ISC",
       "source": "cloud/websites/console, cloud/websites/store, cloud/websites/account"
@@ -1925,7 +1925,7 @@
       "source": "cloud, cloud/packages/sdk, cloud/packages/cloud, cloud/packages/utils, cloud/packages/types, cloud/packages/cli, cloud/websites/console, cloud/websites/store"
     },
     {
-      "name": "@mentra/utils",
+      "name": "@veiller/utils",
       "version": "1.0.0",
       "license": "UNLICENSED",
       "source": "cloud/packages/utils"
@@ -7238,7 +7238,7 @@
       "source": "mobile"
     },
     {
-      "name": "mentraos",
+      "name": "veiller",
       "version": "0.0.1",
       "license": "UNLICENSED",
       "source": "mobile"

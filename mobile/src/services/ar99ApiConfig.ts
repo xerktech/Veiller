@@ -9,7 +9,7 @@ export type Ar99ApiEnv = (typeof AR99_API_ENVS)[keyof typeof AR99_API_ENVS]
 export type Ar99ApiConfig = {
   baseUrl: string
   developerId: string
-  /** Vendor OTA client key used for request signing (not a Mentra private secret). */
+  /** Vendor OTA client key used for request signing (not a Veiller private secret). */
   clientKey: string
 }
 

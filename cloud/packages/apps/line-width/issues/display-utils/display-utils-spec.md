@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-A glasses-agnostic, pixel-accurate text measurement and wrapping library for smart glasses displays. Designed to be reusable across different hardware (G1, future glasses), usable by both the MentraOS SDK (for third-party developers) and internal apps (captions, teleprompter, etc.).
+A glasses-agnostic, pixel-accurate text measurement and wrapping library for smart glasses displays. Designed to be reusable across different hardware (G1, future glasses), usable by both the Veiller SDK (for third-party developers) and internal apps (captions, teleprompter, etc.).
 
 ### ⚠️ Key Principle: Pixel-Perfect Measurement (No Averages!)
 
@@ -42,7 +42,7 @@ This library uses **exact pixel widths**, not averages or approximations:
 
 ### 1.1 Current System Issues
 
-The existing text wrapping system in MentraOS has several fundamental problems:
+The existing text wrapping system in Veiller has several fundamental problems:
 
 #### Problem 1: Hardcoded G1 Assumptions
 
@@ -183,7 +183,7 @@ This prevents other apps from using the wrapping utilities without getting capti
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      Display Utils Library                           │
-│                         (@mentra/sdk)                                │
+│                         (@veiller/sdk)                                │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │  LAYER 1: Hardware Abstraction                                       │
@@ -231,7 +231,7 @@ This prevents other apps from using the wrapping utilities without getting capti
         │                                                 │
         ▼                                                 ▼
 ┌───────────────────┐                      ┌─────────────────────────┐
-│   SDK Consumers   │                      │    MentraOS Apps        │
+│   SDK Consumers   │                      │    Veiller Apps        │
 │   (3rd party)     │                      │                         │
 ├───────────────────┤                      ├─────────────────────────┤
 │                   │                      │  ┌───────────────────┐  │
@@ -372,7 +372,7 @@ interface DisplayConstraints {
 ### 4.3 G1 Profile (Reference Implementation)
 
 ```typescript
-import { DisplayProfile } from '@mentra/sdk/display-utils'
+import { DisplayProfile } from '@veiller/sdk/display-utils'
 
 /**
  * Even Realities G1 Smart Glasses Display Profile
@@ -1076,7 +1076,7 @@ import {
   TextWrapper, 
   DisplayHelpers,
   G1_PROFILE 
-} from '@mentra/sdk/display-utils'
+} from '@veiller/sdk/display-utils'
 
 /**
  * Captions-specific display manager.
@@ -1207,7 +1207,7 @@ import {
   TextMeasurer, 
   TextWrapper,
   G1_PROFILE 
-} from '@mentra/sdk/display-utils'
+} from '@veiller/sdk/display-utils'
 
 /**
  * Simple teleprompter - shows text one screen at a time.
@@ -1279,7 +1279,7 @@ import {
   TextWrapper,
   DisplayHelpers,
   G1_PROFILE 
-} from '@mentra/sdk/display-utils'
+} from '@veiller/sdk/display-utils'
 
 /**
  * Shows notifications with titles and body text.
@@ -1351,7 +1351,7 @@ const lines = notifications.formatNotification(
 ### 9.4 Bullet List (Third-Party Developer)
 
 ```typescript
-import { TextMeasurer, TextWrapper, G1_PROFILE } from '@mentra/sdk/display-utils'
+import { TextMeasurer, TextWrapper, G1_PROFILE } from '@veiller/sdk/display-utils'
 
 /**
  * Display bulleted lists.
@@ -1571,7 +1571,7 @@ packages/
 │
 ├── sdk/                           # UPDATE to re-export display-utils
 │   └── src/
-│       └── display-utils.ts       # Re-exports from @mentra/display-utils
+│       └── display-utils.ts       # Re-exports from @veiller/display-utils
 │
 └── apps/
     ├── captions/                  # UPDATE to use new utils
@@ -1612,7 +1612,7 @@ When new glasses are released:
 
 ```typescript
 // future: Add new glasses
-import { GLASSES_X1_PROFILE } from '@mentra/sdk/display-utils/profiles'
+import { GLASSES_X1_PROFILE } from '@veiller/sdk/display-utils/profiles'
 
 const measurer = new TextMeasurer(GLASSES_X1_PROFILE)
 // Everything else stays the same

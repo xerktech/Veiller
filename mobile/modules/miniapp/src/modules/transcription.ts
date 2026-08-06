@@ -33,7 +33,7 @@ export interface TranscriptionConfig {
    * `MiniappValidationError`.
    */
   languageHints?: LanguageHint[]
-  /** Custom vocabulary / boosted terms (e.g. ["MentraOS", "HIPAA"]). */
+  /** Custom vocabulary / boosted terms (e.g. ["Veiller", "HIPAA"]). */
   vocabulary?: string[]
   /** Enable speaker diarisation. Defaults vary by provider. */
   diarization?: boolean

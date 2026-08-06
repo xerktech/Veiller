@@ -3,7 +3,7 @@
  *
  * Mounted at the root so the path is the standard /.well-known/jwks.json.
  *
- *   GET /.well-known/jwks.json — Mentra's public keys in JWK form, each with a
+ *   GET /.well-known/jwks.json — Veiller's public keys in JWK form, each with a
  *                                `kid`.
  *
  * Two keys are published: the access-token key (internal services verify

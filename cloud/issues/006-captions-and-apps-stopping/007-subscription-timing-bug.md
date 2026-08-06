@@ -14,7 +14,7 @@ After WebSocket 1006 closure, the SDK sends an empty subscriptions array to the 
 
 ```
 21:30:45.762 │ App WebSocket closed (code 1006)
-21:30:45.763 │ "App com.mentra.captions.beta unexpectedly disconnected (code: 1006), starting grace period"
+21:30:45.763 │ "App com.veiller.captions.beta unexpectedly disconnected (code: 1006), starting grace period"
 21:30:47.095 │ App reconnected, API key validated
 21:30:47.126 │ "App connected (not from startApp) - moved to runningApps"  ← CRITICAL!
 21:30:47.192 │ Received subscription update with EMPTY array

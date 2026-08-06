@@ -103,7 +103,7 @@ export interface CalendarEventData {
 // ─── Dependency Types ───────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession into the PhoneManager.
+ * Dependencies injected by VeillerSession into the PhoneManager.
  */
 export interface PhoneManagerDeps {
   /** DataStreamRouter — register for stream-type events. */
@@ -419,9 +419,9 @@ export class CalendarSubManager {
 // ─── PhoneManager ───────────────────────────────────────────────────────────
 
 /**
- * Manages all phone-related data streams for a MentraSession.
+ * Manages all phone-related data streams for a VeillerSession.
  *
- * Exposes sub-managers for notifications and calendar. Created by MentraSession and exposed as
+ * Exposes sub-managers for notifications and calendar. Created by VeillerSession and exposed as
  * `session.phone`.
  */
 export class PhoneManager {
@@ -456,7 +456,7 @@ export class PhoneManager {
   /**
    * Remove all registered handlers and unsubscribe from all streams.
    *
-   * Called by MentraSession during disconnect/teardown.
+   * Called by VeillerSession during disconnect/teardown.
    * @internal
    */
   destroy(): void {

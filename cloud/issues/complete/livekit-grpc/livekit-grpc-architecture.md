@@ -438,7 +438,7 @@ On reconnection, old WebSocket still referenced until GC. Closures keep `userSes
 ```protobuf
 syntax = "proto3";
 
-package mentra.livekit.bridge;
+package veiller.livekit.bridge;
 
 service LiveKitBridge {
   // Bidirectional audio streaming
@@ -811,7 +811,7 @@ export class LiveKitGrpcClient {
     const proto = grpc.loadPackageDefinition(packageDef) as any;
 
     // Create client
-    this.client = new proto.mentra.livekit.bridge.LiveKitBridge(
+    this.client = new proto.veiller.livekit.bridge.LiveKitBridge(
       process.env.LIVEKIT_BRIDGE_URL || "localhost:9090",
       grpc.credentials.createInsecure(),
       {

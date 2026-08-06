@@ -17,13 +17,13 @@ import type { TestOemKeypair } from "./keypair";
 
 const ALG = "EdDSA";
 const DEFAULT_JWT_TTL_SEC = 5 * 60;
-const DEFAULT_AUDIENCE = "mentra";
+const DEFAULT_AUDIENCE = "veiller";
 
 export interface MintJwtOptions {
   tenantUserId: string;
   /** Default 5 min. Use a negative value to mint an already-expired token. */
   ttlSec?: number;
-  /** Default `"mentra"`. Override to test audience rejection. */
+  /** Default `"veiller"`. Override to test audience rejection. */
   audience?: string;
   /** Optional pass-through claims (e.g. `oem_display_name`). */
   extraClaims?: Record<string, unknown>;

@@ -8,7 +8,7 @@ console.log('Running postinstall...');
 // is no longer needed and re-introduced duplicate react/react-native copies.
 
 await $({ stdio: 'inherit', cwd: 'modules/bluetooth-sdk' })`bun run prepare`;
-// crust declares @mentra/jspolyfill as a dep so this runs before crust.
+// crust declares @veiller/jspolyfill as a dep so this runs before crust.
 await $({ stdio: 'inherit', cwd: 'modules/jspolyfill' })`bun run build`;
 await $({ stdio: 'inherit', cwd: 'modules/crust' })`bun run prepare`;
 await $({ stdio: 'inherit', cwd: 'modules/miniapp' })`bun run prepare`;

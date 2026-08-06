@@ -6,7 +6,7 @@
  * their state.
  */
 
-import type {HeadingData, MiniappSession} from "@mentra/miniapp"
+import type {HeadingData, MiniappSession} from "@veiller/miniapp"
 
 export type CompassListener = (data: HeadingData) => void
 export type Unsubscribe = () => void

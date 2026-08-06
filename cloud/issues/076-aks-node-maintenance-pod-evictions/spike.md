@@ -19,12 +19,12 @@
 
 **2026-03-31 ~00:28 UTC (5:28 PM Pacific)**
 
-Isaiah was running `com.mentra.captions.debug` on US West (cluster 4965) to test the hot-path allocation hotfix (PR #2389). The captions app suddenly stopped — no error on the glasses, just captions disappeared.
+Isaiah was running `com.veiller.captions.debug` on US West (cluster 4965) to test the hot-path allocation hotfix (PR #2389). The captions app suddenly stopped — no error on the glasses, just captions disappeared.
 
 ### Cloud Logs (US West)
 
 ```
-[00:31:06] [AppManager] Resurrection failed for com.mentra.captions.debug:
+[00:31:06] [AppManager] Resurrection failed for com.veiller.captions.debug:
            Webhook failed: Webhook failed after 2 attempts: Request failed with status code 503
 [00:31:06] [AppManager] Sent app_stopped to mobile after resurrection failure
 [00:31:07] [MicrophoneManager] Mic-off holddown complete, still no media subscriptions - turning mic off

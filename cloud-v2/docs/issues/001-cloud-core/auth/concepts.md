@@ -3,7 +3,7 @@
 **Status:** Learning doc. Start here if auth is unfamiliar. It teaches the handful
 of ideas the rest of this folder assumes (tokens, JWTs, symmetric vs asymmetric
 signing, JWKS, audiences, token exchange, refresh), building each from intuition
-and mapping it onto the actual MentraOS system. By the end, [`spec.md`](./spec.md)
+and mapping it onto the actual Veiller system. By the end, [`spec.md`](./spec.md)
 and [`design.md`](./design.md) should read plainly.
 
 You do not need any crypto background. Where a real standard has a scary name
@@ -32,11 +32,11 @@ at it.
 
 - **The user.** A person wearing glasses, using an app on their phone.
 - **The OEM.** A hardware partner who ships their own glasses and their own phone
-  app, with their own user accounts. (For Mentra's own app, "the OEM" is just
-  Mentra, a reserved special case. Same machinery.)
+  app, with their own user accounts. (For Veiller's own app, "the OEM" is just
+  Veiller, a reserved special case. Same machinery.)
 - **The device / cloud-client.** The code on the phone that talks to our cloud on
   the user's behalf. It holds the user's credential.
-- **Mentra Cloud.** Our backend. It issues credentials and verifies them.
+- **Veiller Cloud.** Our backend. It issues credentials and verifies them.
 - **The miniapp + its developer backend.** A miniapp is a small program that runs
   on the glasses. Some miniapps call a backend the developer runs, and that
   backend wants to know which user it is serving.
@@ -79,10 +79,10 @@ Here is our real **access token**, decoded (this is the device's main credential
 ```json
 {
   "sub": "663b1f...e91a",   // mentraUserId: which user (our users._id)
-  "tenant_id": "mentra",       // which OEM vouched for them
+  "tenant_id": "veiller",       // which OEM vouched for them
   "session_id": "...",      // this runtime session
-  "aud": "mentra-cloud",    // who this token is FOR (section 7)
-  "iss": "mentra-cloud",    // who issued it
+  "aud": "veiller-cloud",    // who this token is FOR (section 7)
+  "iss": "veiller-cloud",    // who issued it
   "jti": "...",             // unique id, so a token can be single-use / revoked
   "exp": 1735689600         // expiry, Unix seconds (section 8)
 }
@@ -110,9 +110,9 @@ so they could check our tokens, any one of them could also mint a token for any
 user and impersonate them everywhere. The verify power and the forge power are the
 same key.
 
-(We still use symmetric signing in one safe spot: tokens that Mentra both issues
+(We still use symmetric signing in one safe spot: tokens that Veiller both issues
 and verifies internally, where the secret never leaves us. The v1 "core token" is
-HS256. That is fine precisely because nobody outside Mentra ever needs to verify
+HS256. That is fine precisely because nobody outside Veiller ever needs to verify
 it.)
 
 ### Asymmetric signing (a key pair)
@@ -124,18 +124,18 @@ Two **different** keys that are mathematically linked:
 
 You cannot derive the private key from the public key. So:
 
-- **Mentra holds the private key.** Only Mentra can sign. Only Mentra can mint
+- **Veiller holds the private key.** Only Veiller can sign. Only Veiller can mint
   tokens.
 - **The public key is given to everyone.** Anyone can verify. Nobody else can
   forge.
 
 That asymmetry is the unlock. It lets thousands of miniapp developer backends
-**check** that a token is genuinely from Mentra without ever being able to **make**
+**check** that a token is genuinely from Veiller without ever being able to **make**
 one. The algorithm we use is **Ed25519** (an `EdDSA` curve); for our purposes it
 is just "a fast, modern asymmetric signature." `RS256`/`ES256` are other names in
 the same family.
 
-This is why every Mentra-issued token a third party must verify is asymmetric.
+This is why every Veiller-issued token a third party must verify is asymmetric.
 
 ## 6. JWKS: publishing the public key
 
@@ -173,13 +173,13 @@ Concretely, our **miniapp-scoped token** is minted with `aud = <packageName>`,
 pinned to exactly one miniapp:
 
 ```json
-{ "sub": "663b1f...", "tenantId": "mentra",
+{ "sub": "663b1f...", "tenantId": "veiller",
   "aud": "com.dev.weather",   // valid ONLY for this miniapp's backend
   "iss": "cloud-core", "exp": ... }
 ```
 
 The weather miniapp's backend, when it verifies a token, checks **both** "is the
-signature genuinely Mentra's?" **and** "is `aud` equal to *my* packageName?" So:
+signature genuinely Veiller's?" **and** "is `aud` equal to *my* packageName?" So:
 
 - A token minted for `com.dev.weather` cannot be replayed against
   `com.dev.banking`'s backend; that backend sees the wrong `aud` and rejects it,
@@ -208,9 +208,9 @@ logins.
 ## 9. Token exchange: trading someone else's proof for ours
 
 Last idea. An OEM already has its own logged-in user, in its own app, with its own
-notion of identity. We do not want the OEM redirecting users to a Mentra login
-screen (there is no Mentra UI in their product). We just need the OEM to **vouch**
-for the user, server-side, and we turn that into a Mentra credential.
+notion of identity. We do not want the OEM redirecting users to a Veiller login
+screen (there is no Veiller UI in their product). We just need the OEM to **vouch**
+for the user, server-side, and we turn that into a Veiller credential.
 
 The standard for "present a token from issuer A, get back a token from issuer B"
 is **token exchange (RFC 8693)**. The flow:
@@ -218,26 +218,26 @@ is **token exchange (RFC 8693)**. The flow:
 1. The OEM's backend signs a short-lived JWT saying "this is my user `tenantUserId`"
    (the **subject token**), using the OEM's own private key.
 2. The device hands that subject token to `POST /api/client/auth/exchange`.
-3. Mentra verifies it against the OEM's **registered public key** (same
-   asymmetric idea, in the other direction: the OEM signs, Mentra verifies), maps
-   `(tenantId, tenantUserId)` to a Mentra user, and returns **our** access + refresh
+3. Veiller verifies it against the OEM's **registered public key** (same
+   asymmetric idea, in the other direction: the OEM signs, Veiller verifies), maps
+   `(tenantId, tenantUserId)` to a Veiller user, and returns **our** access + refresh
    tokens.
 
-From that point on the device carries a Mentra-issued credential, and the OEM's
+From that point on the device carries a Veiller-issued credential, and the OEM's
 backend is out of the per-request path entirely. The same endpoint also accepts
-Mentra's own subject tokens (the v1 core token during transition, a Supabase
+Veiller's own subject tokens (the v1 core token during transition, a Supabase
 session in the end state); the `subject_token_type` selects the verification path.
-Mentra-direct users are just the reserved OEM `"mentra"`.
+Veiller-direct users are just the reserved OEM `"veiller"`.
 
 ## 10. One full trace, using everything above
 
 A user of an OEM's glasses opens a weather miniapp that calls the developer's
 backend. Watch each concept fire.
 
-1. **The user is already signed in to the OEM's app.** No Mentra login.
+1. **The user is already signed in to the OEM's app.** No Veiller login.
 2. **Vouch (exchange, asymmetric, RFC 8693).** The OEM backend signs a subject
    JWT for this user. The cloud-client sends it to `/api/client/auth/exchange`.
-   Mentra verifies it with the OEM's public key, finds-or-creates the user, and
+   Veiller verifies it with the OEM's public key, finds-or-creates the user, and
    returns a **Core access token** (`aud = "cloud-core"`, `sub = mentraUserId`,
    ~1h) plus a **refresh token**.
 3. **The device holds the Core access token** and renews it via `/refresh` as needed.
@@ -247,12 +247,12 @@ backend. Watch each concept fire.
    back a **miniapp-scoped token** with `aud = com.dev.weather`, signed with the
    separate miniapp key.
 5. **Injection.** The on-device runtime hands that one token to the miniapp;
-   `useMentraAuth()` exposes it. The miniapp sees only its own scoped token.
+   `useVeillerAuth()` exposes it. The miniapp sees only its own scoped token.
 6. **The miniapp calls its backend** with `Authorization: Bearer <miniapp token>`.
-7. **The backend verifies, alone (JWKS, aud).** It fetched Mentra's
+7. **The backend verifies, alone (JWKS, aud).** It fetched Veiller's
    `/.well-known/jwks.json` once, picks the key by `kid`, checks the signature is
-   Mentra's, checks `aud == com.dev.weather`, and reads `mentraUserId` + `tenantId`.
-   It never calls Mentra per request, and it could never forge a token because it
+   Veiller's, checks `aud == com.dev.weather`, and reads `mentraUserId` + `tenantId`.
+   It never calls Veiller per request, and it could never forge a token because it
    only holds public keys.
 
 Every idea in this primer is in that trace: signed tokens (3), JWT claims (5),
@@ -271,11 +271,11 @@ OEM's vouch for Core-backed credentials, once.
 sequenceDiagram
     participant OEM as OEM backend
     participant CC as Device (cloud-client)
-    participant Mentra as Mentra Cloud
+    participant Veiller as Veiller Cloud
     OEM->>CC: subject JWT, signed for this user
-    CC->>Mentra: POST /api/client/auth/exchange
-    Mentra->>Mentra: verify with the OEM public key, find or create the user
-    Mentra-->>CC: access token + refresh token
+    CC->>Veiller: POST /api/client/auth/exchange
+    Veiller->>Veiller: verify with the OEM public key, find or create the user
+    Veiller-->>CC: access token + refresh token
     Note over CC: holds the access token, renews via /refresh, never gives it to a miniapp
 ```
 
@@ -287,16 +287,16 @@ its own via JWKS.
 sequenceDiagram
     participant App as Miniapp
     participant CC as Device (cloud-client + runtime)
-    participant Mentra as Mentra Cloud
+    participant Veiller as Veiller Cloud
     participant Backend as Developer backend
     App->>CC: launches
-    CC->>Mentra: POST /api/client/auth/miniapp-token, packageName
-    Mentra-->>CC: miniapp token, aud = the packageName
-    CC->>App: inject the token, read via useMentraAuth
+    CC->>Veiller: POST /api/client/auth/miniapp-token, packageName
+    Veiller-->>CC: miniapp token, aud = the packageName
+    CC->>App: inject the token, read via useVeillerAuth
     App->>Backend: call with the token as Bearer
-    Note over Backend: fetched the Mentra JWKS once, cached
+    Note over Backend: fetched the Veiller JWKS once, cached
     Backend->>Backend: verify signature + aud, read mentraUserId + tenantId
-    Backend-->>App: response, no call to Mentra
+    Backend-->>App: response, no call to Veiller
 ```
 
 ## 11. Quick reference

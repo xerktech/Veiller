@@ -1,15 +1,15 @@
 # New Captions Package Migration
 
-Migrate from `com.augmentos.livecaptions` to `com.mentra.captions`.
+Migrate from `com.augmentos.livecaptions` to `com.veiller.captions`.
 
 ## Quick Context
 
 **Current**: Old captions app `com.augmentos.livecaptions` is hardcoded in cloud and store.
-**Proposed**: Replace with new `com.mentra.captions` package.
+**Proposed**: Replace with new `com.veiller.captions` package.
 
 ## Key Context
 
-The new captions app `com.mentra.captions` has been deployed and added to prod server env vars. This hotfix removes hardcoded references to the old package name.
+The new captions app `com.veiller.captions` has been deployed and added to prod server env vars. This hotfix removes hardcoded references to the old package name.
 
 ## Changes
 
@@ -23,7 +23,7 @@ The new captions app `com.mentra.captions` has been deployed and added to prod s
 
 | File                                          | Change                                                                         |
 | --------------------------------------------- | ------------------------------------------------------------------------------ |
-| `websites/store/src/components/ui/slides.tsx` | Updated 3 references from `com.augmentos.livecaptions` → `com.mentra.captions` |
+| `websites/store/src/components/ui/slides.tsx` | Updated 3 references from `com.augmentos.livecaptions` → `com.veiller.captions` |
 
 ## Not Changed (Intentionally)
 
@@ -35,6 +35,6 @@ The new captions app `com.mentra.captions` has been deployed and added to prod s
 ## Status
 
 - [x] Remove from `PRE_INSTALLED` in `app.service.ts`
-- [x] Update store slides to use `com.mentra.captions`
+- [x] Update store slides to use `com.veiller.captions`
 - [ ] Verify store displays correctly
 - [ ] Deploy to prod

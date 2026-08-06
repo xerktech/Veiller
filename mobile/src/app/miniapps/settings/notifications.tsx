@@ -1,4 +1,4 @@
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 import {useState, useEffect, useCallback, useMemo, useRef} from "react"
 import {View, Platform, TextInput, FlatList, ActivityIndicator, Image} from "react-native"
 import Toast from "react-native-toast-message"
@@ -7,7 +7,7 @@ import {Screen, Text, Header, Switch} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {translate} from "@/i18n"
 import {notifyPackageName} from "@/constants/miniapps"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {useRegisterCapsule} from "@/stores/capsule"
 
 interface InstalledApp {

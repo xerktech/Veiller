@@ -1,11 +1,11 @@
 /**
- * MiniApp — MentraOS AppServer for the example template.
+ * MiniApp — Veiller AppServer for the example template.
  *
  * Handles the glasses lifecycle (onSession/onStop).
  * All per-user state is managed by the UserSession class.
  */
 
-import {AppServer, AppSession} from "@mentra/sdk"
+import {AppServer, AppSession} from "@veiller/sdk"
 import {UserSession} from "./UserSession"
 
 export interface MiniAppConfig {

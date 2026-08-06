@@ -1,6 +1,6 @@
 # Captions App
 
-A real-time live captions app for MentraOS smart glasses. Displays transcriptions from the glasses microphone directly in the user's field of view.
+A real-time live captions app for Veiller smart glasses. Displays transcriptions from the glasses microphone directly in the user's field of view.
 
 ## Project Structure
 
@@ -11,12 +11,12 @@ captions/
 ├── src/
 │   ├── index.ts           # 🎯 Main entry - coordinates everything
 │   ├── server.ts          # 🌐 Bun web server (webview + API)
-│   ├── mentra-app.ts      # 📱 MentraOS AppServer integration
+│   ├── veiller-app.ts      # 📱 Veiller AppServer integration
 │   │
 │   ├── api/               # API Routes
 │   │   └── routes.ts      # HTTP API endpoints
 │   │
-│   ├── app/               # MentraOS App Logic
+│   ├── app/               # Veiller App Logic
 │   │   └── CaptionsApp.ts # AppServer handler (onStart, onStop)
 │   │
 │   └── webview/           # Frontend (React)
@@ -39,9 +39,9 @@ captions/
    - Pure Bun server
    - Serves React webview
    - Handles API routes
-   - No MentraOS dependencies
+   - No Veiller dependencies
 
-2. **MentraOS Integration** (`mentra-app.ts`)
+2. **Veiller Integration** (`veiller-app.ts`)
    - Pure AppServer logic
    - Handles glasses sessions
    - No web server logic
@@ -49,15 +49,15 @@ captions/
 3. **Coordinator** (`index.ts`)
    - Starts both servers
    - 3 lines of code
-   - Can disable MentraOS if needed
+   - Can disable Veiller if needed
 
 ## Getting Started
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) installed
-- MentraOS account at [console.mentra.glass](https://console.mentra.glass)
-- Smart glasses connected to MentraOS app (optional)
+- Veiller account at [console.mentra.glass](https://console.mentra.glass)
+- Smart glasses connected to Veiller app (optional)
 
 ### Installation
 
@@ -77,8 +77,8 @@ Edit `.env`:
 
 ```env
 PORT=3333
-PACKAGE_NAME=com.mentra.captions
-MENTRAOS_API_KEY=your_api_key_here  # Optional: leave empty for webview-only
+PACKAGE_NAME=com.veiller.captions
+VEILLER_API_KEY=your_api_key_here  # Optional: leave empty for webview-only
 NODE_ENV=development
 ```
 
@@ -89,15 +89,15 @@ NODE_ENV=development
 bun run dev
 ```
 
-**Webview only (no MentraOS):**
+**Webview only (no Veiller):**
 ```bash
-# Leave MENTRAOS_API_KEY empty in .env
+# Leave VEILLER_API_KEY empty in .env
 bun run dev
 ```
 
 The app will:
 - ✅ Always start web server at `http://localhost:3333`
-- ✅ Start MentraOS AppServer if API key is present
+- ✅ Start Veiller AppServer if API key is present
 - ⚠️  Show warning if API key missing (webview still works)
 
 ## Usage
@@ -108,24 +108,24 @@ The app will:
 2. Open browser: `http://localhost:3333`
 3. See the React webview
 
-### As a MentraOS App
+### As a Veiller App
 
-1. Add `MENTRAOS_API_KEY` to `.env`
+1. Add `VEILLER_API_KEY` to `.env`
 2. Start the server: `bun run dev`
-3. Launch app from MentraOS phone app
+3. Launch app from Veiller phone app
 4. Captions appear on glasses
 
 ### As an Importable Module
 
 ```typescript
 import { startWebServer } from "./src/server";
-import { startMentraApp } from "./src/mentra-app";
+import { startVeillerApp } from "./src/veiller-app";
 
 // Start just the web server
 const server = startWebServer({ port: 3333 });
 
-// Or start MentraOS integration
-const app = await startMentraApp({
+// Or start Veiller integration
+const app = await startVeillerApp({
   packageName: "com.example.app",
   apiKey: "your-key",
   port: 3333
@@ -156,12 +156,12 @@ export function startWebServer(config) {
 - HMR enabled for instant updates
 - Zero build step needed
 
-### MentraOS Integration (`mentra-app.ts`)
+### Veiller Integration (`veiller-app.ts`)
 
 ```typescript
 import { CaptionsApp } from "./app/CaptionsApp";
 
-export async function startMentraApp(config) {
+export async function startVeillerApp(config) {
   const app = new CaptionsApp({
     packageName: config.packageName,
     apiKey: config.apiKey,
@@ -181,14 +181,14 @@ export async function startMentraApp(config) {
 
 ```typescript
 import { startWebServer } from "./server";
-import { startMentraApp } from "./mentra-app";
+import { startVeillerApp } from "./veiller-app";
 
 // Always start web server
 const server = startWebServer({ port: 3333 });
 
-// Optionally start MentraOS
+// Optionally start Veiller
 if (API_KEY) {
-  const app = await startMentraApp({ ... });
+  const app = await startVeillerApp({ ... });
 }
 ```
 
@@ -248,8 +248,8 @@ private async onStart(session: AppSession) {
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `PORT` | No | `3333` | Server port |
-| `PACKAGE_NAME` | No | `com.mentra.captions` | MentraOS package name |
-| `MENTRAOS_API_KEY` | No | - | API key from console (optional) |
+| `PACKAGE_NAME` | No | `com.veiller.captions` | Veiller package name |
+| `VEILLER_API_KEY` | No | - | API key from console (optional) |
 | `NODE_ENV` | No | `development` | Environment mode |
 
 ## Troubleshooting
@@ -259,8 +259,8 @@ private async onStart(session: AppSession) {
 - Verify `import index from "./webview/index.html"` in `server.ts`
 - Restart dev server
 
-**MentraOS not working?**
-- Check `MENTRAOS_API_KEY` is set
+**Veiller not working?**
+- Check `VEILLER_API_KEY` is set
 - Verify package name matches console
 - Check app is installed in console
 
@@ -276,7 +276,7 @@ PORT=4000 bun run dev
 
 ## Resources
 
-- [MentraOS Documentation](https://docs.mentra.glass)
+- [Veiller Documentation](https://docs.mentra.glass)
 - [Bun Documentation](https://bun.sh/docs)
 - [Developer Console](https://console.mentra.glass)
 - [Discord Community](https://discord.gg/5ukNvkEAqT)

@@ -2,7 +2,7 @@ import {act, fireEvent, render} from "@testing-library/react-native"
 
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {getBluetoothSdkListenerCount, resetBluetoothSdkMock} from "@/test-utils/mockBluetoothSdk"
-import BluetoothSdk from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
 
 const mockFocusEffectPreventBack = jest.fn()
 
@@ -31,8 +31,8 @@ jest.mock("expo-image", () => ({
   Image: () => null,
 }))
 
-jest.mock("@/components/brands/MentraLogoStandalone", () => ({
-  MentraLogoStandalone: () => null,
+jest.mock("@/components/brands/VeillerLogoStandalone", () => ({
+  VeillerLogoStandalone: () => null,
 }))
 
 jest.mock("@/contexts/ThemeContext", () => ({
@@ -154,7 +154,7 @@ describe("OnboardingGuide waitFn lifecycle", () => {
           {
             type: "image",
             source: {uri: "step.png"},
-            name: "MentraOS step",
+            name: "Veiller step",
             transition: false,
             title: "Start using a miniapp",
             details: [
@@ -190,7 +190,7 @@ describe("OnboardingGuide waitFn lifecycle", () => {
             name: "Welcome",
             transition: true,
             duration: 500,
-            title: "Welcome to Mentra",
+            title: "Welcome to Veiller",
           },
           {
             type: "image",
@@ -209,7 +209,7 @@ describe("OnboardingGuide waitFn lifecycle", () => {
     })
 
     expect(getByText("First lesson")).toBeTruthy()
-    expect(queryByText("Welcome to Mentra")).toBeNull()
+    expect(queryByText("Welcome to Veiller")).toBeNull()
   })
 
   it("navigates back to a peer first step without reopening the start gate", () => {

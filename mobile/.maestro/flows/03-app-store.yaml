@@ -1,13 +1,13 @@
 appId: ${MAESTRO_APP_ID}
 ---
 # Test: App Store Browse and Install
-# Description: Tests browsing the MentraOS Store and installing an app
+# Description: Tests browsing the Veiller Store and installing an app
 
 - launchApp
 
 # Navigate to Store
 - tapOn: "Store"
-- assertVisible: "MentraOS Store"
+- assertVisible: "Veiller Store"
 
 # Browse featured apps
 - swipe:
@@ -33,4 +33,4 @@ appId: ${MAESTRO_APP_ID}
 
 # Go back to store
 - back
-- assertVisible: "MentraOS Store"
+- assertVisible: "Veiller Store"

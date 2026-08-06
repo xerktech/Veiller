@@ -1,7 +1,7 @@
 /**
  * @fileoverview DispatchTransport — Transport implementation that rides
  * the native `__dispatch(iface, method, argsJson)` bridge exposed by the
- * MentraJS runtime (per-miniapp JSContext on iOS-JSC, Zipline/QuickJS
+ * VeillerJS runtime (per-miniapp JSContext on iOS-JSC, Zipline/QuickJS
  * context on Android).
  *
  * The existing `MiniappSession` (session.ts) is transport-agnostic — it
@@ -13,7 +13,7 @@
  *
  * What this transport does:
  *   - send(raw) — calls __dispatch("__bridge", "send", [raw]). The host
- *     side `MentraJSRouter` consumes the raw string verbatim, same shape
+ *     side `VeillerJSRouter` consumes the raw string verbatim, same shape
  *     as PostMessageTransport's wire payload.
  *   - The polyfill bundle (`startup.ts`) wires __deliver({kind:'bridge',raw})
  *     back into this transport's message handler so the host can push
@@ -32,10 +32,10 @@ import {Transport, TransportDisconnectHandler, TransportMessageHandler} from "./
 /**
  * Shape of the deliver envelope used by background code to surface
  * RN-originated transport messages back to the SDK. The polyfill bundle
- * fans these into __mentraDeliverBridgeRaw.
+ * fans these into __veillerDeliverBridgeRaw.
  */
 interface BridgeDeliverGlobal {
-  __mentraDeliverBridgeRaw?: (raw: string) => void
+  __veillerDeliverBridgeRaw?: (raw: string) => void
   __dispatch?: (iface: string, method: string, argsJson: string) => string | null
 }
 
@@ -57,7 +57,7 @@ export class DispatchTransport implements Transport {
     // route bridge frames here. Installed lazily so multiple transports
     // can share the same global if a test spins up two.
     const g = globalThis as unknown as BridgeDeliverGlobal
-    g.__mentraDeliverBridgeRaw = (raw: string) => {
+    g.__veillerDeliverBridgeRaw = (raw: string) => {
       if (this.messageHandler) this.messageHandler(raw)
     }
     this.open_ = true
@@ -95,8 +95,8 @@ export class DispatchTransport implements Transport {
   close(): void {
     this.open_ = false
     const g = globalThis as unknown as BridgeDeliverGlobal
-    if (g.__mentraDeliverBridgeRaw) {
-      delete g.__mentraDeliverBridgeRaw
+    if (g.__veillerDeliverBridgeRaw) {
+      delete g.__veillerDeliverBridgeRaw
     }
   }
 

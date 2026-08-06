@@ -1,7 +1,7 @@
 /**
- * `@mentra/engine/devtools` — the devtools-only surface.
+ * `@veiller/engine/devtools` — the devtools-only surface.
  *
- * Debug/diagnostic singletons consumed by the Mentra app's internal dev
+ * Debug/diagnostic singletons consumed by the Veiller app's internal dev
  * screens (stress test, miniapp dev-server tooling). Never import this from
  * product UI or host services; every `/devtools` import in mobile/src is
  * counted (report-only) by scripts/check-mobile-runtime-boundary.sh.

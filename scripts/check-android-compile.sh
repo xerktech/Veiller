@@ -14,7 +14,7 @@ Targets:
   bluetooth-sdk   Prepare mobile/android and run the public-mode Bluetooth SDK Android AAR compile.
   all             Run both targets. This is the default.
 
-Set MENTRA_ANDROID_CHECK_SKIP_PREBUILD=1 to reuse an existing mobile/android
+Set VEILLER_ANDROID_CHECK_SKIP_PREBUILD=1 to reuse an existing mobile/android
 project instead of running Expo prebuild for the bluetooth-sdk target.
 USAGE
 }
@@ -47,9 +47,9 @@ MSG
 ensure_mobile_android_project() {
   local mobile_dir="$repo_root/mobile"
 
-  if [[ "${MENTRA_ANDROID_CHECK_SKIP_PREBUILD:-}" == "1" ]]; then
+  if [[ "${VEILLER_ANDROID_CHECK_SKIP_PREBUILD:-}" == "1" ]]; then
     if [[ ! -x "$mobile_dir/android/gradlew" ]]; then
-      echo "error: mobile/android/gradlew is missing. Unset MENTRA_ANDROID_CHECK_SKIP_PREBUILD or run 'cd mobile && bun expo prebuild --platform android'." >&2
+      echo "error: mobile/android/gradlew is missing. Unset VEILLER_ANDROID_CHECK_SKIP_PREBUILD or run 'cd mobile && bun expo prebuild --platform android'." >&2
       return 1
     fi
     return 0
@@ -83,8 +83,8 @@ run_bluetooth_sdk() {
   ensure_mobile_android_project
   (
     cd "$repo_root/mobile/android"
-    MENTRA_BLUETOOTH_SDK_PACKAGE_PATH="$repo_root/mobile/modules/bluetooth-sdk" \
-      ./gradlew :mentra-bluetooth-sdk:assembleDebug --no-daemon "$@" -PmentraPublicSdk=true
+    VEILLER_BLUETOOTH_SDK_PACKAGE_PATH="$repo_root/mobile/modules/bluetooth-sdk" \
+      ./gradlew :veiller-bluetooth-sdk:assembleDebug --no-daemon "$@" -PveillerPublicSdk=true
   )
 }
 

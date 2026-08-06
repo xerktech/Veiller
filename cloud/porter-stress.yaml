@@ -20,7 +20,7 @@ services:
       RTMP_RELAY_URLS: rtmp-relay-uscentral.mentra.glass:1935
       LOG_LEVEL: info
       DOPPLER_TOKEN: ${DOPPLER_TOKEN}
-      DOPPLER_PROJECT: mentraos-cloud
+      DOPPLER_PROJECT: mentra-cloud
       DOPPLER_CONFIG: staging_stress
     # Extended timeouts for WebSocket connections (/glasses-ws, /app-ws).
     # Porter sets proxy-send-timeout: 60s by default, which kills idle WS

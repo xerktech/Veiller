@@ -1,8 +1,8 @@
-export const cameraPackageName = "com.mentra.camera"
-export const galleryPackageName = "com.mentra.gallery"
-export const settingsPackageName = "com.mentra.settings"
-export const simulatedPackageName = "com.mentra.simulated"
-export const mirrorPackageName = "com.mentra.mirror"
+export const cameraPackageName = "com.veiller.camera"
+export const galleryPackageName = "com.veiller.gallery"
+export const settingsPackageName = "com.veiller.settings"
+export const simulatedPackageName = "com.veiller.simulated"
+export const mirrorPackageName = "com.veiller.mirror"
 export const notifyPackageName = "cloud.augmentos.notify"
 
 /** True when this binary is the China (com.xerktech.veiller.cn) build. */

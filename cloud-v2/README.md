@@ -1,6 +1,6 @@
 # Cloud V2
 
-The MentraOS cloud rewrite for the local JS miniapp SDK.
+The Veiller cloud rewrite for the local JS miniapp SDK.
 
 ## Goals
 
@@ -13,7 +13,7 @@ The MentraOS cloud rewrite for the local JS miniapp SDK.
 ```
 cloud-v2/
 ├── packages/
-│   ├── core/      Mentra Services (OEM auth, portal backend, REST, miniapp store)
+│   ├── core/      Veiller Services (OEM auth, portal backend, REST, miniapp store)
 │   ├── audio/     Audio Stack (UDP ingress, workers, transcription/translation)
 │   ├── proxy/     Forwarder / reverse proxy (OEM-deployable)
 │   └── shared/    Types, config, observability primitives

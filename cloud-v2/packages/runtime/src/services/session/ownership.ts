@@ -34,7 +34,7 @@
  * delete a claim that is no longer ours.
  */
 
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { getRedis } from "../../clients/redis.client";
 
 const logger = createLogger("audio").child({ service: "ownership.service" });

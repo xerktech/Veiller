@@ -13,7 +13,7 @@ describe("navigation build configuration", () => {
     ).toBe("pk.miniapp-token")
   })
 
-  test("falls back to the Mentra App token for bundled builds", () => {
+  test("falls back to the Veiller App token for bundled builds", () => {
     expect(
       resolveMapboxBuildToken({
         NODE_ENV: "production",

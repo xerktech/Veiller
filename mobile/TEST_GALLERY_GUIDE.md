@@ -20,7 +20,7 @@ The test gallery includes:
 Test data is **already enabled** by default in development mode! Just run the app:
 
 ```bash
-cd /Users/mentra/Documents/MentraApps/MentraOS/mobile
+cd /Users/veiller/Documents/VeillerApps/Veiller/mobile
 bun android  # or bun ios
 ```
 

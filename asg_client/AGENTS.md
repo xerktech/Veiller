@@ -1,6 +1,6 @@
 # ASG Client (Android Smart Glasses Client)
 
-Android application that runs on Android-based smart glasses like Mentra Live. Primary transport is BLE to the paired phone (the phone forwards to MentraOS Cloud). Manages hardware interfaces (camera, microphone, LED control, sensors).
+Android application that runs on Android-based smart glasses like Mentra Live. Primary transport is BLE to the paired phone (the phone forwards to Veiller Cloud). Manages hardware interfaces (camera, microphone, LED control, sensors).
 
 ## Required Mentra Live Reference
 
@@ -74,21 +74,21 @@ Camera sources live in `com.mentra.asg_client.camera` subpackages (`lifecycle/`,
 2. **Default Production Configuration**:
 
    ```
-   MENTRAOS_HOST=api.mentra.glass
-   MENTRAOS_PORT=443
-   MENTRAOS_SECURE=true
+   VEILLER_HOST=api.mentra.glass
+   VEILLER_PORT=443
+   VEILLER_SECURE=true
    ```
 
 3. **Local Development Configuration**:
    ```
-   MENTRAOS_HOST=192.168.1.100  # Your local machine's IP
-   MENTRAOS_PORT=9090
-   MENTRAOS_SECURE=false
+   VEILLER_HOST=192.168.1.100  # Your local machine's IP
+   VEILLER_PORT=9090
+   VEILLER_SECURE=false
    ```
 
 ## Development on Mentra Live
 
-Mentra Live ships with `com.mentra.asg_client` as a **system app** signed with Mentra's release key. To run your own build, you must replace the factory app.
+Mentra Live ships with `com.mentra.asg_client` as a **system app** signed with Veiller's release key. To run your own build, you must replace the factory app.
 
 ### Connecting via ADB
 
@@ -105,7 +105,7 @@ This script will:
 2. Replace the factory app with your build
 3. Grant all required permissions
 
-**Warning:** After running this, you will not receive OTA updates from Mentra.
+**Warning:** After running this, you will not receive OTA updates from Veiller.
 
 ### Restoring Stock Firmware
 
@@ -187,7 +187,7 @@ Examples already in that file: `ENABLE_PHOTO_TIMING_LOGS`, `ENABLE_GRAYSCALE_BLE
 
 ### Cloud Communication
 
-- **Phone bridge**: Primary transport is BLE to the paired phone; the phone forwards to MentraOS Cloud. Some ancillary HTTP/WebSocket paths exist (see `BuildConfig.MENTRAOS_HOST`).
+- **Phone bridge**: Primary transport is BLE to the paired phone; the phone forwards to Veiller Cloud. Some ancillary HTTP/WebSocket paths exist (see `BuildConfig.VEILLER_HOST`).
 - **Media Streaming**: RTMP streaming via StreamPackLite
 - **Event Handling**: Camera button events, sensor data
 
@@ -235,7 +235,7 @@ Examples already in that file: `ENABLE_PHOTO_TIMING_LOGS`, `ENABLE_GRAYSCALE_BLE
 
 - **Unit Tests**: `./gradlew test`
 - **Connected Tests**: `./gradlew connectedAndroidTest` (requires connected device)
-- **Manual Testing**: Install on Mentra Live and test with MentraOS mobile app
+- **Manual Testing**: Install on Mentra Live and test with Veiller mobile app
 
 ## Known Issues & Notes
 

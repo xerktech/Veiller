@@ -141,7 +141,7 @@ export class _ConnectionManager {
 
     this.deps.logger.warn(
       { attempt: this.reconnectAttempts, delay },
-      "MentraSession transport closed; scheduling reconnect",
+      "VeillerSession transport closed; scheduling reconnect",
     );
 
     this.reconnectTimer = setTimeout(() => {

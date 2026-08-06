@@ -22,7 +22,7 @@ jest.mock("@/config/veillerMiniapps", () => ({
 
 const mockGetInstalledVersions = jest.fn<string[], [string]>()
 const mockInstallFromLocalZip = jest.fn()
-jest.mock("@mentra/engine/internal", () => ({
+jest.mock("@veiller/engine/internal", () => ({
   appRegistry: {
     getInstalledVersions: (pkg: string) => mockGetInstalledVersions(pkg),
     installFromLocalZip: (uri: string, opts?: unknown) => mockInstallFromLocalZip(uri, opts),

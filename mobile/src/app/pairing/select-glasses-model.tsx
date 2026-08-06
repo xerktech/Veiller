@@ -2,8 +2,8 @@ import {DeviceTypes} from "@/../../cloud/packages/types/src"
 import {View, TouchableOpacity, Platform, ScrollView, Image} from "react-native"
 
 import {EvenRealitiesLogo} from "@/components/brands/EvenRealitiesLogo"
-import {MentraLogo} from "@/components/brands/MentraLogo"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {NimoLogo} from "@/components/brands/NimoLogo"
 import {VuzixLogo} from "@/components/brands/VuzixLogo"
 import {XingyiLogo} from "@/components/brands/XingyiLogo"
@@ -44,7 +44,7 @@ export default function SelectGlassesModelScreen() {
       case DeviceTypes.LIVE:
       case DeviceTypes.NEX:
       case DeviceTypes.MACH1:
-        return <MentraLogo color={theme.colors.text} />
+        return <VeillerLogo color={theme.colors.text} />
       case DeviceTypes.Z100:
         return <VuzixLogo color={theme.colors.text} />
       case DeviceTypes.NIMO:
@@ -76,9 +76,9 @@ export default function SelectGlassesModelScreen() {
     // ...ar99Options,
     // {deviceModel: DeviceTypes.G1, key: "evenrealities_g1"},
     {deviceModel: DeviceTypes.G2, key: "evenrealities_g2"},
-    // {deviceModel: DeviceTypes.MACH1, key: "mentra_mach1"},
+    // {deviceModel: DeviceTypes.MACH1, key: "veiller_mach1"},
     // {deviceModel: DeviceTypes.Z100, key: "vuzix-z100"},
-    // {deviceModel: DeviceTypes.NEX, key: "mentra_nex"},
+    // {deviceModel: DeviceTypes.NEX, key: "veiller_nex"},
     // {deviceModel: DeviceTypes.NIMO, key: "nimo"},
   ]
 
@@ -99,7 +99,7 @@ export default function SelectGlassesModelScreen() {
         onLeftPress={() => {
           goBack()
         }}
-        RightActionComponent={<MentraLogoStandalone />}
+        RightActionComponent={<VeillerLogoStandalone />}
       />
       <Spacer className="h-4" />
       <ScrollView className="-mx-6 px-6 pt-6">

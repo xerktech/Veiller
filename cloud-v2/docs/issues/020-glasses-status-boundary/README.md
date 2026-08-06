@@ -13,7 +13,7 @@ Fable 5 handoff: [fable-5-handoff.md](./fable-5-handoff.md).
 
 Remove host-side access to raw glasses runtime state.
 
-The engine/island layer owns the MentraOS smartglasses runtime: BLE/native
+The engine/island layer owns the Veiller smartglasses runtime: BLE/native
 status, normalized glasses state, pairing readiness, wifi/hotspot state, OTA
 orchestration, controller state, gallery sync, diagnostic context, and the
 runtime rules that turn device events into app behavior.
@@ -36,7 +36,7 @@ SDK does not exist. The Bluetooth SDK is a standalone low-level product that
 customers can use to build their own glasses apps. If a connection type or
 predicate is useful at that level, it probably belongs in the Bluetooth SDK. We
 should not create a second engine connection type unless it adds real
-MentraOS/runtime semantics beyond the Bluetooth SDK contract.
+Veiller/runtime semantics beyond the Bluetooth SDK contract.
 
 ## Current Problem
 
@@ -54,7 +54,7 @@ export {
   getGlassesSystemTimeMs,
   useGlassesStore,
   waitForGlassesState,
-} from "@mentra/engine"
+} from "@veiller/engine"
 ```
 
 That shim was useful while moving ownership into island, but it is now the main
@@ -68,7 +68,7 @@ leak. It lets host screens and services:
   `setMtkUpdatedThisSession`;
 - rebuild cloud/status payloads from internal runtime state.
 
-The result is a muddled contract: OEM UI code must understand the MentraOS
+The result is a muddled contract: OEM UI code must understand the Veiller
 runtime store schema before it can render a branded app.
 
 ## Current Inventory
@@ -147,8 +147,8 @@ The Bluetooth SDK remains the public low-level SDK for customers building their
 own glasses apps. The engine should not wrap or re-export the entire Bluetooth
 SDK just for purity.
 
-For a host app embedding the MentraOS engine, product flows should prefer
-engine facades when the behavior is MentraOS-specific. Use engine for:
+For a host app embedding the Veiller engine, product flows should prefer
+engine facades when the behavior is Veiller-specific. Use engine for:
 
 - pairing flow policy and route-ready state;
 - default/saved device behavior;
@@ -161,7 +161,7 @@ engine facades when the behavior is MentraOS-specific. Use engine for:
 
 Direct Bluetooth SDK usage can still be valid when it is genuinely low-level:
 
-- standalone customer apps that are not embedding the MentraOS engine;
+- standalone customer apps that are not embedding the Veiller engine;
 - internal devtools/device experiments;
 - public SDK types and predicates, such as `GlassesConnectionStatus`, when the
   host is handling low-level Bluetooth state intentionally;
@@ -171,10 +171,10 @@ Direct Bluetooth SDK usage can still be valid when it is genuinely low-level:
 Rule for this migration:
 
 - Do not create new engine types that duplicate Bluetooth SDK types unless the
-  engine is projecting a higher-level MentraOS read model.
+  engine is projecting a higher-level Veiller read model.
 - Do not create pass-through engine wrappers for every Bluetooth SDK method by
   default.
-- Classify each remaining host `@mentra/bluetooth-sdk` import as one of:
+- Classify each remaining host `@veiller/bluetooth-sdk` import as one of:
   intentional low-level SDK use, engine-runtime behavior that should move
   behind a facade, engine devtools/debug use, or dead code.
 - Add a pure Bluetooth SDK types/predicates subpath for shared connection status
@@ -189,7 +189,7 @@ import {
   isBusyGlassesConnectionStatus,
   isConnectedGlassesConnectionStatus,
   isReadyGlassesConnectionStatus,
-} from "@mentra/bluetooth-sdk/types"
+} from "@veiller/bluetooth-sdk/types"
 ```
 
 The subpath must be side-effect free: no native module import, no Expo module
@@ -450,7 +450,7 @@ Use the devtools inventory below as the first cleanup pass.
   - product/OEM UI that should use normal engine facades;
   - dead route/link to delete.
 - Move engine-owned devtools behind a dev-only engine export such as
-  `@mentra/engine/devtools`, then have the host mount those exported screens or
+  `@veiller/engine/devtools`, then have the host mount those exported screens or
   components.
 - Start with the devtools that currently reach into raw runtime internals:
   `CoreStatusBar`, `stress-test.tsx` plus `MemoryWarningMonitor`, and
@@ -470,7 +470,7 @@ different form.
 ### 2. Add Guardrails
 
 - Add a lint/import restriction or CI grep that blocks new host imports from
-  `@/stores/glasses` and direct `useGlassesStore` imports from `@mentra/engine`.
+  `@/stores/glasses` and direct `useGlassesStore` imports from `@veiller/engine`.
 - Start in report-only mode or with a short temporary allowlist while migration
   is active.
 - Permanent exceptions should be narrow: tests, island internals, and engine
@@ -511,12 +511,12 @@ be moved/exported as a engine devtool in step 1.
 
 ### 5. Add Bluetooth SDK Types/Predicates Subpath
 
-- Add a pure `@mentra/bluetooth-sdk/types` or equivalent subpath exporting
+- Add a pure `@veiller/bluetooth-sdk/types` or equivalent subpath exporting
   `GlassesConnectionStatus` and the connected/ready/busy predicates.
 - Update island `GlassesReadiness.ts` to import/re-export those low-level
   predicates instead of duplicating their logic.
 - Keep `waitForGlassesReady` and timeout/reporting policy in island/engine,
-  because those are MentraOS runtime semantics.
+  because those are Veiller runtime semantics.
 
 ### 6. Convert Pairing And Reconnect
 
@@ -527,7 +527,7 @@ be moved/exported as a engine devtool in step 1.
   APIs.
 - Remove host dependency on the raw island `connection` store object and raw
   store readiness helpers.
-- Classify remaining direct `@mentra/bluetooth-sdk` imports using the Bluetooth
+- Classify remaining direct `@veiller/bluetooth-sdk` imports using the Bluetooth
   SDK policy above: intentional low-level SDK use, engine-runtime behavior,
   engine devtools/debug use, or dead code.
 
@@ -625,7 +625,7 @@ miniapps run locally on the phone.
 - OTA has one host progress route. `progress-legacy.tsx` is deleted, the build
   `< 37` route branch is gone, and old-build behavior is covered by engine OTA
   tests rather than a second host-side orchestrator.
-- Any remaining production host imports from `@mentra/bluetooth-sdk` are
+- Any remaining production host imports from `@veiller/bluetooth-sdk` are
   classified as intentional low-level SDK use, engine-runtime behavior moved
   behind a facade, engine devtools/debug use, or dead code.
 - Low-level connection predicates are shared from a pure Bluetooth SDK
@@ -647,7 +647,7 @@ miniapps run locally on the phone.
 ## Devtools Policy
 
 Dev-only diagnostic screens are not OEM host UI when they are owned by the
-engine. They are MentraOS devtools that a host app may mount.
+engine. They are Veiller devtools that a host app may mount.
 
 Policy:
 
@@ -658,7 +658,7 @@ Policy:
   not build equivalent screens in `mobile/src` by importing `useGlassesStore`.
 - Do not create broad public OEM APIs only because a devtool needs internal
   visibility. Prefer a dev-only/internal export such as
-  `@mentra/engine/devtools`.
+  `@veiller/engine/devtools`.
 - If a screen is product UI, branded settings UI, or OEM-customizable UI, it
   should use the normal typed engine facades instead of raw stores.
 
@@ -667,13 +667,13 @@ Policy:
 | Surface | Current location | Access / purpose | Current internals | Judgment |
 | --- | --- | --- | --- | --- |
 | Debug settings hub | `mobile/src/app/miniapps/settings/debug.tsx` | Shown when debug mode is enabled from Settings. Links to route tests, onboarding, OTA check, websocket reset, test errors, backend/cloud URL controls, navigation test, and super settings. | Uses host settings/navigation plus `navigationService`, `WebSocketManager`, and `SocketComms`; no raw glasses-store import. | Mostly host/dev shell. Keep host-owned for endpoint switching/navigation/test-error affordances, but route engine-runtime diagnostics to engine devtools screens. |
-| Super settings | `mobile/src/app/miniapps/settings/super.tsx` | Long-press/debug path for super mode, debug navigation history, debug Bluetooth status bar, native-dashboard flag, native debug buttons, stress test. | Calls `@mentra/bluetooth-sdk-internal` `dbg1()` / `dbg2()` and toggles debug settings. | Split: host can own the super/debug toggles; native/BLE debug actions should move behind engine devtools or a clearly internal Bluetooth SDK dev surface. |
+| Super settings | `mobile/src/app/miniapps/settings/super.tsx` | Long-press/debug path for super mode, debug navigation history, debug Bluetooth status bar, native-dashboard flag, native debug buttons, stress test. | Calls `@veiller/bluetooth-sdk-internal` `dbg1()` / `dbg2()` and toggles debug settings. | Split: host can own the super/debug toggles; native/BLE debug actions should move behind engine devtools or a clearly internal Bluetooth SDK dev surface. |
 | Stress test | `mobile/src/app/miniapps/settings/stress-test.tsx` | Super-mode jetsam/JSC memory benchmark screen. | Uses `engine.dev.getMemoryMB()`, `miniappRunningRegistry`, `useStressTestStore`, and internal Bluetooth SDK JSC benchmark calls. | Engine/runtime devtool. Move/export from engine devtools; host should mount it. |
 | Memory warning monitor | `mobile/src/effects/MemoryWarningMonitor.tsx` | Always-mounted helper that records iOS memory warnings for the stress-test screen. | Writes to `useStressTestStore`. | Move with the stress-test devtool or expose a engine devtools lifecycle hook. |
 | Core status bar | `mobile/src/components/dev/CoreStatusBar.tsx` | Debug overlay for BLE/core/cloud-client/mic/touch status; currently disabled by a commented mount in `Screen.tsx`. | Reads raw `useGlassesStore`, `useCoreStore`, `useConnectionStore`, `useCloudClientStatusStore`, and `useDebugStore`. | Engine devtools overlay candidate. Raw store access is acceptable only after moving behind a engine-owned devtools export. |
 | Version info | `mobile/src/components/dev/VersionInfo.tsx` | Footer/version tap target that enables debug/super mode and copies build/user/backend info. | Reads host settings, auth user, and `useCloudClientStatusStore`. | Host debug shell. Does not need raw glasses state. |
 | Backend/cloud URL controls | `mobile/src/components/dev/BackendUrl.tsx`, `mobile/src/components/dev/CloudUrl.tsx`, `mobile/src/components/dev/OtaVersionUrl.tsx` | Debug endpoint and OTA-manifest controls surfaced from debug settings. | Mostly host settings; OTA URL affects runtime behavior. | Keep endpoint switching host-owned. Review OTA override with OTA migration; likely engine OTA devtools or typed dev config. |
-| Miniapp developer settings | `mobile/src/app/miniapps/settings/miniapp-dev.tsx` | Developer entry point for QR scan and manual dev URL. | Uses host navigation/UI; links into engine app registry/runtime surfaces. | MentraOS developer tooling. Good candidate for engine-provided devtools screen or engine-owned building blocks with host UI adapters. |
+| Miniapp developer settings | `mobile/src/app/miniapps/settings/miniapp-dev.tsx` | Developer entry point for QR scan and manual dev URL. | Uses host navigation/UI; links into engine app registry/runtime surfaces. | Veiller developer tooling. Good candidate for engine-provided devtools screen or engine-owned building blocks with host UI adapters. |
 | Miniapp dev scanner | `mobile/src/app/miniapps/miniappdev/scanner.tsx` | QR scanner for `miniapp://dev`, `miniapp://release`, and URL launches. | Uses Expo Camera, host permission UI, `appRegistry`, `decideDevLaunchRoute`, `registerDevApp`, `useAppStatusStore`. | Engine developer tool with host permission/UI dependencies. Move carefully: either exported devtool screen with host adapters or keep host screen but no raw runtime stores. |
 | Miniapp dev URL loader | `mobile/src/app/miniapps/miniappdev/developer-url.tsx` | Manual URL loader and recent-dev-app launcher. | Uses `decideDevLaunchRoute`, `registerDevApp`, `useAppStatusStore`, storage, and host permission UI. | Same as scanner. Engine owns dev-app runtime logic; host currently owns UI/permissions. |
 | Dev miniapp offline screen | `mobile/src/app/applet/dev-offline.tsx` | Offline fallback screen for dev miniapps. | Uses `useApps`, `decideDevLaunchRoute`, `useAppStatusStore`, host capsule/nav. | Miniapp developer UX. Can remain host UI using typed engine app APIs. |

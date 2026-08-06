@@ -3,7 +3,7 @@
 
 import {useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"
@@ -126,7 +126,7 @@ export default function DisplayPage() {
   // useTester opens a (no-op) subscription so `tester:event {kind:"error"}`
   // from a bad invoke() lands in lastError and surfaces in the UI.
   const {invoke, lastError} = useTester("display")
-  const [text, setText] = useState("Hello from MentraJS!")
+  const [text, setText] = useState("Hello from VeillerJS!")
   // render() scene press count — each press re-renders the same scene with
   // updated content, exercising in-place element updates (stable ids).
   const [sceneCount, setSceneCount] = useState(0)

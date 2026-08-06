@@ -18,7 +18,7 @@ import type {
   WebSocketLike,
   UdpSocketLike,
   KeyValueStore,
-} from "@mentra/cloud-client";
+} from "@veiller/cloud-client";
 
 /**
  * Adapt the `ws` package to `WebSocketLike`.

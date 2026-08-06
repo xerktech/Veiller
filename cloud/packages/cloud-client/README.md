@@ -19,9 +19,9 @@ npm install @augmentos/cloud-client
 ```
 
 ```typescript
-import { MentraClient } from '@augmentos/cloud-client';
+import { VeillerClient } from '@augmentos/cloud-client';
 
-const client = new MentraClient({
+const client = new VeillerClient({
   email: 'user@example.com',
   serverUrl: 'ws://localhost:3001'
 });
@@ -46,7 +46,7 @@ await client.disconnect();
 The client mirrors the AugmentOS cloud architecture:
 
 ### Core Components
-- **MentraClient**: Main client with clean public API
+- **VeillerClient**: Main client with clean public API
 - **WebSocketManager**: Connection and message protocol
 - **AudioManager**: Audio streaming and VAD
 - **AppManager**: App lifecycle tracking

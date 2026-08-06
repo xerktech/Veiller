@@ -3,7 +3,7 @@
 ## Problem
 
 Local miniapps can have their own backend services, but those backends currently
-cannot know which Mentra user is calling them unless the miniapp invents its own
+cannot know which Veiller user is calling them unless the miniapp invents its own
 login. Passing the phone's Core access token into the miniapp would solve
 identity at the cost of leaking a powerful host credential into developer code.
 That is not acceptable.
@@ -15,7 +15,7 @@ miniapp's own package name.
 
 1. Miniapp code can call `session.auth.getToken()` or `session.auth.fetch(...)`.
 2. The token exposed to the miniapp is audience-scoped to the miniapp package
-   name, for example `aud = "com.mentra.local-merge"`.
+   name, for example `aud = "com.veiller.local-merge"`.
 3. Core/runtime access tokens stay inside the trusted host/cloud-client layer.
 4. Miniapp backends can verify the token with Core's public JWKS endpoint.
 5. Runtime-only deployments keep working; they simply do not provide
@@ -87,14 +87,14 @@ all other request options intact.
 
 ## Backend Verification
 
-Most miniapp backends should use `@mentra/auth`:
+Most miniapp backends should use `@veiller/auth`:
 
 ```ts
-import {createMentraAuth, type MentraAuthVariables} from "@mentra/auth"
+import {createVeillerAuth, type VeillerAuthVariables} from "@veiller/auth"
 import {Hono} from "hono"
 
-const mentraAuth = createMentraAuth({packageName: "com.example.miniapp"})
-const app = new Hono<{Variables: MentraAuthVariables}>()
+const mentraAuth = createVeillerAuth({packageName: "com.example.miniapp"})
+const app = new Hono<{Variables: VeillerAuthVariables}>()
 
 app.use("/api/*", mentraAuth.hono())
 
@@ -111,17 +111,17 @@ The helper verifies:
 3. `iss === "cloud-core"` by default.
 4. `aud === <this backend packageName>`.
 5. `exp` has not passed.
-6. `sub` is present and becomes the Mentra user id.
+6. `sub` is present and becomes the Veiller user id.
 
-`@mentra/auth` defaults to the production Core JWKS:
+`@veiller/auth` defaults to the production Core JWKS:
 `https://core.mentraglass.com/.well-known/jwks.json`. Local, staging, test, or
-self-hosted deployments can pass `jwksUrl` or set `MENTRA_AUTH_JWKS_URL`.
+self-hosted deployments can pass `jwksUrl` or set `VEILLER_AUTH_JWKS_URL`.
 
 ## First Implementation Target
 
 Local Merge is the first protected backend:
 
-1. Mobile mints `com.mentra.local-merge` miniapp tokens through cloud-client.
+1. Mobile mints `com.veiller.local-merge` miniapp tokens through cloud-client.
 2. Local Merge miniapp calls backend through `session.auth.fetch`.
 3. Local Merge backend rejects unauthenticated or wrong-audience calls.
 

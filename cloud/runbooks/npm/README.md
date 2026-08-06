@@ -1,16 +1,16 @@
 # NPM Publishing
 
-We publish a handful of `@mentra/*` packages to npmjs.com. Today
+We publish a handful of `@veiller/*` packages to npmjs.com. Today
 all publishes are manual. CI/CD is on the roadmap; this runbook
 will be updated when it lands.
 
-If you have not published an `@mentra/*` package before, read
+If you have not published an `@veiller/*` package before, read
 [concepts.md](concepts.md) first. It covers scoped packages, dist-tags,
 semver, monorepo workspace dependencies, and 2FA setup.
 
 ## Org access
 
-Packages are published under the `@mentra` npm org. To publish
+Packages are published under the `@veiller` npm org. To publish
 you need to be added to the org. Ask Isaiah or Israelov to add
 your npm username.
 
@@ -18,21 +18,21 @@ Verify access:
 
 ```bash
 npm whoami                       # confirms you are logged in
-npm org ls @mentra               # lists members of the @mentra org
+npm org ls @veiller               # lists members of the @veiller org
 ```
 
 If `npm whoami` fails, run `npm login` and follow the prompts.
-The `@mentra` org requires an npm account with 2FA enabled.
+The `@veiller` org requires an npm account with 2FA enabled.
 
 ## What we publish
 
 | Package | Path | Tag policy |
 | --- | --- | --- |
-| `@mentra/sdk` | `cloud/packages/sdk` | `alpha` only. Never `latest`. See [sdk.md](sdk.md). |
-| `@mentra/react` | `cloud/packages/react-sdk` | `latest` for stable, `beta` for untested. See [react-sdk.md](react-sdk.md). |
-| `@mentra/types` | `cloud/packages/types` | Coupled to `@mentra/sdk` (bundled). Bump together. |
-| `@mentra/cli` | `cloud/packages/cli` | `latest` once tested. |
-| `@mentra/display-utils` | `cloud/packages/display-utils` | `latest`. |
+| `@veiller/sdk` | `cloud/packages/sdk` | `alpha` only. Never `latest`. See [sdk.md](sdk.md). |
+| `@veiller/react` | `cloud/packages/react-sdk` | `latest` for stable, `beta` for untested. See [react-sdk.md](react-sdk.md). |
+| `@mentra/types` | `cloud/packages/types` | Coupled to `@veiller/sdk` (bundled). Bump together. |
+| `@veiller/cli` | `cloud/packages/cli` | `latest` once tested. |
+| `@veiller/display-utils` | `cloud/packages/display-utils` | `latest`. |
 
 This list is not exhaustive. Treat per-package files as the
 source of truth for the packages they cover; add a new file in
@@ -46,11 +46,11 @@ Anything else requires explicit opt-in (`npm install <pkg>@beta`).
 - **`latest`**: stable, production-ready, fully tested. Default
   install target.
 - **`alpha`**: experimental or in-progress. Used today by
-  `@mentra/sdk` because we are migrating to the local SDK. We do
+  `@veiller/sdk` because we are migrating to the local SDK. We do
   not want existing miniapp developers to refactor against an API
   that will change again soon. See [sdk.md](sdk.md) for the full reasoning.
 - **`beta`**: pre-release of something we plan to promote to
-  `latest`. Use this for `@mentra/react` when changes have not
+  `latest`. Use this for `@veiller/react` when changes have not
   been thoroughly tested on real apps yet, then promote to
   `latest` after testing.
 - **Named experimental tags** (`hono`, `local-runtime`, etc.):
@@ -86,8 +86,8 @@ npm version <patch | minor | major | prerelease --preid=alpha>
 npm publish --tag <alpha | beta | latest>
 
 # 6. Verify
-npm view @mentra/<package> versions --json | tail -10
-npm view @mentra/<package> dist-tags
+npm view @veiller/<package> versions --json | tail -10
+npm view @veiller/<package> dist-tags
 
 # 7. Push the version bump commit and tag
 git push && git push --tags
@@ -118,14 +118,14 @@ the previous good version:
 
 ```bash
 # Find the last few versions
-npm view @mentra/<package> versions --json | tail -10
+npm view @veiller/<package> versions --json | tail -10
 
 # Repoint the tag at the last good version
-npm dist-tag add @mentra/<package>@<good-version> <tag>
-# e.g. npm dist-tag add @mentra/sdk@3.0.0-alpha.3 alpha
+npm dist-tag add @veiller/<package>@<good-version> <tag>
+# e.g. npm dist-tag add @veiller/sdk@3.0.0-alpha.3 alpha
 
 # Optionally deprecate the bad version with a warning message
-npm deprecate @mentra/<package>@<bad-version> "Use <good-version>; <reason>."
+npm deprecate @veiller/<package>@<bad-version> "Use <good-version>; <reason>."
 ```
 
 After rolling back, fix the underlying cause and publish a new
@@ -139,10 +139,10 @@ If you published to the wrong tag (e.g. published an alpha to
 
 ```bash
 # Repoint latest back to the correct stable version
-npm dist-tag add @mentra/<package>@<correct-stable-version> latest
+npm dist-tag add @veiller/<package>@<correct-stable-version> latest
 
 # Move the just-published version to the tag it should have been
-npm dist-tag add @mentra/<package>@<just-published-version> alpha
+npm dist-tag add @veiller/<package>@<just-published-version> alpha
 ```
 
 Order matters: fix `latest` first so consumers stop getting the
@@ -151,7 +151,7 @@ just-published version correctly.
 
 ## Coordinated publishes
 
-`@mentra/sdk` bundles `@mentra/types`. If your changes touched
+`@veiller/sdk` bundles `@mentra/types`. If your changes touched
 both packages, publish `types` first, bump the SDK's dependency
 range, rebuild the SDK, then publish the SDK. See
 [sdk.md](sdk.md) for the exact sequence.

@@ -1,6 +1,6 @@
 # Recovery Worker
 
-The recovery worker is a headless companion APK (`com.mentra.recovery`) that keeps ASG alive when the main service crashes or fails to restart after an APK install.
+The recovery worker is a headless companion APK (`com.veiller.recovery`) that keeps ASG alive when the main service crashes or fails to restart after an APK install.
 
 ## Responsibilities
 
@@ -33,4 +33,4 @@ The recovery worker validates that backup APK package name is `com.mentra.asg_cl
 - ASG deploy/start manager: `RecoveryWorkerManager`
 - ASG ping responder: `ServiceHeartbeatReceiver`
 - Telemetry sink: `RecoveryTelemetryReceiver`
-- Recovery sidecar service: `com.mentra.recovery.service.RecoveryService`
+- Recovery sidecar service: `com.veiller.recovery.service.RecoveryService`

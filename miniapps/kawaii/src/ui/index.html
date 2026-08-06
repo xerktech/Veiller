@@ -143,7 +143,7 @@
         <p>Tap the button and the hands change. Tiny, cute, and perfect for update testing.</p>
         <div class="face" id="face">づ(^_^)づ</div>
         <button id="next" type="button">New face</button>
-        <div class="version">com.mentra.kawaii · v__KAWAII_VERSION__</div>
+        <div class="version">com.veiller.kawaii · v__KAWAII_VERSION__</div>
       </section>
     </main>
     <script>
@@ -169,10 +169,10 @@
         index = (index + 1) % faces.length
         const face = faces[index]
         showFace(face)
-        window.mentra?.send?.("kawaii:set-face", { face })
+        window.veiller?.send?.("kawaii:set-face", { face })
       })
-      window.mentra?.on?.("kawaii:face", ({ face }) => showFace(face))
-      window.mentra?.ready?.()
+      window.veiller?.on?.("kawaii:face", ({ face }) => showFace(face))
+      window.veiller?.ready?.()
     </script>
   </body>
 </html>

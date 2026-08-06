@@ -2,11 +2,11 @@
  * Captions App - Two Server Architecture
  *
  * Port 3334 (Bun)     - Serves React webview + custom API routes
- * Port 3333 (Express) - Handles MentraOS AppServer + proxies to Bun
+ * Port 3333 (Express) - Handles Veiller AppServer + proxies to Bun
  *
  * Flow:
  * - User visits localhost:3333 → Express proxies to Bun → Gets React app
- * - MentraOS Cloud calls /session-start → Express handles it
+ * - Veiller Cloud calls /session-start → Express handles it
  * - Browser requests /api/hello → Express proxies to Bun
  */
 
@@ -18,11 +18,11 @@ import {CaptionsApp} from "./app/CaptionsApp"
 // Configuration
 const PORT = parseInt(process.env.PORT || "3333", 10)
 const BUN_PORT = PORT + 1 // 3334
-const PACKAGE_NAME = process.env.PACKAGE_NAME || "com.mentra.captions"
-const API_KEY = process.env.MENTRAOS_API_KEY || ""
+const PACKAGE_NAME = process.env.PACKAGE_NAME || "com.veiller.captions"
+const API_KEY = process.env.VEILLER_API_KEY || ""
 
 if (!API_KEY) {
-  console.error("❌ MENTRAOS_API_KEY environment variable is not set")
+  console.error("❌ VEILLER_API_KEY environment variable is not set")
   process.exit(1)
 }
 
@@ -66,7 +66,7 @@ console.log(`   - API: ${bunServer.url}/api/hello\n`)
 // Step 2: Start Express/AppServer (Port 3333)
 // ============================================
 
-console.log(`📱 Starting MentraOS AppServer on port ${PORT}...`)
+console.log(`📱 Starting Veiller AppServer on port ${PORT}...`)
 
 const captionsApp = new CaptionsApp({
   packageName: PACKAGE_NAME,
@@ -74,7 +74,7 @@ const captionsApp = new CaptionsApp({
   port: PORT,
 })
 
-// Start AppServer first (registers all MentraOS routes)
+// Start AppServer first (registers all Veiller routes)
 await captionsApp.start()
 
 // Get Express app instance AFTER starting (routes are registered)
@@ -107,7 +107,7 @@ expressApp.all("*", async (req, res) => {
   }
 })
 
-console.log(`✅ MentraOS AppServer running at http://localhost:${PORT}`)
+console.log(`✅ Veiller AppServer running at http://localhost:${PORT}`)
 console.log(`   - Session endpoints: http://localhost:${PORT}/session-start`)
 console.log(`   - Webhook: http://localhost:${PORT}/webhook`)
 console.log(`   - Webview (proxied): http://localhost:${PORT}\n`)

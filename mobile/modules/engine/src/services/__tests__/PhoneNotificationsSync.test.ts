@@ -3,7 +3,7 @@
 import {beforeEach, describe, expect, mock, test} from "bun:test"
 
 const mockSetNotificationConfig = mock(() => Promise.resolve())
-mock.module("@mentra/crust", () => ({
+mock.module("@veiller/crust", () => ({
   __esModule: true,
   default: {
     setNotificationConfig: mockSetNotificationConfig,

@@ -7,8 +7,8 @@ apply plugin: 'signing'
 
 def packageJson = new JsonSlurper().parse(file("../package.json"))
 def mavenGroupId = 'com.mentraglass'
-def mavenPublishVersion = (findProperty('mentraMavenVersion') ?: System.getenv('MENTRA_MAVEN_VERSION') ?: packageJson.version).toString()
-def publicMavenSdk = (findProperty('mentraPublicSdk') ?: System.getenv('MENTRA_PUBLIC_SDK') ?: 'false').toString().toBoolean()
+def mavenPublishVersion = (findProperty('veillerMavenVersion') ?: System.getenv('VEILLER_MAVEN_VERSION') ?: packageJson.version).toString()
+def publicMavenSdk = (findProperty('veillerPublicSdk') ?: System.getenv('VEILLER_PUBLIC_SDK') ?: 'false').toString().toBoolean()
 
 // Download Sherpa-ONNX Android AAR from the upstream GitHub release and stage
 // it as a Maven artifact in a tiny on-disk repository under libs/maven/.
@@ -37,10 +37,10 @@ def sherpaOnnxPom = new File(sherpaOnnxRepoDir, "${sherpaOnnxArtifact}-${sherpaO
 // checkouts clean untracked files, so a workspace-only copy meant every release
 // re-downloaded ~55MB from GitHub — and one network blip failed the whole
 // release (that is what broke release 33). The cache lives outside the
-// workspace so it survives `git clean`; override with MENTRA_SHERPA_CACHE_DIR.
+// workspace so it survives `git clean`; override with VEILLER_SHERPA_CACHE_DIR.
 def sherpaOnnxCacheDir = new File(
-  System.getenv("MENTRA_SHERPA_CACHE_DIR")
-    ?: new File(gradle.gradleUserHomeDir, "mentra-sherpa-onnx").absolutePath
+  System.getenv("VEILLER_SHERPA_CACHE_DIR")
+    ?: new File(gradle.gradleUserHomeDir, "veiller-sherpa-onnx").absolutePath
 )
 def sherpaOnnxCachedAar = new File(
   sherpaOnnxCacheDir, "${sherpaOnnxArtifact}-${sherpaOnnxVersion}.aar"
@@ -274,7 +274,7 @@ if (useManagedAndroidSdkVersions) {
 }
 
 android {
-  namespace "com.mentra.bluetoothsdk"
+  namespace "com.veiller.bluetoothsdk"
   defaultConfig {
     versionCode 1
     versionName project.version
@@ -303,7 +303,7 @@ android {
 }
 
 dependencies {
-  // Expo adapter class is compiled into the MentraOS module, but the bare SDK
+  // Expo adapter class is compiled into the Veiller module, but the bare SDK
   // artifact should not expose Expo as a runtime dependency.
   compileOnly project(':expo-modules-core')
 
@@ -333,7 +333,7 @@ dependencies {
 
   // AVIF decode for BLE photo fallback. Public Maven artifacts omit this
   // JitPack-only decoder from runtime metadata; Android 12+ can still use the
-  // platform decoder, while MentraOS app builds keep HeifCoder for broader
+  // platform decoder, while Veiller app builds keep HeifCoder for broader
   // fallback support.
   // Pinned to the JitPack 1.7.3 build (same as asg_client): the Maven Central
   // 2.2.x releases transitively pull kotlin-stdlib 2.3.0, which breaks this
@@ -354,17 +354,17 @@ dependencies {
   // LC3 audio codec library
   implementation project(':lc3Lib')
 
-  // These integrations are used by the full MentraOS app, but are not exposed
+  // These integrations are used by the full Veiller app, but are not exposed
   // through the public SDK API. Public Maven artifacts compile against them
   // without publishing them as runtime transitives, so consumers only need
   // Maven Central/Google repositories for normal SDK use.
-  def optionalMentraOsIntegrationDependency = publicMavenSdk ? 'compileOnly' : 'implementation'
+  def optionalVeillerIntegrationDependency = publicMavenSdk ? 'compileOnly' : 'implementation'
 
   // Sherpa-ONNX for local transcription. Jitpack's v1.13.2 build failed
   // upstream, so we stage the prebuilt AAR into libs/maven/ (see top of file)
   // and consume it as a Maven coord — AGP rejects raw files() .aar deps in
   // library modules.
-  dependencies.add(optionalMentraOsIntegrationDependency, "${sherpaOnnxGroup}:${sherpaOnnxArtifact}:${sherpaOnnxVersion}@aar")
+  dependencies.add(optionalVeillerIntegrationDependency, "${sherpaOnnxGroup}:${sherpaOnnxArtifact}:${sherpaOnnxVersion}@aar")
 
   if (!publicMavenSdk) {
     // Silero VAD — vendored source under silero/, wired as :silero
@@ -421,7 +421,7 @@ afterEvaluate {
         from components.release
 
         pom {
-          name = 'Mentra Bluetooth SDK'
+          name = 'Veiller Bluetooth SDK'
           description = 'SDK for communicating with smart glasses'
           url = 'https://github.com/Mentra-Community/MentraOS'
           licenses {
@@ -432,7 +432,7 @@ afterEvaluate {
           }
           developers {
             developer {
-              id = 'mentra'
+              id = 'veiller'
               name = 'Mentra'
               email = 'dev@mentra.glass'
             }

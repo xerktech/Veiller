@@ -23,8 +23,8 @@
  * actually get".
  */
 
-import {base64ToBytes, bytesToBase64} from "@mentra/miniapp/background"
-import type {AudioChunkData, BlobMeta, BlobWriter, MiniappSession, UnsubscribeFn} from "@mentra/miniapp/background"
+import {base64ToBytes, bytesToBase64} from "@veiller/miniapp/background"
+import type {AudioChunkData, BlobMeta, BlobWriter, MiniappSession, UnsubscribeFn} from "@veiller/miniapp/background"
 
 import type {Channels} from "../../shared/channels"
 import type {RecorderStatus, RecordingItem, Usage} from "../../shared/types"
@@ -38,7 +38,7 @@ const DEFAULT_SAMPLE_RATE = 16000
 /** WAV IART (artist) tag — the source, so players don't show "Unknown Artist". */
 const WAV_ARTIST = "Mentra"
 /** WAV ISFT (software) tag. */
-const WAV_SOFTWARE = "Mentra Recorder"
+const WAV_SOFTWARE = "Veiller Recorder"
 /** Flush the PCM buffer to the blob once it reaches ~1.5s of 16kHz mono audio. */
 const FLUSH_BYTES = 48 * 1024
 /** Throttle UI status pushes to ~5/sec (keyed off captured audio ms, not a timer). */
@@ -795,7 +795,7 @@ function makeKey(): string {
 }
 
 /**
- * A filesystem-friendly file name, e.g. "Mentra Recording 2026-06-24 153012.wav".
+ * A filesystem-friendly file name, e.g. "Veiller Recording 2026-06-24 153012.wav".
  * Only spaces + hyphens (no colons/slashes), so it survives as the shared file's
  * name verbatim. This is the blob's `name` (and thus the shared filename).
  */
@@ -803,7 +803,7 @@ function makeName(d: Date): string {
   const p = (n: number) => n.toString().padStart(2, "0")
   const date = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
   const time = `${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
-  return `Mentra Recording ${date} ${time}.wav`
+  return `Veiller Recording ${date} ${time}.wav`
 }
 
 /**

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add typed request/response RPC to the mini app SDK (`mentra.request` / `session.ui.handle` / `useRpc`), then migrate the Navigation mini app from the single-bundle WebView prototype to the two-layer (background JSContext + UI WebView) architecture so closing the WebView mid-trip never silences the glasses.
+**Goal:** Add typed request/response RPC to the mini app SDK (`veiller.request` / `session.ui.handle` / `useRpc`), then migrate the Navigation mini app from the single-bundle WebView prototype to the two-layer (background JSContext + UI WebView) architecture so closing the WebView mid-trip never silences the glasses.
 
-**Architecture:** RPC reuses the existing UI bus (`session.ui.send` / `mentra.send`) plus one optional envelope field (`requestId`) and one new envelope type (`UI_CANCEL`) for cancellation. A `Rpc<Req, Res>` brand in the per-app `Channels` registry makes `mentra.request` and `mentra.send` mutually exclusive at the type level — wrong API for the channel is a compile error. Navigation gets a `NavigationController` that owns `MiniappSession`, all subscriptions, trip state, the glasses HUD logic, storage, and Places REST. UI becomes a thin Zustand-backed React tree reading channel pushes, sending broadcasts and RPC.
+**Architecture:** RPC reuses the existing UI bus (`session.ui.send` / `veiller.send`) plus one optional envelope field (`requestId`) and one new envelope type (`UI_CANCEL`) for cancellation. A `Rpc<Req, Res>` brand in the per-app `Channels` registry makes `veiller.request` and `veiller.send` mutually exclusive at the type level — wrong API for the channel is a compile error. Navigation gets a `NavigationController` that owns `MiniappSession`, all subscriptions, trip state, the glasses HUD logic, storage, and Places REST. UI becomes a thin Zustand-backed React tree reading channel pushes, sending broadcasts and RPC.
 
 **Tech Stack:** TypeScript (strict), Bun (test runner + bundler), React 19, Zustand, react-native-webview (host bridge), JSContext (iOS) / Hermes-equivalent JSContext (Android) for background, Tailwind 4, motion, Google Maps JS API (UI-only), Google Places REST (background-only).
 
@@ -20,12 +20,12 @@
 |---|---|---|
 | `mobile/modules/miniapp/src/modules/ui.ts` | Modify | Add `Rpc<>`, `RpcRegistry` helpers; extend `UISendEnvelope`/`UIInboundEnvelope` with `requestId` + `UI_CANCEL`; add `handle()` and `request()` to `UIModule`; rewrite top docstring. |
 | `mobile/modules/miniapp/src/modules/ui.test.ts` | Modify | Add ~10 new test cases for handle/request/cancel/timeout. |
-| `mobile/modules/miniapp/src/background/index.ts` | Modify | Re-export `Rpc`, `MentraRpcError`, `MentraRpcTimeoutError`. Update docstring. |
-| `mobile/modules/miniapp/src/ui/index.ts` | Modify | Add `request()` method to `MentraUiGlobal`; export `Rpc`, `MentraRpcError`, `MentraRpcTimeoutError`; update docstring. |
+| `mobile/modules/miniapp/src/background/index.ts` | Modify | Re-export `Rpc`, `VeillerRpcError`, `VeillerRpcTimeoutError`. Update docstring. |
+| `mobile/modules/miniapp/src/ui/index.ts` | Modify | Add `request()` method to `VeillerUiGlobal`; export `Rpc`, `VeillerRpcError`, `VeillerRpcTimeoutError`; update docstring. |
 | `mobile/modules/miniapp/src/react/useRpc.ts` | Create | React hook with auto-abort-on-unmount + `.abort()` for cancel-previous patterns. |
 | `mobile/modules/miniapp/src/react/index.ts` | Modify | Export `useRpc`. |
-| `mobile/modules/engine/src/services/mentraUiShim.ts` | Modify | Add `requestId` to `msg` frames (both directions); generate `cancel` frame; pre-ready buffer for RPC. |
-| `mobile/modules/engine/src/services/MentraUIRouter.ts` | Modify | Pass `requestId` through `routeFromWebView` / `routeFromBackground`; route `cancel` frame in both directions. |
+| `mobile/modules/engine/src/services/veillerUiShim.ts` | Modify | Add `requestId` to `msg` frames (both directions); generate `cancel` frame; pre-ready buffer for RPC. |
+| `mobile/modules/engine/src/services/VeillerUIRouter.ts` | Modify | Pass `requestId` through `routeFromWebView` / `routeFromBackground`; route `cancel` frame in both directions. |
 
 ### Example mini app refactor (`sdk/example-miniapp/`)
 
@@ -91,7 +91,7 @@ After the migration:
 
 ## Conventions
 
-**Branch:** all commits land on `mentra-miniapp-sdk-2`. No new branches.
+**Branch:** all commits land on `veiller-miniapp-sdk-2`. No new branches.
 
 **Commit hook bypass:** use `--no-verify` on every commit. Pre-existing repo errors unrelated to our changes cause hooks to trip; the user has approved this for this branch.
 
@@ -107,7 +107,7 @@ After the migration:
 
 # Phase 1 — SDK RPC helper
 
-## Task 1: Add `Rpc<>` brand + helper types to `@mentra/miniapp/ui` exports
+## Task 1: Add `Rpc<>` brand + helper types to `@veiller/miniapp/ui` exports
 
 **Files:**
 - Modify: `mobile/modules/miniapp/src/modules/ui.ts`
@@ -122,8 +122,8 @@ Open `mobile/modules/miniapp/src/modules/ui.ts`. After the existing `export type
  * Brand for declaring an RPC channel in the shared Channels registry.
  *
  * Wrap a channel's payload type in `Rpc<Req, Res>` to mark it as
- * request/response. The SDK's `mentra.request` / `session.ui.handle`
- * accept only `Rpc<...>` channels; `mentra.send` / `session.ui.on`
+ * request/response. The SDK's `veiller.request` / `session.ui.handle`
+ * accept only `Rpc<...>` channels; `veiller.send` / `session.ui.on`
  * accept only non-RPC channels. Using the wrong API for the wrong
  * channel is a compile-time error.
  *
@@ -142,11 +142,11 @@ export type RpcReq<T> = T extends Rpc<infer Req, unknown> ? Req : never
 /** Response payload type of an `Rpc<Req, Res>` entry. */
 export type RpcRes<T> = T extends Rpc<unknown, infer Res> ? Res : never
 
-/** Options accepted by `mentra.request`. */
+/** Options accepted by `veiller.request`. */
 export interface RpcRequestOptions {
   /** Abort the in-flight call. Sends UI_CANCEL to the handler. */
   signal?: AbortSignal
-  /** Reject with `MentraRpcTimeoutError` after this many ms. No default. */
+  /** Reject with `VeillerRpcTimeoutError` after this many ms. No default. */
   timeout?: number
 }
 
@@ -157,22 +157,22 @@ export interface RpcHandlerContext {
 }
 
 /**
- * Error thrown by `mentra.request` when the handler threw or returned an
+ * Error thrown by `veiller.request` when the handler threw or returned an
  * error envelope. Plain `Error` subclass — distinguished by `err.name`.
  * `err.cause` is `{code?: string}` if the handler attached one.
  */
-export class MentraRpcError extends Error {
+export class VeillerRpcError extends Error {
   constructor(message: string, options?: {cause?: {code?: string}}) {
     super(message, options)
-    this.name = "MentraRpcError"
+    this.name = "VeillerRpcError"
   }
 }
 
-/** Thrown by `mentra.request` when its `{timeout}` elapses. */
-export class MentraRpcTimeoutError extends Error {
+/** Thrown by `veiller.request` when its `{timeout}` elapses. */
+export class VeillerRpcTimeoutError extends Error {
   constructor(message = "RPC timed out") {
     super(message)
-    this.name = "MentraRpcTimeoutError"
+    this.name = "VeillerRpcTimeoutError"
   }
 }
 ```
@@ -189,7 +189,7 @@ Replace the existing `UIModule<TChannels>` interface (around lines 54-87) with t
  *
  * Broadcast vs. RPC channels are distinguished at the type level:
  *   - Channel value `Rpc<Req, Res>` → only `handle()` accepts it on
- *     background; only `mentra.request(...)` accepts it on UI.
+ *     background; only `veiller.request(...)` accepts it on UI.
  *   - Channel value anything else   → only `send()`/`on()` accept it
  *     on both sides.
  *
@@ -235,7 +235,7 @@ export interface UIModule<TChannels extends Record<string, unknown> = Record<str
 
   /**
    * Register the single handler for an RPC channel. The UI side calls
-   * `mentra.request(channel, payload, options?)`; this handler resolves
+   * `veiller.request(channel, payload, options?)`; this handler resolves
    * the call.
    *
    * Throws synchronously if a handler is already registered for the
@@ -639,18 +639,18 @@ git commit -m "Cover handle() error, cancel, and re-register semantics with test
 
 ---
 
-## Task 5: Add `mentra.request` to `MentraUiGlobal` type + shim implementation
+## Task 5: Add `veiller.request` to `VeillerUiGlobal` type + shim implementation
 
 **Files:**
 - Modify: `mobile/modules/miniapp/src/ui/index.ts` — add `request` to the interface
-- Modify: `mobile/modules/engine/src/services/mentraUiShim.ts` — implement `request` on the WebView global
+- Modify: `mobile/modules/engine/src/services/veillerUiShim.ts` — implement `request` on the WebView global
 
-- [ ] **Step 1: Extend the `MentraUiGlobal` interface**
+- [ ] **Step 1: Extend the `VeillerUiGlobal` interface**
 
-In `mobile/modules/miniapp/src/ui/index.ts`, after the existing `send` / `on` / `onOpen` / `onClose` / `ready` declarations on `MentraUiGlobal<TChannels>` (around lines 28-65), narrow `send`/`on` and add `request`:
+In `mobile/modules/miniapp/src/ui/index.ts`, after the existing `send` / `on` / `onOpen` / `onClose` / `ready` declarations on `VeillerUiGlobal<TChannels>` (around lines 28-65), narrow `send`/`on` and add `request`:
 
 ```ts
-export interface MentraUiGlobal<TChannels extends Record<string, unknown> = Record<string, unknown>> {
+export interface VeillerUiGlobal<TChannels extends Record<string, unknown> = Record<string, unknown>> {
   /**
    * Broadcast a typed message to the bound background JSContext.
    * Buffered until `ready()` acks; once acked, fires immediately.
@@ -672,8 +672,8 @@ export interface MentraUiGlobal<TChannels extends Record<string, unknown> = Reco
 
   /**
    * Make an RPC call to the background `session.ui.handle(channel, ...)`
-   * handler. Throws `MentraRpcError` if the handler threw; throws
-   * `MentraRpcTimeoutError` if `options.timeout` elapsed; throws
+   * handler. Throws `VeillerRpcError` if the handler threw; throws
+   * `VeillerRpcTimeoutError` if `options.timeout` elapsed; throws
    * `AbortError` if `options.signal` aborted. No default timeout.
    */
   request<C extends keyof TChannels & string>(
@@ -693,18 +693,18 @@ Add the import at the top of the file (next to other type imports — currently 
 ```ts
 import type {IsRpc, RpcReq, RpcRes, RpcRequestOptions} from "../modules/ui"
 export type {Rpc, IsRpc, RpcReq, RpcRes, RpcRequestOptions, RpcHandlerContext} from "../modules/ui"
-export {MentraRpcError, MentraRpcTimeoutError} from "../modules/ui"
+export {VeillerRpcError, VeillerRpcTimeoutError} from "../modules/ui"
 ```
 
 - [ ] **Step 2: Implement `request` in the shim**
 
-In `mobile/modules/engine/src/services/mentraUiShim.ts`, find the IIFE source (after `function send(...)` around line 93). Add the RPC machinery. The shim is plain ECMAScript (no TS, no imports) — write the new logic in the same style.
+In `mobile/modules/engine/src/services/veillerUiShim.ts`, find the IIFE source (after `function send(...)` around line 93). Add the RPC machinery. The shim is plain ECMAScript (no TS, no imports) — write the new logic in the same style.
 
 After the `function on(channel, cb) {...}` function (around line 109-131), add:
 
 ```js
   // ── RPC ─────────────────────────────────────────────────────────────
-  // Outbound RPC: every mentra.request() generates a request id, sends a
+  // Outbound RPC: every veiller.request() generates a request id, sends a
   // 'msg' envelope tagged with requestId, and stashes a one-shot resolver
   // keyed on the id. The background-side reply is a recv('msg') with the
   // same channel + requestId; we route it directly to the resolver.
@@ -721,22 +721,22 @@ After the `function on(channel, cb) {...}` function (around line 109-131), add:
     return 'r' + rpcCounter + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8)
   }
 
-  function MentraRpcError(message, code) {
+  function VeillerRpcError(message, code) {
     var e = new Error(message)
-    e.name = 'MentraRpcError'
+    e.name = 'VeillerRpcError'
     if (code) {
       try { e.cause = {code: code} } catch (_) { /* old runtimes */ }
     }
     return e
   }
 
-  function MentraRpcTimeoutError(message) {
+  function VeillerRpcTimeoutError(message) {
     var e = new Error(message || 'RPC timed out')
-    e.name = 'MentraRpcTimeoutError'
+    e.name = 'VeillerRpcTimeoutError'
     return e
   }
 
-  function MentraAbortError() {
+  function VeillerAbortError() {
     var e
     try { e = new DOMException('aborted', 'AbortError') } catch (_) {
       e = new Error('aborted')
@@ -771,9 +771,9 @@ After the `function on(channel, cb) {...}` function (around line 109-131), add:
         if (envelope && envelope.ok === true) {
           resolve(envelope.result)
         } else if (envelope && envelope.ok === false) {
-          reject(MentraRpcError(envelope.error && envelope.error.message || 'RPC failed', envelope.error && envelope.error.code))
+          reject(VeillerRpcError(envelope.error && envelope.error.message || 'RPC failed', envelope.error && envelope.error.code))
         } else {
-          reject(MentraRpcError('malformed RPC reply'))
+          reject(VeillerRpcError('malformed RPC reply'))
         }
       }
 
@@ -783,14 +783,14 @@ After the `function on(channel, cb) {...}` function (around line 109-131), add:
       if (signal) {
         if (signal.aborted) {
           cleanup()
-          reject(MentraAbortError())
+          reject(VeillerAbortError())
           return
         }
         abortListener = function () {
           if (done) return
           cleanup()
           postEnvelope({type: 'cancel', requestId: id})
-          reject(MentraAbortError())
+          reject(VeillerAbortError())
         }
         try { signal.addEventListener('abort', abortListener) } catch (_) {}
       }
@@ -800,7 +800,7 @@ After the `function on(channel, cb) {...}` function (around line 109-131), add:
           if (done) return
           cleanup()
           postEnvelope({type: 'cancel', requestId: id})
-          reject(MentraRpcTimeoutError())
+          reject(VeillerRpcTimeoutError())
         }, timeoutMs)
       }
 
@@ -849,10 +849,10 @@ Modify `function recv(envelope)` (around line 181-206) — replace the existing 
   }
 ```
 
-Add `request` to the exported `window.mentra` object (around line 208):
+Add `request` to the exported `window.veiller` object (around line 208):
 
 ```js
-  window.mentra = {
+  window.veiller = {
     send: send,
     on: on,
     request: request,
@@ -882,16 +882,16 @@ Expected: compiles. The shim is `.ts` returning a string — the string content 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add mobile/modules/miniapp/src/ui/index.ts mobile/modules/engine/src/services/mentraUiShim.ts
-git commit -m "Add mentra.request to WebView shim + UI global type" --no-verify
+git add mobile/modules/miniapp/src/ui/index.ts mobile/modules/engine/src/services/veillerUiShim.ts
+git commit -m "Add veiller.request to WebView shim + UI global type" --no-verify
 ```
 
 ---
 
-## Task 6: Route `requestId` + `cancel` frames through `MentraUIRouter`
+## Task 6: Route `requestId` + `cancel` frames through `VeillerUIRouter`
 
 **Files:**
-- Modify: `mobile/modules/engine/src/services/MentraUIRouter.ts`
+- Modify: `mobile/modules/engine/src/services/VeillerUIRouter.ts`
 
 - [ ] **Step 1: Pass `requestId` through both directions and route `cancel` frames**
 
@@ -952,7 +952,7 @@ In `routeFromBackground` (around lines 154-169), preserve `requestId` and add a 
       const cancel = {type: "cancel", requestId: uiSendPayload.requestId}
       const literal = JSON.stringify(cancel)
       const escaped = JSON.stringify(literal)
-      binding.inject(`if (window.__mentra && window.__mentra.recv) window.__mentra.recv(JSON.parse(${escaped})); true;`)
+      binding.inject(`if (window.__veiller && window.__veiller.recv) window.__veiller.recv(JSON.parse(${escaped})); true;`)
       return
     }
     const outbound: Record<string, unknown> = {
@@ -964,11 +964,11 @@ In `routeFromBackground` (around lines 154-169), preserve `requestId` and add a 
     if (typeof uiSendPayload.requestId === "string") outbound.requestId = uiSendPayload.requestId
     const literal = JSON.stringify(outbound)
     const escaped = JSON.stringify(literal)
-    binding.inject(`if (window.__mentra && window.__mentra.recv) window.__mentra.recv(JSON.parse(${escaped})); true;`)
+    binding.inject(`if (window.__veiller && window.__veiller.recv) window.__veiller.recv(JSON.parse(${escaped})); true;`)
   }
 ```
 
-Also: the shim's `recv` needs to handle `'cancel'` frames (background-initiated cancel — unused today, but reserved). Open `mobile/modules/engine/src/services/mentraUiShim.ts` and inside the `recv` function add a branch right before the `'ack'` branch:
+Also: the shim's `recv` needs to handle `'cancel'` frames (background-initiated cancel — unused today, but reserved). Open `mobile/modules/engine/src/services/veillerUiShim.ts` and inside the `recv` function add a branch right before the `'ack'` branch:
 
 ```js
     if (type === 'cancel' && typeof envelope.requestId === 'string') {
@@ -989,13 +989,13 @@ Expected: compiles.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add mobile/modules/engine/src/services/MentraUIRouter.ts mobile/modules/engine/src/services/mentraUiShim.ts
+git add mobile/modules/engine/src/services/VeillerUIRouter.ts mobile/modules/engine/src/services/veillerUiShim.ts
 git commit -m "Pass requestId and cancel frames through the UI router" --no-verify
 ```
 
 ---
 
-## Task 7: Re-export RPC types from `@mentra/miniapp/background`
+## Task 7: Re-export RPC types from `@veiller/miniapp/background`
 
 **Files:**
 - Modify: `mobile/modules/miniapp/src/background/index.ts`
@@ -1006,7 +1006,7 @@ In `mobile/modules/miniapp/src/background/index.ts`, after the existing `export 
 
 ```ts
 export type {Rpc, IsRpc, RpcReq, RpcRes, RpcRequestOptions, RpcHandlerContext} from "../modules/ui"
-export {MentraRpcError, MentraRpcTimeoutError} from "../modules/ui"
+export {VeillerRpcError, VeillerRpcTimeoutError} from "../modules/ui"
 ```
 
 - [ ] **Step 2: Typecheck**
@@ -1021,7 +1021,7 @@ Expected: compiles.
 
 ```bash
 git add mobile/modules/miniapp/src/background/index.ts
-git commit -m "Re-export RPC types from @mentra/miniapp/background" --no-verify
+git commit -m "Re-export RPC types from @veiller/miniapp/background" --no-verify
 ```
 
 ---
@@ -1038,7 +1038,7 @@ git commit -m "Re-export RPC types from @mentra/miniapp/background" --no-verify
 
 ```ts
 /**
- * useRpc — React hook around `mentra.request(channel, ...)`.
+ * useRpc — React hook around `veiller.request(channel, ...)`.
  *
  * Returns a stable callable plus an `.abort()` method. The internal
  * AbortController is recreated per call and bound to component lifecycle:
@@ -1057,12 +1057,12 @@ import type {RpcReq, RpcRes, RpcRequestOptions} from "../modules/ui"
 
 type RequestFn = (channel: string, payload: unknown, options?: RpcRequestOptions) => Promise<unknown>
 
-/** Walk to the global `mentra.request` (typed). */
-function getMentraRequest(): RequestFn {
-  const m = (globalThis as unknown as {mentra?: {request?: RequestFn}}).mentra
+/** Walk to the global `veiller.request` (typed). */
+function getVeillerRequest(): RequestFn {
+  const m = (globalThis as unknown as {veiller?: {request?: RequestFn}}).veiller
   if (!m || typeof m.request !== "function") {
     throw new Error(
-      "useRpc: window.mentra.request is not available — is this miniapp running in a UI WebView with the shim injected?",
+      "useRpc: window.veiller.request is not available — is this miniapp running in a UI WebView with the shim injected?",
     )
   }
   return m.request
@@ -1129,7 +1129,7 @@ export function useRpc<
       const signals: AbortSignal[] = [ctrl.signal, mountRef.current!.signal]
       if (options?.signal) signals.push(options.signal)
       const signal = mergeSignals(signals)
-      return getMentraRequest()(channel, payload, {signal, timeout: options?.timeout}) as Promise<
+      return getVeillerRequest()(channel, payload, {signal, timeout: options?.timeout}) as Promise<
         RpcRes<TChannels[C]>
       >
     },
@@ -1161,7 +1161,7 @@ cat mobile/modules/miniapp/src/react/index.ts
 
 If the file is just `export *` lines, follow that pattern. If it's missing entirely, the hook will be picked up by the package `./react` sub-path via the existing barrel — verify with the next step.
 
-- [ ] **Step 3: Re-export `useRpc` from `@mentra/miniapp/ui`**
+- [ ] **Step 3: Re-export `useRpc` from `@veiller/miniapp/ui`**
 
 In `mobile/modules/miniapp/src/ui/index.ts`, append after the existing `export {useCapsuleHeaderStyle}` line:
 
@@ -1202,11 +1202,11 @@ Replace the entire leading block comment (lines 1-39, ending just before `import
  *
  *   1. **Broadcast** (fire-and-forget, either direction)
  *      - background → UI: `session.ui.send(channel, payload)`
- *      - UI → background: `mentra.send(channel, payload)`
- *      - subscribe:        `session.ui.on(channel, cb)` / `mentra.on(channel, cb)`
+ *      - UI → background: `veiller.send(channel, payload)`
+ *      - subscribe:        `session.ui.on(channel, cb)` / `veiller.on(channel, cb)`
  *
  *   2. **RPC** (request/response, UI → background only)
- *      - UI side:          `await mentra.request(channel, payload, options?)`
+ *      - UI side:          `await veiller.request(channel, payload, options?)`
  *      - background side:  `session.ui.handle(channel, (payload, ctx?) => result)`
  *      - single handler per channel; double-register throws synchronously.
  *      - errors thrown in the handler reject the caller's promise.
@@ -1218,7 +1218,7 @@ Replace the entire leading block comment (lines 1-39, ending just before `import
  * Wrong-API-for-channel is a compile-time error.
  *
  * Buffering:
- *   - `mentra.send` BUFFERS until `mentra.ready()` acks. The WebView is
+ *   - `veiller.send` BUFFERS until `veiller.ready()` acks. The WebView is
  *     the short-lived side and shouldn't drop user input.
  *   - `session.ui.send` silently DROPS when no WebView is bound.
  *     Background is the source of truth; UI state shouldn't accumulate.
@@ -1264,12 +1264,12 @@ git commit -m "Update session.ui top-of-file docstring to describe RPC surface" 
 cd mobile/modules/miniapp && bun run build
 ```
 
-Expected: emits `dist/` with the new `Rpc`, `MentraRpcError`, `useRpc`, etc. (Bun's `tsc` may take a few seconds.)
+Expected: emits `dist/` with the new `Rpc`, `VeillerRpcError`, `useRpc`, etc. (Bun's `tsc` may take a few seconds.)
 
 - [ ] **Step 2: Verify dist exposes the new exports**
 
 ```bash
-grep -l "MentraRpcError\|useRpc\|Rpc<" mobile/modules/miniapp/dist/index.d.ts mobile/modules/miniapp/dist/ui/index.d.ts mobile/modules/miniapp/dist/background/index.d.ts mobile/modules/miniapp/dist/react/useRpc.d.ts 2>&1
+grep -l "VeillerRpcError\|useRpc\|Rpc<" mobile/modules/miniapp/dist/index.d.ts mobile/modules/miniapp/dist/ui/index.d.ts mobile/modules/miniapp/dist/background/index.d.ts mobile/modules/miniapp/dist/react/useRpc.d.ts 2>&1
 ```
 
 Expected: all four files appear in the output (i.e., grep finds matches in each).
@@ -1288,7 +1288,7 @@ If it exits with code 1 (dist NOT ignored): stage and commit.
 
 ```bash
 git add mobile/modules/miniapp/dist
-git commit -m "Rebuild @mentra/miniapp dist with RPC types and useRpc hook" --no-verify
+git commit -m "Rebuild @veiller/miniapp dist with RPC types and useRpc hook" --no-verify
 ```
 
 ---
@@ -1314,7 +1314,7 @@ export interface TesterInvoke {
 }
 
 /** Result of `tester:invoke`. Handlers return the raw call result; errors
- *  propagate via the RPC error path so callers see `MentraRpcError`. */
+ *  propagate via the RPC error path so callers see `VeillerRpcError`. */
 export type TesterInvokeResult = unknown
 ```
 
@@ -1325,7 +1325,7 @@ In `sdk/example-miniapp/src/shared/channels.ts`:
 a) Update the imports at the top to pull in `Rpc` and the new types:
 
 ```ts
-import type {Rpc} from "@mentra/miniapp/ui"
+import type {Rpc} from "@veiller/miniapp/ui"
 import type {
   CaptionsHistoryUpdate,
   CaptionsLastButton,
@@ -1349,8 +1349,8 @@ b) Inside the `Channels` interface, add `tester:invoke` to the RPC section (top-
  * inlines the declarations so there's no runtime cross-boundary I/O.
  *
  * Channels marked `Rpc<Req, Res>` are RPC — call them via
- * `mentra.request(...)` on UI / `session.ui.handle(...)` on background.
- * Everything else is broadcast — `mentra.send` / `session.ui.on`.
+ * `veiller.request(...)` on UI / `session.ui.handle(...)` on background.
+ * Everything else is broadcast — `veiller.send` / `session.ui.on`.
  */
 export interface Channels {
   // ── background → UI ────────────────────────────────────────────────────
@@ -1426,7 +1426,7 @@ git commit -m "Declare tester:invoke as an Rpc<> channel in the example registry
 Replace the entire contents of `sdk/example-miniapp/src/background/controllers/TesterController.ts` with:
 
 ```ts
-import type {MiniappSession} from "@mentra/miniapp/background"
+import type {MiniappSession} from "@veiller/miniapp/background"
 
 import type {Channels} from "../../shared/channels"
 
@@ -1443,7 +1443,7 @@ import type {Channels} from "../../shared/channels"
  *      UI sends `tester:stop` to release.
  *
  *   2. **Imperative testers** (Display / Led / Speaker / Phone fire /
- *      Storage gets). UI calls `await mentra.request("tester:invoke", ...)`
+ *      Storage gets). UI calls `await veiller.request("tester:invoke", ...)`
  *      and we dispatch to `session[iface][method](...args)` via the new
  *      `session.ui.handle` API. The return value flows back through the
  *      SDK's RPC reply; errors throw on the UI side automatically.
@@ -1601,7 +1601,7 @@ git commit -m "Refactor TesterController to use ui.handle for imperative dispatc
 
 ---
 
-## Task 13: Update `useTester` and tester pages to use `mentra.request`
+## Task 13: Update `useTester` and tester pages to use `veiller.request`
 
 **Files:**
 - Modify: `sdk/example-miniapp/src/ui/hooks/useTester.ts`
@@ -1613,7 +1613,7 @@ Replace the contents of `sdk/example-miniapp/src/ui/hooks/useTester.ts`:
 
 ```ts
 import {useEffect, useRef, useState} from "react"
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 
 import "../../shared/channels"
 import type {Channels} from "../../shared/channels"
@@ -1625,7 +1625,7 @@ import type {TesterEventPayload} from "../../shared/types"
  *
  *   - `latest`, `latestByKind(kind)`, `log`, `lastError` — streamed via
  *     `tester:event` from the background controller.
- *   - `invoke(method, args)` — `mentra.request("tester:invoke", ...)`.
+ *   - `invoke(method, args)` — `veiller.request("tester:invoke", ...)`.
  *     Returns the handler's return value; throws on error.
  */
 export function useTester(
@@ -1647,8 +1647,8 @@ export function useTester(
   const rpcInvoke = useRpc<Channels, "tester:invoke">("tester:invoke")
 
   useEffect(() => {
-    mentra.send("tester:start", {iface})
-    const unsub = mentra.on("tester:event", (raw) => {
+    veiller.send("tester:start", {iface})
+    const unsub = veiller.on("tester:event", (raw) => {
       const ev = raw as TesterEventPayload
       if (ev.iface !== ifaceRef.current) return
       setLatest(ev)
@@ -1660,7 +1660,7 @@ export function useTester(
     })
     return () => {
       unsub()
-      mentra.send("tester:stop", {iface})
+      veiller.send("tester:stop", {iface})
     }
   }, [iface, windowSize])
 
@@ -1736,7 +1736,7 @@ Expected: compiles. If a tester page used `fire()` in a fire-and-forget way (not
 
 ```bash
 git add sdk/example-miniapp/src/ui/hooks/useTester.ts sdk/example-miniapp/src/ui/pages/tester/
-git commit -m "Switch tester pages to mentra.request via useTester.invoke" --no-verify
+git commit -m "Switch tester pages to veiller.request via useTester.invoke" --no-verify
 ```
 
 ---
@@ -1761,28 +1761,28 @@ Right before the "Two transports, auto-selected:" line, insert:
 
 Two interaction patterns share the bus:
 
-- **Broadcast** — fire-and-forget. `mentra.send(channel, payload)` (UI) and `session.ui.send(channel, payload)` (background). Subscribe with `mentra.on` / `session.ui.on`. Either direction.
-- **RPC** — request/response. `await mentra.request(channel, payload, options?)` on the UI side; one handler per channel on the background side via `session.ui.handle(channel, (payload, ctx?) => result)`. UI → background only.
+- **Broadcast** — fire-and-forget. `veiller.send(channel, payload)` (UI) and `session.ui.send(channel, payload)` (background). Subscribe with `veiller.on` / `session.ui.on`. Either direction.
+- **RPC** — request/response. `await veiller.request(channel, payload, options?)` on the UI side; one handler per channel on the background side via `session.ui.handle(channel, (payload, ctx?) => result)`. UI → background only.
 
 A channel is declared as RPC by wrapping its payload type in `Rpc<Req, Res>` in the per-miniapp `shared/channels.ts` registry:
 
 ​```ts
-import type {Rpc} from "@mentra/miniapp/ui"
+import type {Rpc} from "@veiller/miniapp/ui"
 
 export interface Channels {
-  // Broadcast — used by mentra.send / session.ui.on
+  // Broadcast — used by veiller.send / session.ui.on
   "captions:live-transcript": {text: string}
 
-  // RPC — used by mentra.request / session.ui.handle
+  // RPC — used by veiller.request / session.ui.handle
   "places:autocomplete": Rpc<{query: string}, PlaceSuggestion[]>
 }
 ​```
 
-Using the wrong API for a channel is a compile-time error (`mentra.send("places:autocomplete", …)` rejects).
+Using the wrong API for a channel is a compile-time error (`veiller.send("places:autocomplete", …)` rejects).
 
-**Errors.** `mentra.request` throws when the handler throws. The error is a plain `Error` with `name === "MentraRpcError"` and `cause?.code` if the handler set one (`throw Object.assign(new Error("…"), {cause: {code: "BAD_INPUT"}})`).
+**Errors.** `veiller.request` throws when the handler throws. The error is a plain `Error` with `name === "VeillerRpcError"` and `cause?.code` if the handler set one (`throw Object.assign(new Error("…"), {cause: {code: "BAD_INPUT"}})`).
 
-**Cancellation.** Pass `{signal}` to `mentra.request`. When the signal aborts, the helper sends a cancel frame; the background handler's `ctx.signal` aborts (handlers can pass it to `fetch(url, {signal})` to short-circuit a slow REST call). The caller's promise rejects with `AbortError` (DOM-standard).
+**Cancellation.** Pass `{signal}` to `veiller.request`. When the signal aborts, the helper sends a cancel frame; the background handler's `ctx.signal` aborts (handlers can pass it to `fetch(url, {signal})` to short-circuit a slow REST call). The caller's promise rejects with `AbortError` (DOM-standard).
 
 **`useRpc`.** A React hook bundles three ergonomic wins:
 - Auto-aborts every in-flight call on unmount.
@@ -1800,9 +1800,9 @@ useEffect(() => {
 
 **Single handler per channel.** `session.ui.handle("foo", h)` throws synchronously if a handler is already registered for that channel — clarifies ownership. Returns a deregister fn the controller stores like other unsubs.
 
-**Streams ≠ RPC.** If a domain wants "start observing X, push updates until stopped", that's a regular channel (`mentra.send("watch-x:start")` on the UI side; background subscribes internally and pushes `mentra.send("watch-x:event", ...)` from the controller). Don't reach for RPC for streams.
+**Streams ≠ RPC.** If a domain wants "start observing X, push updates until stopped", that's a regular channel (`veiller.send("watch-x:start")` on the UI side; background subscribes internally and pushes `veiller.send("watch-x:event", ...)` from the controller). Don't reach for RPC for streams.
 
-**Worked example:** `sdk/example-miniapp/src/background/controllers/TesterController.ts` uses `session.ui.handle("tester:invoke", ...)` to dispatch arbitrary `session[iface][method](...)` calls; the tester UI pages call `mentra.request("tester:invoke", ...)` via the `useTester().invoke(method, args)` convenience.
+**Worked example:** `sdk/example-miniapp/src/background/controllers/TesterController.ts` uses `session.ui.handle("tester:invoke", ...)` to dispatch arbitrary `session[iface][method](...)` calls; the tester UI pages call `veiller.request("tester:invoke", ...)` via the `useTester().invoke(method, args)` convenience.
 ```
 
 (The triple-backtick fences inside the markdown block use zero-width spaces above to avoid breaking the outer fence; if your renderer doesn't substitute, use regular backticks and escape with backslashes as needed for the doc body.)
@@ -1835,7 +1835,7 @@ git commit -m "Document RPC surface in miniapp SDK overview" --no-verify
  * there's no runtime resolution across the boundary.
  */
 
-import type {NavManeuver, Pivot} from "@mentra/miniapp"
+import type {NavManeuver, Pivot} from "@veiller/miniapp"
 
 export type Coords = {lat: number; lng: number; accuracy?: number; ts: number}
 export type LatLng = {lat: number; lng: number}
@@ -1899,19 +1899,19 @@ export type NavSnapshot = {
  * WebView. Both halves import this file at build time; the bundler
  * inlines the declarations so there's no runtime cross-boundary I/O.
  *
- * Channels wrapped in `Rpc<Req, Res>` are RPC (call via mentra.request /
- * session.ui.handle). Everything else is broadcast (mentra.send /
+ * Channels wrapped in `Rpc<Req, Res>` are RPC (call via veiller.request /
+ * session.ui.handle). Everything else is broadcast (veiller.send /
  * session.ui.on / session.ui.send).
  */
 
-import type {Rpc} from "@mentra/miniapp/ui"
+import type {Rpc} from "@veiller/miniapp/ui"
 import type {
   ComputeRouteOptions,
   ComputeRouteResult,
   NavPermissionResult,
   Pivot,
   StartNavigationOptions,
-} from "@mentra/miniapp"
+} from "@veiller/miniapp"
 
 import type {
   Coords,
@@ -1958,10 +1958,10 @@ export interface Channels {
   "storage:add-recent": Rpc<PlaceDetails, void>
 }
 
-// Convenience: the typed shape of `window.mentra` for this miniapp.
+// Convenience: the typed shape of `window.veiller` for this miniapp.
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraUiGlobal<Channels>
+  var veiller: import("@veiller/miniapp/ui").VeillerUiGlobal<Channels>
 }
 ```
 
@@ -2082,7 +2082,7 @@ Expected output (approximate — verify): exported helpers like `autocomplete`, 
  *
  * Background-side wrapper over Google Places REST. Adds AbortSignal
  * threading so per-keystroke cancellation from the UI's
- * `mentra.request("places:autocomplete", ..., {signal})` propagates
+ * `veiller.request("places:autocomplete", ..., {signal})` propagates
  * into the underlying fetch.
  *
  * The Google API key is inlined at build time from
@@ -2143,15 +2143,15 @@ git commit -m "Add PlacesManager wrapping REST helpers with AbortSignal support"
 
 ```ts
 /**
- * Background JSContext entry point — Mentra Map miniapp.
+ * Background JSContext entry point — Veiller Map miniapp.
  *
- * Constructed once by the MentraOS host inside the per-miniapp JSContext.
+ * Constructed once by the Veiller host inside the per-miniapp JSContext.
  * `registerMiniapp(...)` wires the handler to fire after CONNECT lands;
  * the NavigationController instantiated here lives for the entire
  * session, surviving WebView open/close cycles.
  */
 
-import {registerMiniapp} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
 
 import {NavigationController} from "./NavigationController"
 
@@ -2166,16 +2166,16 @@ registerMiniapp((session) => {
 
 ```ts
 /**
- * NavigationController — the always-on logic for the Mentra Map
+ * NavigationController — the always-on logic for the Veiller Map
  * miniapp. Owns MiniappSession subscriptions, trip state, the glasses
  * HUD logic, storage reads/writes, and Places REST. Lives for the
  * entire session — closing the WebView does NOT stop navigation.
  *
  * The UI WebView is a thin renderer fed via session.ui.send and the
- * UI's mentra.send / mentra.request bus declared in shared/channels.ts.
+ * UI's veiller.send / veiller.request bus declared in shared/channels.ts.
  */
 
-import type {MiniappSession, NavManeuver, NavRoute, Pivot, UIModule} from "@mentra/miniapp/background"
+import type {MiniappSession, NavManeuver, NavRoute, Pivot, UIModule} from "@veiller/miniapp/background"
 
 import type {Channels} from "../shared/channels"
 import type {
@@ -2575,7 +2575,7 @@ Inside `start()`, after the `if (this.started) return` line and before `this.ses
       next = `You have arrived${at}`
       durationMs = 10_000
     } else if (!running) {
-      next = "Welcome to Mentra Navigation!\nPick a destination to get started."
+      next = "Welcome to Veiller Navigation!\nPick a destination to get started."
       durationMs = 5_000
     } else if (status === "rerouting") {
       next = "Rebuilding route…"
@@ -2650,7 +2650,7 @@ Inside `start()`, after the `if (this.started) return` line and before `this.ses
     this.ui.send("nav:log-append", entry)
   }
 
-  private formatUpdate(u: import("@mentra/miniapp").NavUpdate): string {
+  private formatUpdate(u: import("@veiller/miniapp").NavUpdate): string {
     switch (u.kind) {
       case "maneuver":
         return `MANEUVER ${u.maneuverType ?? "?"} dist=${u.distanceToManeuverMeters?.toFixed(0)}m`
@@ -2693,13 +2693,13 @@ function formatDistance(m: number): string {
 }
 ```
 
-Add the import for `NavUpdate` at the top of the file (the inline `import("@mentra/miniapp").NavUpdate` works but cleaner imports are preferred):
+Add the import for `NavUpdate` at the top of the file (the inline `import("@veiller/miniapp").NavUpdate` works but cleaner imports are preferred):
 
 ```ts
-import type {MiniappSession, NavManeuver, NavRoute, NavUpdate, Pivot, UIModule} from "@mentra/miniapp/background"
+import type {MiniappSession, NavManeuver, NavRoute, NavUpdate, Pivot, UIModule} from "@veiller/miniapp/background"
 ```
 
-And replace `import("@mentra/miniapp").NavUpdate` in `formatUpdate` with just `NavUpdate`.
+And replace `import("@veiller/miniapp").NavUpdate` in `formatUpdate` with just `NavUpdate`.
 
 The `formatDistance` and `haversineMeters` helpers shadow the moved files — that's intentional for the controller (it bundles into background, can't pull DOM-dependent code). Background-side `lib/formatDistance.ts` and `lib/geometry.ts` already exist as moved files; we could import from them, but keeping the controller self-contained for these tiny pure helpers is fine. **Alternative**: import from `./lib/formatDistance` and `./lib/geometry` if their signatures match. Verify:
 
@@ -2837,10 +2837,10 @@ Replace the existing `sdk/Navigation/miniapp.json` with:
 
 ```json
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.navigation",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.navigation",
   "version": "1.0.2",
-  "name": "Mentra Map",
+  "name": "Veiller Map",
   "description": "Turn-by-turn walking navigation with compass and Google Maps.",
   "icon": "icon.png",
   "type": "standard",
@@ -2912,10 +2912,10 @@ cd sdk/Navigation && rmdir src/frontend 2>/dev/null || true
 
 ```tsx
 /**
- * UI entry point — Mentra Map miniapp.
+ * UI entry point — Veiller Map miniapp.
  *
  * Mounts React, installs root-level channel subscribers feeding the
- * Zustand store, fires `mentra.ready()` so background's
+ * Zustand store, fires `veiller.ready()` so background's
  * session.ui.onOpen handlers fire. The store is the only seam between
  * the channel bus and the React tree.
  */
@@ -2924,7 +2924,7 @@ import "../shared/channels"
 import "./index.css"
 
 import {createRoot} from "react-dom/client"
-import {MentraProvider} from "@mentra/miniapp/ui"
+import {VeillerProvider} from "@veiller/miniapp/ui"
 
 import App from "./App"
 import {installChannelSubscribers} from "./store/navStore"
@@ -2932,14 +2932,14 @@ import {installChannelSubscribers} from "./store/navStore"
 const root = document.getElementById("root")
 if (!root) throw new Error("Root element not found")
 createRoot(root).render(
-  <MentraProvider>
+  <VeillerProvider>
     <App />
-  </MentraProvider>,
+  </VeillerProvider>,
 )
 
 installChannelSubscribers()
 
-mentra.ready()
+veiller.ready()
 ```
 
 - [ ] **Step 3: Create `src/ui/store/navStore.ts`**
@@ -2952,7 +2952,7 @@ mentra.ready()
  *
  * `installChannelSubscribers()` runs once from main.tsx and wires every
  * `nav:*` channel into the store. It also requests a fresh snapshot via
- * `mentra.request("nav:get-snapshot")` so a freshly-mounted WebView
+ * `veiller.request("nav:get-snapshot")` so a freshly-mounted WebView
  * doesn't wait for the background-side onOpen snapshot.
  */
 
@@ -3013,24 +3013,24 @@ export function installChannelSubscribers(): void {
   if (installed) return
   installed = true
 
-  mentra.on("nav:snapshot", (snap) => useNavStore.getState().apply(snap))
-  mentra.on("nav:coords", (coords) => useNavStore.setState({coords}))
-  mentra.on("nav:heading", ({degrees}) => useNavStore.setState({heading: degrees}))
-  mentra.on("nav:trip-state", (trip) => useNavStore.getState().applyTrip(trip))
-  mentra.on("nav:pivots", ({active, upcoming}) =>
+  veiller.on("nav:snapshot", (snap) => useNavStore.getState().apply(snap))
+  veiller.on("nav:coords", (coords) => useNavStore.setState({coords}))
+  veiller.on("nav:heading", ({degrees}) => useNavStore.setState({heading: degrees}))
+  veiller.on("nav:trip-state", (trip) => useNavStore.getState().applyTrip(trip))
+  veiller.on("nav:pivots", ({active, upcoming}) =>
     useNavStore.setState({activePivot: active, upcomingPivot: upcoming}),
   )
-  mentra.on("nav:route", ({points}) => {
+  veiller.on("nav:route", ({points}) => {
     useNavStore.setState((s) => ({trip: {...s.trip, routePoints: points}}))
   })
-  mentra.on("nav:log-append", (entry) => useNavStore.getState().appendLog(entry))
-  mentra.on("nav:log-clear", () => useNavStore.getState().clearLog())
-  mentra.on("nav:dev-settings-update", (s) => useNavStore.getState().applyDevSettings(s))
+  veiller.on("nav:log-append", (entry) => useNavStore.getState().appendLog(entry))
+  veiller.on("nav:log-clear", () => useNavStore.getState().clearLog())
+  veiller.on("nav:dev-settings-update", (s) => useNavStore.getState().applyDevSettings(s))
 
   // Best-effort snapshot kickoff — onOpen also fires one from background,
   // but issuing this explicitly ensures we hydrate even if the open
   // round-trips slowly.
-  mentra
+  veiller
     .request("nav:get-snapshot", undefined as never)
     .then((snap) => useNavStore.getState().apply(snap))
     .catch(() => {
@@ -3056,7 +3056,7 @@ export function useChannel<C extends keyof Channels & string>(
 ): Channels[C] | undefined {
   const [value, setValue] = useState<Channels[C] | undefined>(initial)
   useEffect(() => {
-    return mentra.on(channel, (payload) => setValue(payload as Channels[C]))
+    return veiller.on(channel, (payload) => setValue(payload as Channels[C]))
   }, [channel])
   return value
 }
@@ -3157,20 +3157,20 @@ This is mechanical but tedious. The shape of the change for each call site:
 | `user.coords` | `useNavStore((s) => s.coords)` |
 | `user.heading` | `useNavStore((s) => s.heading)` |
 | `user.mapsReady` | `useNavStore((s) => s.mapsReady)` |
-| `user.navigation.start(opts)` | `mentra.send("nav:start", {...opts, destinationName})` |
-| `user.navigation.stop()` | `mentra.send("nav:stop", {})` |
-| `user.navigation.computeRoute(opts)` | `await mentra.request("nav:compute-route", opts)` |
-| `user.navigation.requestPermission()` | `await mentra.request("nav:request-permission", undefined as never)` |
+| `user.navigation.start(opts)` | `veiller.send("nav:start", {...opts, destinationName})` |
+| `user.navigation.stop()` | `veiller.send("nav:stop", {})` |
+| `user.navigation.computeRoute(opts)` | `await veiller.request("nav:compute-route", opts)` |
+| `user.navigation.requestPermission()` | `await veiller.request("nav:request-permission", undefined as never)` |
 | `user.navigation.getState()` | (delete — snapshot arrives on open + nav:get-snapshot RPC) |
 | `user.navigation.onUpdate(h)` | (delete — store is fed by background) |
 | `user.navigation.onRoute(h)` | (delete) |
 | `user.navigation.getActivePivot()` | `useNavStore((s) => s.activePivot)` |
 | `user.navigation.getUpcomingPivot()` | `useNavStore((s) => s.upcomingPivot)` |
 | `user.navigation.getPivots()` | (deleted; use upcoming/active only OR add `nav:get-pivots` RPC if needed — see Task 23 step 4) |
-| `user.storage.addSavedPlace(p)` | `await mentra.request("storage:add-saved", p)` |
-| `user.storage.getAllSavedPlaces()` | `await mentra.request("storage:list-saved", undefined as never)` |
-| `user.storage.addRecentSearch(p)` | `await mentra.request("storage:add-recent", p)` |
-| `user.storage.getRecentSearches()` | `await mentra.request("storage:list-recent", undefined as never)` |
+| `user.storage.addSavedPlace(p)` | `await veiller.request("storage:add-saved", p)` |
+| `user.storage.getAllSavedPlaces()` | `await veiller.request("storage:list-saved", undefined as never)` |
+| `user.storage.addRecentSearch(p)` | `await veiller.request("storage:add-recent", p)` |
+| `user.storage.getRecentSearches()` | `await veiller.request("storage:list-recent", undefined as never)` |
 | `user.display.showText(...)` | (delete — HUD lives in background controller now) |
 | Places `autocomplete(query)` | `await useRpc<Channels, "places:autocomplete">("places:autocomplete")({query, near})` |
 
@@ -3188,7 +3188,7 @@ import {AddPlacePage} from "./pages/AddPlacePage"
 
 import "../shared/channels"
 import type {Channels} from "../shared/channels"
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 
 function Pages() {
   const {route, pop} = useRouter()
@@ -3257,7 +3257,7 @@ Delete that import. Replace with:
 
 ```ts
 import {useNavStore} from "@/ui/store/navStore"
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 import type {Channels} from "@/shared/channels"
 ```
 
@@ -3293,9 +3293,9 @@ e) Delete the mid-trip hydration `useEffect` (around lines 316-342, the block en
 
 f) Delete the subscription-cleanup `useEffect` at lines 346-353. Subscriptions live in background.
 
-g) Find `handleStart(...)`. Replace `await navigation.start(...)` with `mentra.send("nav:start", {...startOpts, destinationName: destination.name})`. Drop any code that subscribed to update/route after starting — background already handles those.
+g) Find `handleStart(...)`. Replace `await navigation.start(...)` with `veiller.send("nav:start", {...startOpts, destinationName: destination.name})`. Drop any code that subscribed to update/route after starting — background already handles those.
 
-h) Find `handleStop` if present. Replace `navigation.stop()` with `mentra.send("nav:stop", {})`.
+h) Find `handleStop` if present. Replace `navigation.stop()` with `veiller.send("nav:stop", {})`.
 
 i) Find the preview-route `useEffect` (around lines 81-215). Replace `navigation.computeRoute(...)` with `computeRoute(...)`:
 
@@ -3328,7 +3328,7 @@ Delete the corresponding `useState` declarations. Anywhere the page calls `setRu
 Find `sdk/Navigation/src/ui/pages/NavigationPage/components/LocationSearch/LocationSearch.tsx` (342 LoC). It uses Places autocomplete + recent searches. Replace any `placesAutocomplete(...)` import / direct `fetch` calls with the RPC:
 
 ```tsx
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 import type {Channels} from "@/shared/channels"
 
 // inside the component:
@@ -3379,7 +3379,7 @@ Expected: no errors. If errors remain in `src/client/` (the leftover folder), ig
 
 ```bash
 git add sdk/Navigation/src/ui/
-git commit -m "Rewrite Navigation UI pages to read store + use mentra.request" --no-verify
+git commit -m "Rewrite Navigation UI pages to read store + use veiller.request" --no-verify
 ```
 
 ---
@@ -3517,7 +3517,7 @@ grep -c "registerMiniapp\|MiniappSession\|session\.ui\.handle" sdk/Navigation/di
 Expected: > 0 (the controller compiled into the IIFE).
 
 ```bash
-grep -c "mentra.request\|mentra.send\|useNavStore" sdk/Navigation/dist/ui/*.js 2>/dev/null
+grep -c "veiller.request\|veiller.send\|useNavStore" sdk/Navigation/dist/ui/*.js 2>/dev/null
 ```
 
 Expected: > 0.
@@ -3575,10 +3575,10 @@ Expected: dev server prints a QR code.
 
 - [ ] **Step 2: Run through the checklist**
 
-Scan the QR from MentraOS app → Settings → Developer settings → Mini App Development → Scan Mini App QR. Then:
+Scan the QR from Veiller app → Settings → Developer settings → Mini App Development → Scan Mini App QR. Then:
 
 - [ ] Idle: map renders, my-location card shows current GPS, compass updates.
-- [ ] Glasses HUD: shows "Welcome to Mentra Navigation!" within 5 s.
+- [ ] Glasses HUD: shows "Welcome to Veiller Navigation!" within 5 s.
 - [ ] Search: type a destination → suggestions appear; rapid typing cancels prior results (no obvious flicker in stale-suggestions).
 - [ ] Preview: pick a destination → preview polyline draws on the map.
 - [ ] Start trip → glasses HUD changes to "Turn left in 200m" (or similar pivot text) on approach.
@@ -3608,11 +3608,11 @@ After writing this plan, scan it against the spec for coverage and consistency.
 **Placeholders / red flags:** none — every code step has the actual code to write.
 
 **Type consistency check:**
-- `Rpc<Req, Res>`, `IsRpc`, `RpcReq`, `RpcRes`, `RpcRequestOptions`, `RpcHandlerContext`, `MentraRpcError`, `MentraRpcTimeoutError` — declared in Task 1, exported in Tasks 5/7, used consistently in Tasks 8, 11, 15, 18.
-- `Channels` interface — declared per-miniapp in Tasks 11 (example) and 15 (Navigation), consumed by `ui.handle` / `mentra.request` calls in their respective controllers.
+- `Rpc<Req, Res>`, `IsRpc`, `RpcReq`, `RpcRes`, `RpcRequestOptions`, `RpcHandlerContext`, `VeillerRpcError`, `VeillerRpcTimeoutError` — declared in Task 1, exported in Tasks 5/7, used consistently in Tasks 8, 11, 15, 18.
+- `Channels` interface — declared per-miniapp in Tasks 11 (example) and 15 (Navigation), consumed by `ui.handle` / `veiller.request` calls in their respective controllers.
 - `NavSnapshot`, `TripState`, `DevSettings`, `Coords`, `LogEntry` — declared in Task 15, used in 18, 19, 21, 23.
 - `useRpc<Channels, "channel-name">` — same generic pattern everywhere.
 
-**Naming consistency:** `handle()` (not `register()`), `request()` (not `call()`), `useRpc` (not `useRequest`), `MentraRpcError` (not `RpcError`). Consistent across all tasks.
+**Naming consistency:** `handle()` (not `register()`), `request()` (not `call()`), `useRpc` (not `useRequest`), `VeillerRpcError` (not `RpcError`). Consistent across all tasks.
 
 Plan is ready to execute.

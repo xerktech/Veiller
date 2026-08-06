@@ -22,7 +22,7 @@ Other apps (rtmp relay, individual miniapps) have their own
 
 ## Access
 
-You need a Porter account that has been added to the Mentra org.
+You need a Porter account that has been added to the Veiller org.
 Ask Isaiah or Israelov.
 
 - Web dashboard: https://dashboard.porter.run/

@@ -230,7 +230,7 @@ export default function HomePage({userId}: HomePageProps) {
       <header className="flex items-center justify-between px-5 pt-5 pb-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">Voice Assistant</h1>
-          <p className="text-xs text-zinc-500">MentraOS SDK Test</p>
+          <p className="text-xs text-zinc-500">Veiller SDK Test</p>
         </div>
         <div className="flex items-center gap-2">
           {status === "active" ? (

@@ -4,7 +4,7 @@
  * there's no runtime resolution across the boundary.
  */
 
-import type {NavManeuver, Pivot} from "@mentra/miniapp"
+import type {NavManeuver, Pivot} from "@veiller/miniapp"
 
 export type Coords = {lat: number; lng: number; accuracy?: number; ts: number}
 export type LatLng = {lat: number; lng: number}

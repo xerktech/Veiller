@@ -1,5 +1,5 @@
 import type {ReactNode} from "react"
-import {useSafeArea} from "@mentra/miniapp/ui"
+import {useSafeArea} from "@veiller/miniapp/ui"
 
 /**
  * Page shell: a fixed, full-height column with safe-area padding. The frame

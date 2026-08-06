@@ -43,7 +43,7 @@ still-reachable feature (your call).
 | Permission | Contributed by | Component / feature that needs it | Status on G2-only build | Verdict |
 |---|---|---|---|---|
 | `BLUETOOTH` / `BLUETOOTH_ADMIN` (maxSdk 30) | android.ts, bt-sdk | Legacy BLE ≤ API 30 — G2 transport | Live | **Keep** |
-| `BLUETOOTH_SCAN` / `_CONNECT` / `_ADVERTISE` | android.ts, bt-sdk | G2 BLE scan/connect (`MentraBluetoothSdk`) | Live | **Keep** |
+| `BLUETOOTH_SCAN` / `_CONNECT` / `_ADVERTISE` | android.ts, bt-sdk | G2 BLE scan/connect (`VeillerBluetoothSdk`) | Live | **Keep** |
 | `FOREGROUND_SERVICE` / `_CONNECTED_DEVICE` | android.ts, bt-sdk | BLE foreground service (`DeviceManager`) | Live | **Keep** |
 | `WAKE_LOCK` | bt-sdk | Keep BLE/audio service alive | Live | **Keep** |
 | `VIBRATE` | bt-sdk | Haptics | Live | **Keep** |

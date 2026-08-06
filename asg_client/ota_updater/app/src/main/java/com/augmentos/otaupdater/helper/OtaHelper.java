@@ -1,8 +1,8 @@
-package com.mentra.otaupdater.helper;
+package com.veiller.otaupdater.helper;
 
-import static com.mentra.otaupdater.helper.Constants.APK_FILENAME;
-import static com.mentra.otaupdater.helper.Constants.BASE_DIR;
-import static com.mentra.otaupdater.helper.Constants.METADATA_JSON;
+import static com.veiller.otaupdater.helper.Constants.APK_FILENAME;
+import static com.veiller.otaupdater.helper.Constants.BASE_DIR;
+import static com.veiller.otaupdater.helper.Constants.METADATA_JSON;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -23,9 +23,9 @@ import org.json.JSONObject;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import com.mentra.otaupdater.events.BatteryStatusEvent;
-import com.mentra.otaupdater.events.DownloadProgressEvent;
-import com.mentra.otaupdater.events.InstallationProgressEvent;
+import com.veiller.otaupdater.events.BatteryStatusEvent;
+import com.veiller.otaupdater.events.DownloadProgressEvent;
+import com.veiller.otaupdater.events.InstallationProgressEvent;
 
 import java.io.BufferedReader;
 import java.io.File;

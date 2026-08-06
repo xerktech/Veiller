@@ -535,7 +535,7 @@ export default function App() {
     <div className={`app-shell${effectiveViewMode === "compare" ? " compare-mode" : ""}`}>
       <div className="hero">
         <div className="hero-copy">
-          <div className="eyebrow">MentraOS</div>
+          <div className="eyebrow">Veiller</div>
           <h1>Captions Monitor</h1>
           <p>Live e2e caption health across devices and backend targets.</p>
         </div>

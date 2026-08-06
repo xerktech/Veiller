@@ -1,4 +1,4 @@
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 
 async function main() {
@@ -13,7 +13,7 @@ async function main() {
   console.log("Server:", server);
   console.log("Room  :", email);
 
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email,
     serverUrl: `${wsServer}`,
     coreToken: token,

@@ -178,7 +178,7 @@ await subscriptionManager.updateSubscriptions(subs, {traceId})
 await transcriptionManager.ensureStreams({traceId})
 
 // All logs include traceId:
-// info | [tr_abc123] App started: com.mentra.captions.beta
+// info | [tr_abc123] App started: com.veiller.captions.beta
 // debug | [tr_abc123] Subscriptions updated: transcription:en-US
 // debug | [tr_abc123] Stream created: soniox/en-US
 ```
@@ -200,7 +200,7 @@ this.logger.info(
       lastTranscript: "3s ago",
     },
     apps: {
-      running: ["com.mentra.captions.beta"],
+      running: ["com.veiller.captions.beta"],
       subscribed: ["transcription:en-US"],
     },
   },
@@ -352,8 +352,8 @@ The `system.augmentos.dashboard` app updates every minute on a timer. When users
 **Stack trace**:
 
 ```
-at send (/app/node_modules/@mentra/sdk/dist/app/session/index.js:1216:27)
-at updateSystemSection (/app/node_modules/@mentra/sdk/dist/app/session/dashboard.js:60:14)
+at send (/app/node_modules/@veiller/sdk/dist/app/session/index.js:1216:27)
+at updateSystemSection (/app/node_modules/@veiller/sdk/dist/app/session/dashboard.js:60:14)
 at updateDashboardSections (/app/src/index.ts:459:33)
 ```
 

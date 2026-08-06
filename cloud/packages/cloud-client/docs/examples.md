@@ -6,10 +6,10 @@ This document provides practical examples of using the AugmentOS Cloud Client fo
 
 ### Simple Connection Test
 ```typescript
-import { MentraClient } from '@augmentos/cloud-client';
+import { VeillerClient } from '@augmentos/cloud-client';
 
 async function basicConnectionTest() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -35,7 +35,7 @@ async function basicConnectionTest() {
 ### App Lifecycle Testing
 ```typescript
 async function testAppLifecycle() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'app-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -72,7 +72,7 @@ async function testAppLifecycle() {
 ### File-Based Audio Streaming
 ```typescript
 async function testAudioFromFile() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'audio-test@example.com',
     serverUrl: 'ws://localhost:3001',
     audio: {
@@ -102,7 +102,7 @@ async function testAudioFromFile() {
 import { recorder } from 'node-record-lpcm16';
 
 async function testAudioFromMicrophone() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'mic-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -133,7 +133,7 @@ async function testAudioFromMicrophone() {
 ### VAD-Only Testing
 ```typescript
 async function testVadOnly() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'vad-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -155,7 +155,7 @@ async function testVadOnly() {
 ### Transcription Testing with Known Content
 ```typescript
 async function testTranscriptionAccuracy() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'transcription-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -198,7 +198,7 @@ async function testTranscriptionAccuracy() {
 ### Dashboard View Switching
 ```typescript
 async function testDashboardSwitching() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'dashboard-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -240,7 +240,7 @@ async function testDashboardSwitching() {
 ### Display Content Monitoring
 ```typescript
 async function monitorDisplayContent() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'display-monitor@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -299,7 +299,7 @@ async function monitorDisplayContent() {
 ### Static Location Testing
 ```typescript
 async function testLocationUpdates() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'location-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -329,7 +329,7 @@ async function testLocationUpdates() {
 ### Movement Simulation
 ```typescript
 async function simulateWalking() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'walking-test@example.com',
     serverUrl: 'ws://localhost:3001',
     behavior: {
@@ -380,7 +380,7 @@ async function testMultipleServers() {
     'ws://prod.company.com'    // Production
   ];
 
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'multi-server-test@example.com',
     serverUrl: servers[0]  // Default to first server
   });
@@ -416,7 +416,7 @@ async function testMultipleServers() {
 import { Readable } from 'stream';
 
 async function testCustomAudioStream() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'custom-stream-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -467,7 +467,7 @@ async function testCustomAudioStream() {
 ### Multiple Audio Sources
 ```typescript
 async function testMultipleAudioSources() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'multi-audio-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -505,7 +505,7 @@ async function testMultipleAudioSources() {
 ### End-to-End Translation Test
 ```typescript
 async function testTranslationWorkflow() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'translation-e2e@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -555,7 +555,7 @@ async function testTranslationWorkflow() {
 ### Multi-App Interaction Test
 ```typescript
 async function testMultiAppInteraction() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'multi-app-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });
@@ -619,7 +619,7 @@ async function testMultiAppInteraction() {
 ### Connection Recovery
 ```typescript
 async function testConnectionRecovery() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'recovery-test@example.com',
     serverUrl: 'ws://localhost:3001',
     behavior: {
@@ -664,7 +664,7 @@ async function testConnectionRecovery() {
 ### Graceful Error Handling
 ```typescript
 async function testGracefulErrorHandling() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: 'error-test@example.com',
     serverUrl: 'ws://localhost:3001'
   });

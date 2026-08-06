@@ -56,7 +56,7 @@ export function DashboardPage() {
               <ActionRow
                 icon={Code2}
                 title="Use the CLI"
-                body="Run mentra login locally, then publish from your project."
+                body="Run veiller login locally, then publish from your project."
                 action="CLI login"
                 to="/tokens"
               />

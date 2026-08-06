@@ -1,11 +1,11 @@
 ---
 title: "Simple Storage"
-description: "Persistent key-value storage for MentraOS Apps with local caching and cloud sync"
+description: "Persistent key-value storage for Veiller Apps with local caching and cloud sync"
 ---
 
 ## Overview
 
-The Simple Storage module provides a localStorage-like interface for MentraOS Apps to persistently store configuration data, user preferences, and small datasets. Data is automatically synchronized between your app server and the MentraOS Cloud, with intelligent local caching for optimal performance.
+The Simple Storage module provides a localStorage-like interface for Veiller Apps to persistently store configuration data, user preferences, and small datasets. Data is automatically synchronized between your app server and the Veiller Cloud, with intelligent local caching for optimal performance.
 
 <Note>
 Simple Storage data is isolated by userId and packageName, ensuring each user has private storage that other apps cannot access.
@@ -16,7 +16,7 @@ Simple Storage data is isolated by userId and packageName, ensuring each user ha
 Access Simple Storage through your AppSession:
 
 ```typescript
-import { AppServer, AppSession } from '@mentraos/sdk';
+import { AppServer, AppSession } from '@veiller/sdk';
 
 class MyAppServer extends AppServer {
   protected async onSession(session: AppSession, sessionId: string, userId: string) {
@@ -321,7 +321,7 @@ if (value === undefined) {
   <Accordion title="Data Not Persisting">
     - Ensure your app has proper authentication (package name and API key)
     - Check that userId is consistent across sessions
-    - Verify network connectivity between your server and MentraOS Cloud
+    - Verify network connectivity between your server and Veiller Cloud
   </Accordion>
 
   <Accordion title="Cache Issues">

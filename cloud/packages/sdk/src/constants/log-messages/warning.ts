@@ -1,14 +1,14 @@
 /**
  * warning.ts
  *
- * Permission warning messages for the MentraOS SDK.
+ * Permission warning messages for the Veiller SDK.
  *
  * Previously used boxen-bordered ASCII art banners with side-by-side layouts.
  * Now returns plain single-line strings that the clean transport formats with
  * color/prefix.
  *
  * The clean logger renders these as:
- *   MentraOS  ⚠ camera permission required for requestPhoto — enable at https://console.mentra.glass/apps/org.example.myapp/edit
+ *   Veiller  ⚠ camera permission required for requestPhoto — enable at https://console.mentra.glass/apps/org.example.myapp/edit
  */
 
 /**

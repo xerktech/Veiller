@@ -1,4 +1,4 @@
-package com.mentra.otaupdater.events;
+package com.veiller.otaupdater.events;
 
 /**
  * EventBus event for download progress updates

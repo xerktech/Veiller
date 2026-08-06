@@ -5,14 +5,14 @@ developers build against.
 
 ## Pieces (subfolders)
 
-- [`local-sdk/`](./local-sdk/): the Mentra Local SDK (`@mentra/miniapp`), the API
-  developers write miniapps against. Apps built with it run in the Mentra Runtime
+- [`local-sdk/`](./local-sdk/): the Veiller Local SDK (`@veiller/miniapp`), the API
+  developers write miniapps against. Apps built with it run in the Veiller Runtime
   on-device. Existing spike.
-- [`cli/`](./cli/): the Mentra CLI (`@mentra/miniapp-cli`), the build and publish
+- [`cli/`](./cli/): the Veiller CLI (`@veiller/miniapp-cli`), the build and publish
   tool.
 
 ## Related
 
 - [`../001-cloud-core/`](../001-cloud-core/): dev-console-service and
   miniapp-service (publish and listing targets).
-- [`../../mentra-overhaul-plan.md`](../../mentra-overhaul-plan.md)
+- [`../../veiller-overhaul-plan.md`](../../veiller-overhaul-plan.md)

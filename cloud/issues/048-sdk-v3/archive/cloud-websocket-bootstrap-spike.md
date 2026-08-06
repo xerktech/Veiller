@@ -23,7 +23,7 @@ This spike documents the current implementation and the architectural implicatio
 
 The active Bun-native WebSocket implementation lives in:
 
-- [`cloud/packages/cloud/src/services/websocket/bun-websocket.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
+- [`cloud/packages/cloud/src/services/websocket/bun-websocket.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
 
 It exposes two WebSocket upgrade paths:
 
@@ -32,8 +32,8 @@ It exposes two WebSocket upgrade paths:
 
 There are older `ws`-package services in:
 
-- [`cloud/packages/cloud/src/services/websocket/websocket-glasses.service.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/websocket-glasses.service.ts)
-- [`cloud/packages/cloud/src/services/websocket/websocket-app.service.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/websocket-app.service.ts)
+- [`cloud/packages/cloud/src/services/websocket/websocket-glasses.service.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/websocket-glasses.service.ts)
+- [`cloud/packages/cloud/src/services/websocket/websocket-app.service.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/websocket-app.service.ts)
 
 Those follow the same broad lifecycle model, but the Bun path is the active one we should treat as authoritative for current behavior.
 
@@ -55,8 +55,8 @@ Flow:
 
 Relevant code:
 
-- [`bun-websocket.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
-- [`UserSession.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/session/UserSession.ts)
+- [`bun-websocket.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
+- [`UserSession.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/session/UserSession.ts)
 
 Important consequence:
 
@@ -76,8 +76,8 @@ This means the cloud already has a temporary "user session exists without active
 
 Relevant code:
 
-- [`bun-websocket.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
-- [`UserSession.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/session/UserSession.ts)
+- [`bun-websocket.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
+- [`UserSession.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/session/UserSession.ts)
 
 ---
 
@@ -103,8 +103,8 @@ This is true for both:
 
 Relevant code:
 
-- [`bun-websocket.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
-- [`websocket-app.service.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/websocket/websocket-app.service.ts)
+- [`bun-websocket.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/bun-websocket.ts)
+- [`websocket-app.service.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/websocket/websocket-app.service.ts)
 
 Important consequence:
 
@@ -126,7 +126,7 @@ That means the cloud is already authoritative about whether a mini app is suppos
 
 Relevant code:
 
-- [`AppManager.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/cloud/src/services/session/AppManager.ts)
+- [`AppManager.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/cloud/src/services/session/AppManager.ts)
 
 ---
 

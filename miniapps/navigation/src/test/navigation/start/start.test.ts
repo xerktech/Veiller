@@ -1,6 +1,6 @@
 /// <reference types="bun-types" />
 import {describe, expect, test} from "bun:test"
-import type {MiniappSession, StartNavigationOptions} from "@mentra/miniapp"
+import type {MiniappSession, StartNavigationOptions} from "@veiller/miniapp"
 
 import {ackLatest, connectedSession, type FakeTransport, lastEnvelope, lastOutbound} from "../helpers"
 

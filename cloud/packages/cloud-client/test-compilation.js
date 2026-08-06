@@ -9,7 +9,7 @@ const requiredFiles = [
   'package.json',
   'tsconfig.json',
   'src/index.ts',
-  'src/MentraClient.ts',
+  'src/VeillerClient.ts',
   'src/managers/WebSocketManager.ts',
   'src/managers/AudioManager.ts',
   'src/managers/AppManager.ts',
@@ -57,7 +57,7 @@ try {
 
 console.log('\n🎉 Project structure verification complete!');
 console.log('\n📚 Project Summary:');
-console.log('  • Core Client: MentraClient with clean public API');
+console.log('  • Core Client: VeillerClient with clean public API');
 console.log('  • Managers: WebSocket, Audio, App, Location, Display');
 console.log('  • Testing: TranscriptionBenchmark, StressTestRunner, AudioSynthesizer');
 console.log('  • Documentation: Complete API docs and examples');

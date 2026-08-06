@@ -8,7 +8,7 @@ import type {EventEmitter} from "events"
  * AI connection to whichever provider is selected.
  *
  * Audio formats:
- *   Input:  PCM 16-bit, 16kHz, mono (from glasses mic via MentraOS)
+ *   Input:  PCM 16-bit, 16kHz, mono (from glasses mic via Veiller)
  *   Output: PCM 16-bit, 24kHz, mono (written to AudioOutputStream → MP3 → phone)
  */
 

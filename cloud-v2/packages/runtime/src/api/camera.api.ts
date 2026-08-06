@@ -23,8 +23,8 @@ import {
   AccessTokenError,
   createLogger,
   verifyRuntimeToken,
-} from "@mentra/cloud-shared";
-import { photoOptionsSchema, streamOptionsSchema } from "@mentra/cloud-protocol/camera";
+} from "@veiller/cloud-shared";
+import { photoOptionsSchema, streamOptionsSchema } from "@veiller/cloud-protocol/camera";
 import { getStorageProvider } from "../services/storage/storage.service";
 import * as camera from "../services/camera/camera.service";
 

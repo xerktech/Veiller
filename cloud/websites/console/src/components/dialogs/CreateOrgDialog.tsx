@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, AlertDescription, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, Textarea } from "@mentra/shared";
+import { Alert, AlertDescription, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, Textarea } from "@veiller/shared";
 import { AlertCircle, Loader2 } from "lucide-react";
 import api from '@/services/api.service';
 import { toast } from 'sonner';
@@ -205,7 +205,7 @@ const CreateOrgDialog: React.FC<CreateOrgDialogProps> = ({
                 disabled={isCreating}
               />
               <p className="text-xs text-muted-foreground">
-                This will be displayed as the developer name in the Mentra MiniApp Store.
+                This will be displayed as the developer name in the Veiller MiniApp Store.
               </p>
             </div>
 

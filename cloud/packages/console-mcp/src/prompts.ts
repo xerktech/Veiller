@@ -19,7 +19,7 @@ export function registerPrompts(server: McpServer, _config: ConsoleMcpConfig): v
           role: "user" as const,
           content: {
             type: "text" as const,
-            text: `Investigate MentraOS incident ${incidentId}:
+            text: `Investigate Veiller incident ${incidentId}:
 
 1. Call incident_get with incidentId "${incidentId}"
 2. Call incident_get_logs with logType "phone" and grep for errors; repeat for "cloud" if needed
@@ -36,7 +36,7 @@ export function registerPrompts(server: McpServer, _config: ConsoleMcpConfig): v
     "create-miniapp-checklist",
     {
       title: "Create MiniApp Checklist",
-      description: "Steps to register and configure a new MentraOS MiniApp via console MCP tools.",
+      description: "Steps to register and configure a new Veiller MiniApp via console MCP tools.",
     },
     async () => ({
       messages: [
@@ -44,7 +44,7 @@ export function registerPrompts(server: McpServer, _config: ConsoleMcpConfig): v
           role: "user" as const,
           content: {
             type: "text" as const,
-            text: `Create a new MentraOS MiniApp using console MCP tools:
+            text: `Create a new Veiller MiniApp using console MCP tools:
 
 1. org_list — confirm target organization (or org_create)
 2. app_create — packageName, name, publicUrl, appType, permissions as needed

@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react"
 import {motion} from "motion/react"
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 
 import "@/shared/channels"
 import type {Channels} from "@/shared/channels"
@@ -218,7 +218,7 @@ export function AddPlacePage({presetType, onSave, onClose}: Props) {
   // the slot is already chosen, dropdown wouldn't render anyway.
   useEffect(() => {
     if (presetType) return
-    mentra
+    veiller
       .request("storage:list-saved", undefined as never)
       .then((all: SavedPlace[]) => {
         setSavedHome(all.find((p) => p.type === "home") ?? null)

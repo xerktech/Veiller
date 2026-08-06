@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports, import/first */
-import {MiniappStreamType} from "@mentra/miniapp"
+import {MiniappStreamType} from "@veiller/miniapp"
 
 jest.mock("react-native-share", () => ({__esModule: true, default: {open: jest.fn()}}))
 jest.unmock("../../../modules/engine/src/services/LocalMiniappRuntime")

@@ -17,7 +17,7 @@ On Android, Mentra Live glasses use CTKD with the BES2800 chipset:
 5. User taps "Pair" → Both BLE + BT Classic connected
 6. Navigate to home
 
-Implementation location: `mobile/modules/core/android/src/main/java/com/mentra/core/sgcs/MentraLive.java` (lines 770-773, 3031-3151)
+Implementation location: `mobile/modules/core/android/src/main/java/com/veiller/core/sgcs/MentraLive.java` (lines 770-773, 3031-3151)
 
 ### iOS (Current - Limited)
 
@@ -315,7 +315,7 @@ static func sendAudioConnected(deviceName: String) {
 
 #### 2.1 Create AudioSessionMonitor.kt
 
-**Location:** `mobile/modules/core/android/src/main/java/com/mentra/core/utils/AudioSessionMonitor.kt`
+**Location:** `mobile/modules/core/android/src/main/java/com/veiller/core/utils/AudioSessionMonitor.kt`
 
 **Purpose:**
 
@@ -356,7 +356,7 @@ class AudioSessionMonitor {
 
 #### 2.2 Optional Integration into MentraLive.java
 
-**Location:** `mobile/modules/core/android/src/main/java/com/mentra/core/sgcs/MentraLive.java`
+**Location:** `mobile/modules/core/android/src/main/java/com/veiller/core/sgcs/MentraLive.java`
 
 **Changes at line ~773 (optional):**
 

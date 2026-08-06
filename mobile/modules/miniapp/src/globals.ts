@@ -1,5 +1,5 @@
 /**
- * @fileoverview Shape of window.MentraOS, injected by the host MentraOS app
+ * @fileoverview Shape of window.Veiller, injected by the host Veiller app
  * before the miniapp's content loads. Miniapp authors generally won't read
  * this directly — use the typed React hooks (useSafeArea, etc.) instead.
  */
@@ -22,8 +22,8 @@ export interface MiniappCapsuleMenuRect {
 
 export type MiniappColorScheme = "light" | "dark"
 
-export interface MentraOSGlobals {
-  /** Package id the host assigned to this miniapp (e.g. "com.mentra.example"). */
+export interface VeillerGlobals {
+  /** Package id the host assigned to this miniapp (e.g. "com.veiller.example"). */
   packageName?: string
   /** "ios" | "android" | other. */
   platform?: string
@@ -44,19 +44,19 @@ export interface MentraOSGlobals {
   /**
    * The host's current color scheme. Miniapps can follow this to match the
    * phone's appearance. Updates at runtime arrive via the session's
-   * `colorScheme` event — see `useColorScheme()` in @mentra/miniapp/react.
+   * `colorScheme` event — see `useColorScheme()` in @veiller/miniapp/react.
    */
   colorScheme?: MiniappColorScheme
 }
 
 declare global {
   interface Window {
-    MentraOS?: MentraOSGlobals
+    Veiller?: VeillerGlobals
   }
 }
 
-/** Reads window.MentraOS safely — returns an empty object if not set. */
-export function getMentraOSGlobals(): MentraOSGlobals {
+/** Reads window.Veiller safely — returns an empty object if not set. */
+export function getVeillerGlobals(): VeillerGlobals {
   if (typeof window === "undefined") return {}
-  return window.MentraOS ?? {}
+  return window.Veiller ?? {}
 }

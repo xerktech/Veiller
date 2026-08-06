@@ -6,19 +6,19 @@ module.exports = {
     "^@babel/runtime/(.*)$": "<rootDir>/node_modules/@babel/runtime/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@assets/(.*)$": "<rootDir>/assets/$1",
-    "^@mentra/bluetooth-sdk-internal$": "<rootDir>/modules/bluetooth-sdk/src/_internal.ts",
-    "^@mentra/bluetooth-sdk/internal$": "<rootDir>/modules/bluetooth-sdk/src/_internal.ts",
-    // Mirror metro: the @mentra/engine entry points resolve to SOURCE, not the
+    "^@veiller/bluetooth-sdk-internal$": "<rootDir>/modules/bluetooth-sdk/src/_internal.ts",
+    "^@veiller/bluetooth-sdk/internal$": "<rootDir>/modules/bluetooth-sdk/src/_internal.ts",
+    // Mirror metro: the @veiller/engine entry points resolve to SOURCE, not the
     // (stale) build/ output — tests must exercise the same code the app
     // bundles. jest.setup.js mocks all three entries.
-    "^@mentra/engine$": "<rootDir>/modules/engine/src/index.ts",
-    "^@mentra/engine/internal$": "<rootDir>/modules/engine/src/internal.ts",
-    "^@mentra/engine/devtools$": "<rootDir>/modules/engine/src/devtools.ts",
+    "^@veiller/engine$": "<rootDir>/modules/engine/src/index.ts",
+    "^@veiller/engine/internal$": "<rootDir>/modules/engine/src/internal.ts",
+    "^@veiller/engine/devtools$": "<rootDir>/modules/engine/src/devtools.ts",
     "^expo/virtual/env$": "<rootDir>/src/test-utils/expoVirtualEnvMock.ts",
     "^react-native$": "<rootDir>/node_modules/react-native",
     "^crust$": "<rootDir>/modules/crust/src",
     // island-internal code (e.g. RestComms) reaches the full btsdk surface via the
-    // relative build/_internal path (the @mentra/bluetooth-sdk-internal alias
+    // relative build/_internal path (the @veiller/bluetooth-sdk-internal alias
     // doesn't resolve in island's standalone build). Map it to the same source so
     // the jest.setup mock applies — otherwise requireActual loads the real native module.
     "bluetooth-sdk/build/_internal$": "<rootDir>/modules/bluetooth-sdk/src/_internal.ts",

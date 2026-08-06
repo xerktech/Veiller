@@ -307,7 +307,7 @@ truth.
 
 | State | Source of truth | Cached/replicated where | Lifetime |
 | --- | --- | --- | --- |
-| User account, OEM linkage, MentraUserId | Persistent DB (Mongo) | Brief in-memory at request time | Permanent |
+| User account, OEM linkage, VeillerUserId | Persistent DB (Mongo) | Brief in-memory at request time | Permanent |
 | Installed miniapps (list) | Mobile client | Persistent DB (cache for cross-device sync) | Permanent |
 | Installed miniapps (code/JS bundles) | Mobile client | Downloaded from store/CDN | Until uninstall |
 | Miniapp catalog | Persistent DB / object storage | CDN | Permanent |
@@ -437,7 +437,7 @@ Things we looked at and chose not to build, so the reasoning isn't lost:
    (Soniox today, maybe Alibaba or Azure later). Carry v1's
    `TranscriptionProvider` interface or redesign? Lean: carry v1's
    surface; we're not chasing multi-provider in v2's audio.
-5. **Test client deployment.** The test client is the `@mentra/cloud-client` node
+5. **Test client deployment.** The test client is the `@veiller/cloud-client` node
    build (see [`../../004-cloud-client/`](../../004-cloud-client/)): the same client
    the phone runs, driven from a server. It still needs to reach the cloud under
    test, the TEST OEM, and Redis; the deployment topology (local Bun process, sibling

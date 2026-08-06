@@ -1,22 +1,22 @@
 /**
- * MentraOS SDK Logger
+ * Veiller SDK Logger
  *
  * Factory-based logger that supports two modes:
  *
  * **Clean mode** (default): Single-line colored output via the clean transport.
- *   MentraOS  ✓ App server running on port 7010
- *   MentraOS  ✗ Invalid API key
+ *   Veiller  ✓ App server running on port 7010
+ *   Veiller  ✗ Invalid API key
  *
  * **Verbose mode**: Full pino-pretty structured output (today's behavior).
- *   Activated via `verbose: true` in config or `MENTRA_VERBOSE=true` env var.
+ *   Activated via `verbose: true` in config or `VEILLER_VERBOSE=true` env var.
  *
  * The BetterStack transport always runs at debug level when BETTERSTACK_SOURCE_TOKEN
  * is set, regardless of the console transport level. This is intentional — it's
- * an undocumented internal feature for Mentra's own apps.
+ * an undocumented internal feature for Veiller's own apps.
  *
  * Resolution order for log level:
- *   1. MENTRA_VERBOSE=true → verbose mode, debug level
- *   2. MENTRA_LOG_LEVEL env var → sets level (debug implies verbose)
+ *   1. VEILLER_VERBOSE=true → verbose mode, debug level
+ *   2. VEILLER_LOG_LEVEL env var → sets level (debug implies verbose)
  *   3. config.verbose: true → verbose mode, debug level
  *   4. config.logLevel → sets level
  *   5. Default → info level, clean mode
@@ -29,7 +29,7 @@ import { createCleanStream } from "./clean-transport";
 
 // ─── Public Types ────────────────────────────────────────────────────────────
 
-export type MentraLogLevel = "none" | "error" | "warn" | "info" | "debug";
+export type VeillerLogLevel = "none" | "error" | "warn" | "info" | "debug";
 
 export interface LoggerConfig {
   /**
@@ -40,14 +40,14 @@ export interface LoggerConfig {
    * - 'info':  Errors + warnings + lifecycle events (default)
    * - 'debug': Everything (verbose structured output)
    *
-   * Can be overridden with MENTRA_LOG_LEVEL env var.
+   * Can be overridden with VEILLER_LOG_LEVEL env var.
    */
-  logLevel?: MentraLogLevel;
+  logLevel?: VeillerLogLevel;
 
   /**
    * Enable verbose internal logging (full pino-pretty structured output).
-   * Useful when debugging SDK issues — Mentra support may ask you to enable this.
-   * Can also be enabled with MENTRA_VERBOSE=true env var.
+   * Useful when debugging SDK issues — Veiller support may ask you to enable this.
+   * Can also be enabled with VEILLER_VERBOSE=true env var.
    * Default: false
    */
   verbose?: boolean;
@@ -56,28 +56,28 @@ export interface LoggerConfig {
 // ─── Internal Helpers ────────────────────────────────────────────────────────
 
 /** Map our public level names to pino level names. 'none' → pino 'silent'. */
-function toPinoLevel(level: MentraLogLevel): string {
+function toPinoLevel(level: VeillerLogLevel): string {
   return level === "none" ? "silent" : level;
 }
 
-const VALID_LEVELS: MentraLogLevel[] = ["none", "error", "warn", "info", "debug"];
+const VALID_LEVELS: VeillerLogLevel[] = ["none", "error", "warn", "info", "debug"];
 
 /**
  * Resolve the effective logging configuration from env vars + passed config.
- * Env vars take precedence over programmatic config so that Mentra support
- * can tell a developer "set MENTRA_VERBOSE=true and send us the output"
+ * Env vars take precedence over programmatic config so that Veiller support
+ * can tell a developer "set VEILLER_VERBOSE=true and send us the output"
  * without requiring code changes.
  */
 function resolveConfig(config?: LoggerConfig): { pinoLevel: string; verbose: boolean } {
-  const envVerbose = process.env.MENTRA_VERBOSE === "true" || process.env.MENTRA_VERBOSE === "1";
-  const envLevel = process.env.MENTRA_LOG_LEVEL as MentraLogLevel | undefined;
+  const envVerbose = process.env.VEILLER_VERBOSE === "true" || process.env.VEILLER_VERBOSE === "1";
+  const envLevel = process.env.VEILLER_LOG_LEVEL as VeillerLogLevel | undefined;
 
-  // 1. MENTRA_VERBOSE takes highest precedence
+  // 1. VEILLER_VERBOSE takes highest precedence
   if (envVerbose) {
     return { pinoLevel: "debug", verbose: true };
   }
 
-  // 2. MENTRA_LOG_LEVEL overrides config
+  // 2. VEILLER_LOG_LEVEL overrides config
   if (envLevel && VALID_LEVELS.includes(envLevel)) {
     const pinoLevel = toPinoLevel(envLevel);
     return { pinoLevel, verbose: envLevel === "debug" };
@@ -137,7 +137,7 @@ function tryCreatePrettyTransport(): pino.StreamEntry | null {
  * Returns null if the token is not set or the transport fails to load.
  *
  * The BetterStack transport always runs at debug level regardless of the
- * console transport level. This is intentional for Mentra's internal apps.
+ * console transport level. This is intentional for Veiller's internal apps.
  * Third-party devs don't set BETTERSTACK_SOURCE_TOKEN so they never see this.
  */
 function tryCreateBetterStackTransport(): pino.StreamEntry | null {
@@ -208,7 +208,7 @@ export function createLogger(config?: LoggerConfig): Logger {
         // pino-pretty not available — fall back to raw JSON on stdout
         // and emit a one-time notice so the dev knows why output looks different
         process.stderr.write(
-          "[MentraOS] pino-pretty not installed — verbose output will be JSON. " +
+          "[Veiller] pino-pretty not installed — verbose output will be JSON. " +
             "Install it with: bun add -d pino-pretty\n",
         );
         streams.push({ stream: process.stdout, level: pinoLevel as Level });
@@ -261,7 +261,7 @@ export function createLogger(config?: LoggerConfig): Logger {
 // consumers receive the logger via DI, this can be removed.
 
 export const logger = createLogger({
-  logLevel: (process.env.NODE_ENV === "production" ? "info" : "debug") as MentraLogLevel,
+  logLevel: (process.env.NODE_ENV === "production" ? "info" : "debug") as VeillerLogLevel,
   verbose: true,
 });
 

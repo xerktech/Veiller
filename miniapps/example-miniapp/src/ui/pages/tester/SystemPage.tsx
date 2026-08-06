@@ -2,7 +2,7 @@
 
 import {useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"
@@ -46,7 +46,7 @@ export default function SystemPage() {
         <Input id="sys-url" value={url} onChange={(e) => setUrl(e.target.value)} />
         <div className="mt-2 flex flex-wrap gap-2">
           <Button onClick={() => run("openUrl", [url])}>openUrl(url)</Button>
-          <Button onClick={() => run("share", [{url, title: "Shared from Mentra"}])}>
+          <Button onClick={() => run("share", [{url, title: "Shared from Veiller"}])}>
             share({"{"}url, title{"}"})
           </Button>
         </div>

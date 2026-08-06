@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mentra.crust.example"
+      "bundleIdentifier": "com.veiller.crust.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mentra.crust.example"
+      "package": "com.veiller.crust.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

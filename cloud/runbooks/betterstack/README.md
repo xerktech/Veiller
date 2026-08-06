@@ -19,7 +19,7 @@ Ask Isaiah or Israelov.
 - Web: https://logs.betterstack.com/ and
   https://uptime.betterstack.com/
 - API tokens for the `bstack` CLI live in Doppler under the
-  `mentra-sre` project. See [bstack-cli.md](bstack-cli.md).
+  `veiller-sre` project. See [bstack-cli.md](bstack-cli.md).
 
 ## What we have ingested
 

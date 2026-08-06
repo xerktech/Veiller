@@ -1,15 +1,15 @@
 /**
  * CLI Settings Manager
  *
- * Manages CLI configuration file (~/.mentra/config.json)
+ * Manages CLI configuration file (~/.veiller/config.json)
  */
 
 import {homedir} from "os"
 import {join} from "path"
 import {readFileSync, writeFileSync, mkdirSync, existsSync} from "fs"
 
-const MENTRA_DIR = join(homedir(), ".mentra")
-const CONFIG_FILE = join(MENTRA_DIR, "config.json")
+const VEILLER_DIR = join(homedir(), ".veiller")
+const CONFIG_FILE = join(VEILLER_DIR, "config.json")
 
 export interface Config {
   clouds?: {
@@ -50,7 +50,7 @@ export function updateConfig(updates: Partial<Config>): void {
   const config = getConfig()
   const updated = {...config, ...updates}
 
-  mkdirSync(MENTRA_DIR, {recursive: true})
+  mkdirSync(VEILLER_DIR, {recursive: true})
   writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2), {mode: 0o600})
 }
 
@@ -70,7 +70,7 @@ export function setConfigValue(key: string, value: any): void {
   }
   current[keys[keys.length - 1]] = value
 
-  mkdirSync(MENTRA_DIR, {recursive: true})
+  mkdirSync(VEILLER_DIR, {recursive: true})
   writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), {mode: 0o600})
 }
 

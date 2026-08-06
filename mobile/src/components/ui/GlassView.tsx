@@ -1,5 +1,5 @@
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {GlassView as GlassViewComponent, GlassViewProps, isLiquidGlassAvailable} from "expo-glass-effect"
 import {LinearGradient} from "expo-linear-gradient"
 import {Platform, View, ViewProps, StyleSheet} from "react-native"

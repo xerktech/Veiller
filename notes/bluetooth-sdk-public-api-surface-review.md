@@ -19,7 +19,7 @@ language's normal shape:
   native work can fail asynchronously, and `invalidate()`.
 
 Brightness and auto-brightness setters are intentionally not public in any SDK.
-The settings can still exist internally because MentraOS and device-store sync
+The settings can still exist internally because Veiller and device-store sync
 need to preserve existing behavior, but partners should not call them directly
 until the underlying behavior is fixed.
 
@@ -33,11 +33,11 @@ until the underlying behavior is fixed.
 - React Native internal entrypoint:
   `mobile/modules/bluetooth-sdk/src/_internal.ts`
 - Android native facade:
-  `mobile/modules/bluetooth-sdk/android/src/main/java/com/mentra/bluetoothsdk/MentraBluetoothSdk.kt`
+  `mobile/modules/bluetooth-sdk/android/src/main/java/com/veiller/bluetoothsdk/VeillerBluetoothSdk.kt`
 - Android native models/callbacks:
-  `mobile/modules/bluetooth-sdk/android/src/main/java/com/mentra/bluetoothsdk/{audio,camera,connection,events,internal,requests,status,streaming,types}/`
+  `mobile/modules/bluetooth-sdk/android/src/main/java/com/veiller/bluetoothsdk/{audio,camera,connection,events,internal,requests,status,streaming,types}/`
 - iOS native facade:
-  `mobile/modules/bluetooth-sdk/ios/Source/MentraBluetoothSDK.swift`
+  `mobile/modules/bluetooth-sdk/ios/Source/VeillerBluetoothSDK.swift`
 - iOS native models/callbacks:
   `mobile/modules/bluetooth-sdk/ios/Source/{Audio,Camera,Connection,Errors,Events,Internal,Requests,Status,Streaming,Types}/`
 
@@ -67,8 +67,8 @@ All three SDKs expose the same customer-facing feature groups:
 Import path:
 
 ```ts
-import BluetoothSdk from "@mentra/bluetooth-sdk"
-import {useBluetoothEvent, useBluetoothScan, useMentraBluetooth} from "@mentra/bluetooth-sdk/react"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
+import {useBluetoothEvent, useBluetoothScan, useVeillerBluetooth} from "@veiller/bluetooth-sdk/react"
 ```
 
 Public value exports:
@@ -170,7 +170,7 @@ Photo, video, RGB LED, and settings promises reject when the correlated ASG even
 React hook signatures:
 
 ```ts
-useMentraBluetooth(options?: UseMentraBluetoothOptions): MentraBluetoothSession
+useVeillerBluetooth(options?: UseVeillerBluetoothOptions): VeillerBluetoothSession
 useBluetoothScan(options?: UseBluetoothScanOptions): BluetoothScanHookResult
 useBluetoothEvent<EventName extends BluetoothSdkEventName>(
   eventName: EventName,
@@ -225,22 +225,22 @@ Factory signatures:
 ```kotlin
 companion object {
   @JvmStatic
-  fun create(context: Context, listener: MentraBluetoothSdkListener): MentraBluetoothSdk
+  fun create(context: Context, listener: VeillerBluetoothSdkListener): VeillerBluetoothSdk
 
   @JvmStatic
   fun create(
     context: Context,
-    config: MentraBluetoothSdkConfig,
-    listener: MentraBluetoothSdkListener,
-  ): MentraBluetoothSdk
+    config: VeillerBluetoothSdkConfig,
+    listener: VeillerBluetoothSdkListener,
+  ): VeillerBluetoothSdk
 }
 ```
 
 Public facade function signatures:
 
 ```kotlin
-fun addListener(listener: MentraBluetoothSdkListener)
-fun removeListener(listener: MentraBluetoothSdkListener)
+fun addListener(listener: VeillerBluetoothSdkListener)
+fun removeListener(listener: VeillerBluetoothSdkListener)
 
 fun getGlassesStatus(): GlassesStatus
 fun getBluetoothStatus(): BluetoothStatus
@@ -330,7 +330,7 @@ class ScanSession {
   fun stop()
 }
 
-interface MentraBluetoothSdkListener {
+interface VeillerBluetoothSdkListener {
   fun onGlassesStatusChanged(status: GlassesStatusUpdate) {}
   fun onBluetoothStatusChanged(status: BluetoothStatusUpdate) {}
   fun onDeviceDiscovered(device: Device) {}
@@ -363,10 +363,10 @@ Public class/properties:
 
 ```swift
 @MainActor
-public final class MentraBluetoothSDK {
-  public weak var delegate: MentraBluetoothSDKDelegate?
+public final class VeillerBluetoothSDK {
+  public weak var delegate: VeillerBluetoothSDKDelegate?
 
-  public init(configuration: MentraBluetoothSDKConfiguration = .default)
+  public init(configuration: VeillerBluetoothSDKConfiguration = .default)
 
   public var glassesStatus: GlassesStatus { get }
   public var bluetoothStatus: BluetoothStatus { get }
@@ -452,17 +452,17 @@ Public iOS delegate/callback signatures:
 
 ```swift
 @MainActor
-public protocol MentraBluetoothSDKDelegate: AnyObject {
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateGlassesStatus status: GlassesStatusUpdate)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateBluetoothStatus status: BluetoothStatusUpdate)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didDiscover device: Device)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didStopScan reason: ScanStopReason)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEvent)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceiveMicPcm frame: Data)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceiveMicLc3 frame: Data)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didChangeDefaultDevice device: Device?)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didLog message: String)
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didFail error: BluetoothError)
+public protocol VeillerBluetoothSDKDelegate: AnyObject {
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateGlassesStatus status: GlassesStatusUpdate)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateBluetoothStatus status: BluetoothStatusUpdate)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didDiscover device: Device)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didStopScan reason: ScanStopReason)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceive event: BluetoothEvent)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceiveMicPcm frame: Data)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceiveMicLc3 frame: Data)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didChangeDefaultDevice device: Device?)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didLog message: String)
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didFail error: BluetoothError)
 }
 
 public final class ScanSession {
@@ -474,11 +474,11 @@ public final class ScanSession {
 
 ### React Native
 
-The public package root is `@mentra/bluetooth-sdk`. MentraOS-only compatibility
+The public package root is `@veiller/bluetooth-sdk`. Veiller-only compatibility
 code uses the internal import path:
 
 ```ts
-import BluetoothSdkInternal from "@mentra/bluetooth-sdk-internal"
+import BluetoothSdkInternal from "@veiller/bluetooth-sdk-internal"
 ```
 
 The package root does not expose:
@@ -523,7 +523,7 @@ selection events.
 The OTA manifest URL getter/setter (`setOtaVersionUrl` / `getOtaVersionUrl`) and
 the `startOtaUpdate(otaVersionUrl)` override are intentionally kept off the
 public boundary; `setOtaVersionUrl` / `getOtaVersionUrl` are re-exported from the
-`@mentra/bluetooth-sdk/debug` subpath for MentraOS/debug recovery only. The
+`@veiller/bluetooth-sdk/debug` subpath for Veiller/debug recovery only. The
 public `startOtaUpdate()` resolves the same manifest URL `checkForOtaUpdate()`
 uses (the configured/staging default, or the glasses-advertised/production URL
 for pre-wall-clock ASG builds).
@@ -585,7 +585,7 @@ scalar `setMicState(...)` signature.
   also expose request objects for operations where that reads better natively,
   such as photo, stream, RGB LED, and video recording.
 - React Native uses typed event names through `addListener(...)`. Android uses
-  `MentraBluetoothSdkListener`; iOS uses `MentraBluetoothSDKDelegate`.
+  `VeillerBluetoothSdkListener`; iOS uses `VeillerBluetoothSDKDelegate`.
 - Android exposes `close()` because the facade implements `AutoCloseable`. iOS
   exposes `invalidate()`. React Native does not expose a module-wide teardown.
 - Android and iOS public status snapshots currently expose a fuller native view

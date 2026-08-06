@@ -629,8 +629,8 @@ public class NetworkSetupManager {
                                 + HotspotSetupRequestParser.escapeHtml(ssid)
                                 + "</p>"
                                 + "<p>The glasses are now attempting to connect to your WiFi network. "
-                                + "If successful, they will automatically connect to the MentraOS backend.</p>"
-                                + "<p>Please close this window and return to the MentraOS app.</p>"
+                                + "If successful, they will automatically connect to the Veiller backend.</p>"
+                                + "<p>Please close this window and return to the Veiller app.</p>"
                                 + "</body></html>";
 
                 HotspotSetupRequestParser.writeHtmlResponse(out, htmlBody);

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { getMentraAuth } from "@mentra/sdk";
+import { getVeillerAuth } from "@veiller/sdk";
 import { UserSession } from "../session/UserSession";
 
 const app = new Hono();
@@ -104,7 +104,7 @@ async function stopStream(c: any) {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function resolveUserSession(c: any): UserSession | undefined {
-  const auth = getMentraAuth(c);
+  const auth = getVeillerAuth(c);
   const userId = auth?.userId;
   if (!userId) return undefined;
   return UserSession.get(userId);

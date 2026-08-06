@@ -5,7 +5,7 @@
 
 import {G1_PROFILE, NEX_PROFILE, Z100_PROFILE} from "../../vendor/display-utils/profiles"
 import type {DisplayProfile} from "../../vendor/display-utils/profiles"
-import type {MiniappSession} from "@mentra/miniapp/background"
+import type {MiniappSession} from "@veiller/miniapp/background"
 
 export function getProfileForModel(modelName: string | null | undefined): DisplayProfile {
   if (!modelName) return G1_PROFILE
@@ -16,7 +16,7 @@ export function getProfileForModel(modelName: string | null | undefined): Displa
   if (lower.includes("z100") || lower.includes("vuzix") || lower.includes("mach1") || lower.includes("mach 1")) {
     return Z100_PROFILE
   }
-  if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("mentra_nex")) {
+  if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("veiller_nex")) {
     return NEX_PROFILE
   }
   return G1_PROFILE

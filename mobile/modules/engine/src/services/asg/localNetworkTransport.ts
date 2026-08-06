@@ -1,5 +1,5 @@
 import * as RNFS from "@dr.pogodin/react-native-fs"
-import {MentraLocalNetwork, type LocalNetworkDownloadProgress} from "@mentra/bluetooth-sdk/internal"
+import {VeillerLocalNetwork, type LocalNetworkDownloadProgress} from "@veiller/bluetooth-sdk/internal"
 import {Buffer} from "buffer"
 import {Platform} from "react-native"
 
@@ -21,7 +21,7 @@ export function shouldUseScopedLocalNetwork(
 }
 
 function supportsScopedConnection(): boolean {
-  return shouldUseScopedLocalNetwork(Platform.OS, Platform.Version, MentraLocalNetwork != null)
+  return shouldUseScopedLocalNetwork(Platform.OS, Platform.Version, VeillerLocalNetwork != null)
 }
 
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
@@ -53,24 +53,24 @@ export const localNetworkTransport = {
       // react-native-wifi-reborn, removed while the ASG gallery is parked.
       throw new Error("ASG gallery is parked (XERK-206): legacy WiFi connect is unavailable")
     }
-    await MentraLocalNetwork!.connect(ssid, password)
+    await VeillerLocalNetwork!.connect(ssid, password)
     scopedConnectionActive = true
   },
 
   async disconnect(): Promise<void> {
     if (supportsScopedConnection()) {
-      await MentraLocalNetwork!.disconnect().catch(() => {})
+      await VeillerLocalNetwork!.disconnect().catch(() => {})
     }
     scopedConnectionActive = false
     nativeJobs.clear()
   },
 
   async fetch(url: string | URL | Request, init?: RequestInit, timeoutMs = 30_000): Promise<Response> {
-    if (!scopedConnectionActive || !MentraLocalNetwork || typeof url !== "string") {
+    if (!scopedConnectionActive || !VeillerLocalNetwork || typeof url !== "string") {
       return globalThis.fetch(url, init)
     }
 
-    const nativeModule = MentraLocalNetwork
+    const nativeModule = VeillerLocalNetwork
     const id = requestId("request")
     const signal = init?.signal
     const cancel = () => void nativeModule.cancel(id)
@@ -96,13 +96,13 @@ export const localNetworkTransport = {
   },
 
   downloadFile(options: DownloadOptions): DownloadHandle {
-    if (!scopedConnectionActive || !MentraLocalNetwork) return RNFS.downloadFile(options)
+    if (!scopedConnectionActive || !VeillerLocalNetwork) return RNFS.downloadFile(options)
 
     const jobId = nextJobId++
     const id = requestId("download")
     let began = false
     nativeJobs.set(jobId, id)
-    const subscription = MentraLocalNetwork.addListener("downloadProgress", (event: LocalNetworkDownloadProgress) => {
+    const subscription = VeillerLocalNetwork.addListener("downloadProgress", (event: LocalNetworkDownloadProgress) => {
       if (event.requestId !== id) return
       if (!began) {
         began = true
@@ -120,7 +120,7 @@ export const localNetworkTransport = {
       })
     })
 
-    const promise = MentraLocalNetwork.download(
+    const promise = VeillerLocalNetwork.download(
       id,
       options.fromUrl,
       options.toFile,
@@ -158,16 +158,16 @@ export const localNetworkTransport = {
 
   stopDownload(jobId: number): void {
     const nativeId = nativeJobs.get(jobId)
-    if (nativeId && MentraLocalNetwork) {
+    if (nativeId && VeillerLocalNetwork) {
       cancelledNativeJobs.add(jobId)
-      void MentraLocalNetwork.cancel(nativeId)
+      void VeillerLocalNetwork.cancel(nativeId)
       return
     }
     RNFS.stopDownload(jobId)
   },
 }
 
-MentraLocalNetwork?.addListener("networkLost", () => {
+VeillerLocalNetwork?.addListener("networkLost", () => {
   scopedConnectionActive = false
   nativeJobs.clear()
 })

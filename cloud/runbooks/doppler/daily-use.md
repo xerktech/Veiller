@@ -38,7 +38,7 @@ commands in that directory do not need `--project` and
 ```bash
 cd cloud
 doppler setup
-# pick mentraos-cloud, then prod_central-us (or whichever you
+# pick veiller-cloud, then prod_central-us (or whichever you
 # work with most often)
 ```
 
@@ -52,7 +52,7 @@ different repos / sub-folders.
 doppler secrets
 
 # Without a default
-doppler secrets --project mentra-sre --config dev
+doppler secrets --project veiller-sre --config dev
 ```
 
 Add `--only-names` to just get the names. Useful for diffing
@@ -79,7 +79,7 @@ doppler run -- bun src/index.ts
 With explicit project / config:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bstack health
+doppler run --project veiller-sre --config dev -- bstack health
 ```
 
 The `--` separates Doppler's args from the inner command's args.
@@ -103,13 +103,13 @@ the current directory.
 For one-off debugging that needs the same secrets prod has:
 
 ```bash
-doppler run --project mentraos-cloud --config prod_central-us -- \
+doppler run --project veiller-cloud --config prod_central-us -- \
   bun some-debug-script.ts
 ```
 
 Be careful. This connects to production-grade resources.
 
-### Run bstack with mentra-sre credentials
+### Run bstack with veiller-sre credentials
 
 The `bstack` CLI auto-detects Doppler if env vars are missing.
 If your Doppler is configured, just:
@@ -121,15 +121,15 @@ bstack health
 Manual fallback if auto-detect fails:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bstack health
+doppler run --project veiller-sre --config dev -- bstack health
 ```
 
 ### Compare two configs
 
 ```bash
-doppler secrets --project mentraos-cloud --config prod_central-us \
+doppler secrets --project veiller-cloud --config prod_central-us \
   --only-names > /tmp/central
-doppler secrets --project mentraos-cloud --config prod_us-east \
+doppler secrets --project veiller-cloud --config prod_us-east \
   --only-names > /tmp/east
 diff /tmp/central /tmp/east
 ```
@@ -143,8 +143,8 @@ fix.
   Doppler's `bun` flag, not your bun. Always
   `doppler run [...flags] -- bun start`.
 - **Wrong config**. The configs share names across projects but
-  do different things. `mentraos-cloud:dev` and
-  `mentra-sre:dev` are unrelated.
+  do different things. `veiller-cloud:dev` and
+  `veiller-sre:dev` are unrelated.
 - **Running with prod secrets in a local shell tab and forgetting
   about it**. Subsequent commands in the same shell do not
   inherit Doppler's env (Doppler injects per-command), but if

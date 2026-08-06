@@ -2,7 +2,7 @@
  * @fileoverview useSafeArea — React hook exposing the host's safe-area insets
  * and the capsule menu rect to miniapp UIs.
  *
- * The host injects these via window.MentraOS before content loads. This hook
+ * The host injects these via window.Veiller before content loads. This hook
  * reads them once at mount — they don't currently change at runtime (the host
  * would have to force a reload to update them, e.g. on orientation change).
  */
@@ -10,7 +10,7 @@
 import {useState} from "react"
 
 import {
-  getMentraOSGlobals,
+  getVeillerGlobals,
   type MiniappCapsuleMenuRect,
   type MiniappSafeAreaInsets,
 } from "../globals"
@@ -30,7 +30,7 @@ export interface UseSafeAreaResult {
 
 export function useSafeArea(): UseSafeAreaResult {
   const [result] = useState<UseSafeAreaResult>(() => {
-    const globals = getMentraOSGlobals()
+    const globals = getVeillerGlobals()
     return {
       insets: globals.safeAreaInsets ?? EMPTY_INSETS,
       capsuleMenu: globals.capsuleMenu ?? null,

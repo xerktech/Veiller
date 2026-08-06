@@ -43,7 +43,7 @@ export function AppsPage() {
                   Miniapps are created and published from your project with the CLI. Initialize one, then ship the first release.
                 </p>
                 <div className="mt-6 rounded-[12px] bg-[#111217] px-4 py-3 font-mono text-sm text-white">
-                  mentra init &nbsp;&amp;&amp;&nbsp; mentra publish
+                  veiller init &nbsp;&amp;&amp;&nbsp; veiller publish
                 </div>
               </div>
             ) : (

@@ -1,5 +1,5 @@
 import {AudioLines} from "lucide-react"
-import {useCapsuleHeaderStyle} from "@mentra/miniapp/ui"
+import {useCapsuleHeaderStyle} from "@veiller/miniapp/ui"
 
 export function Header() {
   // Aligns the title row with the host's floating capsule menu and pads the

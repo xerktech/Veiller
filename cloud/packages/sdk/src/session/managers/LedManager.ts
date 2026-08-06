@@ -26,7 +26,7 @@ import type { LedColor } from "../../types";
 // ─── Internal Types ─────────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  *
  * Structural type — no concrete imports so the manager stays unit-testable
  * with plain stubs.
@@ -82,7 +82,7 @@ function generateRequestId(): string {
  *
  * @example
  * ```ts
- * const session = await mentra.connect();
+ * const session = await veiller.connect();
  *
  * // Solid green LED for 2 seconds
  * session.led.setColor("green", 2000);
@@ -204,7 +204,7 @@ export class LedManager {
   /**
    * Clean up resources.
    *
-   * Called by MentraSession during disconnect/cleanup. LED commands are
+   * Called by VeillerSession during disconnect/cleanup. LED commands are
    * fire-and-forget so there is no pending state to drain.
    *
    * @internal

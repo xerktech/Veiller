@@ -6,8 +6,8 @@ is what we're paying for.
 
 ## Doppler
 
-**Project**: `cloud-v2` (not `mentraos-cloud-v2` — workspace already says
-MentraOS).
+**Project**: `cloud-v2` (not `veiller-cloud-v2` — workspace already says
+Veiller).
 
 **Configs** (one per environment):
 

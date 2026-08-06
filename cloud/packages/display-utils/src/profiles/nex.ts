@@ -117,10 +117,10 @@ const NEX_GLYPH_WIDTHS: Record<string, number> = {
 /**
  * Mentra Nex Smart Glasses Display Profile
  *
- * Also known as "Mentra Display" - a new Mentra glasses model with display capabilities.
+ * Also known as "Mentra Display" - a new Veiller glasses model with display capabilities.
  */
 export const NEX_PROFILE: DisplayProfile = {
-  id: "mentra-nex",
+  id: "veiller-nex",
   name: "Mentra Nex",
 
   // Display dimensions

@@ -6,15 +6,15 @@
 
 ## What is this?
 
-This folder contains a set of documents covering the improvements needed in the MentraOS cloud for the v3 release. Each doc focuses on a different concern — maintainability, observability, reliability, scalability, and testing. Together they form the roadmap for making the cloud codebase healthier, more debuggable, and more resilient.
+This folder contains a set of documents covering the improvements needed in the Veiller cloud for the v3 release. Each doc focuses on a different concern — maintainability, observability, reliability, scalability, and testing. Together they form the roadmap for making the cloud codebase healthier, more debuggable, and more resilient.
 
-These docs are meant to be read by anyone working on MentraOS — cloud, mobile, firmware, or SDK. Each doc is self-contained, but they reference each other where concerns overlap.
+These docs are meant to be read by anyone working on Veiller — cloud, mobile, firmware, or SDK. Each doc is self-contained, but they reference each other where concerns overlap.
 
 ---
 
 ## System Architecture
 
-MentraOS is a platform for building apps that run on smart glasses. The system spans multiple layers, each owned by different people:
+Veiller is a platform for building apps that run on smart glasses. The system spans multiple layers, each owned by different people:
 
 ```
 ┌──────────┐      ┌──────────────┐      ┌──────────┐      ┌───────────┐
@@ -33,11 +33,11 @@ MentraOS is a platform for building apps that run on smart glasses. The system s
 
 | Component              | What it does                                                                                                                                                | Stack                                                                    |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| **Glasses (firmware)** | Renders display, captures audio/camera, reports sensors (IMU, touch, etc.)                                                                                  | Even Realities G1 firmware (future: MentraOS glasses)                    |
+| **Glasses (firmware)** | Renders display, captures audio/camera, reports sensors (IMU, touch, etc.)                                                                                  | Even Realities G1 firmware (future: Veiller glasses)                    |
 | **Mobile Client**      | Bridges glasses ↔ cloud. Manages BLE connection to glasses, WebSocket connection to cloud. Handles auth, app management UI.                                | React Native (TypeScript) + native modules (Kotlin/Swift)                |
 | **ASG Client**         | Companion app for glasses-specific settings and diagnostics                                                                                                 | Native (Kotlin/Swift)                                                    |
 | **Cloud**              | Central hub. Manages user sessions, routes data between clients and mini apps, handles transcription, display composition, dashboard, permissions, storage. | Bun + Hono + MongoDB + WebSocket                                         |
-| **Mini Apps**          | Third-party apps built by developers using the MentraOS SDK. Receive transcription, send display content, access camera/location/etc.                       | `@mentra/sdk` (TypeScript) — deployed by developers on their own servers |
+| **Mini Apps**          | Third-party apps built by developers using the Veiller SDK. Receive transcription, send display content, access camera/location/etc.                       | `@veiller/sdk` (TypeScript) — deployed by developers on their own servers |
 
 ### Data flow (simplified)
 
@@ -59,9 +59,9 @@ User speaks
 
 | Abstraction       | What it is                                                                                                                                                                                                    | Status                                                                                   |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **`@mentra/sdk`** | TypeScript SDK for building mini apps. Provides `MentraApp`, `AppSession`, and all the manager APIs (display, transcription, camera, etc.)                                                                    | Exists — being redesigned for v3 ([see 039](../039-sdk-v3-api-surface/v2-v3-api-map.md)) |
+| **`@veiller/sdk`** | TypeScript SDK for building mini apps. Provides `VeillerApp`, `AppSession`, and all the manager APIs (display, transcription, camera, etc.)                                                                    | Exists — being redesigned for v3 ([see 039](../039-sdk-v3-api-surface/v2-v3-api-map.md)) |
 | **Device Bridge** | Native abstraction on the mobile side for communicating with glasses hardware (BLE protocol, device commands). Allows swapping glass hardware without changing app code.                                      | In development by mobile/firmware team                                                   |
-| **Cloud Bridge**  | Proposed TypeScript library (`@mentra/cloud-bridge`) that encapsulates the client ↔ cloud protocol (WebSocket connection, auth, message types). Used by mobile client in production AND by the test harness. | Proposed — see [testing.md](./testing.md)                                                |
+| **Cloud Bridge**  | Proposed TypeScript library (`@veiller/cloud-bridge`) that encapsulates the client ↔ cloud protocol (WebSocket connection, auth, message types). Used by mobile client in production AND by the test harness. | Proposed — see [testing.md](./testing.md)                                                |
 
 ---
 

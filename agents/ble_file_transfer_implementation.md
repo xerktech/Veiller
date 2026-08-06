@@ -182,7 +182,7 @@ Based on successful transfer of test.jpg:
 
 1. Place test image in `/asg_client/app/src/main/assets/test.jpg`
 2. Press photo button on glasses
-3. File appears in `/storage/emulated/0/Android/data/com.mentra.mentra/files/MentraLive_Images/`
+3. File appears in `/storage/emulated/0/Android/data/com.veiller.veiller/files/MentraLive_Images/`
 4. Retrieve with: `adb pull <path>`
 
 ## Next Steps

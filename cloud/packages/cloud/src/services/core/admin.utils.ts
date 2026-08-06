@@ -1,7 +1,7 @@
 /**
- * @fileoverview Shared Mentra admin utilities.
+ * @fileoverview Shared Veiller admin utilities.
  *
- * Centralizes the logic for determining whether a user is a MentraOS
+ * Centralizes the logic for determining whether a user is a Veiller
  * platform admin.  A user is considered an admin when:
  *
  *  1. Their email ends with `@mentra.glass`, OR
@@ -14,8 +14,8 @@
  * route handlers without circular-dependency issues.
  */
 
-/** Mentra admin email domains (lowercase). */
-const MENTRA_ADMIN_DOMAINS: readonly string[] = ["@mentra.glass", "@mentraglass.com"];
+/** Veiller admin email domains (lowercase). */
+const VEILLER_ADMIN_DOMAINS: readonly string[] = ["@mentra.glass", "@mentraglass.com"];
 
 /**
  * Parse the `ADMIN_EMAILS` env var into a Set of lowercase addresses.
@@ -35,28 +35,28 @@ function getAdminEmailSet(): Set<string> {
 }
 
 /**
- * Check whether an email address belongs to a MentraOS platform admin.
+ * Check whether an email address belongs to a Veiller platform admin.
  *
  * @param email - The email to check (case-insensitive).
- * @returns `true` when the email is recognized as a Mentra admin.
+ * @returns `true` when the email is recognized as a Veiller admin.
  *
  * @example
  * ```ts
- * import { isMentraAdmin } from "../../services/core/admin.utils";
+ * import { isVeillerAdmin } from "../../services/core/admin.utils";
  *
- * if (!isMentraAdmin(userEmail)) {
+ * if (!isVeillerAdmin(userEmail)) {
  *   return c.json({ error: "Admin access required" }, 403);
  * }
  * ```
  */
-export function isMentraAdmin(email: string): boolean {
+export function isVeillerAdmin(email: string): boolean {
   if (!email) return false;
 
   const normalized = email.trim().toLowerCase();
   if (!normalized) return false;
 
   // 1. Domain-based check
-  for (const domain of MENTRA_ADMIN_DOMAINS) {
+  for (const domain of VEILLER_ADMIN_DOMAINS) {
     if (normalized.endsWith(domain)) {
       return true;
     }
@@ -71,8 +71,8 @@ export function isMentraAdmin(email: string): boolean {
 }
 
 /**
- * The list of recognized Mentra admin email domains.
+ * The list of recognized Veiller admin email domains.
  * Exported for use in log messages or documentation; prefer calling
- * {@link isMentraAdmin} for actual authorization checks.
+ * {@link isVeillerAdmin} for actual authorization checks.
  */
-export { MENTRA_ADMIN_DOMAINS };
+export { VEILLER_ADMIN_DOMAINS };

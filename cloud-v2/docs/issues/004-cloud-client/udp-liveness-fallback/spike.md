@@ -16,7 +16,7 @@ direct transport signal: can a UDP packet for this session reach cloud right now
 
 ## Current cloud-v2 state
 
-- `@mentra/cloud-client` opens the runtime WebSocket and sends audio through
+- `@veiller/cloud-client` opens the runtime WebSocket and sends audio through
   `UdpAudio`.
 - `RuntimeSnapshot` now exposes runtime WebSocket state and
   `audioTransport: "udp" | "ws" | "none"`.

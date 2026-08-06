@@ -268,12 +268,12 @@ if (Test-Path -LiteralPath $LoadOffline) {
 }
 
 # Drop any previous broken container (USB bind-mount leftovers).
-cmd.exe /c "docker rm -f mentra-local-stream >nul 2>nul"
+cmd.exe /c "docker rm -f veiller-local-stream >nul 2>nul"
 
 # Bake mediamtx.yml into an image so we never bind-mount from USB (D:).
 # Uses the already-loaded bluenviron/mediamtx:1 base — no network pull.
-Write-Host "Building mentra-local-mediamtx:1 (config baked in, no USB file mount)..."
-cmd.exe /c "docker build -t mentra-local-mediamtx:1 `"$ScriptDir`""
+Write-Host "Building veiller-local-mediamtx:1 (config baked in, no USB file mount)..."
+cmd.exe /c "docker build -t veiller-local-mediamtx:1 `"$ScriptDir`""
 if ($LASTEXITCODE -ne 0) {
   Write-Host ("ERROR: docker build failed (exit {0})" -f $LASTEXITCODE)
   exit $LASTEXITCODE

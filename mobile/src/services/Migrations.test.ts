@@ -1,7 +1,7 @@
 import {result as Res} from "typesafe-ts"
 
 import {storage} from "@/utils/storage"
-import {SETTINGS, engine} from "@mentra/engine"
+import {SETTINGS, engine} from "@veiller/engine"
 
 import {migrate} from "./Migrations"
 
@@ -13,7 +13,7 @@ jest.mock("@/utils/storage", () => ({
   },
 }))
 
-jest.mock("@mentra/engine", () => ({
+jest.mock("@veiller/engine", () => ({
   SETTINGS: {
     dashboard_depth: {key: "dashboard_depth"},
     onboarding_os_completed: {key: "onboarding_os_completed"},
@@ -36,7 +36,7 @@ describe("mobile migrations", () => {
     mockSet.mockImplementation(() => Res.try_async(async () => undefined))
   })
 
-  it("resets MentraOS onboarding once for users upgrading from version 3", async () => {
+  it("resets Veiller onboarding once for users upgrading from version 3", async () => {
     mockLoad.mockReturnValue(Res.ok(3))
 
     await migrate()
@@ -45,7 +45,7 @@ describe("mobile migrations", () => {
     expect(mockSave).toHaveBeenCalledWith("migration_version", 4)
   })
 
-  it("does not reset MentraOS onboarding after the migration has run", async () => {
+  it("does not reset Veiller onboarding after the migration has run", async () => {
     mockLoad.mockReturnValue(Res.ok(4))
 
     await migrate()

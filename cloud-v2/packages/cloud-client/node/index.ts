@@ -1,5 +1,5 @@
 /**
- * @fileoverview The `@mentra/cloud-client/node` build: a server-wired CloudClient.
+ * @fileoverview The `@veiller/cloud-client/node` build: a server-wired CloudClient.
  *
  * This is the import the backend test harness and the dev stack use. It is a
  * thin wrapper over the shared `CloudClient`: it pre-wires the Node transports
@@ -10,8 +10,8 @@
  *
  * See docs/issues/004-cloud-client/design.md ("node/index.ts").
  */
-import { CloudClient as Base } from "@mentra/cloud-client";
-import type { CloudClientConfig } from "@mentra/cloud-client";
+import { CloudClient as Base } from "@veiller/cloud-client";
+import type { CloudClientConfig } from "@veiller/cloud-client";
 import { nodeTransports } from "./transports";
 
 /**
@@ -29,7 +29,7 @@ export class CloudClient extends Base {
 }
 
 // Re-export the public surface so a host can import the client and the types it
-// needs from the single `@mentra/cloud-client/node` entry, matching the device
+// needs from the single `@veiller/cloud-client/node` entry, matching the device
 // build's ergonomics.
 export type {
   CloudClientConfig,
@@ -45,10 +45,10 @@ export type {
   RuntimeStatus,
   RuntimeTtsSpeakOptions,
   RuntimeTtsSpeechSource,
-} from "@mentra/cloud-client";
+} from "@veiller/cloud-client";
 export {
   CloudClientError,
   HttpError,
   AuthExpiredError,
   noopLogger,
-} from "@mentra/cloud-client";
+} from "@veiller/cloud-client";

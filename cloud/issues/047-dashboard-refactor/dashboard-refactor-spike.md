@@ -10,7 +10,7 @@
 
 ## Background
 
-The MentraOS dashboard is a **head-tilt-activated contextual overlay** — users see it when they tilt their head up past a configurable angle (default 30°), provided the `contextualDashboard` setting is enabled (default: true). It shows time, battery, weather, notifications, and calendar events. It occupies `ViewType.DASHBOARD`, a separate display buffer from `ViewType.MAIN`.
+The Veiller dashboard is a **head-tilt-activated contextual overlay** — users see it when they tilt their head up past a configurable angle (default 30°), provided the `contextualDashboard` setting is enabled (default: true). It shows time, battery, weather, notifications, and calendar events. It occupies `ViewType.DASHBOARD`, a separate display buffer from `ViewType.MAIN`.
 
 **What the dashboard is not:** it is not "what you see when no foreground app is active." App activity is orthogonal — a foreground app can be actively pushing content to the main view while the user looks up to see the dashboard, then looks back down and the app content is exactly where they left it.
 

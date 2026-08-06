@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "../components/ui/MuiToast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProfileDropdown } from "../contexts/ProfileDropdownContext";
-import GetMentraOSButton from "../components/GetMentraOSButton";
+import GetVeillerButton from "../components/GetVeillerButton";
 import { HardwareRequirementLevel, HardwareType } from "../types";
 import {
   APP_TAGS,
@@ -631,10 +631,10 @@ const AppDetailsMobile: React.FC<AppDetailsMobileProps> = ({
             </div>
           </div>
 
-          {/* Get MentraOS - Hide in React Native WebView */}
+          {/* Get Veiller - Hide in React Native WebView */}
           {!isWebView && (
             <div className="text-center mb-8 mt-12">
-              <div className="flex justify-center">{/* <GetMentraOSButton size="small" /> */}</div>
+              <div className="flex justify-center">{/* <GetVeillerButton size="small" /> */}</div>
             </div>
           )}
         </div>

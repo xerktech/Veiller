@@ -1,6 +1,6 @@
 import {ScrollText, Settings as SettingsGlyph} from "lucide-react"
 
-import {useColorScheme} from "@mentra/miniapp/ui"
+import {useColorScheme} from "@veiller/miniapp/ui"
 
 import type {HoldHandlers} from "../hooks/useDeveloperMode"
 import {ACCENT, ACCENT_FG, ACCENT_TEXT} from "../lib/theme"

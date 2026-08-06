@@ -112,7 +112,7 @@ Store conversion script in `agents/scripts/convert_dncnn.py` for reproducibility
 |------|--------|
 | `mobile/modules/core/android/build.gradle` | Add LiteRT dependencies |
 | `mobile/modules/core/android/src/main/assets/dncnn_color.tflite` | Add model file (new) |
-| `mobile/modules/core/android/src/main/java/com/mentra/core/utils/ImageProcessor.java` | Add `applyDenoising()` method |
+| `mobile/modules/core/android/src/main/java/com/veiller/core/utils/ImageProcessor.java` | Add `applyDenoising()` method |
 
 ### Gradle dependencies
 

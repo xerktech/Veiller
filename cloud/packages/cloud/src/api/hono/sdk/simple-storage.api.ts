@@ -1,6 +1,6 @@
 /**
  * @fileoverview Hono simple-storage API routes.
- * Provides key-value storage functionality for MentraOS Apps through REST API endpoints.
+ * Provides key-value storage functionality for Veiller Apps through REST API endpoints.
  * All routes are protected by SDK authentication middleware requiring valid package credentials.
  *
  * Storage is organized by userId (email) and packageName, creating isolated storage spaces

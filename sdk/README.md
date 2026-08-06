@@ -1,8 +1,8 @@
-# MentraOS Miniapp SDK — developer guide
+# Veiller Miniapp SDK — developer guide
 
-This is the workspace for building **and developing** the MentraOS miniapp SDK.
+This is the workspace for building **and developing** the Veiller miniapp SDK.
 If you just want to *use* the SDK to write a miniapp, you don't need this folder —
-run `bunx create-mentra-miniapp` and read [`docs/`](./docs/README.md). This guide
+run `bunx create-veiller-miniapp` and read [`docs/`](./docs/README.md). This guide
 is for engineers working **on** the SDK itself or running the in-repo example.
 
 ## Documentation map
@@ -23,13 +23,13 @@ This `sdk/` folder is a standalone [Bun workspace](https://bun.sh/docs/install/w
 
 | Path | What it is |
 | --- | --- |
-| `../mobile/modules/miniapp` | **The actual `@mentra/miniapp` SDK source** (a workspace member, despite living outside `sdk/`). |
-| `sdk/miniapp-cli` | `@mentra/miniapp-cli` — the `mentra-miniapp` author CLI (`dev`, `release`, `pack`, …). |
+| `../mobile/modules/miniapp` | **The actual `@veiller/miniapp` SDK source** (a workspace member, despite living outside `sdk/`). |
+| `sdk/miniapp-cli` | `@veiller/miniapp-cli` — the `veiller-miniapp` author CLI (`dev`, `release`, `pack`, …). |
 | `sdk/example-miniapp` | Reference miniapp that consumes both via `workspace:*`. The thing you run to see the SDK work. |
-| `sdk/create-mentra-miniapp` | The `bunx create-mentra-miniapp` scaffolder + template. The template pins published versions, **not** `workspace:*`. |
+| `sdk/create-veiller-miniapp` | The `bunx create-veiller-miniapp` scaffolder + template. The template pins published versions, **not** `workspace:*`. |
 | `sdk/docs` | Per-module SDK reference (`session.<module>`). |
 
-Because `example-miniapp` depends on `@mentra/miniapp` via `workspace:*`, it
+Because `example-miniapp` depends on `@veiller/miniapp` via `workspace:*`, it
 resolves to the **source** package — which means that package must be **built
 to `dist/`** before the example can import it.
 
@@ -40,7 +40,7 @@ cd sdk
 bun install
 ```
 
-`bun install` runs a `postinstall` that builds `@mentra/miniapp` for you, so
+`bun install` runs a `postinstall` that builds `@veiller/miniapp` for you, so
 `dist/` exists from the start. (If that build fails for any reason it only
 *warns* — install still succeeds — and you can build it by hand:
 `cd ../mobile/modules/miniapp && bun run build`.)
@@ -53,14 +53,14 @@ bun run dev
 ```
 
 This validates `miniapp.json`, builds the example's `dist/`, serves it over your
-LAN, and prints a QR code. On your phone: **Mentra app → Settings → Developer
+LAN, and prints a QR code. On your phone: **Veiller app → Settings → Developer
 settings → Mini App Development → Scan Mini App QR Code** (phone and laptop must
 be on the same Wi-Fi). See [`miniapp-cli/README.md`](./miniapp-cli/README.md) for
 `dev` / `release` / `pack` details.
 
 ## Developing the SDK itself
 
-The example bundles `@mentra/miniapp` from the SDK's compiled `dist/` (it is
+The example bundles `@veiller/miniapp` from the SDK's compiled `dist/` (it is
 bundled *in*, not externalised — see `example-miniapp/build.ts`). So when you
 change SDK source, you must recompile `dist/` for the example to pick it up.
 
@@ -97,7 +97,7 @@ From `sdk/`:
 
 | Command | Does |
 | --- | --- |
-| `bun run build` | Build the `@mentra/miniapp` SDK (alias for the mobile-module build). |
+| `bun run build` | Build the `@veiller/miniapp` SDK (alias for the mobile-module build). |
 | `bun run test` | Run the SDK's test suite. |
 
 From `mobile/modules/miniapp/`:
@@ -111,7 +111,7 @@ From `mobile/modules/miniapp/`:
 
 ## Troubleshooting
 
-**`Cannot find module '@mentra/miniapp/background'` / "couldn't find background"
+**`Cannot find module '@veiller/miniapp/background'` / "couldn't find background"
 when running the example.**
 The SDK's `dist/` hasn't been built. The `./background` (and `./ui`, `./react`)
 subpath exports resolve to `dist/...`, which is gitignored — a fresh clone has
@@ -124,7 +124,7 @@ cd mobile/modules/miniapp && bun run build
 `bun install` from `sdk/` does this automatically; you only hit this if the SDK
 was edited/cleaned and not rebuilt.
 
-**`workspace:*` won't resolve / `@mentra/miniapp` not found at install time.**
+**`workspace:*` won't resolve / `@veiller/miniapp` not found at install time.**
 Run `bun install` from `sdk/` (the workspace root where `bun.lock` lives), not
 from inside `example-miniapp/`. The workspace includes `../mobile/modules/miniapp`,
 so that path must be present in your checkout (no sparse clone).

@@ -17,7 +17,7 @@
     "types": ["bun-types"],
     "paths": {
       "@/*": ["./src/webview/*"],
-      "@mentra/sdk": ["./node_modules/@mentra/sdk"]
+      "@veiller/sdk": ["./node_modules/@veiller/sdk"]
     }
   },
   "include": ["src/**/*"],

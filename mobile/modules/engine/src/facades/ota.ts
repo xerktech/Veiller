@@ -8,8 +8,8 @@
  * `installSession` fronts the OtaInstallCoordinator state machine (WP 8B) — the host
  * progress screen is a pure renderer over its snapshot + attach/detach/retry/finish.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {OtaProgress, OtaProgressStatus, OtaStatus, OtaUpdateInfo} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {OtaProgress, OtaProgressStatus, OtaStatus, OtaUpdateInfo} from "@veiller/bluetooth-sdk/internal"
 import {isGlassesConnected, useGlassesStore} from "../stores/glasses"
 import {resolveOtaManifestUrl} from "../services/otaManifestUrl"
 import {otaInstallCoordinator, type OtaInstallSnapshot} from "../services/OtaInstallCoordinator"

@@ -2,7 +2,7 @@
 
 ## Summary
 
-A turn-by-turn navigation mini app for MentraOS smart glasses. The user enters
+A turn-by-turn navigation mini app for Veiller smart glasses. The user enters
 a destination on their phone, and step-by-step driving/walking directions
 appear on the glasses display in real time as they move.
 
@@ -33,7 +33,7 @@ SDKs. Those decisions are tracked separately.
 
 ## Target user and primary use case
 
-A MentraOS user wearing G1 glasses, holding their phone, who wants to walk or
+A Veiller user wearing G1 glasses, holding their phone, who wants to walk or
 drive somewhere they don't already know how to get to. They open the
 navigation mini app on the phone, type or paste an address, start the trip,
 and put the phone away. From that point forward, every direction they need
@@ -42,7 +42,7 @@ phone again until they arrive.
 
 ## User journey
 
-1. **Open the mini app.** From the MentraOS phone app, the user launches the
+1. **Open the mini app.** From the Veiller phone app, the user launches the
    navigation mini app. It opens to a destination entry screen.
 2. **Enter destination.** The user types or pastes an address. The app
    confirms the destination is valid and resolvable.
@@ -84,7 +84,7 @@ phone again until they arrive.
 
 ### As a mini app
 
-- Subscribe to the existing MentraOS event streams it needs (e.g. location).
+- Subscribe to the existing Veiller event streams it needs (e.g. location).
 - Render to the glasses through the existing mini app rendering pipeline.
 - Coexist with other running mini apps without breaking them or being broken
   by them.

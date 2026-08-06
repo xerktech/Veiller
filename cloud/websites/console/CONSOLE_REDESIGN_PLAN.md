@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document outlines the implementation plan for redesigning the MentraOS Developer Console based on the ticket requirements. The changes span terminology updates, UX improvements, logical grouping, new features, and styling upgrades.
+This document outlines the implementation plan for redesigning the Veiller Developer Console based on the ticket requirements. The changes span terminology updates, UX improvements, logical grouping, new features, and styling upgrades.
 
 ---
 
@@ -98,10 +98,10 @@ Search and replace in these files:
 | `"Create New App"` | `"Create New MiniApp"` |
 | `"Edit App"` | `"Edit MiniApp"` |
 | `"My Apps"` | `"My MiniApps"` |
-| `"app store"` | `"Mentra MiniApp Store"` |
-| `"App Store"` | `"Mentra MiniApp Store"` |
-| `"MentraOS app store"` | `"Mentra MiniApp Store"` |
-| `"MentraOS App Store"` | `"Mentra MiniApp Store"` |
+| `"app store"` | `"Veiller MiniApp Store"` |
+| `"App Store"` | `"Veiller MiniApp Store"` |
+| `"Veiller app store"` | `"Veiller MiniApp Store"` |
+| `"Veiller App Store"` | `"Veiller MiniApp Store"` |
 | `"Logo URL"` | `"MiniApp Logo"` |
 | `"Hardware Requirements"` | `"Minimum Hardware Requirements"` |
 | `"AI Tools"` (section header) | `"Mentra AI Tools"` |
@@ -212,7 +212,7 @@ interface FormSectionProps {
 └─────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────┐
-│ 🚀 Publish to Mentra MiniApp Store (EditMiniApp only)   │
+│ 🚀 Publish to Veiller MiniApp Store (EditMiniApp only)   │
 ├─────────────────────────────────────────────────────────┤
 │ Status: [DEVELOPMENT / SUBMITTED / PUBLISHED / REJECTED]│
 │ [Store Guidelines]                                      │
@@ -307,9 +307,9 @@ Route: `/store-guidelines`
 
 Content (placeholder):
 ```markdown
-# Mentra MiniApp Store Guidelines
+# Veiller MiniApp Store Guidelines
 
-To be accepted into the Mentra MiniApp Store, your MiniApp must meet the following requirements:
+To be accepted into the Veiller MiniApp Store, your MiniApp must meet the following requirements:
 
 ## Technical Requirements
 - Server must be reachable and respond to health checks

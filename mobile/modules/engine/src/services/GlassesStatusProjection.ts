@@ -2,7 +2,7 @@
  * Glasses status projection — engine-owned. Subscribes to the native bluetooth-sdk
  * status events and projects them into the engine device stores, so engine's own
  * services (which react to those stores) work for ANY host — not just the first-party
- * Mentra app, where this used to live in MantleManager.
+ * Veiller app, where this used to live in MantleManager.
  *
  * This is the INBOUND mirror of GlassesSettingsSync: that pushes the settings store
  * OUT to the device; this pulls device status IN to the stores. It's the feed that
@@ -11,7 +11,7 @@
  *
  * Started by `engine.start()`. Idempotent.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {useCoreStore} from "../stores/core"
 import {useGlassesStore} from "../stores/glasses"
 import localMiniappRuntime from "./LocalMiniappRuntime"

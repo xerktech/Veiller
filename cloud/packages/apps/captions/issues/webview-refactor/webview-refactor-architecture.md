@@ -5,7 +5,7 @@
 ### How Transcription Works Now
 
 ```
-MentraOS Cloud
+Veiller Cloud
     ↓ transcription event
 AppSession.events.onTranscription()
     ↓
@@ -184,7 +184,7 @@ class TranscriptsManager {
 **Implementation:**
 
 ```typescript
-import {AppSession} from "@mentra/sdk"
+import {AppSession} from "@veiller/sdk"
 import {UserSession} from "./UserSession"
 
 interface CaptionSettings {
@@ -735,7 +735,7 @@ test("replaces interim with final", () => {
 bun run dev
 
 # Authenticate
-curl http://localhost:3333/mentra-auth
+curl http://localhost:3333/veiller-auth
 
 # Get transcripts
 curl http://localhost:3333/api/transcripts --cookie cookies.txt
@@ -834,7 +834,7 @@ export class UserSession {
 // app/session/DisplayManager.ts
 import {TranscriptProcessor} from "../utils"
 import {UserSession} from "./UserSession"
-import {ViewType} from "@mentra/sdk"
+import {ViewType} from "@veiller/sdk"
 
 interface TranscriptDebouncer {
   lastSentTime: number

@@ -1,7 +1,7 @@
 /**
- * @fileoverview `@mentra/cloud-runtime/protocol` public entrypoint.
+ * @fileoverview `@veiller/cloud-runtime/protocol` public entrypoint.
  *
- * Pure, isomorphic transport types + zod validators for the Mentra Runtime
+ * Pure, isomorphic transport types + zod validators for the Veiller Runtime
  * protocol. Zero server imports (no `node:*`, no service code) so the client
  * can import the contract without pulling in server code.
  *

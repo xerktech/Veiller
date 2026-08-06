@@ -11,7 +11,7 @@ import App from "../../../models/app.model";
 import { appCache } from "../../../services/core/app-cache.service";
 import { User } from "../../../models/user.model";
 import { OrganizationService } from "../../../services/core/organization.service";
-import { PermissionType } from "@mentra/sdk";
+import { PermissionType } from "@veiller/sdk";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import type { AppEnv, AppContext } from "../../../types/hono";
 

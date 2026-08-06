@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/utils",
+  "name": "@veiller/utils",
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
     "@langchain/anthropic": "^0.3.13",
     "@langchain/google-vertexai": "^0.1.8",
     "@langchain/openai": "^0.3.16",
-    "@mentra/sdk": "workspace:*",
+    "@veiller/sdk": "workspace:*",
     "@logtail/pino": "^0.5.4",
     "pino": "^9.6.0",
     "posthog-node": "^4.14.0"

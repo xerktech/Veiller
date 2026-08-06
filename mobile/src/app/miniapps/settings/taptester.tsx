@@ -8,7 +8,7 @@ import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
 import {useNavigationStore} from "@/stores/navigation"
 import {diffEdit} from "@/utils/taptester/diffEdit"
-import {engine, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@veiller/engine"
 
 // Where the mirrored text is drawn on the glasses. The tester writes raw text
 // (same escape-hatch path the Nex dev tools use) rather than going through the

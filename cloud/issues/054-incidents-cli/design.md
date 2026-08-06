@@ -21,7 +21,7 @@
 | `cloud/packages/incidents/src/commands/get.ts`  | New      | `get` command                                 |
 | `cloud/packages/incidents/src/commands/logs.ts` | New      | `logs` command                                |
 | `cloud/packages/incidents/src/format.ts`        | New      | Output formatting — tables, colors, log lines |
-| `cloud/.env.example`                            | Modified | Add `MENTRA_AGENT_API_KEY` placeholder        |
+| `cloud/.env.example`                            | Modified | Add `VEILLER_AGENT_API_KEY` placeholder        |
 
 Zero cloud/API changes. This is a client-only package.
 
@@ -33,7 +33,7 @@ Zero cloud/API changes. This is a client-only package.
 
 ```json
 {
-  "name": "@mentra/incidents",
+  "name": "@veiller/incidents",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -268,14 +268,14 @@ export type Client = ReturnType<typeof createClient>
 
 ```typescript
 export function resolveConfig(): ClientConfig {
-  const apiKey = process.env.MENTRA_AGENT_API_KEY
+  const apiKey = process.env.VEILLER_AGENT_API_KEY
   if (!apiKey) {
-    console.error("Error: MENTRA_AGENT_API_KEY environment variable is not set.")
+    console.error("Error: VEILLER_AGENT_API_KEY environment variable is not set.")
     console.error("Set it in cloud/.env or export it in your shell.")
     process.exit(1)
   }
 
-  const host = process.env.MENTRA_API_HOST || "https://api.mentra.glass"
+  const host = process.env.VEILLER_API_HOST || "https://api.mentra.glass"
 
   return {apiKey, host}
 }
@@ -772,7 +772,7 @@ Add to `cloud/.env.example`:
 
 ```
 # Agent API key for incidents CLI (used by cloud/packages/incidents)
-MENTRA_AGENT_API_KEY=
+VEILLER_AGENT_API_KEY=
 ```
 
 Just the placeholder. The actual key is set per-developer in `cloud/.env` (gitignored).
@@ -782,7 +782,7 @@ Just the placeholder. The actual key is set per-developer in `cloud/.env` (gitig
 ## Running the CLI
 
 ```bash
-# Load env vars (assumes cloud/.env has MENTRA_AGENT_API_KEY set)
+# Load env vars (assumes cloud/.env has VEILLER_AGENT_API_KEY set)
 cd cloud/packages/incidents
 
 # Direct execution
@@ -796,7 +796,7 @@ bun run incidents get c3f3e699
 bun run incidents logs c3f3e699 --type cloud --level error
 ```
 
-For use from the repo root or other directories, the `MENTRA_AGENT_API_KEY` env var needs to be loaded. If using `dotenv`, source `cloud/.env` first. Alternatively, export it in your shell profile.
+For use from the repo root or other directories, the `VEILLER_AGENT_API_KEY` env var needs to be loaded. If using `dotenv`, source `cloud/.env` first. Alternatively, export it in your shell profile.
 
 ---
 
@@ -823,9 +823,9 @@ No automated tests for v1 — this is a read-only CLI wrapping a stable API. Tes
 | Grep filter           | `bun run incidents logs <id> --grep "disconnect"`                        | Only matching messages                           |
 | Combined filters      | `bun run incidents logs <id> --type cloud --level warn --grep "timeout"` | Intersection of all filters                      |
 | Logs JSON             | `bun run incidents logs <id> --json`                                     | Valid JSON array of log entries                  |
-| Missing API key       | `unset MENTRA_AGENT_API_KEY && bun run incidents list`                   | Clear error message                              |
-| Invalid API key       | `MENTRA_AGENT_API_KEY=bad bun run incidents list`                        | API 401 error                                    |
-| Custom host           | `MENTRA_API_HOST=http://localhost:3000 bun run incidents list`           | Hits local server                                |
+| Missing API key       | `unset VEILLER_AGENT_API_KEY && bun run incidents list`                   | Clear error message                              |
+| Invalid API key       | `VEILLER_AGENT_API_KEY=bad bun run incidents list`                        | API 401 error                                    |
+| Custom host           | `VEILLER_API_HOST=http://localhost:3000 bun run incidents list`           | Hits local server                                |
 
 ### Edge cases
 
@@ -840,6 +840,6 @@ No automated tests for v1 — this is a read-only CLI wrapping a stable API. Tes
 ## Rollout
 
 1. Create the package (`cloud/packages/incidents/`) with all files listed above
-2. Add `MENTRA_AGENT_API_KEY` to `cloud/.env.example`
+2. Add `VEILLER_AGENT_API_KEY` to `cloud/.env.example`
 3. Test against prod with real incident IDs
 4. Update `AGENTS.md` "Bug Report Logs" section to mention the new CLI as the preferred tool over `fetch-incident-logs.sh`

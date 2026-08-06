@@ -10,7 +10,7 @@ import {ConfigPlugin, withDangerousMod} from "@expo/config-plugins"
  *
  * The problem: `Crust` is a CocoaPods static-library target (in Pods.xcodeproj),
  * and the Mapbox SPM products (MapboxNavigationCore / MapboxDirections /
- * MapboxMaps) are added to the APP target in Mentra.xcodeproj (mapbox-nav-ios.ts).
+ * MapboxMaps) are added to the APP target in Veiller.xcodeproj (mapbox-nav-ios.ts).
  * Crust's Swift needs to `import MapboxNavigationCore` etc.
  *
  * IMPORTANT — why we do NOT add package_product_dependencies to Crust:

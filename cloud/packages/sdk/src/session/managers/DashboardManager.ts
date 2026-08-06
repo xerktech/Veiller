@@ -28,7 +28,7 @@ import { DashboardMode, DashboardContentUpdate } from "../../types/dashboard";
 // ─── Internal Types ─────────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  *
  * Structural type — no concrete imports so the manager stays unit-testable
  * with plain stubs.
@@ -75,7 +75,7 @@ export interface DashboardManagerDeps {
  *
  * @example
  * ```ts
- * const session = await mentra.connect();
+ * const session = await veiller.connect();
  *
  * // Show a single line of text
  * session.dashboard.showText("Meeting in 5 minutes");
@@ -168,7 +168,7 @@ export class DashboardManager {
   /**
    * Clean up resources.
    *
-   * Called by MentraSession during disconnect/cleanup. Dashboard commands
+   * Called by VeillerSession during disconnect/cleanup. Dashboard commands
    * are fire-and-forget so there is no pending state to drain.
    *
    * @internal

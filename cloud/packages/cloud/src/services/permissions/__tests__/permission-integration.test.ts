@@ -1,12 +1,12 @@
 // import { SimplePermissionChecker } from '../simple-permission-checker';
-// import { PermissionType } from '@mentra/sdk';
-// import { StreamType, createTranscriptionStream } from '@mentra/sdk';
+// import { PermissionType } from '@veiller/sdk';
+// import { StreamType, createTranscriptionStream } from '@veiller/sdk';
 // import { AppI } from '../../../models/app.model';
 // import subscriptionService from '../../session/subscription.service';
 // import { expect, test, describe, it, jest, mock, beforeEach } from "bun:test";
 
 // // Mock the dependencies
-// mock.module('@mentra/utils', () => ({
+// mock.module('@veiller/utils', () => ({
 //   logger: {
 //     info: jest.fn(),
 //     warn: jest.fn(),

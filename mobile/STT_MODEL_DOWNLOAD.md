@@ -2,7 +2,7 @@
 
 ## Overview
 
-MentraOS now supports on-demand downloading of Speech-to-Text (STT) models instead of bundling them with the app. This reduces app size and allows users to choose when to enable local transcription.
+Veiller now supports on-demand downloading of Speech-to-Text (STT) models instead of bundling them with the app. This reduces app size and allows users to choose when to enable local transcription.
 
 ## How It Works
 

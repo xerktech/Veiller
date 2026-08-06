@@ -30,7 +30,7 @@ because of backwards compatibility:
 ### Option A: Cloud sends ping → SDK responds with pong ❌
 
 - Cloud mirrors `glasses-ws` approach: sends `{type:"ping"}` to SDK apps every N seconds
-- **Problem:** Old SDK apps (`2.x`) receive unrecognized message → `MentraError("UNKNOWN_TYPE")`
+- **Problem:** Old SDK apps (`2.x`) receive unrecognized message → `VeillerError("UNKNOWN_TYPE")`
   emitted, `this.logger.warn(...)` fires → at 1 ping/5s that's ~720 warnings/hour/user/app
 - No way to gate this without knowing the SDK version of connected apps at runtime
 - Cloud has no way to know which SDK version a connected app is running
@@ -194,7 +194,7 @@ The SDK simply sends traffic. The cloud sends traffic back. The connection stays
 
 2. **SDK change** — ping interval + silent pong consumption.
 
-3. **Publish** `@mentra/sdk@3.0.0-hono.7 --tag hono`.
+3. **Publish** `@veiller/sdk@3.0.0-hono.7 --tag hono`.
 
 4. **Update live-captions** to `3.0.0-hono.7` as part of the Hono SDK refactor.
 

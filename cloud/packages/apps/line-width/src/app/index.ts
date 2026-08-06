@@ -1,6 +1,6 @@
 import path from "path";
 
-import { AppServer, AppSession } from "@mentra/sdk";
+import { AppServer, AppSession } from "@veiller/sdk";
 
 import { UserSession } from "./session/UserSession";
 

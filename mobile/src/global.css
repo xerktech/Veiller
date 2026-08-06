@@ -254,97 +254,97 @@
     --zinc-900: #18181b;
     --zinc-950: #09090b;
   }
-  /* Mentra/ui */
+  /* Veiller/ui */
   :root {
     /* light mode */
     @variant light {
       /* color */
-      --color-accent: var(--mentra-green-6);
+      --color-accent: var(--veiller-green-6);
       --color-accent-foreground: var(--neutral-950);
       --color-background: var(--white);
       --color-background-color: var(--black-5);
       --color-border: var(--neutral-200);
       --color-card: var(--white);
       --color-card-foreground: var(--neutral-950);
-      --color-chart-1: var(--mentra-green-10);
-      --color-chart-2: var(--mentra-green-9);
+      --color-chart-1: var(--veiller-green-10);
+      --color-chart-2: var(--veiller-green-9);
       --color-chart-3: var(--amber-500);
       --color-chart-4: var(--blue-500);
       --color-chart-5: var(--red-600);
       --color-destructive: var(--red-600);
       --color-foreground: var(--neutral-950);
       --color-input: var(--neutral-200);
-      --color-muted: var(--mentra-green-4);
+      --color-muted: var(--veiller-green-4);
       --color-muted-foreground: var(--neutral-500);
       --color-popover: var(--white);
       --color-popover-foreground: var(--neutral-950);
-      --color-primary: var(--mentra-green-10);
+      --color-primary: var(--veiller-green-10);
       --color-primary-foreground: var(--neutral-100);
-      --color-ring: var(--mentra-green-10);
-      --color-secondary: var(--mentra-green-5);
+      --color-ring: var(--veiller-green-10);
+      --color-secondary: var(--veiller-green-5);
       --color-secondary-foreground: var(--neutral-950);
       --color-sidebar: var(--neutral-50);
-      --color-sidebar-accent: var(--mentra-green-5);
+      --color-sidebar-accent: var(--veiller-green-5);
       --color-sidebar-accent-foreground: var(--neutral-900);
       --color-sidebar-border: var(--neutral-300);
       --color-sidebar-foreground: var(--neutral-950);
-      --color-sidebar-primary: var(--mentra-green-10);
+      --color-sidebar-primary: var(--veiller-green-10);
       --color-sidebar-primary-foreground: var(--neutral-50);
-      --color-sidebar-ring: var(--mentra-green-10);
+      --color-sidebar-ring: var(--veiller-green-10);
     }
     /* dark mode */
     @variant dark {
       /* color */
-      --color-accent: var(--mentra-green-6);
+      --color-accent: var(--veiller-green-6);
       --color-accent-foreground: var(--neutral-50);
       --color-background: var(--neutral-900);
       --color-background-color: var(--black-5);
       --color-border: var(--neutral-600);
       --color-card: var(--neutral-900);
       --color-card-foreground: var(--neutral-50);
-      --color-chart-1: var(--mentra-green-10);
-      --color-chart-2: var(--mentra-green-9);
+      --color-chart-1: var(--veiller-green-10);
+      --color-chart-2: var(--veiller-green-9);
       --color-chart-3: var(--amber-500);
       --color-chart-4: var(--blue-500);
       --color-chart-5: var(--red-600);
       --color-destructive: var(--red-400);
       --color-foreground: var(--neutral-50);
       --color-input: var(--neutral-900);
-      --color-muted: var(--mentra-green-4);
+      --color-muted: var(--veiller-green-4);
       --color-muted-foreground: var(--neutral-400);
       --color-popover: var(--neutral-950);
       --color-popover-foreground: var(--neutral-50);
-      --color-primary: var(--mentra-green-9);
+      --color-primary: var(--veiller-green-9);
       --color-primary-foreground: var(--neutral-750);
-      --color-ring: var(--mentra-green-9);
-      --color-secondary: var(--mentra-green-5);
+      --color-ring: var(--veiller-green-9);
+      --color-secondary: var(--veiller-green-5);
       --color-secondary-foreground: var(--neutral-50);
       --color-sidebar: var(--neutral-900);
-      --color-sidebar-accent: var(--mentra-green-5);
+      --color-sidebar-accent: var(--veiller-green-5);
       --color-sidebar-accent-foreground: var(--neutral-50);
       --color-sidebar-border: var(--white-10);
       --color-sidebar-foreground: var(--neutral-50);
-      --color-sidebar-primary: var(--mentra-green-9);
+      --color-sidebar-primary: var(--veiller-green-9);
       --color-sidebar-primary-foreground: var(--neutral-50);
-      --color-sidebar-ring: var(--mentra-green-9);
+      --color-sidebar-ring: var(--veiller-green-9);
     }
   }
   /* rdx/colors */
   :root {
     /* light mode */
     /* color */
-    --mentra-green-1: #fbfefb;
-    --mentra-green-10: #00b869;
-    --mentra-green-11: #009258;
-    --mentra-green-12: #006a3f;
-    --mentra-green-2: #f5fbf7;
-    --mentra-green-3: #eaf9ef;
-    --mentra-green-4: #dafde6;
-    --mentra-green-5: #bff5d4;
-    --mentra-green-6: #a2efc3;
-    --mentra-green-7: #7ee8ad;
-    --mentra-green-8: #5ae096;
-    --mentra-green-9: #36dd88;
+    --veiller-green-1: #fbfefb;
+    --veiller-green-10: #00b869;
+    --veiller-green-11: #009258;
+    --veiller-green-12: #006a3f;
+    --veiller-green-2: #f5fbf7;
+    --veiller-green-3: #eaf9ef;
+    --veiller-green-4: #dafde6;
+    --veiller-green-5: #bff5d4;
+    --veiller-green-6: #a2efc3;
+    --veiller-green-7: #7ee8ad;
+    --veiller-green-8: #5ae096;
+    --veiller-green-9: #36dd88;
     --amber-1: #fefdfb;
     --amber-10: #ffba18;
     --amber-11: #ab6400;
@@ -731,18 +731,18 @@
     --yellow-9: #ffe629;
     /* dark mode */
     /* color */
-    --mentra-green-1: #06150d;
-    --mentra-green-10: #36dd88;
-    --mentra-green-11: #63e9a3;
-    --mentra-green-12: #9bf2c3;
-    --mentra-green-2: #092016;
-    --mentra-green-3: #0e2b1d;
-    --mentra-green-4: #123726;
-    --mentra-green-5: #174430;
-    --mentra-green-6: #1c523a;
-    --mentra-green-7: #216044;
-    --mentra-green-8: #267e57;
-    --mentra-green-9: #2b9b6a;
+    --veiller-green-1: #06150d;
+    --veiller-green-10: #36dd88;
+    --veiller-green-11: #63e9a3;
+    --veiller-green-12: #9bf2c3;
+    --veiller-green-2: #092016;
+    --veiller-green-3: #0e2b1d;
+    --veiller-green-4: #123726;
+    --veiller-green-5: #174430;
+    --veiller-green-6: #1c523a;
+    --veiller-green-7: #216044;
+    --veiller-green-8: #267e57;
+    --veiller-green-9: #2b9b6a;
     --amber-1: #16120c;
     --amber-10: #ffd60a;
     --amber-11: #ffca16;

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this MentraOS
+about: Suggest an idea for this Veiller
 title: "[Feature Request] <enter short description here>"
 labels: enhancement
 assignees: ""

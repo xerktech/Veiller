@@ -8,7 +8,7 @@ Cloud-controlled `silent` mode for photo requests to disable LED flash and shutt
 
 ## Quick Context
 
-**Current**: Photo requests don't include `silent` flag. AI apps (Mira, MentraAI) trigger visible/audible camera feedback, which is disruptive for continuous capture.
+**Current**: Photo requests don't include `silent` flag. AI apps (Mira, VeillerAI) trigger visible/audible camera feedback, which is disruptive for continuous capture.
 
 **Proposed**: Cloud adds `silent: true` to photo requests from whitelisted package names. Not exposed to SDK developers—cloud controls this based on packageName.
 

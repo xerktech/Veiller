@@ -5,7 +5,7 @@ import type { AppEnv } from "../../types/hono.types";
 export const adminAuth = createMiddleware<AppEnv>(async (c, next) => {
   const auth = await authenticateConsoleSession(c);
   if (!auth.authenticated) {
-    return c.json({ error: "unauthorized", error_description: "Mentra login required" }, 401);
+    return c.json({ error: "unauthorized", error_description: "Veiller login required" }, 401);
   }
 
   if (!isAdminEmail(auth.user.email)) {

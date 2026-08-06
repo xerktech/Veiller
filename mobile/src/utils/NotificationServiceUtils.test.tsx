@@ -1,12 +1,12 @@
 import {Platform} from "react-native"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 import showAlert from "@/utils/AlertUtils"
 
 import {checkAndRequestNotificationAccessSpecialPermission} from "./NotificationServiceUtils"
 import {checkPermissionAfterSettingsReturn} from "./notificationPermissionFlow"
 
-jest.mock("@mentra/crust", () => ({
+jest.mock("@veiller/crust", () => ({
   __esModule: true,
   default: {
     hasNotificationListenerPermission: jest.fn(),

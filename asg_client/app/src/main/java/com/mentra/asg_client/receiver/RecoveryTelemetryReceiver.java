@@ -11,7 +11,7 @@ public class RecoveryTelemetryReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent == null || !"com.mentra.recovery.ACTION_TELEMETRY".equals(intent.getAction())) {
+        if (intent == null || !"com.veiller.recovery.ACTION_TELEMETRY".equals(intent.getAction())) {
             return;
         }
         String event = intent.getStringExtra("event");

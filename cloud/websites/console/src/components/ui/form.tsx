@@ -12,7 +12,7 @@ import {
 } from "react-hook-form"
 
 import { cn } from "@/libs/utils"
-import { Label } from "@mentra/shared"
+import { Label } from "@veiller/shared"
 
 const Form = FormProvider
 

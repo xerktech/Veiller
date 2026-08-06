@@ -6,7 +6,7 @@
 
 ## Problem
 
-Third-party developers using `@mentra/sdk` are overwhelmed by internal debug output. The SDK currently logs at a level designed for Mentra engineers debugging cloud↔SDK interactions. External devs just need clean, actionable messages.
+Third-party developers using `@veiller/sdk` are overwhelmed by internal debug output. The SDK currently logs at a level designed for Veiller engineers debugging cloud↔SDK interactions. External devs just need clean, actionable messages.
 
 Screenshot from a developer's terminal (an "Invalid API key" error):
 
@@ -20,8 +20,8 @@ Screenshot from a developer's terminal (an "Invalid API key" error):
         "message": "Invalid API key",
         "stack":
             Error: Invalid API key
-                at handleMessage (/Users/.../node_modules/@mentra/sdk/dist/index.js:4266:41)
-                at messageHandler (/Users/.../node_modules/@mentra/sdk/dist/index.js:3962:20)
+                at handleMessage (/Users/.../node_modules/@veiller/sdk/dist/index.js:4266:41)
+                at messageHandler (/Users/.../node_modules/@veiller/sdk/dist/index.js:3962:20)
                 at emit (node:events:98:22)
                 at <anonymous> (ws:192:22)
     }
@@ -112,7 +112,7 @@ Pino logs errors as structured JSON objects with `type`, `message`, `stack`, plu
 
 ### P3: Internal context leaks into dev-facing logs
 
-Fields like `service: "app-server"`, `sessionId`, `packageName` (redundant — the dev knows their own package name), internal WebSocket URLs, and reconnect state machine details are all visible. These are useful for Mentra engineers but noise for SDK consumers.
+Fields like `service: "app-server"`, `sessionId`, `packageName` (redundant — the dev knows their own package name), internal WebSocket URLs, and reconnect state machine details are all visible. These are useful for Veiller engineers but noise for SDK consumers.
 
 ### P4: No error taxonomy
 
@@ -151,74 +151,74 @@ export interface AppServerConfig {
   /**
    * Enable verbose internal logging. Useful for debugging SDK issues.
    * Equivalent to logLevel: 'debug' with full structured output.
-   * Can also be enabled via MENTRA_VERBOSE=true env var.
+   * Can also be enabled via VEILLER_VERBOSE=true env var.
    * Default: false
    */
   verbose?: boolean
 }
 ```
 
-Env var overrides: `MENTRA_LOG_LEVEL`, `MENTRA_VERBOSE`. This lets Mentra support tell a developer "set `MENTRA_VERBOSE=true` and send us the output" without code changes.
+Env var overrides: `VEILLER_LOG_LEVEL`, `VEILLER_VERBOSE`. This lets Veiller support tell a developer "set `VEILLER_VERBOSE=true` and send us the output" without code changes.
 
 ### Two formatting modes
 
 **Default (clean):** Single-line, human-readable, no structured objects.
 
 ```
-[MentraOS] ✗ Invalid API key
-[MentraOS] ⚠ Connection lost, reconnecting (attempt 2/5)
-[MentraOS] ✓ Connected to MentraOS Cloud
+[Veiller] ✗ Invalid API key
+[Veiller] ⚠ Connection lost, reconnecting (attempt 2/5)
+[Veiller] ✓ Connected to Veiller Cloud
 ```
 
-**Verbose:** Current pino-pretty structured output (what Mentra engineers see today). Full context objects, stack traces, internal state.
+**Verbose:** Current pino-pretty structured output (what Veiller engineers see today). Full context objects, stack traces, internal state.
 
 Implementation: swap the pino transport based on verbose flag. Clean mode uses a minimal custom transport that formats single-line messages. Verbose mode uses pino-pretty as today.
 
 ### Error classes
 
 ```typescript
-export class MentraError extends Error {
+export class VeillerError extends Error {
   constructor(
     message: string,
     public code: string,
   ) {
     super(message)
-    this.name = "MentraError"
+    this.name = "VeillerError"
   }
 }
 
-export class MentraAuthError extends MentraError {
+export class VeillerAuthError extends VeillerError {
   constructor(message: string) {
     super(message, "AUTH_ERROR")
-    this.name = "MentraAuthError"
+    this.name = "VeillerAuthError"
   }
 }
 
-export class MentraConnectionError extends MentraError {
+export class VeillerConnectionError extends VeillerError {
   constructor(
     message: string,
     public code: string = "CONNECTION_ERROR",
   ) {
     super(message, code)
-    this.name = "MentraConnectionError"
+    this.name = "VeillerConnectionError"
   }
 }
 
-export class MentraValidationError extends MentraError {
+export class VeillerValidationError extends VeillerError {
   constructor(message: string) {
     super(message, "VALIDATION_ERROR")
-    this.name = "MentraValidationError"
+    this.name = "VeillerValidationError"
   }
 }
 
-export class MentraPermissionError extends MentraError {
+export class VeillerPermissionError extends VeillerError {
   constructor(
     message: string,
     public stream: string,
     public requiredPermission: string,
   ) {
     super(message, "PERMISSION_ERROR")
-    this.name = "MentraPermissionError"
+    this.name = "VeillerPermissionError"
   }
 }
 ```
@@ -227,9 +227,9 @@ Devs can then:
 
 ```typescript
 session.events.onError((error) => {
-  if (error instanceof MentraAuthError) {
+  if (error instanceof VeillerAuthError) {
     console.log("Bad API key, check your config")
-  } else if (error instanceof MentraConnectionError) {
+  } else if (error instanceof VeillerConnectionError) {
     console.log("Connection issue, will retry")
   }
 })
@@ -241,8 +241,8 @@ Audit each error site. Each error should have ONE output path:
 
 | Error type           | Path                                                         | Notes                                                  |
 | -------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
-| Auth failure         | Emitted via `events.emit("error", new MentraAuthError(...))` | Don't also log it — let the dev's error handler decide |
-| Connection failure   | Reject the `connect()` promise with `MentraConnectionError`  | Don't also log + emit                                  |
+| Auth failure         | Emitted via `events.emit("error", new VeillerAuthError(...))` | Don't also log it — let the dev's error handler decide |
+| Connection failure   | Reject the `connect()` promise with `VeillerConnectionError`  | Don't also log + emit                                  |
 | Validation errors    | Throw synchronously                                          | Already correct for most layout/settings validation    |
 | Internal retries     | Log at `debug` level only                                    | Dev doesn't need to know about retry #3 of 5           |
 | Permanent disconnect | Emit `"disconnected"` event with clean info                  | Already mostly correct                                 |
@@ -261,9 +261,9 @@ This reduces the SDK's dependency footprint for devs who don't need verbose logg
 
 The SDK activates the BetterStack pino transport when `BETTERSTACK_SOURCE_TOKEN` is set. This stays. Rationale:
 
-- **Mentra's own apps** set this env var to route logs to Mentra's BetterStack instance for internal observability. We want this to keep working.
+- **Veiller's own apps** set this env var to route logs to Veiller's BetterStack instance for internal observability. We want this to keep working.
 - **Third-party devs** don't know about it — it's undocumented and hidden. They never see it, so it's zero DX burden.
-- **If a third-party dev did set it**, their logs would go to _their_ BetterStack account, not Mentra's. No data leak, no confusion. It's a benign hidden feature.
+- **If a third-party dev did set it**, their logs would go to _their_ BetterStack account, not Veiller's. No data leak, no confusion. It's a benign hidden feature.
 - The **clean logging mode** (default) must not produce any output that references or hints at BetterStack. The transport runs silently in the background if the env var is present.
 
 No changes needed here. Not a DX concern.
@@ -274,7 +274,7 @@ No changes needed here. Not a DX concern.
 
 2. **Custom logger injection?** — Some devs may want to pipe SDK logs into their own logging system (winston, bunyan, etc.). Do we support `logger?: Logger` in config? This is a nice-to-have but adds complexity. Could defer to v3.1.
 
-3. **Breaking change or additive?** — Adding `logLevel`/`verbose` to config is additive (non-breaking). Changing error classes from `Error` to `MentraAuthError` etc. could break `catch` blocks that check `error.constructor === Error`. In practice this is unlikely but worth noting. Since we're targeting SDK v3, we can make this breaking.
+3. **Breaking change or additive?** — Adding `logLevel`/`verbose` to config is additive (non-breaking). Changing error classes from `Error` to `VeillerAuthError` etc. could break `catch` blocks that check `error.constructor === Error`. In practice this is unlikely but worth noting. Since we're targeting SDK v3, we can make this breaking.
 
 ---
 

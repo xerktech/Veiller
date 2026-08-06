@@ -1,4 +1,4 @@
-# MentraOS Developer Portal Guidelines
+# Veiller Developer Portal Guidelines
 
 ## Build Commands
 

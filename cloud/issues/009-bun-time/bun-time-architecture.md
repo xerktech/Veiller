@@ -132,7 +132,7 @@ Bun.serve({
 ```typescript
 // packages/cloud/src/services/session/UserSession.ts
 
-import {GlassesToCloudMessage, GlassesToCloudMessageType} from "@mentra/sdk"
+import {GlassesToCloudMessage, GlassesToCloudMessageType} from "@veiller/sdk"
 
 class UserSession {
   /**
@@ -165,7 +165,7 @@ class UserSession {
         await this.userSettingsManager.handleRequestSettings(message)
         break
 
-      case GlassesToCloudMessageType.MENTRAOS_SETTINGS_UPDATE_REQUEST:
+      case GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST:
         await this.userSettingsManager.handleSettingsUpdate(message)
         break
 
@@ -436,7 +436,7 @@ const server = serve({
   },
 })
 
-logger.info(`MentraOS Cloud Server running on port ${PORT}`)
+logger.info(`Veiller Cloud Server running on port ${PORT}`)
 ```
 
 #### WebSocket Handlers

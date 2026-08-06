@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Button, Input, Label } from "@mentra/shared";
+import { Button, Input, Label } from "@veiller/shared";
 import { CheckCircle2, XCircle, Loader2, RefreshCw } from "lucide-react";
 import { normalizeUrl } from "@/libs/utils";
 import { cn } from "@/libs/utils";
@@ -154,7 +154,7 @@ export function ServerUrlInput({
       )}
 
       <p className="text-xs text-muted-foreground">
-        The base URL of your server where MentraOS will communicate with your
+        The base URL of your server where Veiller will communicate with your
         MiniApp. We&apos;ll automatically append &quot;/webhook&quot; to handle
         events when your MiniApp is activated. HTTPS is required and will be
         added automatically if not specified.

@@ -90,7 +90,7 @@ payload: {
 ```
 
 The exact names can change when protocol types are implemented, but the ack must
-be typed in `@mentra/cloud-runtime/protocol` and consumed by cloud-client.
+be typed in `@veiller/cloud-runtime/protocol` and consumed by cloud-client.
 
 ## WebSocket binary audio fallback
 

@@ -4,7 +4,7 @@ import {extForMime, sanitizeSegment, shareFileName, withDiskExt} from "../blobPa
 
 describe("sanitizeSegment", () => {
   it("keeps safe chars, replaces the rest", () => {
-    expect(sanitizeSegment("com.mentra.recorder")).toBe("com.mentra.recorder")
+    expect(sanitizeSegment("com.veiller.recorder")).toBe("com.veiller.recorder")
     expect(sanitizeSegment("a/b\\c")).toBe("a_b_c")
     expect(sanitizeSegment("tok en:123")).toBe("tok_en_123")
   })

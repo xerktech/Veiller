@@ -16,7 +16,7 @@ public class SysProp {
     private static final String TAG = "SysProp";
 
     // System property key for BES BT MAC address
-    public static final String KEY_BES_BT_MAC = "persist.mentra.live.mac";
+    public static final String KEY_BES_BT_MAC = "persist.veiller.live.mac";
     public static final String KEY_DEVICE_SERIAL = "ro.serialno";
     private static final String GENERIC_ANDROID_SERIAL = "0123456789ABCDEF";
 

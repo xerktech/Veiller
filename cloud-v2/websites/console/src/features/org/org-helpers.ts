@@ -3,14 +3,14 @@ import { displayNameForUser, type ConsoleUser } from "@/features/session/session
 /**
  * Sensible org defaults derived from the signed-in user's email, used to
  * pre-fill the create-org form (both the onboarding gate and the org settings
- * page). Mentra staff get the reserved `com.mentra` prefix; everyone else gets a
+ * page). Veiller staff get the reserved `com.veiller` prefix; everyone else gets a
  * `dev.<local-part>` namespace they can edit.
  */
 export function suggestedOrgDefaults(user: ConsoleUser | undefined) {
   const email = user?.email?.toLowerCase() ?? "";
   const name = displayNameForUser(user);
   if (email.endsWith("@mentraglass.com")) {
-    return { displayName: "Mentra Developers", packagePrefix: "com.mentra" };
+    return { displayName: "Veiller Developers", packagePrefix: "com.veiller" };
   }
 
   // Build a `dev.<local>` prefix that always satisfies isValidPackagePrefix:

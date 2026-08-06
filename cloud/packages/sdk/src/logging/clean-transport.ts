@@ -1,16 +1,16 @@
 /**
- * Clean Transport for MentraOS SDK
+ * Clean Transport for Veiller SDK
  *
  * A lightweight pino-compatible writable stream that formats log output as
  * single-line colored messages. This is the default console transport.
  *
  * Output format:
- *   MentraOS  ✓ App server running on port 7010
- *   MentraOS  ⚠ Connection lost, reconnecting (2/3)...
- *   MentraOS  ✗ Invalid API key
+ *   Veiller  ✓ App server running on port 7010
+ *   Veiller  ⚠ Connection lost, reconnecting (2/3)...
+ *   Veiller  ✗ Invalid API key
  *
  * Color scheme:
- *   - "MentraOS" prefix: dim gray (always present, visually skippable)
+ *   - "Veiller" prefix: dim gray (always present, visually skippable)
  *   - ✓ (info): green — success events
  *   - ⚠ (warn): yellow — warnings, reconnecting, deprecations
  *   - ✗ (error/fatal): red — failures requiring action
@@ -22,7 +22,7 @@
  *   only shown in the terminal at warn level and above. This keeps the developer's
  *   terminal clean — their own `session.logger.info(...)` calls always show,
  *   while internal SDK chatter (subscription updates, ping, handler registration)
- *   is hidden unless the developer sets MENTRA_VERBOSE=true.
+ *   is hidden unless the developer sets VEILLER_VERBOSE=true.
  *
  *   BetterStack always receives ALL logs regardless of the _sdk tag — the
  *   filtering only applies to the terminal/clean transport.
@@ -49,14 +49,14 @@ const LEVEL_CONFIG: Record<number, { symbol: string; color: (s: string) => strin
 };
 
 /** Whether verbose mode is enabled — when true, SDK internal logs are shown in terminal. */
-const VERBOSE = process.env.MENTRA_VERBOSE === "true" || process.env.MENTRA_VERBOSE === "1";
+const VERBOSE = process.env.VEILLER_VERBOSE === "true" || process.env.VEILLER_VERBOSE === "1";
 
 /** Pino level number for warn — SDK internal logs below this are hidden from terminal (unless verbose). */
 const WARN_LEVEL = 40;
 
 const DEFAULT_LEVEL_CONFIG = { symbol: "·", color: chalk.dim };
 
-const PREFIX = chalk.dim("MentraOS");
+const PREFIX = chalk.dim("Veiller");
 
 /**
  * Creates a writable stream that formats pino JSON log lines as single-line

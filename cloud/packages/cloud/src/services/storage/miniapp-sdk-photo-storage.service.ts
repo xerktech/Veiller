@@ -21,7 +21,7 @@ class MiniappSdkPhotoStorageService {
   private initialized = false;
 
   constructor() {
-    this.bucketName = process.env.R2_MINIAPP_SDK_PHOTOS_BUCKET || "mentra-miniapp-sdk-photos";
+    this.bucketName = process.env.R2_MINIAPP_SDK_PHOTOS_BUCKET || "veiller-miniapp-sdk-photos";
   }
 
   /**

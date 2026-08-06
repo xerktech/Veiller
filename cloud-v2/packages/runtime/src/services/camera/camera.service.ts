@@ -22,18 +22,18 @@
  */
 
 import { ulid } from "ulid";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { getRedis } from "../../clients/redis.client";
 import { getStorageProvider } from "../storage/storage.service";
 import { getStreamProvider } from "../stream/stream.service";
 import { forwardToUserSessions } from "../../net/ws";
-import { PROTOCOL_MAJOR } from "@mentra/cloud-protocol/envelope";
+import { PROTOCOL_MAJOR } from "@veiller/cloud-protocol/envelope";
 import type {
   PhotoOptions,
   StreamOptions,
   ManagedStream,
   StreamStatusResult,
-} from "@mentra/cloud-protocol/camera";
+} from "@veiller/cloud-protocol/camera";
 
 const logger = createLogger("audio").child({ service: "camera.service" });
 

@@ -77,7 +77,7 @@ PHPhotoLibrary.shared().performChanges {
 
 ### 1. Native Module - `CoreModule.saveToGalleryWithDate()`
 
-**Android**: `mobile/modules/core/android/src/main/java/com/mentra/core/CoreModule.kt`
+**Android**: `mobile/modules/core/android/src/main/java/com/veiller/core/CoreModule.kt`
 
 ```kotlin
 AsyncFunction("saveToGalleryWithDate") { filePath: String, captureTimeMillis: Long? ->
@@ -220,7 +220,7 @@ adb shell content query --uri content://media/external/images/media \
 
 ### Native Modules (New)
 
-1. `mobile/modules/core/android/src/main/java/com/mentra/core/CoreModule.kt` - Android MediaStore DATE_TAKEN
+1. `mobile/modules/core/android/src/main/java/com/veiller/core/CoreModule.kt` - Android MediaStore DATE_TAKEN
 2. `mobile/modules/core/ios/CoreModule.swift` - iOS Photos creationDate
 3. `mobile/modules/core/src/CoreModule.ts` - TypeScript interface
 

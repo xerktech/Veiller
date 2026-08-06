@@ -2,12 +2,12 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const SERVICE = "mentra-cli-v2";
+const SERVICE = "veiller-cli-v2";
 const LEGACY_NAME = "credentials";
-const MENTRA_DIR = join(homedir(), ".mentra");
-const CREDS_DIR = join(MENTRA_DIR, "cli-v2");
+const VEILLER_DIR = join(homedir(), ".veiller");
+const CREDS_DIR = join(VEILLER_DIR, "cli-v2");
 const LEGACY_CREDS_FILE = join(CREDS_DIR, "credentials.json");
-const SIGNING_KEY_SERVICE = "mentra-cli-v2-signing";
+const SIGNING_KEY_SERVICE = "veiller-cli-v2-signing";
 
 export type CliJwk = Record<string, unknown> & {
   kty?: string;
@@ -60,13 +60,13 @@ export async function saveCredentials(credentials: CliCredentials): Promise<"key
 
 export async function loadCredentials(coreUrl?: string): Promise<CliCredentials | null> {
   const targetCoreUrl = coreUrl ? normalizeCoreUrl(coreUrl) : undefined;
-  if (process.env.MENTRA_CLI_TOKEN) {
+  if (process.env.VEILLER_CLI_TOKEN) {
     return {
-      token: process.env.MENTRA_CLI_TOKEN,
-      workosUserId: process.env.MENTRA_CLI_WORKOS_USER_ID || "unknown",
-      email: process.env.MENTRA_CLI_EMAIL || "unknown",
-      organizationId: process.env.MENTRA_CLI_ORGANIZATION_ID,
-      coreUrl: targetCoreUrl || process.env.MENTRA_CORE_URL || "http://localhost:3000",
+      token: process.env.VEILLER_CLI_TOKEN,
+      workosUserId: process.env.VEILLER_CLI_WORKOS_USER_ID || "unknown",
+      email: process.env.VEILLER_CLI_EMAIL || "unknown",
+      organizationId: process.env.VEILLER_CLI_ORGANIZATION_ID,
+      coreUrl: targetCoreUrl || process.env.VEILLER_CORE_URL || "http://localhost:3000",
       storedAt: new Date().toISOString(),
     };
   }

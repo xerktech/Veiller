@@ -7,7 +7,7 @@ import {writeQRPng} from './qr.js';
 const tempDirs: string[] = [];
 
 function makeTempDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'mentra-qr-test-'));
+  const dir = mkdtempSync(join(tmpdir(), 'veiller-qr-test-'));
   tempDirs.push(dir);
   return dir;
 }

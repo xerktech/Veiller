@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build and install ASG + recovery worker on a connected Mentra Live (ADB).
 # Uses production signing from asg_client/credentials/asg-keystore.jks so
-# signature permissions work between com.mentra.asg_client and com.mentra.recovery.
+# signature permissions work between com.mentra.asg_client and com.veiller.recovery.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -28,10 +28,10 @@ adb install -r -d "$ASG_APK"
 adb install -r "$RECOVERY_APK"
 
 echo "=== Installed packages ==="
-adb shell pm list packages | rg "com.mentra.asg_client|com.mentra.recovery|otaupdater" || true
+adb shell pm list packages | rg "com.mentra.asg_client|com.veiller.recovery|otaupdater" || true
 
 echo ""
 echo "Done. RecoveryWorkerManager will start the sidecar on next ASG boot."
 echo "Quick checks:"
-echo "  adb shell dumpsys activity services | rg com.mentra.recovery"
+echo "  adb shell dumpsys activity services | rg com.veiller.recovery"
 echo "  adb logcat | rg 'RecoveryWorker|RecoveryService|ServiceHeartbeat'"

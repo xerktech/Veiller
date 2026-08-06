@@ -96,7 +96,7 @@ public class AsgConstants {
 
     // Battery status broadcast action
     public static final String ACTION_GLASSES_BATTERY_STATUS =
-            "com.mentra.recovery.ACTION_GLASSES_BATTERY_STATUS";
+            "com.veiller.recovery.ACTION_GLASSES_BATTERY_STATUS";
 
     /**
      * Awake window granted per wake-flagged phone command ("W":1 string wrapper or FLAG_WAKE binary

@@ -278,7 +278,7 @@ private lastLocationCache = new Map<string, Location>();
 ### getSubscribedAppsForAugmentosSetting(userSession: UserSession, settingKey: string): string[]
 
 **Current Usage:**
-- Called to find Apps subscribed to specific MentraOS settings
+- Called to find Apps subscribed to specific Veiller settings
 - Part of the settings notification system
 
 **Dependencies:**

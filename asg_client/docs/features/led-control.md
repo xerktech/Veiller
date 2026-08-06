@@ -81,7 +81,7 @@ shutting down.
 | BES firmware update succeeded | Three quick green flashes | Approximately 100 ms on and 100 ms off per flash. |
 | BES firmware update failed verification | Solid red | Written directly by the BES update path. |
 | Normal shutdown | Red fade | Accompanies the power-off sound. |
-| Mentra miniapp or Mentra App LED request | Requested color and timing | Red, green, blue, orange, and white are supported; this has no universal status meaning. |
+| Veiller miniapp or Veiller App LED request | Requested color and timing | Red, green, blue, orange, and white are supported; this has no universal status meaning. |
 
 ### Glasses status LED while charging in the case
 
@@ -117,7 +117,7 @@ light may be steady, blinking, or breathing depending on the event and whether
 power is flowing, but its orange/green battery meaning remains the same: it
 reports the charging case, not the glasses.
 
-### Interaction with MentraOS control
+### Interaction with Veiller control
 
 `asg_client` claims the status LED when the MTK-to-BES UART connection becomes
 ready and claims it again after the phone-ready handshake. While MTK owns the
@@ -125,9 +125,9 @@ status LED, BES suppresses its ordinary ownership-sensitive patterns. Charger
 transitions are explicitly forced, and BES firmware-update and shutdown paths
 write the hardware directly, so those patterns can still appear.
 
-MentraOS uses the status LED for photo, video-recording, and USB UVC feedback.
+Veiller uses the status LED for photo, video-recording, and USB UVC feedback.
 RTMP, SRT, and WHIP livestreaming currently drive only the separate MTK
-recording/privacy LED and do not set the status LED. Mentra miniapps can request
+recording/privacy LED and do not set the status LED. Veiller miniapps can request
 any supported status LED color and timing, so an app-requested pattern has no
 universal device meaning.
 

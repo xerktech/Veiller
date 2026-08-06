@@ -1,7 +1,7 @@
 import {AsyncResult, result as Res} from "typesafe-ts"
 
 import {storage} from "@/utils/storage"
-import {SETTINGS, engine} from "@mentra/engine"
+import {SETTINGS, engine} from "@veiller/engine"
 
 interface Migration {
   version: number // the version this migration brings you TO
@@ -38,20 +38,20 @@ const migrations: Migration[] = [
     version: 3,
     run: async () => {
       // migrates from 2 → 3: the hardcoded Offline Captions built-in
-      // (com.mentra.offline_captions) was removed — the SDK Captions miniapp
+      // (com.veiller.offline_captions) was removed — the SDK Captions miniapp
       // auto-switches between online and offline transcription now. Clear its
       // persisted state: the offline_captions_running setting (BLE-synced into
       // the native mic gate on older builds) and the app-tray running flag
       // that would otherwise resurrect a now-nonexistent app on boot.
       storage.remove("offline_captions_running")
-      storage.remove("com.mentra.offline_captions_running")
-      storage.remove("com.mentra.offline_captions_screenshot")
+      storage.remove("com.veiller.offline_captions_running")
+      storage.remove("com.veiller.offline_captions_screenshot")
     },
   },
   {
     version: 4,
     run: async () => {
-      // MentraOS onboarding was disabled while its content was out of date.
+      // Veiller onboarding was disabled while its content was out of date.
       // Reset completion once so every user sees the replacement flow after
       // their next pairing, including users who completed the old version.
       const res = await engine.settings.set(SETTINGS.onboarding_os_completed.key, false, false)

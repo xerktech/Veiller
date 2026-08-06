@@ -15,8 +15,8 @@ This document catalogs everything that still needs to be spiked, discussed, or d
 
 | Spike                                                                      | Covers                                                                                         | Status      |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------- |
-| [spike.md](./spike.md)                                                     | Core SDK v3 — MentraSession, managers, MiniAppServer, compat shims, translation, transcription | ✅ Complete |
-| [client-sdk-spike.md](./client-sdk-spike.md)                               | Local runtime — Hermes, MentraJS framework, build pipeline, TranscriptionCapabilities          | ✅ Complete |
+| [spike.md](./spike.md)                                                     | Core SDK v3 — VeillerSession, managers, MiniAppServer, compat shims, translation, transcription | ✅ Complete |
+| [client-sdk-spike.md](./client-sdk-spike.md)                               | Local runtime — Hermes, VeillerJS framework, build pipeline, TranscriptionCapabilities          | ✅ Complete |
 | [reconnection-architecture-spike.md](./reconnection-architecture-spike.md) | Reconnection, resurrection, session identity, subscription sync, multi-cloud, userId/email     | ✅ Complete |
 | [session-camera-spike.md](./session-camera-spike.md)                       | Camera — photos, streaming unification, video recording (future), error propagation            | ✅ Complete |
 | [session-speaker-spike.md](./session-speaker-spike.md)                     | Speaker — audio output, TTS, audio streaming, priority/conflict                                | ✅ Complete |
@@ -152,30 +152,30 @@ The 039 API map §3b has the full spec including the two-layer wrapping model.
 
 ## Needs Discussion But Not a Full Spike
 
-### 11. Route Namespacing (`/api/_mentraos/`)
+### 11. Route Namespacing (`/api/_veiller/`)
 
-The 039 map specifies moving all SDK endpoints behind `/api/_mentraos/`:
+The 039 map specifies moving all SDK endpoints behind `/api/_veiller/`:
 
 | v2 path         | v3 path                       |
 | --------------- | ----------------------------- |
-| `/webhook`      | `/api/_mentraos/webhook`      |
-| `/tool`         | `/api/_mentraos/tool`         |
-| `/health`       | `/api/_mentraos/health`       |
-| `/settings`     | `/api/_mentraos/settings`     |
-| `/photo-upload` | `/api/_mentraos/photo-upload` |
+| `/webhook`      | `/api/_veiller/webhook`      |
+| `/tool`         | `/api/_veiller/tool`         |
+| `/health`       | `/api/_veiller/health`       |
+| `/settings`     | `/api/_veiller/settings`     |
+| `/photo-upload` | `/api/_veiller/photo-upload` |
 
 Legacy aliases at root paths for backward compat.
 
 **What needs team input:** The cloud hardcodes these paths in `AppManager.ts`, `app.service.ts`, `PhotoManager.ts`, `app-settings.routes.ts`, `system-app.api.ts`. When does the cloud switch to the new paths? Same PR as SDK v3? Separate cloud PR? Can the cloud auto-detect which paths the SDK supports (via `sdkVersion`)?
 
-### 12. `mentra` CLI Tool
+### 12. `veiller` CLI Tool
 
-We designed `mentra dev / build / publish` in the client SDK spike. Before building it:
+We designed `veiller dev / build / publish` in the client SDK spike. Before building it:
 
-- Is it a separate npm package (`@mentra/cli`)? Or bundled with `@mentra/sdk`?
-- How does `mentra dev` discover `mentra.config.ts`?
-- Does `mentra build` bundle `hermesc` or call it externally?
-- Does `mentra publish` authenticate with the dev console? How?
+- Is it a separate npm package (`@veiller/cli`)? Or bundled with `@veiller/sdk`?
+- How does `veiller dev` discover `veiller.config.ts`?
+- Does `veiller build` bundle `hermesc` or call it externally?
+- Does `veiller publish` authenticate with the dev console? How?
 - Is this v3.0 scope or v3.1+?
 
 Probably v3.1+ — the CLI is for local apps which depend on the mobile runtime work. v3.0 is the cloud SDK refactor.
@@ -239,12 +239,12 @@ This is a suggestion, not a decision — the team should prioritize based on wha
 
 **Phase 1 — Core refactor (unblocks everything else):**
 
-- `MentraSession` (renamed from AppSession)
+- `VeillerSession` (renamed from AppSession)
 - `Transport` interface + `WebSocketTransport`
 - `MiniAppServer` (callback pattern)
 - `AppServer` compat shim
 - Message dispatch refactor (DataStreamRouter)
-- `@mentra/sdk/session` entrypoint
+- `@veiller/sdk/session` entrypoint
 - `sdkVersion` in CONNECTION_INIT
 
 **Phase 2 — Managers (the bulk of the work):**
@@ -272,15 +272,15 @@ This is a suggestion, not a decision — the team should prioritize based on wha
 
 - `session.state<T>` (typed shared state)
 - WebSocket transport for state sync
-- `useMentraState<T>()` React hook
+- `useVeillerState<T>()` React hook
 - `LegacyEventShim` (v2 compat)
-- Deprecated getters on MentraSession
+- Deprecated getters on VeillerSession
 - `AppSession` type alias
 
 **Phase 5 — Polish:**
 
 - `userId` → MongoDB `_id` migration
-- Route namespacing (`/api/_mentraos/`)
+- Route namespacing (`/api/_veiller/`)
 - WebSocket path renames (`/ws/client`, `/ws/miniapp`)
 - Dead code removal (app-to-app, old DashboardAPI, TpaServer/TpaSession)
 - Bug fixes from the spike tables
@@ -291,7 +291,7 @@ This is a suggestion, not a decision — the team should prioritize based on wha
 
 - Remove all compat shims
 - Remove legacy route aliases
-- `mentra` CLI
+- `veiller` CLI
 - Video recording (when ASG client supports it)
 - Audio priority system
 - SRT streaming support

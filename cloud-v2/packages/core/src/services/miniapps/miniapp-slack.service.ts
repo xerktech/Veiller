@@ -12,7 +12,7 @@
  * fire-and-forget.
  */
 
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 
 const logger = createLogger("core").child({ service: "miniapp-slack.service" });
 

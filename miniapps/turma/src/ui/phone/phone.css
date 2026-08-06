@@ -335,12 +335,12 @@
 .ph-send:hover { filter: brightness(1.07); }
 .ph-send:disabled { opacity: 0.5; cursor: default; }
 
-/* ---- Veiller port: Mentra WebView safe areas --------------------------- */
-/* The Mentra host injects pixel safe-area insets as --mentra-safe-* CSS vars
+/* ---- Veiller port: Veiller WebView safe areas --------------------------- */
+/* The Veiller host injects pixel safe-area insets as --veiller-safe-* CSS vars
    (mobile/modules/engine/src/utils/miniappGlobals.ts) — env(safe-area-inset-*)
    is 0 inside this WebView. Pad the fixed shell's header/nav/compose so
    content clears the status bar and the home indicator. */
-.ph-header { padding-top: calc(14px + var(--mentra-safe-top, 0px)); }
-.ph-session-head { padding-top: calc(8px + var(--mentra-safe-top, 0px)); }
-.ph-nav { padding-bottom: calc(6px + var(--mentra-safe-bottom, 0px)); }
-.ph-compose { padding-bottom: calc(10px + var(--mentra-safe-bottom, 0px)); }
+.ph-header { padding-top: calc(14px + var(--veiller-safe-top, 0px)); }
+.ph-session-head { padding-top: calc(8px + var(--veiller-safe-top, 0px)); }
+.ph-nav { padding-bottom: calc(6px + var(--veiller-safe-bottom, 0px)); }
+.ph-compose { padding-bottom: calc(10px + var(--veiller-safe-bottom, 0px)); }

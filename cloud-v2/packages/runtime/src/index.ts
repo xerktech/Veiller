@@ -1,5 +1,5 @@
 /**
- * `@mentra/cloud-runtime` — Mentra Runtime Services. Audio (UDP ingress, workers,
+ * `@veiller/cloud-runtime` — Veiller Runtime Services. Audio (UDP ingress, workers,
  * Redis-routed ownership, transcription + translation providers) is the first
  * service; streaming and photo land here too.
  *
@@ -15,7 +15,7 @@
  * Spec + design: cloud-v2/docs/issues/002-cloud-runtime/.
  */
 
-import { assertRuntimeAuthConfigured, createLogger } from "@mentra/cloud-shared";
+import { assertRuntimeAuthConfigured, createLogger } from "@veiller/cloud-shared";
 import {
   connectRedis,
   disconnectRedis,
@@ -47,7 +47,7 @@ import {
   stopWorkerPool,
 } from "./services/audio/workers/pool";
 import { transcriptToStreamMessage } from "./services/audio/result";
-import { PROTOCOL_MAJOR } from "@mentra/cloud-protocol/envelope";
+import { PROTOCOL_MAJOR } from "@veiller/cloud-protocol/envelope";
 
 const logger = createLogger("runtime");
 

@@ -1,4 +1,4 @@
-// MentraOS/cloud/packages/cloud/src/services/session/UserSettingsManager.ts
+// Veiller/cloud/packages/cloud/src/services/session/UserSettingsManager.ts
 
 /**
  * UserSettingsManager

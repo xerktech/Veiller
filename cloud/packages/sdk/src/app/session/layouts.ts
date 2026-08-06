@@ -36,7 +36,7 @@ export class LayoutManager {
    * 🎯 Creates a new LayoutManager instance
    *
    * @param packageName - App package identifier
-   * @param sendMessage - Function to send display requests to MentraOS
+   * @param sendMessage - Function to send display requests to Veiller
    */
   constructor(
     private packageName: string,

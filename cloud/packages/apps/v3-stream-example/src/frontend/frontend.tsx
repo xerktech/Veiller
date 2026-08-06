@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { MentraAuthProvider } from "@mentra/react";
+import { VeillerAuthProvider } from "@veiller/react";
 
 import "./index.css";
 
@@ -14,9 +14,9 @@ if (!element) {
 
 const app = (
   <StrictMode>
-    <MentraAuthProvider>
+    <VeillerAuthProvider>
       <App />
-    </MentraAuthProvider>
+    </VeillerAuthProvider>
   </StrictMode>
 );
 

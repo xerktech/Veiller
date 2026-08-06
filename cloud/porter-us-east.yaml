@@ -20,7 +20,7 @@ services:
       NODE_ENV: ${NODE_ENV}
       PORTER_APP_NAME: ${PORTER_APP_NAME}
       DOPPLER_TOKEN: ${DOPPLER_TOKEN}
-      DOPPLER_PROJECT: mentraos-cloud
+      DOPPLER_PROJECT: mentra-cloud
       DOPPLER_CONFIG: prod_us-east
     domains:
       - name: useastapi.mentraglass.com

@@ -1,5 +1,5 @@
 /**
- * `@mentra/cloud-shared` — types, config, observability primitives shared
+ * `@veiller/cloud-shared` — types, config, observability primitives shared
  * across the core, audio, and proxy packages.
  */
 
@@ -15,9 +15,9 @@ export {
   verifyRuntimeToken,
   signRuntimeToken,
   AccessTokenError,
-  resetMentraKeyCache,
+  resetVeillerKeyCache,
   resetRuntimeAuthCache,
   type VerifiedAccessToken,
 } from "./auth";
 
-export const PACKAGE_NAME = "@mentra/cloud-shared";
+export const PACKAGE_NAME = "@veiller/cloud-shared";

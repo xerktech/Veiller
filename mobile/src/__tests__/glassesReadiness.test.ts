@@ -1,4 +1,4 @@
-// Imports the real GlassesReadiness module by path (not via "@mentra/engine",
+// Imports the real GlassesReadiness module by path (not via "@veiller/engine",
 // which jest mocks) so the actual logic runs under the mobile jest CI runner.
 import {
   isGlassesConnected,

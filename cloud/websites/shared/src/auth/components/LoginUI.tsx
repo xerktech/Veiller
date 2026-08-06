@@ -15,7 +15,7 @@ interface LoginUIProps {
   logoUrl?: string
   /** Site name to display below logo (e.g., "Developer Portal") */
   siteName: string
-  /** Optional custom heading that replaces "Welcome to the Mentra {siteName}" */
+  /** Optional custom heading that replaces "Welcome to the Veiller {siteName}" */
   heading?: string
   /** Optional message to display (e.g., for invites) */
   message?: string
@@ -116,16 +116,16 @@ export const LoginUI: React.FC<LoginUIProps> = ({
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="w-full max-w-sm mx-auto flex flex-col items-center">
           {/* Icon */}
-          <img src={logoUrl} alt="Mentra Logo" className="h-24 w-24" />
+          <img src={logoUrl} alt="Veiller Logo" className="h-24 w-24" />
 
           {/* Wordmark */}
           <p className="text-[46px] text-secondary-foreground text-center pt-8 pb-4">
-            Mentra
+            Veiller
           </p>
 
           {/* Site name / Welcome message */}
           <p className="text-xl text-secondary-foreground text-center mb-4">
-            {heading || `Welcome to the Mentra ${siteName}`}
+            {heading || `Welcome to the Veiller ${siteName}`}
           </p>
 
           {/* Invite message if present (hidden when custom heading is used) */}

@@ -1,9 +1,9 @@
 /**
- * @fileoverview getMiniappToken e2e through @mentra/cloud-client (node).
+ * @fileoverview getMiniappToken e2e through @veiller/cloud-client (node).
  *
  * Boots real core + test-oem against the local Mongo + Redis (no audio server,
  * no Soniox: minting a miniapp token is a pure auth-plane flow). Exchanges an
- * OEM JWT for a Mentra access token, then calls cloud.auth.getMiniappToken and
+ * OEM JWT for a Veiller access token, then calls cloud.auth.getMiniappToken and
  * asserts the returned token is audience-pinned to the requested miniapp and
  * subject-pinned to the signed-in user. Also asserts the per-packageName cache:
  * a second call returns the same token until it nears expiry.
@@ -22,24 +22,24 @@ const TEST_PACKAGE = "com.test.app";
 // === Env setup BEFORE any package imports ===
 {
   const access = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     access.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     access.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   // The miniapp-token signing key MUST be distinct from the access-token key
   // (the blast-radius guarantee): generate a separate ed25519 keypair for it.
   const miniapp = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_MINIAPP_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_MINIAPP_JWT_PRIVATE_KEY = stripPemWrap(
     miniapp.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_MINIAPP_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_MINIAPP_JWT_PUBLIC_KEY = stripPemWrap(
     miniapp.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-cloudclient-miniapp-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-cloudclient-miniapp-test";
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/5";
   process.env.LOG_LEVEL ??= "warn";
 }
@@ -57,11 +57,11 @@ let coreHandle: CoreHandle;
 let testOemHandle: TestOemHandle;
 
 beforeAll(async () => {
-  const { resetMentraKeyCache } = await import("../packages/shared/src/auth");
+  const { resetVeillerKeyCache } = await import("../packages/shared/src/auth");
   const { resetSigningKeyCache } = await import(
     "../packages/core/src/services/session.service"
   );
-  resetMentraKeyCache();
+  resetVeillerKeyCache();
   resetSigningKeyCache();
 
   testOemHandle = await startTestOem({ port: TEST_OEM_PORT, tenantId: TEST_OEM_ID });

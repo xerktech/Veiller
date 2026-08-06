@@ -1,5 +1,5 @@
 /**
- * Telemetry Transport for MentraOS SDK
+ * Telemetry Transport for Veiller SDK
  *
  * A pino-compatible Writable stream that intercepts log entries and pushes
  * them into a session-scoped ring buffer for incident debugging.

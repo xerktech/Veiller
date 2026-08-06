@@ -2,13 +2,13 @@
 
 **Status**: In Progress 🔄  
 **Priority**: Medium  
-**Related**: @mentra/display-utils, GlassesDisplayMirror
+**Related**: @veiller/display-utils, GlassesDisplayMirror
 
 ## Problem
 
 Text wrapping logic is duplicated and inconsistent across the codebase:
 
-1. **Cloud SDK** (`@mentra/sdk/display-utils`) - Pixel-accurate wrapping with glyph widths
+1. **Cloud SDK** (`@veiller/sdk/display-utils`) - Pixel-accurate wrapping with glyph widths
 2. **Native SGC layer** (Kotlin/Swift) - Separate wrapping logic, different results
 3. **Mobile preview** (`GlassesDisplayMirror`) - No wrapping, just displays what it receives
 
@@ -38,7 +38,7 @@ The SDK's `display-utils` is pure TypeScript with no Node.js dependencies:
 - `TextWrapper` - Line breaking algorithms
 - `G1_PROFILE`, `Z100_PROFILE`, `NEX_PROFILE` - Hardware-specific measurements
 
-This is now a shared package `@mentra/display-utils` used by both SDK and mobile.
+This is now a shared package `@veiller/display-utils` used by both SDK and mobile.
 
 ## Solution Implemented
 
@@ -58,7 +58,7 @@ Mobile ← DisplayProcessor (display-utils) ← display_event
 
 **New Package:**
 
-- `cloud/packages/display-utils/` - Shared `@mentra/display-utils` package
+- `cloud/packages/display-utils/` - Shared `@veiller/display-utils` package
   - `src/index.ts` - Main exports and factory functions
   - `src/profiles/g1.ts` - Even Realities G1 profile
   - `src/profiles/z100.ts` - Vuzix Z100 profile (placeholder values)
@@ -76,17 +76,17 @@ Mobile ← DisplayProcessor (display-utils) ← display_event
 
 - `mobile/src/services/SocketComms.ts` - Uses DisplayProcessor to process display events before sending to native
 - `mobile/src/bridge/MantleBridge.tsx` - Updates DisplayProcessor device model when glasses connect
-- `mobile/package.json` - Added `@mentra/display-utils` dependency
-- `mobile/tsconfig.json` - Added path mapping for `@mentra/display-utils`
-- `mobile/babel.config.cts` - Added alias for `@mentra/display-utils`
+- `mobile/package.json` - Added `@veiller/display-utils` dependency
+- `mobile/tsconfig.json` - Added path mapping for `@veiller/display-utils`
+- `mobile/babel.config.cts` - Added alias for `@veiller/display-utils`
 - `mobile/metro.config.js` - Added watch folder for display-utils
-- `cloud/packages/sdk/package.json` - Added `@mentra/display-utils` as dependency
+- `cloud/packages/sdk/package.json` - Added `@veiller/display-utils` as dependency
 - `cloud/packages/sdk/src/display-utils.ts` - Now re-exports from shared package
 - `cloud/package.json` - Updated build scripts to include display-utils
 
 ### Code Sharing Strategy
 
-**Decision**: Create shared `@mentra/display-utils` package (Option B from spec)
+**Decision**: Create shared `@veiller/display-utils` package (Option B from spec)
 
 **Rationale**:
 
@@ -167,7 +167,7 @@ Native wrapping logic has been removed/simplified. Text now comes pre-wrapped fr
 
 ### Phase 2.5: ColumnComposer for double_text_wall ✅
 
-Added `ColumnComposer` class to `@mentra/display-utils` for pixel-precise column composition:
+Added `ColumnComposer` class to `@veiller/display-utils` for pixel-precise column composition:
 
 - `ColumnComposer.composeDoubleTextWall(left, right)` - wraps both columns and merges with space-padding
 - `DisplayProcessor.processDoubleTextWall()` now uses ColumnComposer
@@ -185,8 +185,8 @@ Added `ColumnComposer` class to `@mentra/display-utils` for pixel-precise column
 - `mobile/src/services/display/DisplayProcessor.ts` - uses ColumnComposer for double_text_wall
 - `mobile/modules/core/ios/Source/utils/G1Text.swift` - simplified createTextWallChunks
 - `mobile/modules/core/ios/Source/CoreManager.swift` - fixed displayEvent
-- `mobile/modules/core/android/src/main/java/com/mentra/core/sgcs/G1.java` - simplified createTextWallChunks
-- `mobile/modules/core/android/src/main/java/com/mentra/core/CoreManager.kt` - fixed displayEvent
+- `mobile/modules/core/android/src/main/java/com/veiller/core/sgcs/G1.java` - simplified createTextWallChunks
+- `mobile/modules/core/android/src/main/java/com/veiller/core/CoreManager.kt` - fixed displayEvent
 
 ### Phase 3: Validation ✅
 
@@ -307,7 +307,7 @@ When hardware specs become available:
 - [x] Spec written
 - [x] Architecture designed
 - [x] **Phase 1: DisplayProcessor implementation** ✅
-  - [x] Create shared `@mentra/display-utils` package
+  - [x] Create shared `@veiller/display-utils` package
   - [x] Create DisplayProcessor class
   - [x] Integrate with SocketComms
   - [x] Update device model on glasses connect
@@ -346,4 +346,4 @@ When hardware specs become available:
 - `cloud/packages/sdk/src/display-utils.ts` - SDK re-export
 - `mobile/src/services/display/` - Mobile DisplayProcessor
 - `mobile/src/components/mirror/GlassesDisplayMirror.tsx` - Preview component
-- `mobile/modules/core/android/src/main/java/com/mentra/core/sgcs/` - Native SGC code
+- `mobile/modules/core/android/src/main/java/com/veiller/core/sgcs/` - Native SGC code

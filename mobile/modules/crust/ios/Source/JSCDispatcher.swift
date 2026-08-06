@@ -1,6 +1,6 @@
 //
 //  JSCDispatcher.swift
-//  MentraJS — dispatch table + permission gate for the per-miniapp
+//  VeillerJS — dispatch table + permission gate for the per-miniapp
 //  __dispatch(iface, method, args) bridge.
 //
 //  Every JSContext spawned by JSCRuntime gets a single Swift block bound
@@ -8,7 +8,7 @@
 //  which:
 //    1. Looks up the (iface, method) handler from `routes` — local
 //       handlers serve dispatches synchronously, RN-forwarded ones return
-//       .forwardToRn and the runtime emits an `mentrajs_message` event.
+//       .forwardToRn and the runtime emits an `veillerjs_message` event.
 //    2. Consults the InstalledManifest to gate OS-sensitive calls.
 //       PERMISSION_NOT_DECLARED errors propagate back to JS as thrown
 //       Error objects. There is no JIT permission modal — declared-in-
@@ -33,7 +33,7 @@ public enum JSCDispatchOutcome {
     case async
     /// Handler refused; JS sees a thrown Error with `code` + `message`.
     case error(code: String, message: String?)
-    /// Forward to RN as `mentrajs_message`; downstream RN code handles it
+    /// Forward to RN as `veillerjs_message`; downstream RN code handles it
     /// and (for request/response calls) eventually calls dispatchToJs back.
     case forwardToRn([String: Any])
 }
@@ -128,7 +128,7 @@ public final class JSCDispatcher {
             return handler(packageName, args, reqId)
         }
 
-        // No local route → forward to RN. The RN-side MentraJSRouter
+        // No local route → forward to RN. The RN-side VeillerJSRouter
         // is the destination.
         return .forwardToRn([
             "args": args,
@@ -153,7 +153,7 @@ public final class JSCDispatcher {
         // miniapp gets its own UserDefaults suite scoped on packageName.
         register(iface: "localStorage", method: "getItem") { packageName, args, _ in
             guard let key = args.first as? String,
-                  let defaults = UserDefaults(suiteName: "MentraJS-\(packageName)") else {
+                  let defaults = UserDefaults(suiteName: "VeillerJS-\(packageName)") else {
                 return .sync(NSNull())
             }
             let v = defaults.string(forKey: key)
@@ -163,7 +163,7 @@ public final class JSCDispatcher {
             guard args.count >= 2,
                   let key = args[0] as? String,
                   let value = args[1] as? String,
-                  let defaults = UserDefaults(suiteName: "MentraJS-\(packageName)") else {
+                  let defaults = UserDefaults(suiteName: "VeillerJS-\(packageName)") else {
                 return .error(code: "INVALID_ARGS", message: "localStorage.setItem expects (key, value) strings")
             }
             defaults.set(value, forKey: key)
@@ -171,14 +171,14 @@ public final class JSCDispatcher {
         }
         register(iface: "localStorage", method: "removeItem") { packageName, args, _ in
             guard let key = args.first as? String,
-                  let defaults = UserDefaults(suiteName: "MentraJS-\(packageName)") else {
+                  let defaults = UserDefaults(suiteName: "VeillerJS-\(packageName)") else {
                 return .error(code: "INVALID_ARGS", message: "localStorage.removeItem expects (key)")
             }
             defaults.removeObject(forKey: key)
             return .sync(NSNull())
         }
         register(iface: "localStorage", method: "clear") { packageName, _, _ in
-            guard let defaults = UserDefaults(suiteName: "MentraJS-\(packageName)") else {
+            guard let defaults = UserDefaults(suiteName: "VeillerJS-\(packageName)") else {
                 return .sync(NSNull())
             }
             for (k, _) in defaults.dictionaryRepresentation() {
@@ -187,14 +187,14 @@ public final class JSCDispatcher {
             return .sync(NSNull())
         }
         register(iface: "localStorage", method: "length") { packageName, _, _ in
-            guard let defaults = UserDefaults(suiteName: "MentraJS-\(packageName)") else {
+            guard let defaults = UserDefaults(suiteName: "VeillerJS-\(packageName)") else {
                 return .sync(0)
             }
             return .sync(defaults.dictionaryRepresentation().count)
         }
         register(iface: "localStorage", method: "key") { packageName, args, _ in
             guard let idx = args.first as? Int,
-                  let defaults = UserDefaults(suiteName: "MentraJS-\(packageName)") else {
+                  let defaults = UserDefaults(suiteName: "VeillerJS-\(packageName)") else {
                 return .sync(NSNull())
             }
             let keys = Array(defaults.dictionaryRepresentation().keys).sorted()

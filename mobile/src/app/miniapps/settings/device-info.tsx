@@ -9,8 +9,8 @@ import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
 import {useNavigationStore} from "@/stores/navigation"
-import BluetoothSdk from "@mentra/bluetooth-sdk"
-import {engine, SETTINGS, useSetting} from "@mentra/engine"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
+import {engine, SETTINGS, useSetting} from "@veiller/engine"
 import {getAr99DisplayName} from "@/utils/getGlassesImage"
 
 export default function DeviceInfoScreen() {

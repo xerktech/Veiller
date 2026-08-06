@@ -11,7 +11,7 @@ import {
   markRemoteImageSourceFailed,
   useCachedRemoteImageSource,
 } from "@/hooks/useCachedRemoteImageSource"
-import type {ClientApp} from "@mentra/engine"
+import type {ClientApp} from "@veiller/engine"
 
 // Helper to extract style properties for width/height override
 const extractStyleProps = (style: StyleProp<ViewStyle>): Partial<ViewStyle> => {

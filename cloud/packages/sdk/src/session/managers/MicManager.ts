@@ -5,7 +5,7 @@
  * Provides subscriptions for raw PCM audio chunks and voice activity
  * detection (VAD) events.
  *
- * Audio chunks arrive as binary WebSocket frames — MentraSession calls
+ * Audio chunks arrive as binary WebSocket frames — VeillerSession calls
  * `handleBinaryAudio()` when it receives a binary frame that isn't
  * destined for an output stream. VAD events arrive as JSON DATA_STREAM
  * messages routed through the DataStreamRouter.
@@ -36,7 +36,7 @@
 // ─── Dependencies ────────────────────────────────────────────────────────────
 
 /**
- * Shared dependency bag injected by MentraSession.
+ * Shared dependency bag injected by VeillerSession.
  * Keeps managers decoupled from the session implementation.
  */
 export interface ManagerDeps {
@@ -110,7 +110,7 @@ const VAD_STREAM = "VAD";
  * Handles two types of incoming data:
  *
  * 1. **Raw PCM audio chunks** — arrive as binary WebSocket frames.
- *    MentraSession calls `handleBinaryAudio()` for each binary frame
+ *    VeillerSession calls `handleBinaryAudio()` for each binary frame
  *    that isn't part of an output stream. Subscribers receive wrapped
  *    `AudioChunk` objects with metadata.
  *
@@ -343,7 +343,7 @@ export class MicManager {
   /**
    * Handle an incoming binary audio frame from the WebSocket transport.
    *
-   * MentraSession calls this method when it receives a binary WebSocket
+   * VeillerSession calls this method when it receives a binary WebSocket
    * frame that is identified as microphone audio (not part of an output
    * stream). The raw bytes are wrapped with metadata and dispatched to
    * all registered `onChunk` handlers.
@@ -351,7 +351,7 @@ export class MicManager {
    * @param data - Raw binary audio data (PCM16, 16 kHz, mono)
    *
    * @remarks
-   * This is a public method so MentraSession can call it, but it is not
+   * This is a public method so VeillerSession can call it, but it is not
    * intended to be called by app developers.
    *
    * @internal

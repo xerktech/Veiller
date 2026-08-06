@@ -15,9 +15,9 @@ import {RouteButton} from "@/components/ui/RouteButton"
 import {useNavigationStore} from "@/stores/navigation"
 import {useStressTestStore} from "@/stores/stressTest"
 import {buildDummyMiniappHtml} from "@/utils/stressTest/dummyHtml"
-import BluetoothSdk from "@mentra/bluetooth-sdk-internal"
-import {engine} from "@mentra/engine"
-import {miniappRunningRegistry} from "@mentra/engine/devtools"
+import BluetoothSdk from "@veiller/bluetooth-sdk-internal"
+import {engine} from "@veiller/engine"
+import {miniappRunningRegistry} from "@veiller/engine/devtools"
 
 const POLL_MS = 1000
 

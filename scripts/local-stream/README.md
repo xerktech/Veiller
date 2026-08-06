@@ -5,7 +5,7 @@ instance on this laptop. **RTMP is the primary path** (one TCP port, no
 ICE/NAT). **SRT** and **WHIP/WHEP (WebRTC)** are also available.
 
 ```
-Phone (Mentra App / Livestreamer)  --BLE start_stream-->  Mentra Live glasses
+Phone (Veiller App / Livestreamer)  --BLE start_stream-->  Mentra Live glasses
                                                               |
                                                               | RTMP / SRT / WHIP
                                                               v
@@ -23,7 +23,7 @@ Glasses route by URL scheme (`StreamCommandHandler`): `rtmp://` / `rtmps://`
 ## Quick start (RTMP — recommended)
 
 1. Put glasses, phone, and this laptop on the **same Wi‑Fi** (or join the Mentra Live hotspot from the laptop).
-2. Start MediaMTX from the MentraOS repo root:
+2. Start MediaMTX from the Veiller repo root:
 
    **macOS / Linux**
 
@@ -81,7 +81,7 @@ Glasses route by URL scheme (`StreamCommandHandler`): `rtmp://` / `rtmps://`
    - Enable **Local network**
    - Connect → Go Live (unmanaged / direct)
 
-6. **Watch on the laptop** (the Mentra App / Livestreamer phone UI has
+6. **Watch on the laptop** (the Veiller App / Livestreamer phone UI has
    **no preview** for Local-network / unmanaged streams — that card will say
    "No preview available for unmanaged streams" even when the glasses are
    publishing successfully):
@@ -140,7 +140,7 @@ available on Docker Desktop for macOS.
 |------|------|
 | `mediamtx.yml` | MediaMTX config (`live` + `all_others`; RTMP `:1935`, SRT `:8890`, HLS `:8888`, WebRTC `:8889`) |
 | `docker-compose.yml` | Publishes `1935/tcp`, `8888/tcp`, `8889/tcp`, `8189/udp`, `8890/udp`; requires `MTX_WEBRTCADDITIONALHOSTS` |
-| `Dockerfile` | Bakes `mediamtx.yml` into `mentra-local-mediamtx:1` (avoids USB bind-mount failures on Docker Desktop) |
+| `Dockerfile` | Bakes `mediamtx.yml` into `veiller-local-mediamtx:1` (avoids USB bind-mount failures on Docker Desktop) |
 | `start-local-stream.sh` | macOS/Linux: detect LAN IP → export ICE host → `docker compose up` → print URLs + recv stats |
 | `start-local-stream.ps1` | Windows PowerShell: same flow (Wi‑Fi / hotspot IP detect, Docker Desktop) |
 | `start-local-stream.cmd` | Windows launcher that calls the `.ps1` (double-click friendly) |
@@ -158,7 +158,7 @@ available on Docker Desktop for macOS.
 | WHIP POST fails / connection refused | Wrong LAN IP or TCP 8889 blocked |
 | WHIP 201, no video | ICE/UDP 8189 blocked (firewall / Docker Desktop) |
 | Wrong IP in printed URLs | Disconnect VPN; re-run start script. On Windows set `LAN_IP` to the hotspot/Wi‑Fi address from `ipconfig` |
-| `mount ... mediamtx.yml ... not a directory` | Old USB bind-mount bug. Update to the baked-Dockerfile compose (no volume). Run `docker rm -f mentra-local-stream` then re-run start script |
+| `mount ... mediamtx.yml ... not a directory` | Old USB bind-mount bug. Update to the baked-Dockerfile compose (no volume). Run `docker rm -f veiller-local-stream` then re-run start script |
 
 Useful glasses log filters:
 

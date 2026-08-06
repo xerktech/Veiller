@@ -54,7 +54,7 @@ public class OtaUpdaterService extends Service {
         }
         
         return new NotificationCompat.Builder(this, "ota_updater")
-            .setContentTitle("MentraOS Updater")
+            .setContentTitle("Veiller Updater")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_update)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -64,7 +64,7 @@ public class OtaUpdaterService extends Service {
     // Update notification during downloads
     public void updateProgress(String status, int progress) {
         Notification notification = new NotificationCompat.Builder(this, "ota_updater")
-            .setContentTitle("MentraOS Updater")
+            .setContentTitle("Veiller Updater")
             .setContentText(status)
             .setProgress(100, progress, false)
             .setSmallIcon(R.drawable.ic_update)

@@ -15,7 +15,7 @@ class MultiPlatformStreamingApp extends AppServer {
   constructor() {
     super({
       packageName: "com.example.multiplatform-streaming",
-      apiKey: process.env.MENTRAOS_API_KEY || "your-api-key",
+      apiKey: process.env.VEILLER_API_KEY || "your-api-key",
       port: 3000,
     });
   }

@@ -3,7 +3,7 @@ import {useRoute} from "@react-navigation/native"
 import {Linking, PermissionsAndroid, Image, Platform, ScrollView, View} from "react-native"
 import type {ImageStyle, Permission, ViewStyle} from "react-native"
 
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {Button, Header, Icon, Screen, Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
@@ -15,7 +15,7 @@ import {useState} from "react"
 import GlassesTroubleshootingModal from "@/components/glasses/GlassesTroubleshootingModal"
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {CDN_BASE_URL} from "@/constants/appConfig"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {getAr99DisplayName, getAr99ImageSource} from "@/utils/getGlassesImage"
 import {ThemedStyle} from "@/theme"
 
@@ -299,7 +299,7 @@ export default function PairingPrepScreen() {
     )
   }
 
-  const MentraDisplayGlassesPairingGuide = () => {
+  const VeillerDisplayGlassesPairingGuide = () => {
     return (
       <View className="flex-1 flex-col justify-start mt-6">
         <Text text="Mentra Display" className="text-2xl font-bold mb-4 text-secondary-foreground" />
@@ -475,7 +475,7 @@ export default function PairingPrepScreen() {
       case DeviceTypes.Z100:
         return <VuzixZ100PairingGuide />
       case DeviceTypes.NEX:
-        return <MentraDisplayGlassesPairingGuide />
+        return <VeillerDisplayGlassesPairingGuide />
       case DeviceTypes.NIMO:
         return <NimoPairingGuide />
       case DeviceTypes.AR99:
@@ -504,7 +504,7 @@ export default function PairingPrepScreen() {
         title={displayName}
         leftIcon="chevron-left"
         onLeftPress={goBack}
-        RightActionComponent={<MentraLogoStandalone />}
+        RightActionComponent={<VeillerLogoStandalone />}
       />
       {renderGuide()}
       {renderButtons()}

@@ -1,6 +1,6 @@
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.recorder",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.recorder",
   "version": "1.0.7",
   "name": "Recorder",
   "description": "Capture the glasses microphone to a real audio file on your phone — record, play back, and export WAV. A debugging tool for the audio system, built on session.recorder + session.blob.",

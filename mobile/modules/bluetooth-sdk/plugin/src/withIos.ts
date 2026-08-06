@@ -6,11 +6,11 @@ import {type ConfigPlugin, withDangerousMod, withInfoPlist, withPodfile} from "e
 
 import {type BluetoothSdkPluginProps} from "./index"
 
-const BLUETOOTH_SDK_EXPO_ADAPTER_ENV = "MENTRA_BLUETOOTH_SDK_INCLUDE_EXPO_ADAPTER"
+const BLUETOOTH_SDK_EXPO_ADAPTER_ENV = "VEILLER_BLUETOOTH_SDK_INCLUDE_EXPO_ADAPTER"
 const BLUETOOTH_SDK_EXPO_ADAPTER_LINE = `ENV['${BLUETOOTH_SDK_EXPO_ADAPTER_ENV}'] ||= '1'`
-const INFO_ANALYTICS_DISABLED = "MentraBluetoothSdkAnalyticsDisabled"
-const STALE_INFO_POSTHOG_API_KEY = "MentraBluetoothSdkPostHogApiKey"
-const STALE_INFO_POSTHOG_HOST = "MentraBluetoothSdkPostHogHost"
+const INFO_ANALYTICS_DISABLED = "VeillerBluetoothSdkAnalyticsDisabled"
+const STALE_INFO_POSTHOG_API_KEY = "VeillerBluetoothSdkPostHogApiKey"
+const STALE_INFO_POSTHOG_HOST = "VeillerBluetoothSdkPostHogHost"
 
 const ensureBluetoothSdkExpoAdapterPodEnv = (podfile: string): string => {
   if (podfile.includes(BLUETOOTH_SDK_EXPO_ADAPTER_ENV)) {

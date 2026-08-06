@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document archives the RTMP relay implementation that was temporarily used in MentraOS to handle "dirty" RTMP streams from Android smart glasses. The relay was introduced in PR #698 when Cloudflare Stream Live was rejecting our streams due to irregular GOPs, variable frame rates, and timestamp issues.
+This document archives the RTMP relay implementation that was temporarily used in Veiller to handle "dirty" RTMP streams from Android smart glasses. The relay was introduced in PR #698 when Cloudflare Stream Live was rejecting our streams due to irregular GOPs, variable frame rates, and timestamp issues.
 
 **Status**: REMOVED from codebase (but relay infrastructure preserved for potential future use)
 **Removal Date**: 2025-08-04

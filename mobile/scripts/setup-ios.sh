@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# iOS Setup Script for MentraOS Mobile
+# iOS Setup Script for Veiller Mobile
 # This script automates the iOS development environment setup process
 
 set -e  # Exit on any error
@@ -117,7 +117,7 @@ run_setup() {
     
     # Step 4: Open Xcode workspace
     print_status "Opening Xcode workspace..."
-    open ios/Mentra.xcworkspace
+    open ios/Veiller.xcworkspace
     print_success "Xcode workspace opened"
     
     print_warning "Manual step required: Install a dev build on your phone using Xcode"
@@ -162,7 +162,7 @@ fix_pod_conflicts() {
 # Main execution
 main() {
     echo "=========================================="
-    echo "    MentraOS iOS Setup Script"
+    echo "    Veiller iOS Setup Script"
     echo "=========================================="
     echo
     

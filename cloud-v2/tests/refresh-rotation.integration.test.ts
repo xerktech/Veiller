@@ -23,14 +23,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:tes
   const strip = (pem: string) =>
     pem.replace(/-----BEGIN [^-]+-----/, "").replace(/-----END [^-]+-----/, "").replace(/\s+/g, "");
   const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = strip(
+  process.env.VEILLER_JWT_PRIVATE_KEY = strip(
     privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = strip(
+  process.env.VEILLER_JWT_PUBLIC_KEY = strip(
     publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
-  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/mentra-cloud-v2-test";
+  process.env.MONGO_URL ??= "mongodb://127.0.0.1:27017/veiller-cloud-v2-test";
 }
 
 // eslint-disable-next-line import/first
@@ -59,7 +59,7 @@ async function seedSession(plaintext: string): Promise<void> {
     sessionId: `sess_test_${crypto.randomBytes(8).toString("hex")}`,
     refreshTokenHash: hash(plaintext),
     mentraUserId: "mu_test_os1703",
-    tenantId: "mentra", // built-in tenant: always authorized, no OEM doc needed
+    tenantId: "veiller", // built-in tenant: always authorized, no OEM doc needed
     issuedAt: new Date(),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
@@ -168,7 +168,7 @@ describe("refresh rotation recovery (OS-1703)", () => {
       sessionId: `sess_test_${crypto.randomBytes(8).toString("hex")}`,
       refreshTokenHash: hash(stale),
       mentraUserId: "mu_test_os1703",
-      tenantId: "mentra",
+      tenantId: "veiller",
       issuedAt: new Date(Date.now() - 60_000),
       expiresAt: new Date(Date.now() - 1_000), // already expired
     });

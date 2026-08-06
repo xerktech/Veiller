@@ -6,7 +6,7 @@
  *      pod (whichever pod holds the WS). Bounded by MAXLEN ~ retained-window.
  *
  *   2. **Session-tag registry** (`sessionTag:{u32}`). Maps the u32 in UDP
- *      packet headers to a Mentra user (and which pod owns the WS). Lets a
+ *      packet headers to a Veiller user (and which pod owns the WS). Lets a
  *      pod that received a UDP packet for a session it doesn't own resolve
  *      "who is this for" without coordinating with the owner.
  *
@@ -18,7 +18,7 @@
 
 import nacl from "tweetnacl";
 import { getRedis } from "../../clients/redis.client";
-import { UDP_LIVENESS_PROBE_PREFIX } from "@mentra/cloud-protocol/audio";
+import { UDP_LIVENESS_PROBE_PREFIX } from "@veiller/cloud-protocol/audio";
 
 // === Stream constants ===
 

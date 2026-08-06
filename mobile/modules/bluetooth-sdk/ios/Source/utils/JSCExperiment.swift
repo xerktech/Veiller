@@ -1,9 +1,9 @@
 //
 //  JSCExperiment.swift
-//  MentraOS
+//  Veiller
 //
 //  Test/benchmark infrastructure. Self-contained file, never invoked in
-//  normal user flow. Triggered only when (a) MENTRA_RUN_JSC_BENCH env
+//  normal user flow. Triggered only when (a) VEILLER_RUN_JSC_BENCH env
 //  var is set at app launch, or (b) the user taps a JSC button on the
 //  (Super-Mode-gated) stress-test screen.
 //
@@ -17,7 +17,7 @@
 //   - Has __dispatch as a single bridge function (no per-method bindings,
 //     to avoid the production crash Pebble documented in CrashReproducer.kt)
 //   - Runs a representative idle workload: setInterval ping every 5 s
-//   - Names itself "MentraJS: <id>" for Safari Web Inspector
+//   - Names itself "VeillerJS: <id>" for Safari Web Inspector
 //   - Is NOT inspectable in release builds
 //
 //  Measure resident memory before and after spawning N contexts.
@@ -57,12 +57,12 @@ private func jlog(_ message: String) {
 }
 
 @objc class JSCExperiment: NSObject {
-    /// Called from BluetoothSdkModule init. If MENTRA_RUN_JSC_BENCH env var
+    /// Called from BluetoothSdkModule init. If VEILLER_RUN_JSC_BENCH env var
     /// is set, kick off the benchmark after a 5s settle window so the app
     /// is fully booted (RN bridge up, Metro pull done if dev, etc).
     @objc static func maybeAutoBenchmark() {
-        guard ProcessInfo.processInfo.environment["MENTRA_RUN_JSC_BENCH"] != nil else { return }
-        os_log("🧪 MENTRA_RUN_JSC_BENCH set — auto-running benchmark in 5s",
+        guard ProcessInfo.processInfo.environment["VEILLER_RUN_JSC_BENCH"] != nil else { return }
+        os_log("🧪 VEILLER_RUN_JSC_BENCH set — auto-running benchmark in 5s",
                log: jscLog, type: .info)
         DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 5.0) {
             runBenchmark()
@@ -71,7 +71,7 @@ private func jlog(_ message: String) {
 
     /// id → (context, virtualMachine, timer for the workload)
     private static var contexts: [String: (JSContext, JSVirtualMachine, Timer)] = [:]
-    private static let queue = DispatchQueue(label: "com.mentra.jsc-experiment")
+    private static let queue = DispatchQueue(label: "com.veiller.jsc-experiment")
 
     /// Spawn N JSContexts at once. Each gets its own VM + a representative
     /// idle workload. Returns the count successfully spawned.
@@ -99,7 +99,7 @@ private func jlog(_ message: String) {
             let vm = JSVirtualMachine()!
             let ctx = JSContext(virtualMachine: vm)!
 
-            ctx.name = "MentraJS: \(id)"
+            ctx.name = "VeillerJS: \(id)"
             // Inspectable in dev builds only. iOS 16.4+ guarded.
             #if DEBUG
                 if #available(iOS 16.4, *) {

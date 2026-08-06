@@ -4,7 +4,7 @@
  */
 
 import mongoose from "mongoose";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { WorkOS } from "@workos-inc/node";
 import { DeveloperOrgModel } from "../models/developer-org.model";
 import { DeveloperOrgInvitationModel } from "../models/developer-org-invitation.model";
@@ -52,28 +52,28 @@ export async function runStartupMigrations(): Promise<void> {
   await safeCreateInvitationIndexes();
   await backfillDeveloperOrgOwners();
   await backfillMembersFromWorkos();
-  await ensureMentraAccountOem();
+  await ensureVeillerAccountOem();
 }
 
-// Mentra's first-party account backend (issue 019) signs subject tokens that
-// are verified through the normal OEM path, which needs a `mentra` oems row
+// Veiller's first-party account backend (issue 019) signs subject tokens that
+// are verified through the normal OEM path, which needs a `veiller` oems row
 // carrying the account signing public key (static mode). Idempotent upsert;
 // skipped (non-fatal) if the account key env var is not configured yet.
-async function ensureMentraAccountOem(): Promise<void> {
-  const pubB64 = process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY?.trim();
+async function ensureVeillerAccountOem(): Promise<void> {
+  const pubB64 = process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY?.trim();
   if (!pubB64) {
-    logger.warn("MENTRA_ACCOUNT_JWT_PUBLIC_KEY not set; skipping mentra account OEM seed");
+    logger.warn("VEILLER_ACCOUNT_JWT_PUBLIC_KEY not set; skipping veiller account OEM seed");
     return;
   }
   const publicKey = `-----BEGIN PUBLIC KEY-----\n${pubB64}\n-----END PUBLIC KEY-----`;
   await OemModel.updateOne(
-    { tenantId: "mentra" },
+    { tenantId: "veiller" },
     {
       $set: { displayName: "Mentra", publicKeyMode: "static", publicKey, disabled: false },
     },
     { upsert: true },
   );
-  logger.info("ensured mentra account OEM row");
+  logger.info("ensured veiller account OEM row");
 }
 
 // The invitation collection's (orgId,email) index moved to a partial-unique

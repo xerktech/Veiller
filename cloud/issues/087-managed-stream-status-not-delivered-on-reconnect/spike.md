@@ -31,7 +31,7 @@ The only recovery is to restart the glasses.
 - **App:** `examples/stream-test/` — v3 SDK test app for managed streaming
 - **Cloud:** `cloud-debug` (us-central-debug)
 - **Glasses:** Mentra Live, connected via WiFi
-- **Tools:** BetterStack log query via MCP (source: `mentra-us-central`, ID 2321796)
+- **Tools:** BetterStack log query via MCP (source: `veiller-us-central`, ID 2321796)
 
 ### Reproduction steps
 
@@ -52,7 +52,7 @@ The only recovery is to restart the glasses.
 
 ```sql
 SELECT dt, level, service, msg, pkg
-FROM s3Cluster(primary, t373499_mentra_us_central_s3)
+FROM s3Cluster(primary, t373499_veiller_us_central_s3)
 WHERE _row_type = 1
   AND dt > now() - INTERVAL 2 HOUR
   AND userId = 'isaiahballah@gmail.com'
@@ -67,17 +67,17 @@ LIMIT 50
 
 ```
 📡 Starting managed stream in WebRTC mode (WHIP ingest → WHEP playback, low latency)
-    packageName: dev.mentra.streamtest
+    packageName: dev.veiller.streamtest
 
 Added viewer to existing managed stream
     service: StreamRegistry
 
 Skipping duplicate managed stream status       ← ROOT CAUSE
-    packageName: dev.mentra.streamtest
+    packageName: dev.veiller.streamtest
     service: ManagedStreamingExtension
 
 Managed stream request processed
-    packageName: dev.mentra.streamtest
+    packageName: dev.veiller.streamtest
     service: AppMessageHandler
 ```
 

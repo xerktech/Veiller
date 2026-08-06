@@ -5,15 +5,15 @@ import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/Onboardin
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
 import {focusEffectPreventBack, usePushPrevious} from "@/contexts/NavigationHistoryContext"
-import {engine} from "@mentra/engine"
-import type {Device} from "@mentra/bluetooth-sdk"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {engine} from "@veiller/engine"
+import type {Device} from "@veiller/bluetooth-sdk"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {routePairingKickoffFailure} from "@/utils/PairingUtils"
 import {SettingsNavigationUtils} from "@/utils/SettingsNavigationUtils"
 import {View} from "react-native"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 export default function BtClassicPairingScreen() {
   const {goBack} = useNavigationStore.getState()

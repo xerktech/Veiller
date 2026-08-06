@@ -1,6 +1,6 @@
-# MentraOS Cloud Infrastructure
+# Veiller Cloud Infrastructure
 
-A primer on the platforms and pieces that run the MentraOS
+A primer on the platforms and pieces that run the Veiller
 cloud. Operational procedures for each piece live in the
 service-specific subfolders (`porter/`, `betterstack/`,
 `cloudflare/`, `doppler/`).
@@ -126,7 +126,7 @@ We have a custom Vector config in
    kubernetes_container, log_source).
 
 This custom Vector Helm chart sends logs to the
-`MentraCloud - Prod` source (javascript type). It is separate
+`VeillerCloud - Prod` source (javascript type). It is separate
 from the BetterStack default collector (see "Log Flow" below).
 
 ### @logtail/pino
@@ -135,7 +135,7 @@ A Pino transport plugin that sends logs directly from a Bun/Node
 process to BetterStack via HTTP. Was removed from the cloud
 process in issue 067 because it caused ~15 MB/min heap growth.
 Replaced by stdout JSON picked up by Vector. Still present as a
-dependency of `@mentra/sdk`, which means MiniApps built with the
+dependency of `@veiller/sdk`, which means MiniApps built with the
 SDK may still use it.
 
 ## Clusters
@@ -181,8 +181,8 @@ porter app list --cluster 4689
 
 Notable Porter apps you will see: `cloud-prod`, `cloud-staging`,
 `cloud-dev`, `cloud-debug`, `captions`, `captions-beta`,
-`dashboard`, `translation`, `mentra-ai-2-prod`,
-`mentra-notes-prod`, plus various dev/test/example apps and
+`dashboard`, `translation`, `veiller-ai-2-prod`,
+`veiller-notes-prod`, plus various dev/test/example apps and
 streamers.
 
 ## Porter Cloud Configuration
@@ -215,13 +215,13 @@ table below describes what each one is for.
 
 | Source             | Type       | Fed by | Purpose |
 | ------------------ | ---------- | ------ | ------- |
-| `mentra-us-central` | collector  | BetterStack Collector on the US Central cluster | All cloud containers' stdout from US Central, after VRL filtering. |
-| `mentra-us-east`   | collector  | BetterStack Collector on US East cluster | Same shape, US East. |
-| `mentra-us-west`   | collector  | BetterStack Collector on US West cluster | Same shape, US West. |
-| `mentra-france`    | collector  | BetterStack Collector on France cluster | Same shape, France. |
-| `mentra-east-asia` | collector  | BetterStack Collector on East Asia cluster | Same shape, East Asia. |
-| `MentraCloud - Prod` | javascript | Custom Vector Helm chart (issue 067) on US Central; SDK `@logtail/pino` from internal MiniApps | Cloud-only logs from US Central via the custom Vector chart, plus any internal MiniApps that ship via the SDK's BetterStack transport. |
-| `AugmentOS`        | javascript | Legacy: SDK transports from before the Mentra rename | Mostly idle. Likely retire-able once we confirm nothing still ships there. |
+| `veiller-us-central` | collector  | BetterStack Collector on the US Central cluster | All cloud containers' stdout from US Central, after VRL filtering. |
+| `veiller-us-east`   | collector  | BetterStack Collector on US East cluster | Same shape, US East. |
+| `veiller-us-west`   | collector  | BetterStack Collector on US West cluster | Same shape, US West. |
+| `veiller-france`    | collector  | BetterStack Collector on France cluster | Same shape, France. |
+| `veiller-east-asia` | collector  | BetterStack Collector on East Asia cluster | Same shape, East Asia. |
+| `VeillerCloud - Prod` | javascript | Custom Vector Helm chart (issue 067) on US Central; SDK `@logtail/pino` from internal MiniApps | Cloud-only logs from US Central via the custom Vector chart, plus any internal MiniApps that ship via the SDK's BetterStack transport. |
+| `AugmentOS`        | javascript | Legacy: SDK transports from before the Veiller rename | Mostly idle. Likely retire-able once we confirm nothing still ships there. |
 
 ## Collector configuration
 
@@ -232,7 +232,7 @@ above, with a VRL filter limiting to cloud containers
 
 Additionally, US Central runs the older custom Vector Helm
 chart (the one in `cloud/infra/betterstack-logs/values.yaml`),
-which has its own filter and ships to `MentraCloud - Prod`.
+which has its own filter and ships to `VeillerCloud - Prod`.
 This is a deliberate duplicate path for US Central cloud logs.
 Other regions only have the collector path.
 
@@ -256,9 +256,9 @@ flowchart TD
   A["Cloud (Bun)<br/>LOG_STDOUT_JSON=true"]
   B["Container stdout<br/>structured Pino JSON, info level and above"]
   C["Custom Vector DaemonSet<br/>filters to cloud containers<br/>(US Central only)"]
-  D["MentraCloud - Prod source"]
+  D["VeillerCloud - Prod source"]
   E["BetterStack default collector<br/>VRL filter to cloud-* containers<br/>(every cluster)"]
-  F["Regional source<br/>mentra-{region}"]
+  F["Regional source<br/>veiller-{region}"]
 
   A --> B
   B --> C
@@ -267,7 +267,7 @@ flowchart TD
   E --> F
 ```
 
-`MentraCloud - Prod` carries cloud logs from US Central only
+`VeillerCloud - Prod` carries cloud logs from US Central only
 (the custom Vector chart only runs there). The regional sources
 each carry their own region's cloud logs.
 
@@ -284,7 +284,7 @@ console via `pino-pretty`. Nothing ships to BetterStack.
 MiniApps write to stdout. Some internal MiniApps additionally
 ship via the SDK's `@logtail/pino` transport when
 `BETTERSTACK_SOURCE_TOKEN` is set, landing in
-`MentraCloud - Prod` directly.
+`VeillerCloud - Prod` directly.
 
 The collector's VRL filter excludes MiniApp containers (it only
 keeps `cloud-*` containers), so MiniApp stdout is NOT picked up
@@ -306,9 +306,9 @@ logs to stdout in production, the collector ships them.
 
 ### Cloud log double ingestion on US Central
 
-Cloud logs on US Central go to both `MentraCloud - Prod` (via
-the custom Vector Helm chart) and `mentra-us-central` (via the
-BetterStack Collector). Intentional for now: `MentraCloud - Prod`
+Cloud logs on US Central go to both `VeillerCloud - Prod` (via
+the custom Vector Helm chart) and `veiller-us-central` (via the
+BetterStack Collector). Intentional for now: `VeillerCloud - Prod`
 has Pino-flattened fields and aligns with how queries used to
 be written, while the regional sources have current-format data
 plus infrastructure metrics. A future cleanup could remove the

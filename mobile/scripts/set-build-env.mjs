@@ -84,7 +84,7 @@ export async function setBuildEnv() {
   // Snapshot which variables were already set in the real environment BEFORE
   // dotenv loads .env. Those keep their values (standard dotenv semantics:
   // explicit environment beats .env file). CI relies on this — it injects the
-  // release-signing credentials (ORG_GRADLE_PROJECT_MENTRAOS_UPLOAD_*) as env
+  // release-signing credentials (ORG_GRADLE_PROJECT_VEILLER_UPLOAD_*) as env
   // vars while its .env is a verbatim copy of .env.example; letting the file
   // win clobbered them with empty strings and silently downgraded staging
   // release builds to debug signing (broken Play internal uploads, June 2026).

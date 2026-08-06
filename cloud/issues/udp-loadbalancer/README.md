@@ -131,7 +131,7 @@ EXPO_PUBLIC_UDP_HOST_OVERRIDE=<prod-udp-ip>
 
 | Cluster ID | Name                      | Region         |
 | ---------- | ------------------------- | -------------- |
-| 4689       | mentra-cluster-central-us | US Central     |
+| 4689       | veiller-cluster-central-us | US Central     |
 | 4696       | france                    | France Central |
 | 4754       | east-asia                 | East Asia      |
 | 4753       | canada-central            | Canada Central |

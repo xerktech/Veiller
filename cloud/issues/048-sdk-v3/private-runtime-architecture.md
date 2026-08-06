@@ -2,7 +2,7 @@
 
 **Issue:** 048  
 **Status:** Working spec  
-**Scope:** Hidden/internal SDK runtime design for `MiniAppServer`, `MentraSession`, transport, routing, subscriptions, lifecycle, and compatibility  
+**Scope:** Hidden/internal SDK runtime design for `MiniAppServer`, `VeillerSession`, transport, routing, subscriptions, lifecycle, and compatibility  
 **Date:** 2026-03-14  
 **Updated:** 2026-03-19 — naming decisions, internal class consolidation, v2 shim naming
 
@@ -36,11 +36,11 @@ The internal runtime must:
 
 1. Keep the current cloud wire protocol working.
 2. Preserve backward compatibility for legacy SDK apps during the transition.
-3. Make `MentraSession` transport-agnostic so the same session API can later run outside Node.
+3. Make `VeillerSession` transport-agnostic so the same session API can later run outside Node.
 4. Make subscriptions derived from handler registrations, not manually maintained state.
 5. Keep subsystem logic inside managers instead of one giant session class.
 6. Support reconnection without treating every transport loss as session death.
-7. Support a parked/reattach state where the cloud can temporarily defer reconnect acceptance during cloud restart/bootstrap without forcing the SDK to destroy `MentraSession` state.
+7. Support a parked/reattach state where the cloud can temporarily defer reconnect acceptance during cloud restart/bootstrap without forcing the SDK to destroy `VeillerSession` state.
 
 ---
 
@@ -66,7 +66,7 @@ The internal runtime has three layers:
    - cloud/server host
    - owns HTTP endpoints, webhook ingress, and session creation
 
-2. `MentraSession`
+2. `VeillerSession`
    - per-user runtime orchestrator
    - owns transport lifecycle, routing, subscriptions, and manager instances
 
@@ -88,7 +88,7 @@ There is also an explicit distinction between:
 
 - public runtime classes
   - `MiniAppServer`
-  - `MentraSession`
+  - `VeillerSession`
   - public subsystem managers such as `TranscriptionManager`, `MicManager`, `SpeakerManager`
 - private implementation managers
   - underscore-prefixed internal classes such as `_SessionLifecycleManager` or `_SubscriptionManager`
@@ -101,12 +101,12 @@ The purpose of the underscore-prefixed layer is to keep the public top-level cla
 
 ### `MiniAppServer`
 
-`MiniAppServer` is the cloud-only host wrapper. Named `MiniAppServer` (not `MentraApp`) to avoid confusion with future local apps that don't need a server. See `decisions.md` D-002.
+`MiniAppServer` is the cloud-only host wrapper. Named `MiniAppServer` (not `VeillerApp`) to avoid confusion with future local apps that don't need a server. See `decisions.md` D-002.
 
 It owns:
 
 - Hono app construction (extends `AppServer` during transition)
-- Mentra webhook/tool/settings/health/photo-upload routes
+- Veiller webhook/tool/settings/health/photo-upload routes
 - route aliasing for current cloud compatibility
 - `_SessionManager` — creates, tracks, and disposes session instances
 - bridging incoming cloud webhook events into per-user session startup and shutdown
@@ -120,9 +120,9 @@ It does **not** own:
 - subsystem behavior like transcription, audio, notifications, location
 - detailed internal workflow logic when that logic can live in a private underscore-prefixed runtime manager
 
-### `MentraSession`
+### `VeillerSession`
 
-`MentraSession` is the real per-user runtime object.
+`VeillerSession` is the real per-user runtime object.
 
 It owns:
 
@@ -140,7 +140,7 @@ It owns:
 
 It should remain relatively thin. Its job is orchestration, not feature logic.
 
-It should also remain readable. If the class starts accumulating substantial hidden workflow logic, that logic should move into private underscore-prefixed runtime managers rather than turning `MentraSession` into a large god object.
+It should also remain readable. If the class starts accumulating substantial hidden workflow logic, that logic should move into private underscore-prefixed runtime managers rather than turning `VeillerSession` into a large god object.
 
 It must also be able to preserve session-scoped in-memory state through three distinct cases:
 
@@ -207,7 +207,7 @@ These names are illustrative, not mandatory, but the pattern is intentional:
 
 - underscore prefix means internal/private runtime implementation
 - these classes may change freely without implying public API support
-- they exist to keep `MiniAppServer` and `MentraSession` lean
+- they exist to keep `MiniAppServer` and `VeillerSession` lean
 
 Rule of thumb:
 
@@ -220,12 +220,12 @@ This is preferred over allowing the top-level public runtime classes to accumula
 
 ## Transport Boundary
 
-`MentraSession` must depend on `Transport`, not directly on `ws`.
+`VeillerSession` must depend on `Transport`, not directly on `ws`.
 
 Current transport contracts:
 
-- [`cloud/packages/sdk/src/transport/Transport.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/sdk/src/transport/Transport.ts)
-- [`cloud/packages/sdk/src/transport/WebSocketTransport.ts`](/Users/isaiah/Documents/Mentra/MentraOS/cloud/packages/sdk/src/transport/WebSocketTransport.ts)
+- [`cloud/packages/sdk/src/transport/Transport.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/sdk/src/transport/Transport.ts)
+- [`cloud/packages/sdk/src/transport/WebSocketTransport.ts`](/Users/isaiah/Documents/Veiller/Veiller/cloud/packages/sdk/src/transport/WebSocketTransport.ts)
 
 Required transport responsibilities:
 
@@ -307,7 +307,7 @@ Raw PCM audio arrives as binary WebSocket frames. These bypass JSON routing enti
 ### Ownership
 
 - `_MessageRouter` owns both registries (wrapped in a thin class)
-- `MentraSession` creates `_MessageRouter` and registers the bridge between stage 1 and stage 2
+- `VeillerSession` creates `_MessageRouter` and registers the bridge between stage 1 and stage 2
 - managers register only for the message or stream keys they care about
 
 This replaces the legacy 413-line `handleMessage()` if/else chain.
@@ -355,7 +355,7 @@ Examples:
 
 For this pass, `SUBSCRIPTION_UPDATE` message shape must remain compatible with the current cloud.
 
-The bookkeeping behind this may be implemented in a private `_SubscriptionManager` rather than directly inside `MentraSession`, and that is the preferred direction if session code starts becoming noisy.
+The bookkeeping behind this may be implemented in a private `_SubscriptionManager` rather than directly inside `VeillerSession`, and that is the preferred direction if session code starts becoming noisy.
 
 ---
 
@@ -384,12 +384,12 @@ The runtime should consider these internal state groups canonical.
 
 - `MessageHandlerRegistry` — top-level message type dispatch
 - `DataStreamRouter` — DATA_STREAM streamType dispatch with prefix matching
-- manager cleanup callbacks (stored in `cleanupTasks` array on MentraSession)
+- manager cleanup callbacks (stored in `cleanupTasks` array on VeillerSession)
 
 ### Cloud-provided session state
 
 - app settings
-- MentraOS settings
+- Veiller settings
 - capabilities
 - app config
 
@@ -400,7 +400,7 @@ The runtime should consider these internal state groups canonical.
 
 These should remain private to the session runtime, not exposed as public mutable fields.
 
-They also do not all need to live directly on `MentraSession` if a private internal manager is the cleaner owner.
+They also do not all need to live directly on `VeillerSession` if a private internal manager is the cleaner owner.
 
 ---
 
@@ -408,13 +408,13 @@ They also do not all need to live directly on `MentraSession` if a private inter
 
 The expected lifecycle is:
 
-1. `MiniAppServer` creates a `MentraSession`
+1. `MiniAppServer` creates a `VeillerSession`
 2. transport connects
 3. session sends `CONNECTION_INIT`
 4. cloud returns `CONNECTION_ACK`
 5. session applies:
    - settings
-   - MentraOS settings
+   - Veiller settings
    - capabilities
 6. session starts ping keepalive
 7. session sends current `SUBSCRIPTION_UPDATE`
@@ -494,7 +494,7 @@ Some managers use a subset (e.g., `PermissionsManager` only needs `{logger}`, `T
 This is intentional:
 
 - keeps managers testable (mock the bag, test the manager)
-- reduces coupling (no manager imports MentraSession)
+- reduces coupling (no manager imports VeillerSession)
 - allows the runtime to evolve without rewriting every manager
 - enables future local-app runtime to provide the same bag with different implementations
 
@@ -511,7 +511,7 @@ This must stay explicit.
 The target runtime is:
 
 - `MiniAppServer` (cloud host)
-- real `MentraSession` (per-user session)
+- real `VeillerSession` (per-user session)
 - manager-based subsystem APIs (14 managers)
 
 ### Legacy compatibility (v2 shims)
@@ -520,10 +520,10 @@ The compatibility surface is implemented as `_V2*Shim` classes in `session/inter
 
 | Shim                  | What it provides                                                                                                    | Delegates to                                            |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `_V2SessionShim`      | `session.layouts`, `session.audio`, `session.simpleStorage`, `session.events`, `session.settings`, `session.camera` | v3 managers via MentraSession                           |
+| `_V2SessionShim`      | `session.layouts`, `session.audio`, `session.simpleStorage`, `session.events`, `session.settings`, `session.camera` | v3 managers via VeillerSession                           |
 | `_V2EventManagerShim` | `session.events.onTranscription()`, `onButtonPress()`, `onPhoneNotifications()`, etc.                               | TranscriptionManager, DeviceManager, PhoneManager, etc. |
 | `_V2CameraShim`       | `requestPhoto()`, `startStream()`, `startManagedStream()`, etc.                                                     | CameraManager                                           |
-| `_V2SettingsShim`     | `settings.get()`, `settings.has()`, `settings.onChange()`                                                           | MentraSession.settingsData                              |
+| `_V2SettingsShim`     | `settings.get()`, `settings.has()`, `settings.onChange()`                                                           | VeillerSession.settingsData                              |
 | `_V2AudioStreamShim`  | EventEmitter-style `.on("close", ...)` on AudioOutputStream                                                         | SpeakerManager's AudioOutputStream                      |
 
 The compatibility layer wraps the new runtime, not the other way around. Old public names forward to new internals — never the reverse.
@@ -532,9 +532,9 @@ The compatibility layer wraps the new runtime, not the other way around. Old pub
 
 ### Current transition state
 
-`MiniAppServer` extends the v2 `AppServer` for backward compat. When a v3-style `app.onSession((session) => {...})` callback is registered, webhooks flow through `_SessionManager` → `MentraSession` → v3 runtime. When a v2-style subclass overrides `onSession(session, sessionId, userId)`, it goes through the old `AppServer` path entirely.
+`MiniAppServer` extends the v2 `AppServer` for backward compat. When a v3-style `app.onSession((session) => {...})` callback is registered, webhooks flow through `_SessionManager` → `VeillerSession` → v3 runtime. When a v2-style subclass overrides `onSession(session, sessionId, userId)`, it goes through the old `AppServer` path entirely.
 
-This dual path is temporary. The goal is for all paths to flow through `MentraSession` once v2 compat is verified.
+This dual path is temporary. The goal is for all paths to flow through `VeillerSession` once v2 compat is verified.
 
 ---
 
@@ -565,9 +565,9 @@ These internals are not equally stable yet.
 
 The following should be considered decided unless we find a concrete incompatibility:
 
-1. `MiniAppServer` is the cloud host abstraction. Not `MentraApp` — that name is reserved for potential future use.
-2. `MentraSession` is the real per-user runtime abstraction.
-3. `MentraSession` depends on `Transport`, not `ws`.
+1. `MiniAppServer` is the cloud host abstraction. Not `VeillerApp` — that name is reserved for potential future use.
+2. `VeillerSession` is the real per-user runtime abstraction.
+3. `VeillerSession` depends on `Transport`, not `ws`.
 4. Message routing is registry-based, not giant conditional-chain based.
 5. Subscriptions are derived from handler registrations.
 6. Managers are the primary private subsystem boundary.
@@ -575,7 +575,7 @@ The following should be considered decided unless we find a concrete incompatibi
 8. Internal classes use `_` prefix: `_SessionManager`, `_ConnectionManager`, `_SubscriptionManager`, `_MessageRouter`.
 9. V2 compat shims use `_V2` prefix + `Shim` suffix: `_V2SessionShim`, `_V2EventManagerShim`, etc.
 10. Server-level internals (`_SessionManager`) consolidate factory + registry + lifecycle into one class.
-11. `MentraSession` and `MiniAppServer` stay thin — complex stateful logic is extracted to `_`-prefixed internals.
+11. `VeillerSession` and `MiniAppServer` stay thin — complex stateful logic is extracted to `_`-prefixed internals.
 12. Binary audio frames bypass JSON routing and go directly to `MicManager.handleBinaryAudio()`.
 13. Handler errors are isolated — a buggy handler cannot crash the session, transport, or other managers.
 
@@ -585,7 +585,7 @@ The following should be considered decided unless we find a concrete incompatibi
 
 These details are still allowed to evolve during implementation:
 
-1. whether `MiniAppServer` swaps directly to `MentraSession` or via a compat adapter first
+1. whether `MiniAppServer` swaps directly to `VeillerSession` or via a compat adapter first
 2. exact shape of legacy session shim properties and deprecation helpers
 3. whether some managers are gated or partially deferred in the first runtime cutover
 4. what minimal additive cloud changes are required for the new runtime to behave safely

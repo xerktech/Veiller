@@ -138,7 +138,7 @@ No other apps use it. It exists solely for this bad design that **isn't even bei
 | File                          | What to Add                                                       |
 | ----------------------------- | ----------------------------------------------------------------- |
 | `apps/Dashboard/src/index.ts` | `userTimezone` in session info                                    |
-| `apps/Dashboard/src/index.ts` | Read timezone from `session.settings.getMentraOS("userTimezone")` |
+| `apps/Dashboard/src/index.ts` | Read timezone from `session.settings.getVeiller("userTimezone")` |
 | `apps/Dashboard/src/index.ts` | Subscribe to timezone changes via settings                        |
 
 ### Mobile (Coordinate with mobile team)

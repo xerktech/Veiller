@@ -1,8 +1,8 @@
 /**
- * @fileoverview Transport abstraction for @mentra/miniapp.
+ * @fileoverview Transport abstraction for @veiller/miniapp.
  *
  * Two v1 implementations:
- *   - PostMessageTransport — inside MentraOS WebView, uses window.ReactNativeWebView
+ *   - PostMessageTransport — inside Veiller WebView, uses window.ReactNativeWebView
  *   - LocalSocketTransport — in external Safari/Chrome fallback, uses ws://127.0.0.1
  *
  * createTransport() in auto.ts picks the right one based on environment.

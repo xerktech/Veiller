@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback, useRef} from "react"
-import {useMentraAuth} from "@mentra/react"
+import {useVeillerAuth} from "@veiller/react"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -19,7 +19,7 @@ interface PhotoTestResult {
 // ─── App ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const {userId, isLoading, error, isAuthenticated} = useMentraAuth()
+  const {userId, isLoading, error, isAuthenticated} = useVeillerAuth()
 
   if (isLoading) {
     return (
@@ -40,12 +40,12 @@ export default function App() {
           {error ? (
             <p className="text-red-400 text-sm mb-4">{error}</p>
           ) : (
-            <p className="text-neutral-400 text-sm mb-4">Open this page from the MentraOS app, or sign in below.</p>
+            <p className="text-neutral-400 text-sm mb-4">Open this page from the Veiller app, or sign in below.</p>
           )}
-          <a href="/mentra-auth" className="inline-block">
+          <a href="/veiller-auth" className="inline-block">
             <img
               src="https://account.mentra.glass/sign-in-mentra.png"
-              alt="Sign in with Mentra"
+              alt="Sign in with Veiller"
               width={160}
               height={56}
               className="mx-auto"

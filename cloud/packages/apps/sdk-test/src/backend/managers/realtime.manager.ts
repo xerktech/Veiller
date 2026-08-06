@@ -1,5 +1,5 @@
 import type {UserSession} from "../UserSession"
-import type {AppSession} from "@mentra/sdk"
+import type {AppSession} from "@veiller/sdk"
 import type {RealtimeProvider, ProviderType, ProviderConfig} from "./realtime-provider"
 import {OpenAIRealtimeProvider} from "./openai-realtime.provider"
 import {GeminiRealtimeProvider} from "./gemini-realtime.provider"

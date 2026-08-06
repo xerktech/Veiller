@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "cloud-v2",
@@ -10,20 +9,20 @@
       },
     },
     "packages/auth": {
-      "name": "@mentra/auth",
+      "name": "@veiller/auth",
       "version": "0.1.0-dev.0",
       "dependencies": {
         "jose": "^5.9.6",
       },
     },
     "packages/cli": {
-      "name": "@mentra/cli",
+      "name": "@veiller/cli",
       "version": "2.0.0-dev.0",
       "bin": {
-        "mentra": "./src/index.ts",
+        "veiller": "./src/index.ts",
       },
       "dependencies": {
-        "@mentra/miniapp-cli": "file:../../../sdk/miniapp-cli",
+        "@veiller/miniapp-cli": "file:../../../sdk/miniapp-cli",
         "commander": "^14.0.2",
         "qrcode": "^1.5.4",
       },
@@ -33,10 +32,10 @@
       },
     },
     "packages/cloud-client": {
-      "name": "@mentra/cloud-client",
+      "name": "@veiller/cloud-client",
       "version": "0.1.0-dev.0",
       "dependencies": {
-        "@mentra/cloud-protocol": "^0.1.0-dev.0",
+        "@veiller/cloud-protocol": "^0.1.0-dev.0",
         "tweetnacl": "^1.0.3",
       },
       "devDependencies": {
@@ -51,10 +50,10 @@
       ],
     },
     "packages/core": {
-      "name": "@mentra/cloud-core",
+      "name": "@veiller/cloud-core",
       "version": "0.0.0",
       "dependencies": {
-        "@mentra/cloud-shared": "workspace:*",
+        "@veiller/cloud-shared": "workspace:*",
         "@workos-inc/node": "^10.3.0",
         "hono": "^4.11.1",
         "jose": "^5.9.6",
@@ -64,26 +63,26 @@
       },
     },
     "packages/protocol": {
-      "name": "@mentra/cloud-protocol",
+      "name": "@veiller/cloud-protocol",
       "version": "0.1.0-dev.0",
       "dependencies": {
         "zod": "^3.24.1",
       },
     },
     "packages/proxy": {
-      "name": "@mentra/cloud-proxy",
+      "name": "@veiller/cloud-proxy",
       "version": "0.0.0",
       "dependencies": {
-        "@mentra/cloud-shared": "workspace:*",
+        "@veiller/cloud-shared": "workspace:*",
       },
     },
     "packages/runtime": {
-      "name": "@mentra/cloud-runtime",
+      "name": "@veiller/cloud-runtime",
       "version": "0.0.0",
       "dependencies": {
-        "@mentra/cloud-protocol": "^0.1.0-dev.0",
-        "@mentra/cloud-shared": "workspace:*",
         "@soniox/node": "^2.1.0",
+        "@veiller/cloud-protocol": "^0.1.0-dev.0",
+        "@veiller/cloud-shared": "workspace:*",
         "hono": "^4.11.1",
         "ioredis": "^5.4.1",
         "tweetnacl": "^1.0.3",
@@ -92,7 +91,7 @@
       },
     },
     "packages/shared": {
-      "name": "@mentra/cloud-shared",
+      "name": "@veiller/cloud-shared",
       "version": "0.0.0",
       "dependencies": {
         "hono": "^4.11.1",
@@ -104,14 +103,14 @@
       },
     },
     "test/test-client": {
-      "name": "@mentra/test-client",
+      "name": "@veiller/test-client",
       "version": "0.0.0",
       "dependencies": {
         "tweetnacl": "^1.0.3",
       },
     },
     "test/test-oem": {
-      "name": "@mentra/test-oem",
+      "name": "@veiller/test-oem",
       "version": "0.0.0",
       "dependencies": {
         "hono": "^4.11.1",
@@ -119,7 +118,7 @@
       },
     },
     "websites/admin": {
-      "name": "@mentra/cloud-v2-admin",
+      "name": "@veiller/cloud-v2-admin",
       "version": "0.1.0",
       "dependencies": {
         "@radix-ui/react-label": "^2.1.7",
@@ -144,7 +143,7 @@
       },
     },
     "websites/console": {
-      "name": "@mentra/cloud-v2-console",
+      "name": "@veiller/cloud-v2-console",
       "version": "0.1.0",
       "dependencies": {
         "@radix-ui/react-label": "^2.1.7",
@@ -172,7 +171,7 @@
       },
     },
     "websites/portal": {
-      "name": "@mentra/cloud-v2-portal",
+      "name": "@veiller/cloud-v2-portal",
       "version": "0.1.0",
       "dependencies": {
         "@radix-ui/react-label": "^2.1.7",
@@ -211,32 +210,6 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
 
     "@ioredis/commands": ["@ioredis/commands@1.10.0", "", {}, "sha512-UmeW7z4LfctwoQ5wkhVzgq8tXkreED2xZGpX+Bg+zA+WJFZCT6c062AfCK/Dfk81xZnnwdhJCUMkitihRaoC2Q=="],
-
-    "@mentra/auth": ["@mentra/auth@workspace:packages/auth"],
-
-    "@mentra/cli": ["@mentra/cli@workspace:packages/cli"],
-
-    "@mentra/cloud-client": ["@mentra/cloud-client@workspace:packages/cloud-client"],
-
-    "@mentra/cloud-core": ["@mentra/cloud-core@workspace:packages/core"],
-
-    "@mentra/cloud-protocol": ["@mentra/cloud-protocol@workspace:packages/protocol"],
-
-    "@mentra/cloud-proxy": ["@mentra/cloud-proxy@workspace:packages/proxy"],
-
-    "@mentra/cloud-runtime": ["@mentra/cloud-runtime@workspace:packages/runtime"],
-
-    "@mentra/cloud-shared": ["@mentra/cloud-shared@workspace:packages/shared"],
-
-    "@mentra/cloud-v2-admin": ["@mentra/cloud-v2-admin@workspace:websites/admin"],
-
-    "@mentra/cloud-v2-console": ["@mentra/cloud-v2-console@workspace:websites/console"],
-
-    "@mentra/cloud-v2-portal": ["@mentra/cloud-v2-portal@workspace:websites/portal"],
-
-    "@mentra/test-client": ["@mentra/test-client@workspace:test/test-client"],
-
-    "@mentra/test-oem": ["@mentra/test-oem@workspace:test/test-oem"],
 
     "@mongodb-js/saslprep": ["@mongodb-js/saslprep@1.4.11", "", { "dependencies": { "sparse-bitfield": "^3.0.3" } }, "sha512-o9rAHc0IpIjuPSxRutWpE1F62x7n+4mVS4rCNHkzhIUMQcc18bb6xEq5wd2NdN0WjepIyXIppRshYI2kQDOZVA=="],
 
@@ -367,6 +340,32 @@
     "@types/whatwg-url": ["@types/whatwg-url@11.0.5", "", { "dependencies": { "@types/webidl-conversions": "*" } }, "sha512-coYR071JRaHa+xoEvvYqvnIHaVqaYrLPbsufM9BF63HkwI5Lgmy2QR8Q5K/lYDYo5AK82wOvSOS0UsLTpTG7uQ=="],
 
     "@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
+
+    "@veiller/auth": ["@veiller/auth@workspace:packages/auth"],
+
+    "@veiller/cli": ["@veiller/cli@workspace:packages/cli"],
+
+    "@veiller/cloud-client": ["@veiller/cloud-client@workspace:packages/cloud-client"],
+
+    "@veiller/cloud-core": ["@veiller/cloud-core@workspace:packages/core"],
+
+    "@veiller/cloud-protocol": ["@veiller/cloud-protocol@workspace:packages/protocol"],
+
+    "@veiller/cloud-proxy": ["@veiller/cloud-proxy@workspace:packages/proxy"],
+
+    "@veiller/cloud-runtime": ["@veiller/cloud-runtime@workspace:packages/runtime"],
+
+    "@veiller/cloud-shared": ["@veiller/cloud-shared@workspace:packages/shared"],
+
+    "@veiller/cloud-v2-admin": ["@veiller/cloud-v2-admin@workspace:websites/admin"],
+
+    "@veiller/cloud-v2-console": ["@veiller/cloud-v2-console@workspace:websites/console"],
+
+    "@veiller/cloud-v2-portal": ["@veiller/cloud-v2-portal@workspace:websites/portal"],
+
+    "@veiller/test-client": ["@veiller/test-client@workspace:test/test-client"],
+
+    "@veiller/test-oem": ["@veiller/test-oem@workspace:test/test-oem"],
 
     "@workos-inc/node": ["@workos-inc/node@10.3.0", "", { "dependencies": { "eventemitter3": "^5.0.4" } }, "sha512-UfDredHfo7ekB15DucyiMLG9Z3s2OvwMrGLE3znCoEl55wHHsSL3cvJZXBjvHDTgo2zRPLcnrOyMnVah6WnsTg=="],
 
@@ -650,9 +649,9 @@
 
     "zustand": ["zustand@5.0.14", "", { "peerDependencies": { "@types/react": ">=18.0.0", "immer": ">=9.0.6", "react": ">=18.0.0", "use-sync-external-store": ">=1.2.0" }, "optionalPeers": ["@types/react", "immer", "react", "use-sync-external-store"] }, "sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g=="],
 
-    "@mentra/cli/@mentra/miniapp-cli": ["@mentra/miniapp-cli@file:../sdk/miniapp-cli", { "dependencies": { "@clack/prompts": "^1.2.0", "jszip": "^3.10.1", "qrcode": "^1.5.4" }, "devDependencies": { "@types/qrcode": "^1.5.5", "bun-types": "^1.3.14", "typescript": "^5.0.0" }, "bin": { "mentra-miniapp": "./src/index.ts" } }],
+    "@veiller/cli/@veiller/miniapp-cli": ["@veiller/miniapp-cli@file:../sdk/miniapp-cli", { "dependencies": { "@clack/prompts": "^1.2.0", "jszip": "^3.10.1", "qrcode": "^1.5.4", "typescript": "^5.0.0" }, "devDependencies": { "@types/qrcode": "^1.5.5", "bun-types": "^1.3.14" }, "bin": { "veiller-miniapp": "./src/index.ts", "mentra-miniapp": "./src/index.ts" } }],
 
-    "@mentra/cloud-v2-console/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
+    "@veiller/cloud-v2-console/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
     "jszip/readable-stream": ["readable-stream@2.3.8", "", { "dependencies": { "core-util-is": "~1.0.0", "inherits": "~2.0.3", "isarray": "~1.0.0", "process-nextick-args": "~2.0.0", "safe-buffer": "~5.1.1", "string_decoder": "~1.1.1", "util-deprecate": "~1.0.1" } }, "sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA=="],
 

@@ -7,7 +7,7 @@
  * bindings, only Redis shared. Mirrors what Porter / K8s does in prod.
  *
  * Each pod gets its own env: PORT, AUDIO_UDP_PORT, POD_ID, advertise host/port,
- * etc. Inherits MENTRA_JWT_PUBLIC_KEY, REDIS_URL, LOG_LEVEL from parent test
+ * etc. Inherits VEILLER_JWT_PUBLIC_KEY, REDIS_URL, LOG_LEVEL from parent test
  * process.
  */
 

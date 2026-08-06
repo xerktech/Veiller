@@ -35,7 +35,7 @@ func main() {
 		log.Fatal("LIVEKIT_API_SECRET is required (set in .env or environment)")
 	}
 	if wsURL == "" {
-		wsURL = "wss://mentraos-ixrso50o.livekit.cloud"
+		wsURL = "wss://veiller-ixrso50o.livekit.cloud"
 	}
 
 	fmt.Println("=== LiveKit Go SDK Standalone Test ===")

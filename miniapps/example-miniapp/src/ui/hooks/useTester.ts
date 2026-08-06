@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react"
-import {useRpc} from "@mentra/miniapp/ui"
+import {useRpc} from "@veiller/miniapp/ui"
 
 import "../../shared/channels"
 import type {Channels} from "../../shared/channels"
@@ -11,7 +11,7 @@ import type {TesterEventPayload} from "../../shared/types"
  *
  *   - `latest`, `latestByKind(kind)`, `log`, `lastError` — streamed via
  *     `tester:event` from the background controller.
- *   - `invoke(method, args)` — `mentra.request("tester:invoke", ...)`.
+ *   - `invoke(method, args)` — `veiller.request("tester:invoke", ...)`.
  *     Returns the handler's return value; throws on error.
  */
 export function useTester(
@@ -40,8 +40,8 @@ export function useTester(
     setLatest(null)
     setLog([])
     setLastError(null)
-    mentra.send("tester:start", {iface})
-    const unsub = mentra.on("tester:event", (raw) => {
+    veiller.send("tester:start", {iface})
+    const unsub = veiller.on("tester:event", (raw) => {
       const ev = raw as TesterEventPayload
       if (ev.iface !== ifaceRef.current) return
       setLatest(ev)
@@ -53,7 +53,7 @@ export function useTester(
     })
     return () => {
       unsub()
-      mentra.send("tester:stop", {iface})
+      veiller.send("tester:stop", {iface})
     }
   }, [iface, windowSize])
 

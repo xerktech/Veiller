@@ -4,13 +4,13 @@ import {View, ActivityIndicator, Platform, Linking} from "react-native"
 import semver from "semver"
 
 import {Button, Header, Icon, Screen, Text} from "@/components/ignite"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
 import mantle from "@/services/MantleManager"
-import {SETTINGS, engine, useSetting, BgTimer} from "@mentra/engine"
+import {SETTINGS, engine, useSetting, BgTimer} from "@veiller/engine"
 import {SplashVideo} from "@/components/splash/SplashVideo"
 import {APP_STORE_URL, PLAY_STORE_URL} from "@/constants/appConfig"
 import {fetchMinimumClientVersion} from "@/utils/cloudVersion"
@@ -61,7 +61,7 @@ export default function InitScreen() {
   // Helper Functions
   const getLocalVersion = (): string | null => {
     try {
-      return process.env.EXPO_PUBLIC_MENTRAOS_VERSION || null
+      return process.env.EXPO_PUBLIC_VEILLER_VERSION || null
     } catch (error) {
       console.error("Error getting local version:", error)
       return null
@@ -293,12 +293,12 @@ export default function InitScreen() {
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]} extraAndroidInsets>
-      <Header RightActionComponent={<MentraLogoStandalone />} />
+      <Header RightActionComponent={<VeillerLogoStandalone />} />
 
       {/* Content */}
       <View className="flex-1 items-center justify-center px-6">
         {state === "outdated" ? (
-          <MentraLogoStandalone width={100} height={48} />
+          <VeillerLogoStandalone width={100} height={48} />
         ) : (
           <Icon name={statusConfig.icon as any} size={64} color={statusConfig.iconColor} />
         )}

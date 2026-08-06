@@ -7,7 +7,7 @@
  * implementations can be handled uniformly where appropriate.
  */
 
-import type { ExtendedStreamType } from "@mentra/sdk";
+import type { ExtendedStreamType } from "@veiller/sdk";
 
 import type { AppConnectionState, LocationRate } from "./AppSession";
 

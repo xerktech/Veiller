@@ -3,7 +3,7 @@ import type {
   ToolSchema,
   AppSetting,
   HardwareRequirement,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 export enum PermissionType {
   MICROPHONE = "MICROPHONE",

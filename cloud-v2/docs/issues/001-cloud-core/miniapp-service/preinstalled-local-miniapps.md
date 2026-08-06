@@ -8,7 +8,7 @@ implement from this file without review.
 The phone currently carries local miniapp assumptions in app code and dev setup.
 That is enough for one built-in test app, but it does not give the team a
 controlled way to add, remove, or upgrade preinstalled local miniapps across
-Mentra-owned and OEM-owned builds.
+Veiller-owned and OEM-owned builds.
 
 We need a cloud-core source of truth for the default local miniapp set:
 
@@ -26,7 +26,7 @@ We need a cloud-core source of truth for the default local miniapp set:
   newer and compatible.
 - Preserve explicit user intent. A user-disabled or user-removed preinstalled
   app should not be reinstalled every boot unless policy says it is mandatory.
-- Work for Mentra first and leave room for OEM-specific defaults.
+- Work for Veiller first and leave room for OEM-specific defaults.
 - Make this testable in local dev and Porter dev environments.
 
 ## Non-goals
@@ -107,7 +107,7 @@ local state.
 | Version downgrade returned | Ignore unless explicitly marked as rollback policy |
 | User removed optional app | Do not reinstall automatically |
 | Required app missing | Reinstall and surface install failure in debug/telemetry |
-| OEM registry changes | Mentra defaults and OEM defaults merge deterministically |
+| OEM registry changes | Veiller defaults and OEM defaults merge deterministically |
 | Mobile app restarts mid-install | Resume or clean partial install; no duplicate sessions |
 | Local dev registry points to Metro host | Host changes are resolved through current dev host, not stale LAN IP |
 

@@ -14,7 +14,7 @@ describe("insightToSpeechText", () => {
   })
 
   test("keeps markdown link labels without reading URLs", () => {
-    expect(insightToSpeechText("See [Mentra docs](https://mentra.glass/docs)")).toBe("See Mentra docs")
+    expect(insightToSpeechText("See [Veiller docs](https://mentra.glass/docs)")).toBe("See Veiller docs")
   })
 
   test("speaks encoded and literal comparison operators", () => {

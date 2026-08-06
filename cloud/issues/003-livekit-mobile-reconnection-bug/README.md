@@ -71,7 +71,7 @@ Transcription stops completely after mobile reconnects following WebSocket 1006 
 
 3. **Zombie Session Problem** (Major Discovery)
    - Users hitting "session already exists" on **FIRST CONNECTION** (not reconnection!)
-   - 375 failures in 7 days, 212 for one dev user (mentradevphone@gmail.com)
+   - 375 failures in 7 days, 212 for one dev user (veillerdevphone@gmail.com)
    - Caused by: Cloud crashes/restarts, bridge never cleans up session
    - Zombie sessions have `connected=true, room!=nil` but cloud is long gone
    - No TTL, no activity checks, no cleanup mechanism at all

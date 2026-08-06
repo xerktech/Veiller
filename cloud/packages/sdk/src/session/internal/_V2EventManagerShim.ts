@@ -1,4 +1,4 @@
-import { MentraSession } from "../MentraSession";
+import { VeillerSession } from "../VeillerSession";
 
 type LegacyEventName =
   | "transcription"
@@ -28,9 +28,9 @@ type LegacyEventName =
  * @internal
  */
 export class _V2EventManagerShim {
-  private readonly session: MentraSession;
+  private readonly session: VeillerSession;
 
-  constructor(session: MentraSession) {
+  constructor(session: VeillerSession) {
     this.session = session;
   }
 

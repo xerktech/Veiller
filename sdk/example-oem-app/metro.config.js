@@ -6,7 +6,7 @@ const projectRoot = __dirname
 const sdkRoot = path.resolve(projectRoot, "..") // the `sdk` workspace root
 const repoRoot = path.resolve(projectRoot, "..", "..") // monorepo root
 const modulesRoot = path.resolve(repoRoot, "mobile", "modules")
-// The `mobile` bun workspace's own node_modules — where @mentra/engine's
+// The `mobile` bun workspace's own node_modules — where @veiller/engine's
 // transitive deps (typesafe-ts, buffer, events, semver, ...) actually live on
 // disk, since engine is a member of that workspace, not sdk's. Metro's Node
 // resolution walk finds these fine, but Metro also requires the resolved path
@@ -16,7 +16,7 @@ const mobileNodeModulesRoot = path.resolve(repoRoot, "mobile", "node_modules")
 
 const config = getDefaultConfig(projectRoot)
 
-// This app lives in the `sdk` bun workspace (isolated linker), and the Mentra
+// This app lives in the `sdk` bun workspace (isolated linker), and the Veiller
 // SDK packages live under mobile/modules. Metro must watch the workspace store
 // (sdk/node_modules/.bun/*) and the modules folder so every symlinked package —
 // including transitive deps of `expo` — resolves.
@@ -33,13 +33,13 @@ config.resolver.extraNodeModules = {
   // Every monorepo package engine imports at runtime, mapped explicitly so
   // bundling never depends on which node_modules layout the installer chose
   // (bun's member-planting differs across versions).
-  "@mentra/bluetooth-sdk": path.resolve(modulesRoot, "bluetooth-sdk"),
-  "@mentra/engine": path.resolve(modulesRoot, "engine"),
-  "@mentra/crust": path.resolve(modulesRoot, "crust"),
-  "@mentra/jspolyfill": path.resolve(modulesRoot, "jspolyfill"),
-  "@mentra/miniapp": path.resolve(modulesRoot, "miniapp"),
-  "@mentra/cloud-client": path.resolve(cloudPackagesRoot, "cloud-client"),
-  "@mentra/cloud-protocol": path.resolve(cloudPackagesRoot, "protocol"),
+  "@veiller/bluetooth-sdk": path.resolve(modulesRoot, "bluetooth-sdk"),
+  "@veiller/engine": path.resolve(modulesRoot, "engine"),
+  "@veiller/crust": path.resolve(modulesRoot, "crust"),
+  "@veiller/jspolyfill": path.resolve(modulesRoot, "jspolyfill"),
+  "@veiller/miniapp": path.resolve(modulesRoot, "miniapp"),
+  "@veiller/cloud-client": path.resolve(cloudPackagesRoot, "cloud-client"),
+  "@veiller/cloud-protocol": path.resolve(cloudPackagesRoot, "protocol"),
 }
 
 // Search the app's own node_modules first (so React / React Native resolve to a

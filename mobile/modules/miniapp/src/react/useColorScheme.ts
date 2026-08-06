@@ -2,7 +2,7 @@
  * @fileoverview useColorScheme — React hook that returns the host's current
  * color scheme.
  *
- * WebView-side hook: reads `window.MentraOS.colorScheme`, injected by the host
+ * WebView-side hook: reads `window.Veiller.colorScheme`, injected by the host
  * before the miniapp's content loads. Like `useSafeArea`, this is read once at
  * mount — the host doesn't push color-scheme changes to the WebView at runtime;
  * flipping the phone's theme forces a reload.
@@ -16,11 +16,11 @@
 
 import {useState} from "react"
 
-import {getMentraOSGlobals, type MiniappColorScheme} from "../globals"
+import {getVeillerGlobals, type MiniappColorScheme} from "../globals"
 
 export function useColorScheme(): MiniappColorScheme {
   const [scheme] = useState<MiniappColorScheme>(() => {
-    return getMentraOSGlobals().colorScheme === "dark" ? "dark" : "light"
+    return getVeillerGlobals().colorScheme === "dark" ? "dark" : "light"
   })
   return scheme
 }

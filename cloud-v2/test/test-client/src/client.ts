@@ -6,7 +6,7 @@
  * SDK does, speaking the v2 protocol end to end:
  *
  *   1. Get an OEM-signed JWT from TEST OEM
- *   2. Exchange it at core for a Mentra access token
+ *   2. Exchange it at core for a Veiller access token
  *   3. Open WS to audio with `Authorization: Bearer <token>`
  *   4. Send `connection.init` (codec + initial subscriptions), receive
  *      `connection.ack` (sessionTag + UDP host:port)
@@ -49,7 +49,7 @@ const JWT_TOKEN_TYPE = "urn:ietf:params:oauth:token-type:jwt";
 const UDP_HEADER_SIZE = 6;
 const PROTOCOL_MAJOR = 2 as const;
 const PROTOCOL_VERSION = "2.0.0";
-const UDP_LIVENESS_PROBE_PREFIX = "mentra:udp-probe:";
+const UDP_LIVENESS_PROBE_PREFIX = "veiller:udp-probe:";
 
 type UdpSocket = udp.Socket<"buffer">;
 

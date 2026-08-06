@@ -15,7 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { AlertCircle, Loader2, MoveIcon } from "lucide-react";
 import { Organization } from '@/services/api.service';
 import { App } from '@/types/app';

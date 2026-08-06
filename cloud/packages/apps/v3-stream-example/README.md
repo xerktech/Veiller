@@ -9,7 +9,7 @@ A minimal v3 SDK app that streams video from Mentra Live glasses to a local rece
 3. The glasses stream video directly to your computer via SRT
 4. FFmpeg saves it as an MP4 file
 
-This uses `session.camera.startStream({ direct: url })` which sends video straight from the glasses to your URL, bypassing the MentraOS cloud relay. No internet required — just your glasses and computer on the same WiFi network.
+This uses `session.camera.startStream({ direct: url })` which sends video straight from the glasses to your URL, bypassing the Veiller cloud relay. No internet required — just your glasses and computer on the same WiFi network.
 
 ## Prerequisites
 
@@ -38,7 +38,7 @@ Edit `.env`:
 ```
 PORT=3000
 PACKAGE_NAME=your.package.name
-MENTRAOS_API_KEY=your_api_key
+VEILLER_API_KEY=your_api_key
 STREAM_URL=srt://YOUR_COMPUTER_IP:4201?mode=caller
 ```
 
@@ -83,7 +83,7 @@ Copy the ngrok URL and update your app's Public URL in the Developer Console.
 
 ### 6. Start streaming
 
-Open the Mentra app on your phone and start the stream-test app. The glasses will connect to FFmpeg and start streaming. You'll see "Streaming live" on the glasses display.
+Open the Veiller app on your phone and start the stream-test app. The glasses will connect to FFmpeg and start streaming. You'll see "Streaming live" on the glasses display.
 
 When done, stop the app on your phone. Press `Ctrl+C` in the FFmpeg terminal to finalize the MP4 file. Your recording is in the `recordings/` folder.
 
@@ -104,7 +104,7 @@ When done, stop the app on your phone. Press `Ctrl+C` in the FFmpeg terminal to 
 
 ## Using Managed Streaming Instead
 
-If you want to stream through the MentraOS cloud relay (with HLS/WebRTC viewer URLs and restreaming to YouTube/Twitch), change `startStream` in `src/index.ts`:
+If you want to stream through the Veiller cloud relay (with HLS/WebRTC viewer URLs and restreaming to YouTube/Twitch), change `startStream` in `src/index.ts`:
 
 ```typescript
 // Direct (current) — glasses → your computer

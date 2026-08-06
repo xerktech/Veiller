@@ -16,7 +16,7 @@ import { runStartupMigrations } from "../packages/core/src/migrations/startup.mi
 
 beforeAll(async () => {
   await connectMongo(
-    process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/mentra-cloud-v2-test",
+    process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/veiller-cloud-v2-test",
   );
 });
 

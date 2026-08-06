@@ -46,8 +46,8 @@ describe('generateSchema', () => {
     const schema = generateSchema() as any;
     expect(schema.properties.packageName.pattern).toBeDefined();
     const re = new RegExp(schema.properties.packageName.pattern);
-    expect(re.test('com.mentra.example')).toBe(true);
-    expect(re.test('com.mentra.example.app')).toBe(true);
+    expect(re.test('com.veiller.example')).toBe(true);
+    expect(re.test('com.veiller.example.app')).toBe(true);
     expect(re.test('justone')).toBe(false);
     expect(re.test('a.b.c.d')).toBe(true);
   });

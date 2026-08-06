@@ -210,7 +210,7 @@ Internal:
 
 **Line ~1127 (`updateCloudSubscriptions`)** — compute and pass `(hasTranscription, activeLanguage)` to coordinator.
 
-### `mobile/modules/core/android/src/main/java/com/mentra/core/CoreModule.kt`
+### `mobile/modules/core/android/src/main/java/com/veiller/core/CoreModule.kt`
 
 Add two exposed functions:
 
@@ -219,7 +219,7 @@ AsyncFunction("startLocalStt") { coreManager?.startLocalStt() }
 AsyncFunction("stopLocalStt") { coreManager?.stopLocalStt() }
 ```
 
-### `mobile/modules/core/android/src/main/java/com/mentra/core/CoreManager.kt`
+### `mobile/modules/core/android/src/main/java/com/veiller/core/CoreManager.kt`
 
 Add:
 
@@ -232,7 +232,7 @@ fun stopLocalStt() {
 }
 ```
 
-### `mobile/modules/core/android/src/main/java/com/mentra/core/stt/SherpaOnnxTranscriber.kt`
+### `mobile/modules/core/android/src/main/java/com/veiller/core/stt/SherpaOnnxTranscriber.kt`
 
 Verify `start()` / `stop()` exist (they should — `running: AtomicBoolean` at line 46 and worker thread lifecycle at line 248-255). If not, add them:
 

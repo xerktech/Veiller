@@ -88,7 +88,7 @@ The subscription service will:
 Path: `/packages/cloud/src/services/permissions/simple-permission-checker.ts`
 
 ```typescript
-import { PermissionType } from '@mentra/sdk';
+import { PermissionType } from '@veiller/sdk';
 import { AppI } from '../../models/app.model';
 
 /**

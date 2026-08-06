@@ -16,7 +16,7 @@
  *
  * Started by `engine.start()`. Idempotent.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {shallow} from "zustand/shallow"
 
 import localMiniappRuntime from "./LocalMiniappRuntime"

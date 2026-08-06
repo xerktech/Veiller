@@ -1,6 +1,6 @@
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.merge",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.merge",
   "version": "0.1.29",
   "name": "Merge",
   "description": "Merge proactive AI assistant. Listens to conversations and surfaces concise contextual insights through a backend that keeps AI secrets off-device.",

@@ -23,7 +23,7 @@ This doc is the entry point for the second round of work after the initial minia
 
 ### `miniapp-less-reacty-example-spec.md`
 
-- **Repo to mirror: Merge-style** (single `CaptionsController` class, inline handlers). Document Mentra-AI's manager-fleet pattern as the recommended path when an app has 5+ concerns.
+- **Repo to mirror: Merge-style** (single `CaptionsController` class, inline handlers). Document Veiller-AI's manager-fleet pattern as the recommended path when an app has 5+ concerns.
 - **Vanilla (non-React) template variant: deferred** to a follow-up. Get the React example right first.
 - **Store: Zustand.** Parity with the broader `mobile/` codebase.
 - **Soft-disconnect grace period: none in V1.** Local miniapps disconnect rarely.
@@ -37,19 +37,19 @@ This doc is the entry point for the second round of work after the initial minia
 - **Cross-machine packageName collision:** silently update. PackageName is identity.
 - **DEV indicator:** orange dot in the top-right of the icon. Hook into the shared app-icon component.
 - **Bundle caching ships in V1.** Reuse `Composer.getBundleDir` / `installMiniApp` install pipeline. Cache lives at `Paths.document/lmas/<packageName>/dev-<timestamp>/`. Live `devUrl` preferred when reachable; cached bundle is the silent fallback. Removal deletes all `dev-*` dirs for the package.
-- **File list comes from a dev-server manifest endpoint** (`GET /__mentra_dev/files` returns `{files: [...]}`). The CLI generates it by walking the project tree, excluding `node_modules` / `dist` / `.git` / `.env*`. Robust to any framework (Vite, Next, code-split). For dev servers that can't enumerate (Vite on-demand mode), CLI walks the source tree directly.
+- **File list comes from a dev-server manifest endpoint** (`GET /__veiller_dev/files` returns `{files: [...]}`). The CLI generates it by walking the project tree, excluding `node_modules` / `dist` / `.git` / `.env*`. Robust to any framework (Vite, Next, code-split). For dev servers that can't enumerate (Vite on-demand mode), CLI walks the source tree directly.
 - **Offline cache fallback is always silent.** Toast says "Dev server offline — running cached version (cached N days ago)." No threshold, no interrupt. Cache age is informational only.
 - **Bug-report path:** skip `submitMiniappStartFailedBugReport` when `applet.isMiniappDev === true`. Console log only.
 
 ### `miniapp-quick-fixes-spec.md`
 
-- **Live-reload client lives in the SDK.** `@mentra/miniapp` auto-injects when `miniappDeveloperMode === true`. Production miniapps don't ship the bytes.
-- **Reload + log forwarding share one `__mentra_dev` WebSocket.** Multiplexed, no second connection.
+- **Live-reload client lives in the SDK.** `@veiller/miniapp` auto-injects when `miniappDeveloperMode === true`. Production miniapps don't ship the bytes.
+- **Reload + log forwarding share one `__veiller_dev` WebSocket.** Multiplexed, no second connection.
 - **Wire format: simple JSON-tagged messages.** `{type: "reload"}`, `{type: "log", level, args, packageName, timestamp}`. Extend with new `type` strings as needed.
 - **Object serialization in the bridge:** `JSON.stringify` with circular-safe handling, `Error.stack` extraction. `console.trace/table/group` deferred.
 - **Production gate is the single `miniappDeveloperMode` flag.** Sufficient because the shim is only injected via `mountDev`.
-- **CLI surfaces: both object-verb subcommands AND interactive `mentra-miniapp manifest` wizard.** Different audiences, shared backend. Strict validation: unknown types and duplicates fail loudly with closest-match suggestion.
-- **JSON Schema: local-resolved only for V1.** `$schema` points at `./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json`. No hosted URL infrastructure. Single schema file, no `schemaVersion` field yet.
+- **CLI surfaces: both object-verb subcommands AND interactive `veiller-miniapp manifest` wizard.** Different audiences, shared backend. Strict validation: unknown types and duplicates fail loudly with closest-match suggestion.
+- **JSON Schema: local-resolved only for V1.** `$schema` points at `./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json`. No hosted URL infrastructure. Single schema file, no `schemaVersion` field yet.
 - **MockTransport ships in this spec (#6).** Stage-1 stopgap moved out of simulator spec.
 
 ### `miniapp-sdk-v3-alignment-spec.md`
@@ -92,15 +92,15 @@ This spec is intentionally a stub. Stage-1 (MockTransport) shipped as part of qu
 
 ### npm publish (item #4 in the feedback round)
 
-The original feedback was "SDK doesn't work outside the monorepo, had to bun-link everything." The actual fix is publishing `@mentra/miniapp`, `@mentra/miniapp-cli`, `create-mentra-miniapp` to npm.
+The original feedback was "SDK doesn't work outside the monorepo, had to bun-link everything." The actual fix is publishing `@veiller/miniapp`, `@veiller/miniapp-cli`, `create-veiller-miniapp` to npm.
 
 Reasons to defer:
 
 - The packages are at `0.1.0`. The SDK surface is going to change as part of `miniapp-sdk-surface-alignment-spec.md`. Publishing now means publishing a version we'll break in two weeks.
-- Publishing to npm is a release-engineering project on its own (changesets, npm 2FA, ownership of `@mentra` org, automated publish from CI, version tagging, deprecation policy for older versions). Not in scope for the dev-ex improvement round.
+- Publishing to npm is a release-engineering project on its own (changesets, npm 2FA, ownership of `@veiller` org, automated publish from CI, version tagging, deprecation policy for older versions). Not in scope for the dev-ex improvement round.
 - The "scaffolder rewrites `workspace:*`" hack I floated in the feedback discussion isn't worth the maintenance burden until we have a publish target. Drop it.
 
-When we're ready: track as its own dedicated effort. The example template's `package.json` and the `create-mentra-miniapp` template both reference `"@mentra/miniapp": "workspace:*"` — those need to flip to a real semver range as part of the publish task.
+When we're ready: track as its own dedicated effort. The example template's `package.json` and the `create-veiller-miniapp` template both reference `"@veiller/miniapp": "workspace:*"` — those need to flip to a real semver range as part of the publish task.
 
 ### React hooks expansion
 

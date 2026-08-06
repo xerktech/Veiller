@@ -17,7 +17,7 @@ All changes are additive to `AppServerConfig` — existing apps continue to work
 1. A third-party developer running `bun run dev` sees ≤3 SDK lines on a clean startup.
 2. Errors are one line with color, not 15-line pino-pretty YAML blocks.
 3. Every error has exactly one output path (no triple-logging).
-4. Mentra engineers can flip to full verbose output with one env var.
+4. Veiller engineers can flip to full verbose output with one env var.
 5. BetterStack transport is unaffected (silent, undocumented, stays as-is).
 6. Backward compatible — no existing code breaks.
 
@@ -43,18 +43,18 @@ Single-line, colored, human-readable. Uses chalk (already a dependency) to write
 Format:
 
 ```
-MentraOS  ✓ App server running on port 7010
-MentraOS  ✓ Connected — user bob@example.com
-MentraOS  ⚠ Connection lost, reconnecting (2/3)...
-MentraOS  ✓ Reconnected — user bob@example.com
-MentraOS  ✗ Invalid API key
-MentraOS  ✗ Connection refused — is MentraOS Cloud running?
-MentraOS  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @mentra/sdk@latest
+Veiller  ✓ App server running on port 7010
+Veiller  ✓ Connected — user bob@example.com
+Veiller  ⚠ Connection lost, reconnecting (2/3)...
+Veiller  ✓ Reconnected — user bob@example.com
+Veiller  ✗ Invalid API key
+Veiller  ✗ Connection refused — is Veiller Cloud running?
+Veiller  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @veiller/sdk@latest
 ```
 
 Color scheme:
 
-- **`MentraOS`** prefix — dim gray. Always present, visually skippable.
+- **`Veiller`** prefix — dim gray. Always present, visually skippable.
 - **`✓`** — green. Success events (server start, session connect, reconnect success).
 - **`⚠`** — yellow. Warnings (reconnecting, SDK outdated, deprecation, missing permission).
 - **`✗`** — red. Errors (auth failure, connection dead, unrecoverable).
@@ -67,12 +67,12 @@ Clean mode does NOT use pino-pretty. It uses a lightweight custom pino transport
 
 #### Verbose Mode
 
-Today's pino-pretty structured output, unchanged. Full context objects, stack traces, internal state, emoji-prefixed messages — everything Mentra engineers currently see.
+Today's pino-pretty structured output, unchanged. Full context objects, stack traces, internal state, emoji-prefixed messages — everything Veiller engineers currently see.
 
 Activated by:
 
 - `verbose: true` in `AppServerConfig`
-- `MENTRA_VERBOSE=true` env var (takes precedence over config)
+- `VEILLER_VERBOSE=true` env var (takes precedence over config)
 
 When verbose is active, pino-pretty is loaded as the console transport. If pino-pretty is not installed (e.g., dev removed it), fall back to JSON output to `process.stdout` and log a single warning.
 
@@ -97,7 +97,7 @@ export interface AppServerConfig {
   /**
    * Enable verbose internal logging (full pino-pretty structured output).
    * Equivalent to logLevel: 'debug' with structured formatting.
-   * Can also be enabled via MENTRA_VERBOSE=true env var.
+   * Can also be enabled via VEILLER_VERBOSE=true env var.
    * Default: false
    */
   verbose?: boolean
@@ -106,18 +106,18 @@ export interface AppServerConfig {
 
 Env var overrides (checked at logger creation time):
 
-- `MENTRA_LOG_LEVEL` — overrides `logLevel` config. Values: `none`, `error`, `warn`, `info`, `debug`.
-- `MENTRA_VERBOSE` — if `"true"` or `"1"`, overrides to verbose mode regardless of other settings.
+- `VEILLER_LOG_LEVEL` — overrides `logLevel` config. Values: `none`, `error`, `warn`, `info`, `debug`.
+- `VEILLER_VERBOSE` — if `"true"` or `"1"`, overrides to verbose mode regardless of other settings.
 
 Resolution order:
 
-1. `MENTRA_VERBOSE=true` → verbose mode, `debug` level, pino-pretty transport.
-2. `MENTRA_LOG_LEVEL` → sets level, uses clean transport (unless value is `debug`, which implies verbose).
+1. `VEILLER_VERBOSE=true` → verbose mode, `debug` level, pino-pretty transport.
+2. `VEILLER_LOG_LEVEL` → sets level, uses clean transport (unless value is `debug`, which implies verbose).
 3. `config.verbose: true` → verbose mode.
 4. `config.logLevel` → sets level, uses clean transport.
 5. Default → `warn` level, clean transport.
 
-The BetterStack transport **always** runs at the same level as the console transport. If console is suppressed (`none`), BetterStack still receives logs at `debug` level (it has its own stream in the pino multistream, unaffected by the console transport level). This preserves internal observability for Mentra's own apps.
+The BetterStack transport **always** runs at the same level as the console transport. If console is suppressed (`none`), BetterStack still receives logs at `debug` level (it has its own stream in the pino multistream, unaffected by the console transport level). This preserves internal observability for Veiller's own apps.
 
 ### 3. What Gets Logged at Each Level
 
@@ -169,52 +169,52 @@ New file: `src/logging/errors.ts`
  * Base error class for all SDK errors.
  * Extends Error so instanceof Error still works (backward compatible).
  */
-export class MentraError extends Error {
+export class VeillerError extends Error {
   constructor(
     message: string,
     public readonly code: string,
   ) {
     super(message)
-    this.name = "MentraError"
+    this.name = "VeillerError"
   }
 }
 
-export class MentraAuthError extends MentraError {
+export class VeillerAuthError extends VeillerError {
   constructor(message: string) {
     super(message, "AUTH_ERROR")
-    this.name = "MentraAuthError"
+    this.name = "VeillerAuthError"
   }
 }
 
-export class MentraConnectionError extends MentraError {
+export class VeillerConnectionError extends VeillerError {
   constructor(message: string, code: string = "CONNECTION_ERROR") {
     super(message, code)
-    this.name = "MentraConnectionError"
+    this.name = "VeillerConnectionError"
   }
 }
 
-export class MentraTimeoutError extends MentraError {
+export class VeillerTimeoutError extends VeillerError {
   constructor(message: string) {
     super(message, "TIMEOUT_ERROR")
-    this.name = "MentraTimeoutError"
+    this.name = "VeillerTimeoutError"
   }
 }
 
-export class MentraValidationError extends MentraError {
+export class VeillerValidationError extends VeillerError {
   constructor(message: string) {
     super(message, "VALIDATION_ERROR")
-    this.name = "MentraValidationError"
+    this.name = "VeillerValidationError"
   }
 }
 
-export class MentraPermissionError extends MentraError {
+export class VeillerPermissionError extends VeillerError {
   constructor(
     message: string,
     public readonly stream: string,
     public readonly requiredPermission: string,
   ) {
     super(message, "PERMISSION_ERROR")
-    this.name = "MentraPermissionError"
+    this.name = "VeillerPermissionError"
   }
 }
 ```
@@ -222,10 +222,10 @@ export class MentraPermissionError extends MentraError {
 These are exported from `src/index.ts` so SDK consumers can import them:
 
 ```typescript
-import {MentraAuthError, MentraConnectionError} from "@mentra/sdk"
+import {VeillerAuthError, VeillerConnectionError} from "@veiller/sdk"
 
 session.events.onError((error) => {
-  if (error instanceof MentraAuthError) {
+  if (error instanceof VeillerAuthError) {
     // handle auth failure
   }
 })
@@ -259,14 +259,14 @@ Result:
 
 | Error site                    | File:Line                     | Current behavior                                                          | New behavior                                                                                                                           |
 | ----------------------------- | ----------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Invalid API key               | `session/index.ts` L1323      | `events.emit("error", new Error(...))` → also logged by cleanupError      | `events.emit("error", new MentraAuthError(...))` — no internal log                                                                     |
-| Connection refused            | `session/index.ts` L850-866   | logger.error (2x) + errorHandler logs + emits + cleanupError logs         | `events.emit("error", new MentraConnectionError("Connection refused — is MentraOS Cloud running?"))` — no logger.error                 |
-| Connection timeout            | `session/index.ts` L886-899   | logger.error (with config object) + emit + reject                         | `reject(new MentraTimeoutError("Connection timeout after 5000ms"))` — only reject, no log, no emit                                     |
-| WebSocket URL missing         | `session/index.ts` L649-653   | logger.error + reject                                                     | `reject(new MentraValidationError("WebSocket URL is required"))` — only reject                                                         |
-| JSON parse failure            | `session/index.ts` L748-752   | logger.error + emit                                                       | `events.emit("error", new MentraError("Failed to parse message", "PARSE_ERROR"))` — no logger.error                                    |
+| Invalid API key               | `session/index.ts` L1323      | `events.emit("error", new Error(...))` → also logged by cleanupError      | `events.emit("error", new VeillerAuthError(...))` — no internal log                                                                     |
+| Connection refused            | `session/index.ts` L850-866   | logger.error (2x) + errorHandler logs + emits + cleanupError logs         | `events.emit("error", new VeillerConnectionError("Connection refused — is Veiller Cloud running?"))` — no logger.error                 |
+| Connection timeout            | `session/index.ts` L886-899   | logger.error (with config object) + emit + reject                         | `reject(new VeillerTimeoutError("Connection timeout after 5000ms"))` — only reject, no log, no emit                                     |
+| WebSocket URL missing         | `session/index.ts` L649-653   | logger.error + reject                                                     | `reject(new VeillerValidationError("WebSocket URL is required"))` — only reject                                                         |
+| JSON parse failure            | `session/index.ts` L748-752   | logger.error + emit                                                       | `events.emit("error", new VeillerError("Failed to parse message", "PARSE_ERROR"))` — no logger.error                                    |
 | Binary message error          | `session/index.ts` L706-711   | logger.error + emit                                                       | emit only (debug-level log in verbose)                                                                                                 |
 | Connection init error         | `session/index.ts` L674-679   | logger.error + emit + reject                                              | reject only                                                                                                                            |
-| WebSocket error event         | `session/index.ts` L850-866   | logger.error (2-3x) + emit via errorHandler                               | emit only via `events.emit("error", new MentraConnectionError(...))`                                                                   |
+| WebSocket error event         | `session/index.ts` L850-866   | logger.error (2-3x) + emit via errorHandler                               | emit only via `events.emit("error", new VeillerConnectionError(...))`                                                                   |
 | Message send failure          | `session/index.ts` L1896-1903 | logger.error/debug + emit + throw                                         | throw only (emit for disconnect-expected cases at debug level)                                                                         |
 | Reconnection failed           | `session/index.ts` L1814      | logger.error + emit                                                       | emit only (reconnecting state logged at warn if < max, error if final)                                                                 |
 | Permission error from cloud   | `session/index.ts` L1525-1548 | logger.warn (structured) + emit permission_error + emit permission_denied | emit only (both events still emitted, no log)                                                                                          |
@@ -279,12 +279,12 @@ Result:
 
 #### SDK Update Notification
 
-Current (`src/constants/log-messages/updates.ts`): 20+ line boxen-bordered ASCII art banner with the MENTRA logo.
+Current (`src/constants/log-messages/updates.ts`): 20+ line boxen-bordered ASCII art banner with the VEILLER logo.
 
 New: Single-line warning.
 
 ```
-MentraOS  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @mentra/sdk@latest
+Veiller  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @veiller/sdk@latest
 ```
 
 Implementation: Replace `createUpdateNotification()` with a function that returns a plain string (no boxen, no ASCII art). The clean logger formats it with color. In verbose mode, the old banner can still render (but honestly, even in verbose mode the single line is better — leaving this as an implementation detail).
@@ -304,9 +304,9 @@ The SDK has multiple npm dist-tags (release tracks):
 
 The version check always compares against the `latest` dist-tag, regardless of which track the developer is on. A developer on `hono` (`3.0.0-hono.4`) is told to "update" to `2.1.29` — which is actually a downgrade to a completely different branch that bricks their app. Same issue for `beta` users.
 
-**Cloud side** (`api/hono/sdk/sdk-version.api.ts`): hardcoded `fetch("https://registry.npmjs.org/@mentra/sdk/latest")` — always checks the `latest` tag.
+**Cloud side** (`api/hono/sdk/sdk-version.api.ts`): hardcoded `fetch("https://registry.npmjs.org/@veiller/sdk/latest")` — always checks the `latest` tag.
 
-**SDK side** (`app/server/index.ts`): always recommends `bun install @mentra/sdk@latest` in the warning message.
+**SDK side** (`app/server/index.ts`): always recommends `bun install @veiller/sdk@latest` in the warning message.
 
 #### The fix
 
@@ -342,20 +342,20 @@ const tag = c.req.query("tag") || "latest"
 // Validate tag against known dist-tags to prevent abuse
 const allowedTags = ["latest", "beta", "alpha", "hono", "rc", "canary", "next"]
 const safeTag = allowedTags.includes(tag) ? tag : "latest"
-const response = await fetch(`https://registry.npmjs.org/@mentra/sdk/${safeTag}`)
+const response = await fetch(`https://registry.npmjs.org/@veiller/sdk/${safeTag}`)
 ```
 
 **4. SDK uses the correct install command:**
 
 ```
 // Before (always @latest):
-MentraOS  ⚠ SDK update available: 3.0.0-hono.4 → 2.1.29 — bun install @mentra/sdk@latest
+Veiller  ⚠ SDK update available: 3.0.0-hono.4 → 2.1.29 — bun install @veiller/sdk@latest
 
 // After (matches the dev's track):
-MentraOS  ⚠ SDK update available: 3.0.0-hono.4 → 3.0.0-hono.5 — bun install @mentra/sdk@hono
+Veiller  ⚠ SDK update available: 3.0.0-hono.4 → 3.0.0-hono.5 — bun install @veiller/sdk@hono
 ```
 
-For the `latest` track, the install command stays `bun install @mentra/sdk@latest` (same as before).
+For the `latest` track, the install command stays `bun install @veiller/sdk@latest` (same as before).
 
 #### Files changed
 
@@ -373,7 +373,7 @@ Current (`src/constants/log-messages/warning.ts`): Boxen-bordered side-by-side l
 New: Single-line warning.
 
 ```
-MentraOS  ⚠ camera permission required for requestPhoto — enable at https://console.mentra.glass/apps/org.example.myapp/edit
+Veiller  ⚠ camera permission required for requestPhoto — enable at https://console.mentra.glass/apps/org.example.myapp/edit
 ```
 
 Implementation: Replace the boxen banner functions with plain string formatters. The `permissions-utils.ts` functions should use the SDK logger instead of `console.log()` so they respect log level settings.
@@ -419,7 +419,7 @@ This is the only module that does this (all others receive a child logger via DI
 
 | File                             | Purpose                                              |
 | -------------------------------- | ---------------------------------------------------- |
-| `src/logging/errors.ts`          | MentraError class hierarchy                          |
+| `src/logging/errors.ts`          | VeillerError class hierarchy                          |
 | `src/logging/clean-transport.ts` | Custom pino transport for single-line colored output |
 
 ### Modified Files
@@ -450,7 +450,7 @@ The clean transport is a pino transport (a writable stream that receives newline
 1. Parses each JSON line from pino.
 2. Extracts `level` (number) and `msg` (string).
 3. Maps pino level numbers to symbols: 60=`✗` red, 50=`✗` red, 40=`⚠` yellow, 30=`✓`/no-symbol green/default, 20=dim.
-4. Formats as: `${dim("MentraOS")}  ${symbol} ${msg}\n`
+4. Formats as: `${dim("Veiller")}  ${symbol} ${msg}\n`
 5. Writes to `process.stderr`.
 
 It ignores all structured context fields (`app`, `packageName`, `service`, `userId`, `err`, etc.) — those are only visible in verbose mode or in BetterStack. The message string (`msg`) is the only thing that reaches the developer's terminal in clean mode.
@@ -478,7 +478,7 @@ this.logger.info({userId}, `Session connected`) // "Session connected" alone isn
 | --------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------- |
 | New `AppServerConfig` fields                  | None — additive optional fields            | Existing configs work unchanged                               |
 | Error classes extend `Error`                  | `instanceof Error` still true              | `catch (e) { if (e instanceof Error) }` still works           |
-| `events.onError` callback                     | Same signature: `(error: Error) => void`   | `MentraError extends Error`, so type is compatible            |
+| `events.onError` callback                     | Same signature: `(error: Error) => void`   | `VeillerError extends Error`, so type is compatible            |
 | Default log level changes from `debug`→`warn` | Devs see less output                       | This is the goal. `verbose: true` restores old behavior.      |
 | pino-pretty becomes optional                  | Only needed for verbose mode               | Auto-detected; falls back to JSON if missing                  |
 | `boxen` removed from output                   | Permission/update warnings are single-line | Same information, less visual noise                           |
@@ -486,11 +486,11 @@ this.logger.info({userId}, `Session connected`) // "Session connected" alone isn
 | `BETTERSTACK_SOURCE_TOKEN`                    | Unchanged                                  | Still activates BetterStack transport silently                |
 | Internal `cleanupError` handler removed       | Errors no longer double-logged             | Fallback logging in EventManager ensures no silent swallowing |
 
-### Migration for Mentra's own apps
+### Migration for Veiller's own apps
 
-Mentra's internal apps (captions, etc.) that rely on verbose logging should add either:
+Veiller's internal apps (captions, etc.) that rely on verbose logging should add either:
 
-- `MENTRA_VERBOSE=true` in their `.env` / Docker config, OR
+- `VEILLER_VERBOSE=true` in their `.env` / Docker config, OR
 - `verbose: true` in their `AppServerConfig`
 
 This is a one-line change per app. Without it, they'll get the new clean output (which is fine for production, but engineers may want verbose during development).
@@ -513,7 +513,7 @@ We're not replacing pino. We're replacing the _transport_ (how logs reach the te
 
 ### Error classes are the only "breaking" change
 
-`MentraAuthError` replaces `new Error("Invalid API key")`. Since `MentraAuthError extends Error`, `catch (e) { if (e instanceof Error) }` still works. The only break would be code that checks `e.constructor === Error` (exact match, not instanceof). This is extremely uncommon in practice. Since we're bundling this with SDK v3, it's acceptable.
+`VeillerAuthError` replaces `new Error("Invalid API key")`. Since `VeillerAuthError extends Error`, `catch (e) { if (e instanceof Error) }` still works. The only break would be code that checks `e.constructor === Error` (exact match, not instanceof). This is extremely uncommon in practice. Since we're bundling this with SDK v3, it's acceptable.
 
 ---
 

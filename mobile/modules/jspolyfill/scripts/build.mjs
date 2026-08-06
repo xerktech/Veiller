@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// MentraJS polyfill bundle builder.
+// VeillerJS polyfill bundle builder.
 //
 // Reads src/startup.ts and emits a single IIFE at assets/startup.js.
 // That assets/ file is the *single committed source of truth* for the
@@ -54,7 +54,7 @@ await build({
   external: [],
   outfile: outFile,
   banner: {
-    js: "// @generated MentraJS polyfill bundle — see mobile/modules/jspolyfill",
+    js: "// @generated VeillerJS polyfill bundle — see mobile/modules/jspolyfill",
   },
 })
 
@@ -65,7 +65,7 @@ copyFileSync(outFile, assetsFile)
 
 // iOS pod resource: CocoaPods silently drops `..` paths from
 // `resource_bundles`, so pointing the podspec at the assets/ directory
-// across the module boundary produces an empty MentraJSRuntime.bundle
+// across the module boundary produces an empty VeillerJSRuntime.bundle
 // (verified — only Info.plist ends up inside). Mirror startup.js into a
 // LOCAL path the podspec can glob without crossing pod roots. This file
 // is gitignored — every build regenerates it, so it can't drift.
@@ -74,5 +74,5 @@ mkdirSync(iosResourceDir, {recursive: true})
 const iosResourceFile = resolve(iosResourceDir, "startup.js")
 copyFileSync(outFile, iosResourceFile)
 
-console.log(`✅ MentraJS startup bundle built → ${assetsFile}`)
+console.log(`✅ VeillerJS startup bundle built → ${assetsFile}`)
 console.log(`✅ iOS pod resource mirror      → ${iosResourceFile}`)

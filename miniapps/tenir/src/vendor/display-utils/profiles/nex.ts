@@ -120,13 +120,13 @@ const NEX_GLYPH_WIDTHS: Record<string, number> = {
 /**
  * Mentra Nex Smart Glasses Display Profile
  *
- * Also known as "Mentra Display" - a new Mentra glasses model with display capabilities.
+ * Also known as "Mentra Display" - a new Veiller glasses model with display capabilities.
  *
  * PLACEHOLDER VALUES: All values are currently based on G1 profile.
  * TODO: Update with actual Mentra Nex specifications when available.
  */
 export const NEX_PROFILE: DisplayProfile = {
-  id: "mentra-nex",
+  id: "veiller-nex",
   name: "Mentra Nex",
 
   // Display dimensions

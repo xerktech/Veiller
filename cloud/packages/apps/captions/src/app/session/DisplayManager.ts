@@ -1,4 +1,4 @@
-import {ViewType} from "@mentra/sdk"
+import {ViewType} from "@veiller/sdk"
 
 import {CaptionsFormatter, G1_PROFILE_LEGACY, G1_PROFILE, type TranscriptHistoryEntry} from "../utils/CaptionsFormatter"
 import {UserSession} from "./UserSession"

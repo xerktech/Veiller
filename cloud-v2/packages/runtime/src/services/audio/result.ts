@@ -13,14 +13,14 @@
  * Protocol: src/protocol/{audio,messages,envelope}.ts.
  */
 
-import { PROTOCOL_MAJOR, type Envelope } from "@mentra/cloud-protocol/envelope";
+import { PROTOCOL_MAJOR, type Envelope } from "@veiller/cloud-protocol/envelope";
 import type {
   LanguageSource,
   TranscriptionData,
   TranscriptionSubscription,
   TranslationData,
   TranslationSubscription,
-} from "@mentra/cloud-protocol/audio";
+} from "@veiller/cloud-protocol/audio";
 import type { TranscriptMessage } from "./workers/worker";
 
 /** The two push messages a transcript can become. */

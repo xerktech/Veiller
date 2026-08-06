@@ -1,7 +1,7 @@
 /**
  * @fileoverview Bridge envelope format.
  *
- * Every message between @mentra/miniapp and LocalMiniappRuntime is wrapped in
+ * Every message between @veiller/miniapp and LocalMiniappRuntime is wrapped in
  * this envelope for request/response correlation.
  *
  *   { payload: {...}, requestId?: string }

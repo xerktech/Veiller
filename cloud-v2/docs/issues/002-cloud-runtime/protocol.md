@@ -1,7 +1,7 @@
-# Mentra Runtime Protocol (transport)
+# Veiller Runtime Protocol (transport)
 
-The service-agnostic transport contract between the on-device Mentra Runtime
-(the client module we own) and Mentra Runtime Services (`@mentra/cloud-runtime`).
+The service-agnostic transport contract between the on-device Veiller Runtime
+(the client module we own) and Veiller Runtime Services (`@veiller/cloud-runtime`).
 It defines the envelope, handshake, auth, control, error model, and REST
 conventions shared by every runtime service. Each service documents its own
 messages, endpoints, and payloads on top of this frame:
@@ -16,8 +16,8 @@ This is a clean v2-native protocol. It does not carry the v1 phone contract; see
 
 - One source of truth for the wire types, living next to the runtime code and
   exported separately so the client imports types without server code:
-  - `@mentra/cloud-runtime` is the server.
-  - `@mentra/cloud-runtime/protocol` is pure, isomorphic types plus zod
+  - `@veiller/cloud-runtime` is the server.
+  - `@veiller/cloud-runtime/protocol` is pure, isomorphic types plus zod
     validators, with zero server imports (no `node:*`, no service code). A build
     check keeps that entrypoint dependency-isolated so nothing leaks into the RN
     bundle.
@@ -207,7 +207,7 @@ audio service's `SUBSCRIPTION_INVALID`); those are documented in the service doc
 
 Per-service push events (for example `stream.transcript`) are registered in their
 service docs. Each WebSocket type maps 1:1 to a zod schema in
-`@mentra/cloud-runtime/protocol`, combined into a discriminated union on `type`
+`@veiller/cloud-runtime/protocol`, combined into a discriminated union on `type`
 for parse-time validation on both ends.
 
 ## Versioning

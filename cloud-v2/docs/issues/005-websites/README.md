@@ -1,6 +1,6 @@
 # 005 Websites
 
-Umbrella issue for the Mentra web frontends. Each site pairs with a Cloud Core
+Umbrella issue for the Veiller web frontends. Each site pairs with a Cloud Core
 service (see [`../001-cloud-core/`](../001-cloud-core/)).
 
 ## Sites (subfolders)
@@ -16,4 +16,4 @@ service (see [`../001-cloud-core/`](../001-cloud-core/)).
 ## Related
 
 - [`../001-cloud-core/`](../001-cloud-core/)
-- [`../../mentra-overhaul-plan.md`](../../mentra-overhaul-plan.md)
+- [`../../veiller-overhaul-plan.md`](../../veiller-overhaul-plan.md)

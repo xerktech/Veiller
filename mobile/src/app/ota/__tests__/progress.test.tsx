@@ -7,7 +7,7 @@ import {useConnectionOverlayConfig} from "@/contexts/ConnectionOverlayContext"
 import GlobalEventEmitter from "@/utils/GlobalEventEmitter"
 
 import OtaProgressScreen from "@/app/ota/progress"
-import {MINIMUM_OTA_STATUS_BUILD, OtaProgressMessages} from "@mentra/engine"
+import {MINIMUM_OTA_STATUS_BUILD, OtaProgressMessages} from "@veiller/engine"
 
 const mockReplace = jest.fn()
 
@@ -30,8 +30,8 @@ jest.mock("@/contexts/ThemeContext", () => ({
   }),
 }))
 
-jest.mock("@/components/brands/MentraLogoStandalone", () => ({
-  MentraLogoStandalone: () => null,
+jest.mock("@/components/brands/VeillerLogoStandalone", () => ({
+  VeillerLogoStandalone: () => null,
 }))
 
 // NOTE: @/utils/GlobalEventEmitter is intentionally NOT re-mocked here — the shim
@@ -57,7 +57,7 @@ jest.mock("@/components/ignite", () => {
 
 const sb = (n: number) => String(n)
 
-const BluetoothSdk = require("@mentra/bluetooth-sdk-internal").default
+const BluetoothSdk = require("@veiller/bluetooth-sdk-internal").default
 
 function connectedGlassesInfo(values = {}) {
   return {connection: {state: "connected", fullyBooted: true} as const, ...values}

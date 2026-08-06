@@ -20,7 +20,7 @@ import {
   SessionWebhookRequest,
   AppType,
   ExtendedStreamType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 // import subscriptionService from "./subscription.service";
 import App from "../../models/app.model";
@@ -977,7 +977,7 @@ export class AppManager {
       // connect to whatever URL it contains. /ws/miniapp is the v3 path that
       // v2 SDKs can't use (CONNECTION_INIT format mismatch, connection timeout).
       // websocketUrl uses the v3 path for v3 SDKs that read it instead.
-      // augmentOSWebsocketUrl is the legacy alias (deprecated, same as mentraOS).
+      // augmentOSWebsocketUrl is the legacy alias (deprecated, same as veiller).
       // See: cloud/issues/074 — debug deploy v2 app connection failure
       const websocketUrl = `wss://${CLOUD_PUBLIC_HOST_NAME}/ws/miniapp`;
       const mentraOSWebsocketUrl = `wss://${CLOUD_PUBLIC_HOST_NAME}/app-ws`;

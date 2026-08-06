@@ -9,7 +9,7 @@
  */
 
 import { ulid } from "ulid";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { ReportModel } from "../models/report.model";
 import { ReportAssetModel } from "../models/report-asset.model";
 import { notifyReportSlack } from "./report-slack.service";
@@ -130,7 +130,7 @@ async function lookupUserEmail(mentraUserId: string): Promise<string | null> {
   // account.api's tenantUserIdFor); an OEM sub is a different identifier
   // space, and a stray collision would resolve some unrelated account's
   // email.
-  if (!user || user.tenantId !== "mentra") return null;
+  if (!user || user.tenantId !== "veiller") return null;
   const identity = await getUserById(user.tenantUserId);
   return identity?.email || null;
 }

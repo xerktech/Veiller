@@ -1,6 +1,6 @@
 ---
 title: "Android"
-description: "Use the Mentra Bluetooth SDK from a native Android app."
+description: "Use the Veiller Bluetooth SDK from a native Android app."
 icon: "android"
 ---
 
@@ -67,14 +67,14 @@ Request runtime permissions before scanning. Some Android 12+ devices require Lo
 
 ```kotlin
 import android.content.Context
-import com.mentra.bluetoothsdk.Device
-import com.mentra.bluetoothsdk.DeviceModel
-import com.mentra.bluetoothsdk.GlassesRuntimeState
-import com.mentra.bluetoothsdk.MentraBluetoothSdk
-import com.mentra.bluetoothsdk.MentraBluetoothSdkCallback
+import com.veiller.bluetoothsdk.Device
+import com.veiller.bluetoothsdk.DeviceModel
+import com.veiller.bluetoothsdk.GlassesRuntimeState
+import com.veiller.bluetoothsdk.VeillerBluetoothSdk
+import com.veiller.bluetoothsdk.VeillerBluetoothSdkCallback
 
-class GlassesController(context: Context) : MentraBluetoothSdkCallback() {
-    private val sdk = MentraBluetoothSdk.create(
+class GlassesController(context: Context) : VeillerBluetoothSdkCallback() {
+    private val sdk = VeillerBluetoothSdk.create(
         context = context.applicationContext,
         listener = this,
     )
@@ -117,11 +117,11 @@ class GlassesController(context: Context) : MentraBluetoothSdkCallback() {
 
 ## Local SDK Override
 
-Use this when testing SDK source changes from a local MentraOS checkout. Run the publish command from the SDK Android module with a local Gradle install, then consume the Maven-local artifact from your app:
+Use this when testing SDK source changes from a local Veiller checkout. Run the publish command from the SDK Android module with a local Gradle install, then consume the Maven-local artifact from your app:
 
 ```bash
-cd /path/to/MentraOS/mobile/modules/bluetooth-sdk/android
-gradle :lc3Lib:publishToMavenLocal :publishToMavenLocal -PmentraPublicSdk=true
+cd /path/to/Veiller/mobile/modules/bluetooth-sdk/android
+gradle :lc3Lib:publishToMavenLocal :publishToMavenLocal -PveillerPublicSdk=true
 ```
 
 Then include `mavenLocal()` before `mavenCentral()` in the app's repositories while testing the local artifact.

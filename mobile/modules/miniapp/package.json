@@ -1,8 +1,8 @@
 {
-  "name": "@mentra/miniapp",
+  "name": "@veiller/miniapp",
   "version": "0.3.0-dev.1",
-  "description": "SDK for building MentraOS local miniapps (browser/WebView)",
-  "author": "Mentra Labs",
+  "description": "SDK for building Veiller local miniapps (browser/WebView)",
+  "author": "Veiller Labs",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -53,7 +53,7 @@
     }
   },
   "dependencies": {
-    "@mentra/cloud-protocol": "workspace:*",
+    "@veiller/cloud-protocol": "workspace:*",
     "@mentra/types": "1.0.0-beta.2",
     "eventemitter3": "^5.0.1"
   },
@@ -68,8 +68,8 @@
     "!src/**/*.test.ts"
   ],
   "keywords": [
-    "mentra",
-    "mentraos",
+    "veiller",
+    "veiller",
     "miniapp",
     "smart-glasses"
   ],

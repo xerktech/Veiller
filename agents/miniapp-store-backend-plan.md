@@ -15,7 +15,7 @@ Cloud apps live in one MongoDB `apps` collection. Dev flow today:
 3. `POST /api/console/apps/:packageName/publish` flips `appStoreStatus` to `PUBLISHED`
 4. Store reads `/api/store/published-apps`, filters on the flag
 
-File upload already exists: preview images for cloud apps go through `POST /api/dev/apps/:packageName/image` → `storageService.uploadImageAndReplace()` at `cloud/packages/cloud/src/api/hono/routes/developer.routes.ts:731`. That service wraps `R2StorageService` at `cloud/packages/cloud/src/services/storage/r2-storage.service.ts`, which is already fully configured against the `mentra-store` R2 bucket with a public CDN at `https://mentra-store-cdn.mentraglass.com`.
+File upload already exists: preview images for cloud apps go through `POST /api/dev/apps/:packageName/image` → `storageService.uploadImageAndReplace()` at `cloud/packages/cloud/src/api/hono/routes/developer.routes.ts:731`. That service wraps `R2StorageService` at `cloud/packages/cloud/src/services/storage/r2-storage.service.ts`, which is already fully configured against the `veiller-store` R2 bucket with a public CDN at `https://veiller-store-cdn.mentraglass.com`.
 
 So R2 is live. We use it. No new bucket setup needed for assets.
 
@@ -39,7 +39,7 @@ This also sets up clean separation for the eventual cloud rewrite — miniapps l
 Developer flow:
 
 1. Developer registers a miniapp in the console — picks `packageName`, done. This creates a `miniapps` record with no versions, `appStoreStatus: DEVELOPMENT`, not visible anywhere except the dev's own console.
-2. Developer builds the miniapp locally, `mentra-miniapp pack` produces a ZIP.
+2. Developer builds the miniapp locally, `veiller-miniapp pack` produces a ZIP.
 3. Developer uploads the ZIP to the registered miniapp → creates the first version entry. `version`, `permissions`, `hardwareRequirements`, `name`, `description` all come from the `miniapp.json` inside the ZIP.
 4. Subsequent version uploads append to `versions[]` on the same record.
 
@@ -57,23 +57,23 @@ The `miniapp.json` inside the ZIP has a `packageName` — that's the identifier 
 
 Existing buckets (from `cloud/.env.example`):
 
-- **`mentra-store`** — public via CDN `mentra-store-cdn.mentraglass.com`. Holds `mini_app_assets/...` (cloud-app icons + preview images). Wrapped by `R2StorageService` at `cloud/packages/cloud/src/services/storage/r2-storage.service.ts`.
-- **`mentra-incidents`** — private, no CDN mapping. Accessed via API proxy only. Wrapped by `IncidentStorageService` at `cloud/packages/cloud/src/services/storage/incident-storage.service.ts`. This is the precedent for "private R2 bucket in this codebase."
+- **`veiller-store`** — public via CDN `veiller-store-cdn.mentraglass.com`. Holds `mini_app_assets/...` (cloud-app icons + preview images). Wrapped by `R2StorageService` at `cloud/packages/cloud/src/services/storage/r2-storage.service.ts`.
+- **`veiller-incidents`** — private, no CDN mapping. Accessed via API proxy only. Wrapped by `IncidentStorageService` at `cloud/packages/cloud/src/services/storage/incident-storage.service.ts`. This is the precedent for "private R2 bucket in this codebase."
 
 Plan:
 
-- **Icons + preview images**: reuse the existing **`mentra-store`** public bucket under the `mini_app_assets/...` prefix — identical pattern to how cloud-app images work today, served via the existing CDN. No new bucket.
-- **ZIP bundles**: new **private** bucket `mentra-miniapp-bundles` (name TBD; matches the `mentra-incidents` precedent). No CDN mapping. Signed URLs only, via the R2 S3 API endpoint.
+- **Icons + preview images**: reuse the existing **`veiller-store`** public bucket under the `mini_app_assets/...` prefix — identical pattern to how cloud-app images work today, served via the existing CDN. No new bucket.
+- **ZIP bundles**: new **private** bucket `veiller-miniapp-bundles` (name TBD; matches the `veiller-incidents` precedent). No CDN mapping. Signed URLs only, via the R2 S3 API endpoint.
 
 Object key structure:
 
-- Bundles (in `mentra-miniapp-bundles`, private): `bundles/{packageName}/{version}.zip`
-- Icons (in `mentra-store`, public CDN): `mini_app_assets/{packageName}/icon-{timestamp}.{ext}` — uses existing `uploadImageAndReplace` pattern for automatic old-version cleanup
-- Preview images (in `mentra-store`, public CDN): `mini_app_assets/{packageName}/preview-{timestamp}-{filename}` — identical path shape to cloud-app preview images today
+- Bundles (in `veiller-miniapp-bundles`, private): `bundles/{packageName}/{version}.zip`
+- Icons (in `veiller-store`, public CDN): `mini_app_assets/{packageName}/icon-{timestamp}.{ext}` — uses existing `uploadImageAndReplace` pattern for automatic old-version cleanup
+- Preview images (in `veiller-store`, public CDN): `mini_app_assets/{packageName}/preview-{timestamp}-{filename}` — identical path shape to cloud-app preview images today
 
 New env vars (add to `cloud/.env.example`):
 
-- `R2_MINIAPP_BUNDLES_BUCKET=mentra-miniapp-bundles` (or whatever you pick on the Cloudflare side)
+- `R2_MINIAPP_BUNDLES_BUCKET=veiller-miniapp-bundles` (or whatever you pick on the Cloudflare side)
 
 Existing R2 creds (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`) are reused — same account, just a different bucket. No new Cloudflare account setup.
 
@@ -378,7 +378,7 @@ Called by the phone's Composer when installing.
   "success": true,
   "data": {
     "version": "1.2.0",
-    "bundleUrl": "https://<account>.r2.cloudflarestorage.com/mentra-store/...?X-Amz-...",
+    "bundleUrl": "https://<account>.r2.cloudflarestorage.com/veiller-store/...?X-Amz-...",
     "expiresAt": "2026-04-23T12:30:00Z",
     "bundleSha256": "...",
     "bundleSizeBytes": 123456
@@ -447,8 +447,8 @@ No local-disk fallback — R2 is already live.
 
 Move the validator from `sdk/miniapp-cli/src/manifest.ts:68` into a shared package. Candidate homes:
 
-- **`@mentra/miniapp`** — most natural semantically (the SDK defines the manifest shape)
-- **`@mentra/utils`** — easier if `@mentra/miniapp` can't take on a validation dep
+- **`@veiller/miniapp`** — most natural semantically (the SDK defines the manifest shape)
+- **`@veiller/utils`** — easier if `@veiller/miniapp` can't take on a validation dep
 
 Either way: one function, imported by both the CLI and the cloud upload endpoint. No fork.
 
@@ -458,8 +458,8 @@ Either way: one function, imported by both the CLI and the cloud upload endpoint
 
 Suggested slicing (roughly in execution order):
 
-1. **Move CLI manifest validator into shared package.** Extract from `sdk/miniapp-cli/src/manifest.ts:68`, publish in `@mentra/miniapp` or `@mentra/utils`. CLI imports from there. Prereq for everything else.
-2. **Create `mentra-miniapp-bundles` private R2 bucket + `MiniappBundleStorageService`.** New bucket on the existing Cloudflare account, no CDN mapping. Service modeled on `IncidentStorageService` (private-bucket precedent), adds signed-URL support via `@aws-sdk/s3-request-presigner`. Icons + preview images reuse existing `R2StorageService`.
+1. **Move CLI manifest validator into shared package.** Extract from `sdk/miniapp-cli/src/manifest.ts:68`, publish in `@veiller/miniapp` or `@veiller/utils`. CLI imports from there. Prereq for everything else.
+2. **Create `veiller-miniapp-bundles` private R2 bucket + `MiniappBundleStorageService`.** New bucket on the existing Cloudflare account, no CDN mapping. Service modeled on `IncidentStorageService` (private-bucket precedent), adds signed-URL support via `@aws-sdk/s3-request-presigner`. Icons + preview images reuse existing `R2StorageService`.
 3. **`miniapps` collection + model.** Schema, indexes. No routes yet.
 4. **`POST /miniapps` registration endpoint.** Reserve packageName, create empty record.
 5. **`POST /miniapps/:packageName/versions` upload.** Validate, store ZIP, extract icon, update record. At this point dev can register + upload.

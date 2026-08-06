@@ -1,4 +1,4 @@
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {useLocalSearchParams} from "expo-router"
 import {useEffect, useState, useCallback} from "react"
 import {ActivityIndicator, View} from "react-native"
@@ -7,7 +7,7 @@ import {usePushPrevious} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import WifiCredentialsService from "@/utils/wifi/WifiCredentialsService"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {translate, type TxKeyPath} from "@/i18n"
 
 type WifiConnectionErrorCopy = {
@@ -193,7 +193,7 @@ export default function WifiConnectingScreen() {
         <Header
           leftIcon="chevron-left"
           onLeftPress={handleHeaderBack}
-          RightActionComponent={<MentraLogoStandalone />}
+          RightActionComponent={<VeillerLogoStandalone />}
         />
       )}
       {renderContent()}

@@ -11,7 +11,7 @@
  * permission *UI* (it gates `setLocationTier` on the OS permission before calling).
  *
  * The task is registered at module load (the export from `index.ts` evaluates this
- * file as soon as `@mentra/engine` is imported), matching the old MantleManager
+ * file as soon as `@veiller/engine` is imported), matching the old MantleManager
  * top-level `defineTask` timing — including on a headless background relaunch.
  */
 import * as Location from "expo-location"
@@ -49,7 +49,7 @@ TaskManager.defineTask<{locations?: Location.LocationObject[]}>(LOCATION_TASK_NA
   })
 })
 
-/** Map a MentraOS location tier/accuracy string to an expo-location accuracy. */
+/** Map a Veiller location tier/accuracy string to an expo-location accuracy. */
 export function getLocationAccuracy(accuracy: string | undefined): Location.LocationAccuracy {
   switch (accuracy) {
     // Aggregate miniapp tiers (LocalMiniappRuntime.recomputeLocation → "passive" |

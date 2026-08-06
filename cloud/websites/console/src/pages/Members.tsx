@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Spinner } from "@mentra/shared";
+import { Alert, AlertDescription, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Spinner } from "@veiller/shared";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import api, { OrgMember, OrgRole, PendingInvite } from '@/services/api.service';
 import { useOrganization } from '@/context/OrganizationContext';
 import { toast } from 'sonner';
 import { useOrgPermissions } from '@/hooks/useOrgPermissions';
-import { useAuth } from '@mentra/shared';
+import { useAuth } from '@veiller/shared';
 
 /**
  * Members page for managing organization members

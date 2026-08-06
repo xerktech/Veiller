@@ -3,7 +3,7 @@ import os.log
 import UIKit
 
 enum BleTraceLogger {
-    private static let log = OSLog(subsystem: "com.mentra.bluetoothsdk", category: "MentraBleTrace")
+    private static let log = OSLog(subsystem: "com.veiller.bluetoothsdk", category: "VeillerBleTrace")
     private static let maxPayloadChars = 3000
     private static let k900Type = "k900"
     private static let sensitiveKeyParts = ["password", "pass", "token", "secret", "authorization", "auth", "email", "serial"]

@@ -99,10 +99,10 @@ export async function batchEnrichAppsWithProfiles(appsInput: Array<any>): Promis
       }
     }
 
-    // Fallback: If still no orgName, infer from package name for Mentra/Augmentos apps
+    // Fallback: If still no orgName, infer from package name for Veiller/Augmentos apps
     if (!enriched.orgName) {
       if (
-        app.packageName?.startsWith("com.mentra") ||
+        app.packageName?.startsWith("com.veiller") ||
         app.packageName?.startsWith("cloud.augmentos") ||
         app.packageName?.startsWith("com.augmentos")
       ) {

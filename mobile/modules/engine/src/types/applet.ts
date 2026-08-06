@@ -75,7 +75,7 @@ export interface AppletInterface {
  * outside the manifest: offline routing, hardware compatibility result,
  * loading/hidden/local flags, lifecycle hooks, screenshot, and the
  * dev-miniapp escape hatches (`devUrl` / `isMiniappDev`) that surface a
- * `mentra-miniapp dev` snapshot.
+ * `veiller-miniapp dev` snapshot.
  */
 /**
  * A manifest-declared action a miniapp exposes for other (system) miniapps to

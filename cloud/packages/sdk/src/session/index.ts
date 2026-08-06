@@ -1,1 +1,1 @@
-export { MentraSession, type MentraSessionConfig } from "./MentraSession";
+export { VeillerSession, type VeillerSessionConfig } from "./VeillerSession";

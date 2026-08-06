@@ -6,7 +6,7 @@
 
 ## What is this doc?
 
-This doc catalogs maintainability issues in the MentraOS cloud codebase — dead code, duplicated code, god objects, naming confusion, and technical debt that make the codebase harder to work in than it needs to be.
+This doc catalogs maintainability issues in the Veiller cloud codebase — dead code, duplicated code, god objects, naming confusion, and technical debt that make the codebase harder to work in than it needs to be.
 
 ## Why it matters
 
@@ -74,7 +74,7 @@ Already decided in [039 D31](../039-sdk-v3-api-surface/v2-v3-api-map.md#16-dashb
 
 ### 6. SDK route paths hardcoded in multiple places
 
-Cloud hardcodes SDK endpoint paths (`/webhook`, `/tool`, `/health`, `/settings`, `/photo-upload`, `/mentra-auth`) in:
+Cloud hardcodes SDK endpoint paths (`/webhook`, `/tool`, `/health`, `/settings`, `/photo-upload`, `/veiller-auth`) in:
 
 - `AppManager.ts` — webhook calls
 - `app.service.ts` — tool calls, stop webhook
@@ -82,11 +82,11 @@ Cloud hardcodes SDK endpoint paths (`/webhook`, `/tool`, `/health`, `/settings`,
 - `app-settings.routes.ts` — settings push
 - `system-app.api.ts` — tool invocation
 
-For SDK v3 these move to `/api/_mentraos/*`. **Decision: mount both old and new paths during transition**, then drop old paths when v2 SDK apps are sunset.
+For SDK v3 these move to `/api/_veiller/*`. **Decision: mount both old and new paths during transition**, then drop old paths when v2 SDK apps are sunset.
 
 ### 7. Auth middleware is confused
 
-- `validateSupabaseToken` in `developer.routes.ts` is named wrong — it actually validates a MentraOS JWT (`coreToken`), not a Supabase token. Has a TODO acknowledging this.
+- `validateSupabaseToken` in `developer.routes.ts` is named wrong — it actually validates a Veiller JWT (`coreToken`), not a Supabase token. Has a TODO acknowledging this.
 - `unifiedAuthMiddleware` in `apps.routes.ts` mixes client auth, system app auth, and third-party app auth into one middleware. TODO says it should be split.
 - `currentOrgId` comes from a request header and is blindly trusted without validation. TODO says it should be validated or moved to a query param.
 
@@ -97,7 +97,7 @@ Settings is being deprecated in favor of Storage (039 D29). Cloud-side cleanup:
 - `app-settings.routes.ts` — settings push endpoint (exists in both Express and Hono)
 - Settings schema management in app service
 - Settings-related event broadcasting to connected apps
-- MentraOS system settings (`metricSystemEnabled`, `brightness`, etc.) — these are OS-level and need a new home (probably `UserSession` or `DeviceState`)
+- Veiller system settings (`metricSystemEnabled`, `brightness`, etc.) — these are OS-level and need a new home (probably `UserSession` or `DeviceState`)
 
 ### 9. Multi-user app communication is deprecated — remove entirely
 
@@ -114,7 +114,7 @@ Settings is being deprecated in favor of Storage (039 D29). Cloud-side cleanup:
 
 ### 11. `DoubleTextWall` column composition bug
 
-The `ColumnComposer` in `@mentra/display-utils` has a known bug where characters can overflow from the right quadrant to the left side of the screen (off by ~1 character in pixel alignment). This is the bug that partly motivated moving the dashboard away from `DoubleTextWall`. Still needs to be fixed since mini apps may use `showDoubleText()`.
+The `ColumnComposer` in `@veiller/display-utils` has a known bug where characters can overflow from the right quadrant to the left side of the screen (off by ~1 character in pixel alignment). This is the bug that partly motivated moving the dashboard away from `DoubleTextWall`. Still needs to be fixed since mini apps may use `showDoubleText()`.
 
 ### 12. Dead/stale code scattered throughout
 
@@ -123,7 +123,7 @@ The `ColumnComposer` in `@mentra/display-utils` has a known bug where characters
 - Export data endpoint returns empty arrays with TODOs: `apps: [], // TODO: Add installed apps`
 - `audio.routes.ts` has a TODO about improving the audio manager for last-10-seconds retrieval
 - `transcripts.routes.ts` has a TODO about `startTime/endTime` filter handling
-- Various `onMentraosSettingsChange` / `onMentraosSettingChange` duplicate methods in the SDK that need to be removed
+- Various `onMentraosSettingsChange` / `onVeillerSettingChange` duplicate methods in the SDK that need to be removed
 - `DisplayManager6.1.ts` — has a version number in the filename
 
 ### 13. No consistent error handling pattern
@@ -185,13 +185,13 @@ The linter is not running cleanly and is effectively unenforced:
 - Fix or suppress all existing lint errors so the codebase passes cleanly
 - Add lint to CI so it stays clean
 
-### 18. Mentra-auth flow — no account switching, needs improvement
+### 18. Veiller-auth flow — no account switching, needs improvement
 
-The `mentra-auth` / authentication flow for mini app webviews has usability and architectural issues:
+The `veiller-auth` / authentication flow for mini app webviews has usability and architectural issues:
 
-- **No way to switch accounts.** The `@mentra/react-sdk` auth stores `mentraos_userId` and `mentraos_frontendToken` in `localStorage`. Once authenticated, there's no mechanism to switch to a different account — `clearStoredAuth()` exists but isn't exposed in any user-facing flow.
+- **No way to switch accounts.** The `@veiller/react-sdk` auth stores `veiller_userId` and `veiller_frontendToken` in `localStorage`. Once authenticated, there's no mechanism to switch to a different account — `clearStoredAuth()` exists but isn't exposed in any user-facing flow.
 - **Issuer is hardcoded to old name.** The token verification in `authCore.ts` checks `iss: ['https://prod.augmentos.cloud']` — still references the old AugmentOS branding.
-- **The `/mentra-auth` redirect in the SDK** points to `account.mentra.glass/auth` — this is a simple redirect, no error handling, no callback verification, no state parameter for CSRF protection.
+- **The `/veiller-auth` redirect in the SDK** points to `account.mentra.glass/auth` — this is a simple redirect, no error handling, no callback verification, no state parameter for CSRF protection.
 - **Token-in-URL pattern is fragile.** The `aos_signed_user_token` is passed as a URL query parameter, extracted once, then stripped from the URL. If the page loads twice before the strip happens, or if the token is cached in browser history, behavior is undefined.
 
 **What needs to happen:**
@@ -250,7 +250,7 @@ LiveKit was previously used as an audio transport layer between the mobile clien
 | 1   | Mass delete Express code                          | Hono routes already working, can't maintain two sets of routes          |
 | 2   | Kill Azure provider                               | Dead code, dependency weight, inflates TranscriptionManager             |
 | 5   | Dashboard → OS service (rewrite DashboardManager) | Required for new dashboard API                                          |
-| 6   | SDK route paths — mount both old + new            | SDK v3 needs `/api/_mentraos/*`, v2 needs old paths during transition   |
+| 6   | SDK route paths — mount both old + new            | SDK v3 needs `/api/_veiller/*`, v2 needs old paths during transition   |
 | 9   | Remove multi-user app communication               | Deprecated, backend already broken, SDK removing all app-to-app APIs    |
 | 19  | Remove LiveKit                                    | Dead code, inflates per-session memory, separate Go service to maintain |
 | 17  | Fix linter and enforce in CI                      | No lint enforcement = regressions on every commit                       |
@@ -264,7 +264,7 @@ LiveKit was previously used as an audio transport layer between the mobile clien
 | 7   | Auth middleware cleanup                 | Security concern, naming confusion                          |
 | 11  | DoubleTextWall pixel bug                | Mini apps still use `showDoubleText()`                      |
 | 16  | Investigate mini app WS fragility       | Root cause fix would simplify AppSession/AppManager heavily |
-| 18  | Mentra-auth account switching + cleanup | Usability blocker, stale branding references                |
+| 18  | Veiller-auth account switching + cleanup | Usability blocker, stale branding references                |
 
 ### Can defer past v3.0
 
@@ -282,9 +282,9 @@ LiveKit was previously used as an audio transport layer between the mobile clien
 
 | #   | Question                                     | Notes                                                                                                            |
 | --- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Q1  | Where do MentraOS system settings live?      | `metricSystemEnabled`, `brightness` — move to `UserSession`? `DeviceState`?                                      |
-| Q2  | When to drop old SDK paths?                  | Both old (`/webhook`) and new (`/api/_mentraos/webhook`) mounted during transition. When do we remove old paths? |
+| Q1  | Where do Veiller system settings live?      | `metricSystemEnabled`, `brightness` — move to `UserSession`? `DeviceState`?                                      |
+| Q2  | When to drop old SDK paths?                  | Both old (`/webhook`) and new (`/api/_veiller/webhook`) mounted during transition. When do we remove old paths? |
 | Q3  | Why do mini app WebSockets break so often?   | Cloudflare proxy? Bun WS implementation? Mini app server instability? Needs root cause investigation.            |
 | Q4  | userId migration strategy?                   | How to phase the email→UUID migration? Dual-key lookups during transition? What about existing MongoDB docs?     |
-| Q5  | What's the right auth flow for mentra-auth?  | Current token-in-URL approach vs. proper OAuth code flow? How should account switching work in webview context?  |
+| Q5  | What's the right auth flow for veiller-auth?  | Current token-in-URL approach vs. proper OAuth code flow? How should account switching work in webview context?  |
 | Q6  | Is any part of LiveKit still used by anyone? | SpeakerManager for audio playback? Any mobile client paths still requesting LiveKit tokens?                      |

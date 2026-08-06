@@ -15,8 +15,8 @@
  *   - `share` hands a stored file to the OS share sheet.
  *
  * Layout (mirrors SimpleStorage's scoping):
- *   bytes:    Paths.document/mentra_blobs/{userId}/{packageName}/{fileName}
- *   metadata: MMKV key  mentraos_blobmeta_{userId}_{packageName}_{key}  → StoredBlobMeta JSON
+ *   bytes:    Paths.document/veiller_blobs/{userId}/{packageName}/{fileName}
+ *   metadata: MMKV key  veiller_blobmeta_{userId}_{packageName}_{key}  → StoredBlobMeta JSON
  *
  * The on-disk file name is a generated id plus a mime-derived extension (iOS
  * AVPlayer keys a local file's format off the path extension, so blobs played
@@ -31,7 +31,7 @@ import {Buffer} from "buffer"
 import Share from "react-native-share"
 import {Directory, File, Paths, type FileHandle} from "expo-file-system"
 
-import {MiniappErrorCode} from "@mentra/miniapp"
+import {MiniappErrorCode} from "@veiller/miniapp"
 import {storage as mmkvStorage} from "../utils/storage/storage"
 import {sanitizeSegment, shareFileName, withDiskExt} from "./blobPaths"
 
@@ -39,10 +39,10 @@ const LOG_TAG = "LocalMiniappRuntime"
 
 /** Per-app blob quota: 1 GB. */
 export const BLOB_QUOTA_BYTES = 1024 * 1024 * 1024
-const ROOT_DIR_NAME = "mentra_blobs"
+const ROOT_DIR_NAME = "veiller_blobs"
 /** Cache dir root holding short-lived, properly-named copies handed to the OS share sheet (one unique subdir per share). */
-const SHARE_DIR_NAME = "mentra_blob_share"
-const META_KEY_ROOT = "mentraos_blobmeta_"
+const SHARE_DIR_NAME = "veiller_blob_share"
+const META_KEY_ROOT = "veiller_blobmeta_"
 /** Cap md5 computation so we don't block the JS thread hashing a huge file. */
 const MD5_MAX_BYTES = 50 * 1024 * 1024
 
@@ -106,7 +106,7 @@ export class BlobStore {
 
   private currentIdentity(packageName: string): {userId: string; scope: string} {
     const userId = this.hooks.getUserId().trim()
-    if (!userId) throw new Error("Mentra user identity is unavailable")
+    if (!userId) throw new Error("Veiller user identity is unavailable")
     const scope = `${userId}\0${packageName}`
     return {userId, scope}
   }

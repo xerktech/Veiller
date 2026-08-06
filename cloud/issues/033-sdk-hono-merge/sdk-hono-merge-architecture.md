@@ -22,7 +22,7 @@ Dev:   "version": "2.1.29"
 Merge: "version": "3.0.0-hono.3"
 ```
 
-Dependencies kept from Hono side (`hono` instead of `express`, no `multer`, no `cookie-parser`). `@mentra/display-utils` added by dev auto-merged cleanly since both sides had it.
+Dependencies kept from Hono side (`hono` instead of `express`, no `multer`, no `cookie-parser`). `@veiller/display-utils` added by dev auto-merged cleanly since both sides had it.
 
 ### 2. `cloud/packages/sdk/src/app/server/index.ts`
 
@@ -193,8 +193,8 @@ These dev changes merged cleanly into the Hono branch:
 | `src/types/messages/glasses-to-cloud.ts` | UDP `clientPublicKey` (added then removed) |
 | `src/types/models.ts` | `PreviewImage`, `PhotoOrientation` types |
 | `src/types/streams.ts` | New stream type exports |
-| `src/display-utils.ts` | Delegated to `@mentra/display-utils` |
-| `tsconfig.json` | Added `@mentra/display-utils` reference |
+| `src/display-utils.ts` | Delegated to `@veiller/display-utils` |
+| `tsconfig.json` | Added `@veiller/display-utils` reference |
 | `src/types/index.ts` | Auth types, webhook types |
 | `src/app/webview/index.ts` | Webview auth improvements |
 

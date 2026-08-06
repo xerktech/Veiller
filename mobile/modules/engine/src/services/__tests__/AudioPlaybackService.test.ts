@@ -251,11 +251,11 @@ describe("AudioPlaybackService live PCM streams", () => {
     const duplicateComplete = mock(() => {})
 
     await audioPlaybackService.play(
-      {requestId: "processing-one", audioUrl: "file://processing.wav", appId: "com.mentra.ai"},
+      {requestId: "processing-one", audioUrl: "file://processing.wav", appId: "com.veiller.ai"},
       firstComplete,
     )
     await audioPlaybackService.play(
-      {requestId: "processing-two", audioUrl: "file://processing.wav", appId: "com.mentra.ai"},
+      {requestId: "processing-two", audioUrl: "file://processing.wav", appId: "com.veiller.ai"},
       duplicateComplete,
     )
 

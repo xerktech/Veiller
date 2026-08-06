@@ -7,7 +7,7 @@
 
 //
 // MentraLiveManager.swift
-// MentraOS_Manager
+// Veiller_Manager
 //
 // Converted from MentraLiveSGC.java
 //

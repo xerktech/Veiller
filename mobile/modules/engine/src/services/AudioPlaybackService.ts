@@ -1,5 +1,5 @@
 import {createAudioPlayer, AudioPlayer, AudioStatus, setAudioModeAsync} from "expo-audio"
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {AppState, Platform} from "react-native"
 import {BgTimer} from "../utils/timers"
 import {setAudioCloudUplinkSuppressed} from "./AudioCloudUplink"

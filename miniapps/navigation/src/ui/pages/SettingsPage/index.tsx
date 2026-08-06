@@ -37,13 +37,13 @@ export function SettingsPage({onClose}: Props) {
     // Optimistic local update so the toggle feels instant; the background
     // echoes nav:units-update which lands on the same value.
     useNavStore.getState().applyUnitSystem(next)
-    mentra.send("nav:set-units", {unitSystem: next})
+    veiller.send("nav:set-units", {unitSystem: next})
   }
 
   function setVoiceGuidance(next: VoiceGuidanceMode) {
     if (!capabilities.hasSpeaker || next === voiceGuidanceMode) return
     useNavStore.getState().applyVoiceGuidance(next)
-    mentra.send("nav:set-voice-guidance", {mode: next})
+    veiller.send("nav:set-voice-guidance", {mode: next})
   }
 
   return (

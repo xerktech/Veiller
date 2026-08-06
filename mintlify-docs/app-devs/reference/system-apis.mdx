@@ -26,8 +26,8 @@ const all = await session.miniapps.list({ includeIncompatible: true });
 // start() runs a miniapp in the BACKGROUND: it spawns the background context and
 // reports as running, without changing phone navigation or foregrounding anything
 // (the WebView mounts only if the user opens it).
-await session.miniapps.start("com.mentra.todo");
-await session.miniapps.stop("com.mentra.todo");
+await session.miniapps.start("com.veiller.todo");
+await session.miniapps.stop("com.veiller.todo");
 ```
 
 | Method | Returns | Notes |
@@ -44,7 +44,7 @@ handler, and returns the result.
 
 ```ts
 const res = await session.actions.invoke(
-  "com.mentra.todo",
+  "com.veiller.todo",
   "add_todo",
   { text: "milk" },
   { timeoutMs: 30000 }, // default 30s, max 120s

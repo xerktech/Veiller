@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/pr-agent",
+  "name": "@veiller/pr-agent",
   "private": true,
   "type": "module",
   "scripts": {

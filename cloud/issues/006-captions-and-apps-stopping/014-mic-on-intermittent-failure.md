@@ -6,14 +6,14 @@
 **SDK Version**: 2.1.30-beta.1
 **Apps Involved**:
 - `flash.flash.flash` (captions app running locally)
-- `com.mentra.captions.beta` (captions running on porter/cloud)
+- `com.veiller.captions.beta` (captions running on porter/cloud)
 
 **Key Difference from Previous Issues**: Mic was ON (previous Bug 005/007 was about empty subscriptions on reconnect)
 
 ## Symptoms
 
 1. Something was "off" briefly - exact symptom unclear (transcription stopped? audio not flowing?)
-2. Turning on/off the app (at least `com.mentra.captions.beta`) didn't immediately fix it
+2. Turning on/off the app (at least `com.veiller.captions.beta`) didn't immediately fix it
 3. Self-recovered after leaving it running for a few minutes
 4. User was switching between the two apps
 
@@ -35,7 +35,7 @@ When switching between two apps rapidly, subscription updates might race:
 
 ```
 Timeline:
-t0: User has com.mentra.captions.beta active with AUDIO_CHUNK subscription
+t0: User has com.veiller.captions.beta active with AUDIO_CHUNK subscription
 t1: User switches to flash.flash.flash
 t2: Cloud processes app switch, starts cleaning up beta's session
 t3: flash.flash.flash sends its subscription update
@@ -50,7 +50,7 @@ t6: Beta reconnects but subscription state is inconsistent
 
 Since both apps are different instances:
 - `flash.flash.flash` is LOCAL (localhost cloud)
-- `com.mentra.captions.beta` is PORTER (cloud-debug or cloud-dev)
+- `com.veiller.captions.beta` is PORTER (cloud-debug or cloud-dev)
 
 They shouldn't share state, BUT:
 - If both connect to the same cloud instance (unlikely but possible with config)
@@ -129,7 +129,7 @@ Edge case: What if a NON-empty but WRONG subscription update arrives during the 
 Need logs from the incident timeframe (~12:42-45pm PST) for:
 
 1. **Cloud logs (porter)**:
-   - Subscription updates for `com.mentra.captions.beta`
+   - Subscription updates for `com.veiller.captions.beta`
    - App lifecycle events (start/stop/switch)
    - `hasPCMTranscriptionSubscriptions` results
    - AudioManager relay decisions
@@ -357,7 +357,7 @@ To help narrow down the issue:
    - [ ] Something else: ___
 
 2. **How was "turning on and off the app" done?**
-   - [ ] Toggle switch in MentraOS mobile app
+   - [ ] Toggle switch in Veiller mobile app
    - [ ] Stopping app server process and restarting
    - [ ] Other: ___
 
@@ -383,7 +383,7 @@ SELECT timestamp, message, packageName, subscriptions
 FROM logs
 WHERE timestamp BETWEEN '2024-XX-XX 20:42:00' AND '2024-XX-XX 20:50:00'
   AND (message LIKE '%subscription%' OR message LIKE '%AUDIO_CHUNK%')
-  AND packageName IN ('flash.flash.flash', 'com.mentra.captions.beta')
+  AND packageName IN ('flash.flash.flash', 'com.veiller.captions.beta')
 ORDER BY timestamp
 ```
 
@@ -402,7 +402,7 @@ SELECT timestamp, message, packageName
 FROM logs
 WHERE timestamp BETWEEN '2024-XX-XX 20:42:00' AND '2024-XX-XX 20:50:00'
   AND (message LIKE '%ping%' OR message LIKE '%pong%' OR message LIKE '%heartbeat%')
-  AND packageName IN ('flash.flash.flash', 'com.mentra.captions.beta')
+  AND packageName IN ('flash.flash.flash', 'com.veiller.captions.beta')
 ORDER BY timestamp
 ```
 

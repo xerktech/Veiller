@@ -4,6 +4,6 @@
     "modules": ["CrustModule"]
   },
   "android": {
-    "modules": ["com.mentra.crust.CrustModule"]
+    "modules": ["com.veiller.crust.CrustModule"]
   }
 }

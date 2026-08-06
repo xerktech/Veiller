@@ -1,5 +1,5 @@
 /**
- * @fileoverview Exhaustive tests for the `@mentra/cloud-runtime/protocol` types.
+ * @fileoverview Exhaustive tests for the `@veiller/cloud-runtime/protocol` types.
  *
  * Goal: 100% coverage of the protocol package. Every schema parses a valid
  * example and rejects an invalid one; every discriminated union routes each of

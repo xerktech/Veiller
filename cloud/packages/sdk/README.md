@@ -1,11 +1,11 @@
-# @mentra/sdk
+# @veiller/sdk
 
-Build apps for MentraOS smart glasses.
+Build apps for Veiller smart glasses.
 
 ## Quick Start
 
 ```typescript
-import { MiniAppServer } from "@mentra/sdk";
+import { MiniAppServer } from "@veiller/sdk";
 
 const app = new MiniAppServer({
   packageName: "com.example.myapp",
@@ -60,11 +60,11 @@ See the [migration guide](https://docs.mentra.glass/app-devs/migration/overview)
 
 ## Getting Started
 
-The quickest way to get started is using our example app. This guide assumes you have a pair of [compatible smart glasses](https://mentra.glass/os) connected to a phone running the [MentraOS app](https://mentra.glass/install).
+The quickest way to get started is using our example app. This guide assumes you have a pair of [compatible smart glasses](https://mentra.glass/os) connected to a phone running the [Veiller app](https://mentra.glass/install).
 
-### Install MentraOS on your phone
+### Install Veiller on your phone
 
-Download MentraOS from [Mentra.glass/install](https://mentra.glass/install)
+Download Veiller from [Mentra.glass/install](https://mentra.glass/install)
 
 ### Set up ngrok
 
@@ -81,12 +81,12 @@ We are going to use ngrok to expose your local app to the internet. This is usef
   <img width="75%" src="https://docs.mentra.glass/img/ngrok_guide_1.png"></img>
 </center>
 
-### Register your app with MentraOS
+### Register your app with Veiller
 
-![MentraOS Console](https://imagedelivery.net/nrc8B2Lk8UIoyW7fY8uHVg/560e34ff-c3e6-4e1a-1c4e-a0780e4fcd00/small)
+![Veiller Console](https://imagedelivery.net/nrc8B2Lk8UIoyW7fY8uHVg/560e34ff-c3e6-4e1a-1c4e-a0780e4fcd00/small)
 
 1. Navigate to [console.mentra.glass](https://console.mentra.glass/)
-2. Click "Sign In" and log in with the same account you're using for MentraOS
+2. Click "Sign In" and log in with the same account you're using for Veiller
 3. Click "Create App"
 4. Set a unique package name like `com.yourName.yourAppName`
 5. For "Public URL", enter your ngrok static URL
@@ -125,10 +125,10 @@ We are going to use ngrok to expose your local app to the internet. This is usef
      ```
      PORT=3000
      PACKAGE_NAME=com.yourName.yourAppName
-     MENTRAOS_API_KEY=your_api_key_from_console
+     VEILLER_API_KEY=your_api_key_from_console
      ```
-   - Make sure the `PACKAGE_NAME` matches what you registered in the MentraOS Console
-   - Get your `API_KEY` from the MentraOS Developer Console
+   - Make sure the `PACKAGE_NAME` matches what you registered in the Veiller Console
+   - Get your `API_KEY` from the Veiller Developer Console
 6. Run your app:
    ```bash
    bun run dev
@@ -139,9 +139,9 @@ We are going to use ngrok to expose your local app to the internet. This is usef
    ```
    Note: `3000` is the port. It must match what is in the app config. If you changed it to `8080`, use `8080` for ngrok instead.
 
-> After making changes to your app code or restarting your server, you may need to restart your app inside the MentraOS phone app.
+> After making changes to your app code or restarting your server, you may need to restart your app inside the Veiller phone app.
 
-For more information, visit the [MentraOS-Cloud-Example-App repository](https://github.com/Mentra-Community/MentraOS-Cloud-Example-App). For a more in-depth example with app settings support, see the [Extended Example](https://github.com/Mentra-Community/MentraOS-Extended-Example-App).
+For more information, visit the [Veiller-Cloud-Example-App repository](https://github.com/Mentra-Community/MentraOS-Cloud-Example-App). For a more in-depth example with app settings support, see the [Extended Example](https://github.com/Mentra-Community/MentraOS-Extended-Example-App).
 
 ## Documentation
 

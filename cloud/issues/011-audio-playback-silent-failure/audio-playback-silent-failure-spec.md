@@ -6,7 +6,7 @@ Applet audio playback silently fails after the first successful query. Users see
 
 ## Problem
 
-**Reported behavior**: MentraAI on Mentra Live - first Q+A plays audio correctly, but subsequent queries never produce audible responses. The MentraOS Client console confirms AI is responding via display events, so the AI pipeline is working. Only audio playback is broken.
+**Reported behavior**: VeillerAI on Mentra Live - first Q+A plays audio correctly, but subsequent queries never produce audible responses. The Veiller Client console confirms AI is responding via display events, so the AI pipeline is working. Only audio playback is broken.
 
 ### Evidence from BetterStack Logs (2025-12-18)
 
@@ -68,7 +68,7 @@ Add comprehensive logging to Go livekit-bridge:
 ### Phase 2: Reproduce and Capture
 
 1. Deploy logging changes to debug environment
-2. Reproduce the issue with MentraAI Q+A
+2. Reproduce the issue with VeillerAI Q+A
 3. Capture full log trace from first (working) to second (failing) query
 
 ### Phase 3: Root Cause Analysis

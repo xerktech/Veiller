@@ -2,11 +2,11 @@
 
 ## Overview
 
-This document describes a set of improvements made to the MentraOS WebSocket connection system, focusing on reconnection behavior for Apps when network interruptions occur. These improvements address issues observed both in development environments (laptop sleep causing disconnection) and in production (unexpected disconnections without proper recovery).
+This document describes a set of improvements made to the Veiller WebSocket connection system, focusing on reconnection behavior for Apps when network interruptions occur. These improvements address issues observed both in development environments (laptop sleep causing disconnection) and in production (unexpected disconnections without proper recovery).
 
 ## Problem Statement
 
-The WebSocket connections between Apps and MentraOS Cloud were experiencing several issues:
+The WebSocket connections between Apps and Veiller Cloud were experiencing several issues:
 
 1. **WebSocket Closure Detection**: When WebSocket connections would close unexpectedly, the Apps would not attempt to reconnect.
 

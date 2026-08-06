@@ -10,7 +10,7 @@ handler a `session`. It lives in the **background layer**, and every capability
 (display, microphone, sensors, storage) is a module on it.
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 
 registerMiniapp((session) => {
   // session.userId       – who this user is

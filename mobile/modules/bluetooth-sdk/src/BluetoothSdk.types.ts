@@ -943,7 +943,7 @@ export interface TapStrapDeviceInfo {
  */
 export interface TapStrapStatus {
   supported: boolean
-  /** True while MentraOS holds paired straps in controller mode (no phone input). */
+  /** True while Veiller holds paired straps in controller mode (no phone input). */
   takeoverEnabled: boolean
   /** False when BLUETOOTH_CONNECT hasn't been granted, so pairing state is unknown. */
   bluetoothPermission: boolean

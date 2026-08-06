@@ -23,14 +23,14 @@
  */
 
 import type { udp } from "bun";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import {
   ingestAudioPacket,
   parseAudioPacket,
 } from "../services/session/stream";
 import { publishUdpLivenessAck } from "../services/session/control-stream";
 import { getSessionByTag } from "./ws";
-import { PROTOCOL_MAJOR } from "@mentra/cloud-protocol/envelope";
+import { PROTOCOL_MAJOR } from "@veiller/cloud-protocol/envelope";
 
 const logger = createLogger("audio").child({ service: "udp-ingress" });
 

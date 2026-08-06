@@ -17,9 +17,9 @@ The `@mentra/types` package needs to be **built first** (creating `dist/` folder
 ```
 @mentra/types (must build first)
     ↓
-@mentra/sdk (imports from types)
+@veiller/sdk (imports from types)
     ↓
-@mentra/cloud (imports from types)
+@veiller/cloud (imports from types)
 ```
 
 ## Files Fixed
@@ -126,11 +126,11 @@ Step 2: Build @mentra/types
   ├─ Creates dist/index.d.ts
   └─ Now importable by other packages ✅
 
-Step 3: Build @mentra/sdk
+Step 3: Build @veiller/sdk
   ├─ Imports from @mentra/types (finds dist/)
   └─ Bundles @mentra/types code inline
 
-Step 4: Build @mentra/cloud
+Step 4: Build @veiller/cloud
   ├─ Imports from @mentra/types (finds dist/)
   └─ Compiles successfully ✅
 ```

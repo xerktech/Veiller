@@ -1,4 +1,4 @@
-# Publish `@mentra/sdk`
+# Publish `@veiller/sdk`
 
 Path: `cloud/packages/sdk`
 Current version line: `3.0.0-alpha.<N>`
@@ -6,10 +6,10 @@ Tag: `alpha` only.
 
 ## Why never `latest`
 
-`@mentra/sdk` v3 was designed before the local SDK was on the
+`@veiller/sdk` v3 was designed before the local SDK was on the
 roadmap. It contains breaking changes from v2. We are moving the
 miniapp programming model to the local SDK
-(`@mentra/miniapp` in `sdk/miniapp`) within the next quarter or
+(`@veiller/miniapp` in `sdk/miniapp`) within the next quarter or
 so, and the local SDK will change the public API again.
 
 Promoting v3 to `latest` would force every miniapp developer to
@@ -18,13 +18,13 @@ within weeks. We avoid that by keeping v3 on `alpha` until either
 the local SDK ships and supersedes it, or we decide to promote a
 v3.x to `latest` after the dust settles.
 
-Internal apps (live-captions, Mentra-AI, etc.) install with
-`npm install @mentra/sdk@alpha`. External developers who want to
+Internal apps (live-captions, Veiller-AI, etc.) install with
+`npm install @veiller/sdk@alpha`. External developers who want to
 try v3 do the same.
 
 ## Prereqs
 
-1. You are a member of `@mentra` on npm. See [README.md](README.md) in this
+1. You are a member of `@veiller` on npm. See [README.md](README.md) in this
    folder.
 2. You are on the branch that has the changes you want to
    publish. Usually a feature branch off `dev`.
@@ -55,8 +55,8 @@ npm publish --tag alpha
 ## Verify
 
 ```bash
-npm view @mentra/sdk versions --json | tail -5
-npm view @mentra/sdk dist-tags
+npm view @veiller/sdk versions --json | tail -5
+npm view @veiller/sdk dist-tags
 # Expect:
 #   alpha:  3.0.0-alpha.<N>     <- new
 #   latest: <some old v2 version, untouched>
@@ -68,8 +68,8 @@ time you publish:
 ```bash
 mkdir /tmp/sdk-smoke && cd /tmp/sdk-smoke
 npm init -y
-npm install @mentra/sdk@alpha
-node -e "console.log(Object.keys(require('@mentra/sdk')).slice(0,5))"
+npm install @veiller/sdk@alpha
+node -e "console.log(Object.keys(require('@veiller/sdk')).slice(0,5))"
 ```
 
 ## After publishing
@@ -82,7 +82,7 @@ node -e "console.log(Object.keys(require('@mentra/sdk')).slice(0,5))"
 
 ## Bundled types
 
-`@mentra/sdk` ships with `@mentra/types` bundled into the package.
+`@veiller/sdk` ships with `@mentra/types` bundled into the package.
 If your changes touched `cloud/packages/types`, publish that first,
 then update the SDK to depend on the new types version, then
 publish the SDK.
@@ -120,9 +120,9 @@ If a published `alpha` is broken, point the `alpha` tag back at
 the previous version:
 
 ```bash
-npm view @mentra/sdk versions --json | tail -5
-npm dist-tag add @mentra/sdk@<last-good-version> alpha
-npm deprecate @mentra/sdk@<bad-version> "Broken; use <last-good-version>."
+npm view @veiller/sdk versions --json | tail -5
+npm dist-tag add @veiller/sdk@<last-good-version> alpha
+npm deprecate @veiller/sdk@<bad-version> "Broken; use <last-good-version>."
 ```
 
 Then fix the underlying issue and publish a new version. See the

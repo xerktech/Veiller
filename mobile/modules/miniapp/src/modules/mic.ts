@@ -44,7 +44,7 @@ export class MicModule {
   /**
    * Temporarily override glasses-side voice activity detection (GX8002) for
    * this miniapp's lifetime. When disabled, mic gating falls back to the
-   * loudness gate only (if it is enabled). The Mentra App's configured value
+   * loudness gate only (if it is enabled). The Veiller App's configured value
    * is restored when this miniapp disconnects.
    *
    * Requires `MICROPHONE` in the miniapp manifest.
@@ -59,7 +59,7 @@ export class MicModule {
   /**
    * Temporarily override the center-mic loudness gate ("Barrier") for this
    * miniapp's lifetime. It blocks quiet/self-talk audio independent of VAD.
-   * The Mentra App's configured value is restored when this miniapp disconnects.
+   * The Veiller App's configured value is restored when this miniapp disconnects.
    *
    * Requires `MICROPHONE` in the miniapp manifest.
    */

@@ -1,7 +1,7 @@
 /**
  * @fileoverview ElevenLabs streaming TTS provider.
  */
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import type { TtsProvider, TtsProviderSpeakRequest } from "../tts.service";
 
 const logger = createLogger("tts").child({ service: "elevenlabs.tts.provider" });

@@ -1,4 +1,4 @@
-import type {AudioOutputStream} from "@mentra/sdk"
+import type {AudioOutputStream} from "@veiller/sdk"
 import type {UserSession} from "../UserSession"
 
 export type OutputStreamOwner = "realtime" | "tone"

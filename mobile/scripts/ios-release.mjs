@@ -134,11 +134,11 @@ async function waitForInstallableIphone({maxAttempts = 45, intervalMs = 2000} = 
 
 async function findReleaseAppPath() {
   const derivedData = (
-    await $`ls -td ~/Library/Developer/Xcode/DerivedData/MentraOS-*`.quiet()
+    await $`ls -td ~/Library/Developer/Xcode/DerivedData/Veiller-*`.quiet()
   ).stdout
     .trim()
     .split("\n")[0]
-  return `${derivedData}/Build/Products/Release-iphoneos/Mentra.app`
+  return `${derivedData}/Build/Products/Release-iphoneos/Veiller.app`
 }
 
 async function installWithDevicectl(deviceRef, appPath) {

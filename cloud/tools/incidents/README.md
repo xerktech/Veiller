@@ -1,19 +1,19 @@
-# @mentra/incidents
+# @veiller/incidents
 
-CLI tool for browsing incidents and fetching logs from the Mentra agent API.
+CLI tool for browsing incidents and fetching logs from the Veiller agent API.
 
 ## Setup
 
 Set your API key in the environment:
 
 ```bash
-export MENTRA_AGENT_API_KEY=your-api-key
+export VEILLER_AGENT_API_KEY=your-api-key
 ```
 
 Optionally override the API host (defaults to `https://api.mentra.glass`):
 
 ```bash
-export MENTRA_API_HOST=http://localhost:3000
+export VEILLER_API_HOST=http://localhost:3000
 ```
 
 ## Usage
@@ -82,5 +82,5 @@ You can use the first 8 characters of an incident UUID instead of the full ID. T
 
 | Variable               | Required | Description                                             |
 | ---------------------- | -------- | ------------------------------------------------------- |
-| `MENTRA_AGENT_API_KEY` | Yes      | Agent API key for authentication                        |
-| `MENTRA_API_HOST`      | No       | API host override (default: `https://api.mentra.glass`) |
+| `VEILLER_AGENT_API_KEY` | Yes      | Agent API key for authentication                        |
+| `VEILLER_API_HOST`      | No       | API host override (default: `https://api.mentra.glass`) |

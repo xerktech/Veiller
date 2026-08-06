@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# MentraOS self-hosted runner cache cleanup.
+# Veiller self-hosted runner cache cleanup.
 #
 # Frees disk on a runner by deleting cacheable artifacts. Designed to be
 # scheduled weekly via launchd (macOS) or systemd timer (Linux); set up by
@@ -19,13 +19,13 @@
 #              * ~/Library/Caches/* (macOS) / ~/.cache/* (Linux), minus dirs
 #                we know are not safe to wipe (gh, dotnet)
 #              * ~/.android/avd (any configured emulators)
-#              * ~/Library/Developer/Xcode/DerivedData/Mentra-* (macOS only)
+#              * ~/Library/Developer/Xcode/DerivedData/Veiller-* (macOS only)
 #
 # Concurrency: if a build is running (gradle, xcodebuild, Xcode, bun, node
 # processes owned by the current user) the cleanup defers and exits 0. The
 # scheduler retries on its normal cadence (weekly) so no spinning.
 #
-# Logs to ~/mentra/runner-cleanup.log, self-trimmed to last 500 lines.
+# Logs to ~/veiller/runner-cleanup.log, self-trimmed to last 500 lines.
 #
 # Usage:
 #   runner-cleanup.sh                # default: --tier all
@@ -80,7 +80,7 @@ esac
 
 # --- Logging -----------------------------------------------------------------
 
-LOG_DIR="$HOME/mentra"
+LOG_DIR="$HOME/veiller"
 LOG_FILE="$LOG_DIR/runner-cleanup.log"
 mkdir -p "$LOG_DIR"
 
@@ -231,10 +231,10 @@ fi
 # subdir per repo it's checked out. We don't try to nuke a runner's currently
 # active checkout — the build-process guard above already excludes that case.
 # Anything older than 7 days that we wouldn't touch on a typical week.
-if [[ -d "$HOME/mentra" ]]; then
+if [[ -d "$HOME/veiller" ]]; then
     while IFS= read -r dir; do
         nuke "$dir"
-    done < <(find "$HOME/mentra"/actions-runner-*/_work -mindepth 2 -maxdepth 2 -type d -mtime +7 2>/dev/null)
+    done < <(find "$HOME/veiller"/actions-runner-*/_work -mindepth 2 -maxdepth 2 -type d -mtime +7 2>/dev/null)
 fi
 
 # --- Tier 2 ------------------------------------------------------------------
@@ -269,11 +269,11 @@ if [[ "$TIER" == "2" || "$TIER" == "all" ]]; then
     # Android emulators (state, snapshots, custom AVD configs).
     nuke "$HOME/.android/avd"
 
-    # macOS-only: Xcode DerivedData for the Mentra project. Major disk hog
+    # macOS-only: Xcode DerivedData for the Veiller project. Major disk hog
     # (~20-50 GB after a few builds). Next iOS archive is slow (~10 min cold
     # compile) but that's what a deep clean is for.
     if [[ "$PLATFORM" == "mac" ]]; then
-        nuke_glob "$HOME/Library/Developer/Xcode/DerivedData/Mentra-*"
+        nuke_glob "$HOME/Library/Developer/Xcode/DerivedData/Veiller-*"
     fi
 fi
 

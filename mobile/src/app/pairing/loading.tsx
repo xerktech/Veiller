@@ -1,6 +1,6 @@
 import {useRoute} from "@react-navigation/native"
-import {engine} from "@mentra/engine"
-import type {PairFailureEvent} from "@mentra/engine"
+import {engine} from "@veiller/engine"
+import type {PairFailureEvent} from "@veiller/engine"
 import {useCallback, useEffect, useRef, useState} from "react"
 import {View} from "react-native"
 

@@ -10,7 +10,7 @@ import {
   RadioGroup,
   RadioGroupItem,
   Label,
-} from "@mentra/shared";
+} from "@veiller/shared";
 
 const ExportDataPage: React.FC = () => {
   const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
@@ -51,7 +51,7 @@ const ExportDataPage: React.FC = () => {
             <CardHeader>
               <CardTitle>Data Export</CardTitle>
               <CardDescription>
-                Request a download of all your data from Mentra
+                Request a download of all your data from Veiller
               </CardDescription>
             </CardHeader>
             <CardContent>

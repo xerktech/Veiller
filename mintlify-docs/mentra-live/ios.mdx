@@ -1,10 +1,10 @@
 ---
 title: "iOS"
-description: "Use the Mentra Bluetooth SDK from a native iOS app."
+description: "Use the Veiller Bluetooth SDK from a native iOS app."
 icon: "apple"
 ---
 
-Native iOS apps use the `MentraBluetoothSDK` Swift package.
+Native iOS apps use the `VeillerBluetoothSDK` Swift package.
 
 ## Requirements
 
@@ -21,7 +21,7 @@ The public SwiftPM repository is:
 https://github.com/Mentra-Community/mentra-bluetooth-sdk-ios.git
 ```
 
-In Xcode, choose **File > Add Package Dependencies**, enter that URL, select version `0.1.21-beta.3`, and add the `MentraBluetoothSDK` product to your app target.
+In Xcode, choose **File > Add Package Dependencies**, enter that URL, select version `0.1.21-beta.3`, and add the `VeillerBluetoothSDK` product to your app target.
 
 For `Package.swift` consumers:
 
@@ -35,13 +35,13 @@ For `Package.swift` consumers:
 Then add the product to your target:
 
 ```swift
-.product(name: "MentraBluetoothSDK", package: "mentra-bluetooth-sdk-ios")
+.product(name: "VeillerBluetoothSDK", package: "veiller-bluetooth-sdk-ios")
 ```
 
 For local SDK development, add the package folder directly in Xcode:
 
 ```text
-/path/to/MentraOS/mobile/modules/bluetooth-sdk
+/path/to/Veiller/mobile/modules/bluetooth-sdk
 ```
 
 <Warning>
@@ -99,11 +99,11 @@ This SDK version does not enable terminated-app Core Bluetooth state restoration
 ## Basic Flow
 
 ```swift
-import MentraBluetoothSDK
+import VeillerBluetoothSDK
 
 @MainActor
-final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
-    private let sdk = MentraBluetoothSDK()
+final class GlassesController: NSObject, VeillerBluetoothSDKDelegate {
+    private let sdk = VeillerBluetoothSDK()
     private var selectedDevice: Device?
 
     override init() {
@@ -133,7 +133,7 @@ final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
         }
     }
 
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState) {
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState) {
         // Keep app UI derived from SDK status.
         print("Glasses changed: \(glasses)")
     }
@@ -153,7 +153,7 @@ final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
 Use this when testing native Swift SDK source changes locally:
 
 ```text
-/path/to/MentraOS/mobile/modules/bluetooth-sdk
+/path/to/Veiller/mobile/modules/bluetooth-sdk
 ```
 
 Add that folder as a local Swift package in Xcode. Keep local paths in your workspace settings or CI environment, not in committed project settings.

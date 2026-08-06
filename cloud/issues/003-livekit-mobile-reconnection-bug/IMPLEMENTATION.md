@@ -192,7 +192,7 @@ If issues occur:
 - 375 "session already exists" failures in 7 days
 - 12 users affected
 - Transcription broken after reconnections
-- Users experiencing: mentradevphone@gmail.com (212 failures), alex1115alex@gmail.com (79 failures), etc.
+- Users experiencing: veillerdevphone@gmail.com (212 failures), alex1115alex@gmail.com (79 failures), etc.
 
 ### After Fix:
 

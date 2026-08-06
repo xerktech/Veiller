@@ -104,7 +104,7 @@ describe("UIModuleImpl", () => {
     expect(calls).toEqual([1])
   })
 
-  // Regression: the WebView's mentra.ready() (which produces UI_OPEN) races
+  // Regression: the WebView's veiller.ready() (which produces UI_OPEN) races
   // the background session's CONNECT_ACK. If UI_OPEN wins, onOpen handlers
   // must NOT fire until the session is ready — otherwise they read null
   // capabilities and the UI renders a "no glasses" snapshot that never

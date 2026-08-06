@@ -11,7 +11,7 @@
  */
 
 import {useEffect, useRef, useState} from "react"
-import {useColorScheme} from "@mentra/miniapp/ui"
+import {useColorScheme} from "@veiller/miniapp/ui"
 
 import {getMapbox} from "@/ui/lib/mapbox"
 

@@ -4,7 +4,7 @@ description: "Lay out your webview UI around the host chrome: notch insets and t
 icon: "crop"
 ---
 
-Your miniapp UI runs in a WebView inside the Mentra App, and the host draws its
+Your miniapp UI runs in a WebView inside the Veiller App, and the host draws its
 own chrome on top. Two things overlap your content: the device safe-area insets
 (notch, status bar, rounded corners) and a floating **capsule menu** the host
 parks in the top-right. If you lay out edge-to-edge, your header sits under the
@@ -12,11 +12,11 @@ notch and your top-right button sits under the capsule, where taps go to the hos
 instead of your app.
 
 `useSafeArea()` reads both regions so your layout can pad around them. It imports
-from `@mentra/miniapp/react`, the [UI layer](/app-devs/core-concepts/webviews/react-webviews)
+from `@veiller/miniapp/react`, the [UI layer](/app-devs/core-concepts/webviews/react-webviews)
 of the [two-layer architecture](/app-devs/core-concepts/two-layer-architecture).
 
 ```tsx
-import { useSafeArea } from "@mentra/miniapp/react";
+import { useSafeArea } from "@veiller/miniapp/react";
 
 function App() {
   const { insets } = useSafeArea();
@@ -71,7 +71,7 @@ interactive elements out from under the menu, since taps there reach the host.
 
 <Note>
 Coordinates are in CSS pixels. Always handle `capsuleMenu === null` so your layout
-still works outside the Mentra App and on hosts that don't draw a menu.
+still works outside the Veiller App and on hosts that don't draw a menu.
 </Note>
 
 ## `useCapsuleHeaderStyle()`
@@ -82,7 +82,7 @@ header element. It positions the row vertically centered on the capsule menu and
 reserves room on the right so your content doesn't slide under it.
 
 ```tsx
-import { useCapsuleHeaderStyle } from "@mentra/miniapp/react";
+import { useCapsuleHeaderStyle } from "@veiller/miniapp/react";
 
 function Header() {
   const style = useCapsuleHeaderStyle();
@@ -115,7 +115,7 @@ slots (`left`, `title`, `right`) and respects the safe area and capsule menu the
 same way. It also accepts every `useCapsuleHeaderStyle()` option as a prop.
 
 ```tsx
-import { MiniappHeader } from "@mentra/miniapp/react";
+import { MiniappHeader } from "@veiller/miniapp/react";
 
 function App() {
   return (

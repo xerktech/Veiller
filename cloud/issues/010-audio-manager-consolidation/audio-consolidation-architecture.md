@@ -143,7 +143,7 @@ Subscription Changes → SubscriptionManager
 
 import {Logger} from "pino"
 import WebSocket from "ws"
-import {StreamType, VadMessage} from "@mentra/sdk"
+import {StreamType, VadMessage} from "@veiller/sdk"
 import {ResourceTracker} from "../../utils/resource-tracker"
 import UserSession from "./UserSession"
 
@@ -330,7 +330,7 @@ export class TranslationManager {
 #### Message Type Definition
 
 ```typescript
-// In @mentra/sdk types
+// In @veiller/sdk types
 
 export interface MicRequirementsUpdate {
   type: "mic_requirements_update"
@@ -524,7 +524,7 @@ private publishRequirements(): void {
 
 | File                | Change                                           |
 | ------------------- | ------------------------------------------------ |
-| `@mentra/sdk` types | Add MicRequirementsUpdate type                   |
+| `@veiller/sdk` types | Add MicRequirementsUpdate type                   |
 | `AudioManager.ts`   | Add requirements calculation and publishing      |
 | Mobile app          | Accept MIC_REQUIREMENTS_UPDATE, derive mic state |
 

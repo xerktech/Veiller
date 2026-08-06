@@ -1,8 +1,8 @@
-# @mentra/console-mcp
+# @veiller/console-mcp
 
-MCP server for the **MentraOS Developer Console**. Exposes MiniApp management, organization tools, incident triage, and optional internal admin review to Cursor and other MCP clients.
+MCP server for the **Veiller Developer Console**. Exposes MiniApp management, organization tools, incident triage, and optional internal admin review to Cursor and other MCP clients.
 
-This is separate from the [docs MCP](https://docs.mentraglass.com/mcp) (`mentraos-docs`), which only covers SDK documentation.
+This is separate from the [docs MCP](https://docs.mentraglass.com/mcp) (`veiller-docs`), which only covers SDK documentation.
 
 ## Prerequisites
 
@@ -13,10 +13,10 @@ This is separate from the [docs MCP](https://docs.mentraglass.com/mcp) (`mentrao
 
 | Variable | Required for | Description |
 |----------|--------------|-------------|
-| `MENTRA_API_HOST` | No | API base URL. Default: `https://api.mentra.glass`. Local dev: `http://localhost:8002` |
-| `MENTRA_CLI_TOKEN` | App/org tools | CLI key from [Developer Console → CLI Keys](https://console.mentra.glass/cli-keys). Sent as `Authorization: Bearer …` to `/api/cli/*`. Create keys in the dashboard only — not via MCP. |
-| `MENTRA_AGENT_API_KEY` | Incident tools | Agent API key (must match server `MENTRA_AGENT_API_KEY`). Sent as `X-Agent-Key` to `/api/agent/incidents` |
-| `MENTRA_ADMIN_JWT` or `MENTRA_ADMIN_TOKEN` | Admin tools | Core/session JWT for a Mentra admin email (`@mentra.glass` / `ADMIN_EMAILS`). **Not** a CLI key |
+| `VEILLER_API_HOST` | No | API base URL. Default: `https://api.mentra.glass`. Local dev: `http://localhost:8002` |
+| `VEILLER_CLI_TOKEN` | App/org tools | CLI key from [Developer Console → CLI Keys](https://console.mentra.glass/cli-keys). Sent as `Authorization: Bearer …` to `/api/cli/*`. Create keys in the dashboard only — not via MCP. |
+| `VEILLER_AGENT_API_KEY` | Incident tools | Agent API key (must match server `VEILLER_AGENT_API_KEY`). Sent as `X-Agent-Key` to `/api/agent/incidents` |
+| `VEILLER_ADMIN_JWT` or `VEILLER_ADMIN_TOKEN` | Admin tools | Core/session JWT for a Veiller admin email (`@mentra.glass` / `ADMIN_EMAILS`). **Not** a CLI key |
 
 Only tools whose credentials are configured are registered, plus `console_auth_status` (never prints secrets).
 
@@ -24,13 +24,13 @@ Only tools whose credentials are configured are registered, plus `console_auth_s
 
 Add to `~/.cursor/mcp.json` or project `.cursor/mcp.json`.
 
-**Recommended:** use `scripts/run-mcp.sh`. It resolves Bun when Cursor spawns MCP with a minimal `PATH`, and can load `MENTRA_*` exports from `~/.zshrc` (without sourcing the whole file, which would break stdio JSON-RPC).
+**Recommended:** use `scripts/run-mcp.sh`. It resolves Bun when Cursor spawns MCP with a minimal `PATH`, and can load `VEILLER_*` exports from `~/.zshrc` (without sourcing the whole file, which would break stdio JSON-RPC).
 
 ```json
 {
   "mcpServers": {
-    "mentra-console": {
-      "command": "/absolute/path/to/MentraOS/cloud/packages/console-mcp/scripts/run-mcp.sh",
+    "veiller-console": {
+      "command": "/absolute/path/to/Veiller/cloud/packages/console-mcp/scripts/run-mcp.sh",
       "args": []
     }
   }
@@ -42,22 +42,22 @@ Or pass credentials explicitly in `env` (useful for CI or when keys are not in `
 ```json
 {
   "mcpServers": {
-    "mentra-console": {
-      "command": "/absolute/path/to/MentraOS/cloud/packages/console-mcp/scripts/run-mcp.sh",
+    "veiller-console": {
+      "command": "/absolute/path/to/Veiller/cloud/packages/console-mcp/scripts/run-mcp.sh",
       "args": [],
       "env": {
-        "MENTRA_API_HOST": "https://api.mentra.glass",
-        "MENTRA_CLI_TOKEN": "your-cli-key",
-        "MENTRA_AGENT_API_KEY": "your-agent-key"
+        "VEILLER_API_HOST": "https://api.mentra.glass",
+        "VEILLER_CLI_TOKEN": "your-cli-key",
+        "VEILLER_AGENT_API_KEY": "your-agent-key"
       }
     }
   }
 }
 ```
 
-For local cloud dev, set `MENTRA_API_HOST` to `http://localhost:8002` and ensure `MENTRA_AGENT_API_KEY` matches `cloud/.env`.
+For local cloud dev, set `VEILLER_API_HOST` to `http://localhost:8002` and ensure `VEILLER_AGENT_API_KEY` matches `cloud/.env`.
 
-Restart Cursor after changing MCP config. In **Cursor Settings → MCP**, `mentra-console` should show as connected (not errored).
+Restart Cursor after changing MCP config. In **Cursor Settings → MCP**, `veiller-console` should show as connected (not errored).
 
 ### Verify in Cursor
 
@@ -68,38 +68,38 @@ Ask the agent to call `console_auth_status`. You should see your API host and wh
 | Symptom | Fix |
 |---------|-----|
 | MCP server **errored** / `bun: not found` | Use `run-mcp.sh` (not bare `bun`), or set `"env": { "BUN": "/Users/you/.bun/bin/bun" }` |
-| Only `console_auth_status` + incident tools | Set `MENTRA_AGENT_API_KEY` for incidents; `MENTRA_CLI_TOKEN` for app/org tools |
-| Incident tools return 401 | Key must match server `MENTRA_AGENT_API_KEY` (see `cloud/.env` locally) |
-| `run-mcp.sh` loads nothing from shell | Keys must be `export MENTRA_AGENT_API_KEY=...` lines in `~/.zshrc` |
+| Only `console_auth_status` + incident tools | Set `VEILLER_AGENT_API_KEY` for incidents; `VEILLER_CLI_TOKEN` for app/org tools |
+| Incident tools return 401 | Key must match server `VEILLER_AGENT_API_KEY` (see `cloud/.env` locally) |
+| `run-mcp.sh` loads nothing from shell | Keys must be `export VEILLER_AGENT_API_KEY=...` lines in `~/.zshrc` |
 
 ## Run locally
 
 ```bash
 cd cloud/packages/console-mcp
-export MENTRA_CLI_TOKEN=...
+export VEILLER_CLI_TOKEN=...
 bun run start
 ```
 
 ## Tools (by capability)
 
-### Developer (`MENTRA_CLI_TOKEN`)
+### Developer (`VEILLER_CLI_TOKEN`)
 
 - **Apps:** `app_list`, `app_get`, `app_create`, `app_update`, `app_delete` (needs `confirm: true`), `app_publish`, `app_regenerate_api_key`, `app_move_org`
 - **Orgs:** `org_list`, `org_get`, `org_create`, `org_update`, `org_delete`, `org_invite_member`, `org_change_member_role`, `org_remove_member`, `org_resend_invite`, `org_rescind_invite`, `org_accept_invite`
 
 `app_create` only accepts fields allowed by the backend: `packageName`, `name`, `description`, `publicUrl`, `appType`, `tools`, `permissions`, `settings`, `hardwareRequirements`, `onboardingInstructions`, `orgId`.
 
-### Incidents (`MENTRA_AGENT_API_KEY`)
+### Incidents (`VEILLER_AGENT_API_KEY`)
 
 - `incident_list`, `incident_get`, `incident_get_logs` (bounded output, default 200 lines; supports `logType`, `grep`, `level`, short UUID prefixes)
 
-### Admin (`MENTRA_ADMIN_JWT`)
+### Admin (`VEILLER_ADMIN_JWT`)
 
 - `admin_check`, `admin_app_stats`, `admin_apps_submitted`, `admin_app_get`, `admin_app_approve`, `admin_app_reject` (requires non-empty `notes`)
 
 ## Resources and prompts
 
-- Resources: `mentra://apps`, `mentra://apps/{packageName}`, `mentra://incidents/recent`, `mentra://incidents/{incidentId}/summary`
+- Resources: `veiller://apps`, `veiller://apps/{packageName}`, `veiller://incidents/recent`, `veiller://incidents/{incidentId}/summary`
 - Prompts: `debug-incident`, `create-miniapp-checklist`, `review-submission`
 
 ## Tests
@@ -115,9 +115,9 @@ bun test
 
 ```bash
 cd cloud/packages/console-mcp
-export MENTRA_API_HOST=https://api.mentra.glass   # or http://localhost:8002
-export MENTRA_AGENT_API_KEY=...                   # must match cloud/.env when local
-export MENTRA_CLI_TOKEN=...                       # optional, for app/org checks
+export VEILLER_API_HOST=https://api.mentra.glass   # or http://localhost:8002
+export VEILLER_AGENT_API_KEY=...                   # must match cloud/.env when local
+export VEILLER_CLI_TOKEN=...                       # optional, for app/org checks
 
 bun run smoke
 ```

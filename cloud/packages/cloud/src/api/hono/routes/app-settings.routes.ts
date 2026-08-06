@@ -13,8 +13,8 @@ import appService from "../../../services/core/app.service";
 import { isUninstallable } from "../../../services/core/app.service";
 import UserSession from "../../../services/session/UserSession";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
-import { CloudToAppMessageType, AppSetting } from "@mentra/sdk";
-import { Permission } from "@mentra/sdk";
+import { CloudToAppMessageType, AppSetting } from "@veiller/sdk";
+import { Permission } from "@veiller/sdk";
 import type { AppEnv, AppContext } from "../../../types/hono";
 
 const logger = rootLogger.child({ service: "app-settings.routes" });

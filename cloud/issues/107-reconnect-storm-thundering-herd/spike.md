@@ -82,13 +82,13 @@ Code 1006 means the socket disappeared without a normal close frame. That points
 
 Affected app packages included:
 
-- `com.mentra.captions`
-- `com.mentra.ai`
+- `com.veiller.captions`
+- `com.veiller.ai`
 - `cloud.augmentos.notify`
-- `com.mentra.notes`
-- `com.mentra.merge`
-- `com.mentra.streamer`
-- `com.mentra.translation`
+- `com.veiller.notes`
+- `com.veiller.merge`
+- `com.veiller.streamer`
+- `com.veiller.translation`
 - `com.kai.glasses`
 - `com.youfeng.dashboard`
 - `com.youfeng.g2-orchestrator`
@@ -105,7 +105,7 @@ The raw slow-connect logs showed this shape:
   "feature": "slow-app-connect",
   "mode": "connection_init",
   "durationMs": 119.7,
-  "packageName": "com.mentra.captions",
+  "packageName": "com.veiller.captions",
   "phaseTimings": {
     "attachAppSocket": 12.7,
     "broadcastAppState": 97.1,
@@ -307,7 +307,7 @@ Prototype changes tried:
 - app `connection_init` skips `addRunningApp(packageName)` when in-memory state already says the app is running, dormant, or in its grace period.
 - the app settings route updates the in-session settings cache when settings change.
 - install and uninstall routes request an explicit installed-app refresh.
-- the local Mentra-path storm harness waits for scheduled broadcasts and reports installed-app lookup counts and per-round event-loop heartbeat gaps.
+- the local Veiller-path storm harness waits for scheduled broadcasts and reports installed-app lookup counts and per-round event-loop heartbeat gaps.
 
 ### Async DB Delay Test
 
@@ -317,7 +317,7 @@ Command:
 
 ```bash
 cd cloud
-bun run tools/ws-storm-local/mentra-path-storm-harness.ts \
+bun run tools/ws-storm-local/veiller-path-storm-harness.ts \
   --connect-mode=init \
   --users=56 \
   --apps-per-user=1 \
@@ -350,8 +350,8 @@ This test injected short synchronous pauses into the same DB call sites. It is n
 Before fix, running the harness against `origin/staging` produced a liveness-like event-loop gap:
 
 ```bash
-cd /tmp/mentraos-107-staging/cloud
-bun run tools/ws-storm-local/mentra-path-storm-harness.ts \
+cd /tmp/veiller-107-staging/cloud
+bun run tools/ws-storm-local/veiller-path-storm-harness.ts \
   --connect-mode=init \
   --users=56 \
   --apps-per-user=1 \
@@ -379,7 +379,7 @@ After the cheap-reconnect changes, the same sync-pressure shape still has a firs
 
 ```bash
 cd cloud
-bun run tools/ws-storm-local/mentra-path-storm-harness.ts \
+bun run tools/ws-storm-local/veiller-path-storm-harness.ts \
   --connect-mode=init \
   --users=56 \
   --apps-per-user=1 \
@@ -447,7 +447,7 @@ The storm harness was also run inside the deployed cloud-debug container to veri
 ```bash
 porter kubectl --cluster 4689 -- exec -n default cloud-debug-cloud-7bbf467cdf-2jc2q -- bash -lc '
   cd /app &&
-  bun run tools/ws-storm-local/mentra-path-storm-harness.ts \
+  bun run tools/ws-storm-local/veiller-path-storm-harness.ts \
     --connect-mode=init \
     --users=56 \
     --apps-per-user=1 \

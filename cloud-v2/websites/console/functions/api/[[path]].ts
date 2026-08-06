@@ -19,7 +19,7 @@ export async function onRequest(context: {
   const headers = new Headers(context.request.headers);
   stripForwardingAndHopByHopHeaders(headers);
   headers.delete("host");
-  headers.set("x-mentra-public-origin", sourceUrl.origin);
+  headers.set("x-veiller-public-origin", sourceUrl.origin);
 
   return fetch(upstreamUrl, {
     method: context.request.method,
@@ -31,7 +31,7 @@ export async function onRequest(context: {
 
 // Client-supplied forwarding/hop-by-hop headers must never reach CORE_URL: they
 // would let a request spoof trusted proxy metadata (client IP, protocol, host).
-// The edge sets its own trusted values (e.g. x-mentra-public-origin) after this.
+// The edge sets its own trusted values (e.g. x-veiller-public-origin) after this.
 const FORWARDING_AND_HOP_BY_HOP_HEADERS = [
   "forwarded",
   "x-forwarded-for",
@@ -47,7 +47,7 @@ const FORWARDING_AND_HOP_BY_HOP_HEADERS = [
   "trailer",
   "transfer-encoding",
   "upgrade",
-  "x-mentra-public-origin",
+  "x-veiller-public-origin",
 ];
 
 function stripForwardingAndHopByHopHeaders(headers: Headers): void {

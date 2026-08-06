@@ -31,7 +31,7 @@ import { AppToCloudMessageType, CloudToAppMessageType } from "../../types/messag
 // ─── Dependencies ────────────────────────────────────────────────────────────
 
 /**
- * Shared dependency bag injected by MentraSession.
+ * Shared dependency bag injected by VeillerSession.
  * Keeps managers decoupled from the session implementation.
  */
 export interface ManagerDeps {
@@ -721,7 +721,7 @@ export class SpeakerManager {
 
   /**
    * Cancel all pending requests and end any active stream.
-   * Called by MentraSession during disconnect/cleanup.
+   * Called by VeillerSession during disconnect/cleanup.
    * @internal
    */
   destroy(): void {

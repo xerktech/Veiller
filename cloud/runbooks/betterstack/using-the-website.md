@@ -21,7 +21,7 @@ happening right now.
 
 1. Log into https://logs.betterstack.com/
 2. Click the source for the region you want
-   (e.g. `MentraCloud - Prod`).
+   (e.g. `VeillerCloud - Prod`).
 3. The default view is Live Tail.
 4. Use the filter bar at the top to narrow by:
    - **Level**: `info`, `warn`, `error`, etc.

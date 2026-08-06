@@ -10,7 +10,7 @@ The mobile frontend wants to show a "new" badge on apps that have been installed
 
 ```typescript
 {
-  packageName: "com.mentra.merge",
+  packageName: "com.veiller.merge",
   installedDate: "2025-05-09T00:19:05.237Z",
   lastActiveAt: "2026-01-28T18:27:12.202Z"  // Only present if app has been run
 }
@@ -20,7 +20,7 @@ The mobile frontend wants to show a "new" badge on apps that have been installed
 
 ```typescript
 {
-  packageName: "com.mentra.merge",
+  packageName: "com.veiller.merge",
   name: "Merge",
   logoUrl: "...",
   type: "background",
@@ -62,7 +62,7 @@ const isNewApp = !app.lastActiveAt
 
 ```typescript
 {
-  packageName: "com.mentra.merge",
+  packageName: "com.veiller.merge",
   name: "Merge",
   logoUrl: "...",
   type: "background",

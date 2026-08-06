@@ -22,7 +22,7 @@ Specific issues on `dev` not on Hono:
 - The Hono branch already had partial ports: photo reconnection (`c97fe69c6`) and some type fixes (`0892d3362`), creating duplicate code paths
 - `server/index.ts` is the most-changed file on both sides: 876 lines (Hono) vs 1022 lines (dev), with completely different import/middleware/routing patterns
 - `git merge` produced 30+ conflicts in `server/index.ts` alone — no auto-resolution possible
-- The SDK is published to npm as `@mentra/sdk` — broken types or missing exports break downstream apps
+- The SDK is published to npm as `@veiller/sdk` — broken types or missing exports break downstream apps
 
 ## Goals
 
@@ -53,7 +53,7 @@ Specific issues on `dev` not on Hono:
 | `cc30136` | Jan 6 | Silent photo mode type | `types/messages/cloud-to-glasses.ts` |
 | `344f6fa` | Jan 7 | Image preview upload for webview | webview files |
 | `b9a0a4a` | Jan 7 | Image upload setup for preview | webview files |
-| `c6adcb9` | Jan 19 | DisplayProcessor + @mentra/display-utils | `package.json`, `display-utils.ts`, `tsconfig.json` |
+| `c6adcb9` | Jan 19 | DisplayProcessor + @veiller/display-utils | `package.json`, `display-utils.ts`, `tsconfig.json` |
 | `6bab5b9` | Jan 27 | UDP audio encryption types | `types/messages/` |
 | `825e127` | Jan 27 | Simplify UDP encryption to symmetric key | `types/messages/` |
 | `eac608f` | Jan 29 | Timezone handling + deprecate CUSTOM_MESSAGE | `session/events.ts`, `types/` |
@@ -65,5 +65,5 @@ Specific issues on `dev` not on Hono:
    - Publish as pre-release tag first (`npm publish --tag hono`)
 
 2. **When to make Hono the default SDK?**
-   - After at least one app (LiveCaptionsOnSmartGlasses or MentraAI) runs on it in production for a week
+   - After at least one app (LiveCaptionsOnSmartGlasses or VeillerAI) runs on it in production for a week
    - Then merge `cloud/sdk-hono` → `dev` and publish as `3.0.0`

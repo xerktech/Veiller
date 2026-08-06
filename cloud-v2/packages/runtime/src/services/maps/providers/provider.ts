@@ -21,7 +21,7 @@ import type {
   PlaceDetailsResult,
   PlaceSuggestion,
   Route,
-} from "@mentra/cloud-protocol/maps";
+} from "@veiller/cloud-protocol/maps";
 
 export interface MapsProvider {
   /** Diagnostic label, e.g. "mapbox". */

@@ -11,7 +11,7 @@ Tenir (self-hosted live captions) and Turma (self-hosted Claude Code session
 manager) each ship an Even Realities G2 glasses app built for **Even Hub**
 (`.ehpk` WebView apps on `@evenrealities/even_hub_sdk`, sideloaded/published
 through Even's portal). Veiller replaces the Even phone app entirely: it
-drives the G2 over BLE itself and runs **local Mentra miniapps** (background
+drives the G2 over BLE itself and runs **local Veiller miniapps** (background
 JS + optional phone WebView, shipped as flat zips bundled into the APK).
 
 This spec covers porting both glasses apps to local miniapps that live in this
@@ -26,16 +26,16 @@ Upstream sources ported (latest at time of port):
 Miniapp versions mirror those releases: `com.xerktech.tenir-0.5.9`,
 `com.xerktech.turma-0.6.45`. Future in-repo changes bump patch from there.
 
-## Runtime mapping (Even Hub → Mentra miniapp)
+## Runtime mapping (Even Hub → Veiller miniapp)
 
-| Even Hub | Mentra local miniapp |
+| Even Hub | Veiller local miniapp |
 |---|---|
 | `.ehpk` (manifest `app.json`, WebView app) | flat zip (`miniapp.json`, `background/index.js` IIFE + `ui/index.html`) |
 | Lens = LVGL containers, 576×288, 27px lines (~10 lines) | `session.display.render()` scene: text/rect elements, 576×288, 40px lines (~7 lines), ≤6 text/rect elements |
 | `audioControl(true)` + `audioEvent` (16kHz s16le mono ~100ms chunks) | `session.mic.onAudioChunk` (base64 `pcm_s16le` @16k) — same wire format after decode |
 | `sysEvent`/`textEvent` gestures | `session.input.onTouch`: `single_tap`→tap, `double_tap`→doubleTap, `swipe_up`→scrollUp, `swipe_down`→scrollDown |
 | `getLocalStorage`/`setLocalStorage` | `session.storage` (string KV, MMKV-backed) |
-| Same-WebView phone page (shared JS context with lens) | separate WebView; talks to background over `mentra` channels (`session.ui` send/on/handle) |
+| Same-WebView phone page (shared JS context with lens) | separate WebView; talks to background over `veiller` channels (`session.ui` send/on/handle) |
 | `app.json` `network` whitelist (enforced at pack time) | no allowlist; background `fetch`/`WebSocket` are unrestricted (binary WS send supported) |
 | Even Hub portal distribution | zip in `mobile/assets/miniapps/` → installed at app startup |
 
@@ -78,9 +78,9 @@ The upstream core is hardware-agnostic behind three interfaces
 (`GlassesDisplay`, `Dictation`, `KeyValueStorage`), so `app.ts`, `render.ts`,
 `input-box.ts`, `reveal.ts`, `transcript.ts`, `sessions.ts`, `text-wrap.ts`,
 `hub-client.ts`, `live.ts`, `config.ts`, `types.ts` port **verbatim** with
-their tests. New Mentra backends:
+their tests. New Veiller backends:
 
-- `display/mentra.ts` — `ScreenModel` → scene elements: transcript text,
+- `display/veiller.ts` — `ScreenModel` → scene elements: transcript text,
   bordered bottom box (rect + text), right-corner status text; debounced like
   upstream (`display/debounce.ts` ports as-is).
 - `layout.ts` geometry: `DISPLAY_LINES = 7` (288px / 40px lines),

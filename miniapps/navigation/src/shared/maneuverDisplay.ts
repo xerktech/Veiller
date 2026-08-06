@@ -14,7 +14,7 @@
  * own unit system.
  */
 
-import type {NavManeuver} from "@mentra/miniapp"
+import type {NavManeuver} from "@veiller/miniapp"
 import type {NavStatus} from "./types"
 
 /** Distance (m) at/under which we say "Now" instead of "In X m". */

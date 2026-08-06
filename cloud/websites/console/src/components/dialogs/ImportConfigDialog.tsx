@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { CheckCircle2, AlertCircle, Upload } from "lucide-react";
 
 /**

@@ -5,7 +5,7 @@
  *
  * The upstream phone page shared a JS context with the lens app; here the
  * session state machine lives in the background JSContext and this page talks
- * to it over the typed `mentra` channel bus (src/shared/channels.ts):
+ * to it over the typed `veiller` channel bus (src/shared/channels.ts):
  * snapshot/auth/live broadcasts in, login/logout/start/stop/fetch RPCs out.
  * All REST traffic (history) goes through the background's proxied-fetch RPC
  * — the WebView runs from file:// and can't fetch cross-origin itself.
@@ -104,7 +104,7 @@ function toast(message: string): void {
 // ---------------------------------------------------------------------------
 
 async function proxyFetch<T>(req: ProxyFetchRequest): Promise<T> {
-  const res = await mentra.request("tenir:fetch", req);
+  const res = await veiller.request("tenir:fetch", req);
   if (!res.ok) throw new Error(res.error);
   return res.data as T;
 }
@@ -154,7 +154,7 @@ els.form.addEventListener("submit", (e) => {
     els.submit.disabled = true;
     els.submit.textContent = "Logging in…";
     try {
-      const res = await mentra.request("tenir:login", {
+      const res = await veiller.request("tenir:login", {
         serverUrl: els.server.value,
         username: els.user.value.trim(),
         password: els.password.value,
@@ -176,13 +176,13 @@ els.form.addEventListener("submit", (e) => {
 });
 
 els.signOut.addEventListener("click", () => {
-  void mentra.request("tenir:logout", {}).catch((err) => toast(String(err)));
+  void veiller.request("tenir:logout", {}).catch((err) => toast(String(err)));
 });
 
 els.openWeb.addEventListener("click", () => {
   // The server serves its own web UI at the https root of the same host.
   if (!auth.serverUrl) return;
-  mentra.send("tenir:open-url", { url: `https://${auth.serverUrl}` });
+  veiller.send("tenir:open-url", { url: `https://${auth.serverUrl}` });
 });
 
 // ---------------------------------------------------------------------------
@@ -334,7 +334,7 @@ function renderSession(): void {
 }
 
 els.start.addEventListener("click", () => {
-  void mentra
+  void veiller
     .request("tenir:start", {})
     .then((res) => {
       if (!res.ok && res.error) toast(res.error);
@@ -343,7 +343,7 @@ els.start.addEventListener("click", () => {
 });
 
 els.stop.addEventListener("click", () => {
-  void mentra.request("tenir:stop", {}).catch((err) => toast(String(err)));
+  void veiller.request("tenir:stop", {}).catch((err) => toast(String(err)));
 });
 
 // ---------------------------------------------------------------------------
@@ -533,20 +533,20 @@ els.cueToggleInput.addEventListener("change", () => {
 // Channel wiring + bootstrap
 // ---------------------------------------------------------------------------
 
-mentra.on("tenir:snapshot", (snapshot) => {
+veiller.on("tenir:snapshot", (snapshot) => {
   applyAuth(snapshot.auth);
   live = snapshot.live;
   renderSession();
 });
 
-mentra.on("tenir:auth", (state) => {
+veiller.on("tenir:auth", (state) => {
   applyAuth(state);
 });
 
-mentra.on("tenir:live", (state) => {
+veiller.on("tenir:live", (state) => {
   live = state;
   renderSession();
 });
 
 renderSession();
-mentra.ready();
+veiller.ready();

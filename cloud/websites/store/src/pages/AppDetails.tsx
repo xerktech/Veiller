@@ -17,7 +17,7 @@ import {
   CircleDot,
   Lightbulb,
 } from "lucide-react";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { useTheme } from "../hooks/useTheme";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { usePlatform } from "../hooks/usePlatform";
@@ -28,7 +28,7 @@ import { formatCompatibilityError } from "../utils/errorHandling";
 import { Button } from "@/components/ui/button";
 import Header from "../components/Header";
 import AppPermissions from "../components/AppPermissions";
-import GetMentraOSButton from "../components/GetMentraOSButton";
+import GetVeillerButton from "../components/GetVeillerButton";
 
 // Hardware icon mapping
 const hardwareIcons: Record<HardwareType, React.ReactNode> = {
@@ -596,7 +596,7 @@ const AppDetails: React.FC = () => {
                         style={{
                           color: theme === "light" ? "#000000" : "#E4E4E7",
                         }}>
-                        {app.packageName.replace(".augmentos.", ".mentra.")}{" "}
+                        {app.packageName.replace(".augmentos.", ".veiller.")}{" "}
                         {/* TODO: remove this once we have migrated over */}
                       </span>
                     </div>
@@ -818,11 +818,11 @@ const AppDetails: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Get MentraOS - Hide in React Native WebView */}
+                {/* Get Veiller - Hide in React Native WebView */}
                 {!isWebView && (
                   <div className="text-center mb-8">
                     {/* <div className="flex justify-center">
-                      <GetMentraOSButton size="small" />
+                      <GetVeillerButton size="small" />
                     </div> */}
                   </div>
                 )}

@@ -8,11 +8,11 @@ Top PR: https://github.com/Mentra-Community/MentraOS/pull/3276
 
 ## What Is The Engine?
 
-The engine is the MentraOS runtime API that the host app should use. In this
+The engine is the Veiller runtime API that the host app should use. In this
 stack it is implemented by the island package under `mobile/modules/engine` and
 exported to `mobile/src` through typed facades.
 
-The engine owns MentraOS behavior:
+The engine owns Veiller behavior:
 
 - normalized glasses runtime state
 - pairing and reconnect readiness rules
@@ -21,7 +21,7 @@ The engine owns MentraOS behavior:
 - OTA checks and OTA runtime commands
 - gallery sync and media runtime plumbing
 - diagnostics and bug-report context
-- Cloud V2 client calls for MentraOS core services
+- Cloud V2 client calls for Veiller core services
 
 The host app owns OEM presentation:
 
@@ -38,7 +38,7 @@ engine and back in.
 
 ## What We Are Doing
 
-This stack moves MentraOS runtime logic behind engine facades so the host app
+This stack moves Veiller runtime logic behind engine facades so the host app
 can become OEM-brandable UI rather than another owner of smartglasses OS state.
 
 The work started with Cloud V2 incident reporting. The current top branch then
@@ -112,7 +112,7 @@ status stores, compatibility projections, hotspot details, OTA status, and
 pairing state.
 
 That was the wrong shape for OEM UI. The host was learning details of the
-MentraOS runtime, then passing those details back into services or rendering
+Veiller runtime, then passing those details back into services or rendering
 based on internal state that should not be part of the app branding API.
 
 The current top branch replaces that with smaller surfaces:
@@ -135,7 +135,7 @@ avoid needing one.
 - Do not wrap the entire Bluetooth SDK just to hide it. The Bluetooth SDK is a
   standalone lower-level product and should continue to expose low-level
   connection data to SDK consumers.
-- Engine facades should add MentraOS runtime semantics, not duplicate SDK data.
+- Engine facades should add Veiller runtime semantics, not duplicate SDK data.
 - Debug/dev screens are allowed to live in and be exported by the engine. They
   are not OEM surfaces.
 - Cloud V1 remnants should not make the new engine API more complicated.
@@ -189,7 +189,7 @@ state.
 
 These are worth preserving because they came out of review/conflict work:
 
-- The host should use package imports such as `@mentra/bluetooth-sdk/internal`
+- The host should use package imports such as `@veiller/bluetooth-sdk/internal`
   where that package surface exists. Avoid deep relative imports across package
   boundaries.
 - Stale host-side OTA availability projection was removed. The view should not
@@ -287,7 +287,7 @@ to keep reducing host access to runtime details while preserving the simple
 mental model:
 
 - host renders OEM UI
-- engine owns MentraOS runtime behavior
+- engine owns Veiller runtime behavior
 - Bluetooth SDK remains the lower-level customer SDK
 - Cloud V2 owns new core web services
 

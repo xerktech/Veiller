@@ -20,8 +20,8 @@
  * state written mid-pass queues a follow-up pass — the same way a setState
  * during React effects scheduled a re-render after the current effect batch.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {OtaProgress, OtaStatus} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {OtaProgress, OtaStatus} from "@veiller/bluetooth-sdk/internal"
 import GlobalEventEmitter from "../utils/GlobalEventEmitter"
 import {isGlassesConnected, useGlassesStore} from "../stores/glasses"
 import {resolveOtaManifestUrl} from "./otaManifestUrl"

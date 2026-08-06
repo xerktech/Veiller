@@ -40,28 +40,28 @@ class CrustModule extends NativeModule<CrustModuleEvents> {
   async isBetaBuild() {
     return false
   }
-  async mentraJsSpawn(_pkg: string, _polyfill: string, _miniappJs: string) {
+  async veillerJsSpawn(_pkg: string, _polyfill: string, _miniappJs: string) {
     return false
   }
-  async mentraJsEvaluate(_pkg: string, _src: string) {
+  async veillerJsEvaluate(_pkg: string, _src: string) {
     return null
   }
-  async mentraJsKill(_pkg: string) {
+  async veillerJsKill(_pkg: string) {
     return
   }
-  async mentraJsDispatchToJs(_pkg: string, _env: Record<string, unknown>) {
+  async veillerJsDispatchToJs(_pkg: string, _env: Record<string, unknown>) {
     return
   }
-  async mentraJsSetManifest(_pkg: string, _perms: string[]) {
+  async veillerJsSetManifest(_pkg: string, _perms: string[]) {
     return
   }
-  mentraJsAlivePackages() {
+  veillerJsAlivePackages() {
     return []
   }
-  async mentraJsDebugForceGC(_pkg: string) {
+  async veillerJsDebugForceGC(_pkg: string) {
     return false
   }
-  mentraJsLoadPolyfillBundle() {
+  veillerJsLoadPolyfillBundle() {
     return ""
   }
 }

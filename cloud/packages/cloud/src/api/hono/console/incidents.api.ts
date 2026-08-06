@@ -6,7 +6,7 @@
  */
 
 import { Hono } from "hono";
-import { isMentraAdmin } from "../../../services/core/admin.utils";
+import { isVeillerAdmin } from "../../../services/core/admin.utils";
 import { incidentStorage } from "../../../services/storage/incident-storage.service";
 import { Incident } from "../../../models/incident.model";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
@@ -28,7 +28,7 @@ app.use("*", async (c, next) => {
     return c.json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
-  if (!isMentraAdmin(email)) {
+  if (!isVeillerAdmin(email)) {
     return c.json({ error: "Forbidden", message: "Admin access required" }, 403);
   }
 

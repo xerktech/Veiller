@@ -25,5 +25,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>
 }

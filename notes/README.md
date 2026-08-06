@@ -1,6 +1,6 @@
 # Notes
 
-Design specs, implementation plans, and working notes for MentraOS live here. This is intentionally a working tree for humans and agents — not the public product docs (those live in `mintlify-docs/`).
+Design specs, implementation plans, and working notes for Veiller live here. This is intentionally a working tree for humans and agents — not the public product docs (those live in `mintlify-docs/`).
 
 ## Specs vs plans
 

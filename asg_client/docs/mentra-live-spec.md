@@ -4,10 +4,10 @@ This document is the standing product/platform reference for **Mentra Live** whe
 
 ## Purpose
 
-Mentra Live is MentraOS's officially supported Android-based smart glasses device. It is both:
+Mentra Live is Veiller's officially supported Android-based smart glasses device. It is both:
 
 1. **A consumer smart-glasses product** for hands-free capture, streaming, app interactions, and status feedback.
-2. **The reference hardware platform** for `asg_client`, the Android system app that bridges glasses hardware to the MentraOS phone app and cloud ecosystem.
+2. **The reference hardware platform** for `asg_client`, the Android system app that bridges glasses hardware to the Veiller phone app and cloud ecosystem.
 
 In code and older docs, Mentra Live is often called **K900**. `K900` is an internal codename for the Mentra Live hardware platform, not a separate product.
 
@@ -18,10 +18,10 @@ Mentra Live consists of:
 - Smart glasses hardware with camera, microphone/audio path, physical camera button, temple touch/swipe input, battery, sensors, WiFi/Bluetooth connectivity, privacy/status LEDs, and firmware-updatable components.
 - An Android runtime on the glasses, powered by a Mediatek (**MTK**) SoC.
 - A dedicated Bluetooth/audio microcontroller (**BES**) that handles low-level Bluetooth/audio behavior, button/touch events, battery reporting, pre-handoff and forced RGB status LED signaling, and BES firmware OTA.
-- The `com.mentra.asg_client` Android app, shipped as a system app on production devices, which exposes the device to MentraOS.
-- The MentraOS phone app, which pairs with the glasses over BLE, configures device behavior, syncs media, routes app events, and connects the user session to MentraOS Cloud.
+- The `com.mentra.asg_client` Android app, shipped as a system app on production devices, which exposes the device to Veiller.
+- The Veiller phone app, which pairs with the glasses over BLE, configures device behavior, syncs media, routes app events, and connects the user session to Veiller Cloud.
 
-## System role in MentraOS
+## System role in Veiller
 
 Mentra Live is the glasses endpoint in this chain:
 
@@ -30,11 +30,11 @@ Mentra Live hardware
   → BES MCU / MTK Android system
   → asg_client foreground service
   → BLE connection to phone app
-  → MentraOS Cloud
-  → MentraOS apps and app servers
+  → Veiller Cloud
+  → Veiller apps and app servers
 ```
 
-The glasses do not directly run third-party MentraOS apps. Instead, `asg_client` reports device events and media state to the phone; the phone/cloud route those events to apps and route commands back to the glasses.
+The glasses do not directly run third-party Veiller apps. Instead, `asg_client` reports device events and media state to the phone; the phone/cloud route those events to apps and route commands back to the glasses.
 
 ## Hardware and firmware architecture
 
@@ -71,7 +71,7 @@ For some outbound commands, `B` is a JSON object serialized as a string inside t
 
 ### Pairing and phone connectivity
 
-- Mentra Live pairs with the MentraOS phone app over BLE.
+- Mentra Live pairs with the Veiller phone app over BLE.
 - `asg_client` exposes phone-facing commands and responses through the BLE command protocol.
 - The phone is the user's primary UI for setup, WiFi configuration, gallery sync, app routing, and settings.
 - Button/touch events are forwarded to the phone so apps can react even when the glasses also perform local actions.
@@ -157,7 +157,7 @@ value to the phone as `serial_number` in `version_info_3`. It must not substitut
 the generic `0123456789ABCDEF` Android/ADB placeholder—regardless of which
 property exposes it—or a BES system-version field. The Bluetooth
 MAC is sourced from BES (`hs_syvr`/`sr_btaddr`), persisted in
-`persist.mentra.live.mac`, and republished to the phone as soon as it is learned.
+`persist.veiller.live.mac`, and republished to the phone as soon as it is learned.
 
 `asg_client` includes logging, crash/error reporting, incident log buffering, and debug receivers for development and OTA testing. Production behavior should prioritize device stability and useful logs for support while avoiding secrets in logs.
 

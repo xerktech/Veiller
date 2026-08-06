@@ -4,14 +4,14 @@ description: "How a miniapp's always-on background and on-demand UI layers work 
 icon: "layer-group"
 ---
 
-Every Mentra miniapp has two layers. Understanding the split is the key to the
+Every Veiller miniapp has two layers. Understanding the split is the key to the
 whole SDK: it determines where your code runs, what it can reach, and how the
 two halves communicate.
 
 | Layer | Lifetime | Has DOM? | Hardware access | Import from |
 |---|---|---|---|---|
-| **Background** | Always on while the miniapp is enabled | No | Full: owns the `session` | `@mentra/miniapp/background` |
-| **UI** | Only while the user has your tile open | Yes (React) | None: talks to background | `@mentra/miniapp/ui`, `@mentra/miniapp/react` |
+| **Background** | Always on while the miniapp is enabled | No | Full: owns the `session` | `@veiller/miniapp/background` |
+| **UI** | Only while the user has your tile open | Yes (React) | None: talks to background | `@veiller/miniapp/ui`, `@veiller/miniapp/react` |
 
 ## File layout
 
@@ -24,7 +24,7 @@ my-miniapp/
     │   └── index.ts          # registerMiniapp(session => …)
     ├── ui/
     │   ├── index.html
-    │   ├── main.tsx          # mounts <App/>, calls mentra.ready()
+    │   ├── main.tsx          # mounts <App/>, calls veiller.ready()
     │   └── App.tsx
     └── shared/
         └── channels.ts       # typed channel registry: both sides import it
@@ -48,7 +48,7 @@ and calls your `registerMiniapp` handler once the connection is ready. This is
 where every `session.*` call lives.
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 import "../shared/channels";
 
 registerMiniapp(async (session) => {
@@ -74,7 +74,7 @@ background output rather than leaving it external.
 ### Background runtime APIs
 
 Do not infer background support from what TypeScript or Bun accepts at build
-time. The background bundle targets a small, cross-platform runtime. MentraOS
+time. The background bundle targets a small, cross-platform runtime. Veiller
 currently provides these browser-like globals:
 
 | Available | Scope and limits |
@@ -94,14 +94,14 @@ includes `window`, `document`, DOM elements, `performance`,
 `require()` / dynamic module resolution. Put rendering, DOM work, and browser UI
 libraries in `src/ui/`. Put `session.*` calls, hardware subscriptions, durable
 state, and logic that must continue after the UI closes in `src/background/`.
-Exchange only serializable data through `mentra.*` / `session.ui.*`.
+Exchange only serializable data through `veiller.*` / `session.ui.*`.
 
 <Warning>
 If an AI coding agent introduces `performance.now()`, DOM access, or a Node API
 under `src/background/`, move that code to the UI or replace it with a supported
 primitive. For elapsed time in the background, use `Date.now()`.
 
-Projects created with `create-mentra-miniapp` also check background source and
+Projects created with `create-veiller-miniapp` also check background source and
 its imported shared files during `bun run build`. Common unsupported browser or
 Node APIs fail the build with the source location and a supported alternative.
 </Warning>
@@ -110,21 +110,21 @@ Node APIs fail the build with the source location and a supported alternative.
 
 The UI is a normal React app. It has **zero** direct native access: it reaches
 the glasses only by sending messages to its own background layer. It mounts
-inside `<MentraProvider>` and must call `mentra.ready()` on boot so the host
+inside `<VeillerProvider>` and must call `veiller.ready()` on boot so the host
 knows it's mounted.
 
 ```tsx src/ui/main.tsx
 import { createRoot } from "react-dom/client";
-import { MentraProvider } from "@mentra/miniapp/ui";
+import { VeillerProvider } from "@veiller/miniapp/ui";
 import { App } from "./App";
 
 createRoot(document.getElementById("root")!).render(
-  <MentraProvider>
+  <VeillerProvider>
     <App />
-  </MentraProvider>,
+  </VeillerProvider>,
 );
 
-mentra.ready(); // flush any buffered messages from background
+veiller.ready(); // flush any buffered messages from background
 ```
 
 ## Talking between layers
@@ -134,7 +134,7 @@ declare every channel once in `src/shared/channels.ts`; both halves import it, s
 names and payload shapes are enforced at compile time.
 
 ```typescript src/shared/channels.ts
-import type { MentraTyped } from "@mentra/miniapp/ui";
+import type { VeillerTyped } from "@veiller/miniapp/ui";
 
 export interface Channels {
   ping: { at: number };                        // UI → background
@@ -142,16 +142,16 @@ export interface Channels {
 }
 
 declare global {
-  var mentra: MentraTyped<Channels>;
+  var veiller: VeillerTyped<Channels>;
 }
 ```
 
-**From the UI**, use the injected `mentra` global:
+**From the UI**, use the injected `veiller` global:
 
 ```tsx
-mentra.send("ping", { at: Date.now() });            // fire-and-forget
-mentra.on("pong", ({ roundtripMs }) => { /* … */ }); // subscribe
-const res = await mentra.request("getNotes", {});    // request/response (RPC)
+veiller.send("ping", { at: Date.now() });            // fire-and-forget
+veiller.on("pong", ({ roundtripMs }) => { /* … */ }); // subscribe
+const res = await veiller.request("getNotes", {});    // request/response (RPC)
 ```
 
 **From the background**, use `session.ui`:
@@ -159,10 +159,10 @@ const res = await mentra.request("getNotes", {});    // request/response (RPC)
 ```typescript
 session.ui.onOpen(() => session.ui.send("pong", { at: Date.now(), roundtripMs: 0 }));
 session.ui.on("ping", ({ at }) => { /* … */ });
-session.ui.handle("getNotes", async () => ({ notes }));  // respond to mentra.request
+session.ui.handle("getNotes", async () => ({ notes }));  // respond to veiller.request
 ```
 
-The two sides are intentionally asymmetric: `mentra.send` from the UI **buffers**
+The two sides are intentionally asymmetric: `veiller.send` from the UI **buffers**
 until the WebView calls `ready()`, while `session.ui.send` from the background
 **drops silently** when no WebView is open (there's no one to receive it).
 
@@ -177,7 +177,7 @@ cross-miniapp RPC layer (`session.actions`).
    background JS context, and runs your `registerMiniapp` handler. Background is
    alive.
 2. **UI opens**: the user taps your tile; the host spawns a WebView, injects the
-   `mentra` shim, and loads `ui/index.html`. The WebView calls `mentra.ready()`,
+   `veiller` shim, and loads `ui/index.html`. The WebView calls `veiller.ready()`,
    and `session.ui.onOpen` fires in the background.
 3. **UI closes**: the user navigates away; the host destroys the WebView. The
    background context stays alive and `session.ui.onClose` fires.

@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from "@mentra/shared";
+} from "@veiller/shared";
 import { Search } from "@/components/ui/search";
 import { useNavigate } from "react-router-dom";
 import {

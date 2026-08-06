@@ -104,7 +104,7 @@ export interface AppletInterface {
 
 ```typescript
 /**
- * @mentra/types - Shared types for MentraOS
+ * @mentra/types - Shared types for Veiller
  *
  * Uses explicit exports for Bun compatibility
  * DO NOT use `export *` - causes runtime errors

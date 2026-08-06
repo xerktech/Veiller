@@ -1,7 +1,7 @@
 import {useMemo} from "react"
-import {useActiveApps, useApps} from "@mentra/engine"
+import {useActiveApps, useApps} from "@veiller/engine"
 
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 
 /**
  * Foreground tray: standard + background apps. Filtered to offline-only when

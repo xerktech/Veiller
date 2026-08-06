@@ -67,8 +67,8 @@ native module — **JavaScriptCore on iOS** (`mobile/modules/crust/ios/Source/JS
 bridge to the RN host (`LocalMiniappRuntime.ts`, Hermes) moves **strings**:
 
 - JS→host: `globalThis.__dispatch("__bridge","send", JSON.stringify([raw]))`
-  (sync native function) → `mentrajs_message` event → `LocalMiniappRuntime.handleRawMessage`.
-- host→JS: `Crust.mentraJsDispatchToJs(pkg, …)` → evaluate `globalThis.__deliver(<jsStringLiteral(json)>)`
+  (sync native function) → `veillerjs_message` event → `LocalMiniappRuntime.handleRawMessage`.
+- host→JS: `Crust.veillerJsDispatchToJs(pkg, …)` → evaluate `globalThis.__deliver(<jsStringLiteral(json)>)`
   on the context's serial queue (iOS) / single-thread executor (Android).
 
 Properties that matter:
@@ -92,7 +92,7 @@ Two consequences drive the design:
   on the native side where they originate.)
 
 This also means **Phase 2 needs no new Crust/JSC/QuickJS native engine work** —
-it is SDK TypeScript (`@mentra/miniapp`) + host TypeScript (`LocalMiniappRuntime`)
+it is SDK TypeScript (`@veiller/miniapp`) + host TypeScript (`LocalMiniappRuntime`)
 + `expo-file-system` + MMKV. "iOS and Android" is handled by the cross-platform
 host layer and Expo FS, not by parallel Swift/Kotlin. The few genuinely
 platform-specific items are called out in **§Platform notes**.
@@ -103,7 +103,7 @@ platform-specific items are called out in **§Platform notes**.
 
 Binary never belongs in the WebView (DOM memory + postMessage). The UI mirrors
 **metadata** over the miniapp's own UI channel and issues play/export *commands*;
-it never holds bytes. `session.blob` is exported only from `@mentra/miniapp/background`.
+it never holds bytes. `session.blob` is exported only from `@veiller/miniapp/background`.
 
 ```ts
 interface BlobMeta {
@@ -212,11 +212,11 @@ chunk sequentially (per-context serial execution → no benefit to parallel).
 
 ### Physical layout
 
-- **Bytes:** `Paths.document/mentra_blobs/{userId}/{packageName}/{id}` (persistent;
+- **Bytes:** `Paths.document/veiller_blobs/{userId}/{packageName}/{id}` (persistent;
   NOT `Paths.cache`, which the OS can evict). `userId` resolved exactly as the
   storage handlers do (`getRuntimeHooks().settings?.getSetting(coreToken) || "anonymous"`).
 - **Index/metadata:** MMKV (mirror SimpleStorage), one key per blob:
-  `mentraos_blobmeta_{userId}_{packageName}_{id}` → JSON `BlobMeta` (minus `uri`,
+  `veiller_blobmeta_{userId}_{packageName}_{id}` → JSON `BlobMeta` (minus `uri`,
   which is derived on read). `list()`/`usage()` do a prefix scan, exactly like
   `STORAGE_LIST` (LocalMiniappRuntime.ts ~1890). Per-app isolation is automatic.
 
@@ -282,7 +282,7 @@ Most logic is shared TS. Genuinely platform-specific:
 - **iOS backup exclusion.** `Paths.document` on iOS = the app's Documents dir,
   which is **backed up to iCloud by default**. Multi-hundred-MB debug audio must
   NOT bloat user iCloud backups — set `NSURLIsExcludedFromBackupKey` on the
-  `mentra_blobs` dir (or place it under `Application Support` / a no-backup
+  `veiller_blobs` dir (or place it under `Application Support` / a no-backup
   subdir). Android `Paths.document` = internal app files dir, not user-visible, no
   backup concern.
 - **`FileHandle` append/seek parity.** Verify `expo-file-system` streaming write +
@@ -324,7 +324,7 @@ Most logic is shared TS. Genuinely platform-specific:
 
 ## Phasing / tickets
 
-**2a — Blob core.** `session.blob` SDK module (`@mentra/miniapp/background`) +
+**2a — Blob core.** `session.blob` SDK module (`@veiller/miniapp/background`) +
 protocol types + host handlers (create/write/commit/abort/get/list/stat/delete/
 clear/usage/open-read/read/close-read) + streaming FileHandle write + MMKV index +
 per-app quota + startup index↔disk reconcile. Unit tests on the chunk splitter +

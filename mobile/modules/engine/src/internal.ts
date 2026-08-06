@@ -1,11 +1,11 @@
 /**
- * `@mentra/engine/internal` — the migration-era runtime surface.
+ * `@veiller/engine/internal` — the migration-era runtime surface.
  *
- * Raw zustand stores and service singletons that the Mentra app's host-side
+ * Raw zustand stores and service singletons that the Veiller app's host-side
  * services (and the `@/stores/*` / `@/utils/*` shims) still reach into while
  * the typed `engine` facades grow. Everything here either mutates runtime
  * state or exposes a store/service directly, so none of it belongs on the
- * OEM-facing `@mentra/engine` main entry: new host code should read/act
+ * OEM-facing `@veiller/engine` main entry: new host code should read/act
  * through `engine.*` instead.
  *
  * Every `/internal` import in mobile/src is counted (report-only) by
@@ -37,27 +37,27 @@ export {default as localDisplayManager, type DisplayPayload} from "./services/Lo
 export {default as localMiniappRuntime, type InstalledMiniappManifest} from "./services/LocalMiniappRuntime"
 export {miniappLauncher, type LaunchHints, type LaunchResult, type ResolvedBundle} from "./services/MiniappLauncher"
 export {
-  MentraJSRouter,
-  type MentraJSCrustBinding,
-  type OutboundMessagePayload as MentraJSOutboundMessage,
-  type RouterLogger as MentraJSRouterLogger,
-} from "./services/MentraJSRouter"
-export {buildMentraUiShim, type MentraUiShimOptions} from "./services/mentraUiShim"
-export {MentraUIRouter, type MentraUICrustBinding} from "./services/MentraUIRouter"
+  VeillerJSRouter,
+  type VeillerJSCrustBinding,
+  type OutboundMessagePayload as VeillerJSOutboundMessage,
+  type RouterLogger as VeillerJSRouterLogger,
+} from "./services/VeillerJSRouter"
+export {buildVeillerUiShim, type VeillerUiShimOptions} from "./services/veillerUiShim"
+export {VeillerUIRouter, type VeillerUICrustBinding} from "./services/VeillerUIRouter"
 export {
-  MentraJSCrashController,
+  VeillerJSCrashController,
   type CrashState,
   type CrashOutcome,
   type CrashControllerOptions,
-} from "./services/MentraJSCrashController"
+} from "./services/VeillerJSCrashController"
 export {ensureMiniappEngine, getMiniappEngine, type MiniappEngine} from "./services/MiniappEngine"
 export {
   redactSecrets,
-  MentraJSLogThrottle,
-  MentraJSLogRingBuffer,
+  VeillerJSLogThrottle,
+  VeillerJSLogRingBuffer,
   type ThrottleOptions,
-} from "./services/MentraJSLogPipeline"
-// WebView-injection script builders (miniapp globals + mentra-ui shim).
+} from "./services/VeillerJSLogPipeline"
+// WebView-injection script builders (miniapp globals + veiller-ui shim).
 export {
   buildMiniappGlobalsScript,
   getCapsuleMenuRect,
@@ -150,7 +150,7 @@ export {logBuffer, type LogEntry} from "./utils/devLogging"
 // Bluetooth SDK internal compatibility passthrough. Prefer an engine facade
 // when one exists; this remains an escape hatch for app-only compatibility
 // needs (its event TYPES stay on the main entry).
-export {default as BluetoothSdk} from "@mentra/bluetooth-sdk/internal"
+export {default as BluetoothSdk} from "@veiller/bluetooth-sdk/internal"
 
 
 // Engine-owned MMKV instance + debug helper.

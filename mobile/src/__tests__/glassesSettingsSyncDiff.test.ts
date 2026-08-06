@@ -1,4 +1,4 @@
-// Imports the real GlassesSettingsSync by path (not via "@mentra/engine",
+// Imports the real GlassesSettingsSync by path (not via "@veiller/engine",
 // which jest mocks) so the actual diff logic runs under the mobile jest CI
 // runner.
 import {diffBluetoothSettingsForPush, stripPairingIdentity} from "../../modules/engine/src/services/GlassesSettingsSync"

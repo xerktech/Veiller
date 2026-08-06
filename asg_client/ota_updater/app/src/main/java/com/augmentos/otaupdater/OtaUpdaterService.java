@@ -1,4 +1,4 @@
-package com.mentra.otaupdater;
+package com.veiller.otaupdater;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -18,12 +18,12 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.mentra.otaupdater.events.BatteryStatusEvent;
-import com.mentra.otaupdater.events.DownloadProgressEvent;
-import com.mentra.otaupdater.events.InstallationProgressEvent;
-import com.mentra.otaupdater.helper.Constants;
-import com.mentra.otaupdater.helper.OtaHelper;
-import com.mentra.otaupdater.worker.RecoveryWorker;
+import com.veiller.otaupdater.events.BatteryStatusEvent;
+import com.veiller.otaupdater.events.DownloadProgressEvent;
+import com.veiller.otaupdater.events.InstallationProgressEvent;
+import com.veiller.otaupdater.helper.Constants;
+import com.veiller.otaupdater.helper.OtaHelper;
+import com.veiller.otaupdater.worker.RecoveryWorker;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

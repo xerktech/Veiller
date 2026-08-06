@@ -1,16 +1,16 @@
 /**
  * @fileoverview Session aggregate. Token-exchange orchestration, refresh,
- * revocation, and Mentra access-token verification.
+ * revocation, and Veiller access-token verification.
  *
  * What this service owns:
  *   - Orchestrating RFC 8693 token exchange (verify OEM JWT → find/create
- *     user → mint Mentra tokens).
+ *     user → mint Veiller tokens).
  *   - Refresh-token rotation.
  *   - Session revocation (single and bulk-by-OEM).
- *   - Verifying Mentra-issued access tokens, including the revocation
+ *   - Verifying Veiller-issued access tokens, including the revocation
  *     blacklist check.
  *
- * Mentra's own Ed25519 signing keypair is loaded lazily from env on first
+ * Veiller's own Ed25519 signing keypair is loaded lazily from env on first
  * use. Refresh tokens are HMAC-SHA256 hashed with a server-side pepper
  * (`REFRESH_TOKEN_PEPPER`) before storage; the plaintext exists only on
  * the SDK that received it.
@@ -28,7 +28,7 @@ import {
   verifyAccessTokenSignature,
   AccessTokenError,
   type VerifiedAccessToken,
-} from "@mentra/cloud-shared";
+} from "@veiller/cloud-shared";
 import { RefreshTokenModel } from "../models/refresh-token.model";
 import { RevokedJtiModel } from "../models/revoked-jti.model";
 import { OemModel } from "../models/oem.model";
@@ -43,13 +43,13 @@ import {
 import { findOrCreateUser } from "./user.service";
 import { recordSeenJti, verifyTenantJwt } from "./oem.service";
 import {
-  MENTRA_ALG,
+  VEILLER_ALG,
   ACCESS_TOKEN_KID,
   RUNTIME_TOKEN_KID,
   MINIAPP_TOKEN_KID,
   ACCOUNT_TOKEN_KID,
   requireEnv,
-  getMentraKeys,
+  getVeillerKeys,
   getMiniappKeys,
   getAccountKeys,
 } from "./signing-keys.service";
@@ -77,18 +77,18 @@ const CORE_AUDIENCE = "cloud-core";
 // miniapp-token key. Developer backends verify iss/aud/signature via JWKS.
 const MINIAPP_ISSUER = "cloud-core";
 
-// The built-in "OEM zero". Mentra's own users (a phone logging in with a
-// Supabase session, or a legacy mentra-core token) resolve to this tenantId. It
+// The built-in "OEM zero". Veiller's own users (a phone logging in with a
+// Supabase session, or a legacy veiller-core token) resolve to this tenantId. It
 // has no `oems` record and no JWKS: the subject token is verified with a shared
 // HS256 secret, not an OEM public key.
-const MENTRA_OEM_ID = "mentra";
+const VEILLER_OEM_ID = "veiller";
 
-// Default miniapp-token lifetime. Env-overridable (MENTRA_MINIAPP_TOKEN_TTL_SEC)
+// Default miniapp-token lifetime. Env-overridable (VEILLER_MINIAPP_TOKEN_TTL_SEC)
 // so tests can shorten it without touching code.
 const MINIAPP_TOKEN_DEFAULT_TTL_SEC = 60 * 60; // 1 hour
 
-// Mentra's own first-party account backend signs subject tokens and pushes them
-// through the SAME exchange path OEMs use (see issue 019). The `mentra` OEM row
+// Veiller's own first-party account backend signs subject tokens and pushes them
+// through the SAME exchange path OEMs use (see issue 019). The `veiller` OEM row
 // (startup migration) carries the account public key so verifyTenantJwt verifies
 // them. TTL is tiny: the token exists only to cross into createSession.
 const ACCOUNT_SUBJECT_TOKEN_TTL_SEC = 60;
@@ -103,8 +103,8 @@ const ACCOUNT_SUBJECT_TOKEN_TTL_SEC = 60;
  * The subject token is one of three kinds, all presented under the single JWT
  * token-type URN and dispatched by `resolveSubjectIdentity`:
  *   - an OEM-signed JWT (verified against the OEM's JWKS), or
- *   - a Mentra Supabase session / legacy mentra-core token (verified with a
- *     shared HS256 secret; tenantId "mentra").
+ *   - a Veiller Supabase session / legacy veiller-core token (verified with a
+ *     shared HS256 secret; tenantId "veiller").
  *
  * Step-by-step matches design.md "Lifecycles / Issue session":
  *   1–5. Delegated to `resolveSubjectIdentity`.
@@ -205,7 +205,7 @@ export async function refreshSession(args: {
   // Mid-session revocation check. If the tenant's authority was terminated
   // after this session was issued, refuse to re-up. The tenant may be an OEM
   // (oems record) or an enterprise trusted-issuer org (enterprise_orgs record);
-  // the built-in "mentra" tenant has no backing record and is always allowed.
+  // the built-in "veiller" tenant has no backing record and is always allowed.
   await assertTenantStillAuthorized(oldDoc.tenantId);
 
   // Mint fresh tokens. We reuse the existing sessionId so admin handles
@@ -283,8 +283,8 @@ export async function refreshSession(args: {
  * Mid-session revocation guard for the refresh flow. A session's tenant is one
  * of three kinds, each with its own backing record and "still authorized" rule:
  *   - an OEM: allowed while its `oems` row is not disabled. This INCLUDES the
- *     `mentra` tenant, whose account module registers a real oems row (issue
- *     019) so Mentra is validated exactly like any other OEM,
+ *     `veiller` tenant, whose account module registers a real oems row (issue
+ *     019) so Veiller is validated exactly like any other OEM,
  *   - an enterprise trusted-issuer org: allowed while its `enterprise_orgs` row
  *     has status "active".
  * Enterprise tenants have NO `oems` row (their tenantId comes from EnterpriseOrg,
@@ -292,10 +292,10 @@ export async function refreshSession(args: {
  * reject every enterprise session on its first refresh once the access token
  * expired. We check OEMs first, then enterprise orgs, then reject.
  *
- * Transitional: environments that predate the account rollout have no `mentra`
+ * Transitional: environments that predate the account rollout have no `veiller`
  * oems row (the seed migration skips when the account key env is unset), so
- * `mentra` with NO row falls back to allowed. That fallback dies at the V1
- * cutover, at which point mentra is a hard oems-row check like everyone.
+ * `veiller` with NO row falls back to allowed. That fallback dies at the V1
+ * cutover, at which point veiller is a hard oems-row check like everyone.
  */
 async function assertTenantStillAuthorized(tenantId: string): Promise<void> {
   const oem = await OemModel.findOne({ tenantId }).lean();
@@ -305,7 +305,7 @@ async function assertTenantStillAuthorized(tenantId: string): Promise<void> {
     }
     return;
   }
-  if (tenantId === MENTRA_OEM_ID) return; // transitional fallback, see above
+  if (tenantId === VEILLER_OEM_ID) return; // transitional fallback, see above
 
   const enterpriseOrg = await EnterpriseOrgModel.findOne({ tenantId }).lean();
   if (enterpriseOrg) {
@@ -370,7 +370,7 @@ export async function revokeAllSessionsForUser(args: {
 }
 
 /**
- * Verify a Mentra-issued access token. Returns the parsed claims on
+ * Verify a Veiller-issued access token. Returns the parsed claims on
  * success, throws on bad signature / expired / revoked.
  *
  * Auth middleware calls this on inbound requests bearing
@@ -379,7 +379,7 @@ export async function revokeAllSessionsForUser(args: {
  * Delegates signature/claims/expiry to the shared verifier and layers on
  * the core-only Mongo revocation blacklist check.
  */
-export type { VerifiedAccessToken } from "@mentra/cloud-shared";
+export type { VerifiedAccessToken } from "@veiller/cloud-shared";
 
 export async function verifyAccessToken(token: string): Promise<VerifiedAccessToken> {
   // Signature + claims + expiry come from shared. Translate the shared error
@@ -421,7 +421,7 @@ export async function verifyAccessToken(token: string): Promise<VerifiedAccessTo
  * access token plus the requested packageName is sufficient, and the on-device
  * Runtime enforces that a bundle can only request its own packageName.
  *
- * TTL defaults to 1h and is env-overridable via MENTRA_MINIAPP_TOKEN_TTL_SEC
+ * TTL defaults to 1h and is env-overridable via VEILLER_MINIAPP_TOKEN_TTL_SEC
  * so tests can shorten it. Returns the token and its absolute expiry as Unix
  * seconds (what the client caches against).
  */
@@ -436,7 +436,7 @@ export async function issueMiniappToken(args: {
 
   const token = await new jose.SignJWT({ tenantId: args.tenantId })
     // The `kid` points the developer backend at the miniapp-token public key.
-    .setProtectedHeader({ alg: MENTRA_ALG, kid: MINIAPP_TOKEN_KID })
+    .setProtectedHeader({ alg: VEILLER_ALG, kid: MINIAPP_TOKEN_KID })
     .setIssuer(MINIAPP_ISSUER)
     .setAudience(args.packageName)
     .setSubject(args.mentraUserId)
@@ -459,7 +459,7 @@ export async function issueRuntimeToken(args: {
 }): Promise<{ token: string; expiresAt: number }> {
   const expiresAt = Math.floor(Date.now() / 1000) + RUNTIME_TOKEN_TTL_SEC;
   const token = await signRuntimeToken({
-    privateKey: requireEnv("MENTRA_JWT_PRIVATE_KEY"),
+    privateKey: requireEnv("VEILLER_JWT_PRIVATE_KEY"),
     issuer: process.env.CLOUD_CORE_RUNTIME_TOKEN_ISSUER ?? "cloud-core",
     subject: args.mentraUserId,
     tenantId: args.tenantId,
@@ -476,7 +476,7 @@ export async function issueRuntimeToken(args: {
  * flip it between cases.
  */
 function miniappTokenTtlSec(): number {
-  const raw = process.env.MENTRA_MINIAPP_TOKEN_TTL_SEC;
+  const raw = process.env.VEILLER_MINIAPP_TOKEN_TTL_SEC;
   if (!raw) return MINIAPP_TOKEN_DEFAULT_TTL_SEC;
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -491,10 +491,10 @@ function miniappTokenTtlSec(): number {
  * Resolve a subject token to an (tenantId, tenantUserId) identity. All three accepted
  * subject tokens arrive as a JWT under the one RFC 8693 JWT token-type URN, so
  * we dispatch on the token itself:
- *   - HS* (symmetric) tokens are Mentra-internal. A Supabase session (its `iss`
+ *   - HS* (symmetric) tokens are Veiller-internal. A Supabase session (its `iss`
  *     points at Supabase) verifies with SUPABASE_JWT_SECRET; anything else
- *     symmetric is treated as a legacy mentra-core token (MENTRA_CORE_JWT_SECRET).
- *     Both resolve to tenantId "mentra".
+ *     symmetric is treated as a legacy veiller-core token (VEILLER_CORE_JWT_SECRET).
+ *     Both resolve to tenantId "veiller".
  *   - Everything else is an OEM-signed JWT, verified against that OEM's JWKS.
  */
 async function resolveSubjectIdentity(
@@ -518,9 +518,9 @@ async function resolveSubjectIdentity(
   if (alg.startsWith("HS")) {
     const secretEnv = looksLikeSupabase(iss)
       ? "SUPABASE_JWT_SECRET"
-      : "MENTRA_CORE_JWT_SECRET";
+      : "VEILLER_CORE_JWT_SECRET";
     const tenantUserId = await verifyHs256Subject(subjectToken, secretEnv);
-    return { tenantId: MENTRA_OEM_ID, tenantUserId };
+    return { tenantId: VEILLER_OEM_ID, tenantUserId };
   }
 
   const verified = await verifyTenantJwt(subjectToken);
@@ -536,7 +536,7 @@ async function resolveSubjectIdentity(
  * A Supabase session JWT carries an `iss` pointing at the project's auth
  * endpoint (e.g. https://<ref>.supabase.co/auth/v1). Match that, or the
  * configured SUPABASE_URL, so we pick the Supabase secret rather than the
- * mentra-core one.
+ * veiller-core one.
  */
 function looksLikeSupabase(iss: string | undefined): boolean {
   if (!iss) return false;
@@ -572,23 +572,23 @@ async function verifyHs256Subject(
   return sub;
 }
 
-// === Internals: Mentra signing keys ===
+// === Internals: Veiller signing keys ===
 
 /**
- * Mint a short-lived Ed25519 subject token for Mentra's first-party account
- * backend, issued under the `mentra` tenant. It is fed straight into
- * createSession, where verifyTenantJwt validates it against the `mentra` OEM
- * row's public key. This is how Mentra dogfoods its own OEM path instead of a
+ * Mint a short-lived Ed25519 subject token for Veiller's first-party account
+ * backend, issued under the `veiller` tenant. It is fed straight into
+ * createSession, where verifyTenantJwt validates it against the `veiller` OEM
+ * row's public key. This is how Veiller dogfoods its own OEM path instead of a
  * bespoke identity branch (issue 019).
  */
 export async function mintAccountSubjectToken(args: { tenantUserId: string }): Promise<string> {
   const { privateKey } = await getAccountKeys();
   return new jose.SignJWT({})
-    .setProtectedHeader({ alg: MENTRA_ALG, kid: ACCOUNT_TOKEN_KID })
-    // iss = the OEM tenantId ("mentra"); aud = "mentra", the value the OEM
+    .setProtectedHeader({ alg: VEILLER_ALG, kid: ACCOUNT_TOKEN_KID })
+    // iss = the OEM tenantId ("veiller"); aud = "veiller", the value the OEM
     // verifier (verifySignatureWithOemKey) pins for all OEM subject tokens.
-    .setIssuer(MENTRA_OEM_ID)
-    .setAudience(MENTRA_OEM_ID)
+    .setIssuer(VEILLER_OEM_ID)
+    .setAudience(VEILLER_OEM_ID)
     .setSubject(args.tenantUserId)
     .setJti(ulid())
     .setIssuedAt()
@@ -604,14 +604,14 @@ async function issueAccessToken(args: {
   tenantId: string;
   sessionId: string;
 }): Promise<{ token: string; jti: string }> {
-  const { privateKey } = await getMentraKeys();
+  const { privateKey } = await getVeillerKeys();
   const jti = ulid();
   const token = await new jose.SignJWT({
     tenant_id: args.tenantId,
     session_id: args.sessionId,
   })
     // The `kid` points verifiers at the access-token public key in the JWKS.
-    .setProtectedHeader({ alg: MENTRA_ALG, kid: ACCESS_TOKEN_KID })
+    .setProtectedHeader({ alg: VEILLER_ALG, kid: ACCESS_TOKEN_KID })
     .setIssuer(CORE_ISSUER)
     .setAudience(CORE_AUDIENCE)
     .setSubject(args.mentraUserId)

@@ -33,5 +33,5 @@ export { consoleAccountApi, consoleOrgsApi, consoleAppsApi, cliKeysApi, consoleI
 // Agent APIs (coding agents)
 export { agentIncidentsApi } from "./agent";
 
-// Store APIs (MentraOS Store website)
+// Store APIs (Veiller Store website)
 export { storeAppsApi, storeAuthApi, storeUserApi } from "./store";

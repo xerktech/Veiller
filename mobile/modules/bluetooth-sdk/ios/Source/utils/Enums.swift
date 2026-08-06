@@ -1,6 +1,6 @@
 //
 //  Enums.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created by Matthew Fosse on 3/3/25.
 //

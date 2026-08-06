@@ -12,7 +12,7 @@ When mobile moved from native Kotlin/Swift (core) to React Native TypeScript (ma
 | ---------------------------------- | ----- | --------------------------------------- |
 | `CORE_STATUS_UPDATE`               | ~100  | Mobile `SocketComms.ts` doesn't send it |
 | `REQUEST_SETTINGS`                 | ~30   | Mobile loads settings via REST now      |
-| `MENTRAOS_SETTINGS_UPDATE_REQUEST` | ~35   | Mobile saves settings via REST now      |
+| `VEILLER_SETTINGS_UPDATE_REQUEST` | ~35   | Mobile saves settings via REST now      |
 
 ### How We Know It's Dead
 
@@ -53,7 +53,7 @@ New (mantle):
 
 - `handleCoreStatusUpdate()` - ~100 lines of dead code
 - `handleRequestSettings()` - ~30 lines
-- `handleMentraOSSettingsUpdateRequest()` - ~35 lines
+- `handleVeillerSettingsUpdateRequest()` - ~35 lines
 - `DEFAULT_AUGMENTOS_SETTINGS` constant
 - Related imports (`CoreStatusUpdate`, `RequestSettings`, `MentraosSettingsUpdateRequest`)
 
@@ -62,7 +62,7 @@ New (mantle):
 ```typescript
 // REMOVE these cases:
 case GlassesToCloudMessageType.REQUEST_SETTINGS:
-case GlassesToCloudMessageType.MENTRAOS_SETTINGS_UPDATE_REQUEST:
+case GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST:
 case GlassesToCloudMessageType.CORE_STATUS_UPDATE:
 ```
 
@@ -82,7 +82,7 @@ case GlassesToCloudMessageType.CORE_STATUS_UPDATE:
 
 - `GlassesToCloudMessageType.CORE_STATUS_UPDATE`
 - `GlassesToCloudMessageType.REQUEST_SETTINGS`
-- `GlassesToCloudMessageType.MENTRAOS_SETTINGS_UPDATE_REQUEST`
+- `GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST`
 - Related interfaces in `glasses-to-cloud.ts`
 
 ## What to Keep
@@ -107,7 +107,7 @@ Remove from `glasses-message-handler.ts`:
 
 1. Delete `handleCoreStatusUpdate` function
 2. Delete `handleRequestSettings` function
-3. Delete `handleMentraOSSettingsUpdateRequest` function
+3. Delete `handleVeillerSettingsUpdateRequest` function
 4. Delete `DEFAULT_AUGMENTOS_SETTINGS` constant
 5. Remove switch cases
 6. Clean up imports
@@ -138,7 +138,7 @@ Check `cloud-client` package - it still sends `CORE_STATUS_UPDATE` for testing. 
 
 - `handleCoreStatusUpdate()` - ~100 lines of dead code
 - `handleRequestSettings()` - ~30 lines
-- `handleMentraOSSettingsUpdateRequest()` - ~35 lines
+- `handleVeillerSettingsUpdateRequest()` - ~35 lines
 - `DEFAULT_AUGMENTOS_SETTINGS` constant from both files
 - `getChangedKeys()` utility function
 - Unused imports: `CoreStatusUpdate`, `RequestSettings`, `MentraosSettingsUpdateRequest`, `CloudToGlassesMessageType`, `User`

@@ -9,7 +9,7 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_mentra_lc3Lib_Lc3Cpp_initEncoder(JNIEnv *env, jclass clazz) {
+Java_com_veiller_lc3Lib_Lc3Cpp_initEncoder(JNIEnv *env, jclass clazz) {
     int dtUs = 10000;
     int srHz = 16000;
     unsigned encoderSize = lc3_encoder_size(dtUs, srHz);
@@ -25,13 +25,13 @@ Java_com_mentra_lc3Lib_Lc3Cpp_initEncoder(JNIEnv *env, jclass clazz) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_mentra_lc3Lib_Lc3Cpp_freeEncoder(JNIEnv *env, jclass clazz, jlong encPtr) {
+Java_com_veiller_lc3Lib_Lc3Cpp_freeEncoder(JNIEnv *env, jclass clazz, jlong encPtr) {
     void* encMem = reinterpret_cast<void*>(encPtr);
     free(encMem);
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_mentra_lc3Lib_Lc3Cpp_initDecoder(JNIEnv *env, jclass clazz) {
+Java_com_veiller_lc3Lib_Lc3Cpp_initDecoder(JNIEnv *env, jclass clazz) {
     int dtUs = 10000;
     int srHz = 16000;
     unsigned decoderSize = lc3_decoder_size(dtUs, srHz);
@@ -48,7 +48,7 @@ Java_com_mentra_lc3Lib_Lc3Cpp_initDecoder(JNIEnv *env, jclass clazz) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_mentra_lc3Lib_Lc3Cpp_freeDecoder(JNIEnv *env, jclass clazz, jlong decPtr) {
+Java_com_veiller_lc3Lib_Lc3Cpp_freeDecoder(JNIEnv *env, jclass clazz, jlong decPtr) {
     void* decMem = reinterpret_cast<void*>(decPtr);
     free(decMem);
 }
@@ -110,7 +110,7 @@ static jbyteArray encodeLC3WithFrameSize(JNIEnv *env, jlong encPtr, jbyteArray p
 
 // Parameterized encoding function with frame size
 extern "C" JNIEXPORT jbyteArray JNICALL
-Java_com_mentra_lc3Lib_Lc3Cpp_encodeLC3(JNIEnv *env, jclass clazz, jlong encPtr, jbyteArray pcmData, jint frameSize) {
+Java_com_veiller_lc3Lib_Lc3Cpp_encodeLC3(JNIEnv *env, jclass clazz, jlong encPtr, jbyteArray pcmData, jint frameSize) {
     return encodeLC3WithFrameSize(env, encPtr, pcmData, (uint16_t)frameSize);
 }
 
@@ -154,6 +154,6 @@ static jbyteArray decodeLC3WithFrameSize(JNIEnv *env, jlong decPtr, jbyteArray l
 
 // Parameterized decoding function with frame size
 extern "C" JNIEXPORT jbyteArray JNICALL
-Java_com_mentra_lc3Lib_Lc3Cpp_decodeLC3(JNIEnv *env, jclass clazz, jlong decPtr, jbyteArray lc3Data, jint frameSize) {
+Java_com_veiller_lc3Lib_Lc3Cpp_decodeLC3(JNIEnv *env, jclass clazz, jlong decPtr, jbyteArray lc3Data, jint frameSize) {
     return decodeLC3WithFrameSize(env, decPtr, lc3Data, (uint16_t)frameSize);
 }

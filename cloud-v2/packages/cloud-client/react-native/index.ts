@@ -1,5 +1,5 @@
 /**
- * @fileoverview The React Native build: `@mentra/cloud-client/react-native`.
+ * @fileoverview The React Native build: `@veiller/cloud-client/react-native`.
  *
  * This is what the mobile app imports. It is a thin wrapper over the shared
  * `CloudClient` that supplies the phone's transports (WebSocket, native UDP,
@@ -12,8 +12,8 @@
  *
  * See docs/issues/004-cloud-client/design.md ("react-native/index.ts").
  */
-import { CloudClient as Base } from "@mentra/cloud-client";
-import type { CloudClientConfig } from "@mentra/cloud-client";
+import { CloudClient as Base } from "@veiller/cloud-client";
+import type { CloudClientConfig } from "@veiller/cloud-client";
 import { reactNativeTransports } from "./transports";
 
 /**
@@ -35,4 +35,4 @@ export type { NativeUdpFactory } from "./transports";
 
 // Re-export the public surface so a host can import everything (types, errors,
 // the logger hook) from the platform build without also reaching for the root.
-export * from "@mentra/cloud-client";
+export * from "@veiller/cloud-client";

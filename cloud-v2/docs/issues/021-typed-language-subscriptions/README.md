@@ -33,7 +33,7 @@ display names ("French") with `default: return "en-US"`. The two registries
 never agreed, so `languageToLocale("fr")` fell through to en-US. Picking ANY
 language subscribed to English transcription.
 
-Evidence: Metro log shows `SUBSCRIBE from com.mentra.captions:
+Evidence: Metro log shows `SUBSCRIBE from com.veiller.captions:
 [transcription:en-US]` after selecting French.
 
 Fixed in captions 1.0.12 (code-to-locale map added), but the structural fix is
@@ -101,7 +101,7 @@ bug.
 
 ### S1. One canonical language registry
 
-The protocol package (`@mentra/cloud-protocol`) exports the single source of
+The protocol package (`@veiller/cloud-protocol`) exports the single source of
 truth:
 
 - `SUPPORTED_TRANSCRIPTION_LANGUAGES`: readonly array of BCP-47 tags the

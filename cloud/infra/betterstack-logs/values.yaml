@@ -24,9 +24,9 @@
 #     --set "vector.customConfig.sinks.better_stack_http_metrics_sink.uri=https://$INGESTING_HOST/metrics"
 #
 # Source tokens per region (stored in Doppler as BETTERSTACK_SOURCE_TOKEN):
-#   doppler secrets get BETTERSTACK_SOURCE_TOKEN --project mentraos-cloud --config <CONFIG> --plain
+#   doppler secrets get BETTERSTACK_SOURCE_TOKEN --project veiller-cloud --config <CONFIG> --plain
 #
-# The ingesting host for MentraCloud-Prod source:
+# The ingesting host for VeillerCloud-Prod source:
 #   s2324289.eu-nbg-2.betterstackdata.com
 
 vector:

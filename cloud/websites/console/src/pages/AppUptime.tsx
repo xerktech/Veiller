@@ -8,7 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Badge, Button, Card } from "@mentra/shared";
+import { Badge, Button, Card } from "@veiller/shared";
 import { UptimeStreakBar } from "@/components/ui/upTimeStreakBar";
 import { DatePicker } from "@/components/ui/date-picker";
 

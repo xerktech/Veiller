@@ -1,12 +1,12 @@
 /**
  * 🎨 Bitmap Utilities Module
  *
- * Provides helper functions for working with bitmap images in MentraOS applications.
+ * Provides helper functions for working with bitmap images in Veiller applications.
  * Includes file loading, data validation, and format conversion utilities.
  *
  * @example
  * ```typescript
- * import { BitmapUtils } from '@mentra/sdk';
+ * import { BitmapUtils } from '@veiller/sdk';
  *
  * // Load a single BMP file
  * const bmpHex = await BitmapUtils.loadBmpAsHex('./my-image.bmp');
@@ -58,7 +58,7 @@ export interface LoadFramesOptions {
 }
 
 /**
- * Utility class for working with bitmap images in MentraOS applications
+ * Utility class for working with bitmap images in Veiller applications
  */
 export class BitmapUtils {
   static async convert24BitTo1BitBMP(input24BitBmp: Buffer): Promise<Buffer> {
@@ -409,7 +409,7 @@ export class BitmapUtils {
         }
       }
 
-      // Size validation for MentraOS (576x135 = ~9782 bytes expected)
+      // Size validation for Veiller (576x135 = ~9782 bytes expected)
       const expectedSize = 9782;
       if (buffer.length < expectedSize - 100) {
         // Allow some tolerance
@@ -432,10 +432,10 @@ export class BitmapUtils {
           metadata.dimensions = { width, height };
           metadata.format = "BMP";
 
-          // Validate dimensions for MentraOS glasses
+          // Validate dimensions for Veiller glasses
           if (width !== 576 || height !== 135) {
             errors.push(
-              `Invalid dimensions (${width}x${height}, expected 576x135 for MentraOS)`,
+              `Invalid dimensions (${width}x${height}, expected 576x135 for Veiller)`,
             );
           }
         } catch (e) {

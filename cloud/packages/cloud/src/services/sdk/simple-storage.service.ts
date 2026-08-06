@@ -1,5 +1,5 @@
 /**
- * Simple Storage Service for MentraOS Cloud (SDK Audience)
+ * Simple Storage Service for Veiller Cloud (SDK Audience)
  *
  * Provides key-value storage operations scoped by user email and packageName.
  * Data is persisted in MongoDB using the SimpleStorage model, where each document
@@ -11,7 +11,7 @@
  * - Value size limit: 100KB per value
  * - Total storage limit: 1MB per (email, packageName) combination
  *
- * Author: MentraOS Team
+ * Author: Veiller Team
  */
 
 import {

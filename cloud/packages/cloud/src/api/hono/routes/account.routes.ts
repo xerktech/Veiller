@@ -502,7 +502,7 @@ async function downloadExport(c: AppContext) {
       return c.json({ error: "Export file not found" }, 404);
     }
 
-    const filename = `mentra-export-${exportRequest.id}.${exportRequest.format}`;
+    const filename = `veiller-export-${exportRequest.id}.${exportRequest.format}`;
     const file = Bun.file(exportRequest.filePath);
 
     return new Response(file, {

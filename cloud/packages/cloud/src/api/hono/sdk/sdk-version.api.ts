@@ -21,7 +21,7 @@ import type { AppEnv, AppContext } from "../../../types/hono";
 const logger = rootLogger.child({ service: "sdk-version.api" });
 
 /**
- * Allowed npm dist-tags for @mentra/sdk.
+ * Allowed npm dist-tags for @veiller/sdk.
  * Validated before use in the npm registry URL to prevent misuse.
  * Keep this list in sync with the tags published on npm.
  */
@@ -64,7 +64,7 @@ async function getVersionHandler(c: AppContext) {
       logger.debug({ requestedTag, resolvedTag: tag }, "Unknown dist-tag requested, falling back to latest");
     }
 
-    const response = await fetch(`https://registry.npmjs.org/@mentra/sdk/${tag}`);
+    const response = await fetch(`https://registry.npmjs.org/@veiller/sdk/${tag}`);
 
     if (!response.ok) {
       // If the tag doesn't exist on npm (e.g., tag was valid in our list
@@ -74,7 +74,7 @@ async function getVersionHandler(c: AppContext) {
         `npm registry returned ${response.status} for dist-tag "${tag}", falling back to latest`,
       );
 
-      const fallbackResponse = await fetch("https://registry.npmjs.org/@mentra/sdk/latest");
+      const fallbackResponse = await fetch("https://registry.npmjs.org/@veiller/sdk/latest");
       const fallbackData = (await fallbackResponse.json()) as {
         version: string;
       };

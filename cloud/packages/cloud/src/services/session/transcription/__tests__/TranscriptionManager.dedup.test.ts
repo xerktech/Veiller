@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { describe, it, expect, beforeEach, mock, spyOn } from "bun:test";
-import { ExtendedStreamType, StreamType, parseLanguageStream, isLanguageStream } from "@mentra/sdk";
+import { ExtendedStreamType, StreamType, parseLanguageStream, isLanguageStream } from "@veiller/sdk";
 
 /**
  * TranscriptionManager is tightly coupled to UserSession, providers, Docker env vars, etc.

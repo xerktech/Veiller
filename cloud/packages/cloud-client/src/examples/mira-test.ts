@@ -11,7 +11,7 @@
  */
 
 import { resolve } from "path";
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { AccountService } from "../services/AccountService";
 
 const MIRA_PACKAGE = "cloud.augmentos.mira";
@@ -46,7 +46,7 @@ export async function runMiraTestOnce(
   const account = accountService.getDefaultTestAccount();
 
   // Create client
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: account.email,
     coreToken: account.coreToken,
     serverUrl: process.env.DEFAULT_SERVER_URL || "ws://localhost:8002",
@@ -68,8 +68,8 @@ export async function runMiraTestOnce(
   };
 
   try {
-    // Step 1: Connect to MentraOS Cloud
-    console.log("📡 Connecting to MentraOS Cloud...");
+    // Step 1: Connect to Veiller Cloud
+    console.log("📡 Connecting to Veiller Cloud...");
     await client.connect();
     console.log("✅ Connected successfully\n");
 
@@ -228,7 +228,7 @@ function waitForDisplayToContain(
   });
 }
 
-function setupEventListeners(client: MentraClient) {
+function setupEventListeners(client: VeillerClient) {
   // Display events (transcription results should appear here)
   client.on("display_event", (event) => {
     console.log("🔄 Display Event:", {

@@ -26,7 +26,7 @@
 
 #### 1.1 Add `Bridge.kt` Methods
 
-**File**: `modules/core/android/src/main/java/com/mentra/core/Bridge.kt`
+**File**: `modules/core/android/src/main/java/com/veiller/core/Bridge.kt`
 
 ```kotlin
 /** Send phone notification to server (matches server PhoneNotification interface) */
@@ -61,7 +61,7 @@ fun sendPhoneNotification(
 
 #### 1.2 Implement `NotificationListener.kt` Logic
 
-**File**: `modules/core/android/src/main/java/com/mentra/core/services/NotificationListener.kt`
+**File**: `modules/core/android/src/main/java/com/veiller/core/services/NotificationListener.kt`
 
 Add filtering and deduplication (lines 77-97):
 
@@ -176,7 +176,7 @@ internal fun onNotificationPosted(sbn: StatusBarNotification) {
 
 #### 1.3 Add `CoreModule.kt` Methods
 
-**File**: `modules/core/android/src/main/java/com/mentra/core/CoreModule.kt`
+**File**: `modules/core/android/src/main/java/com/veiller/core/CoreModule.kt`
 
 ```kotlin
 // Notification Settings
@@ -559,7 +559,7 @@ case GlassesToCloudMessageType.PHONE_NOTIFICATION_DISMISSED:
 Once this is implemented, third-party app developers can subscribe to phone notifications:
 
 ```typescript
-// In their MentraOS app
+// In their Veiller app
 await session.subscribe(StreamType.PHONE_NOTIFICATION)
 
 session.on("phone_notification", notification => {

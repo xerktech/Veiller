@@ -53,12 +53,12 @@ What **does** use it (from production BetterStack logs, last 24 hours):
 
 | Package                       | Requests / 24h | Distinct users | Hosted in     |
 | ----------------------------- | -------------- | -------------- | ------------- |
-| `com.mentra.link` (LinkLingo) | 36             | 1              | external repo |
+| `com.veiller.link` (LinkLingo) | 36             | 1              | external repo |
 | `cloud.augmentos.mira` (Mira) | 8              | 1              | external repo |
 
-Both are Mentra-published apps hosted outside this monorepo, so they were not caught by the repo-level grep. A 48-hour BetterStack sweep caught 2,751 requests to `/api/transcripts/*` from a `Bun/1.3.10` user-agent, dominated by LinkLingo. Volume is low, user counts are in the single digits, but the endpoint is not dead.
+Both are Veiller-published apps hosted outside this monorepo, so they were not caught by the repo-level grep. A 48-hour BetterStack sweep caught 2,751 requests to `/api/transcripts/*` from a `Bun/1.3.10` user-agent, dominated by LinkLingo. Volume is low, user counts are in the single digits, but the endpoint is not dead.
 
-So: the cloud's `transcriptHistory` exists to feed one REST endpoint with two known callers, neither of which lives in this repo, both Mentra-owned. Killing the endpoint will break both apps unless they are refactored first to keep their own in-memory transcription history, the same way `captions` and `line-width` already do.
+So: the cloud's `transcriptHistory` exists to feed one REST endpoint with two known callers, neither of which lives in this repo, both Veiller-owned. Killing the endpoint will break both apps unless they are refactored first to keep their own in-memory transcription history, the same way `captions` and `line-width` already do.
 
 ### 2. It is session-lifetime state pretending to be durable
 
@@ -132,7 +132,7 @@ Removing it:
 | Finding                                                                                                                                                                                              | Confidence                                                           |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | Cloud-stored transcript history has exactly one consumer endpoint (`GET /api/transcripts/:appSessionId`)                                                                                             | **High** — full monorepo + mobile/glasses audit                      |
-| The only callers measured in production are two Mentra-owned apps hosted outside this repo: LinkLingo (`com.mentra.link`) and Mira (`cloud.augmentos.mira`). Low volume, single-digit distinct users | **Confirmed from 24–48h BetterStack logs**                           |
+| The only callers measured in production are two Veiller-owned apps hosted outside this repo: LinkLingo (`com.veiller.link`) and Mira (`cloud.augmentos.mira`). Low volume, single-digit distinct users | **Confirmed from 24–48h BetterStack logs**                           |
 | In-repo apps that need history already keep their own in-memory buffer (`captions`, `line-width`)                                                                                                    | **Confirmed**                                                        |
 | English is double-stored per session, consistent with the 078 audit finding                                                                                                                          | **Confirmed from code**                                              |
 | Transcript history is not the dominant France leak but is a real, removable growth source                                                                                                            | **High**                                                             |
@@ -143,7 +143,7 @@ Recommendation: kill the cloud-side transcript history in three phases (spec wil
 
 ## Next Steps
 
-1. Refactor LinkLingo (`com.mentra.link`) and Mira (`cloud.augmentos.mira`) out-of-repo to keep their own in-memory transcription history by subscribing to the live transcription stream, matching the pattern used by `captions` and `line-width`. This unblocks the endpoint removal without breaking either app.
+1. Refactor LinkLingo (`com.veiller.link`) and Mira (`cloud.augmentos.mira`) out-of-repo to keep their own in-memory transcription history by subscribing to the live transcription stream, matching the pattern used by `captions` and `line-width`. This unblocks the endpoint removal without breaking either app.
 2. `spec.md` — exact behavior changes, deprecation path for `GET /api/transcripts/:appSessionId`, phased rollout (stop writing → deprecate endpoint → delete), coordination with the two app refactors, and the split between the history kill and the translation migration.
 3. `design.md` — file-by-file diff, test plan, rollout order.
 4. New sibling issue (next number) for the Soniox translation SDK migration, referencing this spike and issue 041.

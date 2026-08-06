@@ -1,6 +1,6 @@
 //
 //  MemoryMonitor.swift
-//  MentraOS
+//  Veiller
 //
 //  Memory usage monitoring for leak detection
 //

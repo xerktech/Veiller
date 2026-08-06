@@ -4,7 +4,7 @@
 
 import DisplayManager from '../../DisplayManager6.1';
 import { MockUserSession } from '../harness/MockUserSession';
-import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from '@mentra/sdk';
+import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from '@veiller/sdk';
 
 // Simple manual test to verify our fixes
 export async function main() {

@@ -1,4 +1,4 @@
-# Mentra Cloud Runtime: architecture
+# Veiller Cloud Runtime: architecture
 
 **Status:** Overview. The big picture of the runtime, in plain language, with one
 end-to-end trace. The deep detail already lives in the audio docs
@@ -32,11 +32,11 @@ A note on words used throughout (skim once, refer back as needed):
 
 The runtime is the service that turns a user's live audio into transcripts (and
 translations), and brokers their camera photos and streams. It's **per-user and
-self-hostable**: an OEM can run their own copy or point at Mentra's. It's one product
+self-hostable**: an OEM can run their own copy or point at Veiller's. It's one product
 made of **services** (audio and camera today) that share one connection protocol
 ([`protocol.md`](./protocol.md)).
 
-The client side of that connection is `@mentra/cloud-client` (issue 004); this is the
+The client side of that connection is `@veiller/cloud-client` (issue 004); this is the
 server side.
 
 ## 2. The problem it solves
@@ -166,5 +166,5 @@ client-managed, so camera needs none of it.
 - [`audio/design.md`](./audio/design.md): the implementation detail (Redis keys, the
   worker protocol, the failure walkthroughs, the packet format).
 - [`camera/spec.md`](./camera/spec.md): the camera service.
-- [`design.md`](./design.md): the `@mentra/cloud-runtime` package build map (the
+- [`design.md`](./design.md): the `@veiller/cloud-runtime` package build map (the
   files, what each owns, and the signatures).

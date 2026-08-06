@@ -3,10 +3,10 @@ import * as SystemUI from "expo-system-ui"
 import {Appearance, ColorSchemeName, Platform, StyleProp, useColorScheme} from "react-native"
 import * as NavigationBar from "expo-navigation-bar"
 
-import {useSetting, SETTINGS} from "@mentra/engine"
+import {useSetting, SETTINGS} from "@veiller/engine"
 import {type Theme, type ThemeContexts, type ThemedStyle, type ThemedStyleArray, lightTheme, darkTheme} from "@/theme"
 import {setStatusBarStyle} from "expo-status-bar"
-import {BgTimer} from "@mentra/engine"
+import {BgTimer} from "@veiller/engine"
 import {Uniwind} from "uniwind"
 
 type ThemeContextType = {

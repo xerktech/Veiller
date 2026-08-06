@@ -9,12 +9,12 @@
 
 ## Purpose
 
-This document plans the CI/CD pipeline for automated `@mentra/sdk` publishing from the MentraOS monorepo. It replaces the current manual process where Isaiah publishes from arbitrary branches and nobody else knows what's live.
+This document plans the CI/CD pipeline for automated `@veiller/sdk` publishing from the Veiller monorepo. It replaces the current manual process where Isaiah publishes from arbitrary branches and nobody else knows what's live.
 
 **Problems this solves:**
 
 1. **Manual publishes from random branches.** The current `3.0.0-hono.8` was published from a feature branch. No record of what commit it corresponds to.
-2. **No branch → npm tag mapping.** Developers install `@mentra/sdk` and have no idea if they're getting `dev`, `staging`, or `main` code.
+2. **No branch → npm tag mapping.** Developers install `@veiller/sdk` and have no idea if they're getting `dev`, `staging`, or `main` code.
 3. **Team doesn't know what's published.** No CI trail, no GitHub release, no changelog — just a human running `npm publish` in a terminal.
 4. **No safety net.** Nothing prevents publishing broken code to `latest`. No build verification, no test gate, no approval step.
 5. **Experimental versions are ad-hoc.** The `hono` tag was a good idea but there's no process for creating, documenting, or cleaning up experiment tags.
@@ -110,7 +110,7 @@ Feature Branch           dev                  staging              main
 
 Reasons:
 
-1. **Monorepo-first.** Changesets was designed for monorepos where multiple packages might be published from one repo. Our repo has `@mentra/sdk`, `@mentra/types`, `@mentra/display-utils`, `@mentra/utils` — they need coordinated publishes.
+1. **Monorepo-first.** Changesets was designed for monorepos where multiple packages might be published from one repo. Our repo has `@veiller/sdk`, `@mentra/types`, `@veiller/display-utils`, `@veiller/utils` — they need coordinated publishes.
 
 2. **Human-written changelogs.** For an SDK with external developers, auto-generated changelogs from commit messages are garbage. "fix: address issue #247" means nothing to a developer reading the changelog. Changesets let the author write a human-readable description: "Fixed a bug where `session.transcription.forLanguage()` would not receive events after reconnection."
 
@@ -125,12 +125,12 @@ Reasons:
 ```
 1. Developer makes a change to packages/sdk/
 2. Developer runs `bunx changeset` — interactive prompt:
-   - Which packages changed? → @mentra/sdk
+   - Which packages changed? → @veiller/sdk
    - Is this a major/minor/patch? → minor
    - Describe the change: "Added session.transcription.forLanguage() for language-specific subscriptions"
 3. This creates a file: .changeset/funny-dogs-dance.md
    ---
-   "@mentra/sdk": minor
+   "@veiller/sdk": minor
    ---
    Added session.transcription.forLanguage() for language-specific subscriptions
 4. Developer commits the changeset file with their PR
@@ -384,7 +384,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Install with:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "npm install @mentra/sdk@${{ inputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "npm install @veiller/sdk@${{ inputs.tag_name }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 ```
 
@@ -397,7 +397,7 @@ This is a GitHub Actions **manual dispatch** — anyone on the team can trigger 
 ### 1. Create npm automation token
 
 ```bash
-# Login to npm as the @mentra org owner
+# Login to npm as the @veiller org owner
 npm login
 
 # Create an automation token (bypasses 2FA, suitable for CI)
@@ -428,20 +428,20 @@ This creates `cloud/.changeset/config.json`:
 ```json
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "user/MentraOS" }],
+  "changelog": ["@changesets/changelog-github", { "repo": "user/Veiller" }],
   "commit": false,
   "fixed": [],
-  "linked": [["@mentra/sdk", "@mentra/types"]],
+  "linked": [["@veiller/sdk", "@mentra/types"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@mentra/cloud", "@mentra/cloud-client"]
+  "ignore": ["@veiller/cloud", "@veiller/cloud-client"]
 }
 ```
 
 Key config:
 
-- `"linked": [["@mentra/sdk", "@mentra/types"]]` — these packages version together. If `@mentra/types` gets a bump, `@mentra/sdk` gets the same bump level.
+- `"linked": [["@veiller/sdk", "@mentra/types"]]` — these packages version together. If `@mentra/types` gets a bump, `@veiller/sdk` gets the same bump level.
 - `"access": "public"` — publishes as public packages (not private).
 - `"ignore"` — packages in the monorepo that should NOT be published to npm.
 - `"changelog": "@changesets/changelog-github"` — generates changelog entries with GitHub PR links.
@@ -456,7 +456,7 @@ to track version bumps and changelogs for published packages.
 
 ## When to add a changeset
 
-If your PR changes behavior in `@mentra/sdk` or `@mentra/types` (anything a
+If your PR changes behavior in `@veiller/sdk` or `@mentra/types` (anything a
 consumer of the package would notice), add a changeset:
 
     bunx changeset
@@ -467,7 +467,7 @@ Follow the prompts. Commit the generated file with your PR.
 
 - Docs-only changes
 - CI/infra changes
-- Changes to unpublished packages (@mentra/cloud, websites, etc.)
+- Changes to unpublished packages (@veiller/cloud, websites, etc.)
 - Test-only changes
 ```
 
@@ -535,24 +535,24 @@ The monorepo has multiple publishable packages:
 
 ```
 @mentra/types          → foundational types
-@mentra/display-utils  → text wrapping utilities
-@mentra/utils          → shared utilities
-@mentra/sdk            → the SDK (depends on @mentra/types, bundled)
+@veiller/display-utils  → text wrapping utilities
+@veiller/utils          → shared utilities
+@veiller/sdk            → the SDK (depends on @mentra/types, bundled)
 ```
 
-If `@mentra/types` changes, `@mentra/sdk` needs to be rebuilt and republished with the new types bundled.
+If `@mentra/types` changes, `@veiller/sdk` needs to be rebuilt and republished with the new types bundled.
 
 ### How changesets handles this
 
 Changesets' `linked` config ensures coordinated versioning:
 
 ```json
-"linked": [["@mentra/sdk", "@mentra/types"]]
+"linked": [["@veiller/sdk", "@mentra/types"]]
 ```
 
-When a changeset bumps `@mentra/types`, changesets also bumps `@mentra/sdk` to the same level. The CI pipeline builds in dependency order and publishes all changed packages in one run.
+When a changeset bumps `@mentra/types`, changesets also bumps `@veiller/sdk` to the same level. The CI pipeline builds in dependency order and publishes all changed packages in one run.
 
-If `@mentra/display-utils` changes independently (no SDK impact), it gets its own version bump without affecting `@mentra/sdk`.
+If `@veiller/display-utils` changes independently (no SDK impact), it gets its own version bump without affecting `@veiller/sdk`.
 
 ### Build order in CI
 
@@ -585,11 +585,11 @@ This already matches the existing `build` script in the root `package.json`:
 ```
 Step 1: Merge the current sdk-v3 work to dev
   - This becomes the first beta: 3.0.0-beta.1
-  - CI auto-publishes to npm as @mentra/sdk@beta
+  - CI auto-publishes to npm as @veiller/sdk@beta
 
 Step 2: Deprecate the hono tag
-  npm dist-tag rm @mentra/sdk hono
-  npm deprecate "@mentra/sdk@3.0.0-hono.*" "Use @mentra/sdk@beta instead"
+  npm dist-tag rm @veiller/sdk hono
+  npm deprecate "@veiller/sdk@3.0.0-hono.*" "Use @veiller/sdk@beta instead"
 
 Step 3: Iterate on dev (beta.2, beta.3, ...)
   - Each merge to dev auto-publishes a new beta
@@ -613,7 +613,7 @@ Step 6: Clean up
 
 ### What about developers on `3.0.0-hono.8`?
 
-Anyone who installed `npm install @mentra/sdk@hono` is on a pinned prerelease. They won't auto-update. When we deprecate the hono versions, they'll see a deprecation warning on `npm install` telling them to switch to `@beta` or `@latest`.
+Anyone who installed `npm install @veiller/sdk@hono` is on a pinned prerelease. They won't auto-update. When we deprecate the hono versions, they'll see a deprecation warning on `npm install` telling them to switch to `@beta` or `@latest`.
 
 No action required from us beyond the deprecation message. Their code keeps working — we're not unpublishing anything.
 
@@ -628,12 +628,12 @@ No action required from us beyond the deprecation message. Their code keeps work
   run: |
     sleep 10  # npm registry propagation delay
     EXPECTED=$(node -p "require('./cloud/packages/sdk/package.json').version")
-    PUBLISHED=$(npm view @mentra/sdk@${{ env.TAG }} version 2>/dev/null || echo "NONE")
+    PUBLISHED=$(npm view @veiller/sdk@${{ env.TAG }} version 2>/dev/null || echo "NONE")
     if [ "$PUBLISHED" != "$EXPECTED" ]; then
       echo "::error::Publish verification failed! Expected $EXPECTED, got $PUBLISHED"
       exit 1
     fi
-    echo "✅ Verified: @mentra/sdk@$PUBLISHED published to tag ${{ env.TAG }}"
+    echo "✅ Verified: @veiller/sdk@$PUBLISHED published to tag ${{ env.TAG }}"
 ```
 
 ### Package size check (add to build workflow)
@@ -660,7 +660,7 @@ No action required from us beyond the deprecation message. Their code keeps work
     VERSION=$(node -p "require('./cloud/packages/sdk/package.json').version")
     curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
       -H "Content-Type: application/json" \
-      -d "{\"content\": \"📦 **@mentra/sdk@${VERSION}** published to npm (\`${{ env.TAG }}\` tag)\"}"
+      -d "{\"content\": \"📦 **@veiller/sdk@${VERSION}** published to npm (\`${{ env.TAG }}\` tag)\"}"
 ```
 
 ---
@@ -712,11 +712,11 @@ No action required from us beyond the deprecation message. Their code keeps work
 
 | #   | Question                                                                  | Notes                                                                                                                                                                                                                                                                                                                                                                      |
 | --- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Should `@mentra/types` be independently published or always bundled?**  | Currently bundled in SDK via `bundledDependencies`. If it's always bundled, it doesn't need its own npm publish pipeline. But `@mentra/cloud` also depends on it — does it use the npm version or the workspace version? Probably workspace for cloud, bundled for SDK. No independent publish needed.                                                                     |
+| 1   | **Should `@mentra/types` be independently published or always bundled?**  | Currently bundled in SDK via `bundledDependencies`. If it's always bundled, it doesn't need its own npm publish pipeline. But `@veiller/cloud` also depends on it — does it use the npm version or the workspace version? Probably workspace for cloud, bundled for SDK. No independent publish needed.                                                                     |
 | 2   | **Should we use `bun publish` instead of `npm publish`?**                 | Bun has a `publish` command now. It supports npm registry. But changesets calls `npm publish` internally. Probably not worth customizing — `npm publish` works fine from a Bun-installed project.                                                                                                                                                                          |
 | 3   | **Do we need provenance attestations?**                                   | npm supports [provenance](https://docs.npmjs.com/generating-provenance-statements) — cryptographic proof that a package was built by a specific CI workflow from a specific commit. Good security practice for public packages. Requires `permissions: id-token: write` in the workflow (already included above). Consider adding `--provenance` flag to publish commands. |
 | 4   | **Should prerelease versions update `CHANGELOG.md`?**                     | Changesets can generate changelog entries for prereleases. These are noisy (many entries for incremental betas). Alternative: only generate changelog for stable releases, accumulate changeset descriptions until then. Leaning toward changelog on stable only.                                                                                                          |
-| 5   | **What about the `@mentra/react-sdk` and `@mentra/client-sdk` packages?** | The monorepo has `packages/react-sdk` and `packages/client-sdk`. Are these published? Do they need the same pipeline? Need to check if they're actively used or dead code. If published, add to changesets config.                                                                                                                                                         |
-| 6   | **Canary releases on every PR?**                                          | Some projects publish a canary version for every PR so reviewers can test the exact code. e.g., `@mentra/sdk@0.0.0-pr-247.1`. Useful but noisy. Probably overkill for our team size. Revisit if the team grows.                                                                                                                                                            |
+| 5   | **What about the `@veiller/react-sdk` and `@veiller/client-sdk` packages?** | The monorepo has `packages/react-sdk` and `packages/client-sdk`. Are these published? Do they need the same pipeline? Need to check if they're actively used or dead code. If published, add to changesets config.                                                                                                                                                         |
+| 6   | **Canary releases on every PR?**                                          | Some projects publish a canary version for every PR so reviewers can test the exact code. e.g., `@veiller/sdk@0.0.0-pr-247.1`. Useful but noisy. Probably overkill for our team size. Revisit if the team grows.                                                                                                                                                            |
 | 7   | **Should we auto-close stale experimental tags?**                         | A scheduled workflow that checks npm dist-tags and warns/removes tags older than 30 days. Prevents tag accumulation. Low priority but good hygiene.                                                                                                                                                                                                                        |
 | 8   | **What about the `prepare` script?**                                      | The SDK's `package.json` has `"prepare": "bun run build"` which runs on every `bun install`. This is fine for development but might cause issues in CI if the build fails during install. Consider removing `prepare` and relying on explicit build steps in CI.                                                                                                           |

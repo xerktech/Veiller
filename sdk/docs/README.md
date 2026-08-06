@@ -1,6 +1,6 @@
-# MentraOS Miniapp SDK — Docs
+# Veiller Miniapp SDK — Docs
 
-Per-module reference for the `@mentra/miniapp` SDK. Each page documents one
+Per-module reference for the `@veiller/miniapp` SDK. Each page documents one
 module on `session.<module>`: what the methods take, what they return, what
 events fire, and the error shapes to expect.
 
@@ -13,7 +13,7 @@ events fire, and the error shapes to expect.
 - [two-layer.md](./two-layer.md) — two-layer miniapp model
   (background JSContext + on-demand UI WebView). Read first if you're
   writing a new miniapp.
-- [ui.md](./ui.md) — `session.ui` message bus + the `mentra` global on
+- [ui.md](./ui.md) — `session.ui` message bus + the `veiller` global on
   the WebView side.
 
 ## Modules

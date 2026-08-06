@@ -49,7 +49,7 @@ Common things to look for:
 - `Stream isn't writeable` / Redis errors → REDIS_URL is wrong or
   ElastiCache is unreachable (cluster-only access — pod must be in the
   right VPC)
-- `MENTRA_JWT_PRIVATE_KEY is not set` → env group not attached or stale
+- `VEILLER_JWT_PRIVATE_KEY is not set` → env group not attached or stale
 - `AccessTokenError` / `JWT verification failed` → keypair mismatch
   between core (signs) and audio/proxy (verifies)
 
@@ -85,7 +85,7 @@ Common cloud-v2 causes:
    respawn; if the pool can't respawn (e.g., bad WORKER_URL), the whole
    audio service crashes.
 4. **Env-loading throw at startup** — `requireEnv()` in
-   `session.service.ts` throws if `MENTRA_JWT_PRIVATE_KEY` etc. are
+   `session.service.ts` throws if `VEILLER_JWT_PRIVATE_KEY` etc. are
    missing. Check the env group has all required keys.
 
 ## Exit 137 (SIGKILL)

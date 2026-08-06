@@ -6,14 +6,14 @@
  * DisplayManager. Callers decide when to push.
  */
 
-import type {MiniappSession, RenderElement} from "@mentra/miniapp"
+import type {MiniappSession, RenderElement} from "@veiller/miniapp"
 import {borderTestImageBase64} from "../lib/bmp"
 
 export class DisplayManager {
   constructor(private readonly session: MiniappSession) {}
 
   // ── Navigation HUD layout ────────────────────────────────────────────
-  // Boxes on the 500×220 Mentra canvas, from the nav HUD mockup: a map bitmap
+  // Boxes on the 500×220 Veiller canvas, from the nav HUD mockup: a map bitmap
   // on the right, a turn-arrow bitmap on the left, trip stats along the top,
   // and the maneuver instruction below the arrow. The firmware draws the outer
   // rounded frame itself, so we only send these content slots. `message` shares
@@ -207,7 +207,7 @@ export class DisplayManager {
   // SINGLE-CONTAINER HUD: the whole frame (maneuver block + trip stats) is now
   // crammed into THIS one container, spanning the full canvas so all the lines
   // fit. There is no longer a separate stats box below it.
-  // Full 500×220 Mentra canvas — used by the single-container states
+  // Full 500×220 Veiller canvas — used by the single-container states
   // (welcome / rerouting / arrived / off-route), which don't use the 4-slot split.
   private static readonly MANEUVER_REGION = {x: 0, y: 0, width: 500, height: 220}
 

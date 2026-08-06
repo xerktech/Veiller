@@ -5,7 +5,7 @@
  * inlines the declarations so there's no runtime cross-boundary I/O.
  */
 
-import type {Rpc} from "@mentra/miniapp/ui"
+import type {Rpc} from "@veiller/miniapp/ui"
 import type {
   CaptionsHistoryUpdate,
   CaptionsLastButton,
@@ -27,8 +27,8 @@ import type {
  * inlines the declarations so there's no runtime cross-boundary I/O.
  *
  * Channels marked `Rpc<Req, Res>` are RPC — call them via
- * `mentra.request(...)` on UI / `session.ui.handle(...)` on background.
- * Everything else is broadcast — `mentra.send` / `session.ui.on`.
+ * `veiller.request(...)` on UI / `session.ui.handle(...)` on background.
+ * Everything else is broadcast — `veiller.send` / `session.ui.on`.
  */
 export interface Channels {
   // ── background → UI ────────────────────────────────────────────────────
@@ -103,5 +103,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>
 }

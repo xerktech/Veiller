@@ -20,7 +20,7 @@ Source: [mobile/modules/miniapp/src/modules/mic.ts](../../mobile/modules/miniapp
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()
@@ -119,12 +119,12 @@ tracked by the module so `stop()` can tear it down too.
 ### `setVoiceActivityDetectionEnabled(enabled)` — `Promise<void>`
 
 Temporarily override glasses-side voice activity detection (GX8002) for this
-miniapp's lifetime. The Mentra App's configured value is restored when the
+miniapp's lifetime. The Veiller App's configured value is restored when the
 miniapp disconnects.
 
 When VAD is disabled, mic gating falls back to the loudness gate only (if
-that gate is enabled). With VAD disabled and the loudness gate enabled, Mentra
-Live keeps sending audio frames but represents quiet input as silence. Mentra
+that gate is enabled). With VAD disabled and the loudness gate enabled, Veiller
+Live keeps sending audio frames but represents quiet input as silence. Veiller
 Live only today; other models no-op.
 
 **Requires:** `MICROPHONE` in the miniapp manifest.
@@ -139,7 +139,7 @@ await session.mic.setVoiceActivityDetectionEnabled(false)
 
 Temporarily override the center-mic loudness gate ("Barrier") for this
 miniapp's lifetime. It blocks quiet / self-talk audio independent of VAD. The
-Mentra App's configured value is restored when the miniapp disconnects.
+Veiller App's configured value is restored when the miniapp disconnects.
 Mentra Live only today; other models no-op.
 
 **Requires:** `MICROPHONE` in the miniapp manifest.

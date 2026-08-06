@@ -2,12 +2,12 @@
  * Basic usage example for the AugmentOS Cloud Client
  */
 
-import { MentraClient } from "../MentraClient";
+import { VeillerClient } from "../VeillerClient";
 import { resolve } from "path";
 import { AccountService } from "../services/AccountService";
 
 async function basicTest() {
-  const client = new MentraClient({
+  const client = new VeillerClient({
     email: "test@example.com",
     serverUrl: process.env.DEFAULT_SERVER_URL || "ws://localhost:8002",
     debug: {

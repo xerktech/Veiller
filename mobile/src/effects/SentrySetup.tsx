@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react-native"
 
-import {SETTINGS, engine} from "@mentra/engine"
+import {SETTINGS, engine} from "@veiller/engine"
 
 export const SentryNavigationIntegration = Sentry.reactNavigationIntegration({
   enableTimeToInitialDisplay: true,
@@ -12,7 +12,7 @@ export const SentryNavigationIntegration = Sentry.reactNavigationIntegration({
  * Demote known third-party fatal errors to non-fatal Sentry reports so the
  * app doesn't get torn down by them. Currently filters:
  *   - PostHog session-id uuidv7 generation throwing `RangeError: invalid field value`
- *     (MENTRA-OS-1SE). Affects devices with clock skew; can't be fixed from app code
+ *     (VEILLER-OS-1SE). Affects devices with clock skew; can't be fixed from app code
  *     without upgrading @posthog/core.
  */
 const installKnownErrorFilter = () => {
@@ -55,7 +55,7 @@ export const SentrySetup = () => {
     return
   }
 
-  const release = `${process.env.EXPO_PUBLIC_MENTRAOS_VERSION}`
+  const release = `${process.env.EXPO_PUBLIC_VEILLER_VERSION}`
   const dist = `${process.env.EXPO_PUBLIC_BUILD_TIME}-${process.env.EXPO_PUBLIC_BUILD_COMMIT}`
   const branch = process.env.EXPO_PUBLIC_BUILD_BRANCH
   const isProd = branch == "main" || branch == "staging"
@@ -88,7 +88,7 @@ export const SentrySetup = () => {
     // Reduce breadcrumb count to prevent memory issues during high-frequency BLE logging
     maxBreadcrumbs: 100,
 
-    // Truncate noisy BLE breadcrumbs to prevent Sentry crashes (see MENTRA-OS-13Z, 13K, 13N, 13P)
+    // Truncate noisy BLE breadcrumbs to prevent Sentry crashes (see VEILLER-OS-13Z, 13K, 13N, 13P)
     beforeBreadcrumb: (breadcrumb) => {
       if (breadcrumb.category === "console" && breadcrumb.message) {
         const msg = breadcrumb.message

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Stream manager for MentraOS RTMP Relay
+# Stream manager for Veiller RTMP Relay
 # Cleans stream with FFmpeg and notifies cloud when HLS is ready
 
 # Extract user and stream from path

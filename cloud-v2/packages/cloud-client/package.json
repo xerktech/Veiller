@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/cloud-client",
+  "name": "@veiller/cloud-client",
   "version": "0.1.0-dev.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -12,7 +12,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@mentra/cloud-protocol": "^0.1.0-dev.0",
+    "@veiller/cloud-protocol": "^0.1.0-dev.0",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
@@ -43,10 +43,10 @@
     "url": "git+https://github.com/Mentra-Community/MentraOS.git",
     "directory": "cloud-v2/packages/cloud-client"
   },
-  "description": "MentraOS cloud client — handshake, envelopes and module message flows over the cloud wire protocol",
+  "description": "Veiller cloud client — handshake, envelopes and module message flows over the cloud wire protocol",
   "keywords": [
-    "mentra",
-    "mentraos",
+    "veiller",
+    "veiller",
     "cloud",
     "client",
     "websocket"

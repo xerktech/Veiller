@@ -82,7 +82,7 @@ level.
 Operationally this means: do not `console.log` non-JSON in
 production. The Vector parser will treat it as an opaque string
 and the structured fields will not be queryable. Always use the
-Pino logger (`createLogger` from `@mentra/utils`).
+Pino logger (`createLogger` from `@veiller/utils`).
 
 ## Common queries
 

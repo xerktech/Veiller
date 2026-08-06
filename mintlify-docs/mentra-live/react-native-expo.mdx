@@ -1,13 +1,13 @@
 ---
 title: "React Native / Expo"
-description: "Use @mentra/bluetooth-sdk from a React Native or Expo development build."
+description: "Use @veiller/bluetooth-sdk from a React Native or Expo development build."
 icon: "mobile-screen-button"
 ---
 
-React Native apps use the JavaScript package `@mentra/bluetooth-sdk`. The package contains native Android and iOS code, so it must run in a development build or production native build.
+React Native apps use the JavaScript package `@veiller/bluetooth-sdk`. The package contains native Android and iOS code, so it must run in a development build or production native build.
 
 <Warning>
-Expo Go cannot load `@mentra/bluetooth-sdk` because Expo Go does not include the SDK's native modules.
+Expo Go cannot load `@veiller/bluetooth-sdk` because Expo Go does not include the SDK's native modules.
 </Warning>
 
 <Warning>
@@ -17,7 +17,7 @@ SDK `0.1.21-beta.3` requires the matching Mentra Live `0.1.21-beta.3` glasses so
 ## Install
 
 ```bash
-bun add @mentra/bluetooth-sdk@0.1.21-beta.3
+bun add @veiller/bluetooth-sdk@0.1.21-beta.3
 bunx expo install expo-build-properties
 ```
 
@@ -30,7 +30,7 @@ Add the SDK plugin and Android native-library packaging rules to your Expo app c
   "expo": {
     "plugins": [
       [
-        "@mentra/bluetooth-sdk",
+        "@veiller/bluetooth-sdk",
         {
           "node": true
         }
@@ -141,7 +141,7 @@ This SDK version does not enable terminated-app Core Bluetooth state restoration
 ## Basic Usage
 
 ```ts
-import BluetoothSdk, {DeviceModels} from '@mentra/bluetooth-sdk';
+import BluetoothSdk, {DeviceModels} from '@veiller/bluetooth-sdk';
 
 const devices = await BluetoothSdk.scan(DeviceModels.MentraLive, {
   timeoutMs: 10_000,
@@ -168,17 +168,17 @@ plumbing while keeping the root SDK available for direct commands:
 
 | Hook | Use when |
 | --- | --- |
-| `useMentraBluetooth` | You want one React session object for status, scan, connect/disconnect, default-device state, and gallery mode. |
+| `useVeillerBluetooth` | You want one React session object for status, scan, connect/disconnect, default-device state, and gallery mode. |
 | `useBluetoothScan` | You want a focused scan picker without the full connection/session helper. |
 | `useBluetoothEvent` | You want React-managed subscription cleanup for hardware events such as button presses, touch, battery, Wi-Fi, hotspot, photo, stream, speaking, or microphone events. |
 
 ```tsx
 import {Button, Text, View} from 'react-native';
-import {DeviceModels} from '@mentra/bluetooth-sdk';
-import {useBluetoothEvent, useMentraBluetooth} from '@mentra/bluetooth-sdk/react';
+import {DeviceModels} from '@veiller/bluetooth-sdk';
+import {useBluetoothEvent, useVeillerBluetooth} from '@veiller/bluetooth-sdk/react';
 
 export function DeviceScreen() {
-  const mentra = useMentraBluetooth({
+  const veiller = useVeillerBluetooth({
     defaultModel: DeviceModels.MentraLive,
     scanTimeoutMs: 10_000,
   });
@@ -194,18 +194,18 @@ export function DeviceScreen() {
   return (
     <View>
       <Text>{mentra.glasses.connected ? 'Connected' : 'Disconnected'}</Text>
-      <Button disabled={mentra.busy} title="Scan" onPress={() => mentra.scan.start()} />
-      {mentra.scan.devices.map((device) => (
-        <Button key={device.id} title={device.name} onPress={() => mentra.connect(device)} />
+      <Button disabled={veiller.busy} title="Scan" onPress={() => veiller.scan.start()} />
+      {veiller.scan.devices.map((device) => (
+        <Button key={device.id} title={device.name} onPress={() => veiller.connect(device)} />
       ))}
       <Button
-        disabled={!mentra.glasses.connected || mentra.sdk.galleryMode.applying}
-        title={mentra.sdk.galleryMode.enabled ? 'Disable gallery mode' : 'Enable gallery mode'}
+        disabled={!mentra.glasses.connected || veiller.sdk.galleryMode.applying}
+        title={veiller.sdk.galleryMode.enabled ? 'Disable gallery mode' : 'Enable gallery mode'}
         onPress={() => {
-          void mentra.setGalleryModeEnabled(!mentra.sdk.galleryMode.enabled);
+          void veiller.setGalleryModeEnabled(!veiller.sdk.galleryMode.enabled);
         }}
       />
-      <Button disabled={!mentra.glasses.connected} title="Disconnect" onPress={mentra.disconnect} />
+      <Button disabled={!mentra.glasses.connected} title="Disconnect" onPress={veiller.disconnect} />
     </View>
   );
 }
@@ -215,8 +215,8 @@ For a standalone picker, use `useBluetoothScan()` directly:
 
 ```tsx
 import {Button, Text, View} from 'react-native';
-import {DeviceModels, type Device} from '@mentra/bluetooth-sdk';
-import {useBluetoothScan} from '@mentra/bluetooth-sdk/react';
+import {DeviceModels, type Device} from '@veiller/bluetooth-sdk';
+import {useBluetoothScan} from '@veiller/bluetooth-sdk/react';
 
 export function ScanPicker({onConnect}: {onConnect: (device: Device) => void}) {
   const scan = useBluetoothScan({
@@ -238,7 +238,7 @@ export function ScanPicker({onConnect}: {onConnect: (device: Device) => void}) {
 
 The hooks do not request Android permissions or choose a persistence package for
 you. Ask for permissions in your app before calling scan/connect actions, and
-pass a `defaultDeviceStorage` adapter to `useMentraBluetooth` if you want to
+pass a `defaultDeviceStorage` adapter to `useVeillerBluetooth` if you want to
 restore a default device across app restarts.
 
 ## Status Shape
@@ -256,7 +256,7 @@ type GlassesConnectionStatus =
 
 Use `mentra.glasses.connection.state` for link-layer progress. `fullyBooted` only exists when `state === 'connected'`.
 
-Use `useMentraBluetooth()` as the React status API for connection, battery, Wi-Fi, hotspot, scan, and SDK runtime state. `setGalleryModeEnabled(...)` resolves with the ASG `SettingsAckSuccessEvent` and rejects failure statuses, `mentra.sdk.galleryMode.enabled` reflects the acknowledged gallery-mode setting, and `mentra.sdk.galleryMode.applying` is true while that ASG response is in flight.
+Use `useVeillerBluetooth()` as the React status API for connection, battery, Wi-Fi, hotspot, scan, and SDK runtime state. `setGalleryModeEnabled(...)` resolves with the ASG `SettingsAckSuccessEvent` and rejects failure statuses, `veiller.sdk.galleryMode.enabled` reflects the acknowledged gallery-mode setting, and `veiller.sdk.galleryMode.applying` is true while that ASG response is in flight.
 
 ## Default Device
 
@@ -275,10 +275,10 @@ if (savedDevice) {
 Use this when testing SDK source changes locally:
 
 ```bash
-bun add --no-save /path/to/MentraOS/mobile/modules/bluetooth-sdk
-MENTRA_BLUETOOTH_SDK_PACKAGE_PATH=/path/to/MentraOS/mobile/modules/bluetooth-sdk bunx expo run:ios
+bun add --no-save /path/to/Veiller/mobile/modules/bluetooth-sdk
+VEILLER_BLUETOOTH_SDK_PACKAGE_PATH=/path/to/Veiller/mobile/modules/bluetooth-sdk bunx expo run:ios
 # or
-MENTRA_BLUETOOTH_SDK_PACKAGE_PATH=/path/to/MentraOS/mobile/modules/bluetooth-sdk bunx expo run:android
+VEILLER_BLUETOOTH_SDK_PACKAGE_PATH=/path/to/Veiller/mobile/modules/bluetooth-sdk bunx expo run:android
 ```
 
-Keep `MENTRA_BLUETOOTH_SDK_PACKAGE_PATH` in your shell or CI environment, not in committed app config.
+Keep `VEILLER_BLUETOOTH_SDK_PACKAGE_PATH` in your shell or CI environment, not in committed app config.

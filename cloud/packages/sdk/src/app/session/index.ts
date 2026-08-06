@@ -1,7 +1,7 @@
 /**
  * 🎯 App Session Module
  *
- * Manages an active Third Party App session with MentraOS Cloud.
+ * Manages an active Third Party App session with Veiller Cloud.
  * Handles real-time communication, event subscriptions, and display management.
  */
 
@@ -20,7 +20,7 @@ import { CameraModule } from "./modules/camera";
 import { LedModule } from "./modules/led";
 import { AudioManager } from "./modules/audio";
 import { ResourceTracker } from "../../utils/resource-tracker";
-import { MentraAuthError, MentraConnectionError, MentraTimeoutError, MentraError } from "../../logging/errors";
+import { VeillerAuthError, VeillerConnectionError, VeillerTimeoutError, VeillerError } from "../../logging/errors";
 import { createTelemetryStream } from "../../logging/telemetry-transport";
 import type { TelemetryLogEntry } from "../../types/messages/app-to-cloud";
 import type { RequestWifiSetup, OwnershipReleaseMessage } from "../../types/messages/app-to-cloud";
@@ -109,7 +109,7 @@ import { readNotificationWarnLog } from "../../utils/permissions-utils";
 export interface AppSessionConfig {
   /** 📦 Unique identifier for your App (e.g., 'org.company.appname') */
   packageName: string;
-  /** 🔑 API key for authentication with MentraOS Cloud */
+  /** 🔑 API key for authentication with Veiller Cloud */
   apiKey: string;
   /** 🔌 WebSocket server URL (default: 'ws://localhost:7002/app-ws') */
   mentraOSWebsocketUrl?: string;
@@ -136,7 +136,7 @@ const APP_TO_APP_EVENT_TYPES = [
 /**
  * 🚀 App Session Implementation
  *
- * Manages a live connection between your App and MentraOS Cloud.
+ * Manages a live connection between your App and Veiller Cloud.
  * Provides interfaces for:
  * - 🎮 Event handling (transcription, head position, etc.)
  * - 📱 Display management in AR view
@@ -160,7 +160,7 @@ const APP_TO_APP_EVENT_TYPES = [
  * ```
  */
 export class AppSession {
-  /** WebSocket connection to MentraOS Cloud */
+  /** WebSocket connection to Veiller Cloud */
   private ws: WebSocket | null = null;
   /** Current session identifier */
   private sessionId: string | null = null;
@@ -334,7 +334,7 @@ export class AppSession {
     );
     this.layouts = new LayoutManager(config.packageName, this.send.bind(this));
 
-    // Initialize settings manager with all necessary parameters, including subscribeFn for MentraOS settings
+    // Initialize settings manager with all necessary parameters, including subscribeFn for Veiller settings
     this.settings = new SettingsManager(
       this.settingsData,
       this.config.packageName,
@@ -342,7 +342,7 @@ export class AppSession {
       this.sessionId ?? undefined,
       async (streams: string[]) => {
         // NOTE: With Bug 007 fix, subscriptions are derived from EventManager.handlers
-        // This subscribeFn is called by SettingsManager to auto-subscribe to streams for MentraOS settings
+        // This subscribeFn is called by SettingsManager to auto-subscribe to streams for Veiller settings
         // The actual subscription intent should be tracked via handlers, not a separate Set
         this.logger.debug({ streams: JSON.stringify(streams) }, `[AppSession] subscribeFn called for streams`);
 
@@ -648,7 +648,7 @@ export class AppSession {
   // =====================================
 
   /**
-   * 🚀 Connect to MentraOS Cloud
+   * 🚀 Connect to Veiller Cloud
    * @param sessionId - Unique session identifier
    * @returns Promise that resolves when connected
    */
@@ -690,7 +690,7 @@ export class AppSession {
         // Validate WebSocket URL before attempting connection
         if (!this.config.mentraOSWebsocketUrl) {
           this.logger.error("WebSocket URL is missing or undefined");
-          reject(new MentraConnectionError("WebSocket URL is required"));
+          reject(new VeillerConnectionError("WebSocket URL is required"));
           return;
         }
 
@@ -713,8 +713,8 @@ export class AppSession {
           } catch (error: unknown) {
             this.logger.error(error, "Error during connection initialization");
             const errorMessage = error instanceof Error ? error.message : String(error);
-            this.events.emit("error", new MentraConnectionError(`Connection initialization failed: ${errorMessage}`));
-            reject(error instanceof Error ? error : new MentraConnectionError(String(error)));
+            this.events.emit("error", new VeillerConnectionError(`Connection initialization failed: ${errorMessage}`));
+            reject(error instanceof Error ? error : new VeillerConnectionError(String(error)));
           }
         });
 
@@ -726,7 +726,7 @@ export class AppSession {
               try {
                 // Validate buffer before processing
                 if (data.length === 0) {
-                  this.events.emit("error", new MentraError("Received empty binary data", "EMPTY_DATA"));
+                  this.events.emit("error", new VeillerError("Received empty binary data", "EMPTY_DATA"));
                   return;
                 }
 
@@ -747,7 +747,7 @@ export class AppSession {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 this.events.emit(
                   "error",
-                  new MentraError(`Failed to process binary message: ${errorMessage}`, "PARSE_ERROR"),
+                  new VeillerError(`Failed to process binary message: ${errorMessage}`, "PARSE_ERROR"),
                 );
                 return;
               }
@@ -772,7 +772,7 @@ export class AppSession {
 
               // Validate JSON before parsing
               if (!jsonData || jsonData.trim() === "") {
-                this.events.emit("error", new MentraError("Received empty JSON message", "PARSE_ERROR"));
+                this.events.emit("error", new VeillerError("Received empty JSON message", "PARSE_ERROR"));
                 return;
               }
 
@@ -781,7 +781,7 @@ export class AppSession {
 
               // Basic schema validation
               if (!message || typeof message !== "object" || !("type" in message)) {
-                this.events.emit("error", new MentraError("Malformed message: missing type property", "PARSE_ERROR"));
+                this.events.emit("error", new VeillerError("Malformed message: missing type property", "PARSE_ERROR"));
                 return;
               }
 
@@ -790,13 +790,13 @@ export class AppSession {
             } catch (error: unknown) {
               this.logger.error(error, "JSON parsing error");
               const errorMessage = error instanceof Error ? error.message : String(error);
-              this.events.emit("error", new MentraError(`Failed to parse message: ${errorMessage}`, "PARSE_ERROR"));
+              this.events.emit("error", new VeillerError(`Failed to parse message: ${errorMessage}`, "PARSE_ERROR"));
             }
           } catch (error: unknown) {
             // Final catch - should never reach here if individual handlers work correctly
             this.logger.error({ error }, "Unhandled message processing error");
             const errorMessage = error instanceof Error ? error.message : String(error);
-            this.events.emit("error", new MentraError(`Unhandled message error: ${errorMessage}`, "INTERNAL_ERROR"));
+            this.events.emit("error", new VeillerError(`Unhandled message error: ${errorMessage}`, "INTERNAL_ERROR"));
           }
         };
 
@@ -880,7 +880,7 @@ export class AppSession {
         // Connection error handler
         const errorHandler = (error: Error) => {
           this.logger.error(error, "WebSocket error");
-          this.events.emit("error", new MentraConnectionError(error.message));
+          this.events.emit("error", new VeillerConnectionError(error.message));
         };
 
         this.ws.on("error", (error: Error) => {
@@ -913,7 +913,7 @@ export class AppSession {
             `Connection timeout after ${timeoutMs}ms`,
           );
 
-          const err = new MentraTimeoutError(`Connection timeout after ${timeoutMs}ms`);
+          const err = new VeillerTimeoutError(`Connection timeout after ${timeoutMs}ms`);
           this.events.emit("error", err);
           reject(err);
         }, timeoutMs);
@@ -929,7 +929,7 @@ export class AppSession {
       } catch (error: unknown) {
         this.logger.error(error, "Connection setup error");
         const errorMessage = error instanceof Error ? error.message : String(error);
-        reject(new MentraConnectionError(`Failed to setup connection: ${errorMessage}`));
+        reject(new VeillerConnectionError(`Failed to setup connection: ${errorMessage}`));
       }
     });
   }
@@ -967,7 +967,7 @@ export class AppSession {
   }
 
   /**
-   * 👋 Disconnect from MentraOS Cloud
+   * 👋 Disconnect from Veiller Cloud
    * Flushes any pending SimpleStorage writes before closing
    *
    * @param options - Optional disconnect options
@@ -1097,7 +1097,7 @@ export class AppSession {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.events.emit(
         "error",
-        new MentraError(`Failed to update subscriptions: ${errorMessage}`, "SUBSCRIPTION_ERROR"),
+        new VeillerError(`Failed to update subscriptions: ${errorMessage}`, "SUBSCRIPTION_ERROR"),
       );
     }
   }
@@ -1236,7 +1236,7 @@ export class AppSession {
    */
   requestWifiSetup(reason?: string): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      throw new Error("Not connected to MentraOS Cloud");
+      throw new Error("Not connected to Veiller Cloud");
     }
 
     const message: RequestWifiSetup = {
@@ -1270,7 +1270,7 @@ export class AppSession {
     try {
       // Validate message before processing
       if (!this.validateMessage(message)) {
-        this.events.emit("error", new MentraError("Invalid message format received", "PARSE_ERROR"));
+        this.events.emit("error", new VeillerError("Invalid message format received", "PARSE_ERROR"));
         return;
       }
 
@@ -1304,7 +1304,7 @@ export class AppSession {
           // Update the settings manager with the new settings
           this.settings.updateSettings(this.settingsData);
 
-          // Handle MentraOS system settings if provided
+          // Handle Veiller system settings if provided
           this.logger.debug(
             { mentraosSettings: JSON.stringify(message.mentraosSettings) },
             `[AppSession] CONNECTION_ACK mentraosSettings}`,
@@ -1355,7 +1355,7 @@ export class AppSession {
         } else if (isAppConnectionError(message) || message.type === "connection_error") {
           // Handle both App-specific connection_error and standard connection_error
           const errorMessage = message.message || "Unknown connection error";
-          this.events.emit("error", new MentraAuthError(errorMessage));
+          this.events.emit("error", new VeillerAuthError(errorMessage));
         } else if (message.type === StreamType.AUDIO_CHUNK) {
           // Check if we have a handler registered for AUDIO_CHUNK (derived from handlers)
           const hasAudioHandler = this.events.getRegisteredStreams().includes(StreamType.AUDIO_CHUNK);
@@ -1436,8 +1436,8 @@ export class AppSession {
           // Emit settings update event (for backwards compatibility)
           this.events.emit("settings_update", this.settingsData);
 
-          // --- MentraOS settings update logic ---
-          // If the message.settings looks like MentraOS settings (object with known keys), update mentraosSettings
+          // --- Veiller settings update logic ---
+          // If the message.settings looks like Veiller settings (object with known keys), update mentraosSettings
           if (message.settings && typeof message.settings === "object") {
             this.settings.updateMentraosSettings(message.settings);
           }
@@ -1540,9 +1540,9 @@ export class AppSession {
             this.pendingDirectMessages.delete(response.messageId);
           }
         } else if (message.type === "augmentos_settings_update") {
-          const mentraosMsg = message as MentraosSettingsUpdate;
-          if (mentraosMsg.settings && typeof mentraosMsg.settings === "object") {
-            this.settings.updateMentraosSettings(mentraosMsg.settings);
+          const veillerMsg = message as MentraosSettingsUpdate;
+          if (veillerMsg.settings && typeof veillerMsg.settings === "object") {
+            this.settings.updateMentraosSettings(veillerMsg.settings);
           }
         }
         // Handle 'connection_error' as a specific case if cloud sends this string literal
@@ -1554,7 +1554,7 @@ export class AppSession {
           this.logger.warn(
             `Received 'connection_error' type directly. Consider aligning cloud to send 'tpa_connection_error'. Message: ${errorMessage}`,
           );
-          this.events.emit("error", new MentraConnectionError(errorMessage));
+          this.events.emit("error", new VeillerConnectionError(errorMessage));
         } else if (message.type === "permission_error") {
           // Handle permission errors from cloud
           this.logger.warn(
@@ -1663,14 +1663,14 @@ export class AppSession {
           this.logger.warn(`Unrecognized message type: ${(message as any).type}`);
           this.events.emit(
             "error",
-            new MentraError(`Unrecognized message type: ${(message as any).type}`, "UNKNOWN_TYPE"),
+            new VeillerError(`Unrecognized message type: ${(message as any).type}`, "UNKNOWN_TYPE"),
           );
         }
       } catch (processingError: unknown) {
         // Catch any errors during message processing to prevent App crashes
         this.logger.error(processingError, "Error processing message:");
         const errorMessage = processingError instanceof Error ? processingError.message : String(processingError);
-        this.events.emit("error", new MentraError(`Error processing message: ${errorMessage}`, "INTERNAL_ERROR"));
+        this.events.emit("error", new VeillerError(`Error processing message: ${errorMessage}`, "INTERNAL_ERROR"));
       }
     } catch (error: unknown) {
       // Final safety net to ensure the App doesn't crash on any unexpected errors

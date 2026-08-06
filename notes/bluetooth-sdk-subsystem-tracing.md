@@ -14,12 +14,12 @@ adb -s RFCX71TH0CR logcat -G 8M
 adb -s 0123456789ABCDEF logcat -G 8M
 
 # Live trace, no command-name grep needed.
-adb -s RFCX71TH0CR logcat -v time -s MentraBleTrace:V
-adb -s 0123456789ABCDEF logcat -v time -s MentraBleTrace:V
+adb -s RFCX71TH0CR logcat -v time -s VeillerBleTrace:V
+adb -s 0123456789ABCDEF logcat -v time -s VeillerBleTrace:V
 
 # Recent buffered trace without clearing logcat.
-adb -s RFCX71TH0CR logcat -d -t 500 -v time -s MentraBleTrace:V
-adb -s 0123456789ABCDEF logcat -d -t 500 -v time -s MentraBleTrace:V
+adb -s RFCX71TH0CR logcat -d -t 500 -v time -s VeillerBleTrace:V
+adb -s 0123456789ABCDEF logcat -d -t 500 -v time -s VeillerBleTrace:V
 ```
 
 For phone app logs, prefer a shell function over an alias so the phone serial is
@@ -27,7 +27,7 @@ used for both `pidof` and `logcat`:
 
 ```bash
 PHONE=RFCX71TH0CR
-PHONE_PKG=com.mentra.bluetoothsdk.example
+PHONE_PKG=com.veiller.bluetoothsdk.example
 
 logm() {
   local pid
@@ -36,7 +36,7 @@ logm() {
     echo "No running process for $PHONE_PKG on $PHONE" >&2
     return 1
   fi
-  adb -s "$PHONE" logcat --pid="$pid" -v time -s MentraBleTrace:V
+  adb -s "$PHONE" logcat --pid="$pid" -v time -s VeillerBleTrace:V
 }
 ```
 
@@ -63,7 +63,7 @@ logapt  # glasses ASG client, pretty, America/Los_Angeles
 Example pretty output:
 
 ```text
-18:46:18.112  PHONE APP          app_lifecycle       module_create      event=module_create component=BluetoothSdkModule pid=21080 version=1.0+1 package=com.mentra.bluetoothsdk.example
+18:46:18.112  PHONE APP          app_lifecycle       module_create      event=module_create component=BluetoothSdkModule pid=21080 version=1.0+1 package=com.veiller.bluetoothsdk.example
 18:46:19.403  GLASSES APP        app_lifecycle       service_create     event=service_create component=AsgClientService pid=3559 version=36.0+36 package=com.mentra.asg_client
 18:46:21.683  SDK -> APP          sdk_event_dispatch   speaking_status     speaking=true
 18:46:22.985  GLASSES -> PHONE    sdk_ble_event        k900:sr_vad         B.on=0
@@ -83,15 +83,15 @@ Sensitive fields such as passwords, tokens, auth fields, secrets, and emails are
 ```mermaid
 flowchart TB
     subgraph Phone["Phone"]
-        App["MentraOS / Partner app UI\nReact Native, Swift, or Kotlin"]
+        App["Veiller / Partner app UI\nReact Native, Swift, or Kotlin"]
         AppState["App state and hooks\nsession, scan results, events"]
-        CloudComms["MentraOS cloud comms\nWebSocket + REST"]
+        CloudComms["Veiller cloud comms\nWebSocket + REST"]
         SdkPublic["Bluetooth SDK public API\nscan, connect, requestPhoto, startStream"]
         SdkNative["Bluetooth SDK native runtime\nDeviceManager + SGC controller"]
         PhoneBle["Phone BLE transport\ncommand writer + event reader"]
     end
 
-    subgraph Cloud["MentraOS Cloud"]
+    subgraph Cloud["Veiller Cloud"]
         CloudWs["Cloud WebSocket"]
         MiniApps["Mini apps / App SDK"]
         Storage["Cloud APIs and storage"]
@@ -126,7 +126,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    App["Partner / MentraOS app\nReact Native or native UI"]
+    App["Partner / Veiller app\nReact Native or native UI"]
     SdkApi["Bluetooth SDK public API\nrequestPhoto, startStream, setMicState"]
     PhoneSdk["Phone SDK native runtime\nDeviceManager + SGC"]
     PhoneBle["Phone BLE wire\nMentraLive.sendJson / processJsonMessage"]
@@ -168,18 +168,18 @@ sequenceDiagram
 
     App->>SDK: startStream({ video: { fps } })
     SDK->>PhoneBLE: JSON command
-    Note over PhoneBLE: MentraBleTrace<br/>direction=phone_to_glasses<br/>layer=sdk_ble_command
+    Note over PhoneBLE: VeillerBleTrace<br/>direction=phone_to_glasses<br/>layer=sdk_ble_command
     PhoneBLE->>ASGBLE: BLE bytes
-    Note over ASGBLE: MentraBleTrace<br/>direction=phone_to_glasses<br/>layer=asg_ble_input
+    Note over ASGBLE: VeillerBleTrace<br/>direction=phone_to_glasses<br/>layer=asg_ble_input
     ASGBLE->>Router: parsed command
-    Note over Router: MentraBleTrace<br/>direction=phone_to_glasses<br/>layer=asg_command_router
+    Note over Router: VeillerBleTrace<br/>direction=phone_to_glasses<br/>layer=asg_command_router
     Router->>Feature: handle command
     Feature->>ASGBLE: status/event JSON
-    Note over ASGBLE: MentraBleTrace<br/>direction=glasses_to_phone<br/>layer=asg_ble_output
+    Note over ASGBLE: VeillerBleTrace<br/>direction=glasses_to_phone<br/>layer=asg_ble_output
     ASGBLE->>PhoneBLE: BLE bytes
-    Note over PhoneBLE: MentraBleTrace<br/>direction=glasses_to_phone<br/>layer=sdk_ble_event
+    Note over PhoneBLE: VeillerBleTrace<br/>direction=glasses_to_phone<br/>layer=sdk_ble_event
     PhoneBLE->>SDK: typed event dispatch
-    Note over SDK: MentraBleTrace<br/>direction=phone_to_app<br/>layer=sdk_event_dispatch
+    Note over SDK: VeillerBleTrace<br/>direction=phone_to_app<br/>layer=sdk_event_dispatch
     SDK->>App: listener/hook update
 ```
 

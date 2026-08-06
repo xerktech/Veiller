@@ -2,7 +2,7 @@
 // Two-layer port: streams events from background via useTester("transcription").
 
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"

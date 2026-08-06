@@ -59,7 +59,7 @@ User → Bun.serve :3333
                ├── /health
                ├── /settings
                ├── /photo-upload
-               ├── /mentra-auth
+               ├── /veiller-auth
                └── /api/* (custom)
 ```
 
@@ -176,7 +176,7 @@ this.post("/photo-upload", async (c) => {
 ```typescript
 // Apps/LiveCaptionsOnSmartGlasses/src/index.ts
 import {serve} from "bun"
-import {AppServer} from "@mentra/sdk"
+import {AppServer} from "@veiller/sdk"
 import {api} from "./api"
 import webview from "./webview/index.html"
 

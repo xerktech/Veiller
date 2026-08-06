@@ -14,7 +14,7 @@ module.exports = function (api: any) {
             "@plugins": "./plugins",
             "@assets": "./assets",
             "@cloud": "../cloud/packages/types",
-            "@mentra/bluetooth-sdk-internal": "./modules/bluetooth-sdk/src/_internal",
+            "@veiller/bluetooth-sdk-internal": "./modules/bluetooth-sdk/src/_internal",
           },
           extensions: [".ios.js", ".android.js", ".js", ".ts", ".tsx", ".json"],
         },

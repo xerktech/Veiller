@@ -32,14 +32,14 @@ is a manual opt-in method that nothing in the SDK calls. The buffer is always em
 
 ### Comment 2 — Cookie name mismatch between auth route and middleware ⚠️ Pre-existing, track separately
 
-**Bot claim:** `createMentraAuthRoutes()` sets the cookie as `${packageName}-session` but
-`createAuthMiddleware()` defaults to `"aos_session"`, so the cookie written by `/api/mentra/auth/init`
+**Bot claim:** `createVeillerAuthRoutes()` sets the cookie as `${packageName}-session` but
+`createAuthMiddleware()` defaults to `"aos_session"`, so the cookie written by `/api/veiller/auth/init`
 is never read by the middleware on subsequent requests.
 
 **Reality:** Valid bug. Code inspection confirmed the mismatch:
 
 ```
-// createMentraAuthRoutes() — line 435 of webview/index.ts
+// createVeillerAuthRoutes() — line 435 of webview/index.ts
 const cookieName = `${packageName}-session`  // e.g. "org.example.myapp-session"
 
 // createAuthMiddleware() — line 237 of webview/index.ts

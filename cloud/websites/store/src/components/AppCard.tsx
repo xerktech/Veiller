@@ -10,7 +10,7 @@ const APP_TAGS: Record<string, string[]> = {
   "Streamer": ["Video", "Broadcast"],
   "Translation": ["Language", "Communication"],
   "LinkLingo": ["Language", "Learning"],
-  "Mentra Notes": ["Tools"],
+  "Veiller Notes": ["Tools"],
   "Dash": ["Fitness", "Running"],
   "Calendar": ["Time", "Schedule"],
   "Teleprompter": ["Media", "Tools"],

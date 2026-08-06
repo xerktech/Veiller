@@ -12,7 +12,7 @@ import { Logger } from "pino";
 import WebSocket from "ws";
 import { SonioxNodeClient } from "@soniox/node";
 
-import { StreamType, getLanguageInfo, parseLanguageStream, TranscriptionData, SonioxToken } from "@mentra/sdk";
+import { StreamType, getLanguageInfo, parseLanguageStream, TranscriptionData, SonioxToken } from "@veiller/sdk";
 
 import { SonioxSdkStream } from "./SonioxSdkStream";
 import { SonioxCredential, SonioxKeyPool, getSharedSonioxKeyPool } from "../../soniox/SonioxKeyPool";
@@ -632,7 +632,7 @@ class SonioxTranscriptionStream implements StreamInstance {
       enable_endpoint_detection: true, // Automatically finalize tokens on speech pauses
       enable_speaker_diarization: true,
       language_hints: languageHints.length > 0 ? languageHints : undefined,
-      // context: "Mentra, MentraOS, Mira, Hey Mira",
+      // context: "Veiller, Veiller, Mira, Hey Mira",
       context: {
         terms: ["Mentra", "Israelov"],
       },

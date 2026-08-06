@@ -3,7 +3,7 @@
  * indicates we're running in a dev miniapp.
  *
  * Companion to the phone-side console-tap shim (which is injected by the
- * MentraOS app, not by the SDK). The SDK installs this listener on import so
+ * Veiller app, not by the SDK). The SDK installs this listener on import so
  * authors get live reload without any opt-in code.
  *
  * Mechanism:
@@ -13,7 +13,7 @@
  *     with payload `{type: "miniapp_dev_reload"}`.
  *   - This listener catches that MessageEvent and calls `location.reload()`.
  *
- * Gated on `window.MentraOS.miniappDeveloperMode === true` so production
+ * Gated on `window.Veiller.miniappDeveloperMode === true` so production
  * miniapps never set up the listener. In production WebViews the host won't
  * inject the message anyway, but belt-and-suspenders.
  */
@@ -22,11 +22,11 @@ const RELOAD_MESSAGE_TYPE = "miniapp_dev_reload"
 
 export function installDevReloadListenerIfDevMode(): void {
   if (typeof window === "undefined") return
-  const mentra = (window as {MentraOS?: {miniappDeveloperMode?: boolean}}).MentraOS
-  if (!mentra?.miniappDeveloperMode) return
+  const veiller = (window as {Veiller?: {miniappDeveloperMode?: boolean}}).Veiller
+  if (!veiller?.miniappDeveloperMode) return
 
   // Avoid double-install if the SDK is hot-reloaded mid-session.
-  const flagKey = "__mentraDevReloadInstalled"
+  const flagKey = "__veillerDevReloadInstalled"
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((window as any)[flagKey]) return
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +45,7 @@ export function installDevReloadListenerIfDevMode(): void {
     const type = env?.payload?.type
     if (type !== RELOAD_MESSAGE_TYPE) return
     // eslint-disable-next-line no-console
-    console.log("[mentra-miniapp] dev reload signal received — reloading")
+    console.log("[veiller-miniapp] dev reload signal received — reloading")
     try {
       location.reload()
     } catch {

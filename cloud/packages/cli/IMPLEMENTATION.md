@@ -8,7 +8,7 @@
 
 ## 🎯 Overview
 
-This document summarizes the complete implementation of the Mentra CLI tool, including all Phase 2 commands, backend infrastructure, testing, and documentation.
+This document summarizes the complete implementation of the Veiller CLI tool, including all Phase 2 commands, backend infrastructure, testing, and documentation.
 
 ## ✅ What Was Implemented
 
@@ -96,7 +96,7 @@ All commands support both **interactive** and **non-interactive** modes.
   - Linux libsecret
   - Windows Credential Manager
 - ✅ Fallback: Encrypted file with `chmod 600`
-- ✅ Environment variable: `MENTRA_CLI_TOKEN` for CI/CD
+- ✅ Environment variable: `VEILLER_CLI_TOKEN` for CI/CD
 - ✅ No plaintext token storage
 - ✅ Tokens never logged
 
@@ -210,8 +210,8 @@ All commands support both **interactive** and **non-interactive** modes.
 
 #### Environment Variables
 
-- ✅ `MENTRA_CLI_TOKEN` - Skip auth in CI/CD
-- ✅ `MENTRA_API_URL` - Override API endpoint
+- ✅ `VEILLER_CLI_TOKEN` - Skip auth in CI/CD
+- ✅ `VEILLER_API_URL` - Override API endpoint
 - ✅ Secure credential handling
 
 #### Automation Features
@@ -243,7 +243,7 @@ All commands support both **interactive** and **non-interactive** modes.
 ### 1. App Create (Interactive Mode)
 
 ```bash
-$ mentra app create
+$ veiller app create
 
 Package name (e.g., com.example.myapp): com.acme.demo
 App name: Demo App
@@ -280,7 +280,7 @@ App details:
 ### 2. App Update (Interactive Mode)
 
 ```bash
-$ mentra app update com.acme.demo
+$ veiller app update com.acme.demo
 
 Fetching current app details...
 
@@ -312,7 +312,7 @@ Updated app details:
 ### 3. App Delete (With Safety)
 
 ```bash
-$ mentra app delete com.acme.demo
+$ veiller app delete com.acme.demo
 
 ⚠️  WARNING: This action cannot be undone!
 
@@ -331,7 +331,7 @@ Deleting app...
 ### 4. App API Key Regeneration
 
 ```bash
-$ mentra app api-key com.acme.demo
+$ veiller app api-key com.acme.demo
 
 ⚠️  WARNING: This will invalidate the current API key!
 
@@ -355,11 +355,11 @@ Regenerating API key...
 
 ```bash
 # Export to file
-$ mentra app export com.acme.demo -o demo.json
+$ veiller app export com.acme.demo -o demo.json
 ✓ App config exported to: demo.json
 
 # Export to stdout
-$ mentra app export com.acme.demo
+$ veiller app export com.acme.demo
 {
   "packageName": "com.acme.demo",
   "name": "Demo App",
@@ -368,11 +368,11 @@ $ mentra app export com.acme.demo
   "publicUrl": "https://demo.acme.com",
   "logoURL": "https://demo.acme.com/logo.png",
   "exportedAt": "2024-01-15T10:30:00.000Z",
-  "exportedBy": "mentra-cli"
+  "exportedBy": "veiller-cli"
 }
 
 # Import from file
-$ mentra app import demo.json
+$ veiller app import demo.json
 
 Importing app configuration:
   Package: com.acme.demo
@@ -440,7 +440,7 @@ req.cli = {
 
 ```typescript
 // Primary: OS keychain via Bun.secrets
-await Bun.secrets.save("mentra-cli", {
+await Bun.secrets.save("veiller-cli", {
   token: cliToken,
   email: userEmail,
 })
@@ -450,7 +450,7 @@ const credsPath = path.join(configDir, "credentials.json")
 await fs.writeFile(credsPath, JSON.stringify(creds), {mode: 0o600})
 
 // Environment override
-const token = process.env.MENTRA_CLI_TOKEN || savedToken
+const token = process.env.VEILLER_CLI_TOKEN || savedToken
 ```
 
 ---
@@ -493,20 +493,20 @@ test("should generate valid CLI key", async () => {
 
 ```bash
 # Authenticate
-mentra auth $TEST_TOKEN
+veiller auth $TEST_TOKEN
 
 # Create app
-mentra app create \
+veiller app create \
   --package-name com.test.app \
   --name "Test App" \
   --app-type standard \
   --public-url https://test.com
 
 # Verify created
-mentra app get com.test.app
+veiller app get com.test.app
 
 # Cleanup
-mentra app delete com.test.app --force
+veiller app delete com.test.app --force
 ```
 
 ---
@@ -529,18 +529,18 @@ mentra app delete com.test.app --force
 
 ```bash
 # 1. Authenticate
-mentra auth <your-cli-token>
+veiller auth <your-cli-token>
 
 # 2. Create app
-mentra app create
+veiller app create
 
 # 3. Work on your app...
 
 # 4. Update when ready
-mentra app update com.example.app --description "Updated version"
+veiller app update com.example.app --description "Updated version"
 
 # 5. Publish to store
-mentra app publish com.example.app
+veiller app publish com.example.app
 ```
 
 ### CI/CD Workflow
@@ -549,26 +549,26 @@ mentra app publish com.example.app
 # GitHub Actions example
 - name: Deploy to Staging
   env:
-    MENTRA_CLI_TOKEN: ${{ secrets.MENTRA_CLI_TOKEN }}
+    VEILLER_CLI_TOKEN: ${{ secrets.VEILLER_CLI_TOKEN }}
   run: |
-    mentra cloud use staging
-    mentra app update $PACKAGE_NAME --description "Build ${{ github.sha }}"
-    mentra app publish $PACKAGE_NAME --force
+    veiller cloud use staging
+    veiller app update $PACKAGE_NAME --description "Build ${{ github.sha }}"
+    veiller app publish $PACKAGE_NAME --force
 ```
 
 ### Multi-Environment Workflow
 
 ```bash
 # Work on staging
-mentra cloud use staging
-mentra app create --package-name com.example.app ...
+veiller cloud use staging
+veiller app create --package-name com.example.app ...
 
 # Test on staging...
 
 # Promote to production
-mentra app export com.example.app -o app.json
-mentra cloud use production
-mentra app import app.json
+veiller app export com.example.app -o app.json
+veiller cloud use production
+veiller app import app.json
 ```
 
 ---
@@ -587,7 +587,7 @@ mentra app import app.json
 ### After (CLI)
 
 ```bash
-mentra app create \
+veiller app create \
   --package-name com.example.app \
   --name "My App" \
   --app-type standard \
@@ -647,7 +647,7 @@ mentra app create \
 
 **All Phase 2 CLI commands have been successfully implemented!**
 
-The Mentra CLI is now feature-complete for v1.0 with:
+The Veiller CLI is now feature-complete for v1.0 with:
 
 - ✅ 20 commands implemented
 - ✅ Full backend infrastructure

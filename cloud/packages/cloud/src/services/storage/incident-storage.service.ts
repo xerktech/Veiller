@@ -49,7 +49,7 @@ class IncidentStorageService {
   private locks: Map<string, Promise<void>> = new Map();
 
   constructor() {
-    this.bucketName = process.env.R2_INCIDENTS_BUCKET || "mentra-incidents";
+    this.bucketName = process.env.R2_INCIDENTS_BUCKET || "veiller-incidents";
   }
 
   /**

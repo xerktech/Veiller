@@ -1,4 +1,4 @@
-import type {StreamStatusEvent} from "@mentra/bluetooth-sdk/internal"
+import type {StreamStatusEvent} from "@veiller/bluetooth-sdk/internal"
 
 /** Fields forwarded to cloud / miniapps after the first resolvedConfig ack. */
 export function slimStreamStatusEvent(

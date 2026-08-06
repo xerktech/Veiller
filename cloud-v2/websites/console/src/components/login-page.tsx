@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import mentraLogo from "@/assets/mentra-logo.svg";
+import veillerLogo from "@/assets/mentra-logo.svg";
 
 type LoginStep = "email" | "code";
 type LoginStatus = "idle" | "loading" | "error";
@@ -48,11 +48,11 @@ export function LoginPage() {
         <div className="relative w-full max-w-[420px] overflow-hidden rounded-[24px] p-9 shadow-[0_16px_40px_-8px_rgba(20,20,26,0.07),0_0_0_1px_rgba(20,20,26,0.07),inset_0_1px_0_rgba(255,255,255,0.9)]">
           <div className="absolute inset-0 rounded-[24px] bg-[rgba(255,255,255,0.8)] backdrop-blur-[14px]" />
           <div className="relative">
-            <img src={mentraLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
+            <img src={veillerLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
 
             <div className="h-[22px]" />
             <h1 className="text-center font-display text-[22px] font-bold leading-[26px] tracking-[-0.44px] text-[#14141a]">
-              Sign into Mentra Developer Console
+              Sign into Veiller Developer Console
             </h1>
 
             <div className="h-2" />
@@ -157,7 +157,7 @@ export function LoginPage() {
 
             <div className="h-6" />
             <div className="font-body text-[11.5px] leading-4 text-[#a6a6ac]">
-              <p>By continuing you agree to the MentraOS developer terms.</p>
+              <p>By continuing you agree to the Veiller developer terms.</p>
               <p>No fees to build or publish.</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export function LoginPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 whitespace-normal text-center font-body text-[12.5px] leading-none text-[#9a9aa2] sm:whitespace-nowrap">
           <span>Signing in from the CLI?</span>
-          <span className="font-mono text-xs font-medium text-[#5b5b63]">mentra login</span>
+          <span className="font-mono text-xs font-medium text-[#5b5b63]">veiller login</span>
           <span>opens this page automatically.</span>
         </div>
       </section>

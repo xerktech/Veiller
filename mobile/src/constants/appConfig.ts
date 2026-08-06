@@ -5,7 +5,7 @@ const VARIANTS = {
     playStoreBetaUrl: "https://play.google.com/apps/testing/com.xerktech.veiller",
     appStoreUrl: "https://apps.apple.com/app/id6747363193",
     appStoreReviewUrl: "https://apps.apple.com/app/id6747363193?action=write-review",
-    cdnBaseUrl: "https://mentra-videos-cdn.mentraglass.com",
+    cdnBaseUrl: "https://veiller-videos-cdn.mentraglass.com",
   },
   china: {
     packageName: "com.xerktech.veiller.cn",

@@ -6,7 +6,7 @@
 #
 # To add a new runner to the rack:
 #   ssh user@new-runner '
-#     cd /tmp && git clone <some checkout of MentraOS> && cd MentraOS/mobile
+#     cd /tmp && git clone <some checkout of Veiller> && cd Veiller/mobile
 #     bundle install
 #     MATCH_PASSWORD=<from 1password> bundle exec fastlane match appstore --readonly
 #   '
@@ -30,5 +30,5 @@ type("appstore")
 
 # Bundle ids that match should manage. Keep this list in sync with
 # app.config.ts. Variant ids (com.xerktech.veiller.<name>) are created on
-# demand via MENTRAOS_BUILD_NAME and don't need pre-provisioned profiles.
+# demand via VEILLER_BUILD_NAME and don't need pre-provisioned profiles.
 app_identifier(["com.xerktech.veiller"])

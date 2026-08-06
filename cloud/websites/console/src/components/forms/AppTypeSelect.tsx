@@ -1,4 +1,4 @@
-import { Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@mentra/shared";
+import { Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@veiller/shared";
 import AppTypeTooltip from "./AppTypeTooltip";
 
 enum AppType {

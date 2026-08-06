@@ -48,7 +48,7 @@ describe("saved-address actions", () => {
   test("resolves and saves one address slot", async () => {
     const resolved: PlaceDetails = {
       placeId: "resolved-id",
-      name: "Mentra HQ",
+      name: "Veiller HQ",
       address: "369 Hayes St, San Francisco, CA",
       lat: 37.7764,
       lng: -122.4222,
@@ -64,7 +64,7 @@ describe("saved-address actions", () => {
     ).resolves.toEqual({
       address: {
         type: "work",
-        name: "Mentra HQ",
+        name: "Veiller HQ",
         address: "369 Hayes St, San Francisco, CA",
         latitude: 37.7764,
         longitude: -122.4222,

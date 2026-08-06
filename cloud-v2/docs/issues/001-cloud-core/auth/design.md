@@ -14,7 +14,7 @@ for the from-zero primer (JWTs, asymmetric signing, JWKS, audiences, exchange).
 ## End to end, in one pass
 
 1. A user signs in. For an OEM user the OEM's backend mints a short-lived subject
-   JWT; for a Mentra user the subject is the existing core token (transition) or a
+   JWT; for a Veiller user the subject is the existing core token (transition) or a
    Supabase session (end state).
 2. In Core-backed mode, the **cloud-client** exchanges the subject token at
    `POST /api/client/auth/exchange` for a **Core access token** (+ refresh), and
@@ -32,8 +32,8 @@ for the from-zero primer (JWTs, asymmetric signing, JWKS, audiences, exchange).
    JSContext (which owns the session); the UI gets it over RPC if it needs it. The
    Core/runtime tokens never reach the miniapp.
 6. The bundle calls its developer backend with the miniapp token. The backend
-   verifies it against Mentra's **JWKS**, checks `aud`, and applies its `tenantId`
-   trust policy. No per-request call to Mentra.
+   verifies it against Veiller's **JWKS**, checks `aud`, and applies its `tenantId`
+   trust policy. No per-request call to Veiller.
 
 Identity throughout is `mentraUserId` (the `users._id`) + `tenantId`.
 
@@ -47,23 +47,23 @@ DB-generated `_id` rather than minting a separate id. The same human reached via
 two OEMs is two different `mentraUserId`s. The mapping and the `users` schema are
 specified in [`oem-auth.md`](./oem-auth.md#collection-users).
 
-### Mentra's own users (OEM zero)
+### Veiller's own users (OEM zero)
 
-"Mentra's own users" spans the consumer app, the Dev Console website, and the
+"Veiller's own users" spans the consumer app, the Dev Console website, and the
 App/MiniApp Store website. Today all three use **one** identity system: Supabase
 sign-in plus a core-token exchange (not three separate systems). v2 keeps them on a
 single identity system and unifies them on the Core-backed auth path.
 
-Architecturally Mentra's app is just the first consumer of the Mentra Engine (Mentra
-is "OEM zero"), so Mentra issues its users' tokens as its own **reserved OEM**
-(`tenantId = "mentra"`): a Mentra-side issuer presents the user's Supabase identity to
-the same exchange. For Mentra-direct users the `tenantUserId` is the Supabase `sub`
+Architecturally Veiller's app is just the first consumer of the Veiller Engine (Veiller
+is "OEM zero"), so Veiller issues its users' tokens as its own **reserved OEM**
+(`tenantId = "veiller"`): a Veiller-side issuer presents the user's Supabase identity to
+the same exchange. For Veiller-direct users the `tenantUserId` is the Supabase `sub`
 (stable, unlike email). One issuance and revocation path for every surface.
 
 ### OEM users
 
 An OEM owns its users' identity. The OEM mints a subject JWT, exchanges it via RFC
-8693 for Core-backed tokens in hosted deployments; Mentra maps
+8693 for Core-backed tokens in hosted deployments; Veiller maps
 `(tenantId, tenantUserId)` to a `mentraUserId`, created on first sight. The
 dev-backend handoff carries
 `mentraUserId` + `tenantId` (the miniapp auto-auth flow below). Full mechanics in
@@ -80,7 +80,7 @@ Context for the migration bridge below. In v1:
   symmetric `AUGMENTOS_AUTH_JWT_SECRET` (HS256), claims
   `{ sub, email, organizations, defaultOrg }`.
 - **`userId` is the email**; everything downstream keys on it.
-- The same flow backs every Mentra-direct surface: the Store exchanges at
+- The same flow backs every Veiller-direct surface: the Store exchanges at
   `POST /api/store/auth/exchange-token`, the Dev Console verifies the same core
   token in `console.middleware.ts`, both keyed on email. One identity system across
   consumer app, Dev Console, and Store, with a shared secret only the cloud can
@@ -96,11 +96,11 @@ credentials from the v1 core token:
 
 1. The client logs in exactly as today (Supabase to core token at v1) and uses the
    core token for the v1 path, unchanged.
-2. Cloud Core v2 exposes the RFC 8693 exchange where, for the reserved `mentra`
-   OEM, the **subject token is the core token**. Mentra is "OEM zero," and its
+2. Cloud Core v2 exposes the RFC 8693 exchange where, for the reserved `veiller`
+   OEM, the **subject token is the core token**. Veiller is "OEM zero," and its
    "OEM-signed JWT" is the core token it already issues.
 3. Cloud Core/Auth verifies the core token (it knows the shared secret), maps
-   `(tenantId = "mentra", tenantUserId = the Supabase sub carried in the core token)` to
+   `(tenantId = "veiller", tenantUserId = the Supabase sub carried in the core token)` to
    a `mentraUserId`, and returns the v2 Core credential. The same broker can mint
    a normalized `cloud-runtime` token for hosted Runtime.
 4. The client now holds the v1 core token for legacy APIs plus v2 credentials:
@@ -108,31 +108,31 @@ credentials from the v1 core token:
 
 Two details:
 
-- **Mentra-as-OEM verifies with the shared secret, not a registered public key.**
-  Every other OEM registers an asymmetric key; Mentra's own subject token (the core
-  token) is HS256, so the exchange has one internal issuer (`mentra`) that verifies
+- **Veiller-as-OEM verifies with the shared secret, not a registered public key.**
+  Every other OEM registers an asymmetric key; Veiller's own subject token (the core
+  token) is HS256, so the exchange has one internal issuer (`veiller`) that verifies
   against the shared `AUGMENTOS_AUTH_JWT_SECRET`.
-- **`tenantUserId` for Mentra-direct is the Supabase `sub`** (stable), which the core
+- **`tenantUserId` for Veiller-direct is the Supabase `sub`** (stable), which the core
   token already carries as its own `sub`.
 
 End state: once v2 is primary, swap the subject token from "core token" to a
-cleaner Mentra-direct issuer credential, same broker/exchange concept, and retire
+cleaner Veiller-direct issuer credential, same broker/exchange concept, and retire
 the bridge. The v1 webview auth path (temp token, `frontendToken`, the API-key
 hash) is replaced by the asymmetric JWKS flow (see auto-auth below); it stays until
 v1 is retired.
 
 **Tracked separately:** v1 keyed users (and dev backends) on email. Migrating
-existing email-based Mentra users to `mentraUserId` is its own spec.
+existing email-based Veiller users to `mentraUserId` is its own spec.
 
 ## Miniapp auto-auth
 
-How Mentra injects auth into a local miniapp so it can call the developer's own
+How Veiller injects auth into a local miniapp so it can call the developer's own
 backend with no login. This is the "miniapp to developer-server auth" the OEM-auth
 work deferred; the identity it carries is the model above.
 
 It inherits the OEM-auth trust decisions and does not re-open them: the dev-backend
 handoff identity is `mentraUserId` + `tenantId`; the dev configures a trust policy on
-`tenantId` (`trust-all` default, `mentra-direct-only`, or `whitelist`); a per-app
+`tenantId` (`trust-all` default, `veiller-direct-only`, or `whitelist`); a per-app
 pseudonymous `sub = H(mentraUserId, packageName)` is a future privacy opt-in. See
 [`oem-auth.md`](./oem-auth.md#miniapp-identity-handoff).
 
@@ -140,19 +140,19 @@ pseudonymous `sub = H(mentraUserId, packageName)` is a future privacy opt-in. Se
 
 Context. The v1 handshake injects auth into a remotely-served miniapp webview so it
 is authenticated against the developer's backend with no login. Two paths produce
-the same `useMentraAuth() -> { userId, frontendToken }`:
+the same `useVeillerAuth() -> { userId, frontendToken }`:
 
 - **Path A (mobile, automatic).** The phone app appends two tokens to the webview
   URL: a one-time `aos_temp_token` (~60s, tied to user+packageName) and an RS256
   `aos_signed_user_token` (`sub` + `frontendToken`, verifiable client-side with
-  Mentra's hardcoded public key), plus a `cloudApiUrl` + HMAC checksum.
-- **Path B (browser).** No tokens in URL; "Sign in with Mentra" ->
+  Veiller's hardcoded public key), plus a `cloudApiUrl` + HMAC checksum.
+- **Path B (browser).** No tokens in URL; "Sign in with Veiller" ->
   `account.mentra.glass` login -> redirect back with the same tokens.
 
 The developer's SDK backend exchanges the temp token (authenticated by the app's
 **API key**) for `{ userId }`, and derives a
 `frontendToken = userId:sha256(userId + sha256(apiKey))`. Trust anchors: a per-app
-API key (symmetric) and a hardcoded Mentra public key; `userId` is the email.
+API key (symmetric) and a hardcoded Veiller public key; `userId` is the email.
 
 ### v2 (local miniapps)
 
@@ -164,18 +164,18 @@ verifiers can check with a JWKS). The mechanism:
 1. The miniapp declares it has a backend (in `miniapp.json`), with the
    audience/key id it expects.
 2. At launch, the on-device runtime (holding the user's Core credential) obtains a
-   short-lived **miniapp-scoped token**: an Ed25519 Mentra-signed JWT with
+   short-lived **miniapp-scoped token**: an Ed25519 Veiller-signed JWT with
    `sub = mentraUserId`, `tenantId`, `aud = <packageName>`, short expiry. Minted by
    `POST /api/client/auth/miniapp-token` (see [`spec.md`](./spec.md)). Minting is
    server-side so it can be revoked and audited.
 3. The runtime delivers the token to the miniapp's background JSContext (which owns
-   the session), not through a URL parameter; `useMentraAuth()` reads it from the
+   the session), not through a URL parameter; `useVeillerAuth()` reads it from the
    bridge. See "On-device injection" below.
 4. The webview calls the developer's backend with
    `Authorization: Bearer <miniapp-scoped-token>`.
-5. The developer's backend verifies the token against Mentra's **JWKS**, checks
+5. The developer's backend verifies the token against Veiller's **JWKS**, checks
    `aud == its packageName`, and applies its trust policy on `tenantId`. No
-   per-request call to Mentra, no symmetric `frontendToken`, no API-key hash.
+   per-request call to Veiller, no symmetric `frontendToken`, no API-key hash.
 6. The runtime refreshes and re-injects before expiry.
 
 What v2 gains over v1: standard public-key verification (JWKS) with key rotation that
@@ -183,7 +183,7 @@ needs no SDK reship; audience pinning, so a token for miniapp A can't be replaye
 against miniapp B's backend; and `mentraUserId` instead of email. Miniapps
 with **no backend** need none of this; the local SDK already hands them
 `mentraUserId` on-device. The browser path (a webview outside the app, or a
-companion web app) still needs a "Sign in with Mentra" OAuth flow that ends in the
+companion web app) still needs a "Sign in with Veiller" OAuth flow that ends in the
 same miniapp-scoped token (v1's Path B carried forward, issuing the v2 token).
 
 ### On-device injection
@@ -199,18 +199,18 @@ the scoped token from `cloud.auth.getMiniappToken(packageName)` and delivers it.
   the background.
 - **Delivery.** The SDK's `session.connect()` handshake (in the background) returns
   `mentraUserId` and the initial miniapp token alongside the session info. The
-  background's `useMentraAuth()` exposes `{ mentraUserId, token }` plus the
+  background's `useVeillerAuth()` exposes `{ mentraUserId, token }` plus the
   authed-fetch helper. The UI, if it needs the identity or token, gets it from the
   background over the RPC bridge. On the web fallback (a standalone web page with no
-  background context), the "Sign in with Mentra" OAuth flow ends with the same token,
-  so `useMentraAuth()` is identical either way.
+  background context), the "Sign in with Veiller" OAuth flow ends with the same token,
+  so `useVeillerAuth()` is identical either way.
 - **Refresh.** The Runtime re-mints before expiry (via `getMiniappToken`, which
   caches and refreshes per packageName) and pushes the new token to the background
   through a dedicated auth-update message; the SDK swaps it in transparently.
 
 ```ts
 // developer's miniapp (web or headless), via the SDK
-const { mentraUserId, token } = useMentraAuth()
+const { mentraUserId, token } = useVeillerAuth()
 await fetch("https://api.theirapp.com/...", {
   headers: { Authorization: `Bearer ${token}` },
 })
@@ -221,8 +221,8 @@ await fetch("https://api.theirapp.com/...", {
 ### 1. Cloud Core (`packages/core`)
 
 - **Exchange** `POST /api/client/auth/exchange` (RFC 8693). Add the reserved
-  internal **`mentra` OEM** issuer: route on `subject_token_type` and verify the
-  Mentra subject tokens with the shared secrets (`AUGMENTOS_AUTH_JWT_SECRET` for
+  internal **`veiller` OEM** issuer: route on `subject_token_type` and verify the
+  Veiller subject tokens with the shared secrets (`AUGMENTOS_AUTH_JWT_SECRET` for
   the core token, `SUPABASE_JWT_SECRET` for a Supabase session), versus the
   OEM-JWT path which verifies against the OEM's registered key. Map
   `(tenantId, tenantUserId)` to the user record.
@@ -235,7 +235,7 @@ await fetch("https://api.theirapp.com/...", {
 - **`user.service.ts`:** `mentraUserId` is the `users._id` (drop the
   `mu_${ulid()}` mint and the separate `mentraUserId` field/index).
 
-### 2. Cloud-client auth module (`@mentra/cloud-client`, `cloud.auth`)
+### 2. Cloud-client auth module (`@veiller/cloud-client`, `cloud.auth`)
 
 - Construct with a subject token (or a `getSubjectToken()` callback). On first use
   call `/exchange`; own refresh via `/refresh`.
@@ -257,28 +257,28 @@ await fetch("https://api.theirapp.com/...", {
 
 ### 4. Developer SDK and backend verifier
 
-- The frontend SDK (`@mentra/react` `useMentraAuth()`, and the local SDK in the
+- The frontend SDK (`@veiller/react` `useVeillerAuth()`, and the local SDK in the
   background JSContext) reads `{ mentraUserId, token }` from the bridge on device, or
-  from the "Sign in with Mentra" OAuth redirect on the web.
-- The backend verifier (replacing the v1 `createMentraAuthRoutes` temp-token
+  from the "Sign in with Veiller" OAuth redirect on the web.
+- The backend verifier (replacing the v1 `createVeillerAuthRoutes` temp-token
   exchange): fetch the JWKS, verify the signature and `aud == packageName`, apply
-  the `tenantId` trust policy. No per-request call to Mentra, no API-key hash.
+  the `tenantId` trust policy. No per-request call to Veiller, no API-key hash.
 
 ## Implementation order
 
-1. Cloud Core: the `_id` change, the exchange (Mentra-as-OEM), the mint endpoint,
+1. Cloud Core: the `_id` change, the exchange (Veiller-as-OEM), the mint endpoint,
    JWKS, the two signing keys.
 2. Cloud-client `auth` module (exchange, refresh, `getMiniappToken`).
 3. On-device injection + the runtime transport wiring.
-4. Developer SDK verifier + `useMentraAuth`.
+4. Developer SDK verifier + `useVeillerAuth`.
 
 ## Open
 
-- **API key role.** Keep API keys strictly for dev-backend-to-Mentra
+- **API key role.** Keep API keys strictly for dev-backend-to-Veiller
   server-to-server calls, or retire them entirely? They are already out of the
   per-user verification path; this is only about whether any role remains.
 - **Injection details.** The precise auth-update message format on each bridge (the
-  WebView channel and the background JSContext bridge), and whether `useMentraAuth()`
+  WebView channel and the background JSContext bridge), and whether `useVeillerAuth()`
   and the local SDK share one implementation. Finalized during implementation.
 
 ## References

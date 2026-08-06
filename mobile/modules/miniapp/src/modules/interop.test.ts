@@ -90,14 +90,14 @@ describe("ActionsModule (session.actions)", () => {
     const {session, oneShots} = mockSession()
     const actions = new ActionsModule(session)
     actions.handle("add_todo", async (params, ctx) => ({added: params.text, by: ctx.callerPackageName}))
-    actions._deliver("call-1", "add_todo", {text: "milk"}, {callerPackageName: "com.mentra.ai"})
+    actions._deliver("call-1", "add_todo", {text: "milk"}, {callerPackageName: "com.veiller.ai"})
     await tick()
     expect(oneShots).toEqual([
       {
         type: MiniappRequestType.ACTION_RESULT,
         callId: "call-1",
         ok: true,
-        result: {added: "milk", by: "com.mentra.ai"},
+        result: {added: "milk", by: "com.veiller.ai"},
       },
     ])
   })
@@ -105,7 +105,7 @@ describe("ActionsModule (session.actions)", () => {
   test("_deliver before handle buffers, then dispatches once the handler registers", async () => {
     const {session, oneShots} = mockSession()
     const actions = new ActionsModule(session)
-    actions._deliver("call-2", "later", {}, {callerPackageName: "com.mentra.ai"})
+    actions._deliver("call-2", "later", {}, {callerPackageName: "com.veiller.ai"})
     await tick()
     expect(oneShots).toEqual([]) // buffered — no reply yet
     actions.handle("later", () => "done")
@@ -126,7 +126,7 @@ describe("ActionsModule (session.actions)", () => {
     actions.handle("boom", () => {
       throw new Error("nope")
     })
-    actions._deliver("call-3", "boom", {}, {callerPackageName: "com.mentra.ai"})
+    actions._deliver("call-3", "boom", {}, {callerPackageName: "com.veiller.ai"})
     await tick()
     expect(oneShots[0]).toMatchObject({
       type: MiniappRequestType.ACTION_RESULT,

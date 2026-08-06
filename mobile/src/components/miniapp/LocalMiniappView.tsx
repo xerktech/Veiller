@@ -4,12 +4,12 @@ import {WebView, type WebViewMessageEvent} from "react-native-webview"
 
 import {Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {getMentraJS} from "@/services/mentraJsBootstrap"
+import {getVeillerJS} from "@/services/veillerJsBootstrap"
 import {useStressTestStore} from "@/stores/stressTest"
 import MiniappSplash from "@/components/miniapp/MiniappSplash"
-import {BgTimer, engine} from "@mentra/engine"
-import {buildMentraUiShim, buildMiniappGlobalsScript, miniappLauncher} from "@mentra/engine/internal"
-import {devServerBridge} from "@mentra/engine/devtools"
+import {BgTimer, engine} from "@veiller/engine"
+import {buildVeillerUiShim, buildMiniappGlobalsScript, miniappLauncher} from "@veiller/engine/internal"
+import {devServerBridge} from "@veiller/engine/devtools"
 import {useNavigationStore} from "@/stores/navigation"
 import CapsuleMenu from "@/effects/CapsuleMenu"
 import {useRegisterCapsule} from "@/stores/capsule"
@@ -21,7 +21,7 @@ import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
  * Renders the miniapp's WebView and owns its lifecycle: dev-snapshot install,
  * JSContext spawn (idempotent), WebView mount + UI-router binding, loading
  * affordance, and dev hot-reload. The always-on JSContext lives in
- * MentraJSRouter and survives this component unmounting — only the WebView is
+ * VeillerJSRouter and survives this component unmounting — only the WebView is
  * torn down (see the launch effect's cleanup, which unbinds the WebView).
  *
  * This was previously the body of the `/applet/local` route; it's now a
@@ -87,7 +87,7 @@ function LocalMiniappView({
   //
   // The `ready` handshake has exactly one source of truth: `connected`.
   // onLoadEnd only means the WebView painted — not that the miniapp UI JS
-  // mounted and called mentra.ready(). After each load we arm a timer; if no
+  // mounted and called veiller.ready(). After each load we arm a timer; if no
   // `ready` envelope arrives within READY_TIMEOUT_MS we reload, up to
   // MAX_LOAD_ATTEMPTS total, then give up with an error.
   //
@@ -127,7 +127,7 @@ function LocalMiniappView({
   const refreshUiBinding = useCallback(
     (reason: string, log = true, probeBackground = false) => {
       if (!packageName) return
-      const mj = getMentraJS()
+      const mj = getVeillerJS()
       if (!mj?.uiRouter.isBound(packageName)) return
       if (log) {
         console.log(`LocalMiniappView: refreshing UI bridge for ${packageName} (${reason})`)
@@ -282,13 +282,13 @@ function LocalMiniappView({
     return () => {
       ac.abort()
       clearReadyTimer()
-      getMentraJS()?.uiRouter.unbindWebView(packageName)
+      getVeillerJS()?.uiRouter.unbindWebView(packageName)
     }
   }, [packageName, version, devUrl, devPort, resetLoadState, clearReadyTimer, fail])
 
   // ----- WebView bindings ----------------------------------------------------
 
-  // Bind UI router on ref attach so mentra.send/on routes outbound messages
+  // Bind UI router on ref attach so veiller.send/on routes outbound messages
   // through `webViewRef.current.injectJavaScript(...)`. Unbinds on cleanup
   // (see the launch effect's return) so backgrounding fires UI_CLOSE on the
   // JSContext side and clears the inject hook.
@@ -296,7 +296,7 @@ function LocalMiniappView({
     (instance: WebView | null) => {
       webViewRef.current = instance
       if (!instance || !packageName) return
-      const mj = getMentraJS()
+      const mj = getVeillerJS()
       if (!mj) return
       mj.uiRouter.bindWebView(packageName, (js: string) => {
         try {
@@ -317,7 +317,7 @@ function LocalMiniappView({
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {
       if (!packageName) return
-      // Observe the miniapp's `ready` envelope (posted by mentra.ready() in
+      // Observe the miniapp's `ready` envelope (posted by veiller.ready() in
       // the WebView shim). This is the real "UI mounted and bridge wired up"
       // signal — gate the splash on it instead of onLoadEnd. We only observe;
       // the envelope still flows on to routeFromWebView below (which fires
@@ -327,7 +327,7 @@ function LocalMiniappView({
       }
       // Intercept `dev_log` envelopes from the WebView's console-tap shim
       // (miniappGlobals.ts wraps console.log/warn/error to post these).
-      // MentraUIRouter does NOT handle dev_log — it drops unknown
+      // VeillerUIRouter does NOT handle dev_log — it drops unknown
       // envelopes silently — so without this interception WebView console
       // output never reaches the dev sidecar or the RN console. Affects
       // both iOS and Android: the legacy single-bundle webview.tsx had
@@ -335,7 +335,7 @@ function LocalMiniappView({
       // LocalMiniappView (the two-layer path) lacked the equivalent
       // until now.
       if (forwardWebViewDevLog(packageName, event.nativeEvent.data)) return
-      const mj = getMentraJS()
+      const mj = getVeillerJS()
       mj?.uiRouter.routeFromWebView(packageName, event.nativeEvent.data)
     },
     [packageName, markConnected],
@@ -404,7 +404,7 @@ function LocalMiniappView({
   // UI is loaded straight off the dev server over HTTP (with cache-control:
   // no-store), a plain reload re-fetches the freshly built index.html + its
   // content-hashed chunks — no re-install needed. The JSContext respawn for
-  // src/background/ changes is handled by mentraJsBootstrap via
+  // src/background/ changes is handled by veillerJsBootstrap via
   // devServerBridge.onRespawnBackground.
   useEffect(() => {
     if (!packageName || !devUrl) return
@@ -456,7 +456,7 @@ function LocalMiniappView({
     webviewFillsStatusBar: true,
     colorScheme,
   })
-  const uiShim = buildMentraUiShim({packageName})
+  const uiShim = buildVeillerUiShim({packageName})
   const injectedJS = `${globalsScript}\n${uiShim}`
 
   // While the WebView is mounted but the miniapp hasn't sent `ready` yet, the
@@ -531,8 +531,8 @@ export default LocalMiniappView
 
 /**
  * True iff `raw` is the WebView shim's `{type:"ready"}` envelope, posted by
- * `mentra.ready()` (mentraUiShim.ts) once the miniapp UI has mounted and
- * wired up its `window.mentra` bridge. LocalMiniappView uses this as the
+ * `veiller.ready()` (veillerUiShim.ts) once the miniapp UI has mounted and
+ * wired up its `window.veiller` bridge. LocalMiniappView uses this as the
  * real "loaded" signal — onLoadEnd only means the WebView painted.
  */
 function isReadyEnvelope(raw: string): boolean {
@@ -548,14 +548,14 @@ function isReadyEnvelope(raw: string): boolean {
  * miniappGlobals.ts wraps `console.log/warn/error/info/debug` to post
  * `{payload:{type:"dev_log", level, args, ...}}` via
  * `window.ReactNativeWebView.postMessage`. Without this interception
- * `MentraUIRouter` would drop the envelope silently (it only knows
+ * `VeillerUIRouter` would drop the envelope silently (it only knows
  * `msg` / `cancel` shapes) and the dev sidecar would never receive UI
  * logs — that's the root cause of "WebView console output never reaches
  * the terminal on iOS" we hit while debugging long-press.
  *
  * Forwards to:
  *   1. `devServerBridge.forwardLog(packageName, level, args, ts, "ui")` —
- *      ships to the laptop's `mentra-miniapp dev` terminal. No-op when no
+ *      ships to the laptop's `veiller-miniapp dev` terminal. No-op when no
  *      sidecar is connected.
  *   2. The React Native console — surfaces the log in Metro / Xcode /
  *      adb logcat so installed-miniapp errors are still inspectable when

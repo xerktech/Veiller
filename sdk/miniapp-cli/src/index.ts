@@ -12,7 +12,7 @@ const subcommand = process.argv[2];
 const subcommandArg = process.argv[3];
 
 function printUsage(): void {
-  console.log('Usage: mentra-miniapp <command>\n');
+  console.log('Usage: veiller-miniapp <command>\n');
   console.log('Commands:');
   console.log('  dev                              Start dev server with hot reload and QR code');
   console.log('                                   Options: --qr-output <path>  write PNG QR to path');
@@ -68,7 +68,7 @@ switch (subcommand) {
     } else if (subcommandArg === 'remove') {
       await removePermissionCmd(process.argv[4]);
     } else {
-      console.error('Usage: mentra-miniapp permission <list|add|remove> [TYPE]');
+      console.error('Usage: veiller-miniapp permission <list|add|remove> [TYPE]');
       process.exit(1);
     }
     break;
@@ -80,7 +80,7 @@ switch (subcommand) {
     } else if (subcommandArg === 'remove') {
       await removeHardwareCmd(process.argv[4]);
     } else {
-      console.error('Usage: mentra-miniapp hardware <list|add|remove> [TYPE] [LEVEL]');
+      console.error('Usage: veiller-miniapp hardware <list|add|remove> [TYPE] [LEVEL]');
       process.exit(1);
     }
     break;
@@ -90,7 +90,7 @@ switch (subcommand) {
     } else if (subcommandArg === 'regenerate') {
       regenerateSchemaFile();
     } else {
-      console.error('Usage: mentra-miniapp schema <print|regenerate>');
+      console.error('Usage: veiller-miniapp schema <print|regenerate>');
       process.exit(1);
     }
     break;

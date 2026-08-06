@@ -22,14 +22,14 @@ Source: [mobile/modules/miniapp/src/modules/transcription.ts](../../mobile/modul
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()
 
 session.transcription.configure({
   languageHints: ["en", "ja"],
-  vocabulary: ["MentraOS", "HIPAA"],
+  vocabulary: ["Veiller", "HIPAA"],
   diarization: true,
 })
 
@@ -133,7 +133,7 @@ locally so future reconnect logic can re-send.
 interface TranscriptionConfig {
   /** ISO 639-1 language hints to improve detection accuracy (e.g. ["en", "ja"]). */
   languageHints?: string[]
-  /** Custom vocabulary / boosted terms (e.g. ["MentraOS", "HIPAA"]). */
+  /** Custom vocabulary / boosted terms (e.g. ["Veiller", "HIPAA"]). */
   vocabulary?: string[]
   /** Enable speaker diarisation. Defaults vary by provider. */
   diarization?: boolean

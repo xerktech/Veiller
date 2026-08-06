@@ -1,4 +1,4 @@
-import {MiniappErrorCode, type CalendarEvent} from "@mentra/miniapp"
+import {MiniappErrorCode, type CalendarEvent} from "@veiller/miniapp"
 
 const DEFAULT_LIMIT = 50
 const MAX_LIMIT = 100

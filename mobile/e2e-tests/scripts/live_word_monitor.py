@@ -43,7 +43,7 @@ DEFAULT_INCIDENT_CONFIG = {
         "alert_threshold_ms": 15000,
     },
     "app_not_foreground": {
-        "name": "MentraOS Not Foreground",
+        "name": "Veiller Not Foreground",
         "enabled": True,
         "incident_threshold_ms": 0,
         "alert_threshold_ms": 15000,
@@ -116,12 +116,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--alert-intent-action",
-        default="com.mentra.CAPTIONS_TESTER_INCIDENT",
+        default="com.veiller.CAPTIONS_TESTER_INCIDENT",
         help="Android broadcast action to fire when an alert is raised.",
     )
     parser.add_argument(
         "--alert-intent-component",
-        default="com.xerktech.veiller/com.mentra.crust.receivers.CaptionsTesterIncidentReceiver",
+        default="com.xerktech.veiller/com.veiller.crust.receivers.CaptionsTesterIncidentReceiver",
         help="Optional explicit Android broadcast component for alert dispatch.",
     )
     parser.add_argument(
@@ -136,7 +136,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-history", type=int, default=500, help="How many completed utterances and drop events to keep in memory")
     parser.add_argument(
         "--captions-package",
-        default="com.mentra.captions",
+        default="com.veiller.captions",
         help="Monitor SocketComms app_started/app_stopped logs for this captions package. Pass an empty string to disable this check.",
     )
     parser.add_argument(
@@ -1822,16 +1822,16 @@ class MonitorWorker:
                 device_id,
                 incident_type,
                 now_ms,
-                {**details, "reason": "mentraos_not_foreground"},
+                {**details, "reason": "veiller_not_foreground"},
             )
             if incident_id is not None:
                 active_incident = device_state.ongoing_incidents.get(incident_id)
                 if active_incident is not None:
-                    active_incident.update({**details, "reason": "mentraos_not_foreground"})
+                    active_incident.update({**details, "reason": "veiller_not_foreground"})
                 self.maybe_alert_and_dispatch(device_id, incident_id, now_ms)
             return
         if ongoing_incident is not None:
-            self.state.end_incident(device_id, ongoing_incident["incident_id"], now_ms, {**details, "reason": "mentraos_foreground_restored"})
+            self.state.end_incident(device_id, ongoing_incident["incident_id"], now_ms, {**details, "reason": "veiller_foreground_restored"})
 
     def handle_captions_app_lifecycle_line(self, device_id: str, line: str, now_ms: int) -> bool:
         monitored_package = (self.args.captions_package or "").strip()
@@ -2191,7 +2191,7 @@ class MonitorHandler(BaseHTTPRequestHandler):
             upstream_url,
             headers={
                 "Accept": self.headers.get("Accept", "*/*"),
-                "User-Agent": self.headers.get("User-Agent", "MentraMonitor/1.0"),
+                "User-Agent": self.headers.get("User-Agent", "VeillerMonitor/1.0"),
             },
         )
 

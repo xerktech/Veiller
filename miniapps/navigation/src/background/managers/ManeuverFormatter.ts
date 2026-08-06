@@ -11,7 +11,7 @@
  * NavigationManager (`user.navigation.format.headline(m)`).
  */
 
-import type {NavManeuver} from "@mentra/miniapp"
+import type {NavManeuver} from "@veiller/miniapp"
 
 import type {UnitSystem} from "../../shared/types"
 import {formatDistance, formatDuration} from "../lib/formatDistance"

@@ -1,11 +1,11 @@
 ---
 title: 'API Reference'
-description: 'MentraOS Cloud API endpoints and WebSocket connections'
+description: 'Veiller Cloud API endpoints and WebSocket connections'
 ---
 
 ## Overview
 
-MentraOS Cloud provides both WebSocket and REST APIs:
+Veiller Cloud provides both WebSocket and REST APIs:
 
 <CardGroup cols={2}>
   <Card title="WebSocket APIs" icon="plug">
@@ -42,7 +42,7 @@ http://localhost:8002 # REST API
 WebSocket connections authenticate using JWT tokens in the Authorization header:
 
 ```typescript
-const ws = new WebSocket('wss://cloud.mentraos.com/glasses-ws', {
+const ws = new WebSocket('wss://cloud.veiller.com/glasses-ws', {
   headers: {
     'Authorization': `Bearer ${jwtToken}`
   }
@@ -54,7 +54,7 @@ const ws = new WebSocket('wss://cloud.mentraos.com/glasses-ws', {
 REST endpoints use Bearer token authentication:
 
 ```bash
-curl -X GET https://api.mentraos.com/user/profile \
+curl -X GET https://api.veiller.com/user/profile \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -156,15 +156,15 @@ All WebSocket messages are JSON with a `type` field:
 
 ## SDK Integration
 
-The MentraOS SDK handles all API communication for you:
+The Veiller SDK handles all API communication for you:
 
 ```typescript
-import { AppServer } from '@mentraos/sdk';
+import { AppServer } from '@veiller/sdk';
 
 // SDK manages all API calls internally
 const server = new AppServer({
   packageName: 'com.example.app',
-  apiKey: process.env.MENTRAOS_API_KEY
+  apiKey: process.env.VEILLER_API_KEY
 });
 ```
 

@@ -7,7 +7,7 @@ import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
 import {ThemedStyle} from "@/theme"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 
 interface BatteryStatusProps {
   compact?: boolean

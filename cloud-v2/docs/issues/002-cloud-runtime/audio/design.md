@@ -152,7 +152,7 @@ Bun's `Worker` API; messages between main thread and worker via
 ### Type definitions
 
 ```ts
-import type { TranscriptionData, TranslationData, AudioSubscription } from "@mentra/sdk";
+import type { TranscriptionData, TranslationData, AudioSubscription } from "@veiller/sdk";
 
 // Codec config from session-setup (immutable for the session)
 type AudioCodecConfig =
@@ -495,7 +495,7 @@ subscription.
 1. Phone sends the **full new desired set** (not a delta) via a guarded
    REST write — `PUT /api/audio/subscriptions` with its `sessionId` and a
    monotonic `version`. (Locked wire contract; see [`wire.md`](./wire.md).
-   `@mentra/cloud-client` posts to this REST path — it is **not** a WS message.)
+   `@veiller/cloud-client` posts to this REST path — it is **not** a WS message.)
 2. The runtime applies the guarded write to the per-user subscription key,
    then publishes a control-stream nudge the user's worker reads:
    `{ kind: "user-subscriptions-changed", update: { userId, subscriptions } }`.

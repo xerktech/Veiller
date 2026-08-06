@@ -76,7 +76,7 @@ A developer builds a streaming mini app. Their expectation:
 
 ### Scenario 5: User Stops the App
 
-**What happens:** The user closes the mini app from the Mentra phone app.
+**What happens:** The user closes the mini app from the Veiller phone app.
 
 **Current behavior:** The app's stop webhook fires. Stream may or may not be stopped depending on whether the mini app handles `onStop` correctly.
 
@@ -164,7 +164,7 @@ Both stream types need the same lifecycle handling, but with different details:
 
 | Aspect | Direct Stream | Managed Stream |
 |--------|--------------|----------------|
-| Who receives the video | Developer's endpoint (RTMP/SRT URL) | MentraOS cloud relay |
+| Who receives the video | Developer's endpoint (RTMP/SRT URL) | Veiller cloud relay |
 | Viewer URLs | None | HLS, DASH, WebRTC |
 | Survives app blip? | Should: yes | Should: yes (relay keeps running) |
 | Survives app restart? | Should: adoptable | Should: adoptable (viewer URLs still valid) |

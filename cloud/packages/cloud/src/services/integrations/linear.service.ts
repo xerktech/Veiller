@@ -2,7 +2,7 @@
 // Linear integration for bug report ticket creation and deduplication
 
 import { LinearClient, Issue } from "@linear/sdk";
-import { LLMProvider } from "@mentra/utils";
+import { LLMProvider } from "@veiller/utils";
 import { logger as rootLogger } from "../logging/pino-logger";
 import type { IncidentLogs } from "../storage/incident-storage.service";
 

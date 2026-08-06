@@ -168,7 +168,7 @@ describe("parseLegacySessionId", () => {
     });
 
     test("5-letter TLD (.glass) is recognized", () => {
-      // Sanity: covers Mentra's own dogfood domain and equivalents like
+      // Sanity: covers Veiller's own dogfood domain and equivalents like
       // ".world", ".tech". The TLD regex permits 2–5 letters.
       expect(parseLegacySessionId("user@example.glass-some-app")).toEqual({
         userId: "user@example.glass",

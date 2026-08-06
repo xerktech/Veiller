@@ -1,7 +1,7 @@
 import CoreImage
 import UIKit
 
-/// Image processor for gallery photos synced from Mentra glasses.
+/// Image processor for gallery photos synced from Veiller glasses.
 /// Applies lens distortion correction and color correction using CoreImage.
 class ImageProcessor {
     private static let TAG = "ImageProcessor"

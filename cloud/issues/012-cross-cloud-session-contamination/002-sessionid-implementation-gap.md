@@ -14,7 +14,7 @@ The `sessionId` is supposed to uniquely identify a session, but the current impl
 sessionId: this.userSession.userId + "-" + packageName;
 ```
 
-**Result**: `"isaiah@mentra.glass-com.mentra.captions.beta"`
+**Result**: `"isaiah@mentra.glass-com.veiller.captions.beta"`
 
 This is the **same** for:
 
@@ -76,11 +76,11 @@ sessionId: crypto.randomUUID();
 
 // Option 2: Include cloud instance ID
 sessionId: `${userId}-${packageName}-${cloudInstanceId}`;
-// = "isaiah@mentra.glass-com.mentra.captions.beta-cloud-debug-12345"
+// = "isaiah@mentra.glass-com.veiller.captions.beta-cloud-debug-12345"
 
 // Option 3: Include timestamp/nonce
 sessionId: `${userId}-${packageName}-${Date.now()}`;
-// = "isaiah@mentra.glass-com.mentra.captions.beta-1702345678901"
+// = "isaiah@mentra.glass-com.veiller.captions.beta-1702345678901"
 ```
 
 ## Impact Analysis
@@ -236,7 +236,7 @@ The SDK already treats sessionId as an opaque string. As long as:
    - **Decision needed**: Store sessionId in user.runningApps or separate field?
 
 3. **Logging and debugging**
-   - Current: Easy to read `isaiah@mentra.glass-com.mentra.captions.beta`
+   - Current: Easy to read `isaiah@mentra.glass-com.veiller.captions.beta`
    - With UUID: Harder to trace `a1b2c3d4-5678-90ab-cdef-1234567890ab`
    - **Suggestion**: Include userId and packageName in log context, use UUID for uniqueness
 

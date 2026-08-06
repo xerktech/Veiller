@@ -1,7 +1,7 @@
 /// <reference types="bun-types" />
 import {describe, expect, test} from "bun:test"
 
-import {MiniappStreamType} from "@mentra/miniapp"
+import {MiniappStreamType} from "@veiller/miniapp"
 
 import {connectedSession, pushEvent} from "../helpers"
 

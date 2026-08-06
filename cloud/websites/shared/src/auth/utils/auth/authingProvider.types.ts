@@ -1,4 +1,4 @@
-export type MentraAuthUser = {
+export type VeillerAuthUser = {
   id: string
   email?: string
   name: string
@@ -8,7 +8,7 @@ export type MentraAuthUser = {
   provider?: string
 }
 
-export type MentraAuthStateChangeSubscriptionResponse = {
+export type VeillerAuthStateChangeSubscriptionResponse = {
   data: {
     subscription: any
   } | null
@@ -17,50 +17,50 @@ export type MentraAuthStateChangeSubscriptionResponse = {
   } | null
 }
 
-export type MentraAuthSession = {
+export type VeillerAuthSession = {
   token?: string
-  user?: MentraAuthUser
+  user?: VeillerAuthUser
 }
 
-export type MentraAuthSessionResponse = {
+export type VeillerAuthSessionResponse = {
   data: {
-    session: MentraAuthSession | null
+    session: VeillerAuthSession | null
   } | null
   error: {
     message: string
   } | null
 }
 
-export type MentraAuthUserResponse = {
+export type VeillerAuthUserResponse = {
   data: {
-    user: MentraAuthUser | null
+    user: VeillerAuthUser | null
   } | null
   error: {
     message: string
   } | null
 }
 
-export type MentraSignOutResponse = {
+export type VeillerSignOutResponse = {
   error: {
     message: string
   } | null
 }
 
-export type MentraUpdateUserPasswordResponse = {
+export type VeillerUpdateUserPasswordResponse = {
   data: {} | null
   error: {
     message: string
   } | null
 }
 
-export type MentraPasswordResetResponse = {
+export type VeillerPasswordResetResponse = {
   data: {} | null
   error: {
     message: string
   } | null
 }
 
-export type MentraOauthProviderResponse = {
+export type VeillerOauthProviderResponse = {
   data: {
     url?: string
   } | null
@@ -69,10 +69,10 @@ export type MentraOauthProviderResponse = {
   } | null
 }
 
-export type MentraSigninResponse = {
+export type VeillerSigninResponse = {
   data: {
-    session: MentraAuthSession | null
-    user: MentraAuthUser | null
+    session: VeillerAuthSession | null
+    user: VeillerAuthUser | null
   } | null
   error: {
     message: string

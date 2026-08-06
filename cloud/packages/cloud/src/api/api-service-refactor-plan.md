@@ -102,7 +102,7 @@ We currently serve multiple audiences (client/mobile, store/public, console/dev 
 ## Assumptions to confirm
 
 - Preinstalled apps should NOT be uninstallable.
-- Canonical tool/settings schema should match the `@mentra/sdk` types currently used.
+- Canonical tool/settings schema should match the `@veiller/sdk` types currently used.
 - Webhook signing approach: HMAC over raw JSON payload using apiKey as the secret (acceptable short‑term).
 - Audience boundaries:
   - client = end‑user actions (install/uninstall/start/stop)

@@ -12,7 +12,7 @@ describe("listProjectFiles — dist/ inclusion", () => {
   let root: string
 
   beforeEach(() => {
-    root = mkdtempSync(join(tmpdir(), "mentra-dev-test-"))
+    root = mkdtempSync(join(tmpdir(), "veiller-dev-test-"))
   })
 
   afterEach(() => {
@@ -97,7 +97,7 @@ describe("buildProjectZip — two-output bundle contract", () => {
   let root: string
 
   beforeEach(() => {
-    root = mkdtempSync(join(tmpdir(), "mentra-zip-test-"))
+    root = mkdtempSync(join(tmpdir(), "veiller-zip-test-"))
   })
 
   afterEach(() => {

@@ -19,10 +19,10 @@ const app = new Hono<AppEnv>();
  */
 app.use("*", async (c, next) => {
   const agentKey = c.req.header("X-Agent-Key");
-  const expectedAgentKey = process.env.MENTRA_AGENT_API_KEY;
+  const expectedAgentKey = process.env.VEILLER_AGENT_API_KEY;
 
   if (!expectedAgentKey) {
-    logger.error("MENTRA_AGENT_API_KEY not configured");
+    logger.error("VEILLER_AGENT_API_KEY not configured");
     return c.json({ error: "Agent API not configured" }, 500);
   }
 

@@ -1,7 +1,7 @@
 /**
  * ElevenLabsController — ConvAI mic → WebSocket + agent audio playback.
  *
- * Ports Mentra-Bluetooth-SDK-Starter-Kit/examples/react-native-elevenlabs-audio/App.tsx
+ * Ports Veiller-Bluetooth-SDK-Starter-Kit/examples/react-native-elevenlabs-audio/App.tsx
  * conversation logic into the always-on background JSContext:
  *   signed URL → WebSocket → session.mic.onAudioChunk as { user_audio_chunk }
  *   agent audio_event (PCM base64) → session.speaker.createStream
@@ -13,8 +13,8 @@
  * Do not run the session.mic tester and this conversation at the same time.
  */
 
-import {base64ToBytes} from "@mentra/miniapp/background"
-import type {BlobWriter, MiniappSession, UnsubscribeFn} from "@mentra/miniapp/background"
+import {base64ToBytes} from "@veiller/miniapp/background"
+import type {BlobWriter, MiniappSession, UnsubscribeFn} from "@veiller/miniapp/background"
 
 import type {Channels} from "../../shared/channels"
 import {getElevenLabsConfig} from "../../shared/elevenlabsConfig"

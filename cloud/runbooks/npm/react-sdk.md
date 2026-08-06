@@ -1,4 +1,4 @@
-# Publish `@mentra/react`
+# Publish `@veiller/react`
 
 Path: `cloud/packages/react-sdk`
 Current version line: `2.x.x`
@@ -8,7 +8,7 @@ been thoroughly tested on real apps.
 ## When to use which tag
 
 - **`latest`**: the change has been built, type-checked, and
-  smoke-tested in a real consumer app (Mentra-AI, the dev
+  smoke-tested in a real consumer app (Veiller-AI, the dev
   console, or a similar app). External developers default to
   this.
 - **`beta`**: the change compiles and passes whatever local tests
@@ -16,14 +16,14 @@ been thoroughly tested on real apps.
   `beta`, install in an internal app, verify, then promote to
   `latest`.
 
-Unlike `@mentra/sdk`, this package's API is stable across our
+Unlike `@veiller/sdk`, this package's API is stable across our
 local-SDK transition (it handles webview auth via tokens, which
 is independent of the miniapp programming model). Promoting to
 `latest` is the normal path.
 
 ## Prereqs
 
-1. You are a member of `@mentra` on npm. See [README.md](README.md) in this
+1. You are a member of `@veiller` on npm. See [README.md](README.md) in this
    folder.
 2. You are on the branch with your changes. Stable releases
    usually go from `main`; beta releases usually go from a
@@ -51,7 +51,7 @@ Install in a consumer app to verify:
 
 ```bash
 cd <consumer-app>
-bun add @mentra/react@beta     # or npm install @mentra/react@beta
+bun add @veiller/react@beta     # or npm install @veiller/react@beta
 # run the app, exercise the auth flow, verify nothing regressed
 ```
 
@@ -92,8 +92,8 @@ npm publish --tag latest
 ## Verify
 
 ```bash
-npm view @mentra/react versions --json | tail -5
-npm view @mentra/react dist-tags
+npm view @veiller/react versions --json | tail -5
+npm view @veiller/react dist-tags
 # Expect latest to point at the new version (or the old one if
 # this was a beta-only publish).
 ```
@@ -103,8 +103,8 @@ Smoke check from tmp:
 ```bash
 mkdir /tmp/react-smoke && cd /tmp/react-smoke
 npm init -y
-npm install react react-dom @mentra/react
-node -e "console.log(Object.keys(require('@mentra/react')))"
+npm install react react-dom @veiller/react
+node -e "console.log(Object.keys(require('@veiller/react')))"
 ```
 
 ## After publishing
@@ -120,21 +120,21 @@ If a published `latest` is broken:
 
 ```bash
 # Find the last known good version
-npm view @mentra/react versions --json | tail -10
+npm view @veiller/react versions --json | tail -10
 
 # Repoint latest at it
-npm dist-tag add @mentra/react@<last-good-version> latest
+npm dist-tag add @veiller/react@<last-good-version> latest
 
 # Deprecate the bad version
-npm deprecate @mentra/react@<bad-version> "Use <last-good-version>; <reason>."
+npm deprecate @veiller/react@<bad-version> "Use <last-good-version>; <reason>."
 ```
 
 Then publish a fix as a new patch version. Do not republish the
 deprecated version.
 
-## When changes affect both `@mentra/react` and `@mentra/sdk`
+## When changes affect both `@veiller/react` and `@veiller/sdk`
 
-`@mentra/react` does not depend on `@mentra/sdk` directly, but
+`@veiller/react` does not depend on `@veiller/sdk` directly, but
 some webview flows interact with both. If your change spans both
 packages, publish each one independently following its own
 runbook. Verify the combination in a consumer app before

@@ -68,7 +68,7 @@ Three layers, in increasing priority:
 Verify what a pod actually sees:
 
 ```bash
-porter env pull --app cloud-dev --merged | grep MENTRA_JWT
+porter env pull --app cloud-dev --merged | grep VEILLER_JWT
 # Shows the merged env, including env-group values
 ```
 

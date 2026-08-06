@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* Tailwind v4: make `dark:` variants follow the host-driven `.dark` class
-   (toggled by MentraProvider) instead of prefers-color-scheme. */
+   (toggled by VeillerProvider) instead of prefers-color-scheme. */
 @custom-variant dark (&:is(.dark *));
 
 /* CSS Variables (ported verbatim from the cloud webview) */

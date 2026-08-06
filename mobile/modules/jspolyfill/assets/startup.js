@@ -1,8 +1,8 @@
-// @generated MentraJS polyfill bundle — see mobile/modules/jspolyfill
+// @generated VeillerJS polyfill bundle — see mobile/modules/jspolyfill
 "use strict";
 (() => {
   // src/startup.ts
-  (function installMentraJSRuntime() {
+  (function installVeillerJSRuntime() {
     const g = globalThis;
     function installConsole() {
       const safeStringify = (args) => {
@@ -110,7 +110,7 @@
           callbacks.delete(token);
         }
       };
-      const installSetTimeout = g.setTimeout == null || g.__mentraOwnsSetTimeout;
+      const installSetTimeout = g.setTimeout == null || g.__veillerOwnsSetTimeout;
       if (installSetTimeout) {
         g.setTimeout = (fn, delayMs, ...rest) => {
           const token = nextToken++;
@@ -136,7 +136,7 @@
           } catch {
           }
         };
-        g.__mentraOwnsSetTimeout = true;
+        g.__veillerOwnsSetTimeout = true;
       }
       g.setInterval = (fn, delayMs, ...rest) => {
         const token = nextToken++;
@@ -186,7 +186,7 @@
     installTimers();
     function installAbortController() {
       if (typeof g.AbortController === "function") return;
-      class MentraAbortSignal {
+      class VeillerAbortSignal {
         constructor() {
           this.aborted = false;
           this.reason = void 0;
@@ -221,17 +221,17 @@
           this.listeners.clear();
         }
       }
-      class MentraAbortController {
+      class VeillerAbortController {
         constructor() {
-          this.signal = new MentraAbortSignal();
+          this.signal = new VeillerAbortSignal();
         }
         abort(reason) {
           this.signal.__fire(reason ?? new Error("aborted"));
         }
       }
       ;
-      MentraAbortSignal.any = (signals) => {
-        const out = new MentraAbortSignal();
+      VeillerAbortSignal.any = (signals) => {
+        const out = new VeillerAbortSignal();
         const onAbort = (s) => {
           if (!out.aborted) out.__fire(s.reason);
         };
@@ -244,8 +244,8 @@
         }
         return out;
       };
-      g.AbortController = MentraAbortController;
-      g.AbortSignal = MentraAbortSignal;
+      g.AbortController = VeillerAbortController;
+      g.AbortSignal = VeillerAbortSignal;
     }
     installAbortController();
     const pending = /* @__PURE__ */ new Map();
@@ -274,7 +274,7 @@
         return;
       }
       if (env.kind === "event" && typeof env.iface === "string") {
-        const listeners = g.__mentraEventListeners ?? /* @__PURE__ */ new Map();
+        const listeners = g.__veillerEventListeners ?? /* @__PURE__ */ new Map();
         const set = listeners.get(env.iface);
         if (set) {
           for (const l of set) {
@@ -297,7 +297,7 @@
         return;
       }
       if (env.kind === "ws-event") {
-        const wsHook = g.__mentraDeliverWebSocketEvent;
+        const wsHook = g.__veillerDeliverWebSocketEvent;
         const sid = env.sid;
         const wsType = env.wsType;
         if (typeof wsHook === "function" && typeof sid === "string" && typeof wsType === "string") {
@@ -306,7 +306,7 @@
         return;
       }
       if (env.kind === "bridge" && typeof env.raw === "string") {
-        const deliver = g.__mentraDeliverBridgeRaw;
+        const deliver = g.__veillerDeliverBridgeRaw;
         if (typeof deliver === "function") {
           deliver(env.raw);
         }
@@ -314,12 +314,12 @@
       }
       if (env.kind === "init" && typeof env.sessionId === "string") {
         ;
-        g.__mentraSessionId = env.sessionId;
-        const initCb = g.__mentraInitCallback;
+        g.__veillerSessionId = env.sessionId;
+        const initCb = g.__veillerInitCallback;
         if (initCb) initCb(env.sessionId);
       }
     };
-    g.__mentraSendOneShot = (iface, method, args) => {
+    g.__veillerSendOneShot = (iface, method, args) => {
       try {
         __dispatch(iface, method, JSON.stringify(args ?? []));
       } catch (e) {
@@ -334,7 +334,7 @@
         }
       }
     };
-    g.__mentraSendRequest = (iface, method, args) => {
+    g.__veillerSendRequest = (iface, method, args) => {
       return new g.Promise((resolve, reject) => {
         const reqId = `${nextReqId++}`;
         pending.set(reqId, { resolve, reject });
@@ -346,9 +346,9 @@
         }
       });
     };
-    g.__mentraEventListeners = /* @__PURE__ */ new Map();
-    g.__mentraSubscribe = (iface, cb) => {
-      const map = g.__mentraEventListeners;
+    g.__veillerEventListeners = /* @__PURE__ */ new Map();
+    g.__veillerSubscribe = (iface, cb) => {
+      const map = g.__veillerEventListeners;
       let set = map.get(iface);
       if (!set) {
         set = /* @__PURE__ */ new Set();
@@ -372,7 +372,7 @@
         return null;
       }
     };
-    g.__mentraDispatchSync = dispatchSyncOrNull;
+    g.__veillerDispatchSync = dispatchSyncOrNull;
     const localStorage = {
       getItem(key) {
         const v = dispatchSyncOrNull("localStorage", "getItem", [String(key)]);
@@ -424,7 +424,7 @@
     if (!cryptoNs.subtle) {
       const notImplemented = () => {
         throw new Error(
-          "crypto.subtle is not yet implemented in MentraJS \u2014 see agents/mentrajs-two-layer-miniapp-architecture.md (Polyfill strategy section). Use a pure-JS hash/encrypt library for now."
+          "crypto.subtle is not yet implemented in VeillerJS \u2014 see agents/veillerjs-two-layer-miniapp-architecture.md (Polyfill strategy section). Use a pure-JS hash/encrypt library for now."
         );
       };
       cryptoNs.subtle = new Proxy(
@@ -576,7 +576,7 @@
             }
           }
         }
-        const sendRequest = g.__mentraSendRequest;
+        const sendRequest = g.__veillerSendRequest;
         const result = await sendRequest("fetch", "request", [
           { url, method, headers, body: bodyString }
         ]);
@@ -658,12 +658,12 @@
       };
       var bytesToBase64 = bytesToBase642, base64ToBytes = base64ToBytes2, queueMicrotaskSafe = queueMicrotaskSafe2;
       const sockets = /* @__PURE__ */ new Map();
-      g.__mentraDeliverWebSocketEvent = (sid, type, payload) => {
+      g.__veillerDeliverWebSocketEvent = (sid, type, payload) => {
         const sock = sockets.get(sid);
         if (!sock) return;
         sock._deliver(type, payload ?? {});
       };
-      class MentraWebSocket {
+      class VeillerWebSocket {
         constructor(url, protocols) {
           this.CONNECTING = 0;
           this.OPEN = 1;
@@ -799,12 +799,12 @@
           }
         }
       }
-      MentraWebSocket.CONNECTING = 0;
-      MentraWebSocket.OPEN = 1;
-      MentraWebSocket.CLOSING = 2;
-      MentraWebSocket.CLOSED = 3;
+      VeillerWebSocket.CONNECTING = 0;
+      VeillerWebSocket.OPEN = 1;
+      VeillerWebSocket.CLOSING = 2;
+      VeillerWebSocket.CLOSED = 3;
       ;
-      g.WebSocket = MentraWebSocket;
+      g.WebSocket = VeillerWebSocket;
     }
     try {
       __dispatch("__runtime", "ready", JSON.stringify([]));

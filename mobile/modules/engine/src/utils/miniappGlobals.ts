@@ -1,5 +1,5 @@
 /**
- * miniappGlobals — shared builder for the window.MentraOS globals injected
+ * miniappGlobals — shared builder for the window.Veiller globals injected
  * into every miniapp WebView (both cloud and local).
  *
  * Authors should be able to use one API in their miniapp code regardless of
@@ -76,9 +76,9 @@ export interface BuildMiniappGlobalsOptions {
 
 /**
  * Returns the JS string to inject into a miniapp WebView before its content
- * loads. Sets window.MentraOS with the standard fields miniapps read:
+ * loads. Sets window.Veiller with the standard fields miniapps read:
  *
- *   window.MentraOS = {
+ *   window.Veiller = {
  *     platform, packageName?, capabilities, safeAreaInsets, capsuleMenu,
  *     miniappLocal?, miniappDeveloperMode?
  *   }
@@ -101,25 +101,25 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
 
   // CSS custom properties that mirror the capsule menu / safe-area data.
   // Miniapp CSS (or Tailwind arbitrary values) can read these without
-  // touching JS: e.g. `style="margin-top: var(--mentra-capsule-top)"`.
+  // touching JS: e.g. `style="margin-top: var(--veiller-capsule-top)"`.
   const capsule = globals.capsuleMenu as CapsuleMenuRect
   const insets = opts.safeAreaInsets
   const capsuleCenter = capsule.top + capsule.height / 2
   const cssVars: Record<string, string> = {
-    "--mentra-safe-top": `${insets.top}px`,
-    "--mentra-safe-bottom": `${insets.bottom}px`,
-    "--mentra-safe-left": `${insets.left}px`,
-    "--mentra-safe-right": `${insets.right}px`,
-    "--mentra-capsule-top": `${capsule.top}px`,
-    "--mentra-capsule-bottom": `${capsule.bottom}px`,
-    "--mentra-capsule-left": `${capsule.left}px`,
-    "--mentra-capsule-right": `${capsule.right}px`,
-    "--mentra-capsule-width": `${capsule.width}px`,
-    "--mentra-capsule-height": `${capsule.height}px`,
-    "--mentra-capsule-center-y": `${capsuleCenter}px`,
+    "--veiller-safe-top": `${insets.top}px`,
+    "--veiller-safe-bottom": `${insets.bottom}px`,
+    "--veiller-safe-left": `${insets.left}px`,
+    "--veiller-safe-right": `${insets.right}px`,
+    "--veiller-capsule-top": `${capsule.top}px`,
+    "--veiller-capsule-bottom": `${capsule.bottom}px`,
+    "--veiller-capsule-left": `${capsule.left}px`,
+    "--veiller-capsule-right": `${capsule.right}px`,
+    "--veiller-capsule-width": `${capsule.width}px`,
+    "--veiller-capsule-height": `${capsule.height}px`,
+    "--veiller-capsule-center-y": `${capsuleCenter}px`,
     // Right-side gutter to reserve so content doesn't slide under the
     // capsule: capsule width + 16px breathing room.
-    "--mentra-capsule-gutter": `${capsule.width + 16}px`,
+    "--veiller-capsule-gutter": `${capsule.width + 16}px`,
   }
   const cssVarsBlock = Object.entries(cssVars)
     .map(([k, v]) => `${k}: ${v};`)
@@ -128,7 +128,7 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
   // Console-tap shim: wrap console.log/warn/error/info/debug so each call
   // also forwards a `dev_log` envelope back to the phone via
   // ReactNativeWebView.postMessage. Dev mode forwards to the laptop's
-  // `mentra-miniapp dev` terminal; non-dev mode falls back to the React
+  // `veiller-miniapp dev` terminal; non-dev mode falls back to the React
   // Native log stream (Metro / Xcode console / adb logcat) so installed-
   // miniapp errors are still inspectable when there's no laptop sidecar.
   //
@@ -168,7 +168,7 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
                     type: "dev_log",
                     level: level,
                     args: args,
-                    packageName: (window.MentraOS && window.MentraOS.packageName) || null,
+                    packageName: (window.Veiller && window.Veiller.packageName) || null,
                     timestamp: Date.now()
                   }
                 }));
@@ -190,7 +190,7 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
                   type: "dev_log",
                   level: "error",
                   args: ["[window.error] " + (e.message || "unknown"), {filename: e.filename, lineno: e.lineno, colno: e.colno, stack: e.error && e.error.stack}],
-                  packageName: (window.MentraOS && window.MentraOS.packageName) || null,
+                  packageName: (window.Veiller && window.Veiller.packageName) || null,
                   timestamp: Date.now()
                 }
               }));
@@ -209,7 +209,7 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
                   type: "dev_log",
                   level: "error",
                   args: ["[unhandledrejection]", serialized],
-                  packageName: (window.MentraOS && window.MentraOS.packageName) || null,
+                  packageName: (window.Veiller && window.Veiller.packageName) || null,
                   timestamp: Date.now()
                 }
               }));
@@ -225,12 +225,12 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
   // double-tap-zoom via CSS. Re-applies on DOMContentLoaded in case the
   // miniapp re-writes <head> during boot.
   return `
-    window.MentraOS = ${JSON.stringify(globals)};
+    window.Veiller = ${JSON.stringify(globals)};
     window.receiveNativeMessage = window.receiveNativeMessage || function() {};
     (function() {
       try {
         var styleEl = document.createElement("style");
-        styleEl.setAttribute("data-mentra-injected", "1");
+        styleEl.setAttribute("data-veiller-injected", "1");
         styleEl.textContent =
           ":root { ${cssVarsBlock} }" +
           "html, body { touch-action: manipulation; -ms-content-zooming: none; }";

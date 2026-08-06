@@ -24,7 +24,7 @@ export interface IslandConfigValues {
   coreUrl?: string
   /** cloud-v2 runtime service base URL. */
   runtimeUrl?: string
-  /** OEM identifier (Mentra is OEM #0); reserved for OEM auth/telemetry. */
+  /** OEM identifier (Veiller is OEM #0); reserved for OEM auth/telemetry. */
   oemId?: string
   /**
    * LC3 frame size (bytes) the phone's mic encoder emits — announced to the

@@ -1,4 +1,4 @@
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 import {submitAutomaticReport} from "../facades/reports"
 import {

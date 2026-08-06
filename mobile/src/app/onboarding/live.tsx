@@ -1,4 +1,4 @@
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {useMemo} from "react"
 import {Platform} from "react-native"
 

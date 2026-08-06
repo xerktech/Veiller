@@ -214,7 +214,7 @@ Step 1 alone probably narrows the cause. Step 2 confirms.
 Re-capture the sample:
 
 ```bash
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   bun cloud/tools/bstack/bstack.ts sql "
 SELECT dt,
        JSONExtract(raw,'heapUsedMB','Nullable(Float64)') AS heap_mb,
@@ -235,7 +235,7 @@ LIMIT 20"
 Heap growth rate over time:
 
 ```bash
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   bun cloud/tools/bstack/bstack.ts sql "
 SELECT toStartOfInterval(dt, INTERVAL 15 MINUTE) AS bucket,
        round(avg(JSONExtract(raw,'heapUsedMB','Nullable(Float64)')), 0) AS heap_mb,
@@ -253,7 +253,7 @@ ORDER BY bucket"
 App cache refresh pattern:
 
 ```bash
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   bun cloud/tools/bstack/bstack.ts sql "
 SELECT dt,
        JSONExtract(raw,'count','Nullable(Int32)') AS app_count,

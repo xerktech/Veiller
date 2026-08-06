@@ -18,7 +18,7 @@ keep those boundaries crisp from the start.
 - Store immutable release bundle metadata and hashes in Cloud Core.
 - Route all bundle and media bytes through the Core storage service.
 - Keep release review/publish state on the release, not on the MiniApp.
-- Let Console2 and `@mentra/cli` share the same Core API.
+- Let Console2 and `@veiller/cli` share the same Core API.
 - Later, let mobile reconcile installed/preinstalled miniapps from a signed
   registry response.
 
@@ -27,7 +27,7 @@ keep those boundaries crisp from the start.
 - Do not rebuild the Store catalog UI in this issue.
 - Do not let developers publish directly into the preinstalled registry.
 - Do not duplicate S3/R2/local storage provider code inside miniapp-service.
-- Do not require the enterprise portal before Mentra-default preinstalled
+- Do not require the enterprise portal before Veiller-default preinstalled
   registry works.
 
 ## Core Concepts
@@ -55,8 +55,8 @@ because a MiniApp can have one release published while another release is in
 review or rejected.
 
 Package names must start with the developer org's package prefix. For the
-Mentra dev org this is currently `com.mentra`, so package names look like
-`com.mentra.local-captions` or `com.mentra.example`. Console2 renders the prefix
+Veiller dev org this is currently `com.veiller`, so package names look like
+`com.veiller.local-captions` or `com.veiller.example`. Console2 renders the prefix
 as non-editable text, and Core still enforces it for CLI/API callers.
 
 Developer orgs are created during Console2 onboarding. Each org claims one
@@ -67,7 +67,7 @@ verification state:
 packagePrefixStatus: "unverified" | "verified" | "rejected"
 ```
 
-Reserved prefixes such as `com.mentra` are policy-protected so a random
+Reserved prefixes such as `com.veiller` are policy-protected so a random
 developer cannot claim them. Verification is not the same as reservation:
 unverified prefixes are allowed for development, while public store review can
 later require proof of domain or brand ownership. Once an org has active
@@ -188,14 +188,14 @@ POST /api/console/apps/:packageName/releases/:releaseId/finalize
 ## CLI Contract
 
 ```txt
-mentra login
-mentra miniapps list
-mentra miniapps create com.mentra.myapp --name "My App"
-mentra releases list com.mentra.myapp
-mentra publish
+veiller login
+veiller miniapps list
+veiller miniapps create com.veiller.myapp --name "My App"
+veiller releases list com.veiller.myapp
+veiller publish
 ```
 
-`mentra publish` runs from a miniapp folder, reads `miniapp.json`, runs the
+`veiller publish` runs from a miniapp folder, reads `miniapp.json`, runs the
 project build/pack scripts, creates the MiniApp record if needed, uploads the
 release bundle zip to Core, then submits that release for admin review.
 
@@ -305,7 +305,7 @@ cloud-v2/websites/admin
 bun run dev:admin   # http://localhost:5174
 ```
 
-It signs in through the same Mentra/WorkOS login, reviews submitted release
+It signs in through the same Veiller/WorkOS login, reviews submitted release
 bundles, publishes accepted releases, and promotes selected release bundles to
 the active preinstall registry revision.
 

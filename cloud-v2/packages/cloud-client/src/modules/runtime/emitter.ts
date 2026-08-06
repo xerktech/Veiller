@@ -13,7 +13,7 @@ import type {
   TranscriptionData,
   TranslationData,
   ProtocolError,
-} from "@mentra/cloud-protocol";
+} from "@veiller/cloud-protocol";
 import type { RuntimeSnapshot } from "./status";
 
 /**

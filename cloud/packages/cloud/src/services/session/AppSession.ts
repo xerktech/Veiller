@@ -16,7 +16,7 @@
 import { Logger } from "pino";
 import { randomUUID } from "crypto";
 
-import { ExtendedStreamType, StreamType, isLanguageStream, parseLanguageStream } from "@mentra/sdk";
+import { ExtendedStreamType, StreamType, isLanguageStream, parseLanguageStream } from "@veiller/sdk";
 
 import { MemoryOwnerStat } from "../metrics/memory-census";
 import { estimateStringBytes, sumEstimatedBytes } from "../metrics/memory-estimate";

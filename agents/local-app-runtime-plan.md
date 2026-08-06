@@ -2,7 +2,7 @@
 
 ## Goal
 
-Enable third-party mini apps to run locally on the phone (in WebViews inside MentraOS, or external browsers as fallback). Eliminate the cloud hop for display, events, and hardware access. Developers build a static web bundle, ship it as a ZIP, the phone loads it into a WebView, and it talks directly to glasses through the phone.
+Enable third-party mini apps to run locally on the phone (in WebViews inside Veiller, or external browsers as fallback). Eliminate the cloud hop for display, events, and hardware access. Developers build a static web bundle, ship it as a ZIP, the phone loads it into a WebView, and it talks directly to glasses through the phone.
 
 This mirrors how offline captions works today — the phone consumes events locally and handles routing internally. The cloud has no knowledge of local miniapps.
 
@@ -14,11 +14,11 @@ Two parallel paradigms living side by side:
 ┌─ CLOUD APPS (existing) ────────────────────────────────────┐
 │                                                             │
 │   App Server                                                │
-│   (Node/Bun, uses @mentra/sdk)                              │
+│   (Node/Bun, uses @veiller/sdk)                              │
 │       |                                                     │
 │       | WebSocket                                           │
 │       v                                                     │
-│   MentraOS Cloud                                            │
+│   Veiller Cloud                                            │
 │       |                                                     │
 │       | WebSocket                                           │
 │       v                                                     │
@@ -28,8 +28,8 @@ Two parallel paradigms living side by side:
 
 ┌─ LOCAL MINIAPPS (new) ─────────────────────────────────────┐
 │                                                             │
-│   WebView in MentraOS   |   Safari/Chrome (fallback)        │
-│   (uses @mentra/miniapp)|   (uses @mentra/miniapp)          │
+│   WebView in Veiller   |   Safari/Chrome (fallback)        │
+│   (uses @veiller/miniapp)|   (uses @veiller/miniapp)          │
 │       |                 |       |                           │
 │       | postMessage     |       | ws://127.0.0.1:8765       │
 │       v                 |       v                           │
@@ -40,7 +40,7 @@ Two parallel paradigms living side by side:
 │         |                                                   │
 │         | (for STT/translation only)                        │
 │         v                                                   │
-│     MentraOS Cloud                                          │
+│     Veiller Cloud                                          │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -49,18 +49,18 @@ Two parallel paradigms living side by side:
 
 | Package                 | Runs in                                    | Purpose                                                                                                                                                                                           | Status                                                                                                                                                                                                                                            |
 | ----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@mentra/sdk`           | Node/Bun (server)                          | Cloud apps — AppServer, AppSession, layouts, events                                                                                                                                               | Runtime untouched. One additive type change in Phase 2.5: a new `GlassesToCloudMessageType.PHONE_SUBSCRIPTION_UPDATE` enum value and matching interface in `cloud/packages/sdk/src/types/`. No existing cloud app uses these, no behavior change. |
-| `@mentra/react`         | Browser (existing cloud webview frontends) | Published `@mentra/react` 2.1.2 exports `MentraAuthProvider` and `useMentraAuth` only.                                                                                                            | Published exports stay intact. The unpublished in-branch `useMentraBridge.ts` is deleted.                                                                                                                                                         |
-| `@mentra/miniapp`       | Browser / WebView                          | NEW. Local miniapp SDK with React hooks. Browser-native from day one. Defines its own wire protocol enum values in `src/protocol.ts` — no runtime dependency on `@mentra/sdk`.                    | Created by this plan.                                                                                                                                                                                                                             |
-| `create-mentra-miniapp` | Dev machine                                | NEW. Scaffolder CLI — generates a Bun Fullstack + React + `@mentra/miniapp` project from a template.                                                                                              | Created by this plan.                                                                                                                                                                                                                             |
-| `@mentra/miniapp-cli`   | Dev machine                                | NEW. Dev helper (`mentra-miniapp dev` wraps Bun Fullstack, detects LAN IP, prints QR) and packager (`mentra-miniapp pack` builds a distributable ZIP from `dist/` + `miniapp.json` + `icon.png`). | Created by this plan.                                                                                                                                                                                                                             |
+| `@veiller/sdk`           | Node/Bun (server)                          | Cloud apps — AppServer, AppSession, layouts, events                                                                                                                                               | Runtime untouched. One additive type change in Phase 2.5: a new `GlassesToCloudMessageType.PHONE_SUBSCRIPTION_UPDATE` enum value and matching interface in `cloud/packages/sdk/src/types/`. No existing cloud app uses these, no behavior change. |
+| `@veiller/react`         | Browser (existing cloud webview frontends) | Published `@veiller/react` 2.1.2 exports `VeillerAuthProvider` and `useVeillerAuth` only.                                                                                                            | Published exports stay intact. The unpublished in-branch `useVeillerBridge.ts` is deleted.                                                                                                                                                         |
+| `@veiller/miniapp`       | Browser / WebView                          | NEW. Local miniapp SDK with React hooks. Browser-native from day one. Defines its own wire protocol enum values in `src/protocol.ts` — no runtime dependency on `@veiller/sdk`.                    | Created by this plan.                                                                                                                                                                                                                             |
+| `create-veiller-miniapp` | Dev machine                                | NEW. Scaffolder CLI — generates a Bun Fullstack + React + `@veiller/miniapp` project from a template.                                                                                              | Created by this plan.                                                                                                                                                                                                                             |
+| `@veiller/miniapp-cli`   | Dev machine                                | NEW. Dev helper (`veiller-miniapp dev` wraps Bun Fullstack, detects LAN IP, prints QR) and packager (`veiller-miniapp pack` builds a distributable ZIP from `dist/` + `miniapp.json` + `icon.png`). | Created by this plan.                                                                                                                                                                                                                             |
 
 **Invariants:**
 
-- `@mentra/miniapp` is a new package. `@mentra/sdk` is not refactored. Runtime untouched; only additive type additions in `cloud/packages/sdk/src/types/` for the new phone-subscription wire message (Phase 2.5).
-- Wire protocol for `@mentra/miniapp` uses fresh `miniapp_*` values defined in `@mentra/miniapp/src/protocol.ts` (Phase 1.3). `LocalMiniappRuntime` translates between miniapp-protocol names and any legacy cloud values at the boundary.
-- One package, not two: React hooks live at `@mentra/miniapp/react` as a subpath export. Imperative API (`MiniappSession`) is the default export. React is an optional peer dep.
-- Existing cloud apps on `@mentra/sdk` keep working unchanged throughout Phases 1-5.
+- `@veiller/miniapp` is a new package. `@veiller/sdk` is not refactored. Runtime untouched; only additive type additions in `cloud/packages/sdk/src/types/` for the new phone-subscription wire message (Phase 2.5).
+- Wire protocol for `@veiller/miniapp` uses fresh `miniapp_*` values defined in `@veiller/miniapp/src/protocol.ts` (Phase 1.3). `LocalMiniappRuntime` translates between miniapp-protocol names and any legacy cloud values at the boundary.
+- One package, not two: React hooks live at `@veiller/miniapp/react` as a subpath export. Imperative API (`MiniappSession`) is the default export. React is an optional peer dep.
+- Existing cloud apps on `@veiller/sdk` keep working unchanged throughout Phases 1-5.
 
 ## Service Map
 
@@ -109,14 +109,14 @@ The phone subscribes to these cloud services as if it were an app, on behalf of 
 
 ---
 
-## Phase 1: `@mentra/miniapp` Package
+## Phase 1: `@veiller/miniapp` Package
 
-**Goal:** Create a new, purpose-built, browser-native SDK for local miniapps. `@mentra/sdk` is not modified.
+**Goal:** Create a new, purpose-built, browser-native SDK for local miniapps. `@veiller/sdk` is not modified.
 
 **Constraints:**
 
 - Every file must run in a WebView / browser JavaScript engine. No `Buffer`, no `process`, no `fs`, no `ws`, no Jimp, no pino. Build target: `browser` / `neutral`.
-- Zero runtime dependency on `@mentra/sdk`. All wire protocol enum values are defined in `@mentra/miniapp/src/protocol.ts` (Phase 1.3).
+- Zero runtime dependency on `@veiller/sdk`. All wire protocol enum values are defined in `@veiller/miniapp/src/protocol.ts` (Phase 1.3).
 - Non-wire shared types (`Capabilities`, `AppletInterface`, `HardwareType`, etc.) are imported from `@mentra/types` via `import type`.
 
 ### 1.1 Package Location and Structure
@@ -156,9 +156,9 @@ sdk/miniapp/
 
 ```json
 {
-  "name": "@mentra/miniapp",
+  "name": "@veiller/miniapp",
   "version": "0.1.0",
-  "description": "SDK for building MentraOS local miniapps",
+  "description": "SDK for building Veiller local miniapps",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -191,15 +191,15 @@ sdk/miniapp/
 }
 ```
 
-- React is an optional peer dep. Hooks live at `@mentra/miniapp/react` and only load when imported.
+- React is an optional peer dep. Hooks live at `@veiller/miniapp/react` and only load when imported.
 - `sideEffects: false` — tree-shakable.
 - Build target: browser-compatible ES modules.
 - `@mentra/types` is pinned to published semver, not `workspace:*`, because `mobile/` is not inside the `cloud/` monorepo workspace. Bumping `@mentra/types` requires publishing before updating this pin.
-- `./protocol` subpath export is mandatory: `LocalMiniappRuntime` (mobile) imports `MiniappRequestType` from `@mentra/miniapp/protocol`.
+- `./protocol` subpath export is mandatory: `LocalMiniappRuntime` (mobile) imports `MiniappRequestType` from `@veiller/miniapp/protocol`.
 
 ### 1.3 Protocol (`src/protocol.ts`)
 
-Fresh enum definitions for the miniapp wire protocol. No inheritance of legacy `tpa_*` naming. These values are the contract between `@mentra/miniapp` and `LocalMiniappRuntime` on the phone.
+Fresh enum definitions for the miniapp wire protocol. No inheritance of legacy `tpa_*` naming. These values are the contract between `@veiller/miniapp` and `LocalMiniappRuntime` on the phone.
 
 ```typescript
 // Miniapp → phone (request, via bridge envelope)
@@ -279,12 +279,12 @@ export interface Transport {
 
 ### 1.5 PostMessageTransport
 
-`src/transport/postmessage.ts` — for WebView miniapps inside MentraOS.
+`src/transport/postmessage.ts` — for WebView miniapps inside Veiller.
 
 - `send()` → `window.ReactNativeWebView.postMessage(JSON.stringify(envelope))`
 - `onMessage()` → assigns `window.receiveNativeMessage = handler`
-- No network involved — just the existing MentraOS WebView bridge
-- Read `window.MentraOS.packageName`, `window.MentraOS.userId`, and glasses capabilities from the injected globals
+- No network involved — just the existing Veiller WebView bridge
+- Read `window.Veiller.packageName`, `window.Veiller.userId`, and glasses capabilities from the injected globals
 
 ### 1.6 LocalSocketTransport
 
@@ -292,7 +292,7 @@ export interface Transport {
 
 - Uses browser-native `new WebSocket('ws://127.0.0.1:8765')`
 - Same envelope protocol as postMessage
-- Used when the SDK detects it's in a browser that isn't inside a MentraOS WebView
+- Used when the SDK detects it's in a browser that isn't inside a Veiller WebView
 
 ### 1.7 Auto-Detection
 
@@ -300,13 +300,13 @@ export interface Transport {
 
 ```typescript
 export function createTransport(): Transport {
-  if (typeof window !== "undefined" && window.ReactNativeWebView && window.MentraOS) {
+  if (typeof window !== "undefined" && window.ReactNativeWebView && window.Veiller) {
     return new PostMessageTransport()
   }
   if (typeof window !== "undefined" && typeof window.WebSocket !== "undefined") {
     return new LocalSocketTransport()
   }
-  throw new Error("@mentra/miniapp requires a browser environment")
+  throw new Error("@veiller/miniapp requires a browser environment")
 }
 ```
 
@@ -392,11 +392,11 @@ export function useSession(): MiniappSession {
 - On connect failure (transport error or `CONNECT_ACK` timeout after 10s): `ready` stays `false`, `"error"` event fires, queued calls reject with `NotConnectedError`, subsequent calls reject immediately.
 - Pushed events (`MiniappResponseType.EVENT`) are emitted to subscribers only after `CONNECT_ACK`. Pre-ACK there are no subscriptions to queue against.
 
-`src/react/index.ts` exports `useSession` only. The package `exports` map exposes this as `@mentra/miniapp/react`.
+`src/react/index.ts` exports `useSession` only. The package `exports` map exposes this as `@veiller/miniapp/react`.
 
 ### 1.11 Build
 
-Single `tsc` step emitting ES modules. No bundling — consumers bundle `@mentra/miniapp` into their own app via Bun Fullstack (or esbuild/Vite/webpack). Ship compiled TypeScript.
+Single `tsc` step emitting ES modules. No bundling — consumers bundle `@veiller/miniapp` into their own app via Bun Fullstack (or esbuild/Vite/webpack). Ship compiled TypeScript.
 
 `tsconfig.json`:
 
@@ -419,9 +419,9 @@ No Node lib, no Node types. Accidental references to `Buffer` or `process` fail 
 
 ### 1.12 Verification
 
-- `@mentra/miniapp` builds cleanly with `tsc`.
+- `@veiller/miniapp` builds cleanly with `tsc`.
 - A minimal test miniapp (`index.html` + a script that imports `MiniappSession` and calls `showTextWall`) bundles with Bun Fullstack (`bun run --hot server.ts`) and loads in a browser without errors.
-- Existing cloud apps on `@mentra/sdk` continue to run unchanged.
+- Existing cloud apps on `@veiller/sdk` continue to run unchanged.
 
 ---
 
@@ -486,7 +486,7 @@ Every SDK message uses a typed envelope over postMessage / MiniSockets:
 }
 ```
 
-**Legacy bridge messages (`share`, `copy_clipboard`, `open_url`, `download`, `core_fn`):** deleted from `MiniComms.ts` and `@mentra/react`. Replaced by `SystemModule` on the miniapp SDK session object:
+**Legacy bridge messages (`share`, `copy_clipboard`, `open_url`, `download`, `core_fn`):** deleted from `MiniComms.ts` and `@veiller/react`. Replaced by `SystemModule` on the miniapp SDK session object:
 
 - `session.system.share({text?, url?, title?, base64?, mimeType?, filename?})` — OS share sheet
 - `session.system.openUrl(url)` — opens in system browser (blocks `javascript:` and `file:` schemes)
@@ -509,17 +509,17 @@ Corresponding `MiniappRequestType` values: `SHARE`, `OPEN_URL`, `COPY_CLIPBOARD`
 - Parse as envelope (see Phase 2.2)
 - Forward SDK messages to `LocalMiniappRuntime.handleMessage(packageName, payload)`
 
-Delete the legacy bridge handlers (`share`, `copy_clipboard`, `download`, `open_url`, `core_fn`) from `MiniComms.ts` and `@mentra/react`'s `useMentraBridge.ts`.
+Delete the legacy bridge handlers (`share`, `copy_clipboard`, `download`, `open_url`, `core_fn`) from `MiniComms.ts` and `@veiller/react`'s `useVeillerBridge.ts`.
 
 ### 2.4 Miniapp Request Handlers
 
-`LocalMiniappRuntime.handleRequest(packageName, request)` dispatches by `MiniappRequestType` (from `@mentra/miniapp/src/protocol.ts`, Phase 1.3). All values are the fresh miniapp-naming wire values — no legacy `tpa_*` prefix.
+`LocalMiniappRuntime.handleRequest(packageName, request)` dispatches by `MiniappRequestType` (from `@veiller/miniapp/src/protocol.ts`, Phase 1.3). All values are the fresh miniapp-naming wire values — no legacy `tpa_*` prefix.
 
-**Mobile protocol enum import:** add `"@mentra/miniapp": "file:../sdk/miniapp"` to `mobile/package.json`. Mobile then imports `import { MiniappRequestType } from "@mentra/miniapp/protocol"`. Requires `@mentra/miniapp` to be built (`dist/` present) before mobile's TypeScript pass.
+**Mobile protocol enum import:** add `"@veiller/miniapp": "file:../sdk/miniapp"` to `mobile/package.json`. Mobile then imports `import { MiniappRequestType } from "@veiller/miniapp/protocol"`. Requires `@veiller/miniapp` to be built (`dist/` present) before mobile's TypeScript pass.
 
 | MiniappRequestType                                                | Action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CONNECT` (`miniapp_connect`)                                     | Validate packageName matches the one the phone injected into `window.MentraOS` (miniapp cannot impersonate another package). Register in `connectedApps` map. Respond with `CONNECT_ACK` carrying `{userId, packageName, capabilities}`. No cloud round-trip.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `CONNECT` (`miniapp_connect`)                                     | Validate packageName matches the one the phone injected into `window.Veiller` (miniapp cannot impersonate another package). Register in `connectedApps` map. Respond with `CONNECT_ACK` carrying `{userId, packageName, capabilities}`. No cloud round-trip.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `SUBSCRIBE` (`miniapp_subscribe`)                                 | Update per-app subscription set. Check permissions against the miniapp's declared manifest (Phase 2.16). For cloud-dependent streams (transcription, translation), recompute aggregated phone subscriptions and send `PHONE_SUBSCRIPTION_UPDATE` to cloud if changed. Update `MicStateCoordinator` if mic-requiring streams changed.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `DISPLAY` (`miniapp_display`)                                     | Call `displayProcessor.processDisplayEvent()` → `CoreModule.displayEvent()`. Same path as `SocketComms.handle_display_event()`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `PLAY_AUDIO` (`miniapp_play_audio`)                               | `audioPlaybackService.play({requestId, audioUrl, volume, stopOtherAudio, appId: packageName})` with completion callback that sends `REQUEST_RESULT` response back via bridge.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -626,7 +626,7 @@ interface DataStream extends BaseMessage {
 **Phone-side flow:**
 
 1. Local miniapp calls `session.events.onTranscription('en-US', handler)`.
-2. `@mentra/miniapp` sends `MiniappRequestType.SUBSCRIBE` via bridge with stream list including `"transcription:en-US"`.
+2. `@veiller/miniapp` sends `MiniappRequestType.SUBSCRIBE` via bridge with stream list including `"transcription:en-US"`.
 3. `LocalMiniappRuntime.handleSubscription()`:
    - Checks the miniapp's declared manifest permissions for mic-requiring streams (`MICROPHONE` in `miniapp.json`).
    - If denied: send `MiniappResponseType.ERROR` via bridge.
@@ -697,7 +697,7 @@ No translation needed for cloud-delivered streams: the language-suffixed naming 
 
 ### 2.7 Subscription Lifecycle
 
-**Important:** "user navigates away from the miniapp" is NOT the same as "WebView unmounts". Per Phase 2.12a, navigating away moves the miniapp's WebView offscreen but keeps it mounted and running in the background so it can continue receiving events and driving glasses. This section only covers real teardown: user explicitly closes the miniapp, MentraOS logout, or the WebView is evicted by the `MiniappHost`.
+**Important:** "user navigates away from the miniapp" is NOT the same as "WebView unmounts". Per Phase 2.12a, navigating away moves the miniapp's WebView offscreen but keeps it mounted and running in the background so it can continue receiving events and driving glasses. This section only covers real teardown: user explicitly closes the miniapp, Veiller logout, or the WebView is evicted by the `MiniappHost`.
 
 **Miniapp closed by user (capsule-menu close button):**
 
@@ -705,7 +705,7 @@ No translation needed for cloud-delivered streams: the language-suffixed naming 
 - Unmount handler calls `localMiniappRuntime.unregisterApp(packageName)`.
 - `unregisterApp` drops all subscriptions and calls `unsubscribePhoneStream()` for any streams with no remaining subscribers across all still-running miniapps.
 
-**MentraOS logout / re-auth:**
+**Veiller logout / re-auth:**
 
 - `LocalMiniappRuntime.cleanup()` is called from `MantleManager` during logout.
 - Every connected miniapp is unregistered, every WebView in `MiniappHost` is unmounted.
@@ -730,7 +730,7 @@ No translation needed for cloud-delivered streams: the language-suffixed naming 
 **Keepalive PING / orphan detection:**
 
 - `LocalMiniappRuntime` sends a bridge `PING` envelope to every registered miniapp every 5 seconds (both foreground and background). See Phase 2.12a for why this exists — it is both a liveness keeper and an orphan probe.
-- Miniapp SDK (`@mentra/miniapp`) auto-replies with `PONG` from a handler attached at `connect()` time. The dev never sees this.
+- Miniapp SDK (`@veiller/miniapp`) auto-replies with `PONG` from a handler attached at `connect()` time. The dev never sees this.
 - If a miniapp misses N consecutive pings (default N=3, so ~15 seconds of silence), `LocalMiniappRuntime` treats it as dead: calls `unregisterApp(packageName)`, tells `MiniappHost` to tear down the WebView, logs a warning. Next open is a cold start.
 
 ### 2.8 Auth
@@ -739,31 +739,31 @@ Three distinct auth stories. Do not conflate them.
 
 **Bundled local miniapp (postMessage transport, WebView loads HTML from `Paths.document/lmas/`):**
 
-The phone is fully in control of the WebView. The WebView loads static HTML from the phone's filesystem. There is no remote server, no cross-origin concern, no need for JWT auth tokens. The phone already knows the user is authenticated (because the user is logged in to MentraOS and launched the miniapp from within the app).
+The phone is fully in control of the WebView. The WebView loads static HTML from the phone's filesystem. There is no remote server, no cross-origin concern, no need for JWT auth tokens. The phone already knows the user is authenticated (because the user is logged in to Veiller and launched the miniapp from within the app).
 
 LocalMiniappRuntime trusts the WebView implicitly based on:
 
-- The phone injected `window.MentraOS.packageName` before the content loaded — the bundled miniapp cannot lie about its identity
-- The miniapp is running in-process inside the MentraOS app, under the user's MentraOS session
+- The phone injected `window.Veiller.packageName` before the content loaded — the bundled miniapp cannot lie about its identity
+- The miniapp is running in-process inside the Veiller app, under the user's Veiller session
 
 No tokens passed. No signature verification. Identity is established by the injection.
 
 **Dev miniapp (postMessage transport, WebView loads HTML from `http://<LAN-IP>:3000`):**
 
-Same trust model as bundled. The user explicitly scanned a QR code from the Miniapp Developer screen to load this URL, consenting to treat it as trusted. The phone injects `window.MentraOS.packageName` before content loads, same as a bundled miniapp. The only differences are the source URL scheme (HTTP instead of `file://`) and the `miniappDeveloperMode: true` flag in the injected globals (see Phase 3.3 for terminology — this is NOT the internal "Mentra Developer Mode" flag). No tokens, no cross-origin handling beyond the Android cleartext HTTP exception (see Phase 2.12).
+Same trust model as bundled. The user explicitly scanned a QR code from the Miniapp Developer screen to load this URL, consenting to treat it as trusted. The phone injects `window.Veiller.packageName` before content loads, same as a bundled miniapp. The only differences are the source URL scheme (HTTP instead of `file://`) and the `miniappDeveloperMode: true` flag in the injected globals (see Phase 3.3 for terminology — this is NOT the internal "Veiller Developer Mode" flag). No tokens, no cross-origin handling beyond the Android cleartext HTTP exception (see Phase 2.12).
 
-The existing `aos_signed_user_token` / `aos_temp_token` flow used by cloud webview apps under `@mentra/sdk`'s `/webview/` routes is a separate system and is not used by local bundled or dev miniapps.
+The existing `aos_signed_user_token` / `aos_temp_token` flow used by cloud webview apps under `@veiller/sdk`'s `/webview/` routes is a separate system and is not used by local bundled or dev miniapps.
 
 **External browser miniapp (LocalSocketTransport, Safari/Chrome fallback):**
 
-Here auth matters because MentraOS launches Safari with the miniapp URL, and the connection from Safari to the phone's localhost WebSocket is separate from the MentraOS app process.
+Here auth matters because Veiller launches Safari with the miniapp URL, and the connection from Safari to the phone's localhost WebSocket is separate from the Veiller app process.
 
 Flow:
 
-1. User taps "Open App" in MentraOS
-2. MentraOS generates a short-lived local session token bound to (userId, packageName, current timestamp)
-3. MentraOS opens Safari with URL: `https://miniapp.example.com/?aos_package=com.example.myapp&aos_local_token=<token>`
-4. `@mentra/miniapp` running in Safari reads the token from the URL, passes it in the `CONNECT` request over MiniSockets
+1. User taps "Open App" in Veiller
+2. Veiller generates a short-lived local session token bound to (userId, packageName, current timestamp)
+3. Veiller opens Safari with URL: `https://miniapp.example.com/?aos_package=com.example.myapp&aos_local_token=<token>`
+4. `@veiller/miniapp` running in Safari reads the token from the URL, passes it in the `CONNECT` request over MiniSockets
 5. LocalMiniappRuntime validates the token against its in-memory list of issued tokens, extracts userId + packageName
 6. Token is consumed (single-use) or has a short TTL (e.g., 5 minutes)
 
@@ -901,7 +901,7 @@ Permissions from `miniapp.json` must be surfaced into `ClientAppletInterface.per
 1. User opens a local miniapp from the launcher
 2. Router navigates to `/applet/local?packageName=...&version=...`
 3. `local.tsx` reads the manifest and the bundle directory path via `Composer.getMiniappManifest()` / `Composer.getBundleDir()`
-4. `LocalMiniApp.tsx` mounts a WebView with `source={{ uri: \`file://${bundleDir}/index.html\` }}`and`injectedJavaScriptBeforeContentLoaded`for the`window.MentraOS` globals (packageName, userId, glasses capabilities — see Phase 2.10)
+4. `LocalMiniApp.tsx` mounts a WebView with `source={{ uri: \`file://${bundleDir}/index.html\` }}`and`injectedJavaScriptBeforeContentLoaded`for the`window.Veiller` globals (packageName, userId, glasses capabilities — see Phase 2.10)
 5. WebView loads `index.html` from disk, relative asset paths (`./assets/*.js`, `./styles.css`) resolve against the bundle directory, miniapp JS imports the SDK, SDK auto-detects transport, sends `CONNECT` request
 6. `LocalMiniappRuntime` receives it, responds with `CONNECT_ACK`
 7. Miniapp is live
@@ -916,7 +916,7 @@ Permissions from `miniapp.json` must be surfaced into `ClientAppletInterface.per
 - **Home screen**: each entry appears in `AppsGrid` alongside cloud and offline apps. Bundled miniapps are visible on the home screen across restarts without any extra work.
 - **Uninstall**: `Composer.uninstall(packageName, version?)` deletes the bundle directory on disk and updates `appletStatusStore`. The next launch scans a reduced (or empty) `lmas/` tree, so the entry stays gone. Note: bundled miniapps will be re-installed on next app launch since they ship in assets — uninstalling a bundled miniapp is effectively a "reset to factory" for that app.
 - **Dev-mode miniapps (Phase 3.3) are NOT persisted**. QR-loaded dev miniapps live only in-memory on `appletStatusStore` and are cleared on app restart; ZIP-installed miniapps persist.
-- **When data IS lost**: only when the user uninstalls MentraOS itself or the OS clears app data. No MentraOS code path clears `Paths.document/lmas/` beyond explicit `Composer.uninstall()` calls.
+- **When data IS lost**: only when the user uninstalls Veiller itself or the OS clears app data. No Veiller code path clears `Paths.document/lmas/` beyond explicit `Composer.uninstall()` calls.
 
 **Out of scope for v1 bundle handling:**
 
@@ -967,7 +967,7 @@ const htmlUri = `file://${bundleDir}/index.html`
   javaScriptEnabled={true}
   domStorageEnabled={true}
   injectedJavaScriptBeforeContentLoaded={`
-    window.MentraOS = {
+    window.Veiller = {
       packageName: ${JSON.stringify(packageName)},
       platform: ${JSON.stringify(Platform.OS)},
       ${isMiniappDeveloperMode ? "miniappDeveloperMode: true," : ""}
@@ -986,10 +986,10 @@ const htmlUri = `file://${bundleDir}/index.html`
 
 **Security model (v1):**
 
-The OS sandbox isolates the MentraOS app's private data directory from other apps on both iOS and Android. Within MentraOS's own sandbox:
+The OS sandbox isolates the Veiller app's private data directory from other apps on both iOS and Android. Within Veiller's own sandbox:
 
-- **iOS**: `WKWebView.loadFileURL(url, allowingReadAccessTo: bundleDir)` scopes read access to the specific bundle directory. A miniapp cannot read sibling miniapp bundles or MentraOS storage via `fetch('file://...')`. Enforced natively by WKWebView.
-- **Android**: with `allowFileAccessFromFileURLs = true`, a miniapp can `fetch('file://...')` any file readable by the MentraOS process (sibling bundles, `Paths.document`, AsyncStorage backing files). This is a v1 trade-off — miniapps on Android have the same on-disk read access as the MentraOS process. `allowUniversalAccessFromFileURLs` stays `false` so cross-origin network fetches from `file://` are blocked.
+- **iOS**: `WKWebView.loadFileURL(url, allowingReadAccessTo: bundleDir)` scopes read access to the specific bundle directory. A miniapp cannot read sibling miniapp bundles or Veiller storage via `fetch('file://...')`. Enforced natively by WKWebView.
+- **Android**: with `allowFileAccessFromFileURLs = true`, a miniapp can `fetch('file://...')` any file readable by the Veiller process (sibling bundles, `Paths.document`, AsyncStorage backing files). This is a v1 trade-off — miniapps on Android have the same on-disk read access as the Veiller process. `allowUniversalAccessFromFileURLs` stays `false` so cross-origin network fetches from `file://` are blocked.
 
 v1 mitigations: store distribution + manual review. v2 hardening (out of scope): per-miniapp localhost HTTP server with scoped routing, single-file HTML bundling with `allowFileAccessFromFileURLs=false`, or bundle signature verification.
 
@@ -1017,13 +1017,13 @@ Internally:
 
 - Bundled: WebView `source={{ uri: 'file://' + bundleDir + '/index.html' }}`
 - Dev: WebView `source={{ uri: devUrl }}`
-- Bundled: inject `window.MentraOS = {packageName, platform}`
-- Dev: inject `window.MentraOS = {packageName, platform, miniappDeveloperMode: true}`
+- Bundled: inject `window.Veiller = {packageName, platform}`
+- Dev: inject `window.Veiller = {packageName, platform, miniappDeveloperMode: true}`
 - Dev mode also allows HTTP (not just HTTPS) URLs since LAN IPs are HTTP
 
 The `miniappDeveloperMode: true` flag is informational. Log forwarding is already handled by Bun Fullstack's `console: true` over the HMR WebSocket — the SDK does not do any log wrapping. The flag can be used by the SDK to opt into verbose internal logging or skip caching if needed.
 
-**Android HTTP cleartext exception:** Loading an HTTP dev URL into the WebView requires the Android manifest to allow cleartext traffic for the dev URL. The simplest approach is adding `android:usesCleartextTraffic="true"` to the app manifest for debug builds (already true in most RN dev builds) OR adding a network security config that allows cleartext for LAN IP ranges. For production builds loading a dev URL would be unusual — dev mode is primarily for internal Mentra developer builds and dogfood testers, not end users.
+**Android HTTP cleartext exception:** Loading an HTTP dev URL into the WebView requires the Android manifest to allow cleartext traffic for the dev URL. The simplest approach is adding `android:usesCleartextTraffic="true"` to the app manifest for debug builds (already true in most RN dev builds) OR adding a network security config that allows cleartext for LAN IP ranges. For production builds loading a dev URL would be unusual — dev mode is primarily for internal Veiller developer builds and dogfood testers, not end users.
 
 **Local miniapp route rewrite:**
 
@@ -1034,7 +1034,7 @@ Keep `MiniAppCapsuleMenu` in both `webview.tsx` and `local.tsx`.
 
 ### 2.12a Background Execution and `MiniappHost`
 
-**Contract:** once opened, a local miniapp stays running in the background until the user explicitly closes it, the OS kills the MentraOS process, or the WebView is evicted. Backgrounded miniapps continue to receive events (transcription, button presses, location, etc.), can call SDK methods, and can drive the glasses display. This matches how cloud apps already behave — a running cloud app keeps running regardless of which screen the user is looking at.
+**Contract:** once opened, a local miniapp stays running in the background until the user explicitly closes it, the OS kills the Veiller process, or the WebView is evicted. Backgrounded miniapps continue to receive events (transcription, button presses, location, etc.), can call SDK methods, and can drive the glasses display. This matches how cloud apps already behave — a running cloud app keeps running regardless of which screen the user is looking at.
 
 This applies to every miniapp by default. There is no opt-in manifest flag. Miniapps that do not want to do work in the background should gate their own logic on `session.visibility` (see below).
 
@@ -1060,12 +1060,12 @@ When the applet route in expo-router mounts, it does NOT mount a fresh WebView �
 | User navigates away (back button, open another app, home) | `MiniappHost` moves the current WebView to its offscreen parking position. WebView stays mounted. `session.visibility` → `"background"` event fires.                                                                                                      |
 | User opens a different (already-running) miniapp          | Previous miniapp moves offscreen, new miniapp moves onscreen. Both keep running.                                                                                                                                                                          |
 | User explicitly closes miniapp (capsule menu close)       | `MiniappHost.unmount(packageName)` — real WebView unmount, calls `localMiniappRuntime.unregisterApp(packageName)`.                                                                                                                                        |
-| MentraOS process is killed by OS                          | Everything dies at once. Next launch is a cold start for all miniapps. No persistence of in-memory state (miniapps must use `session.storage` for anything they need across process restarts).                                                            |
+| Veiller process is killed by OS                          | Everything dies at once. Next launch is a cold start for all miniapps. No persistence of in-memory state (miniapps must use `session.storage` for anything they need across process restarts).                                                            |
 | WebView JS runtime evicted by OS (memory pressure)        | Treated the same as a crash. `MiniappHost` unmounts, `LocalMiniappRuntime.unregisterApp`, next foreground is a cold start. On iOS, surface this via an alert box in debug builds so it's visible during development — see "iOS eviction debugging" below. |
 
 **`session.visibility` API (SDK side):**
 
-`@mentra/miniapp` adds a new observable on `MiniappSession`:
+`@veiller/miniapp` adds a new observable on `MiniappSession`:
 
 ```ts
 session.visibility: "foreground" | "background"
@@ -1087,7 +1087,7 @@ Cadence is tunable via a constant in `LocalMiniappRuntime`.
 
 **No concurrent miniapp cap.** Miniapps stay alive until the OS reclaims memory. There is no LRU eviction policy in `MiniappHost` — if you have 20 miniapps open, you have 20 WebViews mounted, until the OS kicks in. This matches the cloud-app model where N running apps = N live AppSessions. Users with memory pressure will see the OS evict WebViews (handled via the crash path); users without won't.
 
-**Process-level keepalive (Android):** the existing glasses BLE foreground service keeps the MentraOS process alive in the background. Nothing new needed. If the user disconnects glasses AND backgrounds MentraOS, the OS will eventually kill the process — accept this. Miniapps cold-start when the user returns.
+**Process-level keepalive (Android):** the existing glasses BLE foreground service keeps the Veiller process alive in the background. Nothing new needed. If the user disconnects glasses AND backgrounds Veiller, the OS will eventually kill the process — accept this. Miniapps cold-start when the user returns.
 
 **Process-level keepalive (iOS):** the existing BLE central background mode for the glasses connection holds the process. When the user disconnects glasses, iOS kills the whole app within ~1 minute regardless of what the miniapps are doing. This is acceptable — without glasses there is nothing useful for a miniapp to do. On return, all miniapps cold-start.
 
@@ -1114,7 +1114,7 @@ WKWebView can evict a backgrounded WebView's JS context under memory pressure ev
 
 LocalMiniappRuntime handles SDK `SimpleStorage` calls via phone-local AsyncStorage. No cloud.
 
-- Key format: `mentraos_localstorage_${userId}_${packageName}_${key}`
+- Key format: `veiller_localstorage_${userId}_${packageName}_${key}`
 - Scope: installed app, current user
 - API: `get(key)`, `set(key, value)`, `delete(key)`, `list()`
 - On user logout: clear all keys matching the user's prefix
@@ -1123,7 +1123,7 @@ Cloud apps keep using the existing cloud-hosted simple-storage API. Local miniap
 
 ### 2.14 Dashboard API — Deferred in v1
 
-`session.dashboard.setContent()` noops and logs `console.warn("Dashboard API is deferred for local miniapps in v1")`. The API surface exists in `@mentra/miniapp` so TypeScript compiles; calls have no effect on the display.
+`session.dashboard.setContent()` noops and logs `console.warn("Dashboard API is deferred for local miniapps in v1")`. The API surface exists in `@veiller/miniapp` so TypeScript compiles; calls have no effect on the display.
 
 Rationale: `cloud/packages/cloud/src/services/session/dashboard/DashboardManager.ts` is 825 lines owning LLM-ranked notifications, weather, calendar, multi-device profile spacing, native token resolution, widget rotation, and the debounced render cycle. Porting to phone is out of scope for v1. Local miniapps use `layouts.showTextWall()` / `showReferenceCard()` for their own display needs. The OS dashboard continues running on cloud unchanged.
 
@@ -1155,22 +1155,22 @@ Permissions declared in `miniapp.json` map to phone OS permissions. Local miniap
 
 2. **`LocalMiniappRuntime` enforces declared permissions at subscribe time.** In the `SUBSCRIBE` handler, reject any mic-requiring stream (`transcription:*`, `translation:*`, `audio_chunk`, `vad`) unless `connectedApps.get(packageName).installedManifest.permissions` includes `MICROPHONE`. Same check for `LOCATION` streams against `LOCATION`. Rejection payload: `MiniappResponseType.ERROR` with `{code: "PERMISSION_NOT_DECLARED"}`.
 
-**Out of scope for v1:** per-miniapp grant/revoke UI inside MentraOS settings. OS-level permission management is sufficient.
+**Out of scope for v1:** per-miniapp grant/revoke UI inside Veiller settings. OS-level permission management is sufficient.
 
 ---
 
-## Phase 3: Developer Tooling — `create-mentra-miniapp`, Dev Loop, QR Sideload
+## Phase 3: Developer Tooling — `create-veiller-miniapp`, Dev Loop, QR Sideload
 
 **Goal:** One-command scaffold + hot reload + terminal log streaming + production ZIP packaging.
 
 **Tooling stack:** Bun Fullstack. `Bun.serve({ development: { hmr: true, console: true } })` routes `console.log` / `warn` / `error` from the loaded page back to the Bun terminal over the HMR WebSocket. No SDK-side code needed to stream logs from a phone WebView to the developer's laptop.
 
-### 3.1 `create-mentra-miniapp` Scaffolder
+### 3.1 `create-veiller-miniapp` Scaffolder
 
-A new CLI package (`sdk/create-mentra-miniapp/`) that scaffolds a working miniapp project.
+A new CLI package (`sdk/create-veiller-miniapp/`) that scaffolds a working miniapp project.
 
 ```bash
-bunx create-mentra-miniapp my-app
+bunx create-veiller-miniapp my-app
 cd my-app
 bun install
 bun dev
@@ -1180,7 +1180,7 @@ Generated project structure (no `vite.config.ts` — this uses Bun Fullstack):
 
 ```
 my-app/
-├── package.json            # scripts: dev, build. deps: @mentra/miniapp, react, react-dom
+├── package.json            # scripts: dev, build. deps: @veiller/miniapp, react, react-dom
 ├── tsconfig.json           # react-jsx target
 ├── miniapp.json            # manifest template with packageName placeholder
 ├── icon.png                # default icon
@@ -1217,7 +1217,7 @@ Bun.serve({
 Starter `App.tsx`:
 
 ```tsx
-import {useSession} from "@mentra/miniapp/react"
+import {useSession} from "@veiller/miniapp/react"
 
 export default function App() {
   const session = useSession()
@@ -1256,36 +1256,36 @@ Starter `package.json`:
 {
   "name": "my-app",
   "scripts": {
-    "dev": "mentra-miniapp dev",
+    "dev": "veiller-miniapp dev",
     "build": "bun build ./index.html --outdir=./dist --target=browser",
-    "pack": "mentra-miniapp pack"
+    "pack": "veiller-miniapp pack"
   },
   "dependencies": {
-    "@mentra/miniapp": "^0.1.0",
+    "@veiller/miniapp": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@mentra/miniapp-cli": "^0.1.0"
+    "@veiller/miniapp-cli": "^0.1.0"
   }
 }
 ```
 
 **Dependency rules:**
 
-- `@mentra/miniapp` is a normal dependency (bundled into developer build output).
-- `@mentra/miniapp-cli` is a devDependency (provides `mentra-miniapp dev` and `mentra-miniapp pack`).
+- `@veiller/miniapp` is a normal dependency (bundled into developer build output).
+- `@veiller/miniapp-cli` is a devDependency (provides `veiller-miniapp dev` and `veiller-miniapp pack`).
 - Template `package.json` uses published npm semver ranges (e.g., `^0.1.0`), not `workspace:*`. Scaffolder copies the template verbatim.
-- The scaffolder's own `package.json` in `sdk/create-mentra-miniapp/` uses `workspace:*` for its own deps (monorepo-internal).
-- Publication order: `@mentra/miniapp` and `@mentra/miniapp-cli` must be on npm before `create-mentra-miniapp` is published. For internal pre-publication testing, swap the template deps to `"file:../../miniapp"` while running from the sdk/ workspace.
+- The scaffolder's own `package.json` in `sdk/create-veiller-miniapp/` uses `workspace:*` for its own deps (monorepo-internal).
+- Publication order: `@veiller/miniapp` and `@veiller/miniapp-cli` must be on npm before `create-veiller-miniapp` is published. For internal pre-publication testing, swap the template deps to `"file:../../miniapp"` while running from the sdk/ workspace.
 
-**Scaffolder script:** `sdk/create-mentra-miniapp/bin/index.ts` — Bun script that copies `template/` to target path, replaces `{{packageName}}` placeholders in `miniapp.json`, prints next-step instructions.
+**Scaffolder script:** `sdk/create-veiller-miniapp/bin/index.ts` — Bun script that copies `template/` to target path, replaces `{{packageName}}` placeholders in `miniapp.json`, prints next-step instructions.
 
 ### 3.2 Dev Loop — QR Sideload with Log Streaming
 
 **Flow:**
 
-1. Developer runs `bun dev`, which invokes `mentra-miniapp dev`:
+1. Developer runs `bun dev`, which invokes `veiller-miniapp dev`:
    - Spawns `bun run --hot server.ts` as a child process (Bun Fullstack with HMR + console forwarding).
    - Waits for Bun to listen on its port (default 3000).
    - Detects the developer's LAN IP via `os.networkInterfaces()` (first non-loopback IPv4).
@@ -1293,7 +1293,7 @@ Starter `package.json`:
    - Prints a terminal QR code via `qrcode-terminal` and the raw URL as a fallback.
    - Relays the child Bun server's stdout/stderr to the developer's terminal.
 2. Developer scans the QR from the phone app's "Miniapp Developer" screen (Phase 3.3).
-3. MentraOS parses the URL, opens a WebView at `http://192.168.1.50:3000`, injects `window.MentraOS = { packageName, platform, miniappDeveloperMode: true }`.
+3. Veiller parses the URL, opens a WebView at `http://192.168.1.50:3000`, injects `window.Veiller = { packageName, platform, miniappDeveloperMode: true }`.
 4. WebView loads `index.html` → `main.tsx` → React mount → miniapp SDK auto-detects PostMessage transport → sends `CONNECT`.
 5. `LocalMiniappRuntime` responds with `CONNECT_ACK`.
 6. On file save, Bun HMR pushes the update over its WebSocket. WebView re-renders. SDK reconnects via `CONNECT`.
@@ -1303,15 +1303,15 @@ Starter `package.json`:
    [15:42:01] [my-app] Showing text on glasses
    ```
 
-**Log forwarding mechanism:** Bun Fullstack's `console: true` injects a client script into served HTML that wraps `console.log` / `warn` / `error` / `info` and streams messages to the Bun server over the HMR WebSocket. React Native WebView supports standard WebSockets, so the HMR connection (`ws://192.168.1.50:3000/_bun/hmr`) runs from the WebView back to the developer's laptop. `@mentra/miniapp` does not wrap `console` and implements no log forwarding — Bun handles everything.
+**Log forwarding mechanism:** Bun Fullstack's `console: true` injects a client script into served HTML that wraps `console.log` / `warn` / `error` / `info` and streams messages to the Bun server over the HMR WebSocket. React Native WebView supports standard WebSockets, so the HMR connection (`ws://192.168.1.50:3000/_bun/hmr`) runs from the WebView back to the developer's laptop. `@veiller/miniapp` does not wrap `console` and implements no log forwarding — Bun handles everything.
 
-**Permissions for dev miniapps:** the Bun Fullstack template in Phase 3.1 serves `miniapp.json` at `/miniapp.json`. On dev URL load, MentraOS fetches `http://<LAN-IP>:3000/miniapp.json`, reads declared permissions, and passes them to `askPermissionsUI` before mounting the WebView. Same launcher gate as bundled miniapps.
+**Permissions for dev miniapps:** the Bun Fullstack template in Phase 3.1 serves `miniapp.json` at `/miniapp.json`. On dev URL load, Veiller fetches `http://<LAN-IP>:3000/miniapp.json`, reads declared permissions, and passes them to `askPermissionsUI` before mounting the WebView. Same launcher gate as bundled miniapps.
 
 ### 3.3 Phone-Side Miniapp Developer Screen
 
-**Terminology:** "Miniapp Developer" (screen name, for third-party developers loading a WIP miniapp) is distinct from the existing "Mentra Developer Mode" (internal Mentra Labs flag). Do not conflate in code, UI copy, or settings paths.
+**Terminology:** "Miniapp Developer" (screen name, for third-party developers loading a WIP miniapp) is distinct from the existing "Veiller Developer Mode" (internal Veiller Labs flag). Do not conflate in code, UI copy, or settings paths.
 
-**v1 gating:** the Miniapp Developer screen is hidden inside the existing Mentra Developer Mode settings. Entry point: `Settings → Mentra Developer Mode → Miniapp Developer`. Add a `// TODO(miniapp-public-release): remove this gate` comment at the gating site. On public release, move the screen to a top-level settings entry.
+**v1 gating:** the Miniapp Developer screen is hidden inside the existing Veiller Developer Mode settings. Entry point: `Settings → Veiller Developer Mode → Miniapp Developer`. Add a `// TODO(miniapp-public-release): remove this gate` comment at the gating site. On public release, move the screen to a top-level settings entry.
 
 **Screen UI (`mobile/src/app/miniapps/settings/miniapp-developer.tsx`, new file):**
 
@@ -1330,17 +1330,17 @@ Starter `package.json`:
 6. Fetch `<url>/miniapp.json` to read declared permissions (dev helper serves this — see 3.2)
 7. Call the shared `askPermissionsUI(dummyApp, theme)` helper with a synthetic `ClientAppletInterface` built from the fetched manifest
 8. If permissions OK, navigate to the WebView route with the dev URL, marking it `isLocal: true` and `isMiniappDev: true`
-9. WebView mounts at the dev URL with `window.MentraOS = { packageName, platform, miniappDeveloperMode: true }` injected
+9. WebView mounts at the dev URL with `window.Veiller = { packageName, platform, miniappDeveloperMode: true }` injected
 
 **Dev miniapp in the launcher:** dev miniapps appear in `AppsGrid` with a `[dev]` tag and a distinct icon tint, backed by an in-memory `ClientAppletInterface` list on `appletStatusStore`. Cleared on app restart (ZIP-installed miniapps persist).
 
 **URL scheme handler in `DeeplinkContext.tsx`:** optional. If enabled, handles `miniapp://dev?...` URLs opened from outside the app (e.g., a QR tapped in a preview app) by navigating directly to the dev screen with the URL pre-filled. The in-app QR scanner is the primary path and works without this.
 
-### 3.4 `@mentra/miniapp-cli` — Dev Helper and Packager
+### 3.4 `@veiller/miniapp-cli` — Dev Helper and Packager
 
 New package at `sdk/miniapp-cli/`. Commands: `dev` and `pack`.
 
-**`mentra-miniapp dev`** — invoked by the scaffolder's `package.json` as `"dev": "mentra-miniapp dev"`:
+**`veiller-miniapp dev`** — invoked by the scaffolder's `package.json` as `"dev": "veiller-miniapp dev"`:
 
 1. Spawns `bun run --hot server.ts` as a child process. Bun Fullstack starts listening on port 3000 (or whatever `PORT` env is set to).
 2. Waits for the port to be reachable (simple retry loop).
@@ -1354,7 +1354,7 @@ New package at `sdk/miniapp-cli/`. Commands: `dev` and `pack`.
 
 A single `bun dev` spawns the Bun Fullstack server, detects the LAN IP, prints the QR, handles IP changes, and unifies terminal output for HMR + forwarded console logs.
 
-**`mentra-miniapp pack`** — invoked as `"pack": "mentra-miniapp pack"`. Does:
+**`veiller-miniapp pack`** — invoked as `"pack": "veiller-miniapp pack"`. Does:
 
 1. Verifies `dist/` exists (developer has run `bun run build` first).
 2. Copies `miniapp.json` and `icon.png` from project root into `dist/`.
@@ -1385,7 +1385,7 @@ Implementation: Bun script using Bun file APIs, `qrcode-terminal`, and Bun's chi
 
 ```bash
 bun run build     # bun build ./index.html --outdir=./dist --target=browser
-bun run pack      # invokes mentra-miniapp-pack
+bun run pack      # invokes veiller-miniapp-pack
 ```
 
 Output: `<packageName>-<version>.zip` ready to install via `Composer.installFromUrl()` or publish to the store.
@@ -1395,7 +1395,7 @@ Output: `<packageName>-<version>.zip` ready to install via `Composer.installFrom
 Two paths:
 
 1. **Dev server + QR** (Phase 3.2/3.3) — hot reload, terminal log streaming. Primary workflow.
-2. **Install ZIP** — `bun run build && bun run pack`, upload the ZIP to any HTTP host, use an "Install from URL" dev screen in MentraOS to install via `Composer.installFromUrl()`. Exercises the full production bundle path.
+2. **Install ZIP** — `bun run build && bun run pack`, upload the ZIP to any HTTP host, use an "Install from URL" dev screen in Veiller to install via `Composer.installFromUrl()`. Exercises the full production bundle path.
 
 ### 3.7 Advanced Debugging (Doc-Only)
 
@@ -1415,7 +1415,7 @@ For cases where terminal `console.log` is insufficient (breakpoints, network ins
 3. Safari (Mac): Preferences → Advanced → Show Develop menu in menu bar
 4. Develop menu → [iPhone name] → [miniapp WebView]
 
-Requires MentraOS built in debug mode. Dev builds are WebView-debuggable by default on both iOS and Android via React Native WebView. No extra flags or implementation work.
+Requires Veiller built in debug mode. Dev builds are WebView-debuggable by default on both iOS and Android via React Native WebView. No extra flags or implementation work.
 
 ---
 
@@ -1423,7 +1423,7 @@ Requires MentraOS built in debug mode. Dev builds are WebView-debuggable by defa
 
 **Status:** Exploratory. Android-first implementation; iOS viability is an open investigation — see 4.5.
 
-**Goal:** If Apple forces webviews out of the native app, local miniapps can run in Safari and still talk to MentraOS over a localhost WebSocket.
+**Goal:** If Apple forces webviews out of the native app, local miniapps can run in Safari and still talk to Veiller over a localhost WebSocket.
 
 ### 4.1 Start MiniSockets
 
@@ -1442,8 +1442,8 @@ Phase 2.3's envelope protocol works over MiniSockets the same way it works over 
 
 ### 4.3 App Launch Flow
 
-1. User taps "Open App" in MentraOS
-2. MentraOS opens Safari with the app's URL + auth tokens as query params
+1. User taps "Open App" in Veiller
+2. Veiller opens Safari with the app's URL + auth tokens as query params
 3. App loads, SDK detects browser environment (no `window.ReactNativeWebView`), connects to `ws://127.0.0.1:8765`
 4. `CONNECT` request with auth token in the payload
 5. LocalMiniappRuntime handles it identically to a postMessage miniapp
@@ -1457,15 +1457,15 @@ Phase 2.3's envelope protocol works over MiniSockets the same way it works over 
 
 ### 4.5 iOS Viability — Open Investigation
 
-A localhost WebSocket server inside MentraOS is unreliable on iOS when Safari is foregrounded and the RN app is backgrounded. iOS kills the listening socket shortly after background entry unless MentraOS holds a long-lived background task for an approved reason (audio, VoIP, location, etc.).
+A localhost WebSocket server inside Veiller is unreliable on iOS when Safari is foregrounded and the RN app is backgrounded. iOS kills the listening socket shortly after background entry unless Veiller holds a long-lived background task for an approved reason (audio, VoIP, location, etc.).
 
 Open questions that must be answered before Phase 4 ships on iOS:
 
-1. **Background suspension behavior**: install a MiniSockets build on a device, launch a miniapp in Safari, background MentraOS, observe whether the WebSocket stays connected after 30s / 2min / 10min.
-2. **BLE keep-alive effect**: MentraOS already holds a BLE connection for glasses. Verify whether that alone keeps the listening socket alive across background entry.
-3. **Fallback options** if (1) and (2) fail: (a) wake MentraOS via universal links when a miniapp sends a message, (b) require the user to foreground MentraOS before launching the miniapp, (c) drop iOS from Phase 4 and ship WebView-only for iOS.
+1. **Background suspension behavior**: install a MiniSockets build on a device, launch a miniapp in Safari, background Veiller, observe whether the WebSocket stays connected after 30s / 2min / 10min.
+2. **BLE keep-alive effect**: Veiller already holds a BLE connection for glasses. Verify whether that alone keeps the listening socket alive across background entry.
+3. **Fallback options** if (1) and (2) fail: (a) wake Veiller via universal links when a miniapp sends a message, (b) require the user to foreground Veiller before launching the miniapp, (c) drop iOS from Phase 4 and ship WebView-only for iOS.
 
-Phase 4 is **Android-first**. On Android, foreground services + the existing BLE service keep MentraOS alive, so the localhost WebSocket survives background. iOS is blocked on the investigation above.
+Phase 4 is **Android-first**. On Android, foreground services + the existing BLE service keep Veiller alive, so the localhost WebSocket survives background. iOS is blocked on the investigation above.
 
 ---
 
@@ -1597,14 +1597,14 @@ Local miniapps have no server, so glasses cannot upload to an app-hosted webhook
 #### Storage
 
 - **Backend**: `R2StorageService`, new object key prefix `miniapp_photos/{userId}/{requestId}-{timestamp}.jpg`. Existing R2 credentials and bucket (`R2_BUCKET_NAME`).
-- **TTL**: R2 lifecycle rule on `miniapp_photos/` prefix → 24h expiration. Document in `@mentra/miniapp` `camera.takePhoto()` JSDoc that photos are not persisted beyond 24h.
+- **TTL**: R2 lifecycle rule on `miniapp_photos/` prefix → 24h expiration. Document in `@veiller/miniapp` `camera.takePhoto()` JSDoc that photos are not persisted beyond 24h.
 - **URL model**: public R2 custom domain (`${R2_PUBLIC_URL}/miniapp_photos/...`). Path contains a UUID; URL is treated as a capability token.
 
 #### Auth model
 
 Two distinct tokens:
 
-1. **coreToken** — gates `POST /miniapp-photo/request`. Proves the phone is a legitimate MentraOS client.
+1. **coreToken** — gates `POST /miniapp-photo/request`. Proves the phone is a legitimate Veiller client.
 2. **uploadToken** — gates `POST /miniapp-photo/upload/:requestId`. Minted by cloud, sent to glasses as `authToken` in `PHOTO_REQUEST`, valid for one upload within 2 minutes, scoped to a single `requestId`. Implementation: signed JWT with `{ requestId, userId, exp }` using a new `MINIAPP_PHOTO_UPLOAD_SECRET` env var.
 
 #### Error paths
@@ -1714,7 +1714,7 @@ Same bypass in `stopStream` (line 538) and any other ownership checks.
 
 #### Miniapp SDK
 
-**`sdk/miniapp/src/modules/stream.ts`** — `StreamModule.startUnmanaged(rtmpUrl, options)` returns `AsyncIterable<StreamStatus>` (or a Promise+event-emitter, matching current `@mentra/sdk` shape). Waits for the first `ACTIVE` status before resolving.
+**`sdk/miniapp/src/modules/stream.ts`** — `StreamModule.startUnmanaged(rtmpUrl, options)` returns `AsyncIterable<StreamStatus>` (or a Promise+event-emitter, matching current `@veiller/sdk` shape). Waits for the first `ACTIVE` status before resolving.
 
 ---
 
@@ -1767,7 +1767,7 @@ Same `LocalMiniappRuntime` changes as 5.2, mapping `stream.startManaged` → `ma
 
 #### Miniapp SDK
 
-**`StreamModule.startManaged(options)`** — mirrors `@mentra/sdk`'s `ManagedStreamRequest`. Returns playback URLs once the cloud has provisioned the Cloudflare Live Input.
+**`StreamModule.startManaged(options)`** — mirrors `@veiller/sdk`'s `ManagedStreamRequest`. Returns playback URLs once the cloud has provisioned the Cloudflare Live Input.
 
 #### Files touched for 5.2 + 5.3
 
@@ -1798,23 +1798,23 @@ Same `LocalMiniappRuntime` changes as 5.2, mapping `stream.startManaged` → `ma
 
 ## Phase 6: Cloud Apps → Local Miniapps Migration
 
-Migration of existing cloud apps is out of scope for this plan. `@mentra/sdk` and all cloud apps continue to work unchanged throughout Phases 1-5. Per-app migration path (performed by the app owners):
+Migration of existing cloud apps is out of scope for this plan. `@veiller/sdk` and all cloud apps continue to work unchanged throughout Phases 1-5. Per-app migration path (performed by the app owners):
 
-1. Create a new miniapp project via `create-mentra-miniapp`.
-2. Port UI and logic to `@mentra/miniapp/react` and the static bundle format.
+1. Create a new miniapp project via `create-veiller-miniapp`.
+2. Port UI and logic to `@veiller/miniapp/react` and the static bundle format.
 3. Remove the server backend, or keep it as a separate service for cloud-specific features.
 4. Submit the new miniapp ZIP to the store.
 5. Deprecate the old cloud app once users migrate.
 
-Archiving `@mentra/sdk` and `@mentra/react` is out of scope.
+Archiving `@veiller/sdk` and `@veiller/react` is out of scope.
 
 ---
 
 ## Implementation Order
 
-Phases are numbered for organization, not strict sequencing. Phase 1 and Phase 2 can be built in parallel once the protocol enums in `@mentra/miniapp/src/protocol.ts` (1.3) are defined.
+Phases are numbered for organization, not strict sequencing. Phase 1 and Phase 2 can be built in parallel once the protocol enums in `@veiller/miniapp/src/protocol.ts` (1.3) are defined.
 
-1. **Phase 1** — Create `@mentra/miniapp` package (`protocol.ts`, transports, `MiniappSession`, modules, React hooks) in `sdk/miniapp/`. Add `build:miniapp` to `sdk/package.json`. No phone or cloud changes in this phase.
+1. **Phase 1** — Create `@veiller/miniapp` package (`protocol.ts`, transports, `MiniappSession`, modules, React hooks) in `sdk/miniapp/`. Add `build:miniapp` to `sdk/package.json`. No phone or cloud changes in this phase.
 2. **Phase 2** — Phone runtime:
    - 2.1 `LocalMiniappRuntime` singleton, initialized during `MantleManager.init()` after `SocketComms` auth
    - 2.2 Envelope protocol + 2.3 MiniComms refactor + 2.4 request handlers
@@ -1828,8 +1828,8 @@ Phases are numbered for organization, not strict sequencing. Phase 1 and Phase 2
    - 2.16 Permission gate
    - 2.14 Dashboard is a noop (no work)
 3. **Phase 3** — Developer tooling:
-   - 3.1 `create-mentra-miniapp` scaffolder
-   - 3.4 `@mentra/miniapp-cli` `dev` + `pack` commands
+   - 3.1 `create-veiller-miniapp` scaffolder
+   - 3.4 `@veiller/miniapp-cli` `dev` + `pack` commands
    - 3.3 Phone-side "Miniapp Developer" screen + QR scanner
    - 3.2 Dev loop verification end-to-end
 4. **Phase 4** — Web app fallback (Android-first; iOS exploratory per 4.5).
@@ -1853,17 +1853,17 @@ E2E verification is human-driven for v1. No E2E automation.
 
 **Human verification checkpoints:**
 
-1. **Phase 1:** `@mentra/miniapp` builds cleanly (`tsc` exits 0). A minimal consumer project imports `MiniappSession`, bundles with Bun Fullstack, runs in Chrome without crashing. Existing cloud apps continue to work.
+1. **Phase 1:** `@veiller/miniapp` builds cleanly (`tsc` exits 0). A minimal consumer project imports `MiniappSession`, bundles with Bun Fullstack, runs in Chrome without crashing. Existing cloud apps continue to work.
 2. **Phase 2 display:** drop a test miniapp into `Paths.document/lmas/com.test.hello/1.0.0/`, open it, verify `session.layouts.showTextWall("hello")` renders on glasses.
 3. **Phase 2 subscriptions:** a miniapp calling `session.events.onTranscription(...)` receives transcription data via the synthetic `__phone__` AppSession path.
-4. **Phase 3:** `bunx create-mentra-miniapp test-app && cd test-app && bun dev` runs, prints a QR code. Scanning the QR from MentraOS (Mentra Developer Mode → Miniapp Developer) loads the miniapp on glasses, `console.log` streams to the terminal, code edits hot-reload.
+4. **Phase 3:** `bunx create-veiller-miniapp test-app && cd test-app && bun dev` runs, prints a QR code. Scanning the QR from Veiller (Veiller Developer Mode → Miniapp Developer) loads the miniapp on glasses, `console.log` streams to the terminal, code edits hot-reload.
 5. **Phase 4:** the miniapp opens in Safari with a generated auth token and connects through MiniSockets end-to-end.
 
 ---
 
 ## Key Files
 
-### New package: `@mentra/miniapp`
+### New package: `@veiller/miniapp`
 
 | File                                        | Change                                                                                                                                                                                                                                                                                         |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1898,29 +1898,29 @@ E2E verification is human-driven for v1. No E2E automation.
 | `mobile/src/services/__tests__/MicStateCoordinator.test.ts`                    | NEW — state machine tests                                           |
 | `cloud/packages/cloud/src/services/session/__tests__/AppManager.phone.test.ts` | NEW — `__phone__` routing and idempotence                           |
 
-### New package: `create-mentra-miniapp` (scaffolder)
+### New package: `create-veiller-miniapp` (scaffolder)
 
 | File                                               | Change                                                                                                                                   |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `sdk/create-mentra-miniapp/package.json`           | NEW — scaffolder CLI package manifest, `bin` entry for `create-mentra-miniapp`                                                           |
-| `sdk/create-mentra-miniapp/bin/index.ts`           | NEW — scaffolder entry point. Copies `template/` to target path, replaces `{{packageName}}` placeholders, prints next-step instructions. |
-| `sdk/create-mentra-miniapp/template/package.json`  | NEW — starter project package.json with `dev`/`build`/`pack` scripts, `@mentra/miniapp` + `react` + `react-dom` deps                     |
-| `sdk/create-mentra-miniapp/template/server.ts`     | NEW — `Bun.serve({ development: { hmr: true, console: true } })` entry with HTML import                                                  |
-| `sdk/create-mentra-miniapp/template/index.html`    | NEW — HTML entry with `<script type="module" src="./src/main.tsx">`                                                                      |
-| `sdk/create-mentra-miniapp/template/src/main.tsx`  | NEW — React root mount                                                                                                                   |
-| `sdk/create-mentra-miniapp/template/src/App.tsx`   | NEW — starter component using `useSession` from `@mentra/miniapp/react`                                                                  |
-| `sdk/create-mentra-miniapp/template/miniapp.json`  | NEW — manifest template with `{{packageName}}` placeholder                                                                               |
-| `sdk/create-mentra-miniapp/template/icon.png`      | NEW — default icon                                                                                                                       |
-| `sdk/create-mentra-miniapp/template/tsconfig.json` | NEW — react-jsx target                                                                                                                   |
+| `sdk/create-veiller-miniapp/package.json`           | NEW — scaffolder CLI package manifest, `bin` entry for `create-veiller-miniapp`                                                           |
+| `sdk/create-veiller-miniapp/bin/index.ts`           | NEW — scaffolder entry point. Copies `template/` to target path, replaces `{{packageName}}` placeholders, prints next-step instructions. |
+| `sdk/create-veiller-miniapp/template/package.json`  | NEW — starter project package.json with `dev`/`build`/`pack` scripts, `@veiller/miniapp` + `react` + `react-dom` deps                     |
+| `sdk/create-veiller-miniapp/template/server.ts`     | NEW — `Bun.serve({ development: { hmr: true, console: true } })` entry with HTML import                                                  |
+| `sdk/create-veiller-miniapp/template/index.html`    | NEW — HTML entry with `<script type="module" src="./src/main.tsx">`                                                                      |
+| `sdk/create-veiller-miniapp/template/src/main.tsx`  | NEW — React root mount                                                                                                                   |
+| `sdk/create-veiller-miniapp/template/src/App.tsx`   | NEW — starter component using `useSession` from `@veiller/miniapp/react`                                                                  |
+| `sdk/create-veiller-miniapp/template/miniapp.json`  | NEW — manifest template with `{{packageName}}` placeholder                                                                               |
+| `sdk/create-veiller-miniapp/template/icon.png`      | NEW — default icon                                                                                                                       |
+| `sdk/create-veiller-miniapp/template/tsconfig.json` | NEW — react-jsx target                                                                                                                   |
 
-### New package: `@mentra/miniapp-cli` (dev helper + packager)
+### New package: `@veiller/miniapp-cli` (dev helper + packager)
 
 | File                              | Change                                                                                                                                                                                                                                  |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sdk/miniapp-cli/package.json`    | NEW — CLI package manifest, `bin` entries for `mentra-miniapp` command                                                                                                                                                                  |
+| `sdk/miniapp-cli/package.json`    | NEW — CLI package manifest, `bin` entries for `veiller-miniapp` command                                                                                                                                                                  |
 | `sdk/miniapp-cli/src/index.ts`    | NEW — CLI entry point with `dev` and `pack` subcommands                                                                                                                                                                                 |
-| `sdk/miniapp-cli/src/dev.ts`      | NEW — `mentra-miniapp dev` implementation: detect LAN IP via `os.networkInterfaces()`, construct `miniapp://dev?url=...` URL, print QR code to terminal via `qrcode-terminal`, print URL as fallback, monitor for LAN IP changes |
-| `sdk/miniapp-cli/src/pack.ts`     | NEW — `mentra-miniapp pack` implementation: verify `dist/` exists, copy `miniapp.json` + `icon.png` into `dist/`, validate manifest schema + permissions, create `<packageName>-<version>.zip`                                          |
+| `sdk/miniapp-cli/src/dev.ts`      | NEW — `veiller-miniapp dev` implementation: detect LAN IP via `os.networkInterfaces()`, construct `miniapp://dev?url=...` URL, print QR code to terminal via `qrcode-terminal`, print URL as fallback, monitor for LAN IP changes |
+| `sdk/miniapp-cli/src/pack.ts`     | NEW — `veiller-miniapp pack` implementation: verify `dist/` exists, copy `miniapp.json` + `icon.png` into `dist/`, validate manifest schema + permissions, create `<packageName>-<version>.zip`                                          |
 | `sdk/miniapp-cli/src/qr.ts`       | NEW — QR code generation helper using `qrcode-terminal`                                                                                                                                                                                 |
 | `sdk/miniapp-cli/src/manifest.ts` | NEW — `miniapp.json` schema validation + `AppPermissionType` validation                                                                                                                                                                 |
 
@@ -1929,16 +1929,16 @@ E2E verification is human-driven for v1. No E2E automation.
 | File                                              | Change                                                                                                                                                                                                 |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `cloud/packages/sdk/`                             | Runtime untouched. Only additive type additions in Phase 2.5 (see Cloud section below).                                                                                                                |
-| `cloud/packages/react-sdk/src/useMentraBridge.ts` | **Delete.** Not in the published `@mentra/react` 2.1.2 tarball (`dist/index.d.ts` exports only `MentraAuthProvider`, `useMentraAuth`, `AuthState`). The in-branch version was never published.         |
-| `cloud/packages/react-sdk/src/index.ts`           | Remove the `useMentraBridge` re-export line. Keep `MentraAuthProvider` and `useMentraAuth`.                                                                                                            |
-| `cloud/packages/react-sdk/dist/`                  | Rebuild after the source delete: `cd cloud/packages/react-sdk && bun run build`. The committed `dist/useMentraBridge.*` files become stale after the source delete and must be regenerated or removed. |
+| `cloud/packages/react-sdk/src/useVeillerBridge.ts` | **Delete.** Not in the published `@veiller/react` 2.1.2 tarball (`dist/index.d.ts` exports only `VeillerAuthProvider`, `useVeillerAuth`, `AuthState`). The in-branch version was never published.         |
+| `cloud/packages/react-sdk/src/index.ts`           | Remove the `useVeillerBridge` re-export line. Keep `VeillerAuthProvider` and `useVeillerAuth`.                                                                                                            |
+| `cloud/packages/react-sdk/dist/`                  | Rebuild after the source delete: `cd cloud/packages/react-sdk && bun run build`. The committed `dist/useVeillerBridge.*` files become stale after the source delete and must be regenerated or removed. |
 | `cloud/packages/react-sdk/package.json`           | Unchanged.                                                                                                                                                                                             |
 
 ### Shared types (`@mentra/types`)
 
 | File                                | Change                                                                                                                                                                                                                                                                                      |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cloud/packages/types/src/index.ts` | No change. `@mentra/miniapp` defines its own wire enums in `src/protocol.ts` (Phase 1.3) and imports non-wire shared types (`Capabilities`, `AppletInterface`, `AppletPermission`, `AppPermissionType`, `HardwareType`, `HardwareRequirementLevel`) from `@mentra/types` via `import type`. |
+| `cloud/packages/types/src/index.ts` | No change. `@veiller/miniapp` defines its own wire enums in `src/protocol.ts` (Phase 1.3) and imports non-wire shared types (`Capabilities`, `AppletInterface`, `AppletPermission`, `AppPermissionType`, `HardwareType`, `HardwareRequirementLevel`) from `@mentra/types` via `import type`. |
 
 ### Cloud (synthetic `__phone__` AppSession)
 
@@ -1960,7 +1960,7 @@ E2E verification is human-driven for v1. No E2E automation.
 | File                                                                     | Change                                                                                                                                                                                         |
 | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mobile/modules/core/ios/Source/sgcs/G1.swift`                           | Add `convertToG1Bmp()` mirroring G2.swift's `convertToG2Bmp()`. Accept arbitrary image data, scale + pad + convert to 1-bit BMP natively. Route local-miniapp bitmap events through this path. |
-| `mobile/modules/core/android/src/main/java/com/mentra/core/sgcs/G1.java` | Same for Android                                                                                                                                                                               |
+| `mobile/modules/core/android/src/main/java/com/veiller/core/sgcs/G1.java` | Same for Android                                                                                                                                                                               |
 
 ### Mobile services
 
@@ -1971,7 +1971,7 @@ E2E verification is human-driven for v1. No E2E automation.
 | `mobile/src/contexts/AllProviders.tsx`            | Mount `<MiniappHost />` inside the provider tree.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `mobile/src/services/MicStateCoordinator.ts`      | NEW — unions cloud-driven and local-miniapp-driven mic requirements, applies final state via `CoreModule.update()`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `mobile/src/services/MiniComms.ts`                | Parse envelope format, route SDK messages to LocalMiniappRuntime. Delete legacy bridge message handlers (`share`, `copy_clipboard`, `download`, `open_url`, `core_fn`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `cloud/packages/react-sdk/src/useMentraBridge.ts` | Duplicate of the entry in "Existing SDK packages" above — see there.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `cloud/packages/react-sdk/src/useVeillerBridge.ts` | Duplicate of the entry in "Existing SDK packages" above — see there.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `mobile/src/services/MiniSockets.ts`              | Start from `MantleManager.init()` (conditional). Add `sendToClient(clientId, msg)`. Route incoming text frames through the envelope parser to LocalMiniappRuntime.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `mobile/src/services/SocketComms.ts`              | Add new case in `handle_message()` for incoming `data_stream` messages (transcription/translation deliveries) → dispatch to `localMiniappRuntime.forwardEvent(streamType, data)`. Add `updatePhoneSubscriptions(subs)` method that sends `PHONE_SUBSCRIPTION_UPDATE` to cloud over the client WebSocket. Refactor `handle_microphone_state_change()` (line 454) to call `micStateCoordinator.setCloudRequirements(...)` instead of calling `CoreModule.update("core", {...})` directly.                                                                                                                                                                                                                                        |
 | `mobile/src/services/MantleManager.ts`            | Forward local sensor events (location, notifications, calendar) to LocalMiniappRuntime. Initialize LocalMiniappRuntime and MicStateCoordinator. Start MiniSockets conditionally.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -1982,15 +1982,15 @@ E2E verification is human-driven for v1. No E2E automation.
 
 | File                                                             | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mobile/src/app/applet/webview.tsx`                              | Branch lifecycle: for local miniapps, skip cloud handshake and fade in on WebView `onLoad`. Inject `window.MentraOS` with packageName + platform. Accept both bundled miniapp paths (file://) and dev server URLs (http://LAN-IP:3000). When loading a dev URL, inject `miniappDeveloperMode: true` in `window.MentraOS`.                                                                                                                                                                                                              |
+| `mobile/src/app/applet/webview.tsx`                              | Branch lifecycle: for local miniapps, skip cloud handshake and fade in on WebView `onLoad`. Inject `window.Veiller` with packageName + platform. Accept both bundled miniapp paths (file://) and dev server URLs (http://LAN-IP:3000). When loading a dev URL, inject `miniappDeveloperMode: true` in `window.Veiller`.                                                                                                                                                                                                              |
 | `mobile/src/app/applet/local.tsx`                                | Rewrite. Route `/applet/local?packageName=...&version=...` does NOT mount a WebView directly. On mount, calls `MiniappHost.setForeground(packageName, bundleDir\|devUrl)` which either creates the WebView (first open) or moves an existing one into the foreground render target. On unmount (user navigates away), calls `MiniappHost.setBackground(packageName)` which parks the WebView offscreen — the WebView keeps running. Close button in `MiniAppCapsuleMenu` calls `MiniappHost.unmount(packageName)` for a real teardown. |
 | `mobile/src/components/home/LocalMiniApp.tsx`                    | Thin wrapper that resolves `packageName` + `bundleDir` or `devUrl` and delegates to `MiniappHost`. Does not own the `<WebView>` directly — ownership lives in `MiniappHost` so the WebView survives route unmounts.                                                                                                                                                                                                                                                                                                                    |
-| `mobile/src/app/miniapps/settings/miniapp-developer.tsx`         | NEW — "Miniapp Developer" screen (Phase 3.3). Hidden behind the existing Mentra Developer Mode flag for v1. Buttons: "Scan QR from dev server", "Enter dev URL manually". List of recently-scanned dev miniapps persisted in AsyncStorage.                                                                                                                                                                                                                                                                                             |
+| `mobile/src/app/miniapps/settings/miniapp-developer.tsx`         | NEW — "Miniapp Developer" screen (Phase 3.3). Hidden behind the existing Veiller Developer Mode flag for v1. Buttons: "Scan QR from dev server", "Enter dev URL manually". List of recently-scanned dev miniapps persisted in AsyncStorage.                                                                                                                                                                                                                                                                                             |
 | `mobile/src/app/miniapps/settings/miniapp-developer-scanner.tsx` | NEW — Fullscreen QR scanner using `expo-camera`'s `CameraView` with `barcodeScannerSettings={{ barcodeTypes: ['qr'] }}` and `onBarcodeScanned`. Already in `mobile/package.json` (`expo-camera ~55.0.9`). Decodes QR, parses `miniapp://dev?url=...&name=...&package=...`, fetches `<url>/miniapp.json` for permissions, calls `askPermissionsUI`, navigates to webview route with `isMiniappDev: true`.                                                                                                                        |
-| `mobile/src/contexts/DeeplinkContext.tsx`                        | Optional for v1. Only needed for OS-level `miniapp://` deeplink handling. The v1 flow uses the in-app QR scanner and does not require deeplink changes. If enabled: add scheme detection at the top of `findMatchingRoute()` — if `parsedUrl.protocol === "mentra-miniapp:"`, route to the miniapp developer screen with URL params pre-filled.                                                                                                                                                                                 |
-| `mobile/app.config.ts`                                           | Optional for v1. Only needed if OS-level `miniapp://` handling is enabled. Change `scheme: "com.mentra"` (line 16) to `scheme: ["com.mentra", "mentra-miniapp"]`. Requires a native rebuild.                                                                                                                                                                                                                                                                                                                                    |
+| `mobile/src/contexts/DeeplinkContext.tsx`                        | Optional for v1. Only needed for OS-level `miniapp://` deeplink handling. The v1 flow uses the in-app QR scanner and does not require deeplink changes. If enabled: add scheme detection at the top of `findMatchingRoute()` — if `parsedUrl.protocol === "veiller-miniapp:"`, route to the miniapp developer screen with URL params pre-filled.                                                                                                                                                                                 |
+| `mobile/app.config.ts`                                           | Optional for v1. Only needed if OS-level `miniapp://` handling is enabled. Change `scheme: "com.veiller"` (line 16) to `scheme: ["com.veiller", "veiller-miniapp"]`. Requires a native rebuild.                                                                                                                                                                                                                                                                                                                                    |
 | `mobile/src/app/miniapps/settings/miniapp-developer-install.tsx` | NEW — "Install from URL" page. Text input for a ZIP URL, submit button, progress/success/error feedback. On submit calls `Composer.installFromUrl(url)`. On success the miniapp appears in the home screen grid immediately (via `appletStatusStore` update). Accessible from `miniapp-developer.tsx`.                                                                                                                                                                                                                                 |
-| `mobile/src/app/miniapps/settings/`                              | Add a "Miniapp Developer" menu item inside the existing Mentra Developer Mode settings screen, linking to `miniapp-developer.tsx`.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `mobile/src/app/miniapps/settings/`                              | Add a "Miniapp Developer" menu item inside the existing Veiller Developer Mode settings screen, linking to `miniapp-developer.tsx`.                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `mobile/src/stores/applets.ts`                                   | Add in-memory dev miniapps list (cleared on app restart). Extend `ClientAppletInterface` with `devUrl?: string` and `isMiniappDev?: boolean`. Extend `startApplet()` around line 870: when `applet.isMiniappDev === true`, push to `/applet/local` with `{packageName, devUrl, appName, transition: "zoom"}`. Add this branch before the existing `applet.local` branch.                                                                                                                                                               |
 
 ---

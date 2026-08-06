@@ -1,10 +1,10 @@
 # Getting Connected: Authentication Flow
 
-Let's follow a user named Alex as they open the MentraOS mobile app and connect their smart glasses to the cloud. This journey shows how authentication works and how WebSocket connections are established.
+Let's follow a user named Alex as they open the Veiller mobile app and connect their smart glasses to the cloud. This journey shows how authentication works and how WebSocket connections are established.
 
 ## Step 1: Mobile App Login
 
-When Alex opens the MentraOS app on their phone:
+When Alex opens the Veiller app on their phone:
 
 1. **User Authentication**
    - Alex logs in with their email/password
@@ -25,7 +25,7 @@ When Alex opens the MentraOS app on their phone:
 Once authenticated, the mobile app:
 
 1. **Establishes Bluetooth connection** with Alex's smart glasses
-2. **Opens WebSocket to cloud** at `wss://cloud.mentraos.com/glasses-ws`
+2. **Opens WebSocket to cloud** at `wss://cloud.veiller.com/glasses-ws`
 3. **Sends the coreToken** in the Authorization header:
    ```
    Authorization: Bearer eyJhbGciOiJIUzI1NiIs...

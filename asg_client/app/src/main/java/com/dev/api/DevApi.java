@@ -11,7 +11,7 @@ public class DevApi {
     private static final int CMD_SET_LED_CONTROL = 104;
     private static final int CMD_SET_ROI_FOV = 106;
 
-    /** ROI position for camera FOV (matches K900Server_mentra naming) */
+    /** ROI position for camera FOV (matches K900Server_veiller naming) */
     public static final int ROI_POSITION_CENTER = 0;
 
     public static final int ROI_POSITION_BOTTOM = 1;

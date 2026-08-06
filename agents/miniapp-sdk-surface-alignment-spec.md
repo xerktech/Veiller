@@ -2,7 +2,7 @@
 
 ## Why
 
-Feedback from the PR #2512 dev-ex round, item #8: the new `@mentra/miniapp` SDK organizes its API more like the old cloud SDK (v2 shape) than the new cloud SDK (v3 shape). Specifically: events that should belong to a domain module are all hanging off `session.events` instead of being attached to the module that owns the corresponding capability.
+Feedback from the PR #2512 dev-ex round, item #8: the new `@veiller/miniapp` SDK organizes its API more like the old cloud SDK (v2 shape) than the new cloud SDK (v3 shape). Specifically: events that should belong to a domain module are all hanging off `session.events` instead of being attached to the module that owns the corresponding capability.
 
 The SDK is still at `0.1.0` and is unpublished. This is the right moment to fix the surface before any external consumer pins to it.
 

@@ -5,7 +5,7 @@
  *
  * `installChannelSubscribers()` runs once from main.tsx and wires every
  * `nav:*` channel into the store. It also requests a fresh snapshot via
- * `mentra.request("nav:get-snapshot")` so a freshly-mounted WebView
+ * `veiller.request("nav:get-snapshot")` so a freshly-mounted WebView
  * doesn't wait for the background-side onOpen snapshot.
  */
 
@@ -78,26 +78,26 @@ export function installChannelSubscribers(): void {
   if (installed) return
   installed = true
 
-  mentra.on("nav:snapshot", (snap) => useNavStore.getState().apply(snap))
-  mentra.on("nav:coords", (coords) => useNavStore.setState({coords}))
-  mentra.on("nav:heading", ({degrees}) => useNavStore.setState({heading: degrees}))
-  mentra.on("nav:trip-state", (trip) => useNavStore.getState().applyTrip(trip))
-  mentra.on("nav:pivots", ({active, upcoming}) => useNavStore.setState({activePivot: active, upcomingPivot: upcoming}))
-  mentra.on("nav:route", ({points, steps}) => {
+  veiller.on("nav:snapshot", (snap) => useNavStore.getState().apply(snap))
+  veiller.on("nav:coords", (coords) => useNavStore.setState({coords}))
+  veiller.on("nav:heading", ({degrees}) => useNavStore.setState({heading: degrees}))
+  veiller.on("nav:trip-state", (trip) => useNavStore.getState().applyTrip(trip))
+  veiller.on("nav:pivots", ({active, upcoming}) => useNavStore.setState({activePivot: active, upcomingPivot: upcoming}))
+  veiller.on("nav:route", ({points, steps}) => {
     useNavStore.setState((s) => ({trip: {...s.trip, routePoints: points, routeSteps: steps}}))
   })
-  mentra.on("nav:log-append", (entry) => useNavStore.getState().appendLog(entry))
-  mentra.on("nav:log-clear", () => useNavStore.getState().clearLog())
-  mentra.on("nav:dev-settings-update", (s) => useNavStore.getState().applyDevSettings(s))
-  mentra.on("nav:units-update", ({unitSystem}) => useNavStore.getState().applyUnitSystem(unitSystem))
-  mentra.on("nav:voice-guidance-update", ({voiceGuidanceMode, capabilities}) =>
+  veiller.on("nav:log-append", (entry) => useNavStore.getState().appendLog(entry))
+  veiller.on("nav:log-clear", () => useNavStore.getState().clearLog())
+  veiller.on("nav:dev-settings-update", (s) => useNavStore.getState().applyDevSettings(s))
+  veiller.on("nav:units-update", ({unitSystem}) => useNavStore.getState().applyUnitSystem(unitSystem))
+  veiller.on("nav:voice-guidance-update", ({voiceGuidanceMode, capabilities}) =>
     useNavStore.getState().applyVoiceGuidance(voiceGuidanceMode, capabilities),
   )
 
   // Best-effort snapshot kickoff — onOpen also fires one from background,
   // but issuing this explicitly ensures we hydrate even if the open
   // round-trips slowly.
-  mentra
+  veiller
     .request("nav:get-snapshot", undefined as never)
     .then((snap) => useNavStore.getState().apply(snap))
     .catch(() => {

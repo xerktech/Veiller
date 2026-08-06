@@ -1,5 +1,5 @@
 /**
- * @mentra/jspolyfill — polyfill bundle for per-miniapp JS contexts.
+ * @veiller/jspolyfill — polyfill bundle for per-miniapp JS contexts.
  *
  * The actual runtime JS lives in `src/startup.ts` and is built into a
  * single IIFE at `dist/startup.js`. That bundled file is shipped INSIDE

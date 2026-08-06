@@ -1,11 +1,11 @@
-# MentraOS Manager Guidelines
+# Veiller Manager Guidelines
 
 RULES:
-READ: ../mintlify-docs/os-devs/contributing/mentraos-manager-guidelines.mdx
+READ: ../mintlify-docs/os-devs/contributing/veiller-manager-guidelines.mdx
 
 ## Overview
 
-MentraOS Manager is a React Native app built with Expo and expo-router for file-based routing. The app was recently migrated from vanilla React Native to Expo.
+Veiller Manager is a React Native app built with Expo and expo-router for file-based routing. The app was recently migrated from vanilla React Native to Expo.
 
 ## Build and Test Commands
 
@@ -26,17 +26,17 @@ MentraOS Manager is a React Native app built with Expo and expo-router for file-
 ### Versioning
 
 The user-facing app version (`CFBundleShortVersionString` on iOS,
-`versionName` on Android) comes from `EXPO_PUBLIC_MENTRAOS_VERSION` in
+`versionName` on Android) comes from `EXPO_PUBLIC_VEILLER_VERSION` in
 `.env`. **The CI staging-builds workflow uses `.env.example`** (it does
 `cp .env.example .env` on each runner), so:
 
-- Bump `EXPO_PUBLIC_MENTRAOS_VERSION` in **both `.env` and `.env.example`**
+- Bump `EXPO_PUBLIC_VEILLER_VERSION` in **both `.env` and `.env.example`**
   whenever starting work on a new version (e.g. 2.10 → 2.11). Otherwise
   CI keeps building the old train and TestFlight will reject with
   "train is closed for new build submissions" once that train is approved.
 - The build number (`CFBundleVersion` / `versionCode`) is derived at
   build time from wall-clock seconds — see `mobile/scripts/build-number.mjs`.
-  Nothing to bump manually; just don't downgrade `EXPO_PUBLIC_MENTRAOS_VERSION`.
+  Nothing to bump manually; just don't downgrade `EXPO_PUBLIC_VEILLER_VERSION`.
 - Automatic glasses OTA is enabled only when the mobile bundle contains an
   `EXPO_PUBLIC_ASG_OTA_VERSION_URL` release pin. Local and compile-only builds
   without a pin fail closed; a Super Mode manifest override remains available
@@ -56,7 +56,7 @@ The user-facing app version (`CFBundleShortVersionString` on iOS,
 Gradle checks should run through the generated `mobile/android` project via the
 repo script above. The script installs mobile dependencies when needed, runs
 `bun expo prebuild --platform android`, uses the generated Gradle wrapper, and
-passes `-PmentraPublicSdk=true` for the SDK module check.
+passes `-PveillerPublicSdk=true` for the SDK module check.
 
 ## Project Setup
 
@@ -103,7 +103,7 @@ bun ios
 - State management: Context API for app-wide state
 - Error handling: use typesafe-ts (see RestComms.ts for examples)
 
-## Working with MentraOS
+## Working with Veiller
 
 - Backend server required for local testing
 - Port forwarding: `bun adb` (sets up tcp:9090, tcp:3000, tcp:9001, tcp:8081)

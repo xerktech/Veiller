@@ -21,12 +21,12 @@
       "@cloud/*": ["../cloud/packages/types/*"],
       "@assets/*": ["./assets/*"],
       "@plugins/*": ["./plugins/*"],
-      "@mentra/bluetooth-sdk-internal": ["./modules/bluetooth-sdk/src/_internal"],
-      "@mentra/cloud-client": ["../cloud-v2/packages/cloud-client/src/index.ts"],
-      "@mentra/cloud-client/react-native": ["../cloud-v2/packages/cloud-client/react-native/index.ts"],
-      "@mentra/cloud-runtime/protocol": ["../cloud-v2/packages/runtime/src/protocol/index.ts"],
-      "@mentra/engine": ["./modules/engine/src/index.ts"],
-      "@mentra/engine/*": ["./modules/engine/src/*"]
+      "@veiller/bluetooth-sdk-internal": ["./modules/bluetooth-sdk/src/_internal"],
+      "@veiller/cloud-client": ["../cloud-v2/packages/cloud-client/src/index.ts"],
+      "@veiller/cloud-client/react-native": ["../cloud-v2/packages/cloud-client/react-native/index.ts"],
+      "@veiller/cloud-runtime/protocol": ["../cloud-v2/packages/runtime/src/protocol/index.ts"],
+      "@veiller/engine": ["./modules/engine/src/index.ts"],
+      "@veiller/engine/*": ["./modules/engine/src/*"]
     },
     "types": ["node", "react", "jest", "bun-types"]
   },

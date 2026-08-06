@@ -1,7 +1,7 @@
 /**
  * Ramer-Douglas-Peucker polyline simplification for visual rendering.
  *
- * The pivot-detection variant of RDP moved into `@mentra/miniapp`'s
+ * The pivot-detection variant of RDP moved into `@veiller/miniapp`'s
  * internal geometry helpers when pivot tracking was lifted into the
  * SDK. This file is the small leftover that NavMap uses to smooth
  * the visible route polyline before drawing it on the map — pure

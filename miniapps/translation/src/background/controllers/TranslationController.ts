@@ -19,7 +19,7 @@
  * full snapshot on every session.ui.onOpen.
  */
 
-import type {CloudClientStatus, MiniappSession, TranslationData, UnsubscribeFn} from "@mentra/miniapp/background"
+import type {CloudClientStatus, MiniappSession, TranslationData, UnsubscribeFn} from "@veiller/miniapp/background"
 
 import {
   CaptionsFormatter,
@@ -115,7 +115,7 @@ function getProfileForModel(modelName: string | null | undefined): DisplayProfil
   if (lower.includes("z100") || lower.includes("vuzix") || lower.includes("mach1") || lower.includes("mach 1")) {
     return Z100_PROFILE
   }
-  if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("mentra_nex")) {
+  if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("veiller_nex")) {
     return NEX_PROFILE
   }
   return G1_PROFILE

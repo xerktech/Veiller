@@ -125,10 +125,10 @@ public class AsgClientService extends Service implements NetworkStateListener, T
     public static final String LEGACY_ACTION_INSTALLATION_PROGRESS =
             "com.augmentos.otaupdater.ACTION_INSTALLATION_PROGRESS";
     public static final String ACTION_DOWNLOAD_PROGRESS =
-            "com.mentra.recovery.ACTION_DOWNLOAD_PROGRESS";
+            "com.veiller.recovery.ACTION_DOWNLOAD_PROGRESS";
     public static final String ACTION_INSTALLATION_PROGRESS =
-            "com.mentra.recovery.ACTION_INSTALLATION_PROGRESS";
-    public static final String ACTION_OTA_HEARTBEAT = "com.mentra.recovery.ACTION_PING";
+            "com.veiller.recovery.ACTION_INSTALLATION_PROGRESS";
+    public static final String ACTION_OTA_HEARTBEAT = "com.veiller.recovery.ACTION_PING";
 
     /** Solid white RGB LED duration while USB UVC streaming (same as video recording). */
     private static final int UVC_STREAMING_LED_DURATION_MS = 1_800_000;
@@ -1470,7 +1470,7 @@ public class AsgClientService extends Service implements NetworkStateListener, T
                             String action = intent.getAction();
                             Log.d(TAG, "💓 Heartbeat receiver triggered - Action: " + action);
 
-                            if ("com.mentra.recovery.ACTION_PING".equals(action)) {
+                            if ("com.veiller.recovery.ACTION_PING".equals(action)) {
                                 // ServiceHeartbeatReceiver (manifest) is the sole PONG sender.
                                 Log.d(
                                         TAG,

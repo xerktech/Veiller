@@ -44,7 +44,7 @@ enum SettingsEvents {
  * 🔧 Settings Manager
  *
  * Provides a type-safe interface for accessing and reacting to App settings.
- * Automatically synchronizes with MentraOS Cloud.
+ * Automatically synchronizes with Veiller Cloud.
  */
 export class SettingsManager {
   // Current settings values
@@ -59,9 +59,9 @@ export class SettingsManager {
   // Logger instance (injected via constructor for proper log level respect)
   private logger: Logger;
 
-  // --- MentraOS settings event system ---
+  // --- Veiller settings event system ---
   private mentraosSettings: Record<string, any> = {};
-  private mentraosEmitter = new EventEmitter();
+  private veillerEmitter = new EventEmitter();
   private subscribeFn?: (streams: string[]) => Promise<void>; // Added for auto-subscriptions
 
   /**
@@ -275,19 +275,19 @@ export class SettingsManager {
   }
 
   /**
-   * 🎛️ Get an MentraOS system setting value with optional default
+   * 🎛️ Get an Veiller system setting value with optional default
    *
-   * @param key MentraOS setting key (e.g., 'metricSystemEnabled', 'brightness')
+   * @param key Veiller setting key (e.g., 'metricSystemEnabled', 'brightness')
    * @param defaultValue Default value to return if the setting is not found
    * @returns The setting value or the default value
    *
    * @example
    * ```typescript
-   * const isMetric = settings.getMentraOS<boolean>('metricSystemEnabled', false);
-   * const brightness = settings.getMentraOS<number>('brightness', 50);
+   * const isMetric = settings.getVeiller<boolean>('metricSystemEnabled', false);
+   * const brightness = settings.getVeiller<number>('brightness', 50);
    * ```
    */
-  getMentraOS<T = any>(key: string, defaultValue?: T): T {
+  getVeiller<T = any>(key: string, defaultValue?: T): T {
     const value = this.mentraosSettings[key];
 
     if (value !== undefined) {
@@ -331,7 +331,7 @@ export class SettingsManager {
   }
 
   /**
-   * 🎛️ Listen for changes to a specific MentraOS setting (e.g., metricSystemEnabled)
+   * 🎛️ Listen for changes to a specific Veiller setting (e.g., metricSystemEnabled)
    *
    * @param key The mentraosSettings key to listen for (e.g., 'metricSystemEnabled')
    * @param handler Function to call when the value changes
@@ -339,72 +339,72 @@ export class SettingsManager {
    *
    * @example
    * ```typescript
-   * settings.onMentraosChange('metricSystemEnabled', (isMetric, wasMetric) => {
+   * settings.onVeillerChange('metricSystemEnabled', (isMetric, wasMetric) => {
    *   console.log(`Units changed: ${wasMetric ? 'metric' : 'imperial'} → ${isMetric ? 'metric' : 'imperial'}`);
    * });
    * ```
    */
-  onMentraosChange<T = any>(key: string, handler: SettingValueChangeHandler<T>): () => void {
-    return this.onMentraosSettingChange(key, handler);
+  onVeillerChange<T = any>(key: string, handler: SettingValueChangeHandler<T>): () => void {
+    return this.onVeillerSettingChange(key, handler);
   }
 
   /**
-   * Listen for changes to a specific MentraOS setting (e.g., metricSystemEnabled)
+   * Listen for changes to a specific Veiller setting (e.g., metricSystemEnabled)
    * This is a convenience wrapper for onValueChange for well-known mentraosSettings keys.
    * @param key The mentraosSettings key to listen for (e.g., 'metricSystemEnabled')
    * @param handler Function to call when the value changes
    * @returns Function to remove the listener
-   * @deprecated Use onMentraosChange instead
+   * @deprecated Use onVeillerChange instead
    */
   onMentraosSettingsChange<T = any>(key: string, handler: SettingValueChangeHandler<T>): () => void {
-    return this.onMentraosSettingChange(key, handler);
+    return this.onVeillerSettingChange(key, handler);
   }
 
   /**
-   * Update the current MentraOS settings
+   * Update the current Veiller settings
    * Compares new and old values, emits per-key events, and updates stored values.
-   * @param newSettings The new MentraOS settings object
+   * @param newSettings The new Veiller settings object
    */
   updateMentraosSettings(newSettings: Record<string, any>): void {
     const oldSettings = this.mentraosSettings;
-    this.logger.debug({ newSettings }, `[SettingsManager] Updating MentraOS settings. New settings`);
+    this.logger.debug({ newSettings }, `[SettingsManager] Updating Veiller settings. New settings`);
     for (const key of Object.keys(newSettings)) {
       const oldValue = oldSettings[key];
       const newValue = newSettings[key];
       if (oldValue !== newValue) {
         this.logger.debug(
-          `[SettingsManager] MentraOS setting '${key}' changed: ${oldValue} -> ${newValue}. Emitting event.`,
+          `[SettingsManager] Veiller setting '${key}' changed: ${oldValue} -> ${newValue}. Emitting event.`,
         );
-        this.mentraosEmitter.emit(`augmentos:value:${key}`, newValue, oldValue);
+        this.veillerEmitter.emit(`augmentos:value:${key}`, newValue, oldValue);
       }
     }
     // Also handle keys that might have been removed from newSettings but existed in oldSettings
     for (const key of Object.keys(oldSettings)) {
       if (!(key in newSettings)) {
         this.logger.debug(
-          `[SettingsManager] MentraOS setting '${key}' removed. Old value: ${oldSettings[key]}. Emitting event with undefined newValue.`,
+          `[SettingsManager] Veiller setting '${key}' removed. Old value: ${oldSettings[key]}. Emitting event with undefined newValue.`,
         );
-        this.mentraosEmitter.emit(`augmentos:value:${key}`, undefined, oldSettings[key]);
+        this.veillerEmitter.emit(`augmentos:value:${key}`, undefined, oldSettings[key]);
       }
     }
     this.mentraosSettings = { ...newSettings };
     this.logger.debug(
       { mentraosSettings: this.mentraosSettings },
-      `[SettingsManager] Finished updating MentraOS settings. Current state:`,
+      `[SettingsManager] Finished updating Veiller settings. Current state:`,
     );
   }
 
   /**
-   * Subscribe to changes for a specific MentraOS setting (e.g., 'metricSystemEnabled')
-   * @param key The MentraOS setting key to listen for
+   * Subscribe to changes for a specific Veiller setting (e.g., 'metricSystemEnabled')
+   * @param key The Veiller setting key to listen for
    * @param handler Function to call when the value changes (newValue, oldValue)
    * @returns Function to remove the listener
    */
-  onMentraosSettingChange<T = any>(key: string, handler: (newValue: T, oldValue: T) => void): () => void {
+  onVeillerSettingChange<T = any>(key: string, handler: (newValue: T, oldValue: T) => void): () => void {
     const eventName = `augmentos:value:${key}`;
-    this.logger.debug(`[SettingsManager] Registering handler for MentraOS setting '${key}' on event '${eventName}'.`);
-    this.mentraosEmitter.on(eventName, (...args) => {
-      this.logger.debug({ args }, `[SettingsManager] MentraOS setting '${key}' event fired. Args:`);
+    this.logger.debug(`[SettingsManager] Registering handler for Veiller setting '${key}' on event '${eventName}'.`);
+    this.veillerEmitter.on(eventName, (...args) => {
+      this.logger.debug({ args }, `[SettingsManager] Veiller setting '${key}' event fired. Args:`);
       handler(...(args as [T, T]));
     });
 
@@ -420,23 +420,23 @@ export class SettingsManager {
         });
     } else {
       this.logger.warn(
-        `[SettingsManager] 'subscribeFn' not provided. Cannot auto-subscribe for MentraOS setting '${key}'. Manual App subscription might be required.`,
+        `[SettingsManager] 'subscribeFn' not provided. Cannot auto-subscribe for Veiller setting '${key}'. Manual App subscription might be required.`,
       );
     }
 
     return () => {
       this.logger.debug(
-        `[SettingsManager] Unregistering handler for MentraOS setting '${key}' from event '${eventName}'.`,
+        `[SettingsManager] Unregistering handler for Veiller setting '${key}' from event '${eventName}'.`,
       );
-      this.mentraosEmitter.off(eventName, handler as (newValue: unknown, oldValue: unknown) => void);
+      this.veillerEmitter.off(eventName, handler as (newValue: unknown, oldValue: unknown) => void);
     };
   }
 
   /**
-   * Get the current value of an MentraOS setting
+   * Get the current value of an Veiller setting
    */
-  getMentraosSetting<T = any>(key: string, defaultValue?: T): T {
-    this.logger.debug({ key, mentraosSettings: this.mentraosSettings }, `Getting MentraOS setting '${key}'`);
+  getVeillerSetting<T = any>(key: string, defaultValue?: T): T {
+    this.logger.debug({ key, mentraosSettings: this.mentraosSettings }, `Getting Veiller setting '${key}'`);
     if (key in this.mentraosSettings) {
       return this.mentraosSettings[key] as T;
     }

@@ -110,7 +110,7 @@ mobile/modules/crust/
 │   ├── MiniappWebView.swift           NEW — ExpoView wrapping WKWebView
 │   ├── MiniappSchemeHandler.swift     NEW — WKURLSchemeHandler impl
 │   └── MiniappWebViewModule.swift     NEW — Expo module declaration
-├── android/src/main/java/com/mentra/crust/miniapp/
+├── android/src/main/java/com/veiller/crust/miniapp/
 │   ├── MiniappWebView.kt              NEW — ExpoView wrapping WebView
 │   ├── MiniappSchemeInterceptor.kt    NEW — WebViewClient.shouldInterceptRequest
 │   └── MiniappWebViewModule.kt        NEW — Expo module declaration
@@ -127,7 +127,7 @@ mobile/src/components/miniapp/MiniappHost.tsx
 
 URL shape: `miniapp://<package>/<path>`
 
-- `<package>` — `com.mentra.example` etc. Becomes the host. Origin
+- `<package>` — `com.veiller.example` etc. Becomes the host. Origin
   isolation kicks in here: WebView treats `miniapp://com.a` and
   `miniapp://com.b` as different origins. Storage, cookies,
   service workers all scoped per-host automatically.
@@ -135,7 +135,7 @@ URL shape: `miniapp://<package>/<path>`
   Resolved against `lmas/<package>/<active-version>/`.
 
 A miniapp's index would load from
-`miniapp://com.mentra.example/index.html`. Its bundled assets
+`miniapp://com.veiller.example/index.html`. Its bundled assets
 are referenced as relative paths in the HTML (`./main.js`) and the
 WebView resolves them against the same origin → all served from disk.
 
@@ -193,7 +193,7 @@ Implements `WebViewClient.shouldInterceptRequest(WebView, WebResourceRequest): W
 ```kotlin
 override fun shouldInterceptRequest(view: WebView, req: WebResourceRequest): WebResourceResponse? {
   val url = req.url
-  if (url.scheme != "mentra-miniapp") return null  // let WebView handle it
+  if (url.scheme != "veiller-miniapp") return null  // let WebView handle it
 
   // 1. host = package, path = file
   // 2. Resolve <lmas>/<package>/<active>/<path>
@@ -342,7 +342,7 @@ risk.
 1. **iOS (`mobile/modules/crust/ios/`):**
    - `MiniappWebView.swift` — `ExpoView` subclass, holds a `WKWebView`.
      Initializes with WKWebViewConfiguration that registers the
-     scheme handler for `mentra-miniapp`.
+     scheme handler for `veiller-miniapp`.
    - `MiniappSchemeHandler.swift` — `WKURLSchemeHandler`. Reads files
      from `Documents/lmas/<pkg>/<version>/`. Active version comes from
      a prop set by the view.
@@ -350,7 +350,7 @@ risk.
      `View(MiniappWebView.self)` with the prop set we settled on.
      Imperative methods (reload, goBack, etc.) implemented.
 
-2. **Android (`mobile/modules/crust/android/src/main/java/com/mentra/crust/miniapp/`):**
+2. **Android (`mobile/modules/crust/android/src/main/java/com/veiller/crust/miniapp/`):**
    - Same shape. `MiniappWebView.kt`, `MiniappSchemeInterceptor.kt`,
      `MiniappWebViewModule.kt`.
    - `WebView.setWebContentsDebuggingEnabled(true)` in dev builds.
@@ -359,7 +359,7 @@ risk.
    - Typed wrapper. Re-export from `crust`'s index.
 
 4. **MiniappHost:**
-   - Import `MiniappWebView` from `@mentra/crust`.
+   - Import `MiniappWebView` from `@veiller/crust`.
    - Replace the `<WebView>` JSX. Drop `originWhitelist`,
      `allowFileAccess*`, etc. (now hardcoded in native).
    - Update `mount()` to set `liveUrl: undefined` and `version:
@@ -368,7 +368,7 @@ risk.
      route through the new wrapper's imperative API.
 
 **Acceptance:**
-- Production-built miniapp installed via `mentra-miniapp release`
+- Production-built miniapp installed via `veiller-miniapp release`
   loads, runs, and renders content. No white screen.
 - ES modules, dynamic imports, and WASM all work in the production
   build.

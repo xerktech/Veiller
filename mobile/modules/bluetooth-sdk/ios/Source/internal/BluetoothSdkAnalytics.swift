@@ -34,8 +34,8 @@ public struct BluetoothSdkAnalyticsConfiguration {
 final class BluetoothSdkAnalytics {
     private static let defaultPostHogApiKey = "phc_FCweXVAxVgU7wZK4Fk3okOx4RmyNqVHJf62YpZSfJt5"
     private static let defaultPostHogHost = "https://us.i.posthog.com"
-    private let stateQueue = DispatchQueue(label: "com.mentra.bluetoothsdk.analytics.state")
-    private let transportQueue = DispatchQueue(label: "com.mentra.bluetoothsdk.analytics.transport")
+    private let stateQueue = DispatchQueue(label: "com.veiller.bluetoothsdk.analytics.state")
+    private let transportQueue = DispatchQueue(label: "com.veiller.bluetoothsdk.analytics.transport")
     private let configuration: BluetoothSdkAnalyticsConfiguration
     private var startedCaptured = false
     private var lastConnected = false
@@ -143,7 +143,7 @@ final class BluetoothSdkAnalytics {
     private func baseProperties(configuration: BluetoothSdkAnalyticsConfiguration) -> [String: Any] {
         var properties: [String: Any] = [
             "$process_person_profile": false,
-            "event_source": "mentra_bluetooth_sdk",
+            "event_source": "veiller_bluetooth_sdk",
             "sdk_platform": "ios",
             "sdk_surface": configuration.surface,
             "app_identifier": Bundle.main.bundleIdentifier ?? "",
@@ -158,11 +158,11 @@ final class BluetoothSdkAnalytics {
     }
 
     private func distinctId() -> String {
-        let key = "mentra_bluetooth_sdk_analytics_distinct_id"
+        let key = "veiller_bluetooth_sdk_analytics_distinct_id"
         if let existing = UserDefaults.standard.string(forKey: key), !existing.isEmpty {
             return existing
         }
-        let generated = "mentra-bt-sdk-\(UUID().uuidString)"
+        let generated = "veiller-bt-sdk-\(UUID().uuidString)"
         UserDefaults.standard.set(generated, forKey: key)
         return generated
     }
@@ -189,7 +189,7 @@ private extension String {
 
 private extension BluetoothSdkAnalyticsConfiguration {
     func resolvedForApp() -> BluetoothSdkAnalyticsConfiguration {
-        let disabledByApp = Bundle.main.object(forInfoDictionaryKey: "MentraBluetoothSdkAnalyticsDisabled") as? Bool == true
+        let disabledByApp = Bundle.main.object(forInfoDictionaryKey: "VeillerBluetoothSdkAnalyticsDisabled") as? Bool == true
 
         return BluetoothSdkAnalyticsConfiguration(
             enabled: enabled && !disabledByApp,

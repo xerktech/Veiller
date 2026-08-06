@@ -167,7 +167,7 @@ flowchart TD
   B["Container stdout<br/>JSON line: level, time, msg, userId, ..."]
   C["Node disk<br/>/var/log/containers/cloud-prod-cloud_default_*.log"]
   D["Vector pod (DaemonSet on this node)<br/>filter container_name<br/>parse JSON, flatten Pino fields<br/>decorate _meta.kubernetes_pod"]
-  E["BetterStack<br/>ClickHouse table for the source<br/>(e.g. mentra-us-central)"]
+  E["BetterStack<br/>ClickHouse table for the source<br/>(e.g. veiller-us-central)"]
   F["Read paths<br/>Live Tail · bstack CLI · BetterStack dashboards"]
 
   A -->|Pino serializes to JSON| B
@@ -193,7 +193,7 @@ shipping.
 
 The SDK still has the `@logtail/pino` transport wired up
 (opt-in via `BETTERSTACK_SOURCE_TOKEN`), used by some internal
-miniapps. Their logs land in the legacy `MentraCloud - Prod`
+miniapps. Their logs land in the legacy `VeillerCloud - Prod`
 source, separate from the regional Vector sources. See the
 README for which source receives what.
 

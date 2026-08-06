@@ -41,10 +41,10 @@ const N_CLIENTS = Number.parseInt(process.env.AUDIO_SOAK_N ?? "30", 10);
 
 {
   const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
@@ -53,13 +53,13 @@ const N_CLIENTS = Number.parseInt(process.env.AUDIO_SOAK_N ?? "30", 10);
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS ??= JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       oemIdClaim: "oem_id",
     },
   ]);
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-soak-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-soak-test";
   // Distinct Redis DB so this test doesn't share keys with other suites.
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/3";
   // Deterministic offline transcript source: this suite tests scaling/routing,
@@ -93,11 +93,11 @@ let podA: PodHandle;
 let podB: PodHandle;
 
 beforeAll(async () => {
-  const { resetMentraKeyCache } = await import("../packages/shared/src/auth");
+  const { resetVeillerKeyCache } = await import("../packages/shared/src/auth");
   const { resetSigningKeyCache } = await import(
     "../packages/core/src/services/session.service"
   );
-  resetMentraKeyCache();
+  resetVeillerKeyCache();
   resetSigningKeyCache();
 
   testOemHandle = await startTestOem({

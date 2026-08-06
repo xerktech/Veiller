@@ -19,8 +19,8 @@ import {
   type GlassesDashboardWidget,
 } from "@/utils/glassesDashboardWidgets"
 import {PermissionFeatures, checkFeaturePermissions, requestFeaturePermissions} from "@/utils/PermissionsUtils"
-import {SETTINGS, useSetting} from "@mentra/engine"
-import {engine} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
+import {engine} from "@veiller/engine"
 
 /**
  * Dashboard auto-close values, in seconds; 0 means "Never" — the G2 driver
@@ -95,7 +95,7 @@ export default function DashboardSettingsScreen() {
       <Header titleTx="settings:dashboardSettings" leftIcon="chevron-left" onLeftPress={goBack} />
       <ScrollView>
         <View className="gap-6 pt-6">
-          {/* Contextual dashboard is the MentraOS-rendered head-up overlay; on
+          {/* Contextual dashboard is the Veiller-rendered head-up overlay; on
               devices with a native firmware dashboard (G2) it does nothing. */}
           {!features?.hasNativeDashboard && (
             <ToggleSetting

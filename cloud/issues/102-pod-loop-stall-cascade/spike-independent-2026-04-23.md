@@ -36,7 +36,7 @@ porter kubectl --cluster 4689 -- describe pod -n default cloud-prod-cloud-7b9847
 - Repo BetterStack CLI with credentials supplied by Doppler:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bun cloud/tools/bstack/bstack.ts ...
+doppler run --project veiller-sre --config dev -- bun cloud/tools/bstack/bstack.ts ...
 ```
 
 - `bstack sql` raw ClickHouse queries against:
@@ -82,7 +82,7 @@ scheduled promptly. It does not implicate MongoDB or `/health` work.
 Query:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bun cloud/tools/bstack/bstack.ts sql "
+doppler run --project veiller-sre --config dev -- bun cloud/tools/bstack/bstack.ts sql "
 SELECT
   dt,
   JSONExtract(raw,'gapMs','Nullable(Float64)') AS gap_ms,
@@ -113,7 +113,7 @@ about 704MB against a 4096MB limit.
 Query:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bun cloud/tools/bstack/bstack.ts sql "
+doppler run --project veiller-sre --config dev -- bun cloud/tools/bstack/bstack.ts sql "
 SELECT
   dt,
   JSONExtract(raw,'rssMB','Nullable(Float64)') AS rss,
@@ -166,7 +166,7 @@ after the loop becomes schedulable again.
 Query shape:
 
 ```bash
-doppler run --project mentra-sre --config dev -- bun cloud/tools/bstack/bstack.ts sql "
+doppler run --project veiller-sre --config dev -- bun cloud/tools/bstack/bstack.ts sql "
 SELECT
   toStartOfInterval(dt, INTERVAL 30 SECOND) AS bucket,
   count() AS logs,

@@ -27,7 +27,7 @@
 
 //   // You may need to adjust the nesting order based on your specific requirements
 //   return (
-//     // <ThemeProvider defaultTheme="light" storageKey="mentraos-theme">
+//     // <ThemeProvider defaultTheme="light" storageKey="veiller-theme">
 //       <TooltipProvider>
 //         <ToastProvider>
 //           <DialogProvider>

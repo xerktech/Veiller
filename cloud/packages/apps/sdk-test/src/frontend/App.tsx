@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback, createContext, useContext} from "react"
-import {useMentraAuth} from "@mentra/react"
+import {useVeillerAuth} from "@veiller/react"
 import HomePage from "./pages/home/HomePage"
 
 // Theme Context
@@ -20,7 +20,7 @@ export function useTheme() {
 }
 
 export default function App() {
-  const {userId, isLoading, error, isAuthenticated} = useMentraAuth()
+  const {userId, isLoading, error, isAuthenticated} = useVeillerAuth()
 
   // Theme state with localStorage persistence
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -102,7 +102,7 @@ export default function App() {
           <h2 className="text-destructive text-lg font-semibold mb-2">Authentication Error</h2>
           <p className="text-destructive/80 text-sm mb-4">{error}</p>
           <p className="text-muted-foreground text-xs">
-            Please ensure you are opening this page from the MentraOS app.
+            Please ensure you are opening this page from the Veiller app.
           </p>
         </div>
       </div>

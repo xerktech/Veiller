@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# restore-stock.sh - Restore stock MentraOS on Mentra Live
+# restore-stock.sh - Restore stock Veiller on Mentra Live
 #
 # This script removes your third-party asg_client build, re-enables the
-# stock app, and optionally updates it to the latest version from Mentra.
+# stock app, and optionally updates it to the latest version from Veiller.
 #
 # Usage:
 #   ./scripts/restore-stock.sh
@@ -15,7 +15,7 @@ STOCK_PKG="com.mentra.asg_client"
 DEV_PKG="com.mentra.asg_client.thirdparty"
 OTA_URL="https://ota.mentraglass.com/prod_live_version_v2.json"
 
-echo "=== Restore Stock MentraOS ==="
+echo "=== Restore Stock Veiller ==="
 echo ""
 
 # Check for ADB connection
@@ -154,5 +154,5 @@ adb shell am start -n "$STOCK_PKG/.MainActivity" 2>/dev/null || true
 echo ""
 echo "=== Stock Firmware Restored ==="
 echo ""
-echo "The stock MentraOS app is now active."
+echo "The stock Veiller app is now active."
 echo ""

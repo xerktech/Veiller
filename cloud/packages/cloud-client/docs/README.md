@@ -13,9 +13,9 @@ The Cloud Client is a pure TypeScript SDK for connecting to and interacting with
 ## Quick Start
 
 ```typescript
-import { MentraClient } from '@augmentos/cloud-client';
+import { VeillerClient } from '@augmentos/cloud-client';
 
-const client = new MentraClient({
+const client = new VeillerClient({
   email: 'user@example.com',
   serverUrl: 'ws://localhost:3001'
 });
@@ -34,7 +34,7 @@ await client.disconnect();
 The Cloud Client mirrors the AugmentOS cloud architecture with clean separation of concerns:
 
 ### Core Client
-- **MentraClient**: Main client class with clean public API
+- **VeillerClient**: Main client class with clean public API
 - Pure SDK that could be used in production applications
 
 ### Internal Managers
@@ -202,7 +202,7 @@ const benchmarkAudio = await AudioSynthesizer.createBenchmarkAudio([
 
 ### Basic App Testing
 ```typescript
-const client = new MentraClient({
+const client = new VeillerClient({
   email: 'test@example.com',
   serverUrl: 'ws://localhost:3001'
 });
@@ -266,7 +266,7 @@ for (const point of route) {
 
 ### Multi-Server Testing
 ```typescript
-const client = new MentraClient({
+const client = new VeillerClient({
   email: 'test@example.com',
   serverUrl: 'ws://localhost:3001'  // Default server
 });

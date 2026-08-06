@@ -25,7 +25,7 @@ declare class CrustModule extends NativeModule<CrustModuleEvents> {
    */
   setDeferredSystemGestures(edges: Array<"top" | "bottom" | "left" | "right" | "all">): Promise<void>
 
-  // MentraOS Notification Commands
+  // Veiller Notification Commands
   setNotificationConfig(listenerEnabled: boolean, blocklist: string[]): Promise<void>
   getInstalledApps(): Promise<InstalledApp[]>
   getInstalledAppsForNotifications(): Promise<InstalledApp[]>
@@ -154,38 +154,38 @@ declare class CrustModule extends NativeModule<CrustModuleEvents> {
   startHeading(): Promise<{ok: boolean; error?: string}>
   stopHeading(): Promise<{ok: boolean; error?: string}>
 
-  // MentraJS Runtime — per-miniapp JSContext lifecycle.
+  // VeillerJS Runtime — per-miniapp JSContext lifecycle.
   /**
    * Spawn a per-miniapp JS context. Re-spawn is allowed: a live context
    * with the same packageName is killed first. Returns true if the
    * polyfill bundle + miniapp source evaluated without throwing.
    *
-   * The polyfill bundle is `mobile/modules/mentrajs-runtime/dist/startup.js`
+   * The polyfill bundle is `mobile/modules/veillerjs-runtime/dist/startup.js`
    * (shipped inside the host binary). It installs window-style globals
    * (console, timers, fetch, localStorage, crypto) atop the JSC runtime.
    */
-  mentraJsSpawn(packageName: string, polyfillBundle: string, miniappJs: string): Promise<boolean>
-  mentraJsEvaluate(packageName: string, source: string): Promise<unknown>
-  mentraJsKill(packageName: string): Promise<void>
+  veillerJsSpawn(packageName: string, polyfillBundle: string, miniappJs: string): Promise<boolean>
+  veillerJsEvaluate(packageName: string, source: string): Promise<unknown>
+  veillerJsKill(packageName: string): Promise<void>
   /**
    * Push a `{kind: "event"|"response", …}` envelope into the named
    * context's globalThis.__deliver. Returns when the underlying
    * evaluateScript completes (the JS handler runs synchronously on the
    * context's queue).
    */
-  mentraJsDispatchToJs(packageName: string, envelope: Record<string, unknown>): Promise<void>
-  mentraJsSetManifest(packageName: string, permissions: string[]): Promise<void>
+  veillerJsDispatchToJs(packageName: string, envelope: Record<string, unknown>): Promise<void>
+  veillerJsSetManifest(packageName: string, permissions: string[]): Promise<void>
   /** Diagnostic — returns the packageNames of every live JSContext. */
-  mentraJsAlivePackages(): string[]
+  veillerJsAlivePackages(): string[]
   /** Diagnostic — force a GC cycle on the named context. */
-  mentraJsDebugForceGC(packageName: string): Promise<boolean>
+  veillerJsDebugForceGC(packageName: string): Promise<boolean>
   /**
-   * Read the bundled MentraJS polyfill (startup.js) shipped inside the
+   * Read the bundled VeillerJS polyfill (startup.js) shipped inside the
    * host binary. Synchronous — host RN code calls this once on app boot
-   * and caches the string, then passes it to every mentraJsSpawn so
+   * and caches the string, then passes it to every veillerJsSpawn so
    * every JSContext starts with the same polyfill ABI.
    */
-  mentraJsLoadPolyfillBundle(): string
+  veillerJsLoadPolyfillBundle(): string
 }
 
 // This call loads the native module object from the JSI.

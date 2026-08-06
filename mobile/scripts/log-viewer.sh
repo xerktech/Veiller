@@ -1,5 +1,5 @@
 #!/bin/bash
-# MentraOS Log Viewer - Enhanced battlefield visibility
+# Veiller Log Viewer - Enhanced battlefield visibility
 # Usage: bun run start 2>&1 | ./scripts/log-viewer.sh
 
 # Color codes for different subsystems

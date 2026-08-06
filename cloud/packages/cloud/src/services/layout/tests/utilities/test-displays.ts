@@ -4,7 +4,7 @@
  * Utility functions for creating test display requests.
  */
 
-import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from '@mentra/sdk';
+import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from '@veiller/sdk';
 
 /**
  * Create a simple text display request

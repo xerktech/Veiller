@@ -6,7 +6,7 @@ import {
   DataStream,
   CloudToAppMessageType,
   StreamType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { User, UserI } from "../../models/user.model";
 import { logger as rootLogger } from "../logging/pino-logger";

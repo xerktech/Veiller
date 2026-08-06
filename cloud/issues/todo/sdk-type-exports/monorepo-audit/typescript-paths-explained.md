@@ -5,10 +5,10 @@
 When you write this in your code:
 
 ```typescript
-import { Capabilities } from "@mentra/sdk";
+import { Capabilities } from "@veiller/sdk";
 ```
 
-**Three different systems** need to understand what `@mentra/sdk` means:
+**Three different systems** need to understand what `@veiller/sdk` means:
 
 1. **TypeScript** (type checking, IDE autocomplete)
 2. **Package Manager** (bun/npm - installing dependencies)
@@ -24,7 +24,7 @@ The `"paths"` config is **only for #1 (TypeScript)**.
 
 ```json
 "paths": {
-  "@mentra/sdk": ["../sdk/src"]
+  "@veiller/sdk": ["../sdk/src"]
 }
 ```
 
@@ -50,7 +50,7 @@ The `"paths"` config is **only for #1 (TypeScript)**.
 
 ```json
 "dependencies": {
-  "@mentra/sdk": "workspace:*"
+  "@veiller/sdk": "workspace:*"
 }
 ```
 
@@ -59,13 +59,13 @@ The `"paths"` config is **only for #1 (TypeScript)**.
 **Used by**:
 
 - `bun install` to create symlinks in node_modules
-- Creates: `node_modules/@mentra/sdk` → `../../packages/sdk`
+- Creates: `node_modules/@veiller/sdk` → `../../packages/sdk`
 
 **What happens**:
 
 ```bash
 $ bun install
-# Creates: cloud/packages/cloud/node_modules/@mentra/sdk
+# Creates: cloud/packages/cloud/node_modules/@veiller/sdk
 #          ↓ (symlink)
 #          cloud/packages/sdk
 ```
@@ -78,8 +78,8 @@ $ bun install
 
 **How it works**:
 
-1. See `import { X } from "@mentra/sdk"`
-2. Look in `node_modules/@mentra/sdk/` (finds symlink)
+1. See `import { X } from "@veiller/sdk"`
+2. Look in `node_modules/@veiller/sdk/` (finds symlink)
 3. Follow symlink to `../../packages/sdk`
 4. Read `package.json` → check `"main"` or `"exports"`
 5. Load that file
@@ -114,21 +114,21 @@ Bun will:
 ```json
 // tsconfig.json
 "paths": {
-  "@mentra/sdk": ["../sdk/dist"]
+  "@veiller/sdk": ["../sdk/dist"]
 }
 ```
 
 ```json
 // package.json
 "dependencies": {
-  "@mentra/sdk": "workspace:*"
+  "@veiller/sdk": "workspace:*"
 }
 ```
 
 **What happened**:
 
 1. **TypeScript**: Looks at `../sdk/dist/index.d.ts` for types
-2. **Bun install**: Creates symlink `node_modules/@mentra/sdk` → `../sdk`
+2. **Bun install**: Creates symlink `node_modules/@veiller/sdk` → `../sdk`
 3. **Bun runtime**: Follows symlink, reads `package.json`, loads `dist/index.js`
 
 **Result**: Everyone uses `dist/`. You must rebuild SDK for TypeScript to see changes.
@@ -140,14 +140,14 @@ Bun will:
 ```json
 // tsconfig.json
 "paths": {
-  "@mentra/sdk": ["../sdk/src"]  // ← Changed
+  "@veiller/sdk": ["../sdk/src"]  // ← Changed
 }
 ```
 
 ```json
 // package.json (unchanged)
 "dependencies": {
-  "@mentra/sdk": "workspace:*"
+  "@veiller/sdk": "workspace:*"
 }
 ```
 
@@ -213,20 +213,20 @@ echo "console.log('🔍 LOADED FROM SOURCE');" >> packages/sdk/src/index.ts
 When TypeScript sees:
 
 ```typescript
-import { X } from "@mentra/sdk";
+import { X } from "@veiller/sdk";
 ```
 
 It needs to resolve this to a **physical file path** to read the types.
 
 Without `"paths"`, TypeScript would:
 
-1. Look in `node_modules/@mentra/sdk`
+1. Look in `node_modules/@veiller/sdk`
 2. Find a symlink (but TypeScript doesn't follow symlinks well)
 3. Get confused or fail
 
 With `"paths"`, you tell TypeScript explicitly:
 
-> "When you see `@mentra/sdk`, look in `../sdk/src` instead"
+> "When you see `@veiller/sdk`, look in `../sdk/src` instead"
 
 ---
 
@@ -287,7 +287,7 @@ In a monorepo:
 **Before**:
 
 ```json
-"paths": { "@mentra/sdk": ["../sdk/dist"] }
+"paths": { "@veiller/sdk": ["../sdk/dist"] }
 ```
 
 → TypeScript looks at compiled output  
@@ -296,7 +296,7 @@ In a monorepo:
 **After**:
 
 ```json
-"paths": { "@mentra/sdk": ["../sdk/src"] }
+"paths": { "@veiller/sdk": ["../sdk/src"] }
 ```
 
 → TypeScript looks at source files  

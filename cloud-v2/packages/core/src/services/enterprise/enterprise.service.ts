@@ -162,13 +162,13 @@ export class EnterpriseServiceError extends Error {
   }
 }
 
-// Tenant IDs are a single namespace shared with OEMs and the built-in "mentra"
+// Tenant IDs are a single namespace shared with OEMs and the built-in "veiller"
 // tenant. The refresh-time revocation check (assertTenantStillAuthorized in
-// session.service) resolves a tenantId against "mentra" -> OEM -> enterprise in
+// session.service) resolves a tenantId against "veiller" -> OEM -> enterprise in
 // that order, so an enterprise org must never claim a reserved or OEM tenantId:
 // a collision would bind enterprise sessions to the wrong authority or bypass
 // revocation entirely.
-const RESERVED_TENANT_IDS = new Set(["mentra"]);
+const RESERVED_TENANT_IDS = new Set(["veiller"]);
 
 async function assertTenantIdAvailable(tenantId: string): Promise<void> {
   if (RESERVED_TENANT_IDS.has(tenantId)) {

@@ -52,13 +52,13 @@ Legend:
 
 ### Naming note
 
-The cloud/server host class is `MiniAppServer`, not `MentraApp`.
+The cloud/server host class is `MiniAppServer`, not `VeillerApp`.
 
 Why:
 
-- `MentraSession` is the runtime-agnostic app/session API that works across cloud and future local runtimes
+- `VeillerSession` is the runtime-agnostic app/session API that works across cloud and future local runtimes
 - the cloud-only host should be named for what it is: a server wrapper for mini apps
-- `MentraApp` becomes ambiguous once mini apps can run locally on the phone without a server
+- `VeillerApp` becomes ambiguous once mini apps can run locally on the phone without a server
 
 ### Key decision: callback pattern, not class inheritance
 
@@ -100,7 +100,7 @@ const server = new MyApp({packageName: "com.example.app", apiKey: "xxx"})
 await server.start()
 
 // ─── v3 (callback composition) ───────────────────
-import {MiniAppServer} from "@mentra/sdk"
+import {MiniAppServer} from "@veiller/sdk"
 
 const app = new MiniAppServer({packageName: "com.example.app", apiKey: "xxx"})
 
@@ -140,7 +140,7 @@ await app.start();
 | `packageName`     | `string` (required)                       | `string` (required)                  | ✅ Keep   |
 | `apiKey`          | `string` (required)                       | `string` (required)                  | ✅ Keep   |
 | `port`            | `number` (default 7010)                   | `number` (default 7010)              | ✅ Keep   |
-| `logLevel`        | `MentraLogLevel`                          | `MentraLogLevel` (from 038)          | ✅ Keep   |
+| `logLevel`        | `VeillerLogLevel`                          | `VeillerLogLevel` (from 038)          | ✅ Keep   |
 | `verbose`         | `boolean`                                 | `boolean` (from 038)                 | ✅ Keep   |
 | `cloudApiUrl`     | `string` (deprecated)                     | —                                    | ❌ Remove |
 | `webhookPath`     | `string` (deprecated, default '/webhook') | —                                    | ❌ Remove |
@@ -199,7 +199,7 @@ Currently the Dashboard mini app does 12 lines of boilerplate every time it need
 
 ```typescript
 // v2 — painful
-const userTimezone = session.settings.getMentraOS<string>("userTimezone")
+const userTimezone = session.settings.getVeiller<string>("userTimezone")
 const timezone = userTimezone || sessionInfo.latestLocation?.timezone
 if (timezone) {
   const options: Intl.DateTimeFormatOptions = {
@@ -258,11 +258,11 @@ Timezone is resolved from: user setting (`userTimezone`) → GPS-derived timezon
 
 ## 3b. session.display — Text Formatting Integration
 
-`session.display` integrates with `@mentra/display-utils` automatically. The session knows the device profile (G1, Nex, etc.) — developers don't need to manually create toolkits or pick profiles.
+`session.display` integrates with `@veiller/display-utils` automatically. The session knows the device profile (G1, Nex, etc.) — developers don't need to manually create toolkits or pick profiles.
 
 ### Two-layer wrapping model
 
-Text wrapping in MentraOS happens at two independent layers with different responsibilities:
+Text wrapping in Veiller happens at two independent layers with different responsibilities:
 
 **Layer 1 — SDK (`session.display.showText`)**: formats for readability.
 
@@ -355,7 +355,7 @@ session.display.showText(scroll.getViewport().lines)
 
 ### Architecture
 
-`@mentra/display-utils` stays as a standalone package (cloud and mobile use it directly). `session.display` wraps it with session context so SDK developers don't need to import it or pick profiles manually.
+`@veiller/display-utils` stays as a standalone package (cloud and mobile use it directly). `session.display` wraps it with session context so SDK developers don't need to import it or pick profiles manually.
 
 **`display-utils` break modes reference:**
 
@@ -404,7 +404,7 @@ interface TranscriptionConfig {
   languageHints?: string[]
 
   /** Custom vocabulary for better recognition of domain-specific terms.
-   *  e.g., ['MentraOS', 'HIPAA', 'kubectl'] */
+   *  e.g., ['Veiller', 'HIPAA', 'kubectl'] */
   vocabulary?: string[]
 
   /** Enable/disable speaker diarization.
@@ -462,7 +462,7 @@ session.transcription.onLanguage("en", (data) => {
 // Configure hints (all optional)
 session.transcription.configure({
   languageHints: ["en", "ja"],
-  vocabulary: ["MentraOS", "Soniox"],
+  vocabulary: ["Veiller", "Soniox"],
 })
 
 // Change hints mid-session (handler keeps working)
@@ -571,7 +571,7 @@ High-level methods (`showText`, `showCard`, etc.) continue to work on G1 — the
 
 Keep it minimal: `text`, `rect`, `line`, `image`, `circle`. If devs need complex rendering, they render to a bitmap externally and use `canvas.image()`.
 
-> **Note**: Canvas API depends on firmware capabilities of MentraOS glasses (in development). The exact draw call API will be specced alongside firmware.
+> **Note**: Canvas API depends on firmware capabilities of Veiller glasses (in development). The exact draw call API will be specced alongside firmware.
 
 ---
 
@@ -815,7 +815,7 @@ if (session.location.hasPermission) {
 // React to permission changes
 session.permissions.onUpdate((perms) => {
   if (!perms.location) {
-    session.display.showText('Please enable location in MentraOS settings');
+    session.display.showText('Please enable location in Veiller settings');
   }
 });
 
@@ -855,16 +855,16 @@ The app settings system (dev-defined schemas in dev console, user-configured val
 | `session.settings.onChange(handler)`                                   | ⚠️ Deprecated                                               | ⚠️ Deprecate        |
 | `session.settings.onValueChange(key, handler)`                         | ⚠️ Deprecated                                               | ⚠️ Deprecate        |
 | `session.settings.fetch()`                                             | ⚠️ Deprecated                                               | ⚠️ Deprecate        |
-| `session.settings.getMentraOS(key, default?)`                          | TBD — MentraOS system settings may move to `session.device` | ❓ Open             |
-| `session.settings.onMentraosChange(key, handler)`                      | TBD — same as above                                         | ❓ Open             |
+| `session.settings.getVeiller(key, default?)`                          | TBD — Veiller system settings may move to `session.device` | ❓ Open             |
+| `session.settings.onVeillerChange(key, handler)`                      | TBD — same as above                                         | ❓ Open             |
 | `session.settings.onMentraosSettingsChange(key, handler)` (deprecated) | —                                                           | ❌ Remove           |
-| `session.settings.getMentraosSetting(key, default?)` (duplicate)       | —                                                           | ❌ Remove           |
+| `session.settings.getVeillerSetting(key, default?)` (duplicate)       | —                                                           | ❌ Remove           |
 | `session.events.onSettingsUpdate(handler)`                             | —                                                           | ❌ Remove duplicate |
 | `session.events.onSettingChange(key, handler)`                         | —                                                           | ❌ Remove duplicate |
 | `session.getSettings()` (deprecated)                                   | —                                                           | ❌ Remove           |
 | `session.getSetting(key)` (deprecated)                                 | —                                                           | ❌ Remove           |
 
-> **Open question**: MentraOS system settings (`metricSystemEnabled`, `brightness`, etc.) are OS-level, not app-defined. Do they move to `session.device`? Or stay accessible somewhere else?
+> **Open question**: Veiller system settings (`metricSystemEnabled`, `brightness`, etc.) are OS-level, not app-defined. Do they move to `session.device`? Or stay accessible somewhere else?
 
 ---
 
@@ -1197,22 +1197,22 @@ Cloud-side: delete `app-communication.routes.ts` (both Express and Hono versions
 
 ### Problem
 
-SDK mounts HTTP endpoints at root level (`/webhook`, `/tool`, `/health`, `/settings`, `/photo-upload`, `/mentra-auth`). With `MiniAppServer extends Hono`, dev's web app shares the same server — route collisions are invisible and fragile.
+SDK mounts HTTP endpoints at root level (`/webhook`, `/tool`, `/health`, `/settings`, `/photo-upload`, `/veiller-auth`). With `MiniAppServer extends Hono`, dev's web app shares the same server — route collisions are invisible and fragile.
 
 ### Solution
 
-All SDK internal endpoints move behind a prefix: `/api/_mentraos/`
+All SDK internal endpoints move behind a prefix: `/api/_veiller/`
 
 | v2 path              | v3 path                            |
 | -------------------- | ---------------------------------- |
-| `POST /webhook`      | `POST /api/_mentraos/webhook`      |
-| `POST /tool`         | `POST /api/_mentraos/tool`         |
-| `GET /health`        | `GET /api/_mentraos/health`        |
-| `POST /settings`     | `POST /api/_mentraos/settings`     |
-| `POST /photo-upload` | `POST /api/_mentraos/photo-upload` |
-| `GET /mentra-auth`   | `GET /api/_mentraos/auth`          |
+| `POST /webhook`      | `POST /api/_veiller/webhook`      |
+| `POST /tool`         | `POST /api/_veiller/tool`         |
+| `GET /health`        | `GET /api/_veiller/health`        |
+| `POST /settings`     | `POST /api/_veiller/settings`     |
+| `POST /photo-upload` | `POST /api/_veiller/photo-upload` |
+| `GET /veiller-auth`   | `GET /api/_veiller/auth`          |
 
-### Why `/api/_mentraos/`
+### Why `/api/_veiller/`
 
 - `/api/*` is the conventional namespace for API endpoints.
 - The dev's own API routes live at `/api/whatever` (their convention).
@@ -1230,7 +1230,7 @@ The cloud hardcodes these paths (`${publicUrl}/webhook`, `${publicUrl}/tool`, et
 - `app-settings.routes.ts` — settings push
 - `system-app.api.ts` — tool invocation
 
-**Backwards compat strategy**: SDK v3 mounts at `/api/_mentraos/*` as primary paths AND mounts thin aliases at old root paths during transition. Cloud can migrate to new paths, then old aliases are removed in v4.
+**Backwards compat strategy**: SDK v3 mounts at `/api/_veiller/*` as primary paths AND mounts thin aliases at old root paths during transition. Cloud can migrate to new paths, then old aliases are removed in v4.
 
 ---
 
@@ -1239,7 +1239,7 @@ The cloud hardcodes these paths (`${publicUrl}/webhook`, `${publicUrl}/tool`, et
 | #   | Decision                                                                  | Rationale                                                                        |
 | --- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | D1  | Manager pattern for session API                                           | Discoverability, lifecycle management, smaller files                             |
-| D2  | Route namespacing under `/api/_mentraos/`                                 | Prevents collision with dev's web app routes; `/api/*` is conventional           |
+| D2  | Route namespacing under `/api/_veiller/`                                 | Prevents collision with dev's web app routes; `/api/*` is conventional           |
 | D3  | `session.location` as top-level manager (not under phone)                 | Location is complex enough to be its own namespace                               |
 | D4  | Auto-detect as transcription default                                      | Soniox's strength, zero-config happy path                                        |
 | D5  | ISO 639-1 language codes (`en`, `ja`)                                     | Soniox native format, Azure is dead code                                         |
@@ -1285,7 +1285,7 @@ The cloud hardcodes these paths (`${publicUrl}/webhook`, `${publicUrl}/tool`, et
 
 | #   | Question                                                               | Notes                                                                                                                   |
 | --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Q1  | MentraOS system settings — where do they live?                         | `metricSystemEnabled`, `brightness`, etc. are OS-level, not app-defined. Move to `session.device`?                      |
+| Q1  | Veiller system settings — where do they live?                         | `metricSystemEnabled`, `brightness`, etc. are OS-level, not app-defined. Move to `session.device`?                      |
 | Q2  | Typed storage with generics?                                           | `session.storage.get<MyData>('key')` — nice DX but requires dev-maintained types                                        |
 | Q3  | Lazy-initialize managers?                                              | If app never uses `session.camera`, skip init? Saves memory, adds complexity                                            |
 | Q4  | `session.display.clear()` — auto-clear on new display call?            | State management for what's on screen                                                                                   |

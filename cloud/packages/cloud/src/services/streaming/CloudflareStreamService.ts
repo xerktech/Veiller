@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import { Logger } from "pino";
-import { RestreamDestination } from "@mentra/sdk";
+import { RestreamDestination } from "@veiller/sdk";
 
 /**
  * Cloudflare Output configuration
@@ -296,7 +296,7 @@ export class CloudflareStreamService {
             timeoutSeconds: 0, // Use platform default
           },
           // meta: {
-          //   mentraOS: true,
+          //   veiller: true,
           //   userId: userId,
           //   quality: config.quality,
           // },
@@ -621,7 +621,7 @@ export class CloudflareStreamService {
       const liveInputs: CloudflareLiveInput[] = response.data.result;
 
       return liveInputs
-        .filter((input) => input.meta?.mentraOS === true)
+        .filter((input) => input.meta?.veiller === true)
         .map((input) => ({
           id: input.uid,
           userId: input.meta.userId || "unknown",

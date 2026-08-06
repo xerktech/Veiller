@@ -1,7 +1,7 @@
 /**
  * App Server Module
  *
- * Creates and manages a server for Apps in the MentraOS ecosystem.
+ * Creates and manages a server for Apps in the Veiller ecosystem.
  * Handles webhook endpoints, session management, and cleanup.
  *
  * Now built on Hono + Bun for better performance and developer experience.
@@ -27,14 +27,14 @@ import {
 } from "../../types";
 
 import { AppSession } from "../session/index";
-import { createAuthMiddleware, createMentraAuthRoutes } from "../webview";
+import { createAuthMiddleware, createVeillerAuthRoutes } from "../webview";
 
 // Import PhotoData type for pending photo requests
 import type { PhotoData } from "../../types/photo-data";
 
 export const GIVE_APP_CONTROL_OF_TOOL_RESPONSE: string = "GIVE_APP_CONTROL_OF_TOOL_RESPONSE";
-const SDK_ROUTE_PREFIX = "/api/_mentraos";
-const LEGACY_MENTRA_AUTH_ROUTE_PREFIX = "/api/mentra/auth";
+const SDK_ROUTE_PREFIX = "/api/_veiller";
+const LEGACY_VEILLER_AUTH_ROUTE_PREFIX = "/api/veiller/auth";
 
 /**
  * Pending photo request stored at AppServer level for reconnection resilience.
@@ -68,7 +68,7 @@ interface PendingPhotoRequest {
 export interface AppServerConfig {
   /** 📦 Unique identifier for your App (e.g., 'org.company.appname') must match what you specified at https://console.mentra.glass */
   packageName: string;
-  /** 🔑 API key for authentication with MentraOS Cloud */
+  /** 🔑 API key for authentication with Veiller Cloud */
   apiKey: string;
   /** 🌐 Port number for the server (default: 7010) */
   port?: number;
@@ -101,7 +101,7 @@ export interface AppServerConfig {
    * - 'info': Normal operation
    * - 'debug': Everything including SDK internals
    *
-   * Can also be set with the MENTRA_LOG_LEVEL environment variable.
+   * Can also be set with the VEILLER_LOG_LEVEL environment variable.
    * This config option takes priority over the env var.
    */
   logLevel?: "error" | "warn" | "info" | "debug";
@@ -116,7 +116,7 @@ type AppHono = Hono<{ Variables: AuthVariables }>;
  * Base class for creating App servers, now extending Hono for a modern API.
  * Handles:
  * - 🔄 Session lifecycle management
- * - 📡 Webhook endpoints for MentraOS Cloud
+ * - 📡 Webhook endpoints for Veiller Cloud
  * - 📂 Static file serving
  * - ❤️ Health checks
  * - 🧹 Cleanup on shutdown
@@ -188,7 +188,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
     // Apply config-level log settings to environment before logger creation.
     // Config takes priority over env vars.
     if (config.logLevel !== undefined) {
-      process.env.MENTRA_LOG_LEVEL = config.logLevel;
+      process.env.VEILLER_LOG_LEVEL = config.logLevel;
     }
 
     this.logger = createLogger({
@@ -220,8 +220,8 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
     this.setupHealthCheck();
     this.setupToolCallEndpoint();
     this.setupPhotoUploadEndpoint();
-    this.setupMentraWebviewAuth();
-    this.setupMentraAuthRedirect();
+    this.setupVeillerWebviewAuth();
+    this.setupVeillerAuthRedirect();
     this.setupPublicDir();
     this.setupShutdown();
   }
@@ -280,11 +280,11 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
 
   /**
    * 🛠️ Tool Call Handler
-   * Override this method to handle tool calls from MentraOS Cloud.
+   * Override this method to handle tool calls from Veiller Cloud.
    * This is where you implement your app's tool functionality.
    *
    * @param toolCall - The tool call request containing tool details and parameters
-   * @returns Optional string response that will be sent back to MentraOS Cloud
+   * @returns Optional string response that will be sent back to Veiller Cloud
    */
   protected async onToolCall(toolCall: ToolCall): Promise<string | undefined> {
     this.logger.debug(`Tool call received: ${toolCall.toolId}`);
@@ -342,7 +342,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
    */
   private async checkSDKVersion(): Promise<void> {
     try {
-      const sdkPkgPath = path.resolve(process.cwd(), "node_modules/@mentra/sdk/package.json");
+      const sdkPkgPath = path.resolve(process.cwd(), "node_modules/@veiller/sdk/package.json");
 
       let currentVersion = "unknown";
 
@@ -350,7 +350,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
         const sdkPkg = JSON.parse(fs.readFileSync(sdkPkgPath, "utf-8"));
         currentVersion = sdkPkg.version || "not-found";
       } else {
-        this.logger.debug({ sdkPkgPath }, "No @mentra/sdk package.json found at path");
+        this.logger.debug({ sdkPkgPath }, "No @veiller/sdk package.json found at path");
       }
 
       // Determine which dist-tag (release track) the dev is on
@@ -361,7 +361,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 3000);
-        const response = await fetch(`https://registry.npmjs.org/@mentra/sdk/${distTag}`, {
+        const response = await fetch(`https://registry.npmjs.org/@veiller/sdk/${distTag}`, {
           signal: controller.signal,
         });
         clearTimeout(timeout);
@@ -375,10 +375,10 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
 
       if (currentVersion === "not-found") {
         this.logger.warn(
-          "@mentra/sdk not found in your project dependencies. Install it with: bun install @mentra/sdk",
+          "@veiller/sdk not found in your project dependencies. Install it with: bun install @veiller/sdk",
         );
       } else if (latest && latest !== currentVersion) {
-        this.logger.warn(`SDK update available: ${currentVersion} → ${latest} — bun install @mentra/sdk@${distTag}`);
+        this.logger.warn(`SDK update available: ${currentVersion} → ${latest} — bun install @veiller/sdk@${distTag}`);
       }
     } catch (err) {
       this.logger.debug(err, "Version check failed");
@@ -515,7 +515,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
 
   /**
    * Setup Webhook Endpoint
-   * Creates the webhook endpoint that MentraOS Cloud calls to start new sessions.
+   * Creates the webhook endpoint that Veiller Cloud calls to start new sessions.
    */
   private setupWebhook(): void {
     const webhookPaths = [this.config.webhookPath || "/webhook", `${SDK_ROUTE_PREFIX}/webhook`];
@@ -562,7 +562,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
 
   /**
    * Setup Tool Call Endpoint
-   * Creates a /tool endpoint for handling tool calls from MentraOS Cloud.
+   * Creates a /tool endpoint for handling tool calls from Veiller Cloud.
    */
   private setupToolCallEndpoint(): void {
     const postHandler = async (c: Context<{ Variables: AuthVariables }>) => {
@@ -805,7 +805,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
 
   /**
    * Setup Settings Endpoint
-   * Creates a /settings endpoint that the MentraOS Cloud can use to update settings.
+   * Creates a /settings endpoint that the Veiller Cloud can use to update settings.
    */
   private setupSettingsEndpoint(): void {
     const handler = async (c: Context<{ Variables: AuthVariables }>) => {
@@ -1063,16 +1063,16 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
   }
 
   /**
-   * Setup Mentra Auth Redirect Endpoint
-   * Creates a /mentra-auth endpoint that redirects to the MentraOS OAuth flow.
+   * Setup Veiller Auth Redirect Endpoint
+   * Creates a /veiller-auth endpoint that redirects to the Veiller OAuth flow.
    */
-  private setupMentraAuthRedirect(): void {
+  private setupVeillerAuthRedirect(): void {
     const handler = (c: Context<{ Variables: AuthVariables }>) => {
       const authUrl = `https://account.mentra.glass/auth?packagename=${encodeURIComponent(this.config.packageName)}`;
       return c.redirect(authUrl, 302);
     };
 
-    for (const path of ["/mentra-auth", `${SDK_ROUTE_PREFIX}/auth`]) {
+    for (const path of ["/veiller-auth", `${SDK_ROUTE_PREFIX}/auth`]) {
       this.get(path, handler);
     }
   }
@@ -1081,17 +1081,17 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
    * Setup SDK-owned webview auth routes.
    *
    * Canonical v3 path is under the internal SDK namespace. The legacy
-   * `/api/mentra/auth` path remains as a compatibility alias during the
+   * `/api/veiller/auth` path remains as a compatibility alias during the
    * transition so older Hono examples and early adopters keep working.
    */
-  private setupMentraWebviewAuth(): void {
-    const authApp = createMentraAuthRoutes({
+  private setupVeillerWebviewAuth(): void {
+    const authApp = createVeillerAuthRoutes({
       apiKey: this.config.apiKey,
       packageName: this.config.packageName,
       cookieSecret: this.config.cookieSecret || this.config.apiKey,
     });
 
-    for (const path of [`${SDK_ROUTE_PREFIX}/auth`, LEGACY_MENTRA_AUTH_ROUTE_PREFIX]) {
+    for (const path of [`${SDK_ROUTE_PREFIX}/auth`, LEGACY_VEILLER_AUTH_ROUTE_PREFIX]) {
       this.route(path, authApp);
     }
   }

@@ -3,12 +3,12 @@ import {useEffect, useRef, useState} from "react"
 import {useNavigationStore} from "@/stores/navigation"
 import {Capabilities, getModelCapabilities} from "@/../../cloud/packages/types/src"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import showAlert from "@/utils/AlertUtils"
 import {translate} from "@/i18n/translate"
 import {usePathname} from "expo-router"
-import {BgTimer, engine, type VersionInfo} from "@mentra/engine"
-import {fetchVersionInfo} from "@mentra/engine/internal"
+import {BgTimer, engine, type VersionInfo} from "@veiller/engine"
+import {fetchVersionInfo} from "@veiller/engine/internal"
 
 export {
   fetchVersionInfo,
@@ -17,7 +17,7 @@ export {
   findMatchingMtkPatch,
   checkBesUpdate,
   checkForOtaUpdate,
-} from "@mentra/engine/internal"
+} from "@veiller/engine/internal"
 
 function areGlassesConnectedNow(): boolean {
   return engine.ota.snapshot().connected

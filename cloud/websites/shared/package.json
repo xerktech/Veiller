@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/shared",
+  "name": "@veiller/shared",
   "version": "1.0.0",
   "description": "Shared code for all websites.",
   "main": "src/index.tsx",

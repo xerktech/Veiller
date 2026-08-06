@@ -1,6 +1,6 @@
 import {randomUUID} from "crypto"
 
-import {TranscriptionData} from "@mentra/sdk"
+import {TranscriptionData} from "@veiller/sdk"
 
 import {UserSession} from "./UserSession"
 import {convertToPinyin} from "../utils/ChineseUtils"

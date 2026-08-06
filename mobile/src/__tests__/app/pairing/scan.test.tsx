@@ -1,4 +1,4 @@
-jest.mock("@mentra/bluetooth-sdk", () => {
+jest.mock("@veiller/bluetooth-sdk", () => {
   const {bluetoothSdkMock} = require("@/test-utils/mockBluetoothSdk")
   return {
     __esModule: true,
@@ -63,8 +63,8 @@ jest.mock("@/contexts/ThemeContext", () => ({
   }),
 }))
 
-jest.mock("@/components/brands/MentraLogoStandalone", () => ({
-  MentraLogoStandalone: function MockMentraLogoStandalone() {
+jest.mock("@/components/brands/VeillerLogoStandalone", () => ({
+  VeillerLogoStandalone: function MockVeillerLogoStandalone() {
     return null
   },
 }))
@@ -135,16 +135,16 @@ import {act, render, fireEvent, waitFor} from "@testing-library/react-native"
 import type {ReactNode} from "react"
 import {Platform} from "react-native"
 
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {useLocalSearchParams} from "expo-router"
 import {focusEffectPreventBack, usePushUnder} from "@/contexts/NavigationHistoryContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {requestFeaturePermissions} from "@/utils/PermissionsUtils"
 import SelectGlassesBluetoothScreen from "@/app/pairing/scan"
-import {useCoreStore} from "@mentra/engine/internal"
+import {useCoreStore} from "@veiller/engine/internal"
 import {useGlassesStore} from "../../../../modules/engine/src/stores/glasses"
-import {SETTINGS} from "@mentra/engine"
-import {useSettingsStore} from "@mentra/engine/internal"
+import {SETTINGS} from "@veiller/engine"
+import {useSettingsStore} from "@veiller/engine/internal"
 import {resetBluetoothSdkMock} from "@/test-utils/mockBluetoothSdk"
 
 const originalPlatformOS = Platform.OS

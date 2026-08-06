@@ -375,7 +375,7 @@ describe("LiveKitGrpcClient", () => {
 ```go
 import (
     "testing"
-    pb "github.com/mentra/livekit-bridge/proto"
+    pb "github.com/veiller/livekit-bridge/proto"
 )
 
 func TestJoinRoom(t *testing.T) {

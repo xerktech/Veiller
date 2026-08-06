@@ -1,5 +1,5 @@
 /**
- * `@mentra/cloud-core` — Mentra Services. OEM auth runtime, OEM portal backend,
+ * `@veiller/cloud-core` — Veiller Services. OEM auth runtime, OEM portal backend,
  * miniapp store, REST endpoints.
  *
  * Boot order:
@@ -16,7 +16,7 @@
  * Specs: cloud-v2/docs/issues/001-oem-auth/, 002-oem-portal/, miniapp store work.
  */
 
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import {
   connectMongo,
   disconnectMongo,
@@ -30,7 +30,7 @@ const logger = createLogger("core");
 export interface StartCoreOptions {
   /** HTTP port. Default: `process.env.PORT ?? 3000`. */
   port?: number;
-  /** Mongo URL. Default: `process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/mentra-cloud-v2"`. */
+  /** Mongo URL. Default: `process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/veiller-cloud-v2"`. */
   mongoUrl?: string;
 }
 
@@ -46,7 +46,7 @@ export async function startCore(opts: StartCoreOptions = {}): Promise<CoreHandle
   const mongoUrl =
     opts.mongoUrl ??
     process.env.MONGO_URL ??
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2";
 
   await connectMongo(mongoUrl);
   try {

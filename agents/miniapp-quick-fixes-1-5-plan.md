@@ -15,12 +15,12 @@ This doc is the *how*. The *what* and *why* are in the spec — read that first 
   user's server.ts ───┤  port 3000 (miniapp)   │
                       │                        │
                       │  port 3001 (sidecar)   │
-                      │   ws://__mentra_dev    │
+                      │   ws://__veiller_dev    │
                       └──────────┬─────────────┘
                                  │ WebSocket
                                  │
             ┌────────────────────┴───────────────────┐
-            │ Phone (MentraOS app)                   │
+            │ Phone (Veiller app)                   │
             │                                        │
             │  DevServerBridge.ts ─────┐             │
             │   (per-package WS)       │             │
@@ -44,19 +44,19 @@ Two channels multiplexed on one WebSocket:
 
 ### 1. Sidecar dev server — `sdk/miniapp-cli/src/dev-server.ts` (new)
 
-A separate `Bun.serve` started by `mentra-miniapp dev`, on port `<userPort + 1>` (default 3001 when miniapp is on 3000). Doesn't touch the user's `server.ts`.
+A separate `Bun.serve` started by `veiller-miniapp dev`, on port `<userPort + 1>` (default 3001 when miniapp is on 3000). Doesn't touch the user's `server.ts`.
 
 Responsibilities:
-- WebSocket upgrade at `/__mentra_dev`.
+- WebSocket upgrade at `/__veiller_dev`.
 - Filesystem watcher on the project root (chokidar or `Bun.watch`); debounced 100ms; broadcasts `{type: "reload"}` on change.
 - Routes incoming `{type: "log", ...}` to stdout, formatted with package name + timestamp + ANSI color.
-- `GET /__mentra_dev/health` for liveness checks.
+- `GET /__veiller_dev/health` for liveness checks.
 - Listens on `127.0.0.1` AND `0.0.0.0` so phone (LAN) can reach it.
 
 **Why sidecar, not patching user's server:**
 - Works regardless of what the dev server uses (Bun.serve, Vite, Next, Express, custom).
 - Doesn't pollute user code.
-- Can also host the `/__mentra_dev/files` endpoint for the dev-applets caching spec — single dev surface.
+- Can also host the `/__veiller_dev/files` endpoint for the dev-applets caching spec — single dev surface.
 
 ### 2. CLI changes — `sdk/miniapp-cli/src/dev.ts`
 
@@ -100,12 +100,12 @@ The unmount cleanup calls `devServerBridge.disconnect(packageName)`.
 
 ### 6. Console-tap injection — `mobile/src/utils/miniappGlobals.ts`
 
-Extend `BuildMiniappGlobalsOptions` with `injectDevConsoleTap?: boolean`. When true, append the console-wrap shim to the returned script *after* the existing `window.MentraOS` setup.
+Extend `BuildMiniappGlobalsOptions` with `injectDevConsoleTap?: boolean`. When true, append the console-wrap shim to the returned script *after* the existing `window.Veiller` setup.
 
 The shim:
 
 ```js
-if (window.MentraOS && window.MentraOS.miniappDeveloperMode) {
+if (window.Veiller && window.Veiller.miniappDeveloperMode) {
   ['log', 'warn', 'error', 'info', 'debug'].forEach(level => {
     const original = console[level];
     console[level] = function(...args) {
@@ -117,7 +117,7 @@ if (window.MentraOS && window.MentraOS.miniappDeveloperMode) {
           return a;
         });
         window.ReactNativeWebView.postMessage(JSON.stringify({
-          payload: {type: "dev_log", level: level, args: serialized, packageName: window.MentraOS.packageName, timestamp: Date.now()}
+          payload: {type: "dev_log", level: level, args: serialized, packageName: window.Veiller.packageName, timestamp: Date.now()}
         }));
       } catch(e) { /* swallow */ }
     };
@@ -137,7 +137,7 @@ In `handleRawMessage`: if envelope `payload.type === "dev_log"`, route to `devSe
 
 ### 9. SDK auto-injected reload listener — `sdk/miniapp/src/index.ts` or new `sdk/miniapp/src/dev-reload.ts`
 
-When the SDK initializes and detects `window.MentraOS.miniappDeveloperMode === true`, register a listener on `window.message` events. On `{type: "reload"}`, call `location.reload()`.
+When the SDK initializes and detects `window.Veiller.miniappDeveloperMode === true`, register a listener on `window.message` events. On `{type: "reload"}`, call `location.reload()`.
 
 This is symmetrical to the console-tap (which is phone-injected) — the reload listener is SDK-injected because it lives entirely inside the WebView's JS world.
 
@@ -225,7 +225,7 @@ Future expansion: new `type` strings (`{type: "reload-css"}`, `{type: "open-devt
 ## Sequencing
 
 1. **Sidecar dev server** — standalone, testable in isolation. Ship first as the sidecar can run before the phone-side bridge exists; it just won't have any clients.
-2. **CLI integration** — spawn sidecar from `mentra-miniapp dev`, encode `dev` in QR.
+2. **CLI integration** — spawn sidecar from `veiller-miniapp dev`, encode `dev` in QR.
 3. **Phone DevServerBridge** — reconnect logic, ring buffer, multiplexed message handling.
 4. **Console-tap injection** — extend `miniappGlobals.ts`, wire from `MiniappHost`.
 5. **LocalMiniappRuntime routing** — `dev_log` short-circuit.
@@ -240,7 +240,7 @@ Estimated 5-7 days end-to-end. Steps 1-2 can run in parallel with steps 3-6 sinc
 
 - **Risk: ReactNativeWebView.postMessage rate cap.** The shim could DoS the bridge if the user logs in a tight loop. Mitigation: phone-side rate limit (~100 logs/sec/package), drop excess.
 - **Risk: Sidecar port conflict.** If port `userPort + 1` is taken, fall back to a random ephemeral port. CLI prints which port it chose.
-- **Risk: WebSocket `open` succeeds but server is wrong process.** Mitigation: on connect, send `{type: "hello", protocol: "mentra-dev/1"}`; sidecar replies `{type: "hello-ack"}`. If no ack within 1s, treat as wrong server, close.
+- **Risk: WebSocket `open` succeeds but server is wrong process.** Mitigation: on connect, send `{type: "hello", protocol: "veiller-dev/1"}`; sidecar replies `{type: "hello-ack"}`. If no ack within 1s, treat as wrong server, close.
 - **Rollback:** if the bridge has issues, set `injectDevConsoleTap: false` and skip the bridge connection in `local.tsx`. The miniapp still works; no live reload, no console forwarding. The path matches the "older CLI without `dev` param" fallback already designed in.
 
 ---

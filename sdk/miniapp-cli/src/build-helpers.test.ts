@@ -46,7 +46,7 @@ describe("background runtime guard", () => {
 
   test("allows public env values that the scaffold build inlines", () => {
     const findings = findUnsupportedBackgroundApis(`
-      const apiUrl = process.env.MENTRA_PUBLIC_API_URL
+      const apiUrl = process.env.VEILLER_PUBLIC_API_URL
       void fetch(apiUrl)
     `)
 

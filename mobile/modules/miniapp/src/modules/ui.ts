@@ -4,11 +4,11 @@
  *
  *   1. **Broadcast** (fire-and-forget, either direction)
  *      - background → UI: `session.ui.send(channel, payload)`
- *      - UI → background: `mentra.send(channel, payload)`
- *      - subscribe:        `session.ui.on(channel, cb)` / `mentra.on(channel, cb)`
+ *      - UI → background: `veiller.send(channel, payload)`
+ *      - subscribe:        `session.ui.on(channel, cb)` / `veiller.on(channel, cb)`
  *
  *   2. **RPC** (request/response, UI → background only)
- *      - UI side:          `await mentra.request(channel, payload, options?)`
+ *      - UI side:          `await veiller.request(channel, payload, options?)`
  *      - background side:  `session.ui.handle(channel, (payload, ctx?) => result)`
  *      - single handler per channel; double-register throws synchronously.
  *      - errors thrown in the handler reject the caller's promise.
@@ -20,7 +20,7 @@
  * Wrong-API-for-channel is a compile-time error.
  *
  * Buffering:
- *   - `mentra.send` BUFFERS until `mentra.ready()` acks. The WebView is
+ *   - `veiller.send` BUFFERS until `veiller.ready()` acks. The WebView is
  *     the short-lived side and shouldn't drop user input.
  *   - `session.ui.send` silently DROPS when no WebView is bound.
  *     Background is the source of truth; UI state shouldn't accumulate.
@@ -45,8 +45,8 @@ export type UIUnsubscribe = () => void
  * Brand for declaring an RPC channel in the shared Channels registry.
  *
  * Wrap a channel's payload type in `Rpc<Req, Res>` to mark it as
- * request/response. The SDK's `mentra.request` / `session.ui.handle`
- * accept only `Rpc<...>` channels; `mentra.send` / `session.ui.on`
+ * request/response. The SDK's `veiller.request` / `session.ui.handle`
+ * accept only `Rpc<...>` channels; `veiller.send` / `session.ui.on`
  * accept only non-RPC channels. Using the wrong API for the wrong
  * channel is a compile-time error.
  *
@@ -65,11 +65,11 @@ export type RpcReq<T> = T extends Rpc<infer Req, unknown> ? Req : never
 /** Response payload type of an `Rpc<Req, Res>` entry. */
 export type RpcRes<T> = T extends Rpc<unknown, infer Res> ? Res : never
 
-/** Options accepted by `mentra.request`. */
+/** Options accepted by `veiller.request`. */
 export interface RpcRequestOptions {
   /** Abort the in-flight call. Sends UI_CANCEL to the handler. */
   signal?: AbortSignal
-  /** Reject with `MentraRpcTimeoutError` after this many ms. No default. */
+  /** Reject with `VeillerRpcTimeoutError` after this many ms. No default. */
   timeout?: number
 }
 
@@ -80,14 +80,14 @@ export interface RpcHandlerContext {
 }
 
 /**
- * Error thrown by `mentra.request` when the handler threw or returned an
+ * Error thrown by `veiller.request` when the handler threw or returned an
  * error envelope. Plain `Error` subclass — distinguished by `err.name`.
  * `err.cause` is `{code?: string}` if the handler attached one.
  */
-export class MentraRpcError extends Error {
+export class VeillerRpcError extends Error {
   constructor(message: string, options?: {cause?: {code?: string}}) {
     super(message)
-    this.name = "MentraRpcError"
+    this.name = "VeillerRpcError"
     // Assign `cause` directly: the package's tsconfig targets ES2020 lib
     // where `Error`'s ctor is typed as 1-arity (no `ErrorOptions`).
     // Modern JS engines still allow setting `cause` as a plain property.
@@ -97,11 +97,11 @@ export class MentraRpcError extends Error {
   }
 }
 
-/** Thrown by `mentra.request` when its `{timeout}` elapses. */
-export class MentraRpcTimeoutError extends Error {
+/** Thrown by `veiller.request` when its `{timeout}` elapses. */
+export class VeillerRpcTimeoutError extends Error {
   constructor(message = "RPC timed out") {
     super(message)
-    this.name = "MentraRpcTimeoutError"
+    this.name = "VeillerRpcTimeoutError"
   }
 }
 
@@ -112,7 +112,7 @@ export class MentraRpcTimeoutError extends Error {
  *
  * Broadcast vs. RPC channels are distinguished at the type level:
  *   - Channel value `Rpc<Req, Res>` → only `handle()` accepts it on
- *     background; only `mentra.request(...)` accepts it on UI.
+ *     background; only `veiller.request(...)` accepts it on UI.
  *   - Channel value anything else   → only `send()`/`on()` accept it
  *     on both sides.
  *
@@ -158,7 +158,7 @@ export interface UIModule<TChannels extends object = Record<string, unknown>> {
 
   /**
    * Register the single handler for an RPC channel. The UI side calls
-   * `mentra.request(channel, payload, options?)`; this handler resolves
+   * `veiller.request(channel, payload, options?)`; this handler resolves
    * the call.
    *
    * Throws synchronously if a handler is already registered for the
@@ -373,7 +373,7 @@ export class UIModuleImpl<TChannels extends object = Record<string, unknown>>
       this.nextSeq = 1
       // onOpen handlers almost always read session.capabilities /
       // session.ready to hydrate the fresh WebView. The WebView's
-      // `mentra.ready()` (which produces this UI_OPEN) races the
+      // `veiller.ready()` (which produces this UI_OPEN) races the
       // background session's CONNECT_ACK — on a fast bridge UI_OPEN can
       // arrive first, leaving capabilities null and the UI rendering a
       // "no glasses" snapshot that never self-corrects. Gate the open

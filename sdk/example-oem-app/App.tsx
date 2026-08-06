@@ -1,5 +1,5 @@
-import {engine, useApps, useStart, useStop} from "@mentra/engine"
-import {miniappRunningRegistry} from "@mentra/engine/devtools"
+import {engine, useApps, useStart, useStop} from "@veiller/engine"
+import {miniappRunningRegistry} from "@veiller/engine/devtools"
 import {StatusBar} from "expo-status-bar"
 import {useCallback, useEffect, useState} from "react"
 import {SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View} from "react-native"
@@ -134,9 +134,9 @@ export default function App() {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>Example OEM App</Text>
-        <Text style={styles.subtitle}>Mentra Engine SDK — pair glasses & run a miniapp</Text>
+        <Text style={styles.subtitle}>Veiller Engine SDK — pair glasses & run a miniapp</Text>
 
-        <Section title="State" subtitle="From @mentra/engine">
+        <Section title="State" subtitle="From @veiller/engine">
           <StatusRow label="Glasses" value={glassesState} busy={scanning} />
           <StatusRow label="Registered miniapps" value={String(apps.length)} />
           <StatusRow label="Running miniapps" value={String(running.length)} />

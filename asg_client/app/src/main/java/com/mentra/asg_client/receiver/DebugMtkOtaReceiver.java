@@ -8,7 +8,7 @@ import android.content.Intent;
  * Debug receiver for testing MTK OTA updates via adb.
  *
  * Usage:
- *   adb shell am broadcast -a com.mentra.DEBUG_MTK_OTA \
+ *   adb shell am broadcast -a com.veiller.DEBUG_MTK_OTA \
  *       --es url "http://localhost:8080/version.json" \
  *       -n com.mentra.asg_client/.receiver.DebugMtkOtaReceiver
  *
@@ -20,7 +20,7 @@ import android.content.Intent;
  */
 public class DebugMtkOtaReceiver extends BroadcastReceiver {
   private static final String TAG = "DebugMtkOtaReceiver";
-  public static final String ACTION_DEBUG_MTK_OTA = "com.mentra.DEBUG_MTK_OTA";
+  public static final String ACTION_DEBUG_MTK_OTA = "com.veiller.DEBUG_MTK_OTA";
 
   @Override
   public void onReceive(Context context, Intent intent) {

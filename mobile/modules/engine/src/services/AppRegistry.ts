@@ -168,8 +168,8 @@ async function downloadMiniAppZip(url: string): Promise<string> {
     throw "CREATE_DOWNLOAD_DIR_FAILED"
   }
 
-  // Pre-delete any cached file with the same name. Both `mentra-miniapp dev`
-  // and `mentra-miniapp release` serve their zip at /bundle.zip, so URLs
+  // Pre-delete any cached file with the same name. Both `veiller-miniapp dev`
+  // and `veiller-miniapp release` serve their zip at /bundle.zip, so URLs
   // collide on the cache filename. Without this delete, a stale dev-snapshot
   // (containing the project source tree) gets unzipped instead of the
   // release build → white screen because index.html points at TSX files.
@@ -954,7 +954,7 @@ export interface DevAppRecord {
   /** Legacy single-slot migration field. New records use the real packageName directly. */
   sourcePackageName?: string
   /**
-   * Short-lived Core-verifiable proof emitted by `mentra dev`. This lets the
+   * Short-lived Core-verifiable proof emitted by `veiller dev`. This lets the
    * dev runtime request auto-auth for the manifest package without letting
    * arbitrary dev URLs claim any package name.
    */

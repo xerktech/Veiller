@@ -70,7 +70,7 @@ describe("buildInfoChunk", () => {
     expect(chunk[22]).toBe(0) // NUL terminator
     expect(chunk[23]).toBe(0) // pad to even
 
-    // Second sub-chunk starts at 24: IART "Mentra\0" — payload 7, padded to 8.
+    // Second sub-chunk starts at 24: IART "Veiller\0" — payload 7, padded to 8.
     expect(str(chunk, 24, 4)).toBe("IART")
     expect(readU32(chunk, 28)).toBe(7)
     expect(str(chunk, 32, 6)).toBe("Mentra")

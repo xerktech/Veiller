@@ -1,10 +1,10 @@
 {
-  "name": "@mentra/cli",
+  "name": "@veiller/cli",
   "version": "1.0.3",
-  "description": "Mentra CLI - Command-line tool for managing Mentra apps and organizations",
+  "description": "Veiller CLI - Command-line tool for managing Veiller apps and organizations",
   "type": "module",
   "bin": {
-    "mentra": "./src/index.ts"
+    "veiller": "./src/index.ts"
   },
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -18,7 +18,7 @@
     "test": "bun test"
   },
   "keywords": [
-    "mentra",
+    "veiller",
     "cli",
     "smart-glasses",
     "augmented-reality"

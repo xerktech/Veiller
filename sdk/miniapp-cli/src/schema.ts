@@ -5,10 +5,10 @@
 //
 // Surface:
 //   - generateSchema(): returns the JSON Schema object
-//   - mentra-miniapp schema print : prints the schema to stdout
+//   - veiller-miniapp schema print : prints the schema to stdout
 //
 // Authors point their IDE at the schema via $schema in miniapp.json:
-//   "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json"
+//   "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json"
 //
 // The scaffolder injects this $schema line so new projects get autocomplete on
 // day one without anyone having to know it exists.
@@ -29,8 +29,8 @@ export function generateSchema(): Record<string, unknown> {
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
     $id: SCHEMA_ID,
-    title: 'MentraOS miniapp manifest',
-    description: 'Manifest schema for a Mentra miniapp (miniapp.json)',
+    title: 'Veiller miniapp manifest',
+    description: 'Manifest schema for a Veiller miniapp (miniapp.json)',
     type: 'object',
     required: ['packageName', 'version', 'name', 'hardwareRequirements'],
     additionalProperties: true,
@@ -65,11 +65,11 @@ export function generateSchema(): Record<string, unknown> {
       },
       sdkVersion: {
         type: 'string',
-        description: 'Semver of the @mentra/miniapp SDK this bundle targets. Host refuses to spawn a miniapp whose sdkVersion is incompatible with the runtime it ships.',
+        description: 'Semver of the @veiller/miniapp SDK this bundle targets. Host refuses to spawn a miniapp whose sdkVersion is incompatible with the runtime it ships.',
       },
       minHostVersion: {
         type: 'string',
-        description: 'Semver of the lowest MentraOS Manager host version that can run this bundle. The host re-validates this on every install and after host upgrades; bundles that no longer meet the bar are disabled (not deleted) with a clear UI.',
+        description: 'Semver of the lowest Veiller Manager host version that can run this bundle. The host re-validates this on every install and after host upgrades; bundles that no longer meet the bar are disabled (not deleted) with a clear UI.',
       },
       entry: {
         type: 'object',
@@ -206,7 +206,7 @@ export function writeSchemaFile(absPath: string): void {
   writeFileSync(absPath, generateSchemaString(), 'utf8');
 }
 
-/** CLI entry: `mentra-miniapp schema print` writes JSON to stdout. */
+/** CLI entry: `veiller-miniapp schema print` writes JSON to stdout. */
 export function schemaPrint(): void {
   process.stdout.write(generateSchemaString());
 }

@@ -1,6 +1,6 @@
-# MentraOS Account Portal
+# Veiller Account Portal
 
-This is the account management portal for MentraOS users. It provides users with the ability to:
+This is the account management portal for Veiller users. It provides users with the ability to:
 
 - View their profile information
 - Delete their account
@@ -10,7 +10,7 @@ This is the account management portal for MentraOS users. It provides users with
 
 - **Profile Management**: View and update your profile information.
 - **Account Deletion**: Request deletion of your account and all associated data.
-- **Data Export**: Request and download an export of all your MentraOS data.
+- **Data Export**: Request and download an export of all your Veiller data.
 
 ## Development
 
@@ -62,7 +62,7 @@ This application is built with:
 - **Tailwind CSS**: For styling
 - **Axios**: For API requests
 
-Authentication is integrated with the existing MentraOS authentication system, using Supabase Auth.
+Authentication is integrated with the existing Veiller authentication system, using Supabase Auth.
 
 ## API Endpoints
 

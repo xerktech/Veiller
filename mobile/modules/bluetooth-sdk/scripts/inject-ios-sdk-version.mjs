@@ -17,7 +17,7 @@ if (typeof version !== "string" || version.trim() === "") {
   throw new Error("mobile/modules/bluetooth-sdk/package.json is missing a version")
 }
 
-const placeholder = 'private static let swiftPackageSdkVersion = "__MENTRA_BLUETOOTH_SDK_VERSION__"'
+const placeholder = 'private static let swiftPackageSdkVersion = "__VEILLER_BLUETOOTH_SDK_VERSION__"'
 const injectedVersion = `private static let swiftPackageSdkVersion = "${version}"`
 
 async function pathExists(filePath) {

@@ -2,7 +2,7 @@
 /**
  * Headless translation/transcription e2e harness — no phone required.
  *
- * Drives the SAME code path the mobile app uses (`@mentra/cloud-client/node`):
+ * Drives the SAME code path the mobile app uses (`@veiller/cloud-client/node`):
  * mint an OEM JWT at the dev-stack's test-oem, exchange it at core, open the
  * runtime WebSocket, PUT the audio subscriptions, then stream PCM from laptop
  * TTS (`say`) over encrypted UDP and print every transcript/translation push.
@@ -93,7 +93,7 @@ await cloud.runtime.setSubscriptions([subscription]);
 console.log("[e2e] subscriptions applied");
 
 // --- 3. TTS -> PCM -----------------------------------------------------------
-const dir = mkdtempSync(join(tmpdir(), "mentra-tts-"));
+const dir = mkdtempSync(join(tmpdir(), "veiller-tts-"));
 const wavPath = join(dir, "tts.wav");
 await run("say", ["--file-format=WAVE", "--data-format=LEI16@16000", "-o", wavPath, TEXT]);
 const pcm = readWavData(new Uint8Array(await Bun.file(wavPath).arrayBuffer()));

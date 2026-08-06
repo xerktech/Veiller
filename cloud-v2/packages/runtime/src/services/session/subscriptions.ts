@@ -2,7 +2,7 @@
  * @fileoverview Shared audio types used across services + workers.
  *
  * The canonical subscription/result types and their zod schemas live in
- * `protocol/audio.ts` (the isomorphic `@mentra/cloud-runtime/protocol`
+ * `protocol/audio.ts` (the isomorphic `@veiller/cloud-runtime/protocol`
  * entrypoint). This module re-exports the subscription types and adds the
  * server-side `subscriptionKey()` canonicalization used for structural
  * equality + Map keys.
@@ -16,9 +16,9 @@ export type {
   TranscriptionSubscription,
   TranslationSubscription,
   AudioSubscription,
-} from "@mentra/cloud-protocol/audio";
+} from "@veiller/cloud-protocol/audio";
 
-import type { AudioSubscription, LanguageSource } from "@mentra/cloud-protocol/audio";
+import type { AudioSubscription, LanguageSource } from "@veiller/cloud-protocol/audio";
 
 /**
  * Stable string key for a subscription, used for equality + Map keys.

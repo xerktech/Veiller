@@ -34,7 +34,7 @@ export const setLegacyCameraFov = mock(async (request: Record<string, unknown>) 
   timestamp: 1,
 }))
 
-mock.module("@mentra/bluetooth-sdk/internal", () => ({
+mock.module("@veiller/bluetooth-sdk/internal", () => ({
   __esModule: true,
   default: {
     addListener: addAudioListener,

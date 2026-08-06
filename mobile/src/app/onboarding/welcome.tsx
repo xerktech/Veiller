@@ -1,9 +1,9 @@
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {Image, TouchableOpacity, useWindowDimensions, View} from "react-native"
 import type {ImageSourcePropType, ImageStyle, ViewStyle} from "react-native"
 
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {Screen, Text} from "@/components/ignite"
 import GlassView from "@/components/ui/GlassView"
 import type {TxKeyPath} from "@/i18n"
@@ -72,7 +72,7 @@ export default function OnboardingWelcome() {
   return (
     <Screen preset="auto" className="px-6" contentContainerStyle={$content} safeAreaEdges={["top"]}>
       <View className="mb-12 mt-6 items-center justify-center">
-        <MentraLogoStandalone width={108} height={58} />
+        <VeillerLogoStandalone width={108} height={58} />
       </View>
 
       <View className="w-full items-center justify-center">

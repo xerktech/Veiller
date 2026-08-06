@@ -1,16 +1,16 @@
-// Sidecar dev server for `mentra-miniapp dev`. Runs on `userPort + 1`,
+// Sidecar dev server for `veiller-miniapp dev`. Runs on `userPort + 1`,
 // alongside the static file server `dev.ts` boots on `userPort`. Hosts
-// the `__mentra_dev` WebSocket multiplexed channel:
+// the `__veiller_dev` WebSocket multiplexed channel:
 //
 //   laptop → phone : {type: "reload"}                 (UI WebView reload — filesystem watcher fired in src/ui)
 //   laptop → phone : {type: "respawn-bg"}              (background JSContext respawn — filesystem watcher fired in src/background)
 //   phone  → laptop: {type: "log", level, args, ...}  (forwarded console calls)
 //
-// Plus a hello handshake (`{type: "hello", protocol: "mentra-dev/1"}` →
+// Plus a hello handshake (`{type: "hello", protocol: "veiller-dev/1"}` →
 // `{type: "hello-ack"}`) so a phone connecting to the wrong sidecar (or an
 // older one) can detect mismatch.
 //
-// Also exposes `/__mentra_dev/bundle.zip` — a flat snapshot of the
+// Also exposes `/__veiller_dev/bundle.zip` — a flat snapshot of the
 // project (including `dist/`) the phone-side install pipeline downloads
 // and unpacks into `lmas/<pkg>/dev-<ts>/`. `onBeforeBroadcast` is the
 // hook that rebuilds `dist/` before each broadcast so the next zip
@@ -41,7 +41,7 @@ interface ClientWsData {
   remoteAddress: string
 }
 
-const PROTOCOL_VERSION = "mentra-dev/1"
+const PROTOCOL_VERSION = "veiller-dev/1"
 const RELOAD_DEBOUNCE_MS = 100
 
 /** Inbound message from the phone. */
@@ -122,12 +122,12 @@ export function startDevSidecar(options: DevServerOptions): {stop: () => void; p
     port: options.port,
     fetch(req, srv) {
       const url = new URL(req.url)
-      if (url.pathname === "/__mentra_dev/health") {
+      if (url.pathname === "/__veiller_dev/health") {
         return new Response(JSON.stringify({ok: true, protocol: PROTOCOL_VERSION}), {
           headers: {"content-type": "application/json"},
         })
       }
-      if (url.pathname === "/__mentra_dev/bundle.zip") {
+      if (url.pathname === "/__veiller_dev/bundle.zip") {
         // Snapshot of the project files for the phone-side bundle cache.
         // Phone calls Composer.installMiniApp(this URL) to download + unzip
         // into lmas/<pkg>/dev-<timestamp>/ — same path store-installed
@@ -149,7 +149,7 @@ export function startDevSidecar(options: DevServerOptions): {stop: () => void; p
           })
         })
       }
-      if (url.pathname === "/__mentra_dev") {
+      if (url.pathname === "/__veiller_dev") {
         const upgraded = srv.upgrade(req, {
           data: {packageName: null, remoteAddress: srv.requestIP(req)?.address ?? "unknown"},
         })
@@ -182,11 +182,11 @@ export function startDevSidecar(options: DevServerOptions): {stop: () => void; p
           case "log": {
             const color = colorForLevel(parsed.level)
             // Source-prefix lets devs tell UI ↔ background apart at a
-            // glance. UI cyan, MentraJS magenta.
+            // glance. UI cyan, VeillerJS magenta.
             const sourceTag =
               parsed.source === "ui"
                 ? `${COLOR.cyan}[UI]${COLOR.reset}`
-                : `${COLOR.magenta}[MentraJS]${COLOR.reset}`
+                : `${COLOR.magenta}[VeillerJS]${COLOR.reset}`
             const tag = `${color}${parsed.level}${COLOR.reset}`
             const body = formatLogArgs(parsed.args ?? [])
             log(
@@ -264,7 +264,7 @@ export function startDevSidecar(options: DevServerOptions): {stop: () => void; p
           suppressEventsUntil = Date.now() + 1_500
         } catch (err) {
           suppressEventsUntil = Date.now() + 1_500
-          log(`${COLOR.red}[__mentra_dev] onBeforeBroadcast failed:${COLOR.reset} ${(err as Error).message}`)
+          log(`${COLOR.red}[__veiller_dev] onBeforeBroadcast failed:${COLOR.reset} ${(err as Error).message}`)
         }
       }
       const msg = JSON.stringify({type})
@@ -289,7 +289,7 @@ export function startDevSidecar(options: DevServerOptions): {stop: () => void; p
     }, RELOAD_DEBOUNCE_MS)
   })
 
-  log(`${COLOR.dim}[__mentra_dev]${COLOR.reset} sidecar listening on :${options.port}`)
+  log(`${COLOR.dim}[__veiller_dev]${COLOR.reset} sidecar listening on :${options.port}`)
 
   return {
     port: options.port,
@@ -418,7 +418,7 @@ export function listProjectFiles(rootDir: string): ProjectFile[] {
         out.push({disk, entry: entryName})
         if (out.length >= MAX_FILES) {
           console.warn(
-            `[__mentra_dev] dist file list truncated at ${MAX_FILES} entries — bundle may be incomplete`,
+            `[__veiller_dev] dist file list truncated at ${MAX_FILES} entries — bundle may be incomplete`,
           )
           return out
         }
@@ -446,7 +446,7 @@ export async function buildProjectZip(rootDir: string): Promise<Uint8Array> {
       const buf = readFileSync(abs)
       zip.file(entry, buf)
     } catch (err) {
-      console.warn(`[__mentra_dev] failed to read ${disk}, skipping:`, err)
+      console.warn(`[__veiller_dev] failed to read ${disk}, skipping:`, err)
     }
   }
   // STORE (no compression) — small project trees, deterministic, fast.

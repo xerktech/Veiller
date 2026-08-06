@@ -6,19 +6,19 @@ come after team discussion.
 ## Problem
 
 The client team is moving third-party developer code **off the cloud**
-and **onto the phone** via the Local JS SDK (`@mentra/miniapp`). Mini
+and **onto the phone** via the Local JS SDK (`@veiller/miniapp`). Mini
 apps ship as static bundles, run in a JS context on the phone, and
 call into a phone-resident runtime instead of a cloud `AppServer`.
 
 That's a clean break from cloud v1's miniapp model. Cloud v1's
-`@mentra/sdk` server protocol — app sessions, heartbeat, webhooks,
+`@veiller/sdk` server protocol — app sessions, heartbeat, webhooks,
 fan-out — is being **deleted**, not ported.
 
 Per [OS-1446](https://linear.app/mentralabs/issue/OS-1446):
 > Cloud 2 is the next major version of our cloud backend. The thing
 > that makes it Cloud 2 is that it does not include the
 > cloud-miniapp infrastructure — no app sessions, no heartbeat, no
-> webhook routes, no `@mentra/sdk` server protocol. That stuff is
+> webhook routes, no `@veiller/sdk` server protocol. That stuff is
 > all in Cloud 1.
 
 But Local SDK miniapps still need **some** cloud surface:
@@ -30,7 +30,7 @@ But Local SDK miniapps still need **some** cloud surface:
   for provisioning + status.
 
 The client team has already built this surface against **cloud v1**
-as a hack (branch `mentra-miniapp-sdk-2`, PRs #2767 / #2839 / #2841).
+as a hack (branch `veiller-miniapp-sdk-2`, PRs #2767 / #2839 / #2841).
 The author described the cloud-side files as "stateless,
 copy-pasteable into cloud-2" — but that code hasn't been independently
 reviewed for architecture quality, so we treat it as a **rough spike**
@@ -71,7 +71,7 @@ Three commitments to validate with the team:
    - **Managed streams** — `/api/v2/client/streams/managed/*`,
      stateless Cloudflare proxy: provision, status, teardown.
 
-   All three exist in v1 on `mentra-miniapp-sdk-2` and define the
+   All three exist in v1 on `veiller-miniapp-sdk-2` and define the
    **behavioral contract** v2 must meet — same routes, same wire
    shapes, same observable semantics from the phone's point of view.
 

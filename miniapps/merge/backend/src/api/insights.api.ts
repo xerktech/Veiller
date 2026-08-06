@@ -1,5 +1,5 @@
 import {Hono, type Context} from "hono"
-import {createMentraAuth, type MentraAuthVariables} from "@mentra/auth"
+import {createVeillerAuth, type VeillerAuthVariables} from "@veiller/auth"
 
 import {
   InsightServiceError,
@@ -7,10 +7,10 @@ import {
   type InsightRequest,
 } from "../services/insights/insights.service"
 
-export const insightsApi = new Hono<{Variables: MentraAuthVariables}>()
+export const insightsApi = new Hono<{Variables: VeillerAuthVariables}>()
 
-const mentraAuth = createMentraAuth({
-  packageName: process.env.MERGE_PACKAGE_NAME ?? "com.mentra.merge",
+const mentraAuth = createVeillerAuth({
+  packageName: process.env.MERGE_PACKAGE_NAME ?? "com.veiller.merge",
 })
 
 insightsApi.use(
@@ -19,9 +19,9 @@ insightsApi.use(
     onUnauthorized: (error, c) => {
       console.warn("[LocalMerge] miniapp auth rejected", {
         error: error.message,
-        packageName: process.env.MERGE_PACKAGE_NAME ?? "com.mentra.merge",
-        jwksUrl: process.env.MENTRA_AUTH_JWKS_URL,
-        issuers: process.env.MENTRA_AUTH_ISSUERS ?? process.env.MENTRA_AUTH_ISSUER,
+        packageName: process.env.MERGE_PACKAGE_NAME ?? "com.veiller.merge",
+        jwksUrl: process.env.VEILLER_AUTH_JWKS_URL,
+        issuers: process.env.VEILLER_AUTH_ISSUERS ?? process.env.VEILLER_AUTH_ISSUER,
       })
       return c.json({error: error.message}, 401)
     },

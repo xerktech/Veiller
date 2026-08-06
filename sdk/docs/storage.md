@@ -5,7 +5,7 @@ All operations round-trip to LocalMiniappRuntime, which reads/writes the
 phone's AsyncStorage with a namespaced key format:
 
 ```
-mentraos_localstorage_{userId}_{packageName}_{key}
+veiller_localstorage_{userId}_{packageName}_{key}
 ```
 
 Values are plain strings. Callers serialize structured data with
@@ -19,7 +19,7 @@ Source: [mobile/modules/miniapp/src/modules/storage.ts](../../mobile/modules/min
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()
@@ -91,7 +91,7 @@ Remove the value at `key`. No-op if the key was not set.
 
 Return every key this miniapp has stored. Keys are returned as the
 caller-supplied portion only — the
-`mentraos_localstorage_{userId}_{packageName}_` namespace prefix is
+`veiller_localstorage_{userId}_{packageName}_` namespace prefix is
 stripped before the keys reach the SDK. Resolves to `[]` when no keys are
 set.
 

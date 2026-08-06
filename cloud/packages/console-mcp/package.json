@@ -1,11 +1,11 @@
 {
-  "name": "@mentra/console-mcp",
+  "name": "@veiller/console-mcp",
   "version": "0.1.0",
   "private": true,
-  "description": "MCP server for MentraOS Developer Console (apps, orgs, incidents)",
+  "description": "MCP server for Veiller Developer Console (apps, orgs, incidents)",
   "type": "module",
   "bin": {
-    "mentra-console-mcp": "./src/index.ts"
+    "veiller-console-mcp": "./src/index.ts"
   },
   "scripts": {
     "start": "bun run src/index.ts",

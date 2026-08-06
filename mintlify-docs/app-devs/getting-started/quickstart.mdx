@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Scaffold a Mentra miniapp and run it on your phone in a few minutes.
+description: Scaffold a Veiller miniapp and run it on your phone in a few minutes.
 ---
 
 import LegacyCloudNote from '/snippets/legacy-cloud-note.mdx'
@@ -19,16 +19,16 @@ Building a mobile app that connects directly to glasses over Bluetooth? Use the
 
 <LegacyCloudNote />
 
-### Step 1: Install the Mentra App
+### Step 1: Install the Veiller App
 
-Install the Mentra App on your Android or iPhone from
+Install the Veiller App on your Android or iPhone from
 [MentraGlass.com/OS](https://mentraglass.com/os), sign in, and connect your
 glasses (if you have them).
 
 ### Step 2: Scaffold a project
 
 ```bash
-bunx create-mentra-miniapp my-miniapp
+bunx create-veiller-miniapp my-miniapp
 ```
 
 The scaffolder asks for a project name and the kind of glasses you're targeting
@@ -40,9 +40,9 @@ cd my-miniapp
 bun install
 ```
 
-`bun install` pulls in [`@mentra/miniapp`](https://www.npmjs.com/package/@mentra/miniapp)
-(the runtime) and [`@mentra/miniapp-cli`](https://www.npmjs.com/package/@mentra/miniapp-cli)
-(the `mentra-miniapp` tooling) automatically.
+`bun install` pulls in [`@veiller/miniapp`](https://www.npmjs.com/package/@veiller/miniapp)
+(the runtime) and [`@veiller/miniapp-cli`](https://www.npmjs.com/package/@veiller/miniapp-cli)
+(the `veiller-miniapp` tooling) automatically.
 
 ### Step 3: Start the dev server
 
@@ -56,7 +56,7 @@ save and forwards the miniapp's console logs back to your terminal.
 
 ### Step 4: Load it on your phone
 
-In the Mentra App, go to **Settings → Miniapp Developer Settings → Scan Miniapp
+In the Veiller App, go to **Settings → Miniapp Developer Settings → Scan Miniapp
 QR Code** and scan the QR from your terminal. If Miniapp Developer Settings is
 hidden, open **Settings → Debug Settings**, enable **Miniapp Developer
 Settings**, then return to Settings. If Debug Settings is hidden, tap the
@@ -89,7 +89,7 @@ my-miniapp/
 **Background**: owns the `session` and all glasses logic:
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 import "../shared/channels";
 
 registerMiniapp((session) => {
@@ -98,7 +98,7 @@ registerMiniapp((session) => {
     // Box coordinates are raw device px from session.capabilities.display.
     const d = session.capabilities?.display;
     session.display.render([
-      { type: "text", id: "hello", box: { x: 0, y: 0, w: d?.width ?? 576, h: d?.height ?? 288 }, text: "Hello from MentraOS" },
+      { type: "text", id: "hello", box: { x: 0, y: 0, w: d?.width ?? 576, h: d?.height ?? 288 }, text: "Hello from Veiller" },
     ]);
   });
 
@@ -109,13 +109,13 @@ registerMiniapp((session) => {
 });
 ```
 
-**UI**: a normal React app that talks to the background over `mentra`. It has no
+**UI**: a normal React app that talks to the background over `veiller`. It has no
 direct hardware access:
 
 ```tsx src/ui/App.tsx
 export function App() {
-  useEffect(() => mentra.on("pong", ({ roundtripMs }) => { /* update UI */ }), []);
-  return <button onClick={() => mentra.send("ping", { at: Date.now() })}>Ping</button>;
+  useEffect(() => veiller.on("pong", ({ roundtripMs }) => { /* update UI */ }), []);
+  return <button onClick={() => veiller.send("ping", { at: Date.now() })}>Ping</button>;
 }
 ```
 

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type { AuthVariables } from "@mentra/sdk";
+import type { AuthVariables } from "@veiller/sdk";
 
 import state from "./state.api";
 

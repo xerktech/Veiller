@@ -952,7 +952,7 @@ class Nimo: NSObject, SGCManager {
 
     func setSilentMode(_ enabled: Bool) {
         Bridge.log("NIMO: setSilentMode(\(enabled))")
-        // TODO: hardware-verify that display-off matches MentraOS silent-mode semantics.
+        // TODO: hardware-verify that display-off matches Veiller silent-mode semantics.
         sendFrame(
             NimoFrameCodec.encodeFrame(
                 cmd: NimoProtocol.CMD_SET_PARAMETER,
@@ -1666,7 +1666,7 @@ class Nimo: NSObject, SGCManager {
 
         guard let buffer = context.data else { return nil }
         // CGContext rows are top-down here; copy row by row in case bytesPerRow != width.
-        // Invert luminance (255 - value): MentraOS app bitmaps follow the platform convention
+        // Invert luminance (255 - value): Veiller app bitmaps follow the platform convention
         // of dark content on a light background, but Nimo's additive display lights up high
         // 2bpp values (3 = white). Without inverting, the background lights the whole lens and
         // the content stays dark — the inverted look. Flipping renders content lit on a dark lens.

@@ -1,6 +1,6 @@
 import {View} from "react-native"
 
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 
 import ToggleSetting from "@/components/settings/ToggleSetting"
 import {Text} from "@/components/ignite"

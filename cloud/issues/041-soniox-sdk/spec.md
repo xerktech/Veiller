@@ -56,7 +56,7 @@ enable_endpoint_detection: true
 enable_speaker_diarization: true
 enable_language_identification: <derived from subscription — true if auto mode>
 language_hints: <derived from subscription — e.g., ['en'] for 'transcription:en-US'>
-context: { terms: ['AugmentOS', 'Mentra', 'MentraOS'] }
+context: { terms: ['AugmentOS', 'Mentra', 'Veiller'] }
 ```
 
 For translation streams, add:

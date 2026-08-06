@@ -1,5 +1,5 @@
 /**
- * @fileoverview Public entry for `@mentra/cloud-client` (the root, shared build).
+ * @fileoverview Public entry for `@veiller/cloud-client` (the root, shared build).
  *
  * This is the platform-agnostic import: it exposes `CloudClient` plus the public
  * config, transport, error, and logger types a host needs to construct and use
@@ -8,14 +8,14 @@
  *
  * Wire/protocol types (`AudioSubscription`, `TranscriptionData`, the message
  * unions) are NOT re-exported here: a host imports those from
- * `@mentra/cloud-protocol` directly, so there is one source of truth and
+ * `@veiller/cloud-protocol` directly, so there is one source of truth and
  * the client cannot drift from what the cloud accepts.
  *
  * See docs/issues/004-cloud-client/spec.md and design.md.
  */
 
 // The top-level object. Implemented in ./client by the client agent; re-exported
-// here so the public import is `@mentra/cloud-client`, not a deep path.
+// here so the public import is `@veiller/cloud-client`, not a deep path.
 export { CloudClient } from "./client";
 
 // Construction contract.

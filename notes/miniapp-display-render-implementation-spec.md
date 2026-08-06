@@ -2,7 +2,7 @@
 
 **Status:** Spec v3 — supersedes the phasing in `miniapp-display-api-redesign.md` §5 for execution; that doc's API contract (§3–4) remains normative (one flagged refinement, §4 here) and is referenced as **[DESIGN]**.
 **Base:** new branch off `ya/mentra-display-add-canvas` (Yash's Mentra Display canvas work — the firmware protocol, SGC verbs, and nav HUD from that branch are foundations here, not throwaways).
-**Firmware reference (READ-ONLY):** `~/Programming/OSSG/Mentra-Zephyr-Glasses-Client`, branch `ya/add-bitmap-rendering-support` (Yash's latest; the canvas system exists ONLY there, not on fw main/dev). **The firmware repo is 100% Yash's domain — we never modify it.** Facts cited as **[FW]** were read from that source. The loaner Mentra Display runs a canvas-branch build (confirmed by Alex).
+**Firmware reference (READ-ONLY):** `~/Programming/OSSG/Veiller-Zephyr-Glasses-Client`, branch `ya/add-bitmap-rendering-support` (Yash's latest; the canvas system exists ONLY there, not on fw main/dev). **The firmware repo is 100% Yash's domain — we never modify it.** Facts cited as **[FW]** were read from that source. The loaner Mentra Display runs a canvas-branch build (confirmed by Alex).
 **Ownership:** us = SDK surface, host pipeline, G2 (iOS + Android), G1/Z100 degrade. Yash = Mentra Display SGC (+ its firmware), NIMO SGC. This spec defines the contract he slots into.
 **Delivery:** one effort, one PR (§11). The [DESIGN] §5 phase split is dropped — the bridge unit changes to a scene from day one.
 
@@ -63,7 +63,7 @@ Per [DESIGN] §3.1. Shipping in this effort:
 
 **Deleted** (pre-release, no shims): `drawLayout`, `removeElement`, `LayoutSpec`, `RemoveOp`, `remove_element` layout type, `showTextAt`, public `positioned_text`, the `canvas` module. Docs fixed (`clearView` → `clear`).
 
-**First-party sweep:** sugar keeps every existing app working through the transition *by construction*, but the end state is a full fleet migration to raw `render()` — captions, translation, teleprompter, merge, kawaii, mentra-ai, recorder, `everything` (the lone `session.canvas` consumer), plus **example-miniapp and the template** (what new devs copy — these matter most). Nav is refit early as the acid test (§9); the rest migrate late (§11), after `render()` is hardware-proven, since sugar-compiled and hand-written scenes take the identical path — the migration is mechanical, not risky.
+**First-party sweep:** sugar keeps every existing app working through the transition *by construction*, but the end state is a full fleet migration to raw `render()` — captions, translation, teleprompter, merge, kawaii, veiller-ai, recorder, `everything` (the lone `session.canvas` consumer), plus **example-miniapp and the template** (what new devs copy — these matter most). Nav is refit early as the acid test (§9); the rest migrate late (§11), after `render()` is hardware-proven, since sugar-compiled and hand-written scenes take the identical path — the migration is mechanical, not risky.
 
 ## 4. SceneFrame IR (host → native contract)
 
@@ -132,8 +132,8 @@ Firmware facts (**[FW]**, all read from `ya/add-bitmap-rendering-support`; repo 
 - SGC changes on our branch are mechanical: default frame handler drives the existing verbs; registry cleared on disconnect; the false "oldest-out eviction" comment goes (host budgets prevent scene overflow; the rect-keyed *legacy-path* leak still needs its fix); geometry constants aligned to 500×220; `CanvasResult` consumption.
 
 ### iOS protobuf regen for Mentra Display (we can try this on the loaner)
-- Source of truth: `~/Programming/OSSG/Mentra-Zephyr-Glasses-Client`, branch **`ya/add-bitmap-rendering-support`**, `proto/mentraos_ble.proto` — same proto Yash's Android `MentraosBle.java` regen came from (protoc 4.29.6). Read-only: we copy the proto out to regenerate; we never push to that repo.
-- Regenerate `mobile/modules/bluetooth-sdk/ios/Source/sgcs/mentraos_ble.pb.swift` with `protoc` + `protoc-gen-swift` matched to the SwiftProtobuf runtime the `MentraBluetoothSDK` pod resolves (current gencode is APIVersion_2 — verify the pinned runtime first).
+- Source of truth: `~/Programming/OSSG/Veiller-Zephyr-Glasses-Client`, branch **`ya/add-bitmap-rendering-support`**, `proto/mentraos_ble.proto` — same proto Yash's Android `MentraosBle.java` regen came from (protoc 4.29.6). Read-only: we copy the proto out to regenerate; we never push to that repo.
+- Regenerate `mobile/modules/bluetooth-sdk/ios/Source/sgcs/mentraos_ble.pb.swift` with `protoc` + `protoc-gen-swift` matched to the SwiftProtobuf runtime the `VeillerBluetoothSDK` pod resolves (current gencode is APIVersion_2 — verify the pinned runtime first).
 - Record the firmware commit hash in the regenerated file headers on both platforms. The canvas messages are not on firmware main/dev, so field numbers (62–66, result 31) could renumber before Yash merges — **flag the risk to him Monday; merge timing is his call**; if his branch changes, we re-regen.
 - After regen: thin Swift verb translation in `MentraNex.swift` (small, because diffing is host-side) → tier-2 validation on the loaner, and a working iOS reference for Yash.
 
@@ -183,7 +183,7 @@ Per Alex: **one big PR to dev** (structured commits inside for reviewability —
 6. Nav refit + rebuilt, version-bumped bundle (the acid test).
 7. Mentra Display: mechanical refit of `MentraNex.kt` onto the frame handler + lifecycle fixes + `CanvasResult` consume/self-heal + 500×220 profile fix; tier-1 validation on the loaner.
 8. iOS Mentra Display pb regen (proto copied read-only from the firmware repo, §7) + thin Swift translation; tier-2 validation on the loaner.
-9. **Fleet migration off sugar** (after hardware validation, low risk — same path): captions, translation, teleprompter, merge, kawaii, mentra-ai, recorder, `everything`, example-miniapp + template. Goldens re-run against the migrated apps' raw `render()` calls (same invariant: G1/Z100 output byte-identical to today).
+9. **Fleet migration off sugar** (after hardware validation, low risk — same path): captions, translation, teleprompter, merge, kawaii, veiller-ai, recorder, `everything`, example-miniapp + template. Goldens re-run against the migrated apps' raw `render()` calls (same invariant: G1/Z100 output byte-identical to today).
 10. **Docs**: mintlify miniapp display pages + `sdk/docs/display.md` + module README rewritten around `render()`/`measure()`/capabilities; sugar absent from the docs (deprecation note only); the `clearView` lie fixed.
 11. Monday, Yash: walkthrough; flag the stale fw geometry comment, the proto-merge/renumber risk, and the commit-verb suggestion — all his domain, zero dependencies from us.
 
@@ -229,8 +229,8 @@ emitted raw RGBA, never a BMP). Deltas and discoveries vs the spec as written:
   raw `display.render()` (full-canvas text element with a stable id;
   `render([])` clears; merge keeps `durationMs` + `breakMode: "word"` via
   RenderOptions/style). example-miniapp's GlassesController + DisplayPage
-  tester and the create-mentra-miniapp template lead with `render()`.
-  kawaii and mentra-ai deliberately untouched (they call `showTextWall`,
+  tester and the create-veiller-miniapp template lead with `render()`.
+  kawaii and veiller-ai deliberately untouched (they call `showTextWall`,
   which stays).
 - **Unused sugar REMOVED from the SDK (in-branch)**: usage audit across all
   monorepo miniapps + the external `Mentra-Community/Mentra-AI-Miniapp` (the
@@ -258,10 +258,10 @@ Pre-PR (this branch):
 Also done in-branch (2026-07-03 round 2):
 - [x] kawaii 0.1.9 + codex-kawaii-e2e 0.1.2 migrated to render()
 - [x] `everything` miniapp DELETED (was unbundled, unreferenced, sole canvas
-      consumer) and `miniapps/mentra-ai` DELETED (abandoned example-scaffold;
+      consumer) and `miniapps/veiller-ai` DELETED (abandoned example-scaffold;
       the real Mentra AI lives in Mentra-Community/Mentra-AI-Miniapp)
 - [x] render() migration PR opened on Mentra-Community/Mentra-AI-Miniapp —
-      NOT merged; gated on host render() rollout (MentraOS PR #3341)
+      NOT merged; gated on host render() rollout (Veiller PR #3341)
 - [x] Canvas module DELETED end to end: session.canvas + CanvasManager +
       CanvasOperation + CANVAS wire type + host handleCanvas + tester
       CanvasPage + docs page (redirected to display/layouts). Zero consumers

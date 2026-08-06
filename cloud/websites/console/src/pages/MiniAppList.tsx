@@ -1,6 +1,6 @@
 // pages/MiniAppList.tsx
 import { useEffect, useMemo } from "react";
-import { Button } from "@mentra/shared";
+import { Button } from "@veiller/shared";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";

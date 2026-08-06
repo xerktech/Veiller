@@ -1,36 +1,36 @@
-# @mentra/miniapp
+# @veiller/miniapp
 
-SDK for building MentraOS local miniapps — static web apps that run inside the MentraOS phone app's WebView and talk to smart glasses via a typed session API.
+SDK for building Veiller local miniapps — static web apps that run inside the Veiller phone app's WebView and talk to smart glasses via a typed session API.
 
 > Developing this SDK or running the in-repo example from a fresh clone? Start at the **[SDK developer guide](../../../sdk/README.md)** (setup, build loop, doc map).
 > Per-module deep dives (return shapes, events, error codes): **[`sdk/docs/`](../../../sdk/docs/README.md)**.
-> Companion package: **[`@mentra/miniapp-cli`](../../../sdk/miniapp-cli/README.md)** — `mentra-miniapp` CLI (`dev`, `release`, `pack`, `manifest`, `permission`, `hardware`, `schema`). Per-command docs live there.
-> Scaffolder: `bunx create-mentra-miniapp my-app`.
+> Companion package: **[`@veiller/miniapp-cli`](../../../sdk/miniapp-cli/README.md)** — `veiller-miniapp` CLI (`dev`, `release`, `pack`, `manifest`, `permission`, `hardware`, `schema`). Per-command docs live there.
+> Scaffolder: `bunx create-veiller-miniapp my-app`.
 > Reference miniapp: [`sdk/example-miniapp/`](../../../sdk/example-miniapp).
 > High-level walkthrough: [`agents/miniapp-sdk-overview.md`](../../../agents/miniapp-sdk-overview.md).
 
 ## Install
 
 ```bash
-bun add @mentra/miniapp
+bun add @veiller/miniapp
 # or
-npm install @mentra/miniapp
+npm install @veiller/miniapp
 ```
 
-`react` is an optional peer dependency — only required if you use `@mentra/miniapp/react`.
+`react` is an optional peer dependency — only required if you use `@veiller/miniapp/react`.
 
 ## Entry points
 
 | Specifier                  | Contents                                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------------- |
-| `@mentra/miniapp`          | `MiniappSession`, `NotConnectedError`, transports, manifest-types re-exports, module type exports |
-| `@mentra/miniapp/react`    | React hooks + `<MentraProvider>` + `<MiniappHeader>`                                              |
-| `@mentra/miniapp/protocol` | `MiniappRequestType`, `MiniappResponseType`, `MiniappStreamType`, `MiniappErrorCode`              |
+| `@veiller/miniapp`          | `MiniappSession`, `NotConnectedError`, transports, manifest-types re-exports, module type exports |
+| `@veiller/miniapp/react`    | React hooks + `<VeillerProvider>` + `<MiniappHeader>`                                              |
+| `@veiller/miniapp/protocol` | `MiniappRequestType`, `MiniappResponseType`, `MiniappStreamType`, `MiniappErrorCode`              |
 
 ## Quick start
 
 ```ts
-import {MiniappSession} from "@mentra/miniapp"
+import {MiniappSession} from "@veiller/miniapp"
 
 const session = new MiniappSession()
 await session.connect() // sends CONNECT, resolves on CONNECT_ACK
@@ -45,7 +45,7 @@ const unsub = session.transcription.on((d) => session.display.render([{type: "te
 React:
 
 ```tsx
-import {MentraProvider, useSession, useConnected} from "@mentra/miniapp/react"
+import {VeillerProvider, useSession, useConnected} from "@veiller/miniapp/react"
 
 function App() {
   const session = useSession() // shared session, auto-connects
@@ -54,9 +54,9 @@ function App() {
 }
 
 // root:
-;<MentraProvider>
+;<VeillerProvider>
   <App />
-</MentraProvider>
+</VeillerProvider>
 ```
 
 ## Session
@@ -74,7 +74,7 @@ session.disconnect()
 
 `MiniappSessionOptions`:
 
-- `packageName?: string` — overrides auto-detection from `window.MentraOS`
+- `packageName?: string` — overrides auto-detection from `window.Veiller`
 - `connectTimeoutMs?: number` — defaults to 10s
 - transport-selection options from `createTransport` (`mode`, `transport`, `localSocket`)
 
@@ -150,7 +150,7 @@ Transcription/translation streams use a colon-suffixed wire format: `transcripti
 
 `PermissionType` is the lowercase canonical union: `"location" | "microphone" | "camera" | "notifications" | "calendar"`. Manifest UPPER_CASE names map onto these (`BACKGROUND_LOCATION` → `location`; `READ_NOTIFICATIONS`, `POST_NOTIFICATIONS` → `notifications`).
 
-## React bindings — `@mentra/miniapp/react`
+## React bindings — `@veiller/miniapp/react`
 
 All hooks share a single session per app, created on first `useSession()` call.
 
@@ -166,14 +166,14 @@ All hooks share a single session per app, created on first `useSession()` call.
 
 Components:
 
-- `<MentraProvider>` — root provider. Keeps `<html class="dark">` in sync with the host color scheme during render (no FOUC).
+- `<VeillerProvider>` — root provider. Keeps `<html class="dark">` in sync with the host color scheme during render (no FOUC).
 - `<MiniappHeader title="…" left={…} right={…} onBack={…} />` — drop-in header that respects the safe area and leaves room for the capsule menu.
 
 ## Manifest — `miniapp.json`
 
 ```json
 {
-  "packageName": "com.mentra.example",
+  "packageName": "com.veiller.example",
   "version": "1.0.0",
   "name": "Live Captions",
   "description": "…",
@@ -189,27 +189,27 @@ Components:
 - `permissions[].type` ∈ `MICROPHONE | CAMERA | CALENDAR | LOCATION | BACKGROUND_LOCATION | READ_NOTIFICATIONS | POST_NOTIFICATIONS`
 - `hardwareRequirements[].type` ∈ `CAMERA | DISPLAY | MICROPHONE | SPEAKER | IMU | BUTTON | LIGHT | WIFI`, `level` ∈ `REQUIRED | OPTIONAL`
 
-The CLI validates the manifest on every `dev`, `release`, and `pack`. Run `mentra-miniapp schema print` for the canonical JSON Schema.
+The CLI validates the manifest on every `dev`, `release`, and `pack`. Run `veiller-miniapp schema print` for the canonical JSON Schema.
 
 ## CLI
 
-The author-facing CLI lives in a sibling package: **[`@mentra/miniapp-cli`](../../../sdk/miniapp-cli/README.md)** (binary: `mentra-miniapp`). Full per-command docs there. Quick map:
+The author-facing CLI lives in a sibling package: **[`@veiller/miniapp-cli`](../../../sdk/miniapp-cli/README.md)** (binary: `veiller-miniapp`). Full per-command docs there. Quick map:
 
 | Command                                                        | Purpose                                                      |
 | -------------------------------------------------------------- | ------------------------------------------------------------ |
-| `mentra-miniapp dev`                                           | Hot-reload dev server + QR sideload onto a phone over LAN    |
-| `mentra-miniapp release`                                       | Build, pack, and serve a QR to install on a phone            |
-| `mentra-miniapp pack`                                          | Validate manifest and zip `dist/` into `<pkg>-<version>.zip` |
-| `mentra-miniapp manifest`                                      | Interactive top-level wizard for `miniapp.json`              |
-| `mentra-miniapp permission list \| add \| remove [TYPE]`       | Object-verb manifest edits for permissions                   |
-| `mentra-miniapp hardware list \| add \| remove [TYPE] [LEVEL]` | Object-verb manifest edits for hardware requirements         |
-| `mentra-miniapp schema print`                                  | Print the canonical `miniapp.json` JSON Schema               |
+| `veiller-miniapp dev`                                           | Hot-reload dev server + QR sideload onto a phone over LAN    |
+| `veiller-miniapp release`                                       | Build, pack, and serve a QR to install on a phone            |
+| `veiller-miniapp pack`                                          | Validate manifest and zip `dist/` into `<pkg>-<version>.zip` |
+| `veiller-miniapp manifest`                                      | Interactive top-level wizard for `miniapp.json`              |
+| `veiller-miniapp permission list \| add \| remove [TYPE]`       | Object-verb manifest edits for permissions                   |
+| `veiller-miniapp hardware list \| add \| remove [TYPE] [LEVEL]` | Object-verb manifest edits for hardware requirements         |
+| `veiller-miniapp schema print`                                  | Print the canonical `miniapp.json` JSON Schema               |
 
 See [the CLI README](../../../sdk/miniapp-cli/README.md) for flags, semantics, and the `miniapp://` URL schemes the QR codes encode.
 
-## Host-injected globals — `window.MentraOS`
+## Host-injected globals — `window.Veiller`
 
-The MentraOS app injects this before content loads. Authors generally use the React hooks instead, but the raw shape is:
+The Veiller app injects this before content loads. Authors generally use the React hooks instead, but the raw shape is:
 
 ```ts
 {
@@ -221,20 +221,20 @@ The MentraOS app injects this before content loads. Authors generally use the Re
 }
 ```
 
-Use `getMentraOSGlobals()` (exported from the package) to read it with the right TypeScript types.
+Use `getVeillerGlobals()` (exported from the package) to read it with the right TypeScript types.
 
 ## Transports
 
 Auto-selected by `createTransport(options)`:
 
-- **`PostMessageTransport`** — used inside the MentraOS WebView. `window.ReactNativeWebView.postMessage` outbound, `window` `message` listener inbound.
+- **`PostMessageTransport`** — used inside the Veiller WebView. `window.ReactNativeWebView.postMessage` outbound, `window` `message` listener inbound.
 - **`LocalSocketTransport`** — fallback for laptop browsers. Default endpoint `ws://127.0.0.1:8765`. The in-laptop-browser dev story is currently broken; see the overview doc for status.
 
 Both are exported for advanced uses (forced transport, tests). `MockTransport` is also exported for unit tests.
 
 ## Wire protocol
 
-Every message is a `{payload, requestId?}` envelope, JSON over the chosen transport. `requestId` correlates request ↔ response for methods that return a value. Constants live in `@mentra/miniapp/protocol`:
+Every message is a `{payload, requestId?}` envelope, JSON over the chosen transport. `requestId` correlates request ↔ response for methods that return a value. Constants live in `@veiller/miniapp/protocol`:
 
 - `MiniappRequestType` — `CONNECT`, `SUBSCRIBE`, etc.
 - `MiniappResponseType` — `CONNECT_ACK`, `EVENT`, `REQUEST_RESULT`, `PERMISSIONS_UPDATE`, …
@@ -257,5 +257,5 @@ See [`sdk/example-miniapp/src/controller/GlassesController.ts`](../../../sdk/exa
 
 - Runtime: [`src/{session,protocol,envelope,globals}.ts`](./src/), [`src/modules/`](./src/modules/), [`src/transport/`](./src/transport/), [`src/react/`](./src/react/)
 - CLI: [`../miniapp-cli/src/`](../../../sdk/miniapp-cli/src/)
-- Scaffolder: [`../create-mentra-miniapp/`](../../../sdk/create-mentra-miniapp/)
+- Scaffolder: [`../create-veiller-miniapp/`](../../../sdk/create-veiller-miniapp/)
 - Reference miniapp: [`../example-miniapp/`](../../../sdk/example-miniapp/)

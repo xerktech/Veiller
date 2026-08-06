@@ -15,8 +15,8 @@
 import { Hono } from "hono";
 import { clientAuth, requireUserSession } from "../middleware/client.middleware";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
-import { GlassesToCloudMessageType, PhotoErrorCode } from "@mentra/sdk";
-import type { PhotoResponse } from "@mentra/sdk";
+import { GlassesToCloudMessageType, PhotoErrorCode } from "@veiller/sdk";
+import type { PhotoResponse } from "@veiller/sdk";
 import type { AppEnv, AppContext } from "../../../types/hono";
 
 const logger = rootLogger.child({ service: "photo.api" });

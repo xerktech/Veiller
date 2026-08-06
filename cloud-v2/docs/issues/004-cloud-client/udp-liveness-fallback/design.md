@@ -4,7 +4,7 @@
 
 ## Components
 
-### `@mentra/cloud-client`
+### `@veiller/cloud-client`
 
 Add a runtime audio transport manager inside the runtime module. It owns:
 
@@ -40,7 +40,7 @@ The mobile debug pill should keep reading `RuntimeSnapshot.audioTransport`.
 The Node build must support the same UDP probe and WS fallback path using `dgram`
 and `ws`. This is required so CI can prove the transport policy without a phone.
 
-### `@mentra/cloud-runtime`
+### `@veiller/cloud-runtime`
 
 Runtime needs to:
 

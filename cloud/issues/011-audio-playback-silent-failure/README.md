@@ -11,7 +11,7 @@ Applet audio playback fails silently after first successful query.
 
 **Symptom**: First Q+A works with audio, subsequent queries show text response but no audio playback.
 
-**Reproduction**: MentraAI on Mentra Live - first query plays audio, subsequent queries fail silently. MentraOS Client console shows AI is responding via display events, but audio never plays.
+**Reproduction**: VeillerAI on Mentra Live - first query plays audio, subsequent queries fail silently. Veiller Client console shows AI is responding via display events, but audio never plays.
 
 ## Key Findings
 
@@ -29,7 +29,7 @@ From BetterStack log investigation (2025-12-18):
 - [ ] Deploy logging changes and reproduce issue
 - [ ] Analyze new logs to find root cause
 - [ ] Fix the actual bug
-- [ ] Verify fix with MentraAI Q+A flow
+- [ ] Verify fix with VeillerAI Q+A flow
 
 ## Hypothesis
 

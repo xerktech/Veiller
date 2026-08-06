@@ -1,5 +1,5 @@
 /**
- * Mobile detection and deeplink utilities for the MentraOS app store
+ * Mobile detection and deeplink utilities for the Veiller app store
  */
 
 /**
@@ -44,7 +44,7 @@ export function isMacOS(): boolean {
 }
 
 /**
- * Generates a deeplink URL for opening the MentraOS app
+ * Generates a deeplink URL for opening the Veiller app
  * @param packageName - Optional package name to navigate to a specific app
  * @returns The deeplink URL
  */
@@ -60,7 +60,7 @@ export function generateDeeplink(packageName?: string): string {
 }
 
 /**
- * Attempts to open the MentraOS app with a deeplink
+ * Attempts to open the Veiller app with a deeplink
  * Falls back to web if the app is not installed
  * @param packageName - Optional package name to navigate to a specific app
  */
@@ -75,7 +75,7 @@ export function openInApp(packageName?: string): void {
 }
 
 /**
- * Opens the appropriate app store for downloading MentraOS
+ * Opens the appropriate app store for downloading Veiller
  * - iOS devices (iPhone, iPad) → App Store
  * - Android devices → Play Store
  * - All desktop/laptop devices → mentra.glass/os
@@ -84,13 +84,13 @@ export function openAppStore(): void {
   if (isIOS()) {
     // iOS devices (iPhone, iPad, iPod)
     window.open(
-      "https://apps.apple.com/us/app/mentra-the-smart-glasses-app/id6747363193",
+      "https://apps.apple.com/us/app/veiller-the-smart-glasses-app/id6747363193",
       "_blank",
     );
   } else if (isAndroid()) {
     // Android devices
     window.open(
-      "https://play.google.com/store/apps/details?id=com.mentra.mentra",
+      "https://play.google.com/store/apps/details?id=com.veiller.veiller",
       "_blank",
     );
   } else {

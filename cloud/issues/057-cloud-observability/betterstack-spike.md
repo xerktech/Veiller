@@ -65,7 +65,7 @@ BetterStack is not one tool. It's six products under one roof:
 - No heartbeat monitors for background jobs
 - Alerts go to email but we've learned to ignore them because deploys look identical to crashes
 
-### Telemetry — Metrics (source: mentra-us-central, ID 2321796)
+### Telemetry — Metrics (source: veiller-us-central, ID 2321796)
 
 **How it works:** BetterStack Collector installed via Helm on the US Central Porter cluster. Uses eBPF to auto-instrument all containers. Sends metrics to BetterStack.
 
@@ -350,7 +350,7 @@ Nearly half the logs are from non-prod. Every query needs `WHERE server = 'cloud
 | Environment                 | BetterStack Source                      | Token                      | Status                          |
 | --------------------------- | --------------------------------------- | -------------------------- | ------------------------------- |
 | **cloud-prod**              | AugmentOS (ID 1311181)                  | *(in cloud/.env as BETTERSTACK_SOURCE_TOKEN)* | ✅ Existing — keep as prod-only |
-| **cloud-local + cloud-dev** | MentraOS Cloud - Dev/Local (ID 2324210) | *(see cloud/.env)* | ✅ Just created                 |
+| **cloud-local + cloud-dev** | Veiller Cloud - Dev/Local (ID 2324210) | *(see cloud/.env)* | ✅ Just created                 |
 | **cloud-staging**           | Create separately                       | TBD                        | ❌ Not yet created              |
 
 **What to change:**

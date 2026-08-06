@@ -1,5 +1,5 @@
 import {AppState, Platform} from "react-native"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 
 import showAlert from "@/utils/AlertUtils"
 

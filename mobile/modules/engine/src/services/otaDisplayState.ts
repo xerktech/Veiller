@@ -1,4 +1,4 @@
-import type {OtaProgress, OtaStatus} from "@mentra/bluetooth-sdk/internal"
+import type {OtaProgress, OtaStatus} from "@veiller/bluetooth-sdk/internal"
 
 import {isLegacyShapedOtaStatus} from "./otaInstallPolicy"
 

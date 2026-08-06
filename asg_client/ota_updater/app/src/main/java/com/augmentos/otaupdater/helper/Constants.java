@@ -1,4 +1,4 @@
-package com.mentra.otaupdater.helper;
+package com.veiller.otaupdater.helper;
 
 public class Constants {
     public static final String TAG = "OTAUpdater";

@@ -36,8 +36,8 @@ All filtering (by user, log type, log level, grep) happens **client-side** in th
 
 | Variable               | Required | Default                    | Purpose                                 |
 | ---------------------- | -------- | -------------------------- | --------------------------------------- |
-| `MENTRA_AGENT_API_KEY` | Yes      | —                          | Sent as `X-Agent-Key` header            |
-| `MENTRA_API_HOST`      | No       | `https://api.mentra.glass` | API base URL (override for dev/staging) |
+| `VEILLER_AGENT_API_KEY` | Yes      | —                          | Sent as `X-Agent-Key` header            |
+| `VEILLER_API_HOST`      | No       | `https://api.mentra.glass` | API base URL (override for dev/staging) |
 
 The key lives in `cloud/.env` (gitignored). The CLI fails immediately with a clear error if the key is missing. The key is never logged or included in output.
 
@@ -150,7 +150,7 @@ ID column shows first 8 characters (the short prefix usable with `get` and `logs
 
 | Scenario                       | Behavior                                                                        |
 | ------------------------------ | ------------------------------------------------------------------------------- |
-| Missing `MENTRA_AGENT_API_KEY` | Exit 1, print: `Error: MENTRA_AGENT_API_KEY not set`                            |
+| Missing `VEILLER_AGENT_API_KEY` | Exit 1, print: `Error: VEILLER_AGENT_API_KEY not set`                            |
 | API returns 401                | Exit 1, print: `Error: Invalid API key`                                         |
 | API returns 404                | Exit 1, print: `Error: Incident not found: {id}`                                |
 | API returns 5xx                | Exit 1, print: `Error: API error ({status}): {message}`                         |

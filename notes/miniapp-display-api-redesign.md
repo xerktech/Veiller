@@ -1,8 +1,8 @@
 # Miniapp SDK Display API Redesign — Design Doc
 
 **Status:** Draft — analysis complete, decisions made, not yet implemented
-**Scope:** `@mentra/miniapp` SDK display surface, host pipeline (island module), native SGC layer
-**Out of scope:** Nex firmware (developed separately — we assume text/bitmap verbs in its SGC), cloud SDK (`@mentra/sdk`) display path
+**Scope:** `@veiller/miniapp` SDK display surface, host pipeline (island module), native SGC layer
+**Out of scope:** Nex firmware (developed separately — we assume text/bitmap verbs in its SGC), cloud SDK (`@veiller/sdk`) display path
 
 ---
 
@@ -28,7 +28,7 @@ We need **one API** that works as similarly as possible across glasses. G1/Z100 
 - **`positioned_text` needs a native bypass hack** — `DeviceManager.swift:1099-1112` routes it *around* the single `viewState` slot straight to the SGC, because the constantly-refreshing `text_wall` would clobber it every frame. The single-slot IR fighting multi-element reality.
 - **Miniapps carry G2 firmware workarounds in app code.** The navigation miniapp hardcodes G2 rects (`{x: 576-100, y: 0, w: 100, h: 100}`), blanks tiles with white bitmaps because G2 reuses same-rect containers, and sequences `clear`-then-redraw with `setTimeout`s for container teardown (`miniapps/navigation/src/background/managers/DisplayManager.ts:12-16, 79-101, 187-205`).
 - **Docs are stale**: `sdk/docs/display.md` and README document a nonexistent `clearView` (real method is `clear`, `display.ts:203`), and omit `showTextAt`, `breakMode`, and bitmap positioning.
-- **`GlassesCapabilities` is untyped** (`session.ts:55-57` — `[key: string]: unknown`); every miniapp re-rolls its own `hasDisplay`/model-name shape-guessing (teleprompter `DisplayProfiles.ts:37-51`, merge `index.ts:691-704`, mentra-ai `GlassesController.ts:88`). No way to ask "can I position things?"
+- **`GlassesCapabilities` is untyped** (`session.ts:55-57` — `[key: string]: unknown`); every miniapp re-rolls its own `hasDisplay`/model-name shape-guessing (teleprompter `DisplayProfiles.ts:37-51`, merge `index.ts:691-704`, veiller-ai `GlassesController.ts:88`). No way to ask "can I position things?"
 - **Data inconsistencies**: capability profile says G2 = 640×200 / 5 lines (`even-realities-g2.ts`), display-utils profile says 8 lines (`display-utils/src/profiles/g2.ts`), the native default container is 576×288, and RE demos place containers at y=230 — the firmware canvas is bigger than any declared number.
 - **`breakMode`** silently applies to only 3 of 7 layout types (`display.ts:208-210`); canvas has no equivalent.
 
@@ -63,7 +63,7 @@ miniapp SDK (display.*/canvas.*)
 | Partial update | ✗ | ✗ | ✓ update text/image in place | ✗ (full frame resend) | ✓ (OEM spec: retained ids + `update` + atomic `commit`) |
 | Unused headroom | — | — | firmware **ListContainer** (scrollable selectable menus + selection events) — unexposed | — | we control the spec |
 
-Sources: G2 = `mobile/modules/bluetooth-sdk/ios/Source/sgcs/G2.swift` + `local/g2_re/ae_g2_rev/proto/.../EvenHub.proto`; NIMO = `local/NIMO/Mentra接入Nimo智能眼镜-动态创建UI布局接入指导.pdf` (dynamic-UI protocol, app id 253) + `local/NIMO/current_nimo_sdk/docs/protocol/`; Nex target = `mintlify-docs/glasses-oems/firmware-spec.mdx`.
+Sources: G2 = `mobile/modules/bluetooth-sdk/ios/Source/sgcs/G2.swift` + `local/g2_re/ae_g2_rev/proto/.../EvenHub.proto`; NIMO = `local/NIMO/Veiller接入Nimo智能眼镜-动态创建UI布局接入指导.pdf` (dynamic-UI protocol, app id 253) + `local/NIMO/current_nimo_sdk/docs/protocol/`; Nex target = `mintlify-docs/glasses-oems/firmware-spec.mdx`.
 
 ### 2.1 NIMO dynamic-UI protocol (the new PDF, summarized)
 
@@ -171,7 +171,7 @@ The API shape doesn't change for this — ids stay optional — but adapters MUS
 #### 3.4.3 Images
 
 - **Input format contract: PNG (base64).** In practice adapters decode anything the platform image decoder reads (PNG/JPEG/BMP — `CGImage`/`BitmapFactory` handle all three), but PNG is what we document so nobody believes input byte layout matters. Images render monochrome/grayscale per device `intensityLevels`; color is quantized.
-- **Hard invariant: adapters always decode → re-encode to the device-perfect wire format. Dev bytes NEVER pass through.** Dev input is *pixels*, never *wire format*. Each device's perfection requirement (G2 4-bit BMP, NIMO 2bpp+zlib, G1 inverted/padded 1-bit BMP, Nex packed intensity rows) lives in its adapter exactly once. This is the lesson of G1's bitmap rot: "must be formatted PERFECTLY" knowledge previously lived in app code / cloud v1 magic bytes and evaporated. (mentra-ai hand-rolling a 4-bit BMP encoder in miniapp code today is the same anti-pattern, one device newer.) No SDK-side PNG→BMP converter needed — adapters want decodable pixels, not BMPs.
+- **Hard invariant: adapters always decode → re-encode to the device-perfect wire format. Dev bytes NEVER pass through.** Dev input is *pixels*, never *wire format*. Each device's perfection requirement (G2 4-bit BMP, NIMO 2bpp+zlib, G1 inverted/padded 1-bit BMP, Nex packed intensity rows) lives in its adapter exactly once. This is the lesson of G1's bitmap rot: "must be formatted PERFECTLY" knowledge previously lived in app code / cloud v1 magic bytes and evaporated. (veiller-ai hand-rolling a 4-bit BMP encoder in miniapp code today is the same anti-pattern, one device newer.) No SDK-side PNG→BMP converter needed — adapters want decodable pixels, not BMPs.
 - `data` (base64) inline every frame is fine at real refresh rates (≤~3 Hz in practice; the JS bridge cost is noise). **Asset registration is deferred** — the expensive hop is BLE, and that's an adapter rule, not an API: *image element with unchanged content ⇒ no re-upload* (G2 adapter compares content per container id and skips the fragment session; NIMO has no cache, nothing lost). `assetId` is purely additive later if a high-frequency image case appears (maps to OEM spec `preload_image`/`display_cached_image`).
 - Bitmap dims must match `box` dims in v1; host rejects otherwise. Any scaling is phone-side, never glasses-side.
 
@@ -266,6 +266,6 @@ Context: few users, dwindling over time — don't over-optimize, but nothing may
 | Per-device drivers | `sgcs/G1.swift`, `G2.swift`, `MentraNex.swift`, `Nimo.swift`, `Mach1.swift`, `MentraLive.swift` (+ Android `.kt` mirrors) |
 | Capabilities | `cloud/packages/types/src/hardware.ts`, `cloud/packages/types/src/capabilities/*.ts` (duplicated in `cloud/packages/cloud/src/config/capabilities/`) |
 | OEM display spec (IR source) | `mintlify-docs/glasses-oems/firmware-spec.mdx` |
-| NIMO dynamic-UI protocol | `local/NIMO/Mentra接入Nimo智能眼镜-动态创建UI布局接入指导.pdf`, `local/NIMO/current_nimo_sdk/docs/protocol/` |
+| NIMO dynamic-UI protocol | `local/NIMO/Veiller接入Nimo智能眼镜-动态创建UI布局接入指导.pdf`, `local/NIMO/current_nimo_sdk/docs/protocol/` |
 | G2 firmware ground truth | `local/g2_re/ae_g2_rev/proto/proto_out_v2.1.0_beta_v3/protos/g2/EvenHub.proto`, `local/g2_re/ae_g2_rev/aegray/demos/` |
 | G2-hack case study | `miniapps/navigation/src/background/managers/DisplayManager.ts` |

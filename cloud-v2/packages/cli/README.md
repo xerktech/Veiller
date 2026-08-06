@@ -1,9 +1,9 @@
-# @mentra/cli
+# @veiller/cli
 
-The Mentra developer CLI — the `mentra` command. Build, publish, and manage
-Mentra miniapps against the Cloud V2 developer console.
+The Veiller developer CLI — the `veiller` command. Build, publish, and manage
+Veiller miniapps against the Cloud V2 developer console.
 
-It wraps [`@mentra/miniapp-cli`](https://www.npmjs.com/package/@mentra/miniapp-cli)
+It wraps [`@veiller/miniapp-cli`](https://www.npmjs.com/package/@veiller/miniapp-cli)
 (the `dev` / `build` / `pack` author flow) and adds account and store operations:
 `login`, `whoami`, `org`, `miniapps`, `releases`, and `publish`.
 
@@ -13,26 +13,26 @@ It wraps [`@mentra/miniapp-cli`](https://www.npmjs.com/package/@mentra/miniapp-c
 ## Install
 
 ```bash
-bun add -g @mentra/cli@dev
-mentra --help
+bun add -g @veiller/cli@dev
+veiller --help
 ```
 
 Or run without installing:
 
 ```bash
-bunx @mentra/cli@dev --help
+bunx @veiller/cli@dev --help
 ```
 
 ## Common commands
 
 ```bash
-mentra login              # sign in to the Mentra Developer Console
-mentra dev                # local dev server with a signed Cloud V2 identity
-mentra build              # build the current miniapp
-mentra pack               # zip dist/ into a submittable release
-mentra publish            # upload + publish a release
-mentra miniapps list      # miniapps owned by your org
-mentra releases submit    # submit an uploaded release for review
+veiller login              # sign in to the Veiller Developer Console
+veiller dev                # local dev server with a signed Cloud V2 identity
+veiller build              # build the current miniapp
+veiller pack               # zip dist/ into a submittable release
+veiller publish            # upload + publish a release
+veiller miniapps list      # miniapps owned by your org
+veiller releases submit    # submit an uploaded release for review
 ```
 
-Run `mentra <command> --help` for the full option set.
+Run `veiller <command> --help` for the full option set.

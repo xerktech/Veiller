@@ -18,13 +18,13 @@ from quickest to widest reach.
 
 ## 1. Dev install (you, iterating)
 
-While you're building, [`mentra-miniapp dev`](/app-devs/reference/cli#dev) serves
-your project over the LAN with hot reload. Scan the QR from the Mentra App and
+While you're building, [`veiller-miniapp dev`](/app-devs/reference/cli#dev) serves
+your project over the LAN with hot reload. Scan the QR from the Veiller App and
 your changes reload on save. This is the inner loop; see the
 [Quickstart](/app-devs/getting-started/quickstart).
 
 Dev mode is not an installation: the computer and CLI must remain running to
-serve each miniapp's runtime bundle. The Mentra App keeps a separate dev entry
+serve each miniapp's runtime bundle. The Veiller App keeps a separate dev entry
 for each manifest package name and caches its name and icon, so you can scan and
 test multiple dev miniapps together. Rescanning the same package updates that
 entry. Use a release install when you want the miniapp to run without the
@@ -32,10 +32,10 @@ computer.
 
 ## 2. Release install (sharing a build over LAN)
 
-To put a real, installed build on one or more phones without going through the Mentra Miniapp Store, run:
+To put a real, installed build on one or more phones without going through the Veiller Miniapp Store, run:
 
 ```bash
-mentra-miniapp release
+veiller-miniapp release
 ```
 
 This builds, packs, and serves the bundle behind a `miniapp://release` QR. Anyone
@@ -48,11 +48,11 @@ devices can install from the same QR.
 
 ## 3. Store submission (reaching everyone)
 
-To reach users who aren't on your network, publish to the Mentra Miniapp Store.
+To reach users who aren't on your network, publish to the Veiller Miniapp Store.
 The artifact is the ZIP produced by:
 
 ```bash
-mentra-miniapp pack
+veiller-miniapp pack
 ```
 
 Submit `build/<packageName>-<version>.zip` through the Developer Console. Make

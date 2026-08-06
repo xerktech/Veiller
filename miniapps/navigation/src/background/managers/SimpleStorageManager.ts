@@ -10,7 +10,7 @@
  *   const raw = await storage.get("recentDestinations")
  */
 
-import type {MiniappSession} from "@mentra/miniapp"
+import type {MiniappSession} from "@veiller/miniapp"
 import type {PlaceDetails, SavedPlace} from "../lib/places"
 import type {UnitSystem, VoiceGuidanceMode} from "../../shared/types"
 

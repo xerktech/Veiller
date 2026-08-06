@@ -143,7 +143,7 @@ export default function HomePage({userId}: HomePageProps) {
           </div>
           <div>
             <h1 className="text-lg font-semibold">Camera App</h1>
-            <p className="text-xs text-muted-foreground">MentraOS</p>
+            <p className="text-xs text-muted-foreground">Veiller</p>
           </div>
         </div>
 

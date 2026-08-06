@@ -57,7 +57,7 @@ protoc \
 
 ```bash
 $ grep "GetStatus" cloud/packages/cloud-livekit-bridge/proto/livekit_bridge_grpc.pb.go
-LiveKitBridge_GetStatus_FullMethodName = "/mentra.livekit.bridge.LiveKitBridge/GetStatus"
+LiveKitBridge_GetStatus_FullMethodName = "/veiller.livekit.bridge.LiveKitBridge/GetStatus"
 GetStatus(ctx context.Context, in *BridgeStatusRequest, opts ...grpc.CallOption) (*BridgeStatusResponse, error)
 # GetStatus RPC is present ✅
 ```

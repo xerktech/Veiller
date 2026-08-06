@@ -4,10 +4,10 @@
 endpoints and the presigned-upload + storage-event model. The runtime serves the
 endpoints (`src/api/camera.api.ts`) behind a **mock provider** for now; the real
 blob/stream provider lands behind `CAMERA_PROVIDER`. The push events
-(`photo.ready` / `photo.error`) are in `@mentra/cloud-runtime/protocol`, and
-`@mentra/cloud-client`'s `camera` module drives the whole flow (proven e2e).
+(`photo.ready` / `photo.error`) are in `@veiller/cloud-runtime/protocol`, and
+`@veiller/cloud-client`'s `camera` module drives the whole flow (proven e2e).
 
-A service within Mentra Runtime Services (`@mentra/cloud-runtime`). It covers the
+A service within Veiller Runtime Services (`@veiller/cloud-runtime`). It covers the
 two camera-side cloud capabilities, both client-initiated:
 
 - **Managed photo request.** The client asks the cloud to coordinate a photo
@@ -26,7 +26,7 @@ are **plain stateless REST that any pod can serve** with no Redis rendezvous.
 **Storage boundary.** Photo blob storage follows the same provider-wrapper
 pattern as Cloud Core's [`storage-service`](../../001-cloud-core/storage-service/),
 but instantiated within this product, not shared across the product boundary:
-since Mentra Runtime Services is self-hostable, a self-hosted Runtime points at
+since Veiller Runtime Services is self-hostable, a self-hosted Runtime points at
 the OEM's own blob config, independent of Cloud Core's instance.
 
 ## Endpoints

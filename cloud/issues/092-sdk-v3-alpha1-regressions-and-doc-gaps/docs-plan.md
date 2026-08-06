@@ -9,7 +9,7 @@
 ## Principles
 
 - The sidebar tells a story: what is a mini app, how do you build one, what can you do with it
-- Every `MentraSession` manager gets its own sidebar entry
+- Every `VeillerSession` manager gets its own sidebar entry
 - Names match manager names, not hardware names
 - Every entry has an icon
 - Bun is required, not optional. No npm, no Node.
@@ -36,7 +36,7 @@ v3 (SDK 3.x)
     React Webviews
     Authentication
     Bridge API
-  MentraSession                 icon: link
+  VeillerSession                 icon: link
   Device >                      icon: glasses
     Overview                    (NEW -- buttons, gestures, head position, state, battery, WiFi)
     Hardware Capabilities       (NEW -- rewrite of 4 hw/ pages, folded into device)

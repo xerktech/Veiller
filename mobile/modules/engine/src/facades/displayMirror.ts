@@ -4,7 +4,7 @@
  * (`engine.display.mirror`). The store is fed by the display paths
  * (LocalDisplayManager + the cloud path) via `setDisplayEvent`; this facade is the
  * read side: `current()` (snapshot) + `onMirror(cb)` (subscribe). The raw store is
- * also exposed as `engine.displayStore` (the Mentra-app escape hatch).
+ * also exposed as `engine.displayStore` (the Veiller-app escape hatch).
  */
 import {useDisplayStore} from "../stores/display"
 

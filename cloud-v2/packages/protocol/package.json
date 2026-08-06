@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/cloud-protocol",
+  "name": "@veiller/cloud-protocol",
   "version": "0.1.0-dev.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -25,10 +25,10 @@
     "url": "git+https://github.com/Mentra-Community/MentraOS.git",
     "directory": "cloud-v2/packages/protocol"
   },
-  "description": "MentraOS phone-cloud wire protocol — message schemas, envelopes and error types (zod)",
+  "description": "Veiller phone-cloud wire protocol — message schemas, envelopes and error types (zod)",
   "keywords": [
-    "mentra",
-    "mentraos",
+    "veiller",
+    "veiller",
     "protocol",
     "schemas",
     "zod"

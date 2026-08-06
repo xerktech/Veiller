@@ -90,10 +90,10 @@ This document analyzes the app reconnection/resurrection system and identifies m
 **Evidence from logs (2025-12-10 00:44)**:
 
 ```
-00:44:25.427  App com.mentra.captions.beta unexpectedly disconnected (code: 1006)
+00:44:25.427  App com.veiller.captions.beta unexpectedly disconnected (code: 1006)
 00:44:30.427  Grace period expired, resurrection starting
 00:44:30.517  Error triggering stop webhook
-00:44:30.761  Triggering webhook for com.mentra.captions.beta
+00:44:30.761  Triggering webhook for com.veiller.captions.beta
 00:44:31.766  Webhook failed after 2 attempts
 00:44:31.767  App connection state changed -> disconnected
 ```

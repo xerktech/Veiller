@@ -1,12 +1,12 @@
 /**
  * Captions App - Exportable AppServer Class
  *
- * This class wraps the MentraOS AppServer and can be:
+ * This class wraps the Veiller AppServer and can be:
  * - Run standalone (via src/index.ts)
  * - Imported and controlled programmatically from other code
  */
 
-import {AppServer, AppSession} from "@mentra/sdk"
+import {AppServer, AppSession} from "@veiller/sdk"
 
 export class CaptionsApp extends AppServer {
   /**

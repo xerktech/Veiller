@@ -9,7 +9,7 @@ import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import UserSession from "../../../services/session/UserSession";
 import App, { AppI } from "../../../models/app.model";
 import appService from "../../../services/core/app.service";
-import { RestreamDestination } from "@mentra/sdk";
+import { RestreamDestination } from "@veiller/sdk";
 import type { AppEnv, AppContext } from "../../../types/hono";
 
 const logger = rootLogger.child({ service: "streams.routes" });

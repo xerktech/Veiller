@@ -328,7 +328,7 @@ describe("SonioxProvider session configuration", () => {
     await provider.close();
   });
 
-  test("sends the Mentra activation phrase as recognition context", async () => {
+  test("sends the Veiller activation phrase as recognition context", async () => {
     const session = new FakeSession();
     let sessionConfig: Record<string, unknown> | undefined;
     const client = {
@@ -349,8 +349,8 @@ describe("SonioxProvider session configuration", () => {
 
     expect(sessionConfig).toMatchObject({
       context: {
-        terms: ["Mentra", "Hey Mentra"],
-        text: "Mentra, Hey Mentra (an AI assistant)",
+        terms: ["Mentra", "Hey Veiller"],
+        text: "Veiller, Hey Veiller (an AI assistant)",
       },
     });
 

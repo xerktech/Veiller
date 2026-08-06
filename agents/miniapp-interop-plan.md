@@ -1,8 +1,8 @@
 # Miniapp Interop: System Lifecycle Control + Actions — Implementation Plan
 
 Status: draft for review
-Scope: `@mentra/miniapp` SDK, island module (host), miniapp-cli (manifest), example miniapp
-Primary consumer: Mentra AI (`com.mentra.ai`) rewritten as a local miniapp
+Scope: `@veiller/miniapp` SDK, island module (host), miniapp-cli (manifest), example miniapp
+Primary consumer: Mentra AI (`com.veiller.ai`) rewritten as a local miniapp
 
 ## Goal
 
@@ -119,13 +119,13 @@ Rules:
 - `id`: `^[a-z][a-z0-9_]*$`, unique within the app, max 64 chars. Global uniqueness is `packageName + id` (explicit addressing — no namespace collisions possible).
 - `description`: required, non-empty. This is the AI-facing contract — CLI lints for length (≥ 20 chars recommended).
 - `parameters`: **a JSON Schema object, restricted to the MCP-compatible subset**: top-level `type: "object"`, `properties` with `type` ∈ `string` / `number` / `boolean` / `array` (of primitives), plus `enum`, `description`, `items` (for arrays), and a top-level `required` array. `number` (not `integer`) since the runtime is JavaScript and everything is a JS number anyway. Arrays of primitives are allowed. No nested objects in v1 (keeps host validation trivial; relax later). This maps verbatim to an MCP `inputSchema`.
-- **No new version gate.** This is greenfield and additive — the `actions` field is optional and ships in the current `@mentra/miniapp` 0.3.x line (host `supportedSdkRange` is `^0.3.0`, current SDK is `0.3.0`). A miniapp built against an SDK that has `session.actions` simply has it; older manifest parsers ignore an unknown `actions` field. We do **not** bump to 0.4.0 — that would fall outside the host's `^0.3.0` range and break the existing gate for no benefit.
+- **No new version gate.** This is greenfield and additive — the `actions` field is optional and ships in the current `@veiller/miniapp` 0.3.x line (host `supportedSdkRange` is `^0.3.0`, current SDK is `0.3.0`). A miniapp built against an SDK that has `session.actions` simply has it; older manifest parsers ignore an unknown `actions` field. We do **not** bump to 0.4.0 — that would fall outside the host's `^0.3.0` range and break the existing gate for no benefit.
 
 ### MCP correspondence (the reason for the schema choice)
 
 | miniapp.json | MCP tool |
 |---|---|
-| `packageName` + `id` | `name` (adapter mangles, e.g. `com_mentra_todo__add_todo` — MCP names disallow dots) |
+| `packageName` + `id` | `name` (adapter mangles, e.g. `com_veiller_todo__add_todo` — MCP names disallow dots) |
 | `description` | `description` |
 | `parameters` | `inputSchema`, verbatim |
 | `invoke()` JSON result | tool result content |
@@ -156,7 +156,7 @@ Payload cap (max serialized size of an action call's `params` and of its `result
 
 ### Prerequisite — extract a headless `MiniappLauncher` (do this first)
 
-Everything below assumes a miniapp's background context can be spawned **without any UI**. Today it can't: the launch sequence — resolve the bundle (dev HTTP vs installed `file://`), read the manifest, then `MentraJSRouter.spawnAndRegister` — lives inside the `LocalMiniappView` React component's mount effect (`mobile/src/components/miniapp/LocalMiniappView.tsx:224-337`), and only runs because the `<Compositor>` mounts that component on **foreground**. `useAppStatusStore.start()` just sets `running: true` optimistically; the actual spawn is a side effect of the UI mounting.
+Everything below assumes a miniapp's background context can be spawned **without any UI**. Today it can't: the launch sequence — resolve the bundle (dev HTTP vs installed `file://`), read the manifest, then `VeillerJSRouter.spawnAndRegister` — lives inside the `LocalMiniappView` React component's mount effect (`mobile/src/components/miniapp/LocalMiniappView.tsx:224-337`), and only runs because the `<Compositor>` mounts that component on **foreground**. `useAppStatusStore.start()` just sets `running: true` optimistically; the actual spawn is a side effect of the UI mounting.
 
 That breaks the headless wake (no foreground → no mount → no spawn) and is incompatible with the codebase direction: `island` is becoming a **native library** OEMs embed via RN brownfield, with **no shared UI components** (the UI-Kit idea is dropped — OEMs write their own native UI). Any logic stuck in our RN components is invisible to an OEM. So the launch logic must live in `island`, and its API is part of island's public, native-facing surface.
 
@@ -169,7 +169,7 @@ launcher.stop(packageName): Promise<void>            // unregister/kill the back
 launcher.isRunning(packageName): boolean
 ```
 
-`ensureRunning` resolves once the context has spawned **and** completed its `miniapp_connect` handshake (or rejects on a spawn/connect timeout). This gives the connect-await a single home instead of each caller polling. It owns the bundle-resolve + manifest-read + spawn recipe currently **duplicated** across `LocalMiniappView`, `mentraJsBootstrap.ts` (dev respawn), `MiniappCatalog`, and `devMiniappLaunch.ts`. No React, no RN-component imports — it must be callable from native across the brownfield bridge.
+`ensureRunning` resolves once the context has spawned **and** completed its `miniapp_connect` handshake (or rejects on a spawn/connect timeout). This gives the connect-await a single home instead of each caller polling. It owns the bundle-resolve + manifest-read + spawn recipe currently **duplicated** across `LocalMiniappView`, `veillerJsBootstrap.ts` (dev respawn), `MiniappCatalog`, and `devMiniappLaunch.ts`. No React, no RN-component imports — it must be callable from native across the brownfield bridge.
 
 **Re-wiring (the whole job is moving four things out of one component):**
 - `apps.ts` `start()` → calls `launcher.ensureRunning(pkg)` so "start" actually spawns, then runs its existing foreground/arbitration (user-tap semantics). Spawn no longer depends on the UI.
@@ -177,7 +177,7 @@ launcher.isRunning(packageName): boolean
 - `LocalMiniappView` → becomes dumb: bind + render the `<WebView>` only. It no longer resolves bundles or spawns anything.
 - The interop `ActionCallBroker` (§4.3) → calls `launcher.ensureRunning(pkg)` for the headless wake.
 
-**The boundary this draws (the point of the exercise):** background-context spawn = `island` (the launcher); WebView *rendering* + foregrounding = the app/OEM. The WebView *host* logic (the `window.MentraOS` injection + `WebviewBridge`) is **already** in island, so the launcher is the one remaining headless piece. After this, `setForeground` cleanly means "render the WebView for an already-running background context" — correctly a UI concern.
+**The boundary this draws (the point of the exercise):** background-context spawn = `island` (the launcher); WebView *rendering* + foregrounding = the app/OEM. The WebView *host* logic (the `window.Veiller` injection + `WebviewBridge`) is **already** in island, so the launcher is the one remaining headless piece. After this, `setForeground` cleanly means "render the WebView for an already-running background context" — correctly a UI concern.
 
 ### 4.1 Privilege check (PUBLIC vs SYSTEM)
 
@@ -208,7 +208,7 @@ const SYSTEM_ONLY = new Set<string>([
 - `SYSTEM_APPS.includes(packageName)` (`mobile/src/constants/miniapps.ts`), **or**
 - the app is a dev sideload (`isMiniappDev`)
 
-That's it. Sideloads are trusted because sideloading already requires the developer to be driving the phone (same trust model as adb on Android) — and this is exactly how the Mentra AI team iterates on the AI miniapp before it ships as a built-in. Squatting isn't a concern: a sideload is already privileged regardless of the name it claims, and in production the store owns `packageName` uniqueness, so a non-system app can't ship as `com.mentra.ai`.
+That's it. Sideloads are trusted because sideloading already requires the developer to be driving the phone (same trust model as adb on Android) — and this is exactly how the Mentra AI team iterates on the AI miniapp before it ships as a built-in. Squatting isn't a concern: a sideload is already privileged regardless of the name it claims, and in production the store owns `packageName` uniqueness, so a non-system app can't ship as `com.veiller.ai`.
 
 ### 4.2 Lifecycle handlers (`LocalMiniappRuntime`)
 
@@ -245,7 +245,7 @@ A miniapp woken by an action **stays running** until something explicitly stops 
 ## 5. Implementation phases
 
 **Phase 0 — Runtime prerequisite: extract `MiniappLauncher`.**
-Move bundle-resolve + manifest-read + `spawnAndRegister` out of `LocalMiniappView` into an island `MiniappLauncher` (`ensureRunning`/`stop`/`isRunning`); re-wire `apps.ts` `start`/`stop` to it; make `LocalMiniappView` render-only. No React in the launcher (it ships across the native bridge). Dedupe the recipe from `mentraJsBootstrap`/`MiniappCatalog`/`devMiniappLaunch`.
+Move bundle-resolve + manifest-read + `spawnAndRegister` out of `LocalMiniappView` into an island `MiniappLauncher` (`ensureRunning`/`stop`/`isRunning`); re-wire `apps.ts` `start`/`stop` to it; make `LocalMiniappView` render-only. No React in the launcher (it ships across the native bridge). Dedupe the recipe from `veillerJsBootstrap`/`MiniappCatalog`/`devMiniappLaunch`.
 Files: `island/src/services/MiniappLauncher.ts` (new), `island/src/stores/apps.ts`, `mobile/src/components/miniapp/LocalMiniappView.tsx`.
 Accept: tapping a miniapp still launches it; a background context can be spawned with the UI closed (call `launcher.ensureRunning` from a non-UI path and confirm `miniapp_connect`); dev respawn unaffected.
 
@@ -256,7 +256,7 @@ Accept: a dev-sideloaded miniapp lists apps (with `CompatibilityResult`), starts
 
 **Phase 2 — Manifest actions + handler registration (`handle`).**
 CLI schema + validation (`sdk/miniapp-cli/src/manifest.ts`); `AppRegistry` parse/cache; new `miniapp/src/modules/actions.ts` with `handle` (target side, open to all); `declaredActions` in CONNECT_ACK. No SDK version bump (additive in 0.3.x).
-Accept: example miniapp declares `add_todo` and registers a handler; `mentra-miniapp dev` validates good/bad manifests; `miniapps.list()` returns its action schema.
+Accept: example miniapp declares `add_todo` and registers a handler; `veiller-miniapp dev` validates good/bad manifests; `miniapps.list()` returns its action schema.
 
 **Phase 3 — Invocation + wake (`invoke`).**
 Add `invoke` to `miniapp/src/modules/actions.ts` (caller side, SYSTEM-gated); `ActionCallBroker`, `ACTION_CALL`/`miniapp_action_result` envelopes, double correlation, headless wake via `launcher.ensureRunning` (Phase 0), timeouts, size caps, error codes, handler-registration buffering.

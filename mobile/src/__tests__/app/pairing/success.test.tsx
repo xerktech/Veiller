@@ -1,5 +1,5 @@
-import {engine, SETTINGS} from "@mentra/engine"
-import {useSettingsStore} from "@mentra/engine/internal"
+import {engine, SETTINGS} from "@veiller/engine"
+import {useSettingsStore} from "@veiller/engine/internal"
 import {useRoute} from "@react-navigation/native"
 import {fireEvent, render, waitFor} from "@testing-library/react-native"
 import type {ReactNode} from "react"
@@ -162,7 +162,7 @@ describe("pairing success screen", () => {
     expect(engine.pairing.waitForBluetoothClassic).not.toHaveBeenCalled()
   })
 
-  it("opens MentraOS onboarding after pairing non-Live glasses when it is incomplete", async () => {
+  it("opens Veiller onboarding after pairing non-Live glasses when it is incomplete", async () => {
     ;(useRoute as jest.Mock).mockReturnValue({params: {deviceModel: "Even Realities G1"}})
 
     const {getAllByText} = render(<PairingSuccessScreen />)

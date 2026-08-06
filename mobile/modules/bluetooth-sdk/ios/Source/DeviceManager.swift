@@ -1,6 +1,6 @@
 //
 //  DeviceManager.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created by Matthew Fosse on 3/5/25.
 //
@@ -11,7 +11,7 @@ import CoreBluetooth
 import Foundation
 import UIKit
 #if SWIFT_PACKAGE
-import MentraBluetoothSDKCoreObjC
+import VeillerBluetoothSDKCoreObjC
 #endif
 
 struct ViewState {
@@ -297,7 +297,7 @@ struct ViewState {
     private var micReinitTimer: Timer?
 
     /// STT:
-    #if !SWIFT_PACKAGE || MENTRA_FEATURE_LOCAL_STT
+    #if !SWIFT_PACKAGE || VEILLER_FEATURE_LOCAL_STT
     private var transcriber: SherpaOnnxTranscriber?
     #endif
 
@@ -334,7 +334,7 @@ struct ViewState {
         // MemoryMonitor.start()
 
         // Initialize SherpaOnnx Transcriber
-        #if !SWIFT_PACKAGE || MENTRA_FEATURE_LOCAL_STT
+        #if !SWIFT_PACKAGE || VEILLER_FEATURE_LOCAL_STT
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first,
            let rootViewController = window.rootViewController
@@ -425,7 +425,7 @@ struct ViewState {
         handleSendingPcm(pcmData)
 
         // Send PCM to local transcriber.
-#if !SWIFT_PACKAGE || MENTRA_FEATURE_LOCAL_STT
+#if !SWIFT_PACKAGE || VEILLER_FEATURE_LOCAL_STT
         if shouldSendTranscript || localSttFallbackActive {
             transcriber?.acceptAudio(pcm16le: pcmData)
         }
@@ -635,12 +635,12 @@ struct ViewState {
         } else if wearable.contains(DeviceTypes.FRAME) {
             // sgc = FrameManager()
         }
-#if !SWIFT_PACKAGE || MENTRA_FEATURE_NEX
+#if !SWIFT_PACKAGE || VEILLER_FEATURE_NEX
         if sgc == nil && wearable.contains(DeviceTypes.NEX) {
             sgc = MentraNexSGC.getInstance()
         }
 #endif
-#if !SWIFT_PACKAGE || MENTRA_FEATURE_VUZIX
+#if !SWIFT_PACKAGE || VEILLER_FEATURE_VUZIX
         if sgc == nil {
             if wearable.contains(DeviceTypes.MACH1) {
                 sgc = Mach1()
@@ -811,7 +811,7 @@ struct ViewState {
         }
 
         if PhoneAudioMonitor.getInstance().isOwnAppAudioPlaying() {
-            Bridge.log("MAN: Mentra audio is playing; skipping glasses mic recovery")
+            Bridge.log("MAN: Veiller audio is playing; skipping glasses mic recovery")
             return
         }
 
@@ -908,7 +908,7 @@ struct ViewState {
     }
 
     func restartTranscriber() {
-        #if !SWIFT_PACKAGE || MENTRA_FEATURE_LOCAL_STT
+        #if !SWIFT_PACKAGE || VEILLER_FEATURE_LOCAL_STT
         Bridge.log("MAN: Restarting SherpaOnnxTranscriber via command")
         transcriber?.restart()
         #else
@@ -1803,7 +1803,7 @@ struct ViewState {
 
     func cleanup() {
         // Clean up transcriber resources
-#if !SWIFT_PACKAGE || MENTRA_FEATURE_LOCAL_STT
+#if !SWIFT_PACKAGE || VEILLER_FEATURE_LOCAL_STT
         transcriber?.shutdown()
         transcriber = nil
 #endif

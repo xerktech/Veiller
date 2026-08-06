@@ -1,9 +1,9 @@
-# @mentra/miniapp-cli (`mentra-miniapp`)
+# @veiller/miniapp-cli (`veiller-miniapp`)
 
-Author-facing CLI for MentraOS miniapps. Pairs with [`@mentra/miniapp`](../miniapp).
+Author-facing CLI for Veiller miniapps. Pairs with [`@veiller/miniapp`](../miniapp).
 
 ```
-mentra-miniapp <command>
+veiller-miniapp <command>
 ```
 
 ## Commands at a glance
@@ -25,7 +25,7 @@ Run with no args to print the same usage table.
 ## `dev`
 
 ```bash
-mentra-miniapp dev
+veiller-miniapp dev
 ```
 
 What it does:
@@ -40,12 +40,12 @@ What it does:
 
 Default `port` is `3000`; override the starting point with a `"port": <n>` field in `miniapp.json`. If that port or its sidecar neighbor is busy, `dev` scans upward until it finds a free adjacent pair.
 
-**On the phone:** open the Mentra App → **Settings → Developer settings → Mini App Development → Scan Mini App QR Code**. Phone and laptop must be on the same Wi-Fi.
+**On the phone:** open the Veiller App → **Settings → Developer settings → Mini App Development → Scan Mini App QR Code**. Phone and laptop must be on the same Wi-Fi.
 
 `dev` is live and temporary. Keep the CLI and computer running because the
-Mentra App loads the runtime bundle from that LAN server. Dev miniapps are keyed
+Veiller App loads the runtime bundle from that LAN server. Dev miniapps are keyed
 by their manifest package name, so you can scan and test several side by side;
-rescanning the same package updates only that entry. The Mentra App caches each
+rescanning the same package updates only that entry. The Veiller App caches each
 entry's name and icon. Use `bun run release` when you need an installed miniapp
 that works without the computer.
 
@@ -56,8 +56,8 @@ that works without the computer.
 ## `release`
 
 ```bash
-mentra-miniapp release
-mentra-miniapp release --no-cache    # force rebuild even if cache is fresh
+veiller-miniapp release
+veiller-miniapp release --no-cache    # force rebuild even if cache is fresh
 ```
 
 The all-in-one verb: build a release, pack it, and serve it behind a QR so you can install on as many phones as you like.
@@ -67,18 +67,18 @@ Flow:
 1. Validates `miniapp.json`.
 2. **Build cache.** Looks for `build/<packageName>-<version>.zip`. If it exists and every project source file (excluding `node_modules`, `dist`, `build`, `.git`) is older than the zip, reuses it. Otherwise rebuilds.
 3. **Build.** Detects your package manager (`bun.lock` → `bun`, `pnpm-lock.yaml` → `pnpm`, `yarn.lock` → `yarn`, else `npm`) and runs `<pm> run build`. Your `package.json` must define a `build` script that produces `dist/`.
-4. **Pack.** Calls the same logic as `mentra-miniapp pack` — validates the manifest, copies `miniapp.json` + `icon.png` into `dist/`, zips to `build/<packageName>-<version>.zip`. Prints size + duration.
+4. **Pack.** Calls the same logic as `veiller-miniapp pack` — validates the manifest, copies `miniapp.json` + `icon.png` into `dist/`, zips to `build/<packageName>-<version>.zip`. Prints size + duration.
 5. **Serve.** Picks a free port between 6789 and 6798. Hosts the bundle, manifest, and icon over HTTP on `0.0.0.0`:
    - `GET /miniapp.json`
    - `GET /icon.png`
    - `GET /bundle.zip`
-   - `GET /__mentra_release/health`
+   - `GET /__veiller_release/health`
 6. Prints a `miniapp://release?url=<lan-base>&package=…&version=…&name=…` URL + QR.
 7. Stays up so multiple devices can install. Each `/bundle.zip` fetch logs `✓ Install #N — <name>@<version> → <remote>`.
 
 `Ctrl+C` to stop the server.
 
-**On the phone:** the Mentra App's QR scanner branches on `miniapp://release` and uses the dev composer to download + install the bundle. The miniapp lands in `lmas/<package>/<version>/` and behaves like any installed local miniapp — runs offline, persists across restarts, no laptop required after install.
+**On the phone:** the Veiller App's QR scanner branches on `miniapp://release` and uses the dev composer to download + install the bundle. The miniapp lands in `lmas/<package>/<version>/` and behaves like any installed local miniapp — runs offline, persists across restarts, no laptop required after install.
 
 > **Why "release" and not "install":** `install` collides with package managers (`bun run install` is reserved). Naming the action after the artifact you're producing avoids that collision and matches Android's `installRelease` mental model.
 
@@ -87,8 +87,8 @@ Flow:
 ## `pack`
 
 ```bash
-mentra-miniapp pack
-mentra-miniapp pack --no-build    # zip dist/ as-is, skip the build
+veiller-miniapp pack
+veiller-miniapp pack --no-build    # zip dist/ as-is, skip the build
 ```
 
 Produces a distributable ZIP. Use this when you want the artifact only — `release` calls `pack` internally.
@@ -112,7 +112,7 @@ The resulting ZIP is the artifact you'd upload to the miniapp store.
 ## `manifest`
 
 ```bash
-mentra-miniapp manifest
+veiller-miniapp manifest
 ```
 
 Interactive top-level wizard for `miniapp.json` (Clack-based). Loop:
@@ -131,9 +131,9 @@ The wizard shares its mutation backend (`manifest-mutate.ts`) with the object-ve
 ## `permission`
 
 ```bash
-mentra-miniapp permission list
-mentra-miniapp permission add [TYPE]
-mentra-miniapp permission remove [TYPE]
+veiller-miniapp permission list
+veiller-miniapp permission add [TYPE]
+veiller-miniapp permission remove [TYPE]
 ```
 
 `add` / `remove` are interactive when called without `TYPE` (Clack select prompts) and non-interactive when `TYPE` is provided.
@@ -147,9 +147,9 @@ Adding a permission interactively prompts for an optional human-readable descrip
 ## `hardware`
 
 ```bash
-mentra-miniapp hardware list
-mentra-miniapp hardware add [TYPE] [LEVEL]
-mentra-miniapp hardware remove [TYPE]
+veiller-miniapp hardware list
+veiller-miniapp hardware add [TYPE] [LEVEL]
+veiller-miniapp hardware remove [TYPE]
 ```
 
 Allowed `TYPE` values: `CAMERA`, `DISPLAY`, `MICROPHONE`, `SPEAKER`, `IMU`, `BUTTON`, `LIGHT`, `WIFI`.
@@ -167,16 +167,16 @@ Add is interactive when called without `TYPE` / `LEVEL`. Non-interactive form re
 ## `schema`
 
 ```bash
-mentra-miniapp schema print
+veiller-miniapp schema print
 ```
 
 Prints the canonical `miniapp.json` JSON Schema to stdout. Useful for piping into IDE config or for validation in CI.
 
 The schema is generated from the same constants the validator uses (`ALLOWED_PERMISSIONS`, `ALLOWED_HARDWARE_TYPES`, `ALLOWED_HARDWARE_LEVELS`), so it can never drift from validation behavior.
 
-The published schema file ships at `node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json` for editors that read `$schema` from `miniapp.json`. The scaffolder (`create-mentra-miniapp`) injects this `$schema` line into new projects automatically.
+The published schema file ships at `node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json` for editors that read `$schema` from `miniapp.json`. The scaffolder (`create-veiller-miniapp`) injects this `$schema` line into new projects automatically.
 
-> `mentra-miniapp schema regenerate` exists too but is a CLI-internal command — it rewrites the published schema file from the in-source allowed-values lists. Authors don't need it.
+> `veiller-miniapp schema regenerate` exists too but is a CLI-internal command — it rewrites the published schema file from the in-source allowed-values lists. Authors don't need it.
 
 ---
 
@@ -184,10 +184,10 @@ The published schema file ships at `node_modules/@mentra/miniapp-cli/schema/mini
 
 ```json
 {
-  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
-  "packageName": "com.mentra.example",
+  "$schema": "./node_modules/@veiller/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.veiller.example",
   "version": "1.0.0",
-  "name": "Mentra Example",
+  "name": "Veiller Example",
   "description": "…",
   "icon": "icon.png",
   "port": 3000,
@@ -205,7 +205,7 @@ Required: `packageName`, `version`, `name`, `hardwareRequirements`. Everything e
 
 `port` defaults to `3000` for `dev` and is ignored by `release` (which picks its own free port). For `dev`, this is the starting port; if the port or its sidecar neighbor is busy, the CLI scans upward until it finds a free adjacent pair.
 
-The CLI's allowed-value lists are mirrored by hand from `@mentra/types` to keep the CLI dependency-light so `bunx mentra-miniapp` stays fast. Drift between the two is caught at validation time, not import time.
+The CLI's allowed-value lists are mirrored by hand from `@mentra/types` to keep the CLI dependency-light so `bunx veiller-miniapp` stays fast. Drift between the two is caught at validation time, not import time.
 
 ---
 

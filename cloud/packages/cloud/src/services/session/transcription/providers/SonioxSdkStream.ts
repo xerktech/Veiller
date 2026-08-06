@@ -26,7 +26,7 @@ import {
   type SttSessionConfig,
 } from "@soniox/node";
 
-import { StreamType, parseLanguageStream, TranscriptionData, SonioxToken } from "@mentra/sdk";
+import { StreamType, parseLanguageStream, TranscriptionData, SonioxToken } from "@veiller/sdk";
 
 import {
   StreamInstance,
@@ -977,8 +977,8 @@ export class SonioxSdkStream implements StreamInstance {
       // mid-utterance splits.
       max_endpoint_delay_ms: this.config.maxEndpointDelayMs,
       context: {
-        terms: ["Mentra", "Hey Mentra"],
-        text: "Mentra, Hey Mentra (an AI assistant)",
+        terms: ["Mentra", "Hey Veiller"],
+        text: "Veiller, Hey Veiller (an AI assistant)",
       },
     };
 

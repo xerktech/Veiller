@@ -1,4 +1,4 @@
-import { MiniAppServer, type MentraSession } from "@mentra/sdk";
+import { MiniAppServer, type VeillerSession } from "@veiller/sdk";
 import { UserSession } from "./backend/session/UserSession";
 import { api } from "./backend/api";
 import indexHtml from "./frontend/index.html";
@@ -6,11 +6,11 @@ import indexHtml from "./frontend/index.html";
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
-const PACKAGE_NAME = process.env.PACKAGE_NAME || "dev.mentra.streamtest";
-const API_KEY = process.env.MENTRAOS_API_KEY || "";
+const PACKAGE_NAME = process.env.PACKAGE_NAME || "dev.veiller.streamtest";
+const API_KEY = process.env.VEILLER_API_KEY || "";
 
 if (!API_KEY) {
-  console.error("MENTRAOS_API_KEY environment variable is not set");
+  console.error("VEILLER_API_KEY environment variable is not set");
   process.exit(1);
 }
 
@@ -20,15 +20,15 @@ const app = new MiniAppServer({
   packageName: PACKAGE_NAME,
   apiKey: API_KEY,
   port: PORT,
-  verbose: process.env.MENTRA_VERBOSE === "true",
+  verbose: process.env.VEILLER_VERBOSE === "true",
 });
 
 app.route("/api", api);
 
-app.onSession((session: MentraSession) => {
+app.onSession((session: VeillerSession) => {
   const userId = session.userId;
   if (!userId) {
-    console.error("MentraSession connected without a userId");
+    console.error("VeillerSession connected without a userId");
     return;
   }
 

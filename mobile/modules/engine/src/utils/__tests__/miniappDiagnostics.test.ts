@@ -45,7 +45,7 @@ describe("miniapp diagnostics", () => {
   test("keeps routing/build manifest fields and excludes arbitrary content", () => {
     const manifest = buildMiniappManifestSnapshot(
       {
-        packageName: "com.mentra.ai",
+        packageName: "com.veiller.ai",
         name: "Mentra AI",
         version: "1.4.9",
         sdkVersion: "0.3.0",
@@ -62,7 +62,7 @@ describe("miniapp diagnostics", () => {
     )
 
     expect(manifest).toEqual({
-      packageName: "com.mentra.ai",
+      packageName: "com.veiller.ai",
       name: "Mentra AI",
       version: "1.4.9",
       sdkVersion: "0.3.0",
@@ -80,10 +80,10 @@ describe("miniapp diagnostics", () => {
 
   test("includes every running manifest, live subscriptions, release identity, and interaction order", () => {
     const apps = [
-      app({packageName: "com.mentra.ai", name: "Mentra AI", version: "1.4.9", foregrounded: true}),
+      app({packageName: "com.veiller.ai", name: "Mentra AI", version: "1.4.9", foregrounded: true}),
       app({
-        packageName: "com.mentra.notes",
-        name: "Mentra Notes",
+        packageName: "com.veiller.notes",
+        name: "Veiller Notes",
         version: "1.0.11",
         running: false,
       }),
@@ -98,7 +98,7 @@ describe("miniapp diagnostics", () => {
     const runtimeSnapshot = runtime({
       connectedApps: [
         {
-          packageName: "com.mentra.ai",
+          packageName: "com.veiller.ai",
           handshakeComplete: true,
           subscriptions: ["button_press", "transcription:auto"],
           lastMessageAgeMs: 25,
@@ -124,24 +124,24 @@ describe("miniapp diagnostics", () => {
         },
       ],
       subscriptionsByStream: {
-        "button_press": ["com.mentra.ai"],
-        "transcription:auto": ["com.mentra.ai"],
+        "button_press": ["com.veiller.ai"],
+        "transcription:auto": ["com.veiller.ai"],
         "location_stream": ["com.example.dev"],
       },
     })
 
     const context = buildMiniappDiagnosticContext({
       apps,
-      foregroundedPackage: "com.mentra.ai",
+      foregroundedPackage: "com.veiller.ai",
       runtime: runtimeSnapshot,
       getLastOpenedAtMs: (candidate) =>
-        candidate.packageName === "com.mentra.notes" ? 300 : candidate.packageName === "com.mentra.ai" ? 200 : 100,
+        candidate.packageName === "com.veiller.notes" ? 300 : candidate.packageName === "com.veiller.ai" ? 200 : 100,
       getManifest: (candidate) =>
-        candidate.packageName === "com.mentra.ai"
+        candidate.packageName === "com.veiller.ai"
           ? {packageName: candidate.packageName, version: candidate.version, sdkVersion: "0.3.0"}
           : undefined,
       getReleaseIdentity: (candidate) =>
-        candidate.packageName === "com.mentra.ai"
+        candidate.packageName === "com.veiller.ai"
           ? {source: "preinstalled_registry", bundleSha256: "abc123", channel: "stable", ignored: "no"}
           : undefined,
     }) as {
@@ -152,20 +152,20 @@ describe("miniapp diagnostics", () => {
       runningMiniapps: Array<Record<string, unknown>>
     }
 
-    expect(context.running).toEqual(["com.mentra.ai", "com.example.dev"])
-    expect(context.foregroundedPackage).toBe("com.mentra.ai")
-    expect(context.mostRecentlyInteractedPackage).toBe("com.mentra.notes")
+    expect(context.running).toEqual(["com.veiller.ai", "com.example.dev"])
+    expect(context.foregroundedPackage).toBe("com.veiller.ai")
+    expect(context.mostRecentlyInteractedPackage).toBe("com.veiller.notes")
     expect(context.recentlyInteracted.map((recent) => recent.packageName)).toEqual([
-      "com.mentra.notes",
-      "com.mentra.ai",
+      "com.veiller.notes",
+      "com.veiller.ai",
       "com.example.dev",
     ])
     expect(context.runningMiniapps[0]).toMatchObject({
-      packageName: "com.mentra.ai",
+      packageName: "com.veiller.ai",
       version: "1.4.9",
       executionMode: "installed_bundle",
       foregrounded: true,
-      manifest: {packageName: "com.mentra.ai", version: "1.4.9", sdkVersion: "0.3.0"},
+      manifest: {packageName: "com.veiller.ai", version: "1.4.9", sdkVersion: "0.3.0"},
       releaseIdentity: {source: "preinstalled_registry", bundleSha256: "abc123", channel: "stable"},
       runtime: {handshakeComplete: true, subscriptions: ["button_press", "transcription:auto"]},
     })

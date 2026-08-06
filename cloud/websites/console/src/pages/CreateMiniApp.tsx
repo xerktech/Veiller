@@ -1,7 +1,7 @@
 // pages/CreateMiniApp.tsx
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { Alert, AlertDescription, Button, Input, Label, Textarea } from "@mentra/shared";
+import { Alert, AlertDescription, Button, Input, Label, Textarea } from "@veiller/shared";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, AlertCircle, CheckCircle } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
@@ -15,7 +15,7 @@ import { HardwareRequirementsSection } from "../components/forms/HardwareRequire
 import { AppTypeSelect } from "../components/forms/AppTypeSelect";
 import { ServerUrlField } from "../components/forms/ServerUrlField";
 import { Permission, PermissionType } from "@/types/app";
-import { AppI, HardwareRequirement } from "@mentra/sdk";
+import { AppI, HardwareRequirement } from "@veiller/sdk";
 import { useOrgStore } from "@/stores/orgs.store";
 import { App } from "@/types/app";
 import ImageUpload from "../components/forms/ImageUpload";
@@ -361,7 +361,7 @@ const CreateMiniApp: React.FC = () => {
             <div className="mb-8">
               <h1 className="text-2xl font-semibold tracking-tight">Create New MiniApp</h1>
               <p className="text-muted-foreground mt-1">
-                Fill out the form below to register your MiniApp for MentraOS.
+                Fill out the form below to register your MiniApp for Veiller.
               </p>
               {currentOrg && (
                 <div className="mt-3 text-sm">
@@ -383,7 +383,7 @@ const CreateMiniApp: React.FC = () => {
               {/* MiniApp Distribution Section */}
               <FormSection
                 title="MiniApp Distribution"
-                description="Core details for your MiniApp listing in the Mentra MiniApp Store"
+                description="Core details for your MiniApp listing in the Veiller MiniApp Store"
                 helpLink={{ text: "Publishing Guide", href: "https://docs.mentraglass.com/app-devs/getting-started/overview" }}
               >
                 <div className="space-y-2">
@@ -425,7 +425,7 @@ const CreateMiniApp: React.FC = () => {
                     <p className="text-xs text-destructive mt-1">{errors.name}</p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    The name that will be displayed to users in the Mentra MiniApp
+                    The name that will be displayed to users in the Veiller MiniApp
                     Store.
                   </p>
                 </div>
@@ -489,7 +489,7 @@ const CreateMiniApp: React.FC = () => {
               {/* MiniApp Configuration Section */}
               <FormSection
                 title="MiniApp Configuration"
-                description="Configure how MentraOS connects to your MiniApp server"
+                description="Configure how Veiller connects to your MiniApp server"
                 helpLink={{ text: "Server Setup Guide", href: "https://docs.mentraglass.com/app-devs/getting-started/deployment/overview" }}
               >
                 <ServerUrlField

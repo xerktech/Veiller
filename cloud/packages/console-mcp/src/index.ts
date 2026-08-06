@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Mentra Console MCP Server — stdio transport for Cursor and other MCP clients.
+ * Veiller Console MCP Server — stdio transport for Cursor and other MCP clients.
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -15,6 +15,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error("mentra-console-mcp failed:", err);
+  console.error("veiller-console-mcp failed:", err);
   process.exit(1);
 });

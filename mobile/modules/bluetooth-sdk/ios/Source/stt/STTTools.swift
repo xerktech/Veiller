@@ -7,7 +7,7 @@ class STTTools {
         // Send partial result to server witgetConnectedBluetoothNameh proper formatting
         let transcriptionLanguage =
             UserDefaults.standard.string(forKey: "STTModelLanguageCode") ?? "en-US"
-        // Bridge.log("Mentra: Sending partial transcription: \(text), \(transcriptionLanguage)")
+        // Bridge.log("Veiller: Sending partial transcription: \(text), \(transcriptionLanguage)")
         let transcription: [String: Any] = [
             "type": "local_transcription",
             "text": transcriptionLanguage == "en-US" ? text.lowercased() : text,
@@ -26,7 +26,7 @@ class STTTools {
         // Send final result to server with proper formatting
         let transcriptionLanguage =
             UserDefaults.standard.string(forKey: "STTModelLanguageCode") ?? "en-US"
-        Bridge.log("Mentra: Sending final transcription: \(text), \(transcriptionLanguage)")
+        Bridge.log("Veiller: Sending final transcription: \(text), \(transcriptionLanguage)")
         if !text.isEmpty {
             let transcription: [String: Any] = [
                 "type": "local_transcription",

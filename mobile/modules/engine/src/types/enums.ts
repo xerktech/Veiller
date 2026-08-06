@@ -1,5 +1,5 @@
 /**
- * @mentra/types - Shared enums for MentraOS
+ * @mentra/types - Shared enums for Veiller
  * These are runtime values (not pure types)
  */
 

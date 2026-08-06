@@ -1,4 +1,4 @@
-/* Mentra Design System - Shared Theme Variables */
+/* Veiller Design System - Shared Theme Variables */
 
 /* Red Hat Display Font */
 @font-face {
@@ -114,19 +114,19 @@
 }
 
 :root {
-  /* Mentra Brand Colors - Green palette from mobile app */
-  --mentra-green-1: #fbfefb;
-  --mentra-green-2: #f5fbf7;
-  --mentra-green-3: #eaf9ef;
-  --mentra-green-4: #dafde6;
-  --mentra-green-5: #bff5d4;
-  --mentra-green-6: #a2efc3;
-  --mentra-green-7: #7ee8ad;
-  --mentra-green-8: #5ae096;
-  --mentra-green-9: #36dd88;
-  --mentra-green-10: #00b869;
-  --mentra-green-11: #009258;
-  --mentra-green-12: #006a3f;
+  /* Veiller Brand Colors - Green palette from mobile app */
+  --veiller-green-1: #fbfefb;
+  --veiller-green-2: #f5fbf7;
+  --veiller-green-3: #eaf9ef;
+  --veiller-green-4: #dafde6;
+  --veiller-green-5: #bff5d4;
+  --veiller-green-6: #a2efc3;
+  --veiller-green-7: #7ee8ad;
+  --veiller-green-8: #5ae096;
+  --veiller-green-9: #36dd88;
+  --veiller-green-10: #00b869;
+  --veiller-green-11: #009258;
+  --veiller-green-12: #006a3f;
 
   /* Core semantic colors - Light theme */
   --background: oklch(0.995 0.002 145);
@@ -147,11 +147,11 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.45 0 0);
 
-  /* Accent: Mentra Green */
+  /* Accent: Veiller Green */
   --accent: #00b869;
   --accent-foreground: oklch(0.985 0 0);
 
-  /* Link color: Mentra Green (same as mobile) */
+  /* Link color: Veiller Green (same as mobile) */
   --link: #00b869;
   --link-hover: #009258;
 
@@ -240,18 +240,18 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-/* Mentra Brand Utilities */
-.text-mentra-green {
-  color: var(--mentra-green-10);
+/* Veiller Brand Utilities */
+.text-veiller-green {
+  color: var(--veiller-green-10);
 }
-.bg-mentra-green {
-  background-color: var(--mentra-green-10);
+.bg-veiller-green {
+  background-color: var(--veiller-green-10);
 }
-.border-mentra-green {
-  border-color: var(--mentra-green-10);
+.border-veiller-green {
+  border-color: var(--veiller-green-10);
 }
-.bg-mentra-green-light {
-  background-color: var(--mentra-green-5);
+.bg-veiller-green-light {
+  background-color: var(--veiller-green-5);
 }
 
 /* Text link utilities */

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Replace Express with Hono in `@mentra/sdk` AppServer, integrating with Bun's fullstack framework to unify React webviews and API routes in a single server.
+Replace Express with Hono in `@veiller/sdk` AppServer, integrating with Bun's fullstack framework to unify React webviews and API routes in a single server.
 
 ## Problem
 
@@ -44,7 +44,7 @@ expressApp.all("*", async (req, res) => {
 
 - **Breaking change for apps using `getExpressApp()`** - migration guide needed
 - **Bun 1.2.3+ required** for fullstack framework
-- **Must maintain all SDK endpoints** - webhook, tool, health, settings, photo-upload, mentra-auth
+- **Must maintain all SDK endpoints** - webhook, tool, health, settings, photo-upload, veiller-auth
 
 ## Goals
 

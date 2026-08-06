@@ -2,7 +2,7 @@
  * StressTestRunner - Multi-client load testing
  */
 
-import { MentraClient } from '../MentraClient';
+import { VeillerClient } from '../VeillerClient';
 import type { 
   StressTestConfig, 
   StressTestResult, 
@@ -18,14 +18,14 @@ export class StressTestRunner {
   static async spawnClients(
     count: number, 
     baseOptions: ClientSpawnOptions
-  ): Promise<MentraClient[]> {
-    const clients: MentraClient[] = [];
+  ): Promise<VeillerClient[]> {
+    const clients: VeillerClient[] = [];
     const promises: Promise<void>[] = [];
 
     for (let i = 0; i < count; i++) {
       const email = baseOptions.email.replace('{id}', i.toString());
       
-      const client = new MentraClient({
+      const client = new VeillerClient({
         email,
         serverUrl: baseOptions.serverUrl,
         coreToken: baseOptions.coreToken,
@@ -68,7 +68,7 @@ export class StressTestRunner {
    * Run coordinated test across multiple clients
    */
   static async coordinatedTest(
-    clients: MentraClient[],
+    clients: VeillerClient[],
     options: CoordinatedTestOptions
   ): Promise<StressTestResult> {
     const startTime = Date.now();
@@ -243,7 +243,7 @@ export class StressTestRunner {
   //===========================================================
 
   private static async executeClientActions(
-    client: MentraClient,
+    client: VeillerClient,
     actions: StressTestAction[],
     initialDelay: number,
     clientIndex: number
@@ -268,7 +268,7 @@ export class StressTestRunner {
     }
   }
 
-  private static async executeAction(client: MentraClient, action: StressTestAction): Promise<void> {
+  private static async executeAction(client: VeillerClient, action: StressTestAction): Promise<void> {
     switch (action.type) {
       case 'startSpeaking':
         if (action.data?.audioFile) {
@@ -313,7 +313,7 @@ export class StressTestRunner {
     }
   }
 
-  private static async disconnectClients(clients: MentraClient[]): Promise<void> {
+  private static async disconnectClients(clients: VeillerClient[]): Promise<void> {
     const disconnectPromises = clients.map(async (client, index) => {
       try {
         await client.disconnect();

@@ -1,4 +1,4 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@mentra/shared";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@veiller/shared";
 import { Building } from "lucide-react";
 import { useOrgStore } from "@/stores/orgs.store";
 import { useNavigate, useLocation } from "react-router-dom";

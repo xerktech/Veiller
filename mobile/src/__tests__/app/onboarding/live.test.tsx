@@ -1,5 +1,5 @@
-import {SETTINGS} from "@mentra/engine"
-import {useSettingsStore} from "@mentra/engine/internal"
+import {SETTINGS} from "@veiller/engine"
+import {useSettingsStore} from "@veiller/engine/internal"
 import {act, fireEvent, render} from "@testing-library/react-native"
 import type {ReactNode} from "react"
 
@@ -55,7 +55,7 @@ describe("Mentra Live onboarding", () => {
     ;(useNavigationStore.getState as jest.Mock).mockReturnValue({clearHistoryAndGoHome, replace})
   })
 
-  it("marks Live complete and continues to MentraOS when skipped", () => {
+  it("marks Live complete and continues to Veiller when skipped", () => {
     const {getByTestId} = render(<MentraLiveOnboarding />)
 
     fireEvent.press(getByTestId("skip-live-onboarding"))
@@ -73,7 +73,7 @@ describe("Mentra Live onboarding", () => {
     expect(clearHistoryAndGoHome).not.toHaveBeenCalled()
   })
 
-  it("describes and performs the home transition when MentraOS is already complete", async () => {
+  it("describes and performs the home transition when Veiller is already complete", async () => {
     await useSettingsStore.getState().setSetting(SETTINGS.onboarding_os_completed.key, true, false)
     const {getByTestId} = render(<MentraLiveOnboarding />)
 

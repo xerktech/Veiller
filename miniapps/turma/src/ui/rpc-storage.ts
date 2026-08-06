@@ -8,11 +8,11 @@ import "../shared/channels.ts";
 
 export class RpcStorage implements KeyValueStorage {
   async get(key: string): Promise<string | null> {
-    const res = await mentra.request("turma:storage-get", { key });
+    const res = await veiller.request("turma:storage-get", { key });
     return res.value;
   }
 
   async set(key: string, value: string): Promise<void> {
-    await mentra.request("turma:storage-set", { key, value });
+    await veiller.request("turma:storage-set", { key, value });
   }
 }

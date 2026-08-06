@@ -1,4 +1,4 @@
-import {sdkPinnedOtaManifestUrl} from "@mentra/bluetooth-sdk/internal"
+import {sdkPinnedOtaManifestUrl} from "@veiller/bluetooth-sdk/internal"
 
 import {SETTINGS, useSettingsStore} from "../stores/settings"
 

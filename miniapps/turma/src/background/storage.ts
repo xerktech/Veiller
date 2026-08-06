@@ -12,7 +12,7 @@ export interface StorageSessionLike {
   };
 }
 
-export class MentraStorage implements KeyValueStorage {
+export class VeillerStorage implements KeyValueStorage {
   constructor(private readonly session: StorageSessionLike) {}
 
   async get(key: string): Promise<string | null> {

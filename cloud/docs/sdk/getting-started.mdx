@@ -1,19 +1,19 @@
 ---
 title: "Getting Started with the SDK"
-description: "Everything you need to know to build apps with the MentraOS SDK"
+description: "Everything you need to know to build apps with the Veiller SDK"
 ---
 
 ## Installation
 
-Install the MentraOS SDK using Bun:
+Install the Veiller SDK using Bun:
 
 ```bash
-bun add @mentraos/sdk
+bun add @veiller/sdk
 ```
 
 ## Basic Concepts
 
-The MentraOS SDK provides two main classes:
+The Veiller SDK provides two main classes:
 
 <CardGroup cols={2}>
   <Card title="AppServer" icon="server">
@@ -31,7 +31,7 @@ The MentraOS SDK provides two main classes:
 ## Creating an App Server
 
 ```typescript
-import { AppServer, AppSession } from '@mentraos/sdk';
+import { AppServer, AppSession } from '@veiller/sdk';
 
 // Extend AppServer to create your app
 class MyAppServer extends AppServer {
@@ -49,7 +49,7 @@ class MyAppServer extends AppServer {
 // Create instance with configuration
 const server = new MyAppServer({
   packageName: 'com.yourcompany.yourapp',  // Your app's unique identifier
-  apiKey: process.env.MENTRAOS_API_KEY!,    // Your API key from dev portal
+  apiKey: process.env.VEILLER_API_KEY!,    // Your API key from dev portal
   port: 3000,                               // Port to listen on (default: 7010)
   publicDir: './public'                     // Optional: static files directory
 });
@@ -88,7 +88,7 @@ protected async onSession(
     User says "Start [app name]" or taps in the mobile app
   </Step>
   <Step title="Cloud sends webhook">
-    MentraOS Cloud sends a webhook to your server
+    Veiller Cloud sends a webhook to your server
   </Step>
   <Step title="Session created">
     Your `onSession` handler is called with an AppSession
@@ -113,7 +113,7 @@ import {
   ButtonPress,
   PhotoData,
   LocationUpdate
-} from '@mentraos/sdk';
+} from '@veiller/sdk';
 
 // All types are available for your use
 ```
@@ -124,7 +124,7 @@ Recommended environment variables:
 
 ```bash
 # Required
-MENTRAOS_API_KEY=your_api_key_here
+VEILLER_API_KEY=your_api_key_here
 
 # Optional
 PORT=3000
@@ -133,10 +133,10 @@ LOG_LEVEL=info
 
 ## Project Structure
 
-A typical MentraOS app project:
+A typical Veiller app project:
 
 ```
-my-mentraos-app/
+my-veiller-app/
 ├── src/
 │   ├── index.ts        # Main server file
 │   ├── server.ts       # Your AppServer class

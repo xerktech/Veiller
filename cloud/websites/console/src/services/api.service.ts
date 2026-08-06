@@ -1,7 +1,7 @@
 // src/services/api.service.ts
 import axios from "axios";
 import { Permission, App } from "@/types/app";
-import { AppI } from "@mentra/sdk";
+import { AppI } from "@veiller/sdk";
 
 // Set default config
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || "http://localhost:8002";
@@ -36,7 +36,7 @@ async function retryWithBackoff<T>(fn: () => Promise<T>, retries = 3, initialDel
 }
 
 // Extended App interface for API responses
-// Locally defined until PreviewImage is published to @mentra/sdk@latest
+// Locally defined until PreviewImage is published to @veiller/sdk@latest
 interface PreviewImageLocal {
   url: string;
   imageId: string;

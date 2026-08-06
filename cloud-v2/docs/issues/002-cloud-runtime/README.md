@@ -1,8 +1,8 @@
 # 002 Cloud Runtime Services
 
-Umbrella issue for **Mentra Runtime Services** (`@mentra/cloud-runtime`): the
-self-hostable, per-user runtime product that backs the on-device Mentra OEM
-Mentra Engine. An OEM can run their own or proxy to Mentra's. Audio is one
+Umbrella issue for **Veiller Runtime Services** (`@veiller/cloud-runtime`): the
+self-hostable, per-user runtime product that backs the on-device Veiller OEM
+Veiller Engine. An OEM can run their own or proxy to Veiller's. Audio is one
 subset of it.
 
 The product is made of **services**, each in its own subfolder. They share one
@@ -14,7 +14,7 @@ and payloads on top of it.
 - [`architecture.md`](./architecture.md): the big picture in plain language, how the
   runtime scales, how a session lives across pods, and one end-to-end trace.
   **Start here.**
-- [`design.md`](./design.md): the `@mentra/cloud-runtime` package build map, the
+- [`design.md`](./design.md): the `@veiller/cloud-runtime` package build map, the
   files, what each owns, and the signatures.
 - [`protocol.md`](./protocol.md): the service-agnostic transport: envelope,
   handshake, auth, control, error model, and REST conventions shared by all
@@ -34,5 +34,5 @@ and payloads on top of it.
   the `cloud-runtime` token and issuer/JWKS model this product verifies.
 - [`../001-cloud-core/auth/oem-auth.md`](../001-cloud-core/auth/oem-auth.md): the
   OEM subject-token exchange Core/Auth can use to broker hosted Runtime tokens.
-- [`../../mentra-overhaul-plan.md`](../../mentra-overhaul-plan.md): the product
+- [`../../veiller-overhaul-plan.md`](../../veiller-overhaul-plan.md): the product
   and service taxonomy this issue sits within.

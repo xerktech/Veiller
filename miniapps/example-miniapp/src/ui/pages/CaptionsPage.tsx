@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
-import {MiniappHeader} from "@mentra/miniapp/ui"
+import {MiniappHeader} from "@veiller/miniapp/ui"
 
 import "../../shared/channels"
 import {useChannel} from "../hooks/useChannel"
@@ -18,7 +18,7 @@ import {Shell} from "./Shell"
  * `session.ui.onOpen`, then hot updates on transcription / button /
  * settings changes. The page just renders what background has sent.
  *
- * User input flows the other direction via `mentra.send`:
+ * User input flows the other direction via `veiller.send`:
  *   - mirror toggle  → "captions:set-mirror"
  *   - "Speak Summary" → "captions:speak-summary"
  *   - "Clear"        → "captions:clear"
@@ -61,7 +61,7 @@ export default function CaptionsPage() {
   const [pendingMirror, setPendingMirror] = useState<boolean | null>(null)
   const setMirror = (v: boolean) => {
     setPendingMirror(v)
-    mentra.send("captions:set-mirror", {mirrorToGlasses: v})
+    veiller.send("captions:set-mirror", {mirrorToGlasses: v})
   }
   const mirrorChecked = pendingMirror ?? mirrorToGlasses
   // Drop the optimistic value once background echoes the matching setting,
@@ -93,7 +93,7 @@ export default function CaptionsPage() {
               </svg>
             </button>
             <span
-              className={`h-2 w-2 rounded-full ${connected ? "bg-mentra-green shadow-[0_0_8px_var(--mentra-green-10)]" : "bg-destructive"}`}
+              className={`h-2 w-2 rounded-full ${connected ? "bg-veiller-green shadow-[0_0_8px_var(--veiller-green-10)]" : "bg-destructive"}`}
             />
           </div>
         }
@@ -116,7 +116,7 @@ export default function CaptionsPage() {
 
       <Card className="mx-5 mt-1 gap-2 py-4">
         <CardHeader className="gap-0 px-4">
-          <CardTitle className="text-[10px] font-bold tracking-[0.15em] text-mentra-green">
+          <CardTitle className="text-[10px] font-bold tracking-[0.15em] text-veiller-green">
             {hasMic ? "LISTENING" : "NO MICROPHONE"}
           </CardTitle>
         </CardHeader>
@@ -138,10 +138,10 @@ export default function CaptionsPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => mentra.send("captions:speak-summary", {})}>
+            onClick={() => veiller.send("captions:speak-summary", {})}>
             Speak Summary
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => mentra.send("captions:clear", {})}>
+          <Button variant="destructive" size="sm" onClick={() => veiller.send("captions:clear", {})}>
             Clear
           </Button>
         </div>
@@ -178,10 +178,10 @@ function Chip({label, on}: {label: string; on: boolean}) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11px] font-medium ${
         on
-          ? "border-mentra-green/40 bg-mentra-green/15 text-mentra-green"
+          ? "border-veiller-green/40 bg-veiller-green/15 text-veiller-green"
           : "border-border bg-muted text-muted-foreground"
       }`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${on ? "bg-mentra-green" : "bg-muted-foreground/50"}`} />
+      <span className={`h-1.5 w-1.5 rounded-full ${on ? "bg-veiller-green" : "bg-muted-foreground/50"}`} />
       {label}
     </span>
   )

@@ -1,4 +1,4 @@
-import { TranscriptSegment } from '@mentra/sdk';
+import { TranscriptSegment } from '@veiller/sdk';
 import { Server as HTTPServer } from 'http';
 
 interface SystemStats {

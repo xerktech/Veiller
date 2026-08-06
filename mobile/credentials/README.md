@@ -1,6 +1,6 @@
 # Credentials Directory
 
-This directory contains sensitive signing credentials for the MentraOS mobile app.
+This directory contains sensitive signing credentials for the Veiller mobile app.
 
 ## Files that belong here:
 

@@ -12,7 +12,7 @@ Text wrapping exists in multiple places with different implementations:
 
 | Location                       | Language   | Logic                                   |
 | ------------------------------ | ---------- | --------------------------------------- |
-| `@mentra/sdk/display-utils`    | TypeScript | Pixel-accurate glyph widths, G1_PROFILE |
+| `@veiller/sdk/display-utils`    | TypeScript | Pixel-accurate glyph widths, G1_PROFILE |
 | `SGCManager` (Android)         | Kotlin     | Character count based (~44 chars)       |
 | `SGCManager` (iOS)             | Swift      | Character count based (~44 chars)       |
 | `TranscriptProcessor` (mobile) | TypeScript | Character count based (maxCharsPerLine) |
@@ -118,7 +118,7 @@ Glasses Display
 
 ```typescript
 // mobile/src/services/DisplayProcessor.ts
-import { TextWrapper, G1_PROFILE } from "@mentra/sdk/display-utils";
+import { TextWrapper, G1_PROFILE } from "@veiller/sdk/display-utils";
 ```
 
 **Pros**: No duplication, always in sync  
@@ -126,7 +126,7 @@ import { TextWrapper, G1_PROFILE } from "@mentra/sdk/display-utils";
 
 ### Option B: Separate Package
 
-Move `display-utils` to `@mentra/display-utils` standalone package.
+Move `display-utils` to `@veiller/display-utils` standalone package.
 
 **Pros**: Clean separation, explicit dependency  
 **Cons**: More packages to maintain, version sync issues
@@ -255,4 +255,4 @@ interface ProcessedDisplayEvent extends DisplayEvent {
 - `cloud/packages/sdk/src/display-utils/` - SDK implementation
 - `cloud/packages/apps/line-width/issues/display-utils/display-utils-spec.md` - Original spec
 - `mobile/src/components/mirror/GlassesDisplayMirror.tsx` - Preview component
-- `mobile/modules/core/android/src/main/java/com/mentra/core/sgcs/` - Native SGC code
+- `mobile/modules/core/android/src/main/java/com/veiller/core/sgcs/` - Native SGC code

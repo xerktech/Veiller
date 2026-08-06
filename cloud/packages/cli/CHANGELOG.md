@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Mentra CLI will be documented in this file.
+All notable changes to the Veiller CLI will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,53 +12,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Core CLI Commands
 
 - **App Management Commands**
-  - `mentra app create` - Create new apps with interactive and non-interactive modes
+  - `veiller app create` - Create new apps with interactive and non-interactive modes
     - Interactive prompts for all required fields with validation
     - Non-interactive mode with command-line flags
     - Package name validation (reverse-domain notation)
     - URL validation for public URLs
     - One-time display of API key on creation
-  - `mentra app update` - Update app metadata
+  - `veiller app update` - Update app metadata
     - Interactive mode with current values shown as defaults
     - Non-interactive mode with flags for selective updates
     - Confirmation prompt before applying changes
-  - `mentra app delete` - Delete apps with safety confirmations
+  - `veiller app delete` - Delete apps with safety confirmations
     - Double confirmation required to prevent accidental deletion
     - `--force` flag to skip confirmations (for automation)
     - Clear warning about irreversible action
-  - `mentra app publish` - Publish apps to MentraOS Store
+  - `veiller app publish` - Publish apps to Veiller Store
     - Status confirmation before publishing
     - `--force` flag for non-interactive publishing
-  - `mentra app api-key` - Regenerate app API keys
+  - `veiller app api-key` - Regenerate app API keys
     - One-time display of new API key
     - Warning about invalidating existing key
     - Confirmation prompt with `--force` override
-  - `mentra app export` - Export app configuration to JSON
+  - `veiller app export` - Export app configuration to JSON
     - Export to stdout or file with `-o` flag
     - Includes metadata (exported timestamp, tool version)
     - Excludes sensitive/internal fields
-  - `mentra app import` - Import app configuration from JSON
+  - `veiller app import` - Import app configuration from JSON
     - Validation of required fields
     - Confirmation prompt before creation
     - Organization selection with `--org` flag
     - One-time display of generated API key
 
 - **Authentication Commands**
-  - `mentra auth <token>` - Authenticate with CLI API key
-  - `mentra auth whoami` - Display current user information
-  - `mentra auth logout` - Clear stored credentials
+  - `veiller auth <token>` - Authenticate with CLI API key
+  - `veiller auth whoami` - Display current user information
+  - `veiller auth logout` - Clear stored credentials
 
 - **Organization Commands**
-  - `mentra org list` - List all organizations
-  - `mentra org get <id>` - Get organization details
-  - `mentra org switch <id>` - Set default organization
+  - `veiller org list` - List all organizations
+  - `veiller org get <id>` - Get organization details
+  - `veiller org switch <id>` - Set default organization
 
 - **Cloud Management Commands**
-  - `mentra cloud list` - List available cloud environments
-  - `mentra cloud current` - Show currently active cloud
-  - `mentra cloud use <cloud>` - Switch between cloud environments
-  - `mentra cloud add <key>` - Add custom cloud endpoint
-  - `mentra cloud remove <cloud>` - Remove custom cloud
+  - `veiller cloud list` - List available cloud environments
+  - `veiller cloud current` - Show currently active cloud
+  - `veiller cloud use <cloud>` - Switch between cloud environments
+  - `veiller cloud add <key>` - Add custom cloud endpoint
+  - `veiller cloud remove <cloud>` - Remove custom cloud
 
 #### Backend Infrastructure
 
@@ -98,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Secure Credential Storage**
   - Primary: OS keychain via `Bun.secrets` (macOS Keychain, Linux libsecret, Windows Credential Manager)
   - Fallback: Encrypted file storage with `chmod 600`
-  - Environment variable override: `MENTRA_CLI_TOKEN` for CI/CD
+  - Environment variable override: `VEILLER_CLI_TOKEN` for CI/CD
   - No plaintext token storage
   - Tokens never logged to console
 
@@ -194,8 +194,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### CI/CD Support
 
 - **Environment Variables**
-  - `MENTRA_CLI_TOKEN` - Skip auth command in CI/CD
-  - `MENTRA_API_URL` - Override API endpoint
+  - `VEILLER_CLI_TOKEN` - Skip auth command in CI/CD
+  - `VEILLER_API_URL` - Override API endpoint
   - Secure credential handling in pipelines
 
 - **Automation Features**
@@ -249,16 +249,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. **Regenerate CLI Keys**
    - Old keys from 0.x are not compatible
    - Generate new key in console: Settings → CLI Keys → Generate New Key
-   - Re-authenticate: `mentra auth <new-token>`
+   - Re-authenticate: `veiller auth <new-token>`
 
 2. **Configuration Migration**
-   - Config location unchanged (`~/.mentra/`)
+   - Config location unchanged (`~/.veiller/`)
    - Credential format updated for enhanced security
-   - Run `mentra auth logout` then `mentra auth <token>` to migrate
+   - Run `veiller auth logout` then `veiller auth <token>` to migrate
 
 3. **New Commands Available**
    - All Phase 2 commands now implemented
-   - Check `mentra app --help` for full list
+   - Check `veiller app --help` for full list
 
 ## Breaking Changes
 

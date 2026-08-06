@@ -136,7 +136,7 @@ export class AsgCameraApiClient {
       // Prepare headers - don't set Content-Type for GET requests
       const headers: Record<string, string> = {
         "Accept": "application/json",
-        "User-Agent": "MentraOS-Mobile/1.0",
+        "User-Agent": "Veiller-Mobile/1.0",
       }
       if (method !== "GET") {
         headers["Content-Type"] = "application/json"
@@ -292,7 +292,7 @@ export class AsgCameraApiClient {
         method: "GET",
         headers: {
           "Accept": "application/json",
-          "User-Agent": "MentraOS-Mobile/1.0",
+          "User-Agent": "Veiller-Mobile/1.0",
         },
         signal: this.createTimeoutSignal(10000), // 10 second timeout
       })
@@ -432,7 +432,7 @@ export class AsgCameraApiClient {
           method: "HEAD",
           headers: {
             "Accept": "*/*",
-            "User-Agent": "MentraOS-Mobile/1.0",
+            "User-Agent": "Veiller-Mobile/1.0",
           },
           signal: this.createTimeoutSignal(5000),
         })
@@ -453,7 +453,7 @@ export class AsgCameraApiClient {
               method: "GET",
               headers: {
                 "Accept": "application/json",
-                "User-Agent": "MentraOS-Mobile/1.0",
+                "User-Agent": "Veiller-Mobile/1.0",
               },
               signal: this.createTimeoutSignal(5000),
             })
@@ -645,7 +645,7 @@ export class AsgCameraApiClient {
     if (this.galleryCapabilities !== undefined) return this.galleryCapabilities
     try {
       const response = await localNetworkTransport.fetch(`${this.baseUrl}/api/v3/capabilities`, {
-        headers: {"Accept": "application/json", "User-Agent": "MentraOS-Mobile/1.0"},
+        headers: {"Accept": "application/json", "User-Agent": "Veiller-Mobile/1.0"},
         signal: this.createTimeoutSignal(5000),
       })
       if (response.status === 404) {
@@ -698,7 +698,7 @@ export class AsgCameraApiClient {
     const response = await localNetworkTransport.fetch(
       `${this.baseUrl}/api/v3/hash?file=${encodeURIComponent(fileName)}`,
       {
-        headers: {"Accept": "application/json", "User-Agent": "MentraOS-Mobile/1.0"},
+        headers: {"Accept": "application/json", "User-Agent": "Veiller-Mobile/1.0"},
         signal: this.createTimeoutSignal(10 * 60 * 1000),
       },
       10 * 60 * 1000,
@@ -925,7 +925,7 @@ export class AsgCameraApiClient {
           toFile: partPath(index),
           headers: {
             "Accept": "*/*",
-            "User-Agent": "MentraOS-Mobile/1.0",
+            "User-Agent": "Veiller-Mobile/1.0",
             "Range": `bytes=${start}-${end}`,
             ...(file.etag ? {"If-Range": file.etag} : {}),
           },
@@ -1213,7 +1213,7 @@ export class AsgCameraApiClient {
           toFile: localFilePath,
           headers: {
             "Accept": "*/*",
-            "User-Agent": "MentraOS-Mobile/1.0",
+            "User-Agent": "Veiller-Mobile/1.0",
           },
           connectionTimeout: 300000,
           readTimeout: 300000,
@@ -1345,7 +1345,7 @@ export class AsgCameraApiClient {
         toFile: partialPath,
         headers: {
           "Accept": "image/jpeg",
-          "User-Agent": "MentraOS-Mobile/1.0",
+          "User-Agent": "Veiller-Mobile/1.0",
         },
         connectionTimeout: 60000,
         readTimeout: 60000,
@@ -1576,7 +1576,7 @@ export class AsgCameraApiClient {
         toFile: localFilePath,
         headers: {
           "Accept": "*/*",
-          "User-Agent": "MentraOS-Mobile/1.0",
+          "User-Agent": "Veiller-Mobile/1.0",
         },
         connectionTimeout: 300000, // 5 minutes for connection establishment
         readTimeout: 300000, // 5 minutes for data reading
@@ -1726,7 +1726,7 @@ export class AsgCameraApiClient {
             toFile: localThumbnailPath as string,
             headers: {
               "Accept": "image/*",
-              "User-Agent": "MentraOS-Mobile/1.0",
+              "User-Agent": "Veiller-Mobile/1.0",
             },
             connectionTimeout: 60000, // 1 minute for thumbnails (smaller files)
             readTimeout: 60000, // 1 minute for thumbnails

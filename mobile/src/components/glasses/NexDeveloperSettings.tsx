@@ -1,5 +1,5 @@
 import {Capabilities, getModelCapabilities} from "@/../../cloud/packages/types/src"
-import {engine, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@veiller/engine"
 import {useEffect, useState} from "react"
 import {ScrollView, TextInput, TextStyle, TouchableOpacity, View, ViewStyle} from "react-native"
 

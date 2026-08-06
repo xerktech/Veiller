@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `session.service.ts` is a critical component of the MentraOS Cloud system, responsible for managing user sessions, audio processing, transcription integration, and display management. It serves as the central hub connecting glasses clients, Apps, and various system services.
+The `session.service.ts` is a critical component of the Veiller Cloud system, responsible for managing user sessions, audio processing, transcription integration, and display management. It serves as the central hub connecting glasses clients, Apps, and various system services.
 
 ## Core Responsibilities
 

@@ -14,7 +14,7 @@
  * picks a result.
  */
 
-import type {MiniappSession} from "@mentra/miniapp"
+import type {MiniappSession} from "@veiller/miniapp"
 
 export type PlaceSuggestion = {
   placeId: string

@@ -32,7 +32,7 @@ During reconnect, apps re-send their subscription updates. The `SubscriptionMana
 
 When subscriptions are rejected, the app's entire data stream is cut — transcription, audio, everything. The app gets no notification that its subscriptions were rejected; it just stops receiving data. The user sees "AI not getting transcripts" with no indication of why.
 
-From the spike: at 19:06:48, `com.mentra.ai` had all 11 subscriptions rejected. Four seconds later, `com.mentra.recorder` had its subscriptions accepted. Same user, same reconnect window — pure timing.
+From the spike: at 19:06:48, `com.veiller.ai` had all 11 subscriptions rejected. Four seconds later, `com.veiller.recorder` had its subscriptions accepted. Same user, same reconnect window — pure timing.
 
 #### Current behavior
 

@@ -21,33 +21,33 @@ public package. In CI, that branch is `dev` after the SDK package version bump
 has merged.
 
 The export copies `ios/Source` by default and excludes only known
-MentraOS-internal or non-SPM-compatible paths. If the export verification fails
+Veiller-internal or non-SPM-compatible paths. If the export verification fails
 after a new Swift file is added, either feature-gate that code for SwiftPM or
 add an explicit exclusion with a short explanation in the export script.
 
 ## Prerequisites
 
-- A clean MentraOS checkout on the release source branch.
+- A clean Veiller checkout on the release source branch.
 - A clean checkout of the public SwiftPM repository next to this repo:
 
   ```text
-  ../mentra-bluetooth-sdk-ios
+  ../veiller-bluetooth-sdk-ios
   ```
 
 - Xcode with the iOS platform installed.
 - Push permission to `Mentra-Community/mentra-bluetooth-sdk-ios`.
-- For CI, a `MENTRA_BLUETOOTH_SDK_IOS_PUSH_TOKEN` repository secret with write
+- For CI, a `VEILLER_BLUETOOTH_SDK_IOS_PUSH_TOKEN` repository secret with write
   access to the SwiftPM mirror repository.
 
 ## Export and Verify
 
-From the MentraOS repo root:
+From the Veiller repo root:
 
 ```bash
 git status --short
 source_sha=$(git rev-parse --short HEAD)
 version=$(node -p "require('./mobile/modules/bluetooth-sdk/package.json').version")
-scripts/export-bluetooth-sdk-ios-spm.sh --target ../mentra-bluetooth-sdk-ios --verify
+scripts/export-bluetooth-sdk-ios-spm.sh --target ../veiller-bluetooth-sdk-ios --verify
 ```
 
 The script rewrites the target checkout except for `.git`. The `--verify` flag
@@ -60,7 +60,7 @@ version into the generated README examples.
 Before committing in the public package repo:
 
 ```bash
-cd ../mentra-bluetooth-sdk-ios
+cd ../veiller-bluetooth-sdk-ios
 git status --short
 git diff --stat
 git diff -- Package.swift README.md ios/Source ios/Packages
@@ -81,15 +81,15 @@ without a leading `v`.
 
 ```bash
 git add Package.swift README.md LICENSE ios .gitignore
-git commit -m "Release MentraBluetoothSDK ${version}" \
-  -m "Exported from MentraOS ${source_sha}."
+git commit -m "Release VeillerBluetoothSDK ${version}" \
+  -m "Exported from Veiller ${source_sha}."
 git tag "${version}"
 git push origin main
 git push origin "${version}"
 ```
 
 If you started a new shell after exporting, rerun `git rev-parse --short HEAD`
-and the package version command above in the MentraOS source checkout, then
+and the package version command above in the Veiller source checkout, then
 paste that source commit hash manually in the commit body.
 
 ## Final Checks

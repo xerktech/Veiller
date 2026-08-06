@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@mentra/shared"
+} from "@veiller/shared"
 
 function Command({
   className,

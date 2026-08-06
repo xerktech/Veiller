@@ -2,10 +2,10 @@ import {createContext, useEffect, useState, useRef, useMemo} from "react"
 import {mentraAuthProvider} from "../utils/auth/authProvider"
 import axios from "axios"
 import {
-  MentraAuthSession,
-  MentraAuthUser,
-  MentraSigninResponse,
-  MentraSignOutResponse,
+  VeillerAuthSession,
+  VeillerAuthUser,
+  VeillerSigninResponse,
+  VeillerSignOutResponse,
 } from "../utils/auth/authingProvider.types"
 
 const CORE_API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_CLOUD_API_URL || "http://localhost:8002"
@@ -20,18 +20,18 @@ declare global {
 }
 
 export interface AuthContextType {
-  session: MentraAuthSession | null
-  user: MentraAuthUser | null
+  session: VeillerAuthSession | null
+  user: VeillerAuthUser | null
   isLoading: boolean
   isAuthenticated: boolean
   supabaseToken: string | null
   coreToken: string | null
   tokenReady: boolean
   isWebViewAuth: boolean
-  signIn: (email: string, password: string) => Promise<MentraSigninResponse>
+  signIn: (email: string, password: string) => Promise<VeillerSigninResponse>
 
-  signUp: (email: string, password: string, redirectPath: string) => Promise<MentraSigninResponse>
-  signOut: () => Promise<MentraSignOutResponse>
+  signUp: (email: string, password: string, redirectPath: string) => Promise<VeillerSigninResponse>
+  signOut: () => Promise<VeillerSignOutResponse>
   refreshUser: () => Promise<void>
 }
 
@@ -61,8 +61,8 @@ export function AuthProvider({
   enableWebViewAuth = false, // Default to false
 }: AuthProviderProps) {
   // --- State Variables ---
-  const [session, setSession] = useState<MentraAuthSession | null>(null)
-  const [user, setUser] = useState<MentraAuthUser | null>(null)
+  const [session, setSession] = useState<VeillerAuthSession | null>(null)
+  const [user, setUser] = useState<VeillerAuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [providerToken, setProviderToken] = useState<string | null>(null)
   const [coreToken, setCoreToken] = useState<string | null>(null)
@@ -154,8 +154,8 @@ export function AuthProvider({
 
         setSession({
           token: result.tokens.supabaseToken || "temp-token-session",
-        } as MentraAuthSession)
-        setUser({id: result.userId || "webview-user"} as MentraAuthUser)
+        } as VeillerAuthSession)
+        setUser({id: result.userId || "webview-user"} as VeillerAuthUser)
         setIsWebViewAuth(true)
         localStorage.setItem("is_webview", "true")
         setTokenReady(true)
@@ -181,7 +181,7 @@ export function AuthProvider({
     }
   }
 
-  const signIn = async (email: string, password: string): Promise<MentraSigninResponse> => {
+  const signIn = async (email: string, password: string): Promise<VeillerSigninResponse> => {
     try {
       console.log("Signing in with email/password")
       const {data, error} = await mentraAuthProvider.signInWithEmail(email, password)
@@ -205,7 +205,7 @@ export function AuthProvider({
     }
   }
 
-  const signUp = async (email: string, password: string, redirectPath: string): Promise<MentraSigninResponse> => {
+  const signUp = async (email: string, password: string, redirectPath: string): Promise<VeillerSigninResponse> => {
     try {
       console.log("Signing up with email/password")
       const emailRedirectTo = `${window.location.origin}${redirectPath}`
@@ -239,7 +239,7 @@ export function AuthProvider({
     }
   }
 
-  const signOut = async (): Promise<MentraSignOutResponse> => {
+  const signOut = async (): Promise<VeillerSignOutResponse> => {
     console.log("Signing out user...")
     try {
       const {error} = await mentraAuthProvider.signOut()
@@ -302,8 +302,8 @@ export function AuthProvider({
             setupAxiosAuth(savedCoreToken)
             setCoreToken(savedCoreToken)
             setProviderToken(savedSupabaseToken)
-            setSession({token: savedSupabaseToken} as MentraAuthSession)
-            setUser({id: "webview-user"} as MentraAuthUser)
+            setSession({token: savedSupabaseToken} as VeillerAuthSession)
+            setUser({id: "webview-user"} as VeillerAuthUser)
             setIsWebViewAuth(true)
             setTokenReady(true)
             return // Auth is complete
@@ -359,8 +359,8 @@ export function AuthProvider({
         localStorage.setItem("supabase_token", token)
 
         exchangeForCoreToken(token).then(() => {
-          setSession({token: token} as MentraAuthSession)
-          setUser({id: "webview-user"} as MentraAuthUser)
+          setSession({token: token} as VeillerAuthSession)
+          setUser({id: "webview-user"} as VeillerAuthUser)
           setIsWebViewAuth(true)
           localStorage.setItem("is_webview", "true")
         })
@@ -375,8 +375,8 @@ export function AuthProvider({
         const supabaseToken = localStorage.getItem("supabase_token")
         setSession({
           token: supabaseToken || "core-only-session",
-        } as MentraAuthSession)
-        setUser({id: "webview-user"} as MentraAuthUser)
+        } as VeillerAuthSession)
+        setUser({id: "webview-user"} as VeillerAuthUser)
         setIsWebViewAuth(true)
         localStorage.setItem("is_webview", "true")
         setTokenReady(true)

@@ -2,7 +2,7 @@
  * Gallery / ASG HTTP-API types (relocated from the host `@/types/asg`). `PhotoInfo`
  * lives with the gallerySync store that owns it; the rest describe the glasses'
  * on-device camera HTTP API that asgCameraApi talks to. The host `@/types/asg`
- * re-exports these from `@mentra/engine` so existing importers stay unchanged.
+ * re-exports these from `@veiller/engine` so existing importers stay unchanged.
  */
 import type {PhotoInfo} from "../stores/gallerySync"
 export type {PhotoInfo}

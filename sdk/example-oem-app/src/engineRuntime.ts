@@ -5,10 +5,10 @@
  * device-identity stores hydrate, so the facade reads below are trustworthy).
  *
  * This module doubles as the compile-time contract test for the public
- * `@mentra/engine` entry: the "OEM Host Boundary Gate" CI workflow typechecks
+ * `@veiller/engine` entry: the "OEM Host Boundary Gate" CI workflow typechecks
  * this app against engine's BUILT types, with no `/internal` access.
  */
-import {engine, type IslandConfigureOptions} from "@mentra/engine"
+import {engine, type IslandConfigureOptions} from "@veiller/engine"
 
 export type EngineLogger = (line: string) => void
 

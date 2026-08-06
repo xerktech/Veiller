@@ -11,7 +11,7 @@ Source: [mobile/modules/miniapp/src/modules/system.ts](../../mobile/modules/mini
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()
@@ -19,7 +19,7 @@ await session.connect()
 // Share text + URL.
 const result = await session.system.share({
   title: "Check this out",
-  text: "Mentra is cool",
+  text: "Veiller is cool",
   url: "https://mentra.glass",
 })
 if (result.cancelled) console.log("user dismissed the sheet")

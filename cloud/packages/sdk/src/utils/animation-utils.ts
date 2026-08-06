@@ -1,12 +1,12 @@
 /**
  * 🎬 Animation Utilities Module
  *
- * Provides helper functions for creating and managing bitmap animations in MentraOS applications.
+ * Provides helper functions for creating and managing bitmap animations in Veiller applications.
  * Includes timing utilities, animation factories, and performance optimization helpers.
  *
  * @example
  * ```typescript
- * import { AnimationUtils } from '@mentra/sdk';
+ * import { AnimationUtils } from '@veiller/sdk';
  *
  * // Create animation from files
  * const animation = await AnimationUtils.createBitmapAnimation(
@@ -28,7 +28,7 @@ import { BitmapUtils, LoadFramesOptions } from "./bitmap-utils";
  * Configuration options for bitmap animations
  */
 export interface AnimationConfig {
-  /** Time between frames in milliseconds (default: 1750ms - optimized for MentraOS) */
+  /** Time between frames in milliseconds (default: 1750ms - optimized for Veiller) */
   intervalMs?: number;
   /** Whether to loop the animation continuously (default: false) */
   repeat?: boolean;
@@ -75,7 +75,7 @@ export interface TimingInfo {
 }
 
 /**
- * Utility class for creating and managing animations in MentraOS applications
+ * Utility class for creating and managing animations in Veiller applications
  */
 export class AnimationUtils {
   /**
@@ -98,7 +98,7 @@ export class AnimationUtils {
   /**
    * Create bitmap animation from files with advanced configuration
    *
-   * @param session - MentraOS app session
+   * @param session - Veiller app session
    * @param basePath - Directory containing animation frames
    * @param frameCount - Number of frames to load
    * @param config - Animation configuration options
@@ -130,7 +130,7 @@ export class AnimationUtils {
     config: AnimationConfig = {},
   ): Promise<AnimationController> {
     const {
-      intervalMs = 1750, // Optimized for MentraOS hardware
+      intervalMs = 1750, // Optimized for Veiller hardware
       repeat = false,
       validateFrames = true,
       loadOptions = {},
@@ -181,7 +181,7 @@ export class AnimationUtils {
   /**
    * Create bitmap animation from pre-loaded frame data
    *
-   * @param session - MentraOS app session
+   * @param session - Veiller app session
    * @param frames - Array of hex-encoded bitmap data
    * @param config - Animation configuration options
    * @returns Animation controller
@@ -294,7 +294,7 @@ export class AnimationUtils {
   /**
    * Create a sequence of bitmap displays with custom timing
    *
-   * @param session - MentraOS app session
+   * @param session - Veiller app session
    * @param sequence - Array of frame data with individual timing
    * @returns Promise that resolves when sequence completes
    *

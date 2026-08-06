@@ -27,7 +27,7 @@ Island/engine internals:
 
 - Island collects diagnostic context from runtime-owned stores.
 - Island reads recent phone logs and attaches artifacts.
-- Island submits through `@mentra/cloud-client`.
+- Island submits through `@veiller/cloud-client`.
 - Island notifies connected glasses with the report id so glasses can upload
   logs.
 - Island owns automatic report detection, classification, local throttling, and
@@ -77,14 +77,14 @@ Automatic report:
 
 ## Implemented Automatic Sources
 
-MentraJS crashloop:
+VeillerJS crashloop:
 
-- Trigger: `miniapp_crashloop` / `mentrajs_crashloop_disabled`.
-- Detection: `MentraJSRouter` emits an island notification when the crash
+- Trigger: `miniapp_crashloop` / `veillerjs_crashloop_disabled`.
+- Detection: `VeillerJSRouter` emits an island notification when the crash
   controller disables a miniapp.
-- Submission: `mobile/modules/engine/src/services/MentraJSCrashloopReportService.ts`.
+- Submission: `mobile/modules/engine/src/services/VeillerJSCrashloopReportService.ts`.
 - Host remains responsible for Sentry and user-facing alert copy in
-  `mobile/src/services/mentraJsBootstrap.ts`.
+  `mobile/src/services/veillerJsBootstrap.ts`.
 
 Miniapp start failure:
 
@@ -162,7 +162,7 @@ Island/engine:
 
 - `mobile/modules/engine/src/facades/reports.ts`
 - `mobile/modules/engine/src/utils/diagnosticContext.ts`
-- `mobile/modules/engine/src/services/MentraJSCrashloopReportService.ts`
+- `mobile/modules/engine/src/services/VeillerJSCrashloopReportService.ts`
 - `mobile/modules/engine/src/facades/pairing.ts`
 - `mobile/modules/engine/src/services/asg/GalleryMediaIntegrityReportService.ts`
 - `mobile/modules/engine/src/services/CaptionsTesterReportService.ts`
@@ -203,7 +203,7 @@ Token lifecycle:
 - Cloud V1 `RestComms.exchangeToken(...)` returns an old core token that is
   still needed by remaining Cloud V1 mobile calls and WebSocket setup, but it
   must stay private to those legacy clients.
-- Cloud V2 core access tokens are minted by `@mentra/cloud-client`, live in
+- Cloud V2 core access tokens are minted by `@veiller/cloud-client`, live in
   memory only, expire after 1 hour, and are refreshed through a persisted
   30-day refresh token.
 - Island syncs the current Cloud V2 access token into the existing Bluetooth
@@ -233,7 +233,7 @@ Cloud V2 ingestion surface for phone logs, glasses logs, and future log sources.
 
 Implementation steps:
 
-1. Mobile/island obtains the Cloud V2 core access token from `@mentra/cloud-client`
+1. Mobile/island obtains the Cloud V2 core access token from `@veiller/cloud-client`
    after auth exchange, using the existing `cloud.auth.getCoreToken()` surface.
 2. Mentra Live continues to send the token to ASG through the existing
    `auth_token` / `coreToken` BLE message, but the token value is the Cloud V2

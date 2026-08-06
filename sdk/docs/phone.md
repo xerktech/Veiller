@@ -26,7 +26,7 @@ Source: [mobile/modules/miniapp/src/modules/phone.ts](../../mobile/modules/minia
 ## Quick start
 
 ```ts
-import {MiniappSession, createTransport} from "@mentra/miniapp"
+import {MiniappSession, createTransport} from "@veiller/miniapp"
 
 const session = new MiniappSession({transport: createTransport()})
 await session.connect()
@@ -82,7 +82,7 @@ Manifest entries map onto canonical keys per `session.permissions`:
 
 Calls made without the matching manifest permission are rejected by the
 phone runtime with `PERMISSION_NOT_DECLARED`. Required permissions are
-requested by the Mentra App before opening the miniapp.
+requested by the Veiller App before opening the miniapp.
 
 ---
 

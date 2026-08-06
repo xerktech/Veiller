@@ -124,7 +124,7 @@ export const useAppStore = create<AppStore>((set) => ({
 #### `controller/GlassesController.ts`
 
 ```ts
-import type {ButtonPressData, MiniappSession, TranscriptionData} from "@mentra/miniapp"
+import type {ButtonPressData, MiniappSession, TranscriptionData} from "@veiller/miniapp"
 import {useAppStore} from "../store/appStore"
 
 /**
@@ -142,7 +142,7 @@ import {useAppStore} from "../store/appStore"
  * diagnostic surfaces, ephemeral by design, and may inline-subscribe.
  *
  * If your miniapp grows beyond ~5 distinct concerns, consider splitting
- * the controller into per-concern manager classes (Mentra-AI's pattern).
+ * the controller into per-concern manager classes (Veiller-AI's pattern).
  * For 1-3 concerns, keeping everything inline here is clearer.
  */
 export class GlassesController {
@@ -242,7 +242,7 @@ export function initGlassesController(session: MiniappSession): GlassesControlle
 
 ```tsx
 import {createRoot} from "react-dom/client"
-import {MentraProvider, useSession} from "@mentra/miniapp/react"
+import {VeillerProvider, useSession} from "@veiller/miniapp/react"
 
 import App from "./App"
 import {initGlassesController} from "./controller/GlassesController"
@@ -262,9 +262,9 @@ function Bootstrap() {
 const root = document.getElementById("root")
 if (!root) throw new Error("Root element not found")
 createRoot(root).render(
-  <MentraProvider>
+  <VeillerProvider>
     <Bootstrap />
-  </MentraProvider>,
+  </VeillerProvider>,
 )
 ```
 
@@ -327,7 +327,7 @@ const onToggleMirror = (v: boolean) => setMirrorToGlasses(v)
 - The rule.
 - Why the rule exists (always-on glasses logic shouldn't be tied to React lifecycle).
 - The example as the reference, calling out `GlassesController` by name.
-- The Mentra-AI manager-fleet pattern as the next-level pattern when 5+ concerns.
+- The Veiller-AI manager-fleet pattern as the next-level pattern when 5+ concerns.
 
 **Tester-page audit:** every tester page is checked to confirm it does NOT push display layouts, does NOT modify glasses state, only displays events. The current pages already do this — verify and document.
 
@@ -356,15 +356,15 @@ Manual verification covers what tests would:
 1. Navigate captions → tester → captions: history preserved.
 2. Toggle mirror-to-glasses while on tester menu: takes effect when transcription arrives without re-mounting captions.
 3. Cause an error mid-transcription (bad utterance): app stays alive, controller stays alive, subscription stays alive.
-4. Live reload via `mentra-miniapp dev`: controller reinitializes cleanly (the singleton check protects against double-wire).
+4. Live reload via `veiller-miniapp dev`: controller reinitializes cleanly (the singleton check protects against double-wire).
 
 ---
 
 ## Open items deferred to during-implementation
 
 - **Soft-disconnect grace period:** confirmed in spec as "not in V1." Skip the implementation entirely. If transient disconnects become a real friction point we revisit.
-- **Vanilla (non-React) template variant:** explicitly deferred per spec. The example stays React. A `--vanilla` flag for `create-mentra-miniapp` is a follow-up.
-- **Mentra-AI-style manager fleet:** documented as the recommended pattern when an app grows past ~5 concerns; not implemented in the example since the captions app is small. The doc points future authors there.
+- **Vanilla (non-React) template variant:** explicitly deferred per spec. The example stays React. A `--vanilla` flag for `create-veiller-miniapp` is a follow-up.
+- **Veiller-AI-style manager fleet:** documented as the recommended pattern when an app grows past ~5 concerns; not implemented in the example since the captions app is small. The doc points future authors there.
 - **Hot-reload-aware controller reinit:** the `instance` singleton + `subscribed` guard handle the live-reload case; if there's edge breakage during dev (e.g. orphaned subs), revisit.
 
 ---

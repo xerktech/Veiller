@@ -18,8 +18,8 @@
  * etc.) instead of waiting 30s for cloud's timeout.
  */
 
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {PhotoSize, PhotoTransferMethod} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {PhotoSize, PhotoTransferMethod} from "@veiller/bluetooth-sdk/internal"
 import {cloudClientService} from "./CloudClientService"
 import {isGlassesConnected} from "./GlassesReadiness"
 import {useGlassesStore} from "../stores/glasses"

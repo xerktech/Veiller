@@ -119,7 +119,7 @@ Path: `/packages/cloud/src/routes/permissions.routes.ts`
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.middleware';
 import App from '../models/app.model';
-import { PermissionType } from '@mentra/sdk';
+import { PermissionType } from '@veiller/sdk';
 
 const router = Router();
 
@@ -470,4 +470,4 @@ During our implementation, we encountered and solved several technical challenge
 ## 7. Future Enhancements
 
 While our implementation provides a solid foundation, future enhancements could include the full permissions manager defined in
-[MentraOS/cloud/packages/cloud/src/services/permissions/docs/permissions-manager.md](./permissions-manager.md)
+[Veiller/cloud/packages/cloud/src/services/permissions/docs/permissions-manager.md](./permissions-manager.md)

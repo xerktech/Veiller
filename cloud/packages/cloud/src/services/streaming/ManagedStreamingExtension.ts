@@ -12,7 +12,7 @@ import {
   KeepStreamAlive,
   StreamStatus,
   KeepAliveAck,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 import { PHONE_PACKAGE_NAME } from "../session/PhoneSession";
 import UserSession from "../session/UserSession";
 import { CloudflareStreamService } from "./CloudflareStreamService";

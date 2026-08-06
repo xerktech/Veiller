@@ -21,7 +21,7 @@ export function useSettings() {
   useEffect(() => {
     mountedRef.current = true
     const offs: Array<() => void> = []
-    const on = mentra.on as (c: string, cb: (p: unknown) => void) => () => void
+    const on = veiller.on as (c: string, cb: (p: unknown) => void) => () => void
 
     offs.push(
       on("translation:snapshot", (payload) => {
@@ -47,37 +47,37 @@ export function useSettings() {
 
   const updateTargetLanguage = async (targetLanguage: string): Promise<boolean> => {
     setSettings((prev) => (prev ? {...prev, targetLanguage} : prev))
-    mentra.send("translation:set-target-language", {targetLanguage})
+    veiller.send("translation:set-target-language", {targetLanguage})
     return true
   }
 
   const updateDisplayLines = async (lines: number): Promise<boolean> => {
     setSettings((prev) => (prev ? {...prev, displayLines: lines} : prev))
-    mentra.send("translation:set-display-lines", {lines})
+    veiller.send("translation:set-display-lines", {lines})
     return true
   }
 
   const updateDisplayWidth = async (width: number): Promise<boolean> => {
     setSettings((prev) => (prev ? {...prev, displayWidth: width} : prev))
-    mentra.send("translation:set-display-width", {width})
+    veiller.send("translation:set-display-width", {width})
     return true
   }
 
   const updateWordBreaking = async (enabled: boolean): Promise<boolean> => {
     setSettings((prev) => (prev ? {...prev, wordBreaking: enabled} : prev))
-    mentra.send("translation:set-word-breaking", {enabled})
+    veiller.send("translation:set-word-breaking", {enabled})
     return true
   }
 
   const updateShowOriginalText = async (enabled: boolean): Promise<boolean> => {
     setSettings((prev) => (prev ? {...prev, showOriginalText: enabled} : prev))
-    mentra.send("translation:set-show-original-text", {enabled})
+    veiller.send("translation:set-show-original-text", {enabled})
     return true
   }
 
   const updateGlassesDisplayMode = async (mode: "translation" | "both"): Promise<boolean> => {
     setSettings((prev) => (prev ? {...prev, glassesDisplayMode: mode} : prev))
-    mentra.send("translation:set-glasses-display-mode", {mode})
+    veiller.send("translation:set-glasses-display-mode", {mode})
     return true
   }
 

@@ -1,4 +1,4 @@
-import { getMentraAuth, type AuthVariables, type MentraAuthHonoContext } from "@mentra/sdk";
+import { getVeillerAuth, type AuthVariables, type VeillerAuthHonoContext } from "@veiller/sdk";
 import { Hono } from "hono";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
@@ -18,7 +18,7 @@ app.post("/set", setState);
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 function snapshot(c: Context<{ Variables: AuthVariables }>) {
-  const resolved = requireUserSession(c as MentraAuthHonoContext);
+  const resolved = requireUserSession(c as VeillerAuthHonoContext);
   if (resolved instanceof Response) {
     return resolved;
   }
@@ -27,7 +27,7 @@ function snapshot(c: Context<{ Variables: AuthVariables }>) {
 }
 
 function stream(c: Context<{ Variables: AuthVariables }>) {
-  const resolved = requireUserSession(c as MentraAuthHonoContext);
+  const resolved = requireUserSession(c as VeillerAuthHonoContext);
   if (resolved instanceof Response) {
     return resolved;
   }
@@ -60,7 +60,7 @@ function stream(c: Context<{ Variables: AuthVariables }>) {
 }
 
 async function setState(c: Context<{ Variables: AuthVariables }>) {
-  const resolved = requireUserSession(c as MentraAuthHonoContext);
+  const resolved = requireUserSession(c as VeillerAuthHonoContext);
   if (resolved instanceof Response) {
     return resolved;
   }
@@ -85,8 +85,8 @@ async function setState(c: Context<{ Variables: AuthVariables }>) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function requireUserSession(c: MentraAuthHonoContext): { userId: string; userSession: UserSession } | Response {
-  const auth = getMentraAuth(c);
+function requireUserSession(c: VeillerAuthHonoContext): { userId: string; userSession: UserSession } | Response {
+  const auth = getVeillerAuth(c);
   if (!auth.userId) {
     return c.json({ error: "Unauthenticated" }, 401);
   }

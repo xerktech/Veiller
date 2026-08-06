@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://schemas.mentra.glass/miniapp/v1.json",
-  "title": "MentraOS miniapp manifest",
-  "description": "Manifest schema for a Mentra miniapp (miniapp.json)",
+  "title": "Veiller miniapp manifest",
+  "description": "Manifest schema for a Veiller miniapp (miniapp.json)",
   "type": "object",
   "required": [
     "packageName",
@@ -44,11 +44,11 @@
     },
     "sdkVersion": {
       "type": "string",
-      "description": "Semver of the @mentra/miniapp SDK this bundle targets. Host refuses to spawn a miniapp whose sdkVersion is incompatible with the runtime it ships."
+      "description": "Semver of the @veiller/miniapp SDK this bundle targets. Host refuses to spawn a miniapp whose sdkVersion is incompatible with the runtime it ships."
     },
     "minHostVersion": {
       "type": "string",
-      "description": "Semver of the lowest MentraOS Manager host version that can run this bundle. The host re-validates this on every install and after host upgrades; bundles that no longer meet the bar are disabled (not deleted) with a clear UI."
+      "description": "Semver of the lowest Veiller Manager host version that can run this bundle. The host re-validates this on every install and after host upgrades; bundles that no longer meet the bar are disabled (not deleted) with a clear UI."
     },
     "entry": {
       "type": "object",

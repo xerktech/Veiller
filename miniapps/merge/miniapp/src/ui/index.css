@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* Dark mode is class-based: `.dark` on <html>, toggled from useColorScheme
-   (what the Mentra host reports). Light stays the untouched default. */
+   (what the Veiller host reports). Light stays the untouched default. */
 @custom-variant dark (&:is(.dark *));
 
 html,

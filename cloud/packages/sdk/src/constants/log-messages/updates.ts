@@ -7,12 +7,12 @@
  * single-line strings that the clean transport formats with color/prefix.
  *
  * The clean logger renders this as:
- *   MentraOS  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @mentra/sdk@latest
- *   MentraOS  ⚠ SDK update available: 3.0.0-hono.4 → 3.0.0-hono.5 — bun install @mentra/sdk@hono
+ *   Veiller  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @veiller/sdk@latest
+ *   Veiller  ⚠ SDK update available: 3.0.0-hono.4 → 3.0.0-hono.5 — bun install @veiller/sdk@hono
  */
 
 /**
- * Known npm dist-tags for @mentra/sdk.
+ * Known npm dist-tags for @veiller/sdk.
  * Used to parse the current version's prerelease identifier into a dist-tag,
  * and to validate the tag before sending it to the cloud API.
  */
@@ -51,5 +51,5 @@ export function getDistTag(version: string): string {
  * @returns A plain string suitable for `logger.warn()`
  */
 export const newSDKUpdate = (currentVersion: string, latestVersion: string, tag: string = "latest"): string => {
-  return `SDK update available: ${currentVersion} → ${latestVersion} — bun install @mentra/sdk@${tag}`;
+  return `SDK update available: ${currentVersion} → ${latestVersion} — bun install @veiller/sdk@${tag}`;
 };

@@ -1,21 +1,21 @@
 /**
- * MentraOS Photo Test App - Fullstack Entry Point
+ * Veiller Photo Test App - Fullstack Entry Point
  *
  * Uses Bun.serve() with HTML imports for the frontend
- * and Hono-based AppServer for the backend + MentraOS SDK.
+ * and Hono-based AppServer for the backend + Veiller SDK.
  *
  * Tests photo request flows end-to-end (OS-947/OS-951).
  */
 
 import {PhotoTestApp} from "./backend/PhotoTestApp"
 import {api} from "./backend/api"
-import {createMentraAuthRoutes} from "@mentra/sdk"
+import {createVeillerAuthRoutes} from "@veiller/sdk"
 import indexHtml from "./frontend/index.html"
 
 // Configuration from environment
 const PORT = parseInt(process.env.PORT || "3000", 10)
 const PACKAGE_NAME = process.env.PACKAGE_NAME
-const API_KEY = process.env.MENTRAOS_API_KEY
+const API_KEY = process.env.VEILLER_API_KEY
 const COOKIE_SECRET = process.env.COOKIE_SECRET || API_KEY
 
 // Validate required environment variables
@@ -25,7 +25,7 @@ if (!PACKAGE_NAME) {
 }
 
 if (!API_KEY) {
-  console.error("MENTRAOS_API_KEY environment variable is not set")
+  console.error("VEILLER_API_KEY environment variable is not set")
   process.exit(1)
 }
 
@@ -37,10 +37,10 @@ const app = new PhotoTestApp({
   cookieSecret: COOKIE_SECRET,
 })
 
-// Mount Mentra auth routes for webview token exchange
+// Mount Veiller auth routes for webview token exchange
 app.route(
-  "/api/mentra/auth",
-  createMentraAuthRoutes({
+  "/api/veiller/auth",
+  createVeillerAuthRoutes({
     apiKey: API_KEY,
     packageName: PACKAGE_NAME,
     cookieSecret: COOKIE_SECRET || "",

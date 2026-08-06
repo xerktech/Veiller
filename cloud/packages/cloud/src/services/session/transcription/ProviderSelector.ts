@@ -3,7 +3,7 @@
  */
 
 import { Logger } from "pino";
-import { getLanguageInfo, ExtendedStreamType } from "@mentra/sdk";
+import { getLanguageInfo, ExtendedStreamType } from "@veiller/sdk";
 import {
   TranscriptionProvider,
   ProviderType,

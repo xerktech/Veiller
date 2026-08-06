@@ -19,7 +19,7 @@ import {
   CloudflareStreamService,
   type CreateLiveInputConfig,
 } from "../../../../services/streaming/CloudflareStreamService";
-import type { RestreamDestination } from "@mentra/sdk";
+import type { RestreamDestination } from "@veiller/sdk";
 import type { AppEnv, AppContext } from "../../../../types/hono";
 
 const logger = rootLogger.child({ service: "v2.streams.api" });
@@ -92,7 +92,7 @@ async function handleProvision(c: AppContext) {
 
     // restreamDestinations accepts either plain URL strings or
     // {url, name?} objects. Strings are normalized to objects; the canonical
-    // RestreamDestination type (from @mentra/sdk) is what
+    // RestreamDestination type (from @veiller/sdk) is what
     // CloudflareStreamService.createOutputs consumes. The stream key is
     // expected to be part of the URL (e.g. rtmp://yt/live/STREAM-KEY).
     let restreamDestinations: RestreamDestination[] | undefined;

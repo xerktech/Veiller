@@ -51,8 +51,8 @@ export class LocalStorageService {
   private readonly CLIENT_ID_KEY = "asg_client_id"
   private readonly SYNC_QUEUE_KEY = "asg_sync_queue"
   private readonly QUARANTINED_FILES_KEY = "asg_quarantined_downloaded_files_v1"
-  private readonly ASG_PHOTOS_DIR = `${RNFS.DocumentDirectoryPath}/MentraPhotos`
-  private readonly ASG_THUMBNAILS_DIR = `${RNFS.DocumentDirectoryPath}/MentraPhotos/thumbnails`
+  private readonly ASG_PHOTOS_DIR = `${RNFS.DocumentDirectoryPath}/VeillerPhotos`
+  private readonly ASG_THUMBNAILS_DIR = `${RNFS.DocumentDirectoryPath}/VeillerPhotos/thumbnails`
 
   private constructor() {
     this.initializeDirectories()
@@ -74,14 +74,14 @@ export class LocalStorageService {
       const photoDirExists = await RNFS.exists(this.ASG_PHOTOS_DIR)
       if (!photoDirExists) {
         await RNFS.mkdir(this.ASG_PHOTOS_DIR)
-        console.log(`[LocalStorage] Created Mentra photos directory: ${this.ASG_PHOTOS_DIR}`)
+        console.log(`[LocalStorage] Created Veiller photos directory: ${this.ASG_PHOTOS_DIR}`)
       }
 
       // Create thumbnails directory if it doesn't exist
       const thumbDirExists = await RNFS.exists(this.ASG_THUMBNAILS_DIR)
       if (!thumbDirExists) {
         await RNFS.mkdir(this.ASG_THUMBNAILS_DIR)
-        console.log(`[LocalStorage] Created Mentra thumbnails directory: ${this.ASG_THUMBNAILS_DIR}`)
+        console.log(`[LocalStorage] Created Veiller thumbnails directory: ${this.ASG_THUMBNAILS_DIR}`)
       }
     } catch (error) {
       console.error("[LocalStorage] Error initializing directories:", error)
@@ -248,7 +248,7 @@ export class LocalStorageService {
     let didMigrate = false
 
     // Normalize every record before saving. This fixes the old read-absolute/write-one-relative
-    // bug and migrates stale iOS container UUID paths via their Documents/MentraPhotos suffix.
+    // bug and migrates stale iOS container UUID paths via their Documents/VeillerPhotos suffix.
     for (const [name, file] of Object.entries(files as Record<string, DownloadedFile>)) {
       const relativePath = this.toPortableRelativePath(file.filePath)
       const relativeThumbnailPath = file.thumbnailPath

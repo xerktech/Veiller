@@ -9,9 +9,9 @@
 
 ## Overview
 
-**What this doc covers:** How to run MentraOS mini apps locally on the phone — same `MentraSession` API, no cloud round-trip — including JS engine options, native bindings, bundle loading, background execution, and app distribution.
+**What this doc covers:** How to run Veiller mini apps locally on the phone — same `VeillerSession` API, no cloud round-trip — including JS engine options, native bindings, bundle loading, background execution, and app distribution.
 
-**What this doc does NOT cover:** The SDK v3 refactor itself (see [spike.md](./spike.md)). This doc assumes `MentraSession` exists with a `Transport` interface and zero server dependencies.
+**What this doc does NOT cover:** The SDK v3 refactor itself (see [spike.md](./spike.md)). This doc assumes `VeillerSession` exists with a `Transport` interface and zero server dependencies.
 
 **Why this matters:** Today, every app round-trips through the cloud: glasses → cloud → app server → cloud → glasses. A captions app shouldn't need internet to display live transcription when the phone can transcribe locally. Local apps unlock offline operation, lower latency, and new categories of apps that need real-time response.
 
@@ -39,7 +39,7 @@
 
 3. **JSI (JavaScript Interface).** Hermes uses JSI for its native bridge — synchronous, zero-serialization C++ calls between JS and native. This is how we'd expose `session.display.showText()` as a native call that sends a Bluetooth command to the glasses with no async overhead.
 
-4. **Separate context isolation.** We can create a dedicated Hermes runtime instance for mini apps, separate from the main RN UI thread. If a mini app crashes, the MentraOS UI stays alive. Similar to Chrome's V8 isolates per tab.
+4. **Separate context isolation.** We can create a dedicated Hermes runtime instance for mini apps, separate from the main RN UI thread. If a mini app crashes, the Veiller UI stays alive. Similar to Chrome's V8 isolates per tab.
 
 5. **Meta-maintained, actively developed.** Not going anywhere.
 
@@ -56,23 +56,23 @@
 
 Running JS in the background on mobile is the hardest problem. Both iOS and Android aggressively kill background processes to save battery.
 
-### How MentraOS gets around this
+### How Veiller gets around this
 
-**MentraOS is a Bluetooth accessory app.** Both iOS and Android grant extended background execution rights to apps that maintain active Bluetooth connections:
+**Veiller is a Bluetooth accessory app.** Both iOS and Android grant extended background execution rights to apps that maintain active Bluetooth connections:
 
 - **iOS:** `UIBackgroundModes: bluetooth-central` and `bluetooth-peripheral` in Info.plist. The app stays alive as long as the BLE connection to the glasses is active. Core Bluetooth framework handles reconnection.
-- **Android:** Foreground Service with `FOREGROUND_SERVICE_CONNECTED_DEVICE` type. The notification tray shows "MentraOS is connected to your glasses." The process stays alive.
+- **Android:** Foreground Service with `FOREGROUND_SERVICE_CONNECTED_DEVICE` type. The notification tray shows "Veiller is connected to your glasses." The process stays alive.
 
-The mini app JS runtime runs in the same process as the MentraOS app. It stays alive as long as the Bluetooth connection does — which is always, while the user is wearing glasses.
+The mini app JS runtime runs in the same process as the Veiller app. It stays alive as long as the Bluetooth connection does — which is always, while the user is wearing glasses.
 
 ### Execution model
 
 ```
-MentraOS App Process
+Veiller App Process
 ├── Main Thread (React Native UI)
 │   └── App management, settings screens, etc.
 │
-├── MentraOS Runtime Thread (native)
+├── Veiller Runtime Thread (native)
 │   ├── Hermes JS Engine Instance (dedicated)
 │   │   ├── Mini App A bundle
 │   │   ├── Mini App B bundle
@@ -95,13 +95,13 @@ The Runtime Thread is a native thread (not the RN JS thread) that hosts its own 
 
 ## SDK is TypeScript — Only the Transport is Native
 
-A key architectural clarification: **the SDK (`@mentra/sdk/session`) is written entirely in TypeScript.** `MentraSession`, `TranscriptionManager`, `DisplayManager`, all the managers — all TypeScript. It gets bundled into the mini app's JS bundle by Bun and runs inside the Hermes context just like any other JS code.
+A key architectural clarification: **the SDK (`@veiller/sdk/session`) is written entirely in TypeScript.** `VeillerSession`, `TranscriptionManager`, `DisplayManager`, all the managers — all TypeScript. It gets bundled into the mini app's JS bundle by Bun and runs inside the Hermes context just like any other JS code.
 
 The only native part is the **transport** — a thin pipe that sends and receives message strings. Everything else (parsing messages, routing to managers, maintaining state, capability checks, subscription logic) lives in the TypeScript SDK.
 
 ```
 What's TypeScript (bundled with the app):
-  MentraSession           — thin orchestrator
+  VeillerSession           — thin orchestrator
   TranscriptionManager    — handles transcription events, capabilities
   TranslationManager      — handles translation events
   DisplayManager          — display commands, text wrapping
@@ -113,7 +113,7 @@ What's TypeScript (bundled with the app):
   ... all other managers, all event handling, all state
 
 What's native (provided by phone runtime, injected as a global):
-  globalThis.__mentraTransport — just send(string) and onMessage(callback)
+  globalThis.__veillerTransport — just send(string) and onMessage(callback)
   That's it. One object. Two functions.
 ```
 
@@ -123,7 +123,7 @@ The phone runtime, before loading any mini app bundle, injects a native transpor
 
 ```typescript
 // Phone runtime (native, C++ via JSI) does this before loading the bundle:
-globalThis.__mentraTransport = {
+globalThis.__veillerTransport = {
   send(data: string): void {
     /* routes to BLE, Sherpa, GPS, etc. */
   },
@@ -143,9 +143,9 @@ globalThis.__mentraTransport = {
 The SDK picks this up on initialization:
 
 ```typescript
-// Inside @mentra/sdk/session — TypeScript, bundled with the app
+// Inside @veiller/sdk/session — TypeScript, bundled with the app
 class NativeBridgeTransport implements Transport {
-  private bridge = globalThis.__mentraTransport;
+  private bridge = globalThis.__veillerTransport;
 
   send(data: string) {
     this.bridge.send(data);
@@ -165,7 +165,7 @@ class NativeBridgeTransport implements Transport {
 }
 ```
 
-**The developer never sees any of this.** They import `@mentra/sdk/session`, it bundles normally via Bun, and the SDK internally detects whether it's running on a server (WebSocket available) or on a phone (native transport global available).
+**The developer never sees any of this.** They import `@veiller/sdk/session`, it bundles normally via Bun, and the SDK internally detects whether it's running on a server (WebSocket available) or on a phone (native transport global available).
 
 ### What the native transport routes to
 
@@ -199,7 +199,7 @@ Same message types as the cloud WebSocket. The SDK TypeScript code processes the
 
 **Store path (recommended):**
 
-1. Developer submits bundle to MentraOS dev console
+1. Developer submits bundle to Veiller dev console
 2. We compile to Hermes bytecode (`.hbc`) on our build servers
 3. Host on CDN (fast, globally cached)
 4. Phone downloads on app install
@@ -208,7 +208,7 @@ Same message types as the cloud WebSocket. The SDK TypeScript code processes the
 
 **Self-host / sideload path (development):**
 
-1. Developer runs `mentra dev` — starts local dev server
+1. Developer runs `veiller dev` — starts local dev server
 2. Phone fetches raw JS from developer's URL (ngrok / local network)
 3. Hermes executes raw JS directly (no `.hbc` needed in dev — slower first parse but works)
 4. Hot reload on save
@@ -223,7 +223,7 @@ Like a PWA with service workers:
 4. Swap on next app launch (not mid-session — avoid runtime inconsistency)
 5. Rollback: keep the previous bundle in case the new one crashes on startup
 
-### Bundle format (output of `mentra build`)
+### Bundle format (output of `veiller build`)
 
 ```
 dist/
@@ -260,13 +260,13 @@ Bundles run in a sandboxed Hermes context — no access to the filesystem, netwo
 ### How a local app starts
 
 ```
-1. User opens MentraOS app (or glasses connect automatically)
-2. MentraOS reads installed apps from local DB
+1. User opens Veiller app (or glasses connect automatically)
+2. Veiller reads installed apps from local DB
 3. For each app marked "auto-start":
-   a. Inject globalThis.__mentraTransport (native bridge)
+   a. Inject globalThis.__veillerTransport (native bridge)
    b. Load cached bundle into Hermes runtime
-   c. Bundle includes @mentra/sdk/session (TypeScript, bundled by Bun)
-   d. SDK detects native transport, creates MentraSession internally
+   c. Bundle includes @veiller/sdk/session (TypeScript, bundled by Bun)
+   d. SDK detects native transport, creates VeillerSession internally
    e. Runtime calls the app's exported onSession(session)
 4. App is now running — receiving events, sending display commands
 ```
@@ -275,17 +275,17 @@ Bundles run in a sandboxed Hermes context — no access to the filesystem, netwo
 
 ```typescript
 // session/index.ts — compiled to session.hbc
-import { MentraSession } from "@mentra/sdk/session";
+import { VeillerSession } from "@veiller/sdk/session";
 
 // The runtime calls this when the session is ready
-export default function onSession(session: MentraSession) {
+export default function onSession(session: VeillerSession) {
   session.transcription.on((data) => {
     session.display.showText(data.text);
   });
 }
 
 // Optional: called when the session ends (glasses disconnect, app stopped)
-export function onStop(session: MentraSession) {
+export function onStop(session: VeillerSession) {
   console.log("bye");
 }
 ```
@@ -294,7 +294,7 @@ This is the same pattern as cloud apps:
 
 ```typescript
 // Cloud app (for comparison)
-const app = new MentraApp({ packageName: "...", apiKey: "..." });
+const app = new VeillerApp({ packageName: "...", apiKey: "..." });
 
 app.onSession((session) => {
   session.transcription.on((data) => {
@@ -303,7 +303,7 @@ app.onSession((session) => {
 });
 ```
 
-The only difference: cloud apps use `MentraApp` (Hono server that creates sessions from webhooks). Local apps export `onSession` and the phone runtime calls it directly. The `MentraSession` class and all managers are the same TypeScript code in both cases — only the transport differs.
+The only difference: cloud apps use `VeillerApp` (Hono server that creates sessions from webhooks). Local apps export `onSession` and the phone runtime calls it directly. The `VeillerSession` class and all managers are the same TypeScript code in both cases — only the transport differs.
 
 ---
 
@@ -311,9 +311,9 @@ The only difference: cloud apps use `MentraApp` (Hono server that creates sessio
 
 ### Current state
 
-MentraOS **already has local transcription** via **Sherpa-ONNX**. It works — English edge quality is "pretty good" per Cayden (audio lead). The main problem isn't the model, it's the **spaghetti code**: local captions is the only offline mini app that uses the mic, and it's deeply intertwined with the rest of the mobile app. Every client change risks breaking it.
+Veiller **already has local transcription** via **Sherpa-ONNX**. It works — English edge quality is "pretty good" per Cayden (audio lead). The main problem isn't the model, it's the **spaghetti code**: local captions is the only offline mini app that uses the mic, and it's deeply intertwined with the rest of the mobile app. Every client change risks breaking it.
 
-Captions 3.0 is being planned (Isaiah + Matt + Israelov meeting Wednesday) to add online/offline switching and clean up the spaghetti. The local runtime architecture in this spike is the long-term fix — if local captions ran as a proper mini app with `MentraSession`, it wouldn't be entangled with the rest of the mobile app.
+Captions 3.0 is being planned (Isaiah + Matt + Israelov meeting Wednesday) to add online/offline switching and clean up the spaghetti. The local runtime architecture in this spike is the long-term fix — if local captions ran as a proper mini app with `VeillerSession`, it wouldn't be entangled with the rest of the mobile app.
 
 ### Engine options
 
@@ -396,7 +396,7 @@ interface TranscriptionCapabilities {
 Usage:
 
 ```typescript
-export default function onSession(session: MentraSession) {
+export default function onSession(session: VeillerSession) {
   // Always works — text and isFinal are always present
   session.transcription.on((data) => {
     session.display.showText(data.text);
@@ -484,7 +484,7 @@ A mini app doesn't have to be 100% local or 100% cloud. It can be hybrid:
 Example: an AI assistant app that shows live captions locally (Whisper) but sends the transcript to an LLM in the cloud for responses:
 
 ```typescript
-export default function onSession(session: MentraSession) {
+export default function onSession(session: VeillerSession) {
   // Local: real-time captions via on-device Sherpa-ONNX
   session.transcription.on((data) => {
     session.display.showText(data.text);
@@ -512,11 +512,11 @@ async function askCloudLLM(text: string): Promise<string> {
 
 ---
 
-## MentraJS Framework & Build Pipeline
+## VeillerJS Framework & Build Pipeline
 
 ### The vision
 
-MentraJS is a framework for building glasses apps — like Next.js but for smart glasses. "Full-stack" means glasses logic + phone companion UI + background processing, all in one project, one language, one dev experience.
+VeillerJS is a framework for building glasses apps — like Next.js but for smart glasses. "Full-stack" means glasses logic + phone companion UI + background processing, all in one project, one language, one dev experience.
 
 ```
 Next.js:
@@ -524,7 +524,7 @@ Next.js:
   Client code (React components) → runs in browser
   One project, framework handles the boundary
 
-MentraJS:
+VeillerJS:
   Session code (glasses logic)   → runs in Hermes (background, always on)
   Webview code (phone UI)        → runs in webview (foreground, when visible)
   One project, framework handles the boundary
@@ -536,7 +536,7 @@ The framework uses a convention-based folder structure:
 
 ```
 my-app/
-├── mentra.config.ts           # package name, permissions, etc.
+├── veiller.config.ts           # package name, permissions, etc.
 ├── session/
 │   └── index.ts               # entry point — runs in Hermes, always on
 ├── webview/                    # optional — not all apps need a phone UI
@@ -551,7 +551,7 @@ The simplest possible app — just live captions, no phone UI:
 
 ```
 captions-app/
-├── mentra.config.ts
+├── veiller.config.ts
 ├── session/
 │   └── index.ts
 └── package.json
@@ -561,21 +561,21 @@ Three files. That's it.
 
 ### Build pipeline
 
-`mentra build` takes the source project and produces what the phone needs:
+`veiller build` takes the source project and produces what the phone needs:
 
 ```
 Source:                          Build:                         Output:
 session/index.ts  ──→  bun build  ──→  session.js  ──→  hermesc  ──→  session.hbc
 webview/App.tsx   ──→  bun build  ──→  webview/index.html + bundle.js
-mentra.config.ts  ──→  generate   ──→  manifest.json
+veiller.config.ts  ──→  generate   ──→  manifest.json
 ```
 
 Steps:
 
-1. **`bun build session/index.ts --outfile dist/session.js`** — bundles session code + `@mentra/sdk/session` into a single JS file. Pure JS, no Node/Bun APIs. The SDK is TypeScript — it bundles in normally.
+1. **`bun build session/index.ts --outfile dist/session.js`** — bundles session code + `@veiller/sdk/session` into a single JS file. Pure JS, no Node/Bun APIs. The SDK is TypeScript — it bundles in normally.
 2. **`bun build webview/`** (if exists) — bundles the web app into static HTML/CSS/JS assets.
 3. **`hermesc dist/session.js -emit-binary -out dist/session.hbc`** — compile to Hermes bytecode for instant startup. (Skipped in dev mode.)
-4. **Generate `dist/manifest.json`** from `mentra.config.ts`.
+4. **Generate `dist/manifest.json`** from `veiller.config.ts`.
 
 Output:
 
@@ -589,17 +589,17 @@ dist/
     └── bundle.js
 ```
 
-**Important:** `@mentra/sdk/session` is NOT externalized — it's bundled into `session.js` as normal TypeScript. The only thing the phone runtime provides is `globalThis.__mentraTransport`. The SDK detects it at initialization and uses it as the transport.
+**Important:** `@veiller/sdk/session` is NOT externalized — it's bundled into `session.js` as normal TypeScript. The only thing the phone runtime provides is `globalThis.__veillerTransport`. The SDK detects it at initialization and uses it as the transport.
 
 ### CLI
 
 ```bash
-mentra dev              # Start dev server, hot reload, phone loads raw JS
-mentra build            # Production build → dist/
-mentra publish          # Build + upload to MentraOS app store
+veiller dev              # Start dev server, hot reload, phone loads raw JS
+veiller build            # Production build → dist/
+veiller publish          # Build + upload to Veiller app store
 ```
 
-**`mentra dev`:**
+**`veiller dev`:**
 
 - Starts a local dev server (Bun)
 - Watches `session/` and `webview/` for changes
@@ -607,17 +607,17 @@ mentra publish          # Build + upload to MentraOS app store
 - Hot reload on file save
 - Both session logic and webview UI reload
 
-**`mentra build`:**
+**`veiller build`:**
 
 - Bundles via Bun
-- Compiles to `.hbc` via `hermesc` (the Hermes compiler, ~5MB binary — bundled with MentraJS CLI, or skip and let the app store compile)
+- Compiles to `.hbc` via `hermesc` (the Hermes compiler, ~5MB binary — bundled with VeillerJS CLI, or skip and let the app store compile)
 - Generates manifest
 - Output in `dist/`
 
-**`mentra publish`:**
+**`veiller publish`:**
 
-- Runs `mentra build`
-- Uploads `dist/` to MentraOS app store
+- Runs `veiller build`
+- Uploads `dist/` to Veiller app store
 - Store can re-compile `.hbc` for different Hermes versions if needed
 - Review process, signing, CDN distribution
 
@@ -627,9 +627,9 @@ For apps that have both `session/` and `webview/`, the framework provides a shar
 
 ```typescript
 // session/index.ts — runs in Hermes, always on
-import { state } from "@mentra/sdk/session";
+import { state } from "@veiller/sdk/session";
 
-export default function onSession(session: MentraSession) {
+export default function onSession(session: VeillerSession) {
   session.transcription.on((data) => {
     // Update shared state — webview sees this when active
     state.set("lastTranscript", data.text);
@@ -649,11 +649,11 @@ export default function onSession(session: MentraSession) {
 
 ```tsx
 // webview/App.tsx — runs in webview, only when phone screen is on
-import { useMentraState } from "@mentra/sdk/webview";
+import { useVeillerState } from "@veiller/sdk/webview";
 
 function App() {
-  const lastTranscript = useMentraState("lastTranscript");
-  const language = useMentraState("language");
+  const lastTranscript = useVeillerState("lastTranscript");
+  const language = useVeillerState("language");
 
   return (
     <div>
@@ -673,11 +673,11 @@ The framework handles the bridge between the Hermes runtime and the webview (nat
 The same `session/index.ts` code works as both a local app and a cloud app:
 
 ```bash
-mentra build            # produces dist/ for phone (local app)
-mentra build --cloud    # produces a MentraApp server deployment
+veiller build            # produces dist/ for phone (local app)
+veiller build --cloud    # produces a VeillerApp server deployment
 ```
 
-For `--cloud`, the build wraps the session code in a `MentraApp` (Hono server) that creates `MentraSession` instances from webhooks with `WebSocketTransport`. The session code is unchanged — only the host environment differs.
+For `--cloud`, the build wraps the session code in a `VeillerApp` (Hono server) that creates `VeillerSession` instances from webhooks with `WebSocketTransport`. The session code is unchanged — only the host environment differs.
 
 ---
 
@@ -691,8 +691,8 @@ The native side is thin — it implements the transport bridge and routes messag
 
 | Module                  | Purpose                                                                  | Complexity | Notes                                                                    |
 | ----------------------- | ------------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------ |
-| **MentraRuntime**       | Hermes instance management, `__mentraTransport` injection, lifecycle     | High       | Core of the system. Manages app contexts, loads bundles.                 |
-| **NativeTransport**     | The `globalThis.__mentraTransport` implementation — `send` + `onMessage` | High       | Routes message strings to/from native. Single object, two key functions. |
+| **VeillerRuntime**       | Hermes instance management, `__veillerTransport` injection, lifecycle     | High       | Core of the system. Manages app contexts, loads bundles.                 |
+| **NativeTransport**     | The `globalThis.__veillerTransport` implementation — `send` + `onMessage` | High       | Routes message strings to/from native. Single object, two key functions. |
 | **DisplayRouter**       | Receives DisplayRequest messages from transport, sends via BLE           | Medium     | Already partially exists in mobile.                                      |
 | **AudioRouter**         | Mic input (BLE → transport) and speaker output (transport → BLE)         | Medium     | Already exists in mobile for cloud audio path.                           |
 | **CameraRouter**        | BLE camera commands + receives photo data                                | Medium     | Already exists in mobile for cloud photo path.                           |
@@ -701,7 +701,7 @@ The native side is thin — it implements the transport bridge and routes messag
 | **StorageRouter**       | Per-app sandboxed key-value storage                                      | Low        | SQLite or MMKV.                                                          |
 | **BundleLoader**        | Download, cache, verify, and load bundles                                | Medium     | HTTP client + file cache + signature verification.                       |
 
-This work is parallel to the SDK v3 refactor. The SDK v3 refactor produces the `MentraSession` + `Transport` interface that the mobile runtime consumes. The mobile work builds the native side that implements that interface.
+This work is parallel to the SDK v3 refactor. The SDK v3 refactor produces the `VeillerSession` + `Transport` interface that the mobile runtime consumes. The mobile work builds the native side that implements that interface.
 
 ---
 
@@ -709,13 +709,13 @@ This work is parallel to the SDK v3 refactor. The SDK v3 refactor produces the `
 
 **Critical:** The head of client is reportedly building something on the mobile side for local apps. If they design their own session management with different method names, different event patterns, different manager structure — we end up with two SDKs that do the same thing differently.
 
-**The contract is `MentraSession` + `Transport`.**
+**The contract is `VeillerSession` + `Transport`.**
 
-- The SDK team (this spike) defines `MentraSession`, the managers, the message types, and the `Transport` interface.
+- The SDK team (this spike) defines `VeillerSession`, the managers, the message types, and the `Transport` interface.
 - The mobile team implements `NativeBridgeTransport` and the native modules that fulfill the JSI bindings.
 - Both teams use the same message protocol. A `DataStream` with transcription data looks identical whether it came from cloud Soniox or on-device Whisper. A `DisplayRequest` is the same over WebSocket or JSI bridge.
 
-**Action item:** Share this spike + the SDK v3 spike with the head of client. Align on `MentraSession` as the shared contract before either team builds further.
+**Action item:** Share this spike + the SDK v3 spike with the head of client. Align on `VeillerSession` as the shared contract before either team builds further.
 
 ---
 
@@ -732,4 +732,4 @@ This work is parallel to the SDK v3 refactor. The SDK v3 refactor produces the `
 | 7   | **Multi-app concurrency**                     | Can multiple mini apps run simultaneously? If so, how do they share the display? Priority system? (Same question as cloud apps — the OS dashboard already handles this.)                                      |
 | 8   | **`whisper.rn` production readiness**         | The `whisper.rn` package exists but how production-ready is it? Battery impact? Thermal throttling? Need benchmarks on target devices.                                                                        |
 | 9   | **iOS App Store review**                      | Will Apple approve an app that downloads and executes arbitrary JS bundles? This is what React Native already does (CodePush, OTA updates). But it's worth verifying our specific use case won't get flagged. |
-| 10  | **Shared vs. dedicated Bluetooth connection** | The main MentraOS app already has a BLE connection to the glasses. Does the mini app runtime share this connection, or does it open its own? Sharing is more efficient; dedicated is more isolated.           |
+| 10  | **Shared vs. dedicated Bluetooth connection** | The main Veiller app already has a BLE connection to the glasses. Does the mini app runtime share this connection, or does it open its own? Sharing is more efficient; dedicated is more isolated.           |

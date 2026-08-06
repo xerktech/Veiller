@@ -33,10 +33,10 @@ The cloud is a passthrough relay — it validates the message and forwards it. T
 | `cloud/src/config/capabilities/mentra-display.ts`            | New capability profile for Mentra Display hardware                                                            |
 | `cloud/src/config/hardware-capabilities.ts`                  | Registered Mentra Display in `HARDWARE_CAPABILITIES` map                                                      |
 | `types/src/capabilities/mentra-display.ts`                   | Same capability profile, duplicated in `@mentra/types`                                                        |
-| `types/src/hardware.ts`                                      | Registered Mentra Display; exported `mentraDisplay`                                                           |
+| `types/src/hardware.ts`                                      | Registered Mentra Display; exported `veillerDisplay`                                                           |
 | `types/src/enums.ts`                                         | Added `ControllerTypes` enum with `R1 = "Even Realities R1"`                                                  |
 | `types/src/index.ts`                                         | Exported `ControllerTypes`                                                                                    |
-| `react-sdk/src/useMentraBridge.ts`                           | Added `CapsuleMenuRect` type, `getCapsuleMenuRect`, `useCapsuleMenu`                                          |
+| `react-sdk/src/useVeillerBridge.ts`                           | Added `CapsuleMenuRect` type, `getCapsuleMenuRect`, `useCapsuleMenu`                                          |
 | `react-sdk/src/index.ts`                                     | Exported `CapsuleMenuRect`, `getCapsuleMenuRect`, `useCapsuleMenu`                                            |
 | `cloud/src/services/incidents/incident-processor.service.ts` | Commented out Linear ticket creation and email notifications                                                  |
 
@@ -86,7 +86,7 @@ The promise resolves when the message is sent from the SDK — not when the glas
 if (!SUPPORTED_FOV.includes(fov) || roiPosition < 0 || roiPosition > 2) {
 ```
 
-`roiPosition` is typed as `CameraRoiPosition = "center" | "top" | "bottom"` (a string union). The numeric comparisons `< 0` and `> 2` produce `TS2365: Operator '<' cannot be applied to types 'string' and 'number'`. This breaks the entire `@mentra/cloud` build.
+`roiPosition` is typed as `CameraRoiPosition = "center" | "top" | "bottom"` (a string union). The numeric comparisons `< 0` and `> 2` produce `TS2365: Operator '<' cannot be applied to types 'string' and 'number'`. This breaks the entire `@veiller/cloud` build.
 
 The validation predates the string union — `roiPosition` was originally a `0 | 1 | 2` number type that was changed to strings, and the cloud handler was not updated.
 
@@ -101,7 +101,7 @@ if (!SUPPORTED_FOV.includes(fov) || !VALID_ROI_POSITIONS.includes(roiPosition)) 
 }
 ```
 
-Also requires importing `CameraRoiPosition` from `@mentra/sdk` in the handler.
+Also requires importing `CameraRoiPosition` from `@veiller/sdk` in the handler.
 
 ### 2. FOV validation discrepancy between SDK and cloud
 
@@ -165,11 +165,11 @@ The SDK JSDoc calls this out explicitly ("Fire-and-forget: the promise resolves 
 
 ### 6. Circular import in `@mentra/types` capability file (root cause of CI failures)
 
-`cloud/packages/types/src/capabilities/mentra-display.ts` imported from `@mentra/sdk`:
+`cloud/packages/types/src/capabilities/mentra-display.ts` imported from `@veiller/sdk`:
 
 ```typescript
-// Bug: @mentra/types cannot depend on @mentra/sdk (circular dep / missing dep)
-import type {Capabilities} from "@mentra/sdk"
+// Bug: @mentra/types cannot depend on @veiller/sdk (circular dep / missing dep)
+import type {Capabilities} from "@veiller/sdk"
 ```
 
 Every other capability file in the same directory uses the relative path:
@@ -178,7 +178,7 @@ Every other capability file in the same directory uses the relative path:
 import type {Capabilities} from "../hardware"
 ```
 
-This caused `@mentra/types`'s `prepare` script to fail during `bun install`, which cascaded into all 3 cloud CI jobs failing with `TS2307: Cannot find module '@mentra/sdk'`. **Fixed on branch `cloud/fix-dev-build-errors`.**
+This caused `@mentra/types`'s `prepare` script to fail during `bun install`, which cascaded into all 3 cloud CI jobs failing with `TS2307: Cannot find module '@veiller/sdk'`. **Fixed on branch `cloud/fix-dev-build-errors`.**
 
 ### 7. Mentra Display capability profile
 

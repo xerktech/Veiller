@@ -28,8 +28,8 @@ import {
   AccessTokenError,
   createLogger,
   verifyRuntimeToken,
-} from "@mentra/cloud-shared";
-import { audioSubscriptionSchema } from "@mentra/cloud-protocol/audio";
+} from "@veiller/cloud-shared";
+import { audioSubscriptionSchema } from "@veiller/cloud-protocol/audio";
 import {
   takeoverSubscriptions,
   writeSubscriptions,

@@ -1,12 +1,12 @@
-# MentraOS-Camera-Example-App
+# Veiller-Camera-Example-App
 
-This is a simple example app which demonstrates how to use the MentraOS Camera API to take photos and display them in a webview.
+This is a simple example app which demonstrates how to use the Veiller Camera API to take photos and display them in a webview.
 
 You could also send the photo to an AI api, store it in a database or cloud storage, send it to Roboflow, or do other processing.
 
-### Install MentraOS on your phone
+### Install Veiller on your phone
 
-MentraOS install links: [mentra.glass/install](https://mentra.glass/install)
+Veiller install links: [mentra.glass/install](https://mentra.glass/install)
 
 ### (Easiest way to get started) Set up ngrok
 
@@ -16,11 +16,11 @@ MentraOS install links: [mentra.glass/install](https://mentra.glass/install)
 
 3. [Use ngrok to make a static address/URL](https://dashboard.ngrok.com/)
 
-### Register your App with MentraOS
+### Register your App with Veiller
 
 1. Navigate to [console.mentra.glass](https://console.mentra.glass/)
 
-2. Click "Sign In", and log in with the same account you're using for MentraOS
+2. Click "Sign In", and log in with the same account you're using for Veiller
 
 3. Click "Create App"
 
@@ -44,14 +44,14 @@ MentraOS install links: [mentra.glass/install](https://mentra.glass/install)
      ```
      PORT=3000
      PACKAGE_NAME=com.yourName.yourAppName
-     MENTRAOS_API_KEY=your_api_key_from_console
+     VEILLER_API_KEY=your_api_key_from_console
      ```
-   * Make sure the `PACKAGE_NAME` matches what you registered in the MentraOS Console
-   * Get your `API_KEY` from the MentraOS Developer Console
+   * Make sure the `PACKAGE_NAME` matches what you registered in the Veiller Console
+   * Get your `API_KEY` from the Veiller Developer Console
 
 6. Run your app with `bun run dev`
 
-7. To expose your app to the internet (and thus MentraOS) with ngrok, run: `ngrok http --url=<YOUR_NGROK_URL_HERE> 3000`
+7. To expose your app to the internet (and thus Veiller) with ngrok, run: `ngrok http --url=<YOUR_NGROK_URL_HERE> 3000`
     * `3000` is the port. It must match what is in the app config. For example, if you entered `port: 8080`, use `8080` for ngrok instead.
 
 

@@ -210,13 +210,13 @@ export interface PhoneNotificationDismissed extends BaseMessage {
 }
 
 /**
- * MentraOS settings update from glasses
+ * Veiller settings update from glasses
  */
 export interface MentraosSettingsUpdateRequest extends BaseMessage {
-  type: GlassesToCloudMessageType.MENTRAOS_SETTINGS_UPDATE_REQUEST;
+  type: GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST;
 }
 export interface MentraosSettingsUpdateRequest extends BaseMessage {
-  type: GlassesToCloudMessageType.MENTRAOS_SETTINGS_UPDATE_REQUEST;
+  type: GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST;
 }
 
 /**

@@ -1,8 +1,8 @@
-# MentraOS Logging System
+# Veiller Logging System
 
 ## Overview
 
-This document outlines the improved logging infrastructure for the MentraOS Cloud system. We use Pino for logging with BetterStack as our log management service and PostHog for error tracking.
+This document outlines the improved logging infrastructure for the Veiller Cloud system. We use Pino for logging with BetterStack as our log management service and PostHog for error tracking.
 
 ## Design Goals
 

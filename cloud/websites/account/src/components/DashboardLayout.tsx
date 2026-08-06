@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button, useAuth } from "@mentra/shared";
+import { Button, useAuth } from "@veiller/shared";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,7 +32,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <div className="flex items-end gap-0">
               <img
                 src="https://imagedelivery.net/nrc8B2Lk8UIoyW7fY8uHVg/757b23a3-9ec0-457d-2634-29e28f03fe00/verysmall"
-                alt="Mentra Logo"
+                alt="Veiller Logo"
               />
             </div>
             <h2 className="text-xs text-gray-600 pb-1">Account</h2>

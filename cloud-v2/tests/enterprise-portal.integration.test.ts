@@ -37,7 +37,7 @@ let enterprise: EnterpriseService;
 beforeAll(async () => {
   await connectMongo(
     process.env.MONGO_URL ??
-      "mongodb://127.0.0.1:27017/mentra-cloud-v2-test",
+      "mongodb://127.0.0.1:27017/veiller-cloud-v2-test",
   );
   await Promise.all([
     EnterpriseOrgModel.syncIndexes(),
@@ -122,9 +122,9 @@ describe("enterprise portal service", () => {
     ).rejects.toThrow(EnterpriseServiceError);
   });
 
-  test("rejects the reserved 'mentra' tenant id", async () => {
+  test("rejects the reserved 'veiller' tenant id", async () => {
     await expect(
-      enterprise.upsertPrimaryOrg(user, { displayName: "Faux Mentra", tenantId: "mentra" }),
+      enterprise.upsertPrimaryOrg(user, { displayName: "Faux Veiller", tenantId: "veiller" }),
     ).rejects.toMatchObject({ code: "tenant_id_reserved", status: 409 });
   });
 

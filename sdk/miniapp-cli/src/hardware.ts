@@ -1,4 +1,4 @@
-// `mentra-miniapp hardware <action>` subcommand handlers. Mirrors permission.ts.
+// `veiller-miniapp hardware <action>` subcommand handlers. Mirrors permission.ts.
 
 import * as p from "@clack/prompts"
 import {ALLOWED_HARDWARE_LEVELS, ALLOWED_HARDWARE_TYPES} from "./manifest.js"
@@ -103,7 +103,7 @@ export async function addHardwareCmd(typeArg?: string, levelArg?: string): Promi
   }
 
   if (!level) {
-    console.error(`Missing level. Usage: mentra-miniapp hardware add ${type} <REQUIRED|OPTIONAL>`)
+    console.error(`Missing level. Usage: veiller-miniapp hardware add ${type} <REQUIRED|OPTIONAL>`)
     process.exit(1)
   }
 

@@ -9,7 +9,7 @@
  * hidden operational kill switch.
  */
 import {Platform} from "react-native"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 import {useSettingsStore, SETTINGS} from "../stores/settings"
 
 export const phoneNotifications = {

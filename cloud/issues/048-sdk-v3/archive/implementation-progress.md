@@ -16,25 +16,25 @@ The immediate target is:
 Recent design decisions now frozen in spec:
 
 - v3 reconnect protocol includes `sdkVersion` on both `CONNECTION_INIT` and `RECONNECT`
-- cloud restart recovery uses `RECONNECT_DEFERRED` plus parked `MentraSession` state
+- cloud restart recovery uses `RECONNECT_DEFERRED` plus parked `VeillerSession` state
 - deferred sockets remain open as unattached control channels
 - parked timeout defaults to 30 seconds
 - SDK should expose `session.onReconnected()` for reconnect/reattach of the same logical session
 
 ## Naming Decision
 
-The server-side host class should be `MiniAppServer`, not `MentraApp`.
+The server-side host class should be `MiniAppServer`, not `VeillerApp`.
 
 Reasoning:
 
-- `MentraSession` is intended to become the runtime-agnostic per-user API.
+- `VeillerSession` is intended to become the runtime-agnostic per-user API.
 - the cloud-hosted Node/Hono wrapper is specifically the server host for a mini app.
 - using `MiniAppServer` avoids future confusion once local mini apps run on-device or on-phone and are still "apps" but not servers.
 
 Compatibility naming:
 
 - `MiniAppServer`: new v3 server host
-- `MentraSession`: new v3 per-user session abstraction
+- `VeillerSession`: new v3 per-user session abstraction
 - `AppServer`: deprecated compatibility surface
 - `AppSession`: legacy compatibility surface behind the transition
 
@@ -144,7 +144,7 @@ Important nuance:
 
 ### Docs Updated For Naming
 
-The main spec docs were updated to use `MiniAppServer` instead of `MentraApp`:
+The main spec docs were updated to use `MiniAppServer` instead of `VeillerApp`:
 
 - `cloud/issues/039-sdk-v3-api-surface/v2-v3-api-map.md`
 - `cloud/issues/048-sdk-v3/spike.md`
@@ -182,7 +182,7 @@ This is intentionally a bridge, not the final architecture.
 
 Added:
 
-- `cloud/packages/sdk/src/session/MentraSession.ts`
+- `cloud/packages/sdk/src/session/VeillerSession.ts`
 
 Updated:
 
@@ -195,7 +195,7 @@ Updated:
 
 Current behavior:
 
-- the real `MentraSession` class now exists as a transport-driven runtime entrypoint
+- the real `VeillerSession` class now exists as a transport-driven runtime entrypoint
 - it wires the staged managers into:
   - `Transport`
   - `MessageHandlerRegistry`
@@ -208,20 +208,20 @@ Current behavior:
   - transport lifecycle
   - raw message routing
   - subscription bookkeeping
-- `MiniAppServer` remains a compatibility host and does not yet construct the new `MentraSession`
+- `MiniAppServer` remains a compatibility host and does not yet construct the new `VeillerSession`
 - `MiniAppServer` now also uses a private underscore-prefixed callback/session bridge internally so the public class stays lean
 - the legacy SDK server now exposes additive namespaced route aliases:
-  - `/api/_mentraos/webhook`
-  - `/api/_mentraos/tool`
-  - `/api/_mentraos/settings`
-  - `/api/_mentraos/photo-upload`
-  - `/api/_mentraos/health`
-  - `/api/_mentraos/auth`
+  - `/api/_veiller/webhook`
+  - `/api/_veiller/tool`
+  - `/api/_veiller/settings`
+  - `/api/_veiller/photo-upload`
+  - `/api/_veiller/health`
+  - `/api/_veiller/auth`
 - a compatibility adapter now exists over the new session runtime as groundwork for the eventual server-side cutover:
-  - `cloud/packages/sdk/src/session/internal/_CompatMentraSessionAdapter.ts`
+  - `cloud/packages/sdk/src/session/internal/_CompatVeillerSessionAdapter.ts`
   - `cloud/packages/sdk/src/session/internal/_CompatEventManagerAdapter.ts`
 - the first real server-side cutover primitives now exist:
-  - `cloud/packages/sdk/src/internal/_MentraSessionServerFactory.ts`
+  - `cloud/packages/sdk/src/internal/_VeillerSessionServerFactory.ts`
   - `cloud/packages/sdk/src/internal/_MiniAppSessionRegistry.ts`
   - `cloud/packages/sdk/src/internal/_MiniAppServerRuntime.ts`
 - `MiniAppServer` now instantiates and configures that new internal runtime
@@ -241,9 +241,9 @@ Current behavior:
   - `CloudToAppMessageType.RECONNECT_ACK`
   - `CloudToAppMessageType.RECONNECT_REJECTED`
   - `CloudToAppMessageType.RECONNECT_DEFERRED`
-  - `MentraSession` now sends `sdkVersion`
-  - `MentraSession` now exposes `onReconnected()`
-  - `MentraSession` can enter parked state on deferred reconnect
+  - `VeillerSession` now sends `sdkVersion`
+  - `VeillerSession` now exposes `onReconnected()`
+  - `VeillerSession` can enter parked state on deferred reconnect
 - cloud-side deferred reconnect support has now started:
   - added deferred v3 app socket registry in `cloud/packages/cloud/src/services/websocket/DeferredAppConnectionRegistry.ts`
   - `/app-ws` Bun handler now recognizes `RECONNECT`
@@ -260,23 +260,23 @@ Current behavior:
   - session-start webhooks now carry the cloud-owned app-session UUID
   - key cloud-to-app message paths now emit the real app-session UUID rather than reconstructing `userId-packageName`
   - cloud websocket aliases now include `/ws/client` and `/ws/miniapp` alongside legacy `/glasses-ws` and `/app-ws`
-  - `MentraSession` now uses the live runtime session ID internally instead of continuing to emit the original configured session ID after ACK/reconnect
+  - `VeillerSession` now uses the live runtime session ID internally instead of continuing to emit the original configured session ID after ACK/reconnect
   - v3 `CONNECTION_INIT` no longer sends `sessionId` from the new SDK runtime
   - terminal `RECONNECT_REJECTED` cases (`NOT_RUNNING`, `BOOT_TIMEOUT`) no longer blindly fall back to fresh `CONNECTION_INIT`
-- root exports now include the real `MentraSession`
-- `MiniAppServer` callback registration is now typed around `MentraSession` for new v3 app authors, while inherited `AppServer` override paths remain available for compatibility
+- root exports now include the real `VeillerSession`
+- `MiniAppServer` callback registration is now typed around `VeillerSession` for new v3 app authors, while inherited `AppServer` override paths remain available for compatibility
 - added a dedicated minimal validation target:
   - `cloud/packages/apps/v3-smoke-test`
-  - this app uses `MiniAppServer` + `MentraSession` directly and is intended to validate the fresh v3 authoring path without unrelated frontend/app complexity
+  - this app uses `MiniAppServer` + `VeillerSession` directly and is intended to validate the fresh v3 authoring path without unrelated frontend/app complexity
 - the v3 smoke app now also exercises the Hono/Bun webview developer path:
   - real `/` and `/webview` HTML routes served through Bun's HTML bundle/HMR flow
   - SDK-owned webview auth is now auto-mounted by `AppServer` / `MiniAppServer`
-  - canonical auth init path is now `/api/_mentraos/auth/init`
-  - `/api/mentra/auth/init` remains as a compatibility alias during transition
+  - canonical auth init path is now `/api/_veiller/auth/init`
+  - `/api/veiller/auth/init` remains as a compatibility alias during transition
   - public auth helpers now include:
     - `createAuthMiddleware()`
-    - `getMentraAuth(c)`
-    - `requireMentraAuth(c)`
+    - `getVeillerAuth(c)`
+    - `requireVeillerAuth(c)`
   - authenticated probe routes now exist for both cookie-backed auth and frontend-token auth without app code reading raw Hono context variable names
   - local validation now confirms the generated HTML shell and Bun chunk assets are served correctly
   - fixed a real subscription bug in the v3 transcription path:
@@ -296,7 +296,7 @@ Passed:
   - `/` returns the Bun HTML shell
   - Bun-generated JS/CSS chunk assets resolve successfully
   - `/api/health` returns the app runtime health JSON
-  - `/api/mentra/auth/init` returns the expected 400 when no auth token is provided
+  - `/api/veiller/auth/init` returns the expected 400 when no auth token is provided
 
 ## Important Compatibility Findings
 
@@ -331,7 +331,7 @@ Passed:
 
 ### SDK
 
-1. `MentraSession` orchestrator now exists and is being used by `MiniAppServer` webhook session creation, but it still needs broader runtime validation against inherited `AppServer` behaviors.
+1. `VeillerSession` orchestrator now exists and is being used by `MiniAppServer` webhook session creation, but it still needs broader runtime validation against inherited `AppServer` behaviors.
 2. Keep the current `MiniAppServer` bridge working while the real orchestrator is hardened.
 3. Continue validating which managers are safe to fully trust against the current cloud contract:
    - lower risk: transcription, translation, display, speaker, mic, device, phone, dashboard, led, location, time
@@ -349,7 +349,7 @@ Passed:
 Still required in this refactor:
 
 1. Keep removing remaining hybrid identity assumptions from cloud websocket/session handling.
-2. Confirm `CONNECTION_ACK` / `RECONNECT_ACK` contain everything the real `MentraSession` managers need.
+2. Confirm `CONNECTION_ACK` / `RECONNECT_ACK` contain everything the real `VeillerSession` managers need.
 3. Audit reconnect/session state behavior against the new SDK timing and deferred attach model.
 4. Validate cloud restart, resurrection, and manual stop behavior end to end.
 
@@ -362,6 +362,6 @@ Deferred unless explicitly pulled in:
 
 ## Recommended Next Implementation Step
 
-Audit and close the remaining compatibility edges around inherited `AppServer` behavior and the cloud websocket bootstrap path now that `MiniAppServer` webhook lifecycle is already on the new `MentraSession` runtime.
+Audit and close the remaining compatibility edges around inherited `AppServer` behavior and the cloud websocket bootstrap path now that `MiniAppServer` webhook lifecycle is already on the new `VeillerSession` runtime.
 
 The biggest runtime questions left are no longer naming or scaffolding; they are compatibility edge cases, reconnect/resurrection behavior, and the last old `AppSession` assumptions in the inherited server path.

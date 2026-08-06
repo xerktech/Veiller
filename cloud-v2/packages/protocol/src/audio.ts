@@ -1,5 +1,5 @@
 /**
- * @fileoverview Canonical audio wire types for the Mentra Runtime protocol.
+ * @fileoverview Canonical audio wire types for the Veiller Runtime protocol.
  *
  * zod schemas + inferred TS types for the audio service's subscription model
  * and result types. These are the single source of truth; `src/audio.types.ts`
@@ -44,7 +44,7 @@ export type AudioSubscription = z.infer<typeof audioSubscriptionSchema>;
 
 // --- UDP liveness -----------------------------------------------------------
 
-export const UDP_LIVENESS_PROBE_PREFIX = "mentra:udp-probe:";
+export const UDP_LIVENESS_PROBE_PREFIX = "veiller:udp-probe:";
 
 export const udpLivenessAckPayloadSchema = z.object({
   sessionId: z.string(),

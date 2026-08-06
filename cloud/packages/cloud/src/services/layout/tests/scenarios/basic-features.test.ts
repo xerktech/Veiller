@@ -10,8 +10,8 @@
 import { strict as assert } from "assert";
 import DisplayManager from "../../DisplayManager6.1";
 import { MockUserSession } from "../harness/MockUserSession";
-import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from "@mentra/sdk";
-const SYSTEM_DASHBOARD_PACKAGE_NAME = "com.mentra.os";
+import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType } from "@veiller/sdk";
+const SYSTEM_DASHBOARD_PACKAGE_NAME = "com.veiller.os";
 
 // App package names
 const APP1 = "com.example.app1";

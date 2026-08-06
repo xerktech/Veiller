@@ -1,4 +1,4 @@
-import type {NavManeuver} from "@mentra/miniapp"
+import type {NavManeuver} from "@veiller/miniapp"
 
 import {ManeuverFormatter} from "@/background/managers/ManeuverFormatter"
 import {useNavStore} from "@/ui/store/navStore"

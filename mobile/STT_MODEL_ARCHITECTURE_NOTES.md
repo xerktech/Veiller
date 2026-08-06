@@ -31,7 +31,7 @@ transducer.setJoiner("path/to/joiner.onnx");
 - More complex architecture
 - Generally better accuracy
 - Larger total model size
-- Used in the current MentraOS implementation
+- Used in the current Veiller implementation
 
 ### 2. CTC Models (single-file architecture)
 
@@ -60,7 +60,7 @@ ctc.setModel("path/to/model.int8.onnx");
 
 ### Current Implementation
 
-The current MentraOS implementation is hardcoded for transducer models:
+The current Veiller implementation is hardcoded for transducer models:
 
 - Expects 3 separate model files
 - Uses `OnlineTransducerModelConfig`

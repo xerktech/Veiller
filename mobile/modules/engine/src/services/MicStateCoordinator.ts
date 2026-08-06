@@ -8,7 +8,7 @@
  * so the mic runs whenever at least one local consumer needs it.
  */
 
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 
 import {createDebouncedPatchFlusher} from "../utils/debouncedPatch"
 

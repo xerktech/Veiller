@@ -24,9 +24,9 @@ End-to-end documentation of how photo capture works across SDK, Cloud, Mobile, a
 
 ## Components
 
-### 1. SDK (`@mentra/sdk`)
+### 1. SDK (`@veiller/sdk`)
 
-**Location**: `MentraOS/cloud/packages/sdk/src/app/session/modules/camera.ts`
+**Location**: `Veiller/cloud/packages/sdk/src/app/session/modules/camera.ts`
 
 The SDK provides `CameraModule` which apps use to request photos from the user's glasses.
 
@@ -64,7 +64,7 @@ this.session.resources.setTimeout(() => {
 
 ### 2. Cloud
 
-**Location**: `MentraOS/cloud/packages/cloud/src/services/session/PhotoManager.ts`
+**Location**: `Veiller/cloud/packages/cloud/src/services/session/PhotoManager.ts`
 
 The Cloud acts as a message relay between SDK and glasses.
 
@@ -106,7 +106,7 @@ async requestPhoto(appRequest: PhotoRequest): Promise<string> {
 
 ### 3. Mobile App (asg_client companion)
 
-**Location**: `MentraOS/asg_client/` Android app
+**Location**: `Veiller/asg_client/` Android app
 
 The mobile app maintains Bluetooth/serial connection to glasses and forwards commands.
 
@@ -118,7 +118,7 @@ The mobile app maintains Bluetooth/serial connection to glasses and forwards com
 
 ### 4. ASG Client (Glasses)
 
-**Location**: `MentraOS/asg_client/app/src/main/java/com/mentra/asg_client/`
+**Location**: `Veiller/asg_client/app/src/main/java/com/mentra/asg_client/`
 
 The glasses run an Android service that handles camera operations.
 
@@ -190,7 +190,7 @@ os.write(imageBytes);
 
 ### 5. SDK Photo Endpoint
 
-**Location**: `MentraOS/cloud/packages/sdk/src/app/server/index.ts`
+**Location**: `Veiller/cloud/packages/sdk/src/app/server/index.ts`
 
 The SDK automatically creates a `/photo-upload` endpoint that receives photos from glasses.
 

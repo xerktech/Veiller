@@ -8,7 +8,7 @@ plugins {
 
 def packageJson = new JsonSlurper().parse(file("../../package.json"))
 def mavenGroupId = 'com.mentraglass'
-def mavenPublishVersion = (findProperty('mentraMavenVersion') ?: System.getenv('MENTRA_MAVEN_VERSION') ?: packageJson.version).toString()
+def mavenPublishVersion = (findProperty('veillerMavenVersion') ?: System.getenv('VEILLER_MAVEN_VERSION') ?: packageJson.version).toString()
 
 group = mavenGroupId
 version = mavenPublishVersion
@@ -85,7 +85,7 @@ gradle.taskGraph.whenReady {
 }
 
 android {
-    namespace "com.mentra.lc3Lib"
+    namespace "com.veiller.lc3Lib"
     compileSdk 33
 
     publishing {
@@ -143,8 +143,8 @@ afterEvaluate {
                 from components.release
 
                 pom {
-                    name = 'Mentra LC3 Android Library'
-                    description = 'LC3 audio codec support for Mentra Bluetooth SDK'
+                    name = 'Veiller LC3 Android Library'
+                    description = 'LC3 audio codec support for Veiller Bluetooth SDK'
                     url = 'https://github.com/Mentra-Community/MentraOS'
                     licenses {
                         license {
@@ -154,7 +154,7 @@ afterEvaluate {
                     }
                     developers {
                         developer {
-                            id = 'mentra'
+                            id = 'veiller'
                             name = 'Mentra'
                             email = 'dev@mentra.glass'
                         }

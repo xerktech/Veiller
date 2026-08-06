@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { X, Building } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { useTheme } from "../hooks/useTheme";
 import { useSearch } from "../contexts/SearchContext";
 import { useProfileDropdown } from "../contexts/ProfileDropdownContext";

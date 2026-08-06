@@ -108,7 +108,7 @@ The phone's BLE handling code in all three implementations (OG Android, refactor
 
 #### Refactored Android (Current)
 
-**File:** `mobile/modules/core/android/src/main/java/com/mentra/core/utils/K900ProtocolUtils.java`
+**File:** `mobile/modules/core/android/src/main/java/com/veiller/core/utils/K900ProtocolUtils.java`
 **Lines:** 395-398
 
 ```java

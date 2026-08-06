@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react"
-import type {NavManeuver, TravelMode} from "@mentra/miniapp"
-import {useRpc} from "@mentra/miniapp/ui"
+import type {NavManeuver, TravelMode} from "@veiller/miniapp"
+import {useRpc} from "@veiller/miniapp/ui"
 
 import "@/shared/channels"
 import type {Channels} from "@/shared/channels"
@@ -231,7 +231,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
   // successful `storage:add-saved`) or on a local star toggle.
   useEffect(() => {
     let cancelled = false
-    mentra
+    veiller
       .request("storage:list-saved", undefined as never)
       .then((places) => {
         if (cancelled) return
@@ -252,9 +252,9 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
   const handleToggleSaved = async (place: PlaceDetails, shouldSave: boolean) => {
     try {
       if (shouldSave) {
-        await mentra.request("storage:add-saved", {...place})
+        await veiller.request("storage:add-saved", {...place})
       } else {
-        await mentra.request("storage:remove-saved", {placeId: place.placeId})
+        await veiller.request("storage:remove-saved", {placeId: place.placeId})
       }
     } finally {
       setLocalSavedVersion((v) => v + 1)
@@ -675,7 +675,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
       }
     }
 
-    mentra.send("nav:start", {
+    veiller.send("nav:start", {
       stops: [{lat: destination.lat, lng: destination.lng}],
       mode: "walking",
       simulate,
@@ -688,7 +688,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
 
   function handleStop() {
     append("stop sent")
-    mentra.send("nav:stop", {})
+    veiller.send("nav:stop", {})
     setPreviewRoutePoints(null)
     setPreviewRouteSummary(null)
     // Also clear the picked destination so the page returns to the
@@ -699,14 +699,14 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
 
   function handleDeviate() {
     append("deviate → +50m off-route")
-    mentra.send("nav:deviate", {})
+    veiller.send("nav:deviate", {})
   }
 
   // Dev: snap the map back to the device's real current location. Handy
   // after a simulated trip leaves the puck parked at the sim destination.
   function handleResetLocation() {
     append("reset → my location")
-    mentra.send("nav:reset-location", {})
+    veiller.send("nav:reset-location", {})
   }
 
   // Cancel the current trip and immediately re-start it to the same
@@ -719,8 +719,8 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
       return
     }
     append(`rebuild → ${dest.name || `${dest.lat}, ${dest.lng}`}`)
-    mentra.send("nav:stop", {})
-    mentra.send("nav:start", {
+    veiller.send("nav:stop", {})
+    veiller.send("nav:start", {
       stops: [{lat: dest.lat, lng: dest.lng}],
       mode: "walking",
       simulate,
@@ -1009,7 +1009,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                 routeDurationSeconds={maneuver?.timeToDestinationSeconds ?? null}
                 routePoints={running ? routePoints : null}
                 canRepeatDirection={capabilities.hasSpeaker && voiceGuidanceMode !== "off"}
-                onRepeatDirection={() => mentra.send("nav:repeat-direction", {})}
+                onRepeatDirection={() => veiller.send("nav:repeat-direction", {})}
                 onStop={handleStop}
                 onClose={() => setDestination(null)}
               />
@@ -1052,7 +1052,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                   <button
                     type="button"
                     onClick={() =>
-                      mentra.request("test:show-text-test", {
+                      veiller.request("test:show-text-test", {
                         text: "Hello from the UI",
                         durationMs: 3000,
                       })
@@ -1065,7 +1065,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                   <span className="text-[13px] font-medium text-neutral-700 dark:text-zinc-200">Send test bitmap to glasses</span>
                   <button
                     type="button"
-                    onClick={() => mentra.request("test:show-bitmap-test", undefined)}
+                    onClick={() => veiller.request("test:show-bitmap-test", undefined)}
                     className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white">
                     Send
                   </button>
@@ -1094,7 +1094,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                         const size = parseInt(bmpWidth, 10)
                         const height = parseInt(bmpHeight, 10)
                         if (!Number.isFinite(size) || !Number.isFinite(height)) return
-                        mentra.request("test:show-bitmap-size", {size, height})
+                        veiller.request("test:show-bitmap-size", {size, height})
                       }}
                       className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white shrink-0">
                       Send
@@ -1107,7 +1107,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                     type="button"
                     onClick={async () => {
                       console.log("[OSM-MAP] 🖱️  Draw button clicked")
-                      const res = await mentra.request("test:show-osm-map", undefined)
+                      const res = await veiller.request("test:show-osm-map", undefined)
                       console.log("[OSM-MAP] result:", res?.ok ? "✅ ok" : `❌ ${res?.error}`)
                     }}
                     className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white">
@@ -1132,7 +1132,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                               type="button"
                               onClick={async () => {
                                 console.log(`[OSM-MAP] 🖱️  pan ${dir}`)
-                                const res = await mentra.request("test:pan-osm-map", {dir})
+                                const res = await veiller.request("test:pan-osm-map", {dir})
                                 console.log("[OSM-MAP] result:", res?.ok ? "✅ ok" : `❌ ${res?.error}`)
                               }}
                               className="w-7 h-7 rounded-lg font-bold bg-red-600 text-white flex items-center justify-center">
@@ -1150,7 +1150,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                   <span className="text-[13px] font-medium text-neutral-700 dark:text-zinc-200">Test bitmap 200×100</span>
                   <button
                     type="button"
-                    onClick={() => mentra.request("test:show-bitmap-size", {size: 200, height: 100})}
+                    onClick={() => veiller.request("test:show-bitmap-size", {size: 200, height: 100})}
                     className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white">
                     Send
                   </button>
@@ -1163,7 +1163,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                         key={size}
                         type="button"
                         onClick={async () => {
-                          const res = await mentra.request("test:show-large-map", {size})
+                          const res = await veiller.request("test:show-large-map", {size})
                           console.log(`[LARGE-MAP] ${size}:`, res?.ok ? "✅ ok" : `❌ ${res?.error}`)
                         }}
                         className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white">
@@ -1176,7 +1176,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                   <span className="text-[13px] font-medium text-neutral-700 dark:text-zinc-200">Count 1→10 every 3s</span>
                   <button
                     type="button"
-                    onClick={() => mentra.request("test:count-1-to-10", undefined)}
+                    onClick={() => veiller.request("test:count-1-to-10", undefined)}
                     className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white">
                     Start
                   </button>
@@ -1187,7 +1187,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                   </span>
                   <button
                     type="button"
-                    onClick={() => mentra.request("test:count-both-boxes", undefined)}
+                    onClick={() => veiller.request("test:count-both-boxes", undefined)}
                     className="text-[11px] px-2.5 py-1 rounded-lg font-semibold bg-red-600 text-white">
                     Start
                   </button>
@@ -1206,7 +1206,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                         key={arrow.glyph}
                         type="button"
                         onClick={() =>
-                          mentra.request("test:show-text-test", {
+                          veiller.request("test:show-text-test", {
                             text: arrow.glyph,
                             durationMs: 3000,
                           })
@@ -1277,7 +1277,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                 onClick={() => {
                   const next = !showMinimap
                   setShowMinimap(next)
-                  mentra.send("nav:set-show-minimap", next)
+                  veiller.send("nav:set-show-minimap", next)
                 }}
                 className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold ${
                   showMinimap ? "bg-blue-600 text-white" : "bg-neutral-200 dark:bg-zinc-700 text-neutral-700 dark:text-zinc-200"
@@ -1358,7 +1358,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                     onClick={() => {
                       const next = !wrongSidewalk
                       setWrongSidewalk(next)
-                      mentra.send("nav:set-dev-settings", {wrongSidewalk: next})
+                      veiller.send("nav:set-dev-settings", {wrongSidewalk: next})
                       append(`wrong-sidewalk offset → ${next ? "on" : "off"}`)
                     }}
                     className={`w-full mt-2 px-3 py-2.5 rounded-xl text-sm font-semibold border border-dashed ${
@@ -1410,7 +1410,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                 onClick={() => {
                   const next = !useRawInstructions
                   setUseRawInstructions(next)
-                  mentra.send("nav:set-dev-settings", {useRawInstructions: next})
+                  veiller.send("nav:set-dev-settings", {useRawInstructions: next})
                   append(`raw-instructions → ${next ? "on" : "off"}`)
                 }}
                 className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold ${
@@ -1429,7 +1429,7 @@ export function NavigationPage({savedPlacesVersion = 0}: Props) {
                 onClick={() => {
                   const next = !largeMapEnabled
                   setLargeMapEnabled(next)
-                  mentra.send("nav:set-dev-settings", {largeMapEnabled: next})
+                  veiller.send("nav:set-dev-settings", {largeMapEnabled: next})
                   append(`large-map → ${next ? "on" : "off"}`)
                 }}
                 className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold ${

@@ -1,13 +1,13 @@
 {
   "platforms": ["apple", "android"],
   "apple": {
-    "modules": ["BluetoothSdkModule", "MentraPhotoReceiverModule"]
+    "modules": ["BluetoothSdkModule", "VeillerPhotoReceiverModule"]
   },
   "android": {
     "modules": [
-      "com.mentra.bluetoothsdk.BluetoothSdkModule",
-      "com.mentra.bluetoothsdk.MentraLocalNetworkModule",
-      "com.mentra.bluetoothsdk.photoreceiver.MentraPhotoReceiverModule"
+      "com.veiller.bluetoothsdk.BluetoothSdkModule",
+      "com.veiller.bluetoothsdk.VeillerLocalNetworkModule",
+      "com.veiller.bluetoothsdk.photoreceiver.VeillerPhotoReceiverModule"
     ]
   }
 }

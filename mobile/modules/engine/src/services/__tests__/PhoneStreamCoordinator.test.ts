@@ -15,7 +15,7 @@ const startExternallyManagedStream = mock(async (req: unknown) => streamStatusFo
 const stopStream = mock(async () => {})
 const sendExternallyManagedStreamKeepAlive = mock(async (_req: unknown) => {})
 
-mock.module("@mentra/bluetooth-sdk/internal", () => ({
+mock.module("@veiller/bluetooth-sdk/internal", () => ({
   default: {startStream, startExternallyManagedStream, stopStream, sendExternallyManagedStreamKeepAlive},
 }))
 

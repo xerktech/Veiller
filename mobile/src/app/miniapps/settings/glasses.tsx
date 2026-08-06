@@ -5,7 +5,7 @@ import GroupTitle from "@/components/settings/GroupTitle"
 import ToggleSetting from "@/components/settings/ToggleSetting"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n/translate"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 
 /**
  * Device-behavior controls for the Even Realities G2 firmware that aren't part

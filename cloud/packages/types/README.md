@@ -1,6 +1,6 @@
 # @mentra/types
 
-Shared TypeScript types for MentraOS client and cloud.
+Shared TypeScript types for Veiller client and cloud.
 
 ## Purpose
 

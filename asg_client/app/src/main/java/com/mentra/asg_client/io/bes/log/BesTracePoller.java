@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 /**
  * Debug-only helper that pulls the BES trace ring buffer at a short interval and
- * emits only newly observed lines into the MentraBleTrace log stream.
+ * emits only newly observed lines into the VeillerBleTrace log stream.
  */
 public class BesTracePoller {
   private static final String TAG = "BesTracePoller";

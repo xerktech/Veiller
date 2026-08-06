@@ -4,7 +4,7 @@
 
 ### Problem Statement
 
-The MentraOS Cloud platform currently lacks a permissions system for Third-Party Applications (Apps). This creates several issues:
+The Veiller Cloud platform currently lacks a permissions system for Third-Party Applications (Apps). This creates several issues:
 
 1. **Lack of Transparency**: Users have no visibility into what data Apps can access
 2. **Confusing User Experience**: When phone permissions are disabled, Apps fail without clear error messages
@@ -201,7 +201,7 @@ async subscribe(type: ExtendedStreamType): Promise<void> {
 Path: `/packages/cloud/src/services/permissions/permission-manager.ts`
 
 ```typescript
-import { PermissionType, PermissionStatus } from "@mentra/sdk";
+import { PermissionType, PermissionStatus } from "@veiller/sdk";
 import { ExtendedUserSession } from "../core/session.service";
 import { Logger } from "winston";
 

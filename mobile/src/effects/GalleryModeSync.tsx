@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 
-import {engine, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@veiller/engine"
 
 import {shouldUseMentraLiveNativeCapture} from "@/effects/buttonCapturePolicy"
 

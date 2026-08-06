@@ -18,8 +18,8 @@
     "types": ["bun-types"],
     "paths": {
       "@/*": ["./src/webview/*"],
-      "@mentra/sdk": ["../../sdk"]
-      // "@mentra/sdk": ["./node_modules/@mentra/sdk"]
+      "@veiller/sdk": ["../../sdk"]
+      // "@veiller/sdk": ["./node_modules/@veiller/sdk"]
     }
   },
   "include": ["src/**/*"],

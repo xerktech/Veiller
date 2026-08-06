@@ -21,7 +21,7 @@
  */
 
 import { Hono } from "hono";
-import { createHealthApp, createLogger, type ReadinessCheck } from "@mentra/cloud-shared";
+import { createHealthApp, createLogger, type ReadinessCheck } from "@veiller/cloud-shared";
 import type { AppEnv } from "../types/hono.types";
 import { OauthError } from "../types/oauth.types";
 import { AccountError } from "../services/account/account-error";

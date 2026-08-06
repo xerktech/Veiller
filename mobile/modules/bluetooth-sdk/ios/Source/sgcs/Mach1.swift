@@ -1,6 +1,6 @@
 //
 //  Mach1.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created by Mach1 Device Integration
 //

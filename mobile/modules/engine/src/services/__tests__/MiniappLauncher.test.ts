@@ -2,7 +2,7 @@
 
 import {beforeAll, beforeEach, describe, expect, test, mock} from "bun:test"
 
-import type {MentraJSRouter} from "../MentraJSRouter"
+import type {VeillerJSRouter} from "../VeillerJSRouter"
 
 // --- Mock the launcher's heavy module deps before importing it. ------------
 
@@ -73,7 +73,7 @@ function buildMockRouter() {
       unregisterCalls.push(packageName)
       registered.delete(packageName)
     },
-  } as unknown as MentraJSRouter
+  } as unknown as VeillerJSRouter
   return {router, registered, spawnCalls, unregisterCalls}
 }
 
@@ -128,7 +128,7 @@ describe("MiniappLauncher", () => {
 
   test("ensureRunning returns null UI for an already-registered package whose resolve fails", async () => {
     // First launch succeeds and registers the package. Later the bundle becomes
-    // unresolvable (e.g. the mentra-miniapp dev server dropped). Headless
+    // unresolvable (e.g. the veiller-miniapp dev server dropped). Headless
     // callers must not throw — LocalMiniappView routes null uiUri + devUrl to
     // /applet/dev-offline instead.
     await miniappLauncher.ensureRunning("com.x")

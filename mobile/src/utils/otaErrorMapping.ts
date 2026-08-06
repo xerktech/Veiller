@@ -1,4 +1,4 @@
-import type {OtaProgress, OtaStatus} from "@mentra/engine"
+import type {OtaProgress, OtaStatus} from "@veiller/engine"
 
 function isDownloadPhaseSnapshot(
   otaStatus: OtaStatus | null | undefined,

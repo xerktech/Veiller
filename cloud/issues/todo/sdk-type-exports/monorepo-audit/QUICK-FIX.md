@@ -8,7 +8,7 @@
 
 ```json
 "paths": {
-  "@mentra/sdk": ["../sdk/dist"],
+  "@veiller/sdk": ["../sdk/dist"],
   "bun-types": ["./node_modules/bun-types"]
 }
 ```
@@ -17,7 +17,7 @@
 
 ```json
 "paths": {
-  "@mentra/sdk": ["../sdk/src"],
+  "@veiller/sdk": ["../sdk/src"],
   "bun-types": ["./node_modules/bun-types"]
 }
 ```
@@ -42,7 +42,7 @@ bun run dev
 ## Why This Works
 
 - Bun runs TypeScript directly (no compilation needed)
-- TypeScript now resolves `@mentra/sdk` to source files
+- TypeScript now resolves `@veiller/sdk` to source files
 - Works with any NODE_ENV value (`isaiah`, `staging`, `prod`, etc.)
 - Changes are instant
 
@@ -58,7 +58,7 @@ This only affects local development.
 
 ## If It Breaks
 
-**Symptom**: "Cannot find module '@mentra/sdk'"
+**Symptom**: "Cannot find module '@veiller/sdk'"
 
 **Fix**:
 

@@ -1,6 +1,6 @@
 import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
-import mentraLogo from "@/assets/mentra-logo.svg";
+import veillerLogo from "@/assets/mentra-logo.svg";
 
 /**
  * Nav-free shell for the onboarding gate. Unlike AppShell it has no sidebar and
@@ -24,10 +24,10 @@ export function OnboardingShell({
       <header className="border-b border-[#e4e6e2] bg-white">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
           <div className="flex items-center gap-3">
-            <img src={mentraLogo} alt="" className="h-[22px] w-[41px]" />
+            <img src={veillerLogo} alt="" className="h-[22px] w-[41px]" />
             <div className="min-w-0">
               <div className="font-display text-[15px] font-bold leading-5 text-[#14151b]">Dev Console</div>
-              <div className="truncate text-xs leading-4 text-muted-foreground">MentraOS{userLabel ? ` · ${userLabel}` : ""}</div>
+              <div className="truncate text-xs leading-4 text-muted-foreground">Veiller{userLabel ? ` · ${userLabel}` : ""}</div>
             </div>
           </div>
           <button

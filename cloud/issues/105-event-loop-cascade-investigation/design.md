@@ -24,7 +24,7 @@ Better Stack is the evidence warehouse: it collects logs/metrics, lets us query 
 The design goal is therefore:
 
 ```text
-Emit cheap, structured Mentra-specific facts.
+Emit cheap, structured Veiller-specific facts.
 Let Better Stack store, graph, alert, and correlate them.
 Use the next cascade to choose one fix PR instead of guessing.
 ```

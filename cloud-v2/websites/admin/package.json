@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/cloud-v2-admin",
+  "name": "@veiller/cloud-v2-admin",
   "version": "0.1.0",
   "private": true,
   "type": "module",

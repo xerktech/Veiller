@@ -54,7 +54,7 @@ const checkIsWebView = (userAgent: string, urlParams: URLSearchParams): boolean 
   // Check user agent for webview indicators
   const webViewIndicators = [
     'augmentos',
-    'mentraos',
+    'veiller',
     'wv',
     'webview',
     // iOS WebView

@@ -10,7 +10,7 @@
  * Kept separate from `revokedJtis` because the use cases and lifetimes
  * differ: `seenJtis` populates on every successful exchange and TTLs out
  * shortly after the short-lived OEM JWT's `exp`; `revokedJtis` populates
- * only on explicit revocation and TTLs out when the longer-lived Mentra
+ * only on explicit revocation and TTLs out when the longer-lived Veiller
  * access token would have expired.
  *
  * Spec: docs/issues/001-oem-auth/design.md ("Data model" / "seenJtis")

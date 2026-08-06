@@ -2,7 +2,7 @@
 
 ## Overview
 
-The MentraOS transcription/translation system implements sophisticated stream optimization to prevent duplicate transcription data and efficiently consolidate translation streams. This system ensures that when multiple apps subscribe to overlapping language pairs, transcription data for each language is sent only once.
+The Veiller transcription/translation system implements sophisticated stream optimization to prevent duplicate transcription data and efficiently consolidate translation streams. This system ensures that when multiple apps subscribe to overlapping language pairs, transcription data for each language is sent only once.
 
 ## Core Problem
 

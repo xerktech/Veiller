@@ -7,14 +7,14 @@
  * This is the device→cloud audio data-plane for the v2 runtime. It used to live in the
  * host's MantleManager `mic_lc3` handler (the "cloud fork"); moved here so ANY host —
  * including a bare OEM that never runs the v1 SocketComms plane — gets cloud
- * transcription/translation, not just the first-party Mentra app.
+ * transcription/translation, not just the first-party Veiller app.
  *
  * The old v1 UDP/SocketComms upload legs were removed; MantleManager only keeps
  * host-side debug mic-activity tracking and on-device PCM fan-out.
  *
  * Started by `engine.start()`. Idempotent.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {cloudClientService} from "./CloudClientService"
 
 let sub: {remove: () => void} | null = null

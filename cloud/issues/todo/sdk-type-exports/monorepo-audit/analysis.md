@@ -31,7 +31,7 @@
 
 ```json
 "paths": {
-  "@mentra/sdk": ["../sdk/dist"],  // ← Points to dist, not src!
+  "@veiller/sdk": ["../sdk/dist"],  // ← Points to dist, not src!
   "bun-types": ["./node_modules/bun-types"]
 }
 ```
@@ -40,7 +40,7 @@
 
 ```json
 "dependencies": {
-  "@mentra/sdk": "workspace:*"  // ← Correct workspace reference
+  "@veiller/sdk": "workspace:*"  // ← Correct workspace reference
 }
 ```
 
@@ -70,14 +70,14 @@ Possible reasons (common in early monorepo setups):
 ```json
 "paths": {
   // Change from dist to src:
-  "@mentra/sdk": ["../sdk/src"],
+  "@veiller/sdk": ["../sdk/src"],
   "bun-types": ["./node_modules/bun-types"]
 }
 ```
 
 #### Why This Works
 
-- TypeScript resolves `@mentra/sdk` to source files directly
+- TypeScript resolves `@veiller/sdk` to source files directly
 - Works regardless of NODE_ENV value (`isaiah`, `staging`, `east-asia-prod`, etc.)
 - Bun runs TypeScript natively, so no compilation needed
 - Changes to SDK are visible immediately
@@ -131,7 +131,7 @@ The SDK's `"development"` export condition in package.json doesn't help us becau
 ```json
 "paths": {
   "bun-types": ["./node_modules/bun-types"]
-  // Removed @mentra/sdk line
+  // Removed @veiller/sdk line
 }
 ```
 
@@ -162,7 +162,7 @@ bun run dev
 
 **Common issues and fixes**:
 
-1. **"Cannot find module '@mentra/sdk'"**
+1. **"Cannot find module '@veiller/sdk'"**
    - Check: Is SDK listed in cloud's package.json?
    - Fix: `cd cloud && bun install` (reinstall workspace links)
 
@@ -172,7 +172,7 @@ bun run dev
 
 3. **"IDE shows errors but bun runs fine"**
    - Not a real problem, just restart TS server
-   - Or add back path alias but point to src: `"@mentra/sdk": ["../sdk/src"]`
+   - Or add back path alias but point to src: `"@veiller/sdk": ["../sdk/src"]`
 
 ### Phase 3: Fallback to Hybrid Mode (30 minutes)
 
@@ -237,8 +237,8 @@ After changing tsconfig to point to `../sdk/src`:
 
 While we're here, you might want to audit:
 
-1. **@mentra/utils package** (if it exists): Same pattern?
-2. **@mentra/agents package**: Check its tsconfig paths
+1. **@veiller/utils package** (if it exists): Same pattern?
+2. **@veiller/agents package**: Check its tsconfig paths
 3. **Websites (console/store)**: Do they import SDK? Same issue?
 4. **Mobile app**: Does it have similar problems with any shared packages?
 

@@ -10,10 +10,10 @@
   },
   "author": "Isaiah Ballah",
   "license": "ISC",
-  "description": "MentraOS photo request test app — verifies photo capture, error handling, and timeout behavior (OS-947/OS-951)",
+  "description": "Veiller photo request test app — verifies photo capture, error handling, and timeout behavior (OS-947/OS-951)",
   "dependencies": {
-    "@mentra/react": "workspace:*",
-    "@mentra/sdk": "workspace:*",
+    "@veiller/react": "workspace:*",
+    "@veiller/sdk": "workspace:*",
     "bun-plugin-tailwind": "^0.1.2",
     "hono": "^4.11.3",
     "react": "^19",

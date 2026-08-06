@@ -134,11 +134,11 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="w-full max-w-sm mx-auto flex flex-col items-center">
           {/* Icon */}
-          <img src={logoUrl} alt="Mentra Logo" className="h-24 w-24" />
+          <img src={logoUrl} alt="Veiller Logo" className="h-24 w-24" />
 
           {/* Wordmark */}
           <p className="text-[46px] text-secondary-foreground text-center pt-8 pb-4">
-            Mentra
+            Veiller
           </p>
 
           {/* Header */}

@@ -1,7 +1,7 @@
 import { Building2, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import mentraLogo from "@/assets/mentra-logo.svg";
+import veillerLogo from "@/assets/mentra-logo.svg";
 
 const organizationSelectionSchema = z.object({
   organizations: z.array(z.object({
@@ -74,7 +74,7 @@ export function OrganizationSelectionPage() {
         <div className="relative w-full overflow-hidden rounded-[24px] p-9 shadow-[0_16px_40px_-8px_rgba(20,20,26,0.07),0_0_0_1px_rgba(20,20,26,0.07),inset_0_1px_0_rgba(255,255,255,0.9)]">
           <div className="absolute inset-0 rounded-[24px] bg-[rgba(255,255,255,0.8)] backdrop-blur-[14px]" />
           <div className="relative">
-            <img src={mentraLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
+            <img src={veillerLogo} alt="Mentra" className="mx-auto h-[27px] w-[50px]" />
 
             <div className="h-[22px]" />
             <h1 className="text-center font-display text-[22px] font-bold leading-[26px] text-[#14141a]">

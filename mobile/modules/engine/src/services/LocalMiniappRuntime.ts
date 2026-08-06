@@ -4,7 +4,7 @@
  * Singleton service that bridges local miniapps (running in WebViews) with
  * phone capabilities: display, audio, storage, sensors, LED, etc.
  *
- * Each miniapp communicates via the @mentra/miniapp envelope protocol.
+ * Each miniapp communicates via the @veiller/miniapp envelope protocol.
  * This runtime handles request dispatch, stream fan-out, and lifecycle
  * management (connect/disconnect/ping).
  */
@@ -15,7 +15,7 @@ import * as Battery from "expo-battery"
 import * as Clipboard from "expo-clipboard"
 import {File, Paths} from "expo-file-system"
 import * as Location from "expo-location"
-import BluetoothSdk, {type RgbLedAction, type RgbLedColor} from "@mentra/bluetooth-sdk"
+import BluetoothSdk, {type RgbLedAction, type RgbLedColor} from "@veiller/bluetooth-sdk"
 
 import {
   MiniappErrorCode,
@@ -25,8 +25,8 @@ import {
   CLOUD_STATUS_STREAM,
   parseEnvelope,
   serializeEnvelope,
-} from "@mentra/miniapp"
-import type {MiniappEnvelope} from "@mentra/miniapp"
+} from "@veiller/miniapp"
+import type {MiniappEnvelope} from "@veiller/miniapp"
 
 import {DeviceTypes, getModelCapabilities} from "../types"
 import {storage as mmkvStorage} from "../utils/storage/storage"
@@ -66,8 +66,8 @@ import {
 } from "../runtime/config"
 import {getAnalytics, getUiSeams} from "../runtime/bootstrap"
 import {normalizeStreamAudioConfig, normalizeStreamVideoConfig} from "../runtime/streamConfig"
-import {toLanguageHint} from "@mentra/cloud-protocol/languages"
-import type {AudioSubscription, LanguageSource, TranscriptionData, TranslationData} from "@mentra/cloud-protocol"
+import {toLanguageHint} from "@veiller/cloud-protocol/languages"
+import type {AudioSubscription, LanguageSource, TranscriptionData, TranslationData} from "@veiller/cloud-protocol"
 import {buildMiniappManifestSnapshot, type MiniappRuntimeDiagnosticSnapshot} from "../utils/miniappDiagnostics"
 import ttsModelManager from "./TTSModelManager"
 import {NavigationHandlers} from "./NavigationHandlers"
@@ -193,13 +193,13 @@ function diagnosticStringList(values: Iterable<string>): string[] {
 }
 
 const SYSTEM_MINIAPP_PACKAGES = new Set([
-  "com.mentra.camera",
-  "com.mentra.gallery",
-  "com.mentra.settings",
-  "com.mentra.simulated",
-  "com.mentra.mirror",
+  "com.veiller.camera",
+  "com.veiller.gallery",
+  "com.veiller.settings",
+  "com.veiller.simulated",
+  "com.veiller.mirror",
   "cloud.augmentos.notify",
-  "com.mentra.miniappdev",
+  "com.veiller.miniappdev",
 ])
 const PING_INTERVAL_MS = 5_000
 const MINIAPP_AUTH_REFRESH_HEADROOM_MS = 5 * 60 * 1000
@@ -217,7 +217,7 @@ const REQUEST_WIFI_SETUP_TYPE = "miniapp_request_wifi_setup"
 // context (heavy interim translation traffic) or OS scheduling while idle can
 // delay pongs well past one interval, and killing a healthy-but-busy script
 // drops its subscriptions (releasing the mic). With the liveness-timeout
-// respawn path wired (MentraJSRouter.start), a genuinely dead context still
+// respawn path wired (VeillerJSRouter.start), a genuinely dead context still
 // comes back automatically — this threshold only bounds how long that takes.
 const PING_TIMEOUT_THRESHOLD = 6 // ~30s
 
@@ -332,13 +332,13 @@ function computeDeclaredPermissionRecord(manifest: InstalledMiniappManifest | un
 // PERMISSION_NOT_DECLARED. The error reaches the SDK but most authors don't
 // subscribe to session.on("error", ...), so it's silent in practice.
 //
-// To make the failure discoverable for developers running the MentraOS app
+// To make the failure discoverable for developers running the Veiller app
 // from source, log a clear, copy-pasteable message in the phone console that
 // names the offending permission, the offending stream/op, and the JSON
 // snippet to add to miniapp.json. Once-per-session per (packageName, permission)
 // to avoid spam from a tight retry loop.
 //
-// Production users running the App Store build of MentraOS won't see these
+// Production users running the App Store build of Veiller won't see these
 // (they don't watch Metro/adb logcat). For them, the WebView console bridge
 // (#5 of the quick-fixes round) ships the structured error to the miniapp
 // itself, and the miniapp's own console.warn flows to the dev terminal.
@@ -413,7 +413,7 @@ class LocalMiniappRuntime {
 
   /**
    * Notified when a miniapp is unregistered for missing liveness pings.
-   * MentraJSRouter wires this into its crash-respawn machinery so a
+   * VeillerJSRouter wires this into its crash-respawn machinery so a
    * silently-stalled background script is restarted (with crash-loop
    * protection) instead of staying dead — a dead background drops its
    * subscriptions, which releases the mic while the webview still looks
@@ -1027,7 +1027,7 @@ class LocalMiniappRuntime {
     // Console-tap forwarding. The miniapp's console.log/warn/etc is wrapped
     // (via injected shim from miniappGlobals.ts) to post a `dev_log`
     // envelope. We fan out to two destinations:
-    //   1. DevServerBridge — forwards to the laptop's `mentra-miniapp dev`
+    //   1. DevServerBridge — forwards to the laptop's `veiller-miniapp dev`
     //      terminal. No-op when there's no sidecar (installed miniapps).
     //   2. React Native console — surfaces the log in Metro / Xcode console
     //      / adb logcat so installed-miniapp errors are still inspectable
@@ -1039,7 +1039,7 @@ class LocalMiniappRuntime {
       // Source is "ui" because the single-bundle WebView console-tap
       // shim in miniappGlobals.ts is the only thing that posts
       // `dev_log`; the two-layer path uses a separate envelope
-      // (`{type:"log", source}`) routed by MentraUIRouter.
+      // (`{type:"log", source}`) routed by VeillerUIRouter.
       devServerBridge.forwardLog(packageName, level, args, timestamp, "ui")
 
       const tag = `[MINIAPP ${packageName}]`
@@ -2589,13 +2589,13 @@ class LocalMiniappRuntime {
   private readonly blobStore = new BlobStore({
     sendResult: (packageName, requestId, ok, result, error) =>
       this.sendResult(packageName, requestId, ok, result, error),
-    getUserId: () => cloudClientService.getMentraUserId(),
+    getUserId: () => cloudClientService.getVeillerUserId(),
   })
   private readonly blobRequestQueues = new Map<string, Promise<void>>()
 
   private readonly simpleStorage = new LocalMiniappStorage({
     backend: localMiniappStorageBackend,
-    getUserId: () => cloudClientService.resolveMentraUserId(),
+    getUserId: () => cloudClientService.resolveVeillerUserId(),
   })
 
   /**
@@ -2612,7 +2612,7 @@ class LocalMiniappRuntime {
     const previous = this.blobRequestQueues.get(packageName) ?? Promise.resolve()
     const queued = previous.then(async () => {
       try {
-        await cloudClientService.resolveMentraUserId()
+        await cloudClientService.resolveVeillerUserId()
       } catch (err) {
         console.error(`${LOG_TAG}: blob identity error:`, err)
         this.sendResult(packageName, requestId, false, undefined, {
@@ -4313,7 +4313,7 @@ class LocalMiniappRuntime {
     const params = (payload.params as Record<string, unknown> | undefined) ?? {}
     // Floor the timeout at 6s so the host never rejects with ACTION_TIMEOUT before
     // the target SDK's handler-registration window closes. A freshly-woken miniapp
-    // buffers an undelivered ACTION_CALL for HANDLER_WAIT_MS (5s in @mentra/miniapp's
+    // buffers an undelivered ACTION_CALL for HANDLER_WAIT_MS (5s in @veiller/miniapp's
     // actions module) waiting for session.actions.handle; a shorter host timeout
     // could fire while the target is still registering, then the action would run
     // with no caller left to receive its result. 6s = that 5s buffer + 1s for the

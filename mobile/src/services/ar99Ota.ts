@@ -1,6 +1,6 @@
 import * as RNFS from "@dr.pogodin/react-native-fs"
 
-import BluetoothSdk from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
 import {getAr99ApiConfig} from "@/services/ar99ApiConfig"
 
 const AR99_OTA_APP_NAME = "AR99"

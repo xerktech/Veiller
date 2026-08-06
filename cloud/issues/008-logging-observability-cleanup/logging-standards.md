@@ -1,6 +1,6 @@
 # Cloud Logging Standards
 
-This document defines the logging standards for the MentraOS cloud services.
+This document defines the logging standards for the Veiller cloud services.
 
 ## Log Levels
 

@@ -1,13 +1,13 @@
 /**
- * `@mentra/engine` — the OEM-facing main entry.
+ * `@veiller/engine` — the OEM-facing main entry.
  *
  * The `engine` namespace (configure/start/stop + typed domain facades), the
  * public contract/read-model types, and the pure helpers host UI legitimately
  * renders with (decision functions, sort/order helpers, policy constants,
  * capability tables, timers). Judgment rule: read models, commands, pure
  * functions and types belong here; anything that mutates runtime state or
- * exposes a raw store/service lives on `@mentra/engine/internal`
- * (migration-era surface) or `@mentra/engine/devtools` (debug-only) instead.
+ * exposes a raw store/service lives on `@veiller/engine/internal`
+ * (migration-era surface) or `@veiller/engine/devtools` (debug-only) instead.
  * See cloud-v2/docs/issues/020-glasses-status-boundary/integration-review.md §D.
  */
 
@@ -120,7 +120,7 @@ export type {
 
 // Bluetooth SDK event types host UI subscribes to via engine facades (the
 // BluetoothSdk singleton passthrough itself is internal).
-export type {PairFailureEvent, GlassesNotReadyEvent} from "@mentra/bluetooth-sdk/internal"
+export type {PairFailureEvent, GlassesNotReadyEvent} from "@veiller/bluetooth-sdk/internal"
 
 // Cloud connection status enum (read model; the connection store is internal).
 export {WebSocketStatus} from "./stores/connection"
@@ -178,7 +178,7 @@ export {
   evenRealitiesG2,
   mentraLive,
   vuzixZ100,
-  mentraDisplay,
+  veillerDisplay,
 } from "./types"
 export type {
   HardwareRequirement,

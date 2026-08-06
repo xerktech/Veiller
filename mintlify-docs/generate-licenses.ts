@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Unified License Generator for MentraOS Monorepo
+ * Unified License Generator for Veiller Monorepo
  *
  * Scans all JS/TS packages and Android projects to generate a comprehensive
  * third-party license file for legal compliance.
@@ -190,7 +190,7 @@ function generateMarkdown(summary: LicenseSummary): string {
 
 *Generated: ${summary.generatedAt}*
 
-This document lists all third-party open-source components used in MentraOS and the Mentra App, along with their respective licenses.
+This document lists all third-party open-source components used in Veiller and the Veiller App, along with their respective licenses.
 
 ## Summary
 
@@ -246,10 +246,10 @@ function generateMintlifyMDX(summary: LicenseSummary): string {
 
   return `---
 title: "Third-Party Licenses"
-description: "Open source components used in MentraOS and the Mentra App"
+description: "Open source components used in Veiller and the Veiller App"
 ---
 
-MentraOS and the Mentra App incorporate third-party open-source components, each governed by its respective license.
+Veiller and the Veiller App incorporate third-party open-source components, each governed by its respective license.
 
 **Last Updated:** ${new Date(summary.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
@@ -304,7 +304,7 @@ function generateHTML(summary: LicenseSummary): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Third-Party Licenses - MentraOS</title>
+  <title>Third-Party Licenses - Veiller</title>
   <style>
     :root {
       --bg: #0a0a0a;
@@ -426,7 +426,7 @@ function generateHTML(summary: LicenseSummary): string {
 }
 
 async function main() {
-  console.log("🔍 MentraOS License Generator\n");
+  console.log("🔍 Veiller License Generator\n");
 
   const args = process.argv.slice(2);
   const formatArg = args.find(a => a.startsWith("--format="));

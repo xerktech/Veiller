@@ -32,7 +32,7 @@ import {
   AccessTokenError,
   createLogger,
   verifyRuntimeToken,
-} from "@mentra/cloud-shared";
+} from "@veiller/cloud-shared";
 import {
   ingestAudioPacket,
   parseAudioPacket,
@@ -58,11 +58,11 @@ import {
   seedSubscriptions,
   takeoverSubscriptions,
 } from "../services/session/subscriptions-store";
-import { clientToCloudMessage } from "@mentra/cloud-protocol/messages";
-import { envelopeSchema, PROTOCOL_MAJOR } from "@mentra/cloud-protocol/envelope";
-import type { ProtocolError, ProtocolErrorCode } from "@mentra/cloud-protocol/errors";
-import { PROTOCOL_ERROR_CODES } from "@mentra/cloud-protocol/errors";
-import type { ConnectionInit } from "@mentra/cloud-protocol/handshake";
+import { clientToCloudMessage } from "@veiller/cloud-protocol/messages";
+import { envelopeSchema, PROTOCOL_MAJOR } from "@veiller/cloud-protocol/envelope";
+import type { ProtocolError, ProtocolErrorCode } from "@veiller/cloud-protocol/errors";
+import { PROTOCOL_ERROR_CODES } from "@veiller/cloud-protocol/errors";
+import type { ConnectionInit } from "@veiller/cloud-protocol/handshake";
 
 const logger = createLogger("audio").child({ service: "session.service" });
 
@@ -132,7 +132,7 @@ export interface SessionEntry {
 const sessionByTag = new Map<number, SessionEntry>();
 
 /**
- * Reference count of sessions per Mentra user on this pod. We need this for
+ * Reference count of sessions per Veiller user on this pod. We need this for
  * release-on-close: when the last session for a user closes, we relinquish
  * the ownership claim. Multiple WSs from the same user to the same pod
  * (re-handshake without the old one closing yet) share the claim.
@@ -194,7 +194,7 @@ export function getActiveSessionCount(): number {
   return sessionByTag.size;
 }
 
-/** Mentra users this pod currently owns. Fed into the ownership refresh loop. */
+/** Veiller users this pod currently owns. Fed into the ownership refresh loop. */
 export function getOwnedUserIds(): Iterable<string> {
   return sessionsPerUser.keys();
 }

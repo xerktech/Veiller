@@ -1,4 +1,4 @@
-import type { AppSession, TranscriptionData } from "@mentra/sdk"
+import type { AppSession, TranscriptionData } from "@veiller/sdk"
 import type { UserSession } from "../UserSession"
 
 interface SSEWriter {

@@ -4,19 +4,19 @@
 watch, to watch over": it keeps watch at the edge of your vision.
 
 Veiller (formerly **Foverlay**) is a self-hosted Android companion app for the
-Even Realities G2 smart glasses, built as a fork of MentraOS (upstream README
+Even Realities G2 smart glasses, built as a fork of Veiller (upstream README
 below).
 
 ---
 
 <div align="center">
-  <img src="./images/Github-Readme.png" alt="Mentra: The open source smart glasses operating system" width="100%" />
+  <img src="./images/Github-Readme.png" alt="Veiller: The open source smart glasses operating system" width="100%" />
 
   <p>
     <a href="https://mentra.glass">Website</a> •
     <a href="https://docs.mentra.glass">Documentation</a> •
     <a href="https://console.mentra.glass">Developer Console</a> •
-    <a href="https://apps.mentra.glass">Mentra MiniApp Store</a>
+    <a href="https://apps.mentra.glass">Veiller MiniApp Store</a>
   </p>
 
   <!--
@@ -31,25 +31,25 @@ below).
 </div>
 
 <div align="center">
-  <a href="https://apps.apple.com/us/app/mentra-the-smart-glasses-app/id6747363193">
+  <a href="https://apps.apple.com/us/app/veiller-the-smart-glasses-app/id6747363193">
     <img src="./images/AppStoreBadge.png" alt="Download on the App Store" width="180">
   </a>
-  <a href="https://play.google.com/store/apps/details?id=com.mentra.mentra">
+  <a href="https://play.google.com/store/apps/details?id=com.veiller.veiller">
     <img src="./images/GooglePlayBadge.png" alt="Get it on Google Play" width="180">
   </a>
 </div>
 
 ## Write Once, Run on Any Smart Glasses
 
-MentraOS is how developers and businesses build smart glasses apps.
+Veiller is how developers and businesses build smart glasses apps.
 
-MentraOS handles pairing, connection, data streaming, hardware access, and cross-device compatibility, so you can focus on building amazing apps. Development goes from months to days.
+Veiller handles pairing, connection, data streaming, hardware access, and cross-device compatibility, so you can focus on building amazing apps. Development goes from months to days.
 
 Every component is open source under the MIT license, giving you privacy, freedom, and control.
 
 ## Supported Smart Glasses
 
-MentraOS works across a growing ecosystem of smart glasses.
+Veiller works across a growing ecosystem of smart glasses.
 
 <div align="center">
   <table border="0" cellspacing="0" cellpadding="0" width="100%" style="border: 0 !important; border-collapse: separate; border-spacing: 8px;">
@@ -90,30 +90,30 @@ MentraOS works across a growing ecosystem of smart glasses.
   </table>
 </div>
 
-## Why Build with MentraOS?
+## Why Build with Veiller?
 
 - **Cross-Compatibility:** Build one app that runs on supported smart glasses from multiple manufacturers.
 - **Fast Development:** Go from months of custom smart glasses development to a working app in days.
 - **Hardware Access:** Use displays, microphones, cameras, speakers, and everything else smart glasses expose from one API.
-- **App Distribution:** Publish to the Mentra MiniApp Store and reach users across the MentraOS ecosystem.
-- **Business Deployment:** Deploy smart glasses apps for field work, remote support, training, accessibility, and compliance-sensitive workflows. MentraOS is already being deployed by Fortune 500 companies.
-- **Open Source Control:** Own it, host it, modify it, and extend it. MentraOS is MIT-licensed infrastructure designed for privacy, transparency, and freedom from hardware or cloud lock-in.
+- **App Distribution:** Publish to the Veiller MiniApp Store and reach users across the Veiller ecosystem.
+- **Business Deployment:** Deploy smart glasses apps for field work, remote support, training, accessibility, and compliance-sensitive workflows. Veiller is already being deployed by Fortune 500 companies.
+- **Open Source Control:** Own it, host it, modify it, and extend it. Veiller is MIT-licensed infrastructure designed for privacy, transparency, and freedom from hardware or cloud lock-in.
 
-## Apps on the Mentra MiniApp Store
+## Apps on the Veiller MiniApp Store
 
 Browse, install, and run glasses apps from your phone. Try captions, AI notes, proactive AI, translation, streaming, and more.
 
 <div align="center">
-  <img src="./images/Mockup_appshomepage.png" alt="MentraOS glasses apps homepage" width="364" />
+  <img src="./images/Mockup_appshomepage.png" alt="Veiller glasses apps homepage" width="364" />
 </div>
 
-## How MentraOS Works
+## How Veiller Works
 
-MentraOS runs glasses apps on the phone inside the Mentra Runtime. Multiple glasses apps can run simultaneously, controlling your smart glasses through one shared connection.
+Veiller runs glasses apps on the phone inside the Veiller Runtime. Multiple glasses apps can run simultaneously, controlling your smart glasses through one shared connection.
 
 This keeps the glasses lightweight while letting multiple apps run together, like captions, notes, notifications, dashboard, and AI tools. It also allows one app to work with any pair of supported smart glasses.
 
-Manufacturers can integrate the Mentra Runtime into their own iOS and Android apps to unlock the Mentra ecosystem while preserving their brand, app, and customer relationship.
+Manufacturers can integrate the Veiller Runtime into their own iOS and Android apps to unlock the Veiller ecosystem while preserving their brand, app, and customer relationship.
 
 ## Nightly Builds
 
@@ -130,14 +130,14 @@ Manufacturers can integrate the Mentra Runtime into their own iOS and Android ap
 
 ## Community
 
-MentraOS is built by developers, companies, and users who believe the next personal computer should be open, cross-compatible, private, and user-controlled.
+Veiller is built by developers, companies, and users who believe the next personal computer should be open, cross-compatible, private, and user-controlled.
 
-Join us and become part of the Mentra Community by joining our Discord server:  
+Join us and become part of the Veiller Community by joining our Discord server:  
 [https://mentra.glass/discord](https://mentra.glass/discord)
 
 ## Contributing
 
-MentraOS is made by a community and we welcome pull requests.
+Veiller is made by a community and we welcome pull requests.
 
 **Contributor guide:**  
 [https://docs.mentraglass.com/os-devs/contributing/overview](https://docs.mentraglass.com/os-devs/contributing/overview)
@@ -157,10 +157,10 @@ Looking for ways to contribute? We mark issues we'd love the community to help w
 
 MIT License
 
-Copyright 2026 Mentra Labs, Inc.
+Copyright 2026 Veiller Labs, Inc.
 
 <div align="center">
   <br />
-  <img width="100" alt="MentraOS" src="./images/MentraLogoWhiteSquare.svg" style="border-radius: 20%;" />
-  <h3>© 2026 Mentra Labs, Inc.</h3>
+  <img width="100" alt="Veiller" src="./images/MentraLogoWhiteSquare.svg" style="border-radius: 20%;" />
+  <h3>© 2026 Veiller Labs, Inc.</h3>
 </div>

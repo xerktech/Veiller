@@ -25,7 +25,7 @@
 // ─── Public Types ───────────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  *
  * Structural type — no concrete imports so the manager stays unit-testable
  * with plain stubs.
@@ -95,12 +95,12 @@ const MAX_WAIT_MS = 10_000; // 10 seconds
  * Key-value storage with local caching and debounced cloud sync.
  *
  * Provides a familiar `get`/`set`/`delete`/`clear` interface backed by
- * an in-memory cache with automatic persistence to the MentraOS cloud.
+ * an in-memory cache with automatic persistence to the Veiller cloud.
  * Writes are batched and debounced to minimise network traffic.
  *
  * @example
  * ```ts
- * const session = await mentra.connect();
+ * const session = await veiller.connect();
  *
  * // Set a value
  * await session.storage.set("username", "alice");
@@ -455,7 +455,7 @@ export class StorageManager {
   /**
    * Flush pending writes and clean up all resources.
    *
-   * Called by MentraSession during disconnect/cleanup.
+   * Called by VeillerSession during disconnect/cleanup.
    * @internal
    */
   async destroy(): Promise<void> {

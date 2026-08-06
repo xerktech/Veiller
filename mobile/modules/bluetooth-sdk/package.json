@@ -1,5 +1,5 @@
 {
-  "name": "@mentra/bluetooth-sdk",
+  "name": "@veiller/bluetooth-sdk",
   "version": "0.1.21-dev.3",
   "description": "SDK for communicating with smart glasses",
   "main": "build/index.js",

@@ -12,7 +12,7 @@ This issue captures what we know, what we don't know, what we need to measure, a
 
 ## How the Cloud Works Today
 
-The MentraOS Cloud is a single Bun process that acts as the hub between phones (with connected glasses) and mini apps (third-party app servers built with the SDK).
+The Veiller Cloud is a single Bun process that acts as the hub between phones (with connected glasses) and mini apps (third-party app servers built with the SDK).
 
 A `UserSession` is created in-memory when a phone connects. It lives in a static `Map<userId, UserSession>` inside the process. **All traffic for a given user must reach the same process:**
 
@@ -131,34 +131,34 @@ Add lightweight metrics to answer the unknowns above. Expose them in three place
 | Metric                                                    | Type    | Description                                                                                     |
 | --------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
 | **Sessions**                                              |         |                                                                                                 |
-| `mentra_user_sessions`                                    | Gauge   | Current number of connected UserSessions                                                        |
-| `mentra_miniapp_sessions`                                 | Gauge   | Current number of mini app sessions                                                             |
+| `veiller_user_sessions`                                    | Gauge   | Current number of connected UserSessions                                                        |
+| `veiller_miniapp_sessions`                                 | Gauge   | Current number of mini app sessions                                                             |
 | **Event Loop**                                            |         |                                                                                                 |
-| `mentra_event_loop_lag_ms`                                | Gauge   | Event loop lag — current sample via `setTimeout(fn, 0)`. The single best indicator of overload. |
-| `mentra_event_loop_lag_avg_ms`                            | Gauge   | Event loop lag rolling average (~5 min window, 150 samples × 2s)                                |
-| `mentra_event_loop_lag_p99_ms`                            | Gauge   | Event loop lag p99 over the rolling window                                                      |
+| `veiller_event_loop_lag_ms`                                | Gauge   | Event loop lag — current sample via `setTimeout(fn, 0)`. The single best indicator of overload. |
+| `veiller_event_loop_lag_avg_ms`                            | Gauge   | Event loop lag rolling average (~5 min window, 150 samples × 2s)                                |
+| `veiller_event_loop_lag_p99_ms`                            | Gauge   | Event loop lag p99 over the rolling window                                                      |
 | **UDP**                                                   |         |                                                                                                 |
-| `mentra_udp_packets_received_total`                       | Counter | UDP audio packets received                                                                      |
-| `mentra_udp_packets_dropped_total`                        | Counter | UDP packets dropped (no session found)                                                          |
-| `mentra_udp_pings_received_total`                         | Counter | UDP ping packets received                                                                       |
-| `mentra_udp_packets_decrypted_total`                      | Counter | UDP packets successfully decrypted                                                              |
-| `mentra_udp_decryption_failures_total`                    | Counter | UDP decryption failures                                                                         |
-| `mentra_udp_registered_sessions`                          | Gauge   | UDP sessions currently registered                                                               |
+| `veiller_udp_packets_received_total`                       | Counter | UDP audio packets received                                                                      |
+| `veiller_udp_packets_dropped_total`                        | Counter | UDP packets dropped (no session found)                                                          |
+| `veiller_udp_pings_received_total`                         | Counter | UDP ping packets received                                                                       |
+| `veiller_udp_packets_decrypted_total`                      | Counter | UDP packets successfully decrypted                                                              |
+| `veiller_udp_decryption_failures_total`                    | Counter | UDP decryption failures                                                                         |
+| `veiller_udp_registered_sessions`                          | Gauge   | UDP sessions currently registered                                                               |
 | **WebSocket**                                             |         |                                                                                                 |
-| `mentra_ws_client_messages_in_total`                      | Counter | WebSocket messages received from mobile client                                                  |
-| `mentra_ws_client_messages_out_total`                     | Counter | WebSocket messages sent to mobile client                                                        |
-| `mentra_ws_miniapp_messages_in_total`                     | Counter | WebSocket messages received from mini apps                                                      |
-| `mentra_ws_miniapp_messages_out_total`                    | Counter | WebSocket messages sent to mini apps                                                            |
+| `veiller_ws_client_messages_in_total`                      | Counter | WebSocket messages received from mobile client                                                  |
+| `veiller_ws_client_messages_out_total`                     | Counter | WebSocket messages sent to mobile client                                                        |
+| `veiller_ws_miniapp_messages_in_total`                     | Counter | WebSocket messages received from mini apps                                                      |
+| `veiller_ws_miniapp_messages_out_total`                    | Counter | WebSocket messages sent to mini apps                                                            |
 | **HTTP**                                                  |         |                                                                                                 |
-| `mentra_http_requests_total{status="2xx\|3xx\|4xx\|5xx"}` | Counter | HTTP requests by status code group                                                              |
+| `veiller_http_requests_total{status="2xx\|3xx\|4xx\|5xx"}` | Counter | HTTP requests by status code group                                                              |
 | **Memory**                                                |         |                                                                                                 |
-| `mentra_heap_used_bytes`                                  | Gauge   | V8 heap used in bytes                                                                           |
-| `mentra_heap_total_bytes`                                 | Gauge   | V8 heap total in bytes                                                                          |
-| `mentra_rss_bytes`                                        | Gauge   | Resident set size in bytes                                                                      |
-| `mentra_external_bytes`                                   | Gauge   | External memory (C++ objects bound to JS)                                                       |
-| `mentra_array_buffers_bytes`                              | Gauge   | ArrayBuffers memory in bytes                                                                    |
+| `veiller_heap_used_bytes`                                  | Gauge   | V8 heap used in bytes                                                                           |
+| `veiller_heap_total_bytes`                                 | Gauge   | V8 heap total in bytes                                                                          |
+| `veiller_rss_bytes`                                        | Gauge   | Resident set size in bytes                                                                      |
+| `veiller_external_bytes`                                   | Gauge   | External memory (C++ objects bound to JS)                                                       |
+| `veiller_array_buffers_bytes`                              | Gauge   | ArrayBuffers memory in bytes                                                                    |
 | **Process**                                               |         |                                                                                                 |
-| `mentra_uptime_seconds`                                   | Gauge   | Process uptime in seconds                                                                       |
+| `veiller_uptime_seconds`                                   | Gauge   | Process uptime in seconds                                                                       |
 
 These show up directly in the Porter Metrics dashboard tab, graphed over time alongside the existing CPU/memory/network charts.
 
@@ -181,8 +181,8 @@ Returns the same data as JSON, structured as:
 **Meaningful autoscaling with Porter:**
 Porter can autoscale based on custom Prometheus metrics instead of CPU. This is critical for us — CPU-based autoscaling doesn't work well because our event loop maxes at 1 core while the pod might show low overall CPU. Instead we can autoscale on:
 
-- `mentra_user_sessions` — "when sessions per pod exceeds N, add a pod"
-- `mentra_event_loop_lag_ms` — "when event loop lag exceeds Xms, add a pod"
+- `veiller_user_sessions` — "when sessions per pod exceeds N, add a pod"
+- `veiller_event_loop_lag_ms` — "when event loop lag exceeds Xms, add a pod"
 
 This requires the Prometheus `/metrics` endpoint and enabling metrics scraping in Porter (Advanced tab → Metrics scraping → enable, port 80, path `/metrics`).
 
@@ -405,7 +405,7 @@ This is probably the most pragmatic path:
 - [x] Pull UDP stats from `UdpAudioServer.getStats()` (lazy, zero coupling)
 - [x] Event loop lag sampling (current, avg, p99 over ~5 min rolling window)
 - [ ] Enable Porter metrics scraping (port 80, path `/metrics`)
-- [ ] Configure custom autoscaling on `mentra_user_sessions` / `mentra_event_loop_lag_ms`
+- [ ] Configure custom autoscaling on `veiller_user_sessions` / `veiller_event_loop_lag_ms`
 - [ ] Set up isolated load test environment on unused Porter cluster
 - [ ] Build load test mini app (SDK-based, subscribes to transcription, sends display updates)
 - [ ] Build load test driver (simulates N phone clients with WS + UDP)

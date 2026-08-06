@@ -28,14 +28,14 @@ describe("Runtime TTS", () => {
       }),
     });
 
-    const source = await tts.speak("Hello from MentraJS", {
+    const source = await tts.speak("Hello from VeillerJS", {
       voice_id: "voice-1",
       model_id: "model-1",
       voice_settings: { speed: 1.1 },
     });
 
     expect(seenPath).toStartWith("/api/tts/speak?");
-    expect(seenPath).toContain("text=Hello+from+MentraJS");
+    expect(seenPath).toContain("text=Hello+from+VeillerJS");
     expect(seenPath).toContain("voice_id=voice-1");
     expect(seenPath).toContain("model_id=model-1");
     expect(source).toEqual({

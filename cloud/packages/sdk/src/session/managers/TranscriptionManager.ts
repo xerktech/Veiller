@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * const session = await mentra.connect();
+ * const session = await veiller.connect();
  *
  * // Subscribe to all transcription (auto-detect language)
  * const stopAll = session.transcription.on((evt) => {
@@ -26,7 +26,7 @@
  * // Configure hints / vocabulary / diarization
  * session.transcription.configure({
  *   languageHints: ["en", "ja"],
- *   vocabulary: ["MentraOS", "HIPAA"],
+ *   vocabulary: ["Veiller", "HIPAA"],
  *   diarization: true,
  * });
  *
@@ -53,7 +53,7 @@ import { StreamType } from "../../types";
 export interface TranscriptionConfig {
   /** ISO 639-1 language hints to improve detection accuracy (e.g. `["en", "ja", "es"]`). */
   languageHints?: string[];
-  /** Custom vocabulary / boosted terms (e.g. `["MentraOS", "HIPAA"]`). */
+  /** Custom vocabulary / boosted terms (e.g. `["Veiller", "HIPAA"]`). */
   vocabulary?: string[];
   /** Enable speaker diarisation. Defaults to `true`. */
   diarization?: boolean;
@@ -95,7 +95,7 @@ export type TranscriptionHandler = (data: TranscriptionEvent) => void;
 // ─── Internal Types ─────────────────────────────────────────────────────────
 
 /**
- * Dependencies injected by MentraSession.
+ * Dependencies injected by VeillerSession.
  *
  * This is intentionally a *structural* type — we don't import the concrete
  * `DataStreamRouter` class so that the manager remains unit-testable with

@@ -98,21 +98,21 @@ export * from "./app/index";
 export * from "./MiniAppServer";
 
 // v3 session — explicit re-exports to avoid name collisions with v2 types
-// The full set of manager types is available via "@mentra/sdk/session" entrypoint
-export { MentraSession } from "./session/MentraSession";
-export type { MentraSessionConfig } from "./session/MentraSession";
+// The full set of manager types is available via "@veiller/sdk/session" entrypoint
+export { VeillerSession } from "./session/VeillerSession";
+export type { VeillerSessionConfig } from "./session/VeillerSession";
 
 // Logging exports
 export * from "./logging/logger";
 
 // Error classes
 export {
-  MentraError,
-  MentraAuthError,
-  MentraConnectionError,
-  MentraTimeoutError,
-  MentraValidationError,
-  MentraPermissionError,
+  VeillerError,
+  VeillerAuthError,
+  VeillerConnectionError,
+  VeillerTimeoutError,
+  VeillerValidationError,
+  VeillerPermissionError,
 } from "./logging/errors";
 
 // Re-export common types for convenience
@@ -269,13 +269,13 @@ export interface WebSocketError {
   details?: unknown;
 }
 
-export type { AuthenticatedRequest, AuthVariables, MentraAuthContext, MentraAuthHonoContext } from "./types/index";
+export type { AuthenticatedRequest, AuthVariables, VeillerAuthContext, VeillerAuthHonoContext } from "./types/index";
 
 // Frontend authentication helpers for Bun fullstack apps
 export {
   createAuthMiddleware,
-  createMentraAuthRoutes,
+  createVeillerAuthRoutes,
   generateFrontendToken,
-  getMentraAuth,
-  requireMentraAuth,
+  getVeillerAuth,
+  requireVeillerAuth,
 } from "./app/webview/index";

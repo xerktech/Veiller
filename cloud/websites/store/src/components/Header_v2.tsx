@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { usePlatform } from "../hooks/usePlatform";
 import { useTheme } from "../hooks/useTheme";
 import { useSearch } from "../contexts/SearchContext";
@@ -195,7 +195,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onSearchClear, onSearchChange
                 <Link
                   to="/"
                   className="flex items-center gap-2 sm:gap-4 select-none hover:opacity-80 transition-opacity">
-                  <img src="/mentra_logo_gr.png" alt="Mentra Logo" className="h-[16px] sm:h-7 w-auto object-contain" />
+                  <img src="/mentra_logo_gr.png" alt="Veiller Logo" className="h-[16px] sm:h-7 w-auto object-contain" />
                   <span
                     className="text-[14px] sm:text-[20px] font-semibold  mb-[-0px] mr-[15px]"
                     style={{
@@ -203,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onSearchClear, onSearchChange
                       letterSpacing: "0.06em",
                       color: "var(--text-primary)",
                     }}>
-                    Mentra MiniApp Store
+                    Veiller MiniApp Store
                   </span>
                 </Link>
 
@@ -314,8 +314,8 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onSearchClear, onSearchChange
           {/* Buttons for small screens and above - hide when search mode is active ONLY between 640px-1630px */}
           {(!searchMode || windowWidth < 640 || windowWidth > 1330) && (
             <div className="hidden sm:flex items-center gap-4 ml-auto  justify-end">
-              {/* Get MentraOS Button */}
-              {/* <GetMentraOSButton size="small" /> */}
+              {/* Get Veiller Button */}
+              {/* <GetVeillerButton size="small" /> */}
 
               {/* Authentication */}
               {isAuthenticated ? (

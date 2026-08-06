@@ -15,7 +15,7 @@
  *      clears foreground. The overlay slides/fades off and the WebView
  *      unmounts — the JSContext stays alive (backgrounded, not stopped).
  *
- * The always-on JSContext is owned by MentraJSRouter; the WebView is only
+ * The always-on JSContext is owned by VeillerJSRouter; the WebView is only
  * mounted while the miniapp is foreground.
  */
 
@@ -38,13 +38,13 @@ import LocalMiniappView from "@/components/miniapp/LocalMiniappView"
 import OfflineAppHost from "@/components/miniapp/OfflineAppHost"
 import {isOfflineHosted} from "@/components/miniapp/offlineHostedPackages"
 import {captureScreenshot} from "@/effects/CapsuleMenu"
-import {engine, useForegroundApp, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, useForegroundApp, SETTINGS, useSetting} from "@veiller/engine"
 import {Screen} from "@/components/ignite/Screen"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 import {appSwitcherProgress, OPEN_SPRING, SWIPE_DISTANCE_THRESHOLD, SWIPE_PERCENT_THRESHOLD} from "@/stores/appSwitcher"
 import {useNavigationStore} from "@/stores/navigation"
 import {hapticBuzz} from "@/utils/utils"
-import CrustModule from "@mentra/crust"
+import CrustModule from "@veiller/crust"
 const EDGE_HIT_WIDTH = 24
 // Distance past which a slow drag commits the back gesture (fraction of screen
 // width). UIKit's interactive pop commits at ~50%; we sit a hair under that.

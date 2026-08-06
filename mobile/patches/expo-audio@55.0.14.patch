@@ -19,7 +19,7 @@ index dca91c32a2787a7bc3ecba26f0f3f2ad9cc40d3d..4bf95c84dcf076e5e330bdaf1f1fcd49
 +        session: MediaSession,
 +        controller: MediaSession.ControllerInfo
 +      ): MediaSession.ConnectionResult {
-+        // Mentra owns the lifecycle of short-form TTS. Hardware media keys
++        // Veiller owns the lifecycle of short-form TTS. Hardware media keys
 +        // must not pause or later resume a transient utterance.
 +        return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
 +          .setAvailablePlayerCommands(

@@ -7,7 +7,7 @@ import {
 import {submitAutomaticReport} from "../../../modules/engine/src/facades/reports"
 import {emitCrustEvent, resetCrustModuleMock} from "@/test-utils/mockCrustModule"
 
-jest.mock("@mentra/crust", () => {
+jest.mock("@veiller/crust", () => {
   const {crustModuleMock} = require("@/test-utils/mockCrustModule")
   return {
     __esModule: true,

@@ -19,7 +19,7 @@ import type { Logger } from "./logger";
 import type { CloudClientConfig } from "./config";
 import { createHttpClient } from "./http";
 import { CloudClientError } from "./errors";
-import type { ConnectionInit } from "@mentra/cloud-protocol";
+import type { ConnectionInit } from "@veiller/cloud-protocol";
 
 // The module implementations. Each is owned by another agent under ./modules/**;
 // this file only constructs them, matching the constructor signatures fixed in

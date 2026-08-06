@@ -51,59 +51,59 @@ Key change: the logger is no longer a module-level singleton. It's created per-A
 Error class hierarchy. All extend `Error` for backward compat.
 
 ```typescript
-export class MentraError extends Error {
+export class VeillerError extends Error {
   constructor(
     message: string,
     public readonly code: string,
   ) {
     super(message)
-    this.name = "MentraError"
+    this.name = "VeillerError"
     // Fix prototype chain for instanceof checks in transpiled code
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }
 
-export class MentraAuthError extends MentraError {
+export class VeillerAuthError extends VeillerError {
   constructor(message: string) {
     super(message, "AUTH_ERROR")
-    this.name = "MentraAuthError"
+    this.name = "VeillerAuthError"
   }
 }
 
-export class MentraConnectionError extends MentraError {
+export class VeillerConnectionError extends VeillerError {
   constructor(message: string, code: string = "CONNECTION_ERROR") {
     super(message, code)
-    this.name = "MentraConnectionError"
+    this.name = "VeillerConnectionError"
   }
 }
 
-export class MentraTimeoutError extends MentraError {
+export class VeillerTimeoutError extends VeillerError {
   constructor(message: string) {
     super(message, "TIMEOUT_ERROR")
-    this.name = "MentraTimeoutError"
+    this.name = "VeillerTimeoutError"
   }
 }
 
-export class MentraValidationError extends MentraError {
+export class VeillerValidationError extends VeillerError {
   constructor(message: string) {
     super(message, "VALIDATION_ERROR")
-    this.name = "MentraValidationError"
+    this.name = "VeillerValidationError"
   }
 }
 
-export class MentraPermissionError extends MentraError {
+export class VeillerPermissionError extends VeillerError {
   constructor(
     message: string,
     public readonly stream: string,
     public readonly requiredPermission: string,
   ) {
     super(message, "PERMISSION_ERROR")
-    this.name = "MentraPermissionError"
+    this.name = "VeillerPermissionError"
   }
 }
 ```
 
-Note the `Object.setPrototypeOf` call — this is required because TypeScript/Bun transpilation can break `instanceof` for subclassed builtins. Without it, `error instanceof MentraAuthError` could return `false` in some environments.
+Note the `Object.setPrototypeOf` call — this is required because TypeScript/Bun transpilation can break `instanceof` for subclassed builtins. Without it, `error instanceof VeillerAuthError` could return `false` in some environments.
 
 ### 2. `src/logging/clean-transport.ts` (NEW)
 
@@ -127,7 +127,7 @@ const LEVEL_MAP: Record<number, {symbol: string; color: (s: string) => string}> 
   60: {symbol: "✗", color: chalk.red}, // fatal
 }
 
-const PREFIX = chalk.dim("MentraOS")
+const PREFIX = chalk.dim("Veiller")
 
 export function createCleanStream(): Writable {
   return new Writable({
@@ -180,15 +180,15 @@ export interface LoggerConfig {
 
 // Resolve effective config from env vars + passed config
 function resolveConfig(config?: LoggerConfig): {level: string; verbose: boolean} {
-  const envVerbose = process.env.MENTRA_VERBOSE === "true" || process.env.MENTRA_VERBOSE === "1"
-  const envLevel = process.env.MENTRA_LOG_LEVEL as string | undefined
+  const envVerbose = process.env.VEILLER_VERBOSE === "true" || process.env.VEILLER_VERBOSE === "1"
+  const envLevel = process.env.VEILLER_LOG_LEVEL as string | undefined
 
-  // MENTRA_VERBOSE takes highest precedence
+  // VEILLER_VERBOSE takes highest precedence
   if (envVerbose) {
     return {level: "debug", verbose: true}
   }
 
-  // MENTRA_LOG_LEVEL overrides config
+  // VEILLER_LOG_LEVEL overrides config
   if (envLevel && ["none", "error", "warn", "info", "debug"].includes(envLevel)) {
     return {level: envLevel === "none" ? "silent" : envLevel, verbose: envLevel === "debug"}
   }
@@ -245,7 +245,7 @@ export function createLogger(config?: LoggerConfig): Logger {
   }
 
   // BetterStack transport: always at debug level if token is present
-  // This runs regardless of console level/mode — it's for Mentra's internal observability
+  // This runs regardless of console level/mode — it's for Veiller's internal observability
   if (BETTERSTACK_SOURCE_TOKEN) {
     try {
       const betterStackTransport = pino.transport({
@@ -319,14 +319,14 @@ export interface AppServerConfig {
    * - 'info':  Errors + warnings + lifecycle events
    * - 'debug': Everything (verbose structured output)
    *
-   * Can be overridden with MENTRA_LOG_LEVEL env var.
+   * Can be overridden with VEILLER_LOG_LEVEL env var.
    */
   logLevel?: "none" | "error" | "warn" | "info" | "debug"
 
   /**
    * Enable verbose internal logging (full structured output).
-   * Useful when debugging SDK issues — Mentra support may ask you to enable this.
-   * Can also be enabled with MENTRA_VERBOSE=true env var.
+   * Useful when debugging SDK issues — Veiller support may ask you to enable this.
+   * Can also be enabled with VEILLER_VERBOSE=true env var.
    * Default: false
    */
   verbose?: boolean
@@ -386,7 +386,7 @@ if (latest && latest !== currentVersion) {
 
 // After:
 if (latest && latest !== currentVersion) {
-  this.logger.warn(`SDK update available: ${currentVersion} → ${latest} — bun install @mentra/sdk@latest`)
+  this.logger.warn(`SDK update available: ${currentVersion} → ${latest} — bun install @veiller/sdk@latest`)
 }
 ```
 
@@ -487,11 +487,11 @@ This is the largest change file — many individual edits. Organized by theme.
 
 ```typescript
 import {
-  MentraAuthError,
-  MentraConnectionError,
-  MentraTimeoutError,
-  MentraValidationError,
-  MentraError,
+  VeillerAuthError,
+  VeillerConnectionError,
+  VeillerTimeoutError,
+  VeillerValidationError,
+  VeillerError,
 } from "../../logging/errors"
 ```
 
@@ -528,7 +528,7 @@ this.logger.error("WebSocket URL is missing or undefined")
 reject(new Error("WebSocket URL is required"))
 
 // After:
-reject(new MentraValidationError("WebSocket URL is required"))
+reject(new VeillerValidationError("WebSocket URL is required"))
 // No log — the rejection is the output path.
 ```
 
@@ -555,7 +555,7 @@ this.events.emit("error", new Error(`Connection initialization failed: ${errorMe
 reject(error)
 
 // After — reject only, no log, no emit:
-reject(error instanceof Error ? error : new MentraConnectionError(String(error)))
+reject(error instanceof Error ? error : new VeillerConnectionError(String(error)))
 ```
 
 **WebSocket error handler (lines 844-866) — the triple-logger:**
@@ -582,14 +582,14 @@ this.ws.on("error", (error: Error) => {
   let userMessage: string
 
   if (msg.includes("ECONNREFUSED")) {
-    userMessage = "Connection refused — is MentraOS Cloud running?"
+    userMessage = "Connection refused — is Veiller Cloud running?"
   } else if (msg.includes("ETIMEDOUT")) {
     userMessage = "Connection timed out — check network connectivity"
   } else {
     userMessage = error.message
   }
 
-  this.events.emit("error", new MentraConnectionError(userMessage))
+  this.events.emit("error", new VeillerConnectionError(userMessage))
 })
 // No logger.error — the error event is the output path.
 // EventManager's fallback handles logging if no onError handler exists.
@@ -607,7 +607,7 @@ this.events.emit("error", new Error(`Connection timeout after ${timeoutMs}ms`))
 reject(new Error("Connection timeout"))
 
 // After:
-const err = new MentraTimeoutError(`Connection timeout after ${timeoutMs}ms`)
+const err = new VeillerTimeoutError(`Connection timeout after ${timeoutMs}ms`)
 reject(err)
 // No log, no emit — rejection is the output path.
 ```
@@ -624,9 +624,9 @@ this.events.emit("error", new Error(errorMessage))
 // After:
 const errorMessage = message.message || "Unknown connection error"
 if (errorMessage.toLowerCase().includes("invalid api key") || errorMessage.toLowerCase().includes("auth")) {
-  this.events.emit("error", new MentraAuthError(errorMessage))
+  this.events.emit("error", new VeillerAuthError(errorMessage))
 } else {
-  this.events.emit("error", new MentraConnectionError(errorMessage))
+  this.events.emit("error", new VeillerConnectionError(errorMessage))
 }
 ```
 
@@ -680,7 +680,7 @@ this.logger.error(error, `❌ [${this.config.packageName}] Reconnection failed f
 this.events.emit("error", new Error(`Reconnection failed: ${errorMessage}`))
 
 // After — only emit:
-this.events.emit("error", new MentraConnectionError(`Reconnection failed: ${errorMessage}`))
+this.events.emit("error", new VeillerConnectionError(`Reconnection failed: ${errorMessage}`))
 
 // Max attempts exhausted (line 1779):
 // Before:
@@ -790,10 +790,10 @@ These are straightforward level changes across the four module files. The patter
 Replace the entire `createUpdateNotification` function:
 
 ```typescript
-// Remove imports of chalk, boxen, mentraLogo_1, newUpdateText
+// Remove imports of chalk, boxen, veillerLogo_1, newUpdateText
 
 export const newSDKUpdate = (currentVersion: string, latestVersion: string): string => {
-  return `SDK update available: ${currentVersion} → ${latestVersion} — bun install @mentra/sdk@latest`
+  return `SDK update available: ${currentVersion} → ${latestVersion} — bun install @veiller/sdk@latest`
 }
 ```
 
@@ -945,12 +945,12 @@ export * from "./logging/logger"
 // Add:
 // Error classes
 export {
-  MentraError,
-  MentraAuthError,
-  MentraConnectionError,
-  MentraTimeoutError,
-  MentraValidationError,
-  MentraPermissionError,
+  VeillerError,
+  VeillerAuthError,
+  VeillerConnectionError,
+  VeillerTimeoutError,
+  VeillerValidationError,
+  VeillerPermissionError,
 } from "./logging/errors"
 ```
 
@@ -1010,19 +1010,19 @@ bun run dev
 Expected terminal output:
 
 ```
-MentraOS  ✓ App server running on port 3333
+Veiller  ✓ App server running on port 3333
 ```
 
 Then connect a glasses session. Expected:
 
 ```
-MentraOS  ✓ Connected — user test@example.com
+Veiller  ✓ Connected — user test@example.com
 ```
 
 Then disconnect. Expected:
 
 ```
-MentraOS  ⚠ Connection lost, reconnecting (1/3)...
+Veiller  ⚠ Connection lost, reconnecting (1/3)...
 ```
 
 Or if clean disconnect:
@@ -1036,23 +1036,23 @@ Or if clean disconnect:
 Set an invalid API key and start. Expected:
 
 ```
-MentraOS  ✗ Invalid API key
+Veiller  ✗ Invalid API key
 ```
 
 One line. No stack trace. No structured object.
 
 #### Test 3: Connection refused
 
-Stop MentraOS Cloud, then start an app. Expected:
+Stop Veiller Cloud, then start an app. Expected:
 
 ```
-MentraOS  ✗ Connection refused — is MentraOS Cloud running?
+Veiller  ✗ Connection refused — is Veiller Cloud running?
 ```
 
 #### Test 4: Verbose mode via env var
 
 ```bash
-MENTRA_VERBOSE=true bun run dev
+VEILLER_VERBOSE=true bun run dev
 ```
 
 Expected: Full pino-pretty output — same as today's behavior. All debug/info lines visible with structured context objects.
@@ -1072,13 +1072,13 @@ Expected: Same as Test 4.
 #### Test 6: Log level override
 
 ```bash
-MENTRA_LOG_LEVEL=info bun run dev
+VEILLER_LOG_LEVEL=info bun run dev
 ```
 
 Expected: Lifecycle events visible (session connect/disconnect), but still in clean single-line format.
 
 ```bash
-MENTRA_LOG_LEVEL=none bun run dev
+VEILLER_LOG_LEVEL=none bun run dev
 ```
 
 Expected: Complete silence from the SDK. Only the dev's own `console.log` output visible.
@@ -1088,8 +1088,8 @@ Expected: Complete silence from the SDK. Only the dev's own `console.log` output
 ```typescript
 session.events.onError((error) => {
   console.log(error instanceof Error) // true
-  console.log(error instanceof MentraError) // true (for SDK errors)
-  console.log(error instanceof MentraAuthError) // true (for auth errors)
+  console.log(error instanceof VeillerError) // true (for SDK errors)
+  console.log(error instanceof VeillerAuthError) // true (for auth errors)
   console.log(error.code) // "AUTH_ERROR"
 })
 ```
@@ -1099,7 +1099,7 @@ session.events.onError((error) => {
 Don't register any `onError` handler. Trigger an error (invalid API key). Expected:
 
 ```
-MentraOS  ✗ Invalid API key
+Veiller  ✗ Invalid API key
 ```
 
 The error is logged by the EventManager's fallback, not silently swallowed.
@@ -1117,7 +1117,7 @@ Expected: Console output is still clean mode. BetterStack transport receives ful
 Start an app with an outdated SDK version. Expected:
 
 ```
-MentraOS  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @mentra/sdk@latest
+Veiller  ⚠ SDK update available: 2.1.29 → 2.1.30 — bun install @veiller/sdk@latest
 ```
 
 No ASCII art. No boxen border. One line.
@@ -1127,7 +1127,7 @@ No ASCII art. No boxen border. One line.
 Call `session.camera.requestPhoto()` without camera permission declared. Expected:
 
 ```
-MentraOS  ⚠ requestPhoto requires camera permission — enable at https://console.mentra.glass/apps/org.example.myapp/edit
+Veiller  ⚠ requestPhoto requires camera permission — enable at https://console.mentra.glass/apps/org.example.myapp/edit
 ```
 
 No boxen border. No ASCII art logo. One line.
@@ -1137,7 +1137,7 @@ No boxen border. No ASCII art logo. One line.
 These can be added to the existing test suite in `cloud/tests/`:
 
 1. **Logger factory tests** — verify `createLogger()` produces correct stream configuration for each config combination (clean/verbose/none, env var overrides).
-2. **Error class tests** — verify `instanceof` chains work correctly (`MentraAuthError instanceof MentraError`, `MentraAuthError instanceof Error`).
+2. **Error class tests** — verify `instanceof` chains work correctly (`VeillerAuthError instanceof VeillerError`, `VeillerAuthError instanceof Error`).
 3. **Clean transport tests** — feed JSON lines into `createCleanStream()` and verify output format.
 4. **Error dedup tests** — verify that each error scenario produces exactly one output (either emit or log, not both).
 
@@ -1149,7 +1149,7 @@ After implementation, before merging:
 
 - [x] All 168 log call sites have been reviewed and assigned correct levels
 - [x] No `console.error` or `console.log` calls remain in SDK src (except in dead/deprecated code paths and out-of-scope files like layouts.ts, simple-storage.ts, api-client.ts)
-- [x] All `new Error(...)` in error-path code use appropriate `Mentra*Error` class (session/index.ts connect, handleMessage, handleReconnection, send)
+- [x] All `new Error(...)` in error-path code use appropriate `Veiller*Error` class (session/index.ts connect, handleMessage, handleReconnection, send)
 - [x] `boxen` removed from dependencies and build script
 - [x] `pino-pretty` moved to optionalDependencies
 - [x] Error classes exported from `src/index.ts`
@@ -1157,7 +1157,7 @@ After implementation, before merging:
 - [x] EventManager accepts and uses logger (no raw console calls)
 - [x] Permission utils accept logger parameter
 - [ ] Captions app tested with default config (clean output)
-- [ ] Captions app tested with `MENTRA_VERBOSE=true` (verbose output)
+- [ ] Captions app tested with `VEILLER_VERBOSE=true` (verbose output)
 - [ ] BetterStack transport verified with `BETTERSTACK_SOURCE_TOKEN`
 - [x] No TypeScript compilation errors
 - [x] Build succeeds: `bun run build`

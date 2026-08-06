@@ -1,4 +1,4 @@
-import {deriveDisplayState, type DisplayState, type OtaProgress, type OtaStatus} from "@mentra/engine"
+import {deriveDisplayState, type DisplayState, type OtaProgress, type OtaStatus} from "@veiller/engine"
 
 type DeriveArgs = Parameters<typeof deriveDisplayState>[0]
 

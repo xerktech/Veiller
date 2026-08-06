@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mentra/shared";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@veiller/shared";
 import { ExternalLink, FileText, CheckCircle, AlertCircle, Info } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
 
@@ -24,15 +24,15 @@ const StoreGuidelines: React.FC = () => {
                 Overview
               </CardTitle>
               <CardDescription>
-                Understanding the Mentra MiniApp Store review process
+                Understanding the Veiller MiniApp Store review process
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Before your MiniApp can be published to the Mentra MiniApp Store,
+                Before your MiniApp can be published to the Veiller MiniApp Store,
                 it must go through our review process. This ensures all MiniApps
                 meet our quality standards and provide a great experience for
-                MentraOS users.
+                Veiller users.
               </p>
             </CardContent>
           </Card>

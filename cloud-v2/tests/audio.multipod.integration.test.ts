@@ -44,10 +44,10 @@ const TEST_OEM_ID = "test-oem";
 
 {
   const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPemWrap(
     privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPemWrap(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPemWrap(
     publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.REFRESH_TOKEN_PEPPER ??= "test-pepper-not-for-production";
@@ -56,13 +56,13 @@ const TEST_OEM_ID = "test-oem";
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS ??= JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       oemIdClaim: "oem_id",
     },
   ]);
   process.env.MONGO_URL ??=
-    "mongodb://127.0.0.1:27017/mentra-cloud-v2-multipod-test";
+    "mongodb://127.0.0.1:27017/veiller-cloud-v2-multipod-test";
   // Different Redis DB from other test files so parallel runs don't conflict
   // on shared `audio:*` / `{user:*}:owner` keys. See audio.integration.test.ts.
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/2";
@@ -105,13 +105,13 @@ let podB: PodHandle;
 beforeAll(async () => {
   // Reset key caches that may be stale from a prior test file in the same
   // Bun test process. See audio.integration.test.ts for the explanation.
-  const { resetMentraKeyCache } = await import(
+  const { resetVeillerKeyCache } = await import(
     "../packages/shared/src/auth"
   );
   const { resetSigningKeyCache } = await import(
     "../packages/core/src/services/session.service"
   );
-  resetMentraKeyCache();
+  resetVeillerKeyCache();
   resetSigningKeyCache();
 
   testOemHandle = await startTestOem({ port: TEST_OEM_PORT, tenantId: TEST_OEM_ID });
@@ -130,7 +130,7 @@ beforeAll(async () => {
   ]);
 
   // Spawn the two audio pods. Each gets its own POD_ID for trace clarity.
-  // Both share REDIS_URL + MENTRA_JWT_PUBLIC_KEY (inherited from this process).
+  // Both share REDIS_URL + VEILLER_JWT_PUBLIC_KEY (inherited from this process).
   [podA, podB] = await Promise.all([
     spawnAudioPod({
       podId: "pod-a",

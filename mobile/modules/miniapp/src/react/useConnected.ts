@@ -2,9 +2,9 @@
  * @fileoverview useConnected — React hook that returns true while the miniapp's
  * UI WebView is bridged to its background JSContext.
  *
- * WebView-side hook. "Connected" here means the `window.mentra` bridge is open:
- * the shim has fired `mentra.ready()` and the host has bound the WebView so
- * `mentra.send/on/request` flow. Tracked via the shim's `onOpen` / `onClose`.
+ * WebView-side hook. "Connected" here means the `window.veiller` bridge is open:
+ * the shim has fired `veiller.ready()` and the host has bound the WebView so
+ * `veiller.send/on/request` flow. Tracked via the shim's `onOpen` / `onClose`.
  * `onOpen` fires its callback immediately if the bridge is already open (see
  * the shim), so late mounts still observe the connected state.
  *
@@ -16,14 +16,14 @@
 
 import {useEffect, useState} from "react"
 
-interface MentraBridge {
+interface VeillerBridge {
   onOpen?: (cb: () => void) => () => void
   onClose?: (cb: () => void) => () => void
 }
 
-function getBridge(): MentraBridge | null {
+function getBridge(): VeillerBridge | null {
   if (typeof window === "undefined") return null
-  return (window as unknown as {mentra?: MentraBridge}).mentra ?? null
+  return (window as unknown as {veiller?: VeillerBridge}).veiller ?? null
 }
 
 export function useConnected(): boolean {

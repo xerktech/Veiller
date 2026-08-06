@@ -9,7 +9,7 @@ import DisplayManager from '../../DisplayManager6.1';
 import { MockUserSession } from './MockUserSession';
 import { MockDisplaySystem } from './MockDisplaySystem';
 import { TimeMachine } from './TimeMachine';
-import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType, ActiveDisplay } from '@mentra/sdk';
+import { DisplayRequest, AppToCloudMessageType, ViewType, LayoutType, ActiveDisplay } from '@veiller/sdk';
 import { systemApps } from '../../../core/system-apps';
 
 interface TimelineEvent {

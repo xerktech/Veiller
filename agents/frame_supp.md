@@ -1,8 +1,8 @@
-# Brilliant Labs Frame Support Implementation Plan for MentraOS
+# Brilliant Labs Frame Support Implementation Plan for Veiller
 
 ## Overview
 
-This document outlines the implementation plan for adding Brilliant Labs Frame glasses support to MentraOS. This is v1 implementation focusing on core functionality.
+This document outlines the implementation plan for adding Brilliant Labs Frame glasses support to Veiller. This is v1 implementation focusing on core functionality.
 
 ## Frame Glasses Specifications
 
@@ -255,11 +255,11 @@ case "Brilliant Labs Frame":
 
 2. **Camera integration**
    - Capture photos from Frame camera
-   - Stream to MentraOS backend
+   - Stream to Veiller backend
 
 3. **Audio support**
    - Receive audio from Frame microphone
-   - Process through MentraOS ASR
+   - Process through Veiller ASR
 
 4. **Advanced display features**
    - Graphics rendering
@@ -270,7 +270,7 @@ case "Brilliant Labs Frame":
 
 - No additional dependencies required
 - Uses existing Android BLE APIs
-- Compatible with current MentraOS architecture
+- Compatible with current Veiller architecture
 
 ### 7. Implementation Order
 

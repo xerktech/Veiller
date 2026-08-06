@@ -51,7 +51,7 @@ R2/S3-compatible environment:
 ```txt
 CLOUD_STORAGE_PROVIDER=r2
 CLOUD_STORAGE_S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
-CLOUD_STORAGE_S3_BUCKET=mentra-cloud-v2-dev
+CLOUD_STORAGE_S3_BUCKET=veiller-cloud-v2-dev
 CLOUD_STORAGE_S3_ACCESS_KEY_ID=...
 CLOUD_STORAGE_S3_SECRET_ACCESS_KEY=...
 CLOUD_STORAGE_S3_REGION=auto

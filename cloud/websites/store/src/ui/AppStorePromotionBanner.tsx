@@ -1,21 +1,21 @@
 import React from "react";
 
 function AppStorePromotionBanner() {
-  const cdnUrl = import.meta.env.CLOUDFLARE_CDN_URL || "https://mentra-store-cdn.mentraglass.com";
-  const bannerImageUrl = `${cdnUrl}/mentra_store_assets/getAppStoreBannerNew.png`;
-  const iPhoneBaderImageUrl = `${cdnUrl}/mentra_store_assets/download_iPhone.svg?v=3`;
-  const androidBaderImageUrl = `${cdnUrl}/mentra_store_assets/newAndroidBadge.svg?v=3`;
-  const githubBaderImageUrl = `${cdnUrl}/mentra_store_assets/download_github.svg?v=3`;
+  const cdnUrl = import.meta.env.CLOUDFLARE_CDN_URL || "https://veiller-store-cdn.mentraglass.com";
+  const bannerImageUrl = `${cdnUrl}/veiller_store_assets/getAppStoreBannerNew.png`;
+  const iPhoneBaderImageUrl = `${cdnUrl}/veiller_store_assets/download_iPhone.svg?v=3`;
+  const androidBaderImageUrl = `${cdnUrl}/veiller_store_assets/newAndroidBadge.svg?v=3`;
+  const githubBaderImageUrl = `${cdnUrl}/veiller_store_assets/download_github.svg?v=3`;
 
   return (
     <div className="flex flex-col w-full px-4 sm:px-6 lg:px-8">
       {/* Hero Section */}
       <div className="flex justify-center items-center flex-col text-center mt-12 sm:mt-20 lg:mt-[128px] px-4">
         <div className="text-2xl sm:text-3xl md:text-4xl lg:text-[36px] font-bold mb-4 sm:mb-6">
-          Mentra MiniApp Store
+          Veiller MiniApp Store
         </div>
         <div className="text-base sm:text-xl md:text-2xl lg:text-[20px] max-w-4xl leading-relaxed">
-          Mentra MiniApp Store is the only app store for smart glasses. With other smart glasses, your experience is
+          Veiller MiniApp Store is the only app store for smart glasses. With other smart glasses, your experience is
           limited to whatever the company builds into the device, but not with Mentra Live. You Choose your reality, one
           app at a time.
         </div>
@@ -25,7 +25,7 @@ function AppStorePromotionBanner() {
       <div className="w-full min-h-[200px] sm:h-auto lg:h-[453px] bg-[var(--primary-foreground)] flex flex-col [@media(min-width:1023px)]:flex-row justify-center items-center mt-12 sm:mt-32 lg:mt-[200px] rounded-2xl sm:rounded-3xl lg:rounded-[38px] p-6 sm:p-8 [@media(min-width:1023px)]:p-0 [clip-path:inset(-100%_0_0_0)]">
         <div className="flex flex-1 flex-col h-full justify-center lg:pl-[114px] w-full pr-[120px]">
           <div className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl [@media(min-width:1358px)]:text-[36px] font-semibold mb-3 sm:mb-4 md:mb-5 lg:mb-[20px]">
-            Download MentraOS
+            Download Veiller
           </div>
           <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-[10px] mb-4 sm:mb-5 md:mb-6">
             <div className="text-xs sm:text-sm md:text-base lg:text-sm [@media(min-width:1358px)]:text-lg 2xl:text-[20px] font-normal leading-relaxed">
@@ -35,12 +35,12 @@ function AppStorePromotionBanner() {
               2. Choose an app and tap Install.
             </div>
             <div className="text-xs sm:text-sm md:text-base lg:text-sm [@media(min-width:1358px)]:text-lg 2xl:text-[20px] font-normal leading-relaxed">
-              3. The app will appear on your MentraOS app in your Apps list.
+              3. The app will appear on your Veiller app in your Apps list.
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 md:gap-4 w-full">
             <a
-              href="https://apps.apple.com/kh/app/mentra-the-smart-glasses-app/id6747363193"
+              href="https://apps.apple.com/kh/app/veiller-the-smart-glasses-app/id6747363193"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-fit max-w-[180px] sm:max-w-none cursor-pointer">
@@ -51,7 +51,7 @@ function AppStorePromotionBanner() {
               />
             </a>
             <a
-              href="https://play.google.com/store/apps/details?id=com.mentra.mentra&hl=en_US"
+              href="https://play.google.com/store/apps/details?id=com.veiller.veiller&hl=en_US"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-fit max-w-[180px] sm:max-w-none cursor-pointer">
@@ -76,7 +76,7 @@ function AppStorePromotionBanner() {
         </div>
         <img
           src={bannerImageUrl}
-          alt="Get MentraOS App Store Banner"
+          alt="Get Veiller App Store Banner"
           className="hidden [@media(min-width:1023px)]:block w-[300px] [@media(min-width:1228px)]:w-[400px] [@media(min-width:1589px)]:w-[450px] h-auto mr-8 [@media(min-width:1589px)]:mr-[150px] mt-8 [@media(min-width:1023px)]:mt-0 -mb-[150px]"
         />
       </div>

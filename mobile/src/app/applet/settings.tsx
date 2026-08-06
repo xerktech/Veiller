@@ -14,7 +14,7 @@ import {focusEffectPreventBack} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
-import {engine, useApps, useRefresh} from "@mentra/engine"
+import {engine, useApps, useRefresh} from "@veiller/engine"
 
 import {SYSTEM_APPS} from "@/constants/miniapps"
 import {ThemedStyle} from "@/theme"

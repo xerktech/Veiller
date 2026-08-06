@@ -25,7 +25,7 @@ import {translate} from "@/i18n"
 import {isVeillerMiniappEnabled, setVeillerMiniappEnabled} from "@/services/miniapps/veillerMiniappPrefs"
 import {veillerMiniappSync, resolveLatestBundle} from "@/services/miniapps/veillerMiniappSync"
 import {useNavigationStore} from "@/stores/navigation"
-import {engine, type ClientApp} from "@mentra/engine"
+import {engine, type ClientApp} from "@veiller/engine"
 
 /** Where the "latest available version" lookup for one row currently stands. */
 type Availability = "loading" | "resolved" | "error"

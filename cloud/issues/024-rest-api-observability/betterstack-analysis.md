@@ -206,7 +206,7 @@ GROUP BY packageName ORDER BY cnt DESC LIMIT 10
 |-------------|-------------|
 | system.augmentos.dashboard | 18,473 |
 | (empty) | 441 |
-| org.mentra.example-play-sound | 2 |
+| org.veiller.example-play-sound | 2 |
 
 **Finding**: Dashboard app generating majority of errors (known issue - timer errors after disconnect).
 

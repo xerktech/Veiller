@@ -2,7 +2,7 @@
  * Seed the Kawaii fixture into a preinstalled miniapp registry.
  *
  * This is intentionally tiny and deterministic: it creates/uses the
- * com.mentra.kawaii release whose zip is supplied by KAWAII_BUNDLE, then
+ * com.veiller.kawaii release whose zip is supplied by KAWAII_BUNDLE, then
  * promotes a registry revision containing that release.
  *
  * Example:
@@ -15,7 +15,7 @@ import {MiniAppReleaseModel} from "../packages/core/src/models/miniapp-release.m
 import {MiniAppService} from "../packages/core/src/services/miniapps/miniapp.service"
 import {PreinstalledRegistryService} from "../packages/core/src/services/miniapps/preinstalled-registry.service"
 
-const PACKAGE_NAME = "com.mentra.kawaii"
+const PACKAGE_NAME = "com.veiller.kawaii"
 const DISPLAY_NAME = "Kawaii"
 const ENVIRONMENT = process.env.SEED_ENV ?? "dev"
 const VERSION = process.env.KAWAII_VERSION ?? "0.1.0"
@@ -26,11 +26,11 @@ const developer = {
   developerId: "dev_kawaii_preinstall",
   email: "isaiah@mentra.glass",
   orgId: "org_kawaii_preinstall",
-  packagePrefix: "com.mentra",
+  packagePrefix: "com.veiller",
 }
 
 async function main() {
-  const mongoUrl = process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/mentra-cloud-v2"
+  const mongoUrl = process.env.MONGO_URL ?? "mongodb://127.0.0.1:27017/veiller-cloud-v2"
   await connectMongo(mongoUrl)
   console.log(`connected mongo=${mongoUrl} env=${ENVIRONMENT}`)
 

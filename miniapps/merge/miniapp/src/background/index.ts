@@ -1,5 +1,5 @@
-import {registerMiniapp} from "@mentra/miniapp/background"
-import type {CloudClientStatus, MiniappSession, TranscriptionData, UnsubscribeFn} from "@mentra/miniapp/background"
+import {registerMiniapp} from "@veiller/miniapp/background"
+import type {CloudClientStatus, MiniappSession, TranscriptionData, UnsubscribeFn} from "@veiller/miniapp/background"
 
 import type {Channels} from "../shared/channels"
 import type {
@@ -77,7 +77,7 @@ const INTERIM_INTERVAL_CHARS = 140
 const MAX_PENDING_CHUNKS = 8
 
 function configuredBackendUrl(): string {
-  const fromEnv = process.env.MENTRA_PUBLIC_MERGE_BACKEND_URL?.trim()
+  const fromEnv = process.env.VEILLER_PUBLIC_MERGE_BACKEND_URL?.trim()
   return (fromEnv || DEFAULT_BACKEND_URL).replace(/\/+$/, "")
 }
 

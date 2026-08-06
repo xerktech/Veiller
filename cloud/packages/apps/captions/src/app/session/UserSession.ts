@@ -1,4 +1,4 @@
-import { AppSession, TranscriptionData } from "@mentra/sdk";
+import { AppSession, TranscriptionData } from "@veiller/sdk";
 
 import { languageToLocale } from "../utils/languageLocale";
 

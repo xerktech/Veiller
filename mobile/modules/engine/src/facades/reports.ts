@@ -2,17 +2,17 @@
  * reports facade — `engine.reports`: user/system report submission over the
  * Cloud V2 core client.
  *
- * Host/OEM code owns UI and wording. Engine owns MentraOS mechanics: context
+ * Host/OEM code owns UI and wording. Engine owns Veiller mechanics: context
  * collection, recent phone logs, Cloud V2 calls, local automatic throttling,
  * screenshots, and notifying connected glasses.
  */
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import type {
   ReportAttachmentInput,
   ReportContext,
   ReportStatus,
   SubmitReportInput,
-} from "@mentra/cloud-client"
+} from "@veiller/cloud-client"
 import {useGlassesStore} from "../stores/glasses"
 import {isGlassesConnected} from "../services/GlassesReadiness"
 import {cloudClientService} from "../services/CloudClientService"
@@ -25,7 +25,7 @@ export type {
   ReportDetails,
   ReportStatus,
   ReportTrigger,
-} from "@mentra/cloud-client"
+} from "@veiller/cloud-client"
 
 export type EngineSubmitReportInput =
   | (Omit<Extract<SubmitReportInput, {kind: "bug"}>, "context"> & {

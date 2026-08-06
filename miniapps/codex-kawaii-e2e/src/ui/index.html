@@ -169,10 +169,10 @@
         index = (index + 1) % faces.length
         const face = faces[index]
         showFace(face)
-        window.mentra?.send?.("kawaii:set-face", { face })
+        window.veiller?.send?.("kawaii:set-face", { face })
       })
-      window.mentra?.on?.("kawaii:face", ({ face }) => showFace(face))
-      window.mentra?.ready?.()
+      window.veiller?.on?.("kawaii:face", ({ face }) => showFace(face))
+      window.veiller?.ready?.()
     </script>
   </body>
 </html>

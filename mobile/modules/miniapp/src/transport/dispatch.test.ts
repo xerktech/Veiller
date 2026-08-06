@@ -6,7 +6,7 @@ import {DispatchTransport} from "./dispatch"
 
 interface BridgeGlobal {
   __dispatch?: (iface: string, method: string, argsJson: string) => string | null
-  __mentraDeliverBridgeRaw?: (raw: string) => void
+  __veillerDeliverBridgeRaw?: (raw: string) => void
 }
 
 describe("DispatchTransport", () => {
@@ -22,7 +22,7 @@ describe("DispatchTransport", () => {
 
   afterEach(() => {
     delete (globalThis as unknown as BridgeGlobal).__dispatch
-    delete (globalThis as unknown as BridgeGlobal).__mentraDeliverBridgeRaw
+    delete (globalThis as unknown as BridgeGlobal).__veillerDeliverBridgeRaw
   })
 
   test("isAvailable returns true when __dispatch is bound", () => {
@@ -56,25 +56,25 @@ describe("DispatchTransport", () => {
     expect(() => t.send("x")).toThrow(/send\(\) before open\(\)/)
   })
 
-  test("incoming messages routed via __mentraDeliverBridgeRaw fire onMessage handler", async () => {
+  test("incoming messages routed via __veillerDeliverBridgeRaw fire onMessage handler", async () => {
     const t = new DispatchTransport()
     await t.open()
     const received: string[] = []
     t.onMessage((raw) => received.push(raw))
-    const deliver = (globalThis as unknown as BridgeGlobal).__mentraDeliverBridgeRaw!
+    const deliver = (globalThis as unknown as BridgeGlobal).__veillerDeliverBridgeRaw!
     expect(typeof deliver).toBe("function")
     deliver('{"type":"SUBSCRIBE_ACK"}')
     deliver('{"type":"EVENT","name":"button"}')
     expect(received).toEqual(['{"type":"SUBSCRIBE_ACK"}', '{"type":"EVENT","name":"button"}'])
   })
 
-  test("close() detaches __mentraDeliverBridgeRaw and flips isOpen()", async () => {
+  test("close() detaches __veillerDeliverBridgeRaw and flips isOpen()", async () => {
     const t = new DispatchTransport()
     await t.open()
     expect(t.isOpen()).toBe(true)
     t.close()
     expect(t.isOpen()).toBe(false)
-    expect((globalThis as unknown as BridgeGlobal).__mentraDeliverBridgeRaw).toBeUndefined()
+    expect((globalThis as unknown as BridgeGlobal).__veillerDeliverBridgeRaw).toBeUndefined()
   })
 
   test("send() after native __dispatch disappears triggers disconnect handler", async () => {

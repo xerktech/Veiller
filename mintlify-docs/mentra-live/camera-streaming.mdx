@@ -16,7 +16,7 @@ Photo upload sends a JPEG from supported glasses to a webhook URL. In the starte
 ```ts
 const photo = await BluetoothSdk.requestPhoto({
   size: 'medium',
-  webhookUrl: 'https://api.example.com/mentra/photo',
+  webhookUrl: 'https://api.example.com/veiller/photo',
   authToken: 'optional-token',
   compress: 'medium',
   sound: true,
@@ -33,7 +33,7 @@ console.log('photo delivered', photo.photoUrl ?? photo.uploadUrl);
 val photo = sdk.requestPhoto(
     PhotoRequest(
         size = PhotoSize.MEDIUM,
-        webhookUrl = "https://api.example.com/mentra/photo",
+        webhookUrl = "https://api.example.com/veiller/photo",
         authToken = "optional-token",
         compress = PhotoCompression.MEDIUM,
         sound = true,
@@ -51,7 +51,7 @@ println("photo delivered: ${photo.requestId}")
 let photo = try await sdk.requestPhoto(
     PhotoRequest(
         size: .medium,
-        webhookUrl: "https://api.example.com/mentra/photo",
+        webhookUrl: "https://api.example.com/veiller/photo",
         authToken: "optional-token",
         compress: .medium,
         sound: true,
@@ -98,7 +98,7 @@ For one-shot manual capture tuning, pass `exposureTimeNs` and `iso` together. `e
 Listen for `photo_status` to render progress and inspect the effective settings the glasses used:
 
 ```ts
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 useBluetoothEvent('photo_status', (event) => {
   if (event.status === 'configuring') {
@@ -194,7 +194,7 @@ console.log('video started', started.status);
 
 const stopped = await BluetoothSdk.stopVideoRecording(
   requestId,
-  'https://api.example.com/mentra/video',
+  'https://api.example.com/veiller/video',
   'optional-token',
 );
 console.log('video uploaded', stopped.status);
@@ -221,7 +221,7 @@ println("video started: ${started.status}")
 
 val stopped = sdk.stopVideoRecording(
     requestId = requestId,
-    webhookUrl = "https://api.example.com/mentra/video",
+    webhookUrl = "https://api.example.com/veiller/video",
     authToken = "optional-token",
 )
 println("video uploaded: ${stopped.status}")
@@ -248,7 +248,7 @@ print("video started: \(started.status)")
 
 let stopped = try await sdk.stopVideoRecording(
     requestId: requestId,
-    webhookUrl: "https://api.example.com/mentra/video",
+    webhookUrl: "https://api.example.com/veiller/video",
     authToken: "optional-token"
 )
 print("video uploaded: \(stopped.status)")
@@ -319,7 +319,7 @@ In gallery mode, photos are saved on the glasses instead of being uploaded to a 
   <Tab title="React Native">
 
 ```ts
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 useBluetoothEvent('photo_status', (event) => {
   if (event.resolvedConfig?.source === 'button') {
@@ -343,7 +343,7 @@ override fun onPhotoStatus(event: PhotoStatusEvent) {
   <Tab title="iOS">
 
 ```swift
-func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEvent) {
+func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceive event: BluetoothEvent) {
     if case let .photoStatus(status) = event,
        status.resolvedConfig?.source == "button" {
         print("gallery photo requestId: \(status.requestId)")
@@ -456,7 +456,7 @@ The starter kit includes a local helper server so developers can try the **Use c
 
 ```bash
 git clone https://github.com/Mentra-Community/Mentra-Bluetooth-SDK-Starter-Kit.git
-cd Mentra-Bluetooth-SDK-Starter-Kit
+cd Veiller-Bluetooth-SDK-Starter-Kit
 python3 examples/local-demo-cloud/server.py
 ```
 
@@ -479,12 +479,12 @@ Use real hardware for these flows. Keep the glasses Wi-Fi active and make sure t
 For direct phone photo upload in React Native, start the phone receiver first and pass its `uploadUrl` as the photo webhook:
 
 ```ts
-import BluetoothSdk from '@mentra/bluetooth-sdk';
-import MentraPhotoReceiver from '@mentra/bluetooth-sdk/photo-receiver';
+import BluetoothSdk from '@veiller/bluetooth-sdk';
+import VeillerPhotoReceiver from '@veiller/bluetooth-sdk/photo-receiver';
 
-const receiver = await MentraPhotoReceiver.startPhotoReceiver();
+const receiver = await VeillerPhotoReceiver.startPhotoReceiver();
 
-const uploadSubscription = MentraPhotoReceiver.addListener('photoUpload', (event) => {
+const uploadSubscription = VeillerPhotoReceiver.addListener('photoUpload', (event) => {
   console.log(event.requestId, event.fileUri, event.byteCount);
 });
 
@@ -499,13 +499,13 @@ try {
   console.log('photo delivered', photo.photoUrl ?? photo.uploadUrl);
 } catch (error) {
   uploadSubscription.remove();
-  await MentraPhotoReceiver.stopPhotoReceiver();
+  await VeillerPhotoReceiver.stopPhotoReceiver();
   throw error;
 }
 
 // Later:
 uploadSubscription.remove();
-await MentraPhotoReceiver.stopPhotoReceiver();
+await VeillerPhotoReceiver.stopPhotoReceiver();
 ```
 
 ## Stream Status
@@ -516,7 +516,7 @@ Subscribe to stream status before starting a stream. Treat stream start as accep
   <Tab title="React Native">
 
 ```tsx
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 export function StreamStatusLogger() {
   useBluetoothEvent('stream_status', (event) => {
@@ -542,7 +542,7 @@ override fun onStreamStatus(event: StreamStatusEvent) {
   <Tab title="iOS">
 
 ```swift
-func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEvent) {
+func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceive event: BluetoothEvent) {
     if case let .streamStatus(status) = event {
         print("Stream status: \(status)")
         print("Resolved FPS: \(status.resolvedConfig?.video?.fps ?? -1)")

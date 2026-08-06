@@ -4,8 +4,8 @@
  * from the store's actions.
  *
  * The miniapp WebView is a HOST component (engine ships the bridge, not the view) —
- * the bridge primitives (`buildMiniappGlobalsScript`, `buildMentraUiShim`, the
- * MentraJS router) are exported from `@mentra/engine` directly; the host mounts a
+ * the bridge primitives (`buildMiniappGlobalsScript`, `buildVeillerUiShim`, the
+ * VeillerJS router) are exported from `@veiller/engine` directly; the host mounts a
  * `<WebView>` wired to them. This facade is the lifecycle half.
  */
 import {useAppStatusStore} from "../stores/apps"

@@ -166,7 +166,7 @@ export default defineConfig([
   },
 
   // Publishable npm packages under mobile/modules/ — these have their own
-  // package.json and ship to npm as @mentra/engine, @mentra/miniapp, etc.
+  // package.json and ship to npm as @veiller/engine, @veiller/miniapp, etc.
   // The @/ alias is mobile-app-only, so internal relative imports are correct.
   // bun:test is a Bun built-in that the import resolver doesn't know about.
   {

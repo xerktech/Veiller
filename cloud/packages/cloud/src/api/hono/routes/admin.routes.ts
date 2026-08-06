@@ -15,7 +15,7 @@ import { Organization } from "../../../models/organization.model";
 import { memoryTelemetryService } from "../../../services/debug/MemoryTelemetryService";
 import { logger as rootLogger } from "../../../services/logging/pino-logger";
 import type { AppEnv, AppContext } from "../../../types/hono";
-import { isMentraAdmin } from "../../../services/core/admin.utils";
+import { isVeillerAdmin } from "../../../services/core/admin.utils";
 import { appCache } from "../../../services/core/app-cache.service";
 import { LeanDocument, Types } from "mongoose";
 
@@ -77,7 +77,7 @@ app.get("/memory/heap-snapshot-bun", validateAdminEmail, (c: AppContext) => {
 
 /**
  * Middleware to validate admin email.
- * Checks JWT token and verifies email belongs to a Mentra admin
+ * Checks JWT token and verifies email belongs to a Veiller admin
  * (@mentra.glass, @mentraglass.com, or in ADMIN_EMAILS env var).
  */
 async function validateAdminEmail(c: AppContext, next: () => Promise<void>) {
@@ -98,7 +98,7 @@ async function validateAdminEmail(c: AppContext, next: () => Promise<void>) {
 
     const email = decoded.email.toLowerCase();
 
-    if (!isMentraAdmin(email)) {
+    if (!isVeillerAdmin(email)) {
       logger.warn({ email }, "Non-admin user attempted admin access");
       return c.json({ error: "Unauthorized - Admin access required" }, 403);
     }

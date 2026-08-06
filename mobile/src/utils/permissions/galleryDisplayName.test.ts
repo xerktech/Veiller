@@ -4,7 +4,7 @@ describe("deriveGalleryDisplayName", () => {
   it("uses capture folder name for base.jpg in capture directories", () => {
     expect(
       deriveGalleryDisplayName(
-        "/data/user/0/com.xerktech.veiller/files/MentraPhotos/IMG_20260608_024955_542_146/base.jpg",
+        "/data/user/0/com.xerktech.veiller/files/VeillerPhotos/IMG_20260608_024955_542_146/base.jpg",
       ),
     ).toBe("IMG_20260608_024955_542_146.jpg")
   })
@@ -12,7 +12,7 @@ describe("deriveGalleryDisplayName", () => {
   it("uses capture folder name for processed photo outputs", () => {
     expect(
       deriveGalleryDisplayName(
-        "/data/user/0/com.xerktech.veiller/files/MentraPhotos/IMG_20260608_024955_542_146/base.jpg.processed.jpg",
+        "/data/user/0/com.xerktech.veiller/files/VeillerPhotos/IMG_20260608_024955_542_146/base.jpg.processed.jpg",
       ),
     ).toBe("IMG_20260608_024955_542_146.jpg")
   })
@@ -30,7 +30,7 @@ describe("deriveGalleryDisplayName", () => {
   })
 
   it("keeps legacy flat filenames unchanged", () => {
-    expect(deriveGalleryDisplayName("/data/MentraPhotos/IMG_20260513_135936_005_426.jpg")).toBe(
+    expect(deriveGalleryDisplayName("/data/VeillerPhotos/IMG_20260513_135936_005_426.jpg")).toBe(
       "IMG_20260513_135936_005_426.jpg",
     )
   })

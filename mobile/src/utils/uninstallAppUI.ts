@@ -1,4 +1,4 @@
-import {engine, type ClientApp} from "@mentra/engine"
+import {engine, type ClientApp} from "@veiller/engine"
 
 import {showAlert} from "@/contexts/ModalContext"
 import {translate} from "@/i18n"

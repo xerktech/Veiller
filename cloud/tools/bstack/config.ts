@@ -49,7 +49,7 @@ export interface LogSource {
 export const LOG_SOURCES: Record<string, LogSource> = {
   prod: {
     id: 2324289,
-    name: "MentraCloud - Prod",
+    name: "VeillerCloud - Prod",
     description:
       "Production and staging logs. Receives from US Central, US West, US East (and France/East Asia after next redeploy).",
     logsTable: "remote(t373499_mentracloud_prod_logs)",
@@ -90,42 +90,42 @@ export const COLLECTORS: Record<string, CollectorSource> = {
   "us-central": {
     collectorId: 60277,
     sourceId: 2321796,
-    name: "mentra-us-central",
+    name: "veiller-us-central",
     region: "us-central",
     clusterId: 4689,
-    metricsTable: "remote(t373499_mentra_us_central_metrics)",
+    metricsTable: "remote(t373499_veiller_us_central_metrics)",
   },
   "france": {
     collectorId: 60500,
     sourceId: 2326580,
-    name: "mentra-france",
+    name: "veiller-france",
     region: "france",
     clusterId: 4696,
-    metricsTable: "remote(t373499_mentra_france_metrics)",
+    metricsTable: "remote(t373499_veiller_france_metrics)",
   },
   "east-asia": {
     collectorId: 60501,
     sourceId: 2326583,
-    name: "mentra-east-asia",
+    name: "veiller-east-asia",
     region: "east-asia",
     clusterId: 4754,
-    metricsTable: "remote(t373499_mentra_east_asia_metrics)",
+    metricsTable: "remote(t373499_veiller_east_asia_metrics)",
   },
   "us-west": {
     collectorId: 60502,
     sourceId: 2326586,
-    name: "mentra-us-west",
+    name: "veiller-us-west",
     region: "us-west",
     clusterId: 4965,
-    metricsTable: "remote(t373499_mentra_us_west_metrics)",
+    metricsTable: "remote(t373499_veiller_us_west_metrics)",
   },
   "us-east": {
     collectorId: 60503,
     sourceId: 2326589,
-    name: "mentra-us-east",
+    name: "veiller-us-east",
     region: "us-east",
     clusterId: 4977,
-    metricsTable: "remote(t373499_mentra_us_east_metrics)",
+    metricsTable: "remote(t373499_veiller_us_east_metrics)",
   },
 };
 
@@ -200,7 +200,7 @@ export interface Dashboard {
 export const DASHBOARDS: Record<string, Dashboard> = {
   sreUsCentral: {
     id: 973977,
-    name: "MentraCloud SRE — US Central",
+    name: "VeillerCloud SRE — US Central",
     sourceId: 2321796,
     description:
       "10 charts: RSS memory, CPU, restarts, OOM kills, HTTP rate, TCP connections. Uses US Central collector metrics.",

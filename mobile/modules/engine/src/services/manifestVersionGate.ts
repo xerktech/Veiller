@@ -26,7 +26,7 @@ export function checkManifestVersions(
     if (cleanHost && cleanMin && semver.lt(cleanHost, cleanMin)) {
       return {
         ok: false,
-        reason: `Requires MentraOS ${manifest.minHostVersion}+; this host is ${options.hostVersion}.`,
+        reason: `Requires Veiller ${manifest.minHostVersion}+; this host is ${options.hostVersion}.`,
       }
     }
   }

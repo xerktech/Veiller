@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { User } from "lucide-react";
-import { useAuth } from "@mentra/shared";
+import { useAuth } from "@veiller/shared";
 import { useTheme } from "../hooks/useTheme";
 import { useNavigate } from "react-router-dom";
 import { useProfileDropdown } from "../contexts/ProfileDropdownContext";

@@ -49,7 +49,7 @@ describe("LocalMiniappUserIdentity", () => {
     identity.remember("mu_123")
     identity.forget()
 
-    await expect(identity.resolve(async () => "")).rejects.toThrow("Mentra user identity is unavailable")
+    await expect(identity.resolve(async () => "")).rejects.toThrow("Veiller user identity is unavailable")
     expect(backend.value).toBeNull()
   })
 })

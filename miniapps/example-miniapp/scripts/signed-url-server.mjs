@@ -14,7 +14,7 @@ const port = Number(process.env.ELEVENLABS_SIGNING_SERVER_PORT || 8788)
 const apiKey = process.env.ELEVENLABS_API_KEY
 const defaultAgentId =
   process.env.ELEVENLABS_AGENT_ID ||
-  process.env.MENTRA_PUBLIC_ELEVENLABS_AGENT_ID ||
+  process.env.VEILLER_PUBLIC_ELEVENLABS_AGENT_ID ||
   process.env.EXPO_PUBLIC_ELEVENLABS_AGENT_ID ||
   DEFAULT_AGENT_ID
 
@@ -82,7 +82,7 @@ const server = createServer(async (req, res) => {
   }
 })
 
-// Bind 0.0.0.0 so a MentraOS phone on the LAN can reach this Mac.
+// Bind 0.0.0.0 so a Veiller phone on the LAN can reach this Mac.
 // Dev-only: keep this on a trusted network — /signed-url is unauthenticated.
 server.listen(port, "0.0.0.0", () => {
   console.log(`ElevenLabs signing server listening at http://0.0.0.0:${port}`)

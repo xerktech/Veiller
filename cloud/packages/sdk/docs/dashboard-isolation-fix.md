@@ -2,7 +2,7 @@
 
 ## Issue Overview
 
-A critical bug has been identified in the MentraOS system where users can see other users' calendar events and notifications in their dashboard display. This represents a serious data privacy issue that must be addressed before moving to production.
+A critical bug has been identified in the Veiller system where users can see other users' calendar events and notifications in their dashboard display. This represents a serious data privacy issue that must be addressed before moving to production.
 
 ## Root Cause Analysis
 

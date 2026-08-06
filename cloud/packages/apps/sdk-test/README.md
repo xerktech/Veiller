@@ -1,12 +1,12 @@
 # SDK Test
 
-MentraOS mini app for testing SDK features end-to-end. Cloned from `hono-example-app` — same fullstack structure (Hono backend + React webview), repurposed as an SDK test harness.
+Veiller mini app for testing SDK features end-to-end. Cloned from `hono-example-app` — same fullstack structure (Hono backend + React webview), repurposed as an SDK test harness.
 
 ## Setup
 
 ```bash
 cp .env.example .env
-# Fill in PACKAGE_NAME and MENTRAOS_API_KEY
+# Fill in PACKAGE_NAME and VEILLER_API_KEY
 
 bun install
 bun run dev
@@ -20,8 +20,8 @@ bun run dev
 - Photo capture
 - Settings / Simple Storage
 - Touch + button input
-- Error classes (`MentraAuthError`, `MentraConnectionError`, etc.)
-- Clean logger output (`MentraOS ✓/⚠/✗`)
+- Error classes (`VeillerAuthError`, `VeillerConnectionError`, etc.)
+- Clean logger output (`Veiller ✓/⚠/✗`)
 - Version check (dist-tag aware, hits npm directly)
 
 ## Structure
@@ -61,8 +61,8 @@ src/
 | Variable | Required | Description |
 |---|---|---|
 | `PACKAGE_NAME` | ✅ | App package name (must match console.mentra.glass) |
-| `MENTRAOS_API_KEY` | ✅ | API key from developer console |
+| `VEILLER_API_KEY` | ✅ | API key from developer console |
 | `PORT` | | Server port (default: 3000) |
 | `COOKIE_SECRET` | | Cookie signing secret (defaults to API key) |
-| `MENTRA_VERBOSE` | | Set to `true` for full structured log output |
-| `MENTRA_LOG_LEVEL` | | `none`, `error`, `warn`, `info`, `debug` |
+| `VEILLER_VERBOSE` | | Set to `true` for full structured log output |
+| `VEILLER_LOG_LEVEL` | | `none`, `error`, `warn`, `info`, `debug` |

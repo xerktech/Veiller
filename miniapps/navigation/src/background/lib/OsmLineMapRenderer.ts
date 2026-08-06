@@ -197,7 +197,7 @@ export async function fetchOsmRoads(
       "Content-Type": "application/x-www-form-urlencoded",
       Accept: "application/json",
       // Overpass rejects requests with no/blank UA (HTTP 406). Identify the app.
-      "User-Agent": "MentraOS-Navigation-PoC/0.1 (OSM line map dev test)",
+      "User-Agent": "Veiller-Navigation-PoC/0.1 (OSM line map dev test)",
     },
     body: `data=${encodeURIComponent(query)}`,
   })

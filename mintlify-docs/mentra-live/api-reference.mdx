@@ -1,10 +1,10 @@
 ---
 title: "API Reference"
-description: "Lifecycle, status, commands, events, and shared types for the Mentra Bluetooth SDK."
+description: "Lifecycle, status, commands, events, and shared types for the Veiller Bluetooth SDK."
 icon: "book"
 ---
 
-The Mentra Bluetooth SDK exposes the same core glasses lifecycle across Android, iOS, and React Native:
+The Veiller Bluetooth SDK exposes the same core glasses lifecycle across Android, iOS, and React Native:
 
 - Scan for a supported glasses model.
 - Connect to a discovered `Device` or an app-restored default device.
@@ -16,11 +16,11 @@ The Mentra Bluetooth SDK exposes the same core glasses lifecycle across Android,
 
 | Platform | Install package | Import |
 | --- | --- | --- |
-| Android | `com.mentraglass:bluetooth-sdk` | `import com.mentra.bluetoothsdk.*` |
-| iOS | `MentraBluetoothSDK` Swift package | `import MentraBluetoothSDK` |
-| React Native / Expo | `@mentra/bluetooth-sdk` | `import BluetoothSdk, {DeviceModels} from '@mentra/bluetooth-sdk'` |
-| React Native hooks | `@mentra/bluetooth-sdk` | `import {useMentraBluetooth} from '@mentra/bluetooth-sdk/react'` |
-| React Native photo receiver | `@mentra/bluetooth-sdk` | `import MentraPhotoReceiver from '@mentra/bluetooth-sdk/photo-receiver'` |
+| Android | `com.mentraglass:bluetooth-sdk` | `import com.veiller.bluetoothsdk.*` |
+| iOS | `VeillerBluetoothSDK` Swift package | `import VeillerBluetoothSDK` |
+| React Native / Expo | `@veiller/bluetooth-sdk` | `import BluetoothSdk, {DeviceModels} from '@veiller/bluetooth-sdk'` |
+| React Native hooks | `@veiller/bluetooth-sdk` | `import {useVeillerBluetooth} from '@veiller/bluetooth-sdk/react'` |
+| React Native photo receiver | `@veiller/bluetooth-sdk` | `import VeillerPhotoReceiver from '@veiller/bluetooth-sdk/photo-receiver'` |
 
 Only documented imports are part of the supported app developer API. Undocumented package subpaths or symbols with a leading underscore can change without notice.
 
@@ -30,10 +30,10 @@ Only documented imports are part of the supported app developer API. Undocumente
   <Tab title="React Native">
 
 ```tsx
-import {useBluetoothEvent, useMentraBluetooth} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent, useVeillerBluetooth} from '@veiller/bluetooth-sdk/react';
 
 function DeviceScreen() {
-  const mentra = useMentraBluetooth();
+  const veiller = useVeillerBluetooth();
   useBluetoothEvent('button_press', (event) => {
     console.log(event.buttonId, event.pressType);
   });
@@ -46,9 +46,9 @@ function DeviceScreen() {
   <Tab title="Android">
 
 ```kotlin
-val sdk = MentraBluetoothSdk.create(
+val sdk = VeillerBluetoothSdk.create(
     context = applicationContext,
-    config = MentraBluetoothSdkConfig(),
+    config = VeillerBluetoothSdkConfig(),
     listener = listener,
 )
 
@@ -59,7 +59,7 @@ sdk.close()
   <Tab title="iOS">
 
 ```swift
-let sdk = MentraBluetoothSDK(configuration: .default)
+let sdk = VeillerBluetoothSDK(configuration: .default)
 sdk.delegate = delegate
 
 sdk.invalidate()
@@ -70,10 +70,10 @@ sdk.invalidate()
 
 Keep one SDK instance per active app session. The SDK owns Bluetooth connection state, native event delivery, and cleanup. Your app owns user identity, UI state, and whether a default device record is persisted across app restarts.
 
-## Mentra SDK Usage Analytics
+## Veiller SDK Usage Analytics
 
-The SDK reports anonymous usage events to Mentra's PostHog project by default
-so Mentra can understand SDK adoption and successful glasses connections:
+The SDK reports anonymous usage events to Veiller's PostHog project by default
+so Veiller can understand SDK adoption and successful glasses connections:
 
 | Event | Fires When |
 | --- | --- |
@@ -83,9 +83,9 @@ so Mentra can understand SDK adoption and successful glasses connections:
 Analytics delivery is fire-and-forget: events are submitted asynchronously, do
 not block Bluetooth SDK behavior, and are not retried if delivery fails.
 
-Mentra's PostHog project API key is embedded in the SDK as a public analytics
+Veiller's PostHog project API key is embedded in the SDK as a public analytics
 write token, not a private PostHog personal API key. Apps do not need to
-configure PostHog to send these Mentra SDK usage events.
+configure PostHog to send these Veiller SDK usage events.
 
 <Tabs>
   <Tab title="React Native">
@@ -97,7 +97,7 @@ Disable analytics before native SDK startup through the Expo config plugin:
   "expo": {
     "plugins": [
       [
-        "@mentra/bluetooth-sdk",
+        "@veiller/bluetooth-sdk",
         {
           "analytics": false
         }
@@ -111,9 +111,9 @@ Disable analytics before native SDK startup through the Expo config plugin:
   <Tab title="Android">
 
 ```kotlin
-val sdk = MentraBluetoothSdk.create(
+val sdk = VeillerBluetoothSdk.create(
     context = applicationContext,
-    config = MentraBluetoothSdkConfig(
+    config = VeillerBluetoothSdkConfig(
         analytics = BluetoothSdkAnalyticsConfig.disabled()
     ),
     listener = listener,
@@ -124,7 +124,7 @@ Android apps can also set application metadata before SDK startup:
 
 ```xml
 <meta-data
-    android:name="com.mentra.bluetoothsdk.analytics.disabled"
+    android:name="com.veiller.bluetoothsdk.analytics.disabled"
     android:value="true" />
 ```
 
@@ -132,27 +132,27 @@ Android apps can also set application metadata before SDK startup:
   <Tab title="iOS">
 
 ```swift
-let sdk = MentraBluetoothSDK(
-    configuration: MentraBluetoothSDKConfiguration(
+let sdk = VeillerBluetoothSDK(
+    configuration: VeillerBluetoothSDKConfiguration(
         analytics: .disabled
     )
 )
 ```
 
-iOS apps can also set `MentraBluetoothSdkAnalyticsDisabled` to `true` in
+iOS apps can also set `VeillerBluetoothSdkAnalyticsDisabled` to `true` in
 `Info.plist` before SDK startup.
 
   </Tab>
 </Tabs>
 
 Apps do not configure the analytics destination; these SDK usage events are
-always sent to Mentra's PostHog project unless analytics are disabled.
+always sent to Veiller's PostHog project unless analytics are disabled.
 
 Captured properties are intentionally narrow:
 
 | Property | Meaning |
 | --- | --- |
-| `event_source` | Always `mentra_bluetooth_sdk`. |
+| `event_source` | Always `veiller_bluetooth_sdk`. |
 | `sdk_platform` | Native platform that sends the event: `android` or `ios`. |
 | `sdk_surface` | Public SDK surface: `react_native`, `android`, or `ios`. |
 | `sdk_version` | Bluetooth SDK version. |
@@ -299,9 +299,9 @@ Do not require `rssi` for picker rows. Use SDK-provided stable discovery order b
   <Tab title="React Native">
 
 ```tsx
-import {useMentraBluetooth} from '@mentra/bluetooth-sdk/react';
+import {useVeillerBluetooth} from '@veiller/bluetooth-sdk/react';
 
-const mentra = useMentraBluetooth();
+const veiller = useVeillerBluetooth();
 ```
 
 React Native exposes `mentra.glasses.connection` as a discriminated union:
@@ -327,7 +327,7 @@ val sdkState = sdk.getSdkState()
 val scan = sdk.getScanState()
 ```
 
-Android exposes `GlassesRuntimeState` as `Connected` or `Disconnected`. The full state is grouped as `MentraBluetoothState(glasses, sdk, scan)`.
+Android exposes `GlassesRuntimeState` as `Connected` or `Disconnected`. The full state is grouped as `VeillerBluetoothState(glasses, sdk, scan)`.
 
   </Tab>
   <Tab title="iOS">
@@ -339,7 +339,7 @@ let sdkState = sdk.sdkState
 let scan = sdk.scanState
 ```
 
-iOS exposes `GlassesRuntimeState` as `.connected(...)` or `.disconnected(...)`. The full state is grouped as `MentraBluetoothState(glasses, sdk, scan)`.
+iOS exposes `GlassesRuntimeState` as `.connected(...)` or `.disconnected(...)`. The full state is grouped as `VeillerBluetoothState(glasses, sdk, scan)`.
 
   </Tab>
 </Tabs>
@@ -362,7 +362,7 @@ These are the supported React Native app developer entrypoints:
 
 | Area | Methods |
 | --- | --- |
-| Status and subscriptions | `useMentraBluetooth`, `useBluetoothScan`, and `useBluetoothEvent` for React components; `addListener` is available as the lower-level non-React subscription API |
+| Status and subscriptions | `useVeillerBluetooth`, `useBluetoothScan`, and `useBluetoothEvent` for React components; `addListener` is available as the lower-level non-React subscription API |
 | Default device | `getDefaultDevice`, `setDefaultDevice`, `clearDefaultDevice` |
 | Connection | `scan`, `startScan`, `stopScan`, `connect`, `connectDefault`, `cancelConnectionAttempt`, `disconnect`, `forget` |
 | Wi-Fi and hotspot | `requestWifiScan`, `sendWifiCredentials`, `forgetWifiNetwork`, `setHotspotState` |
@@ -371,15 +371,15 @@ These are the supported React Native app developer entrypoints:
 | Audio | `setMicState`, `setVoiceActivityDetectionEnabled`, `setLoudnessGateEnabled`, `setPreferredMic`, `setOwnAppAudioPlaying`, `getGlassesMediaVolume`, `setGlassesMediaVolume` |
 | LED, version, and OTA | `rgbLedControl`, `requestVersionInfo`, `checkForOtaUpdate`, `startOtaUpdate` |
 
-React Native helper exports include `DeviceModels`, `isConnectedGlassesConnectionStatus`, `isReadyGlassesConnectionStatus`, `isBusyGlassesConnectionStatus`, `isConnectedWifiStatus`, and `isEnabledHotspotStatus`. The React subpath exports `useMentraBluetooth`, `useBluetoothScan`, and `useBluetoothEvent`.
+React Native helper exports include `DeviceModels`, `isConnectedGlassesConnectionStatus`, `isReadyGlassesConnectionStatus`, `isBusyGlassesConnectionStatus`, `isConnectedWifiStatus`, and `isEnabledHotspotStatus`. The React subpath exports `useVeillerBluetooth`, `useBluetoothScan`, and `useBluetoothEvent`.
 
-For React Native status UI, use `useMentraBluetooth()` from `@mentra/bluetooth-sdk/react`. It returns `mentra.glasses`, `mentra.sdk`, and `mentra.scan` for connection, battery, Wi-Fi, hotspot, scan, and SDK runtime state.
+For React Native status UI, use `useVeillerBluetooth()` from `@veiller/bluetooth-sdk/react`. It returns `mentra.glasses`, `veiller.sdk`, and `veiller.scan` for connection, battery, Wi-Fi, hotspot, scan, and SDK runtime state.
 
 Important defaults:
 
 - `scan(model, options)` reports progressive results through `options.onResults`, resolves with the final matching `Device[]`, and times out after 15 seconds unless `options.timeoutMs` is set.
 - `connect` and `connectDefault` default `saveAsDefault` and `cancelExistingConnectionAttempt` to `true`.
-- `setMicState(enabled)` defaults to glasses microphone on, transcript events off, and LC3 events off. Microphone audio events are continuous while capture is enabled. Use `setVoiceActivityDetectionEnabled(...)` for glasses-side Voice Activity Detection and `setLoudnessGateEnabled(...)` for Mentra Live's center-microphone loudness gate ("Barrier"). With VAD disabled and Barrier enabled, quiet input is represented as silence while audio frames continue. The standalone public Bluetooth SDK defaults are VAD disabled and Barrier enabled, and both settings are reapplied after reconnect. The Mentra App manages separate persisted OS-level microphone preferences. `voice_activity_detection_status` reports whether VAD is enabled, and `speaking_status` reports speaking/not-speaking when supported. Microphone audio events include the latest `voiceActivityDetectionEnabled` value.
+- `setMicState(enabled)` defaults to glasses microphone on, transcript events off, and LC3 events off. Microphone audio events are continuous while capture is enabled. Use `setVoiceActivityDetectionEnabled(...)` for glasses-side Voice Activity Detection and `setLoudnessGateEnabled(...)` for Mentra Live's center-microphone loudness gate ("Barrier"). With VAD disabled and Barrier enabled, quiet input is represented as silence while audio frames continue. The standalone public Bluetooth SDK defaults are VAD disabled and Barrier enabled, and both settings are reapplied after reconnect. The Veiller App manages separate persisted OS-level microphone preferences. `voice_activity_detection_status` reports whether VAD is enabled, and `speaking_status` reports speaking/not-speaking when supported. Microphone audio events include the latest `voiceActivityDetectionEnabled` value.
 - `requestPhoto({authToken, ...})` omits the `Authorization` header when `authToken` is `null` or empty.
 - `requestPhoto(...)` and `warmUpCamera(...)` generate unique request IDs when `requestId` is omitted or blank. Pass an explicit `requestId` only when your app needs to know it before the response, for example to poll a predictable upload-status URL.
 - `requestPhoto({exposureTimeNs, ...})` uses auto exposure when `exposureTimeNs` is omitted or `null`; pass a positive nanosecond value for one-shot manual exposure.
@@ -476,7 +476,7 @@ React Native components should use `useBluetoothEvent()` for hardware events. Th
   <Tab title="React Native">
 
 ```tsx
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 export function HardwareEventLogger() {
   useBluetoothEvent('button_press', (event) => console.log(event));
@@ -498,7 +498,7 @@ export function HardwareEventLogger() {
   <Tab title="Android">
 
 ```kotlin
-class GlassesEvents : MentraBluetoothSdkCallback() {
+class GlassesEvents : VeillerBluetoothSdkCallback() {
     override fun onButtonPress(event: ButtonPressEvent) {
         Log.d("Mentra", "${event.buttonId} ${event.pressType}")
     }
@@ -521,8 +521,8 @@ class GlassesEvents : MentraBluetoothSdkCallback() {
   <Tab title="iOS">
 
 ```swift
-final class GlassesEvents: MentraBluetoothSDKDelegate {
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEvent) {
+final class GlassesEvents: VeillerBluetoothSDKDelegate {
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceive event: BluetoothEvent) {
         switch event {
         case let .buttonPress(button):
             print("\(button.buttonId) \(button.pressType)")
@@ -535,7 +535,7 @@ final class GlassesEvents: MentraBluetoothSDKDelegate {
         }
     }
 
-    func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceiveMicPcm event: MicPcmEvent) {
+    func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceiveMicPcm event: MicPcmEvent) {
         print("\(event.sampleRate) Hz \(event.bitsPerSample)-bit PCM")
     }
 }
@@ -606,7 +606,7 @@ Transport statuses such as `uploading`, `compressing`, `ble_fallback_compression
 
 Local action-button photos emitted by the glasses use the same `photo_status` shape when the phone SDK is connected. Those local captures set `resolvedConfig.source` to `button` and `resolvedConfig.transferMethod` to `local`.
 
-Android and iOS expose typed callbacks/delegate methods instead of the React Native string event API. Android uses `MentraBluetoothSdkListener` methods such as `onStateChanged`, `onGlassesChanged`, `onSdkStateChanged`, `onScanChanged`, `onDeviceDiscovered`, `onButtonPress`, `onSpeakingStatus`, `onPhotoResponse`, `onPhotoStatus`, `onMicPcm`, `onStreamStatus`, and `onOtaStatus`. iOS uses `MentraBluetoothSDKDelegate` methods such as `mentraBluetoothSDK(_:didUpdate:)`, `mentraBluetoothSDK(_:didUpdateGlasses:)`, `mentraBluetoothSDK(_:didUpdateSdkState:)`, `mentraBluetoothSDK(_:didUpdateScan:)`, `mentraBluetoothSDK(_:didDiscover:)`, `mentraBluetoothSDK(_:didReceive:)`, `mentraBluetoothSDK(_:didReceiveMicPcm:)`, and `mentraBluetoothSDK(_:didReceiveMicLc3:)`; OTA install progress arrives through `didReceive` as `.otaStartAck` or `.otaStatus`. Microphone audio callbacks use `MicPcmEvent` and `MicLc3Event` objects with the same metadata as React Native.
+Android and iOS expose typed callbacks/delegate methods instead of the React Native string event API. Android uses `VeillerBluetoothSdkListener` methods such as `onStateChanged`, `onGlassesChanged`, `onSdkStateChanged`, `onScanChanged`, `onDeviceDiscovered`, `onButtonPress`, `onSpeakingStatus`, `onPhotoResponse`, `onPhotoStatus`, `onMicPcm`, `onStreamStatus`, and `onOtaStatus`. iOS uses `VeillerBluetoothSDKDelegate` methods such as `veillerBluetoothSDK(_:didUpdate:)`, `veillerBluetoothSDK(_:didUpdateGlasses:)`, `veillerBluetoothSDK(_:didUpdateSdkState:)`, `veillerBluetoothSDK(_:didUpdateScan:)`, `veillerBluetoothSDK(_:didDiscover:)`, `veillerBluetoothSDK(_:didReceive:)`, `veillerBluetoothSDK(_:didReceiveMicPcm:)`, and `veillerBluetoothSDK(_:didReceiveMicLc3:)`; OTA install progress arrives through `didReceive` as `.otaStartAck` or `.otaStatus`. Microphone audio callbacks use `MicPcmEvent` and `MicLc3Event` objects with the same metadata as React Native.
 
 | Event area | Examples |
 | --- | --- |

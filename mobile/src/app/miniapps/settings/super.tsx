@@ -1,11 +1,11 @@
 import {ScrollView, View} from "react-native"
-import BluetoothSdk from "@mentra/bluetooth-sdk-internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk-internal"
 
 import {Header, Screen} from "@/components/ignite"
 import ToggleSetting from "@/components/settings/ToggleSetting"
 import {Group} from "@/components/ui/Group"
 import {useNavigationStore} from "@/stores/navigation"
-import {SETTINGS, useSetting} from "@mentra/engine"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import {RouteButton} from "@/components/ui/RouteButton"
 
 export default function SuperSettingsScreen() {

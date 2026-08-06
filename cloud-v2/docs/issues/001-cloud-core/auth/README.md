@@ -1,7 +1,7 @@
 # Auth
 
-The home for the whole MentraOS auth system: how every actor proves identity to
-Mentra, and how Mentra hands identity to the parties that need it.
+The home for the whole Veiller auth system: how every actor proves identity to
+Veiller, and how Veiller hands identity to the parties that need it.
 
 **New to auth?** Read [`concepts.md`](./concepts.md) first: a from-zero primer on
 the ideas the rest of this folder assumes (JWTs, asymmetric signing, JWKS,
@@ -21,7 +21,7 @@ on-device injection flow). Those two give the full v2 picture.
   miniapp-token, JWKS). The contract the cloud-client implements against.
 - [`design.md`](./design.md): the end-to-end implementation design across
   cloud-core, cloud-client, on-device, and the dev SDK. Includes the **identity
-  model** (Mentra's own users as "OEM zero", the `mentraUserId` model, the
+  model** (Veiller's own users as "OEM zero", the `mentraUserId` model, the
   core-token migration bridge) and **miniapp auto-auth** (the dev-backend flow and
   on-device token injection).
 - [`oem-auth.md`](./oem-auth.md): the OEM-exchange subsystem (RFC 8693), the one
@@ -33,8 +33,8 @@ on-device injection flow). Those two give the full v2 picture.
 
 Core-owned paths converge on a Core access token (`aud = "cloud-core"`,
 `sub = mentraUserId`, `tenantId`, ...), verified by Core services with the published
-JWKS. OEM users get it via the oem-auth exchange; Mentra-direct users get it via
-the same exchange with reserved `tenantId = "mentra"`. Runtime live services are being
+JWKS. OEM users get it via the oem-auth exchange; Veiller-direct users get it via
+the same exchange with reserved `tenantId = "veiller"`. Runtime live services are being
 split onto their own `cloud-runtime` audience token so Runtime can be self-hosted
 without a live Core dependency; see
 [`../../007-runtime-auth-independence/README.md`](../../007-runtime-auth-independence/README.md).
@@ -51,4 +51,4 @@ credential path.
 
 ## Related
 
-- [`../../../mentra-overhaul-plan.md`](../../../mentra-overhaul-plan.md)
+- [`../../../veiller-overhaul-plan.md`](../../../veiller-overhaul-plan.md)

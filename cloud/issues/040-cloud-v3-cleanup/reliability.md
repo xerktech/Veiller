@@ -6,7 +6,7 @@
 
 ## What is this doc?
 
-This doc covers reliability improvements needed in the MentraOS cloud — making sure the system works correctly and consistently, especially under real-world conditions like rapid display updates, connection drops, and component failures.
+This doc covers reliability improvements needed in the Veiller cloud — making sure the system works correctly and consistently, especially under real-world conditions like rapid display updates, connection drops, and component failures.
 
 ## Why it matters
 

@@ -60,7 +60,7 @@ authCommand
       const creds = await loadCredentials()
       if (!creds) {
         console.error(chalk.red("✗") + " Not authenticated")
-        console.error("  Run: mentra auth <token>")
+        console.error("  Run: veiller auth <token>")
         process.exit(3)
       }
 

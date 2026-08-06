@@ -1,7 +1,7 @@
 import Foundation
 
-public struct MentraBluetoothSDKConfiguration {
-    public static let `default` = MentraBluetoothSDKConfiguration()
+public struct VeillerBluetoothSDKConfiguration {
+    public static let `default` = VeillerBluetoothSDKConfiguration()
 
     public let analytics: BluetoothSdkAnalyticsConfiguration
 

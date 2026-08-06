@@ -108,7 +108,7 @@ session.on("result", (result) => {
 });
 ```
 
-This is exactly what MentraOS does in [SonioxSdkStream.ts:241-247](../../packages/cloud/src/services/session/transcription/providers/SonioxSdkStream.ts#L241-L247). Any consumer following the docs is leaking.
+This is exactly what Veiller does in [SonioxSdkStream.ts:241-247](../../packages/cloud/src/services/session/transcription/providers/SonioxSdkStream.ts#L241-L247). Any consumer following the docs is leaking.
 
 ---
 
@@ -205,9 +205,9 @@ The artifacts produced during this investigation live at:
 To re-confirm the leak on a future pod, pull a snapshot via:
 
 ```bash
-doppler run --project mentra-sre --config dev -- \
+doppler run --project veiller-sre --config dev -- \
   curl -sS -o /tmp/heap.heapsnapshot \
-    -H "Authorization: Bearer $MENTRA_ADMIN_JWT" \
+    -H "Authorization: Bearer $VEILLER_ADMIN_JWT" \
     https://dev.augmentos.cloud/api/admin/memory/heap-snapshot-v8
 ```
 

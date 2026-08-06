@@ -2,7 +2,7 @@
 /**
  * Local cloud-v2 dev stack — boots test-oem + core + runtime as real listening
  * servers on fixed, simulator-reachable ports and STAYS UP. Use this to point
- * the real Mentra mobile app (iOS simulator) at a local cloud-v2.
+ * the real Veiller mobile app (iOS simulator) at a local cloud-v2.
  *
  * The iOS simulator shares the Mac's loopback, so `127.0.0.1` from the app
  * reaches these servers directly.
@@ -14,7 +14,7 @@
  *
  * Runtime only accepts a `cloud-runtime` token (aud=cloud-runtime) — never the
  * Core access token. Two flows produce one:
- *   Core-brokered (hosted Mentra), what the mobile replicates:
+ *   Core-brokered (hosted Veiller), what the mobile replicates:
  *     1. POST {testOem}/test-oem/mint-jwt           -> OEM JWT
  *     2. POST {core}/api/client/auth/exchange       -> Core access token (aud=cloud-core)
  *     3. POST {core}/api/client/auth/runtime-token  -> runtime token (aud=cloud-runtime)
@@ -66,22 +66,22 @@ const stripPem = (p: string) =>
   const miniappKeys = crypto.generateKeyPairSync("ed25519");
   const accountKeys = crypto.generateKeyPairSync("ed25519");
   const localRuntimeKeys = crypto.generateKeyPairSync("ed25519");
-  process.env.MENTRA_JWT_PRIVATE_KEY = stripPem(
+  process.env.VEILLER_JWT_PRIVATE_KEY = stripPem(
     coreKeys.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_JWT_PUBLIC_KEY = stripPem(
+  process.env.VEILLER_JWT_PUBLIC_KEY = stripPem(
     coreKeys.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
-  process.env.MENTRA_MINIAPP_JWT_PRIVATE_KEY = stripPem(
+  process.env.VEILLER_MINIAPP_JWT_PRIVATE_KEY = stripPem(
     miniappKeys.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_MINIAPP_JWT_PUBLIC_KEY = stripPem(
+  process.env.VEILLER_MINIAPP_JWT_PUBLIC_KEY = stripPem(
     miniappKeys.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
-  process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY = stripPem(
+  process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY = stripPem(
     accountKeys.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
   );
-  process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY = stripPem(
+  process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY = stripPem(
     accountKeys.publicKey.export({ type: "spki", format: "pem" }).toString(),
   );
   process.env.LOCAL_RUNTIME_AUTH_PRIVATE_KEY = stripPem(
@@ -94,7 +94,7 @@ const stripPem = (p: string) =>
   process.env.CLOUD_RUNTIME_AUTH_ISSUERS ??= JSON.stringify([
     {
       issuer: "cloud-core",
-      publicKeyEnv: "MENTRA_JWT_PUBLIC_KEY",
+      publicKeyEnv: "VEILLER_JWT_PUBLIC_KEY",
       userIdClaim: "sub",
       tenantIdClaim: "tenant_id",
     },
@@ -110,11 +110,11 @@ const stripPem = (p: string) =>
   process.env.REDIS_URL ??= "redis://127.0.0.1:6379/5";
 }
 
-const { resetMentraKeyCache } = await import("../packages/shared/src/auth");
+const { resetVeillerKeyCache } = await import("../packages/shared/src/auth");
 const { resetSigningKeyCache } = await import(
   "../packages/core/src/services/session.service"
 );
-resetMentraKeyCache();
+resetVeillerKeyCache();
 resetSigningKeyCache();
 
 const provider = process.env.AUDIO_PROVIDER ?? "soniox";

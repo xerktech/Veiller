@@ -25,7 +25,7 @@ This is the "where are we right now" document. It replaces `remaining-work.md` (
 
 | File                              | Lines | Status                                                                        |
 | --------------------------------- | ----- | ----------------------------------------------------------------------------- |
-| `src/session/MentraSession.ts`    | ~340  | Complete — thin orchestrator, all 14 managers                                 |
+| `src/session/VeillerSession.ts`    | ~340  | Complete — thin orchestrator, all 14 managers                                 |
 | `src/session/DataStreamRouter.ts` | ~340  | Complete — `MessageHandlerRegistry` + `DataStreamRouter` with prefix matching |
 | `src/session/index.ts`            | 1     | Complete — barrel re-export                                                   |
 
@@ -41,7 +41,7 @@ This is the "where are we right now" document. It replaces `remaining-work.md` (
 
 | File                                                      | Lines | Status          | Notes                                                                             |
 | --------------------------------------------------------- | ----- | --------------- | --------------------------------------------------------------------------------- |
-| `src/session/internal/_CompatMentraSessionAdapter.ts`     | ~160  | Mostly complete | **To rename → `_V2SessionShim`**. Missing ~15 v2 utility methods (see gaps below) |
+| `src/session/internal/_CompatVeillerSessionAdapter.ts`     | ~160  | Mostly complete | **To rename → `_V2SessionShim`**. Missing ~15 v2 utility methods (see gaps below) |
 | `src/session/internal/_CompatEventManagerAdapter.ts`      | ~120  | Complete        | **To rename → `_V2EventManagerShim`**                                             |
 | `src/session/internal/_CompatCameraAdapter.ts`            | ~165  | Complete        | **To rename → `_V2CameraShim`**                                                   |
 | `src/session/internal/_CompatSettingsAdapter.ts`          | ~95   | Complete        | **To rename → `_V2SettingsShim`**                                                 |
@@ -72,7 +72,7 @@ This is the "where are we right now" document. It replaces `remaining-work.md` (
 | ---------------------------------------------- | ----- | -------- | ----------------------------------------------------------------------------------------------- |
 | `src/MiniAppServer.ts`                         | ~130  | Complete | Extends `AppServer`, overloaded `onSession`/`onStop`/`onToolCall`, delegates to v3 runtime      |
 | `src/internal/_MiniAppServerRuntime.ts`        | ~130  | Complete | Webhook → session lifecycle. **To consolidate into `_SessionManager`** (see decisions.md D-007) |
-| `src/internal/_MentraSessionServerFactory.ts`  | ~60   | Complete | Creates MentraSession + WebSocketTransport. **To merge into `_SessionManager`**                 |
+| `src/internal/_VeillerSessionServerFactory.ts`  | ~60   | Complete | Creates VeillerSession + WebSocketTransport. **To merge into `_SessionManager`**                 |
 | `src/internal/_MiniAppServerCallbackBridge.ts` | ~50   | Complete | Stores handlers. **To rename → `_CallbackManager` or merge into `_SessionManager`**             |
 | `src/internal/_MiniAppSessionRegistry.ts`      | ~60   | Complete | Tracks sessions. **To merge into `_SessionManager`**                                            |
 
@@ -81,8 +81,8 @@ This is the "where are we right now" document. It replaces `remaining-work.md` (
 | File                           | Lines      | Status                                                             |
 | ------------------------------ | ---------- | ------------------------------------------------------------------ |
 | `src/utils/error-utils.ts`     | ~195       | Complete — `toErrorMessage`, `warnOnce`, `safeExec`, `timeout`     |
-| `packages/apps/v3-smoke-test/` | ~600 total | Complete — working app using `MiniAppServer` + `MentraSession` API |
-| `src/index.ts`                 | updated    | Exports `MiniAppServer` and `MentraSession` alongside v2 exports   |
+| `packages/apps/v3-smoke-test/` | ~600 total | Complete — working app using `MiniAppServer` + `VeillerSession` API |
+| `src/index.ts`                 | updated    | Exports `MiniAppServer` and `VeillerSession` alongside v2 exports   |
 
 ---
 
@@ -90,8 +90,8 @@ This is the "where are we right now" document. It replaces `remaining-work.md` (
 
 | Item                                | Priority | Notes                                                                                                      |
 | ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `src/session.ts` entrypoint         | High     | The server-free import path: `import { MentraSession } from "@mentra/sdk/session"`. Needed for local apps. |
-| `AppSession` type alias             | High     | `export type AppSession = MentraSession` for v2 import compat                                              |
+| `src/session.ts` entrypoint         | High     | The server-free import path: `import { VeillerSession } from "@veiller/sdk/session"`. Needed for local apps. |
+| `AppSession` type alias             | High     | `export type AppSession = VeillerSession` for v2 import compat                                              |
 | `package.json` `"./session"` export | High     | Needs new entry in the `exports` field pointing to `dist/session.js`                                       |
 
 ---
@@ -104,7 +104,7 @@ This is the "where are we right now" document. It replaces `remaining-work.md` (
 | --- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | 1   | `LocationManager.ts`                                       | Memory leak — `onUpdate()` creates a `location_update` router registration whose cleanup is never stored or called                                                    | Store `updateCleanup` in the `Registration` struct and call it in the returned cleanup function |
 | 2   | `_SubscriptionManager.ts`                                  | Sends `SUBSCRIPTION_UPDATE` on every single `add()`/`remove()` call. If `onSession` registers 5 subscriptions synchronously, that's 5 WebSocket messages instead of 1 | Add debounce: collect changes within a microtask/tick, send one batched update                  |
-| 3   | `_V2SessionShim` (currently `_CompatMentraSessionAdapter`) | Missing ~15 v2 utility methods that real v2 apps use (see list below)                                                                                                 | Add the missing methods as delegations to MentraSession/managers                                |
+| 3   | `_V2SessionShim` (currently `_CompatVeillerSessionAdapter`) | Missing ~15 v2 utility methods that real v2 apps use (see list below)                                                                                                 | Add the missing methods as delegations to VeillerSession/managers                                |
 
 ### 🟡 Should fix
 
@@ -153,14 +153,14 @@ These renames were decided in this conversation (see `decisions.md` D-005, D-006
 
 | Current file                         | New name                                                           | Decision    |
 | ------------------------------------ | ------------------------------------------------------------------ | ----------- |
-| `_CompatMentraSessionAdapter.ts`     | `_V2SessionShim.ts`                                                | D-006       |
+| `_CompatVeillerSessionAdapter.ts`     | `_V2SessionShim.ts`                                                | D-006       |
 | `_CompatEventManagerAdapter.ts`      | `_V2EventManagerShim.ts`                                           | D-006       |
 | `_CompatCameraAdapter.ts`            | `_V2CameraShim.ts`                                                 | D-006       |
 | `_CompatSettingsAdapter.ts`          | `_V2SettingsShim.ts`                                               | D-006       |
 | `_CompatAudioOutputStreamAdapter.ts` | `_V2AudioStreamShim.ts`                                            | D-006       |
 | `_SessionLifecycleManager.ts`        | `_ConnectionManager.ts`                                            | D-005       |
 | `_MiniAppServerRuntime.ts`           | Merge into `_SessionManager.ts`                                    | D-007       |
-| `_MentraSessionServerFactory.ts`     | Merge into `_SessionManager.ts`                                    | D-007       |
+| `_VeillerSessionServerFactory.ts`     | Merge into `_SessionManager.ts`                                    | D-007       |
 | `_MiniAppServerCallbackBridge.ts`    | Merge into `_SessionManager.ts` or rename to `_CallbackManager.ts` | D-005/D-007 |
 | `_MiniAppSessionRegistry.ts`         | Merge into `_SessionManager.ts`                                    | D-007       |
 
@@ -170,7 +170,7 @@ These renames were decided in this conversation (see `decisions.md` D-005, D-006
 
 **This is the #1 risk for v3 working against the current cloud.**
 
-The v3 `MentraSession.sendConnectionInit()` sends:
+The v3 `VeillerSession.sendConnectionInit()` sends:
 
 ```json
 {"type": "tpa_connection_init", "packageName": "...", "apiKey": "...", "sdkVersion": "3.0.0", "timestamp": "..."}
@@ -188,7 +188,7 @@ The v2 `AppSession.sendConnectionInit()` sends:
 }
 ```
 
-The v3 version does **not send `sessionId`**. The current cloud's `bun-websocket.ts` parses `sessionId` from `CONNECTION_INIT` to extract the userId on the legacy path. However, the v3 factory (`_MentraSessionServerFactory`) passes `userId` via HTTP headers (`x-user-id`, `x-session-id`) during WebSocket upgrade. This works IF the cloud supports header-based auth for the app WebSocket path.
+The v3 version does **not send `sessionId`**. The current cloud's `bun-websocket.ts` parses `sessionId` from `CONNECTION_INIT` to extract the userId on the legacy path. However, the v3 factory (`_VeillerSessionServerFactory`) passes `userId` via HTTP headers (`x-user-id`, `x-session-id`) during WebSocket upgrade. This works IF the cloud supports header-based auth for the app WebSocket path.
 
 **Must verify:** Does the cloud's app WebSocket upgrade handler check for `x-user-id` / `x-session-id` headers? The `handleAppUpgrade` in `bun-websocket.ts` may or may not support this. If it only supports JWT auth or `CONNECTION_INIT` parsing, the v3 SDK will fail to authenticate.
 
@@ -196,7 +196,7 @@ The v3 version does **not send `sessionId`**. The current cloud's `bun-websocket
 
 ## What To Do Next (Priority Order)
 
-1. **Verify the handshake works** — test `MiniAppServer` + `MentraSession` against the real cloud. This validates or invalidates the entire approach. If headers don't work, we need to add `sessionId` back to `CONNECTION_INIT`.
+1. **Verify the handshake works** — test `MiniAppServer` + `VeillerSession` against the real cloud. This validates or invalidates the entire approach. If headers don't work, we need to add `sessionId` back to `CONNECTION_INIT`.
 2. **Fix the three must-fix bugs** — LocationManager leak, SubscriptionManager batching, missing v2 compat methods.
 3. **Apply the renames** — `_Compat*` → `_V2*Shim`, consolidate factory/registry/manager.
 4. **Create `src/session.ts`** entrypoint + update `package.json` exports.
@@ -209,13 +209,13 @@ The v3 version does **not send `sessionId`**. The current cloud's `bun-websocket
 
 ```
 packages/sdk/src/
-├── index.ts                          # Updated — exports MiniAppServer + MentraSession
+├── index.ts                          # Updated — exports MiniAppServer + VeillerSession
 ├── MiniAppServer.ts                  # v3 server host (extends AppServer)
 ├── display-utils.ts                  # Unchanged
 │
 ├── internal/                         # Server-level internals (to consolidate)
 │   ├── _MiniAppServerRuntime.ts      # → merge into _SessionManager
-│   ├── _MentraSessionServerFactory.ts # → merge into _SessionManager
+│   ├── _VeillerSessionServerFactory.ts # → merge into _SessionManager
 │   ├── _MiniAppServerCallbackBridge.ts # → merge into _SessionManager
 │   └── _MiniAppSessionRegistry.ts    # → merge into _SessionManager
 │
@@ -224,14 +224,14 @@ packages/sdk/src/
 │   └── WebSocketTransport.ts         # ws wrapper (only ws import)
 │
 ├── session/
-│   ├── index.ts                      # Re-exports MentraSession
-│   ├── MentraSession.ts              # Core orchestrator (~340 lines)
+│   ├── index.ts                      # Re-exports VeillerSession
+│   ├── VeillerSession.ts              # Core orchestrator (~340 lines)
 │   ├── DataStreamRouter.ts           # Two-level message dispatch
 │   ├── internal/
 │   │   ├── _MessageRouter.ts
 │   │   ├── _SessionLifecycleManager.ts  # → rename _ConnectionManager
 │   │   ├── _SubscriptionManager.ts
-│   │   ├── _CompatMentraSessionAdapter.ts  # → rename _V2SessionShim
+│   │   ├── _CompatVeillerSessionAdapter.ts  # → rename _V2SessionShim
 │   │   ├── _CompatEventManagerAdapter.ts   # → rename _V2EventManagerShim
 │   │   ├── _CompatCameraAdapter.ts         # → rename _V2CameraShim
 │   │   ├── _CompatSettingsAdapter.ts       # → rename _V2SettingsShim

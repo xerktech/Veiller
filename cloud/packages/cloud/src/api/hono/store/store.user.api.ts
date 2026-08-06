@@ -1,6 +1,6 @@
 /**
  * @fileoverview Hono store user API routes.
- * User endpoints for the MentraOS Store website.
+ * User endpoints for the Veiller Store website.
  * Mounted at: /api/store/user
  */
 

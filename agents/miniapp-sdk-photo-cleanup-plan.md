@@ -1,8 +1,8 @@
 # Miniapp SDK Photo Cleanup Plan
 
-Cleanup of the camera SDK's `takePhoto()` photo-capture path on the `mentra-miniapp-sdk` branch. Two problems to fix together:
+Cleanup of the camera SDK's `takePhoto()` photo-capture path on the `veiller-miniapp-sdk` branch. Two problems to fix together:
 
-1. **Security**: photos currently have no working storage destination — the live code writes to ephemeral local disk at a URL nothing serves (404s), and dead code in `R2StorageService.uploadMiniappPhoto()` writes to the **public** `mentra-store` CDN bucket. User-captured photos must land in a **private** bucket with signed-URL download.
+1. **Security**: photos currently have no working storage destination — the live code writes to ephemeral local disk at a URL nothing serves (404s), and dead code in `R2StorageService.uploadMiniappPhoto()` writes to the **public** `veiller-store` CDN bucket. User-captured photos must land in a **private** bucket with signed-URL download.
 2. **Naming**: `miniapp photo` is ambiguous — reads like "photos of miniapps" or "miniapp store photos." Camera SDK's photo-capture path should be unambiguously named `miniappSdkPhoto` / `miniapp-sdk-photo` / `miniapp_sdk_photos` everywhere it appears.
 
 Out of scope: `takePhoto()` SDK API surface, the V2 wiring generally (which was validated as end-to-end in a prior audit — see `agents/miniapp-store-backend-plan.md` context). This doc is strictly about the storage destination + naming.
@@ -17,7 +17,7 @@ Out of scope: `takePhoto()` SDK API surface, the V2 wiring generally (which was 
 
 **Dead code** (never called):
 
-- `R2StorageService.uploadMiniappPhoto()` at `cloud/packages/cloud/src/services/storage/r2-storage.service.ts:224-262` writes to `miniapp_photos/{userId}/{requestId}-{timestamp}.{ext}` under the **public** `mentra-store` bucket (CDN `mentra-store-cdn.mentraglass.com`). Returns a public URL. Not integrated into the upload endpoint.
+- `R2StorageService.uploadMiniappPhoto()` at `cloud/packages/cloud/src/services/storage/r2-storage.service.ts:224-262` writes to `miniapp_photos/{userId}/{requestId}-{timestamp}.{ext}` under the **public** `veiller-store` bucket (CDN `veiller-store-cdn.mentraglass.com`). Returns a public URL. Not integrated into the upload endpoint.
 
 So today, `takePhoto()` returns a broken URL. Nobody's noticed because V2 (camera SDK) hasn't been end-to-end tested with a real consumer miniapp yet.
 
@@ -25,19 +25,19 @@ So today, `takePhoto()` returns a broken URL. Nobody's noticed because V2 (camer
 
 ## Target state
 
-- **New private bucket** `mentra-miniapp-sdk-photos` on the existing Cloudflare R2 account. No CDN mapping.
+- **New private bucket** `veiller-miniapp-sdk-photos` on the existing Cloudflare R2 account. No CDN mapping.
 - Upload endpoint writes to the new private bucket via the existing `R2StorageService` s3 client (reuse existing creds).
 - `phone_photo_ready` message carries a **signed download URL** with 15-minute TTL, minted via `@aws-sdk/s3-request-presigner` (same pattern as the store-plan's bundle downloads).
 - Miniapp SDK receives the signed URL and can `fetch()` it. If the app needs the photo long-term, it downloads the bytes and persists them via the storage API — the signed URL is ephemeral.
 - All naming disambiguated: `miniappSdkPhoto` everywhere the camera SDK's photo path appears.
 - R2 lifecycle policy: auto-delete objects after 1 day. Photos are transient by design; cloud isn't responsible for long-term storage.
 
-Rationale for separate bucket (not sharing with the `mentra-miniapp-bundles` bucket from the store plan):
+Rationale for separate bucket (not sharing with the `veiller-miniapp-bundles` bucket from the store plan):
 
 - **Different lifecycles.** Bundles are small + persistent. Photos are large + ephemeral with TTL.
 - **Different access patterns.** Bundles get one sign per install (5 min). Photos get one sign per capture (15 min). TTLs shouldn't bleed across concerns.
 - **Lifecycle rules scope.** An R2 lifecycle rule auto-deleting objects at 30d is fine for photos, destructive for bundles. Bucket-scope rules avoid accidents.
-- **Symmetry with existing precedent**: the codebase already has `mentra-incidents` as a dedicated private bucket for a specific use. Same approach here.
+- **Symmetry with existing precedent**: the codebase already has `veiller-incidents` as a dedicated private bucket for a specific use. Same approach here.
 
 ---
 
@@ -81,7 +81,7 @@ No other mobile changes needed. File name `MiniappPhotoHandler.ts` can stay — 
 
 ### Shared collection
 
-New env var `R2_MINIAPP_SDK_PHOTOS_BUCKET=mentra-miniapp-sdk-photos` in `cloud/.env.example`.
+New env var `R2_MINIAPP_SDK_PHOTOS_BUCKET=veiller-miniapp-sdk-photos` in `cloud/.env.example`.
 
 ---
 
@@ -124,7 +124,7 @@ The phone SDK and miniapp see the signed URL exactly where they see the current 
 
 ## Rollout order
 
-1. Create `mentra-miniapp-sdk-photos` bucket on Cloudflare R2. Set 30-day expiration lifecycle rule. Add `R2_MINIAPP_SDK_PHOTOS_BUCKET` env var.
+1. Create `veiller-miniapp-sdk-photos` bucket on Cloudflare R2. Set 30-day expiration lifecycle rule. Add `R2_MINIAPP_SDK_PHOTOS_BUCKET` env var.
 2. Build `MiniappSdkPhotoStorageService` (new file).
 3. Rename file + class + field + env var across cloud code. Update all call sites.
 4. Replace local-disk write in the upload handler with `miniappSdkPhotoStorage.putPhoto()`. Replace constructed URL with signed download URL.

@@ -16,7 +16,7 @@ import {
   AppToCloudMessage,
   AppToCloudMessageType,
   CloudToAppMessageType,
-} from "@mentra/sdk";
+} from "@veiller/sdk";
 
 import { logger as rootLogger } from "../logging/pino-logger";
 import UserSession from "../session/UserSession";

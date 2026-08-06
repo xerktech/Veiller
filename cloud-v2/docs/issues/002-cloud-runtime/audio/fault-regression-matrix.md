@@ -100,7 +100,7 @@ Use distinct spoken markers so screenshots prove ordering:
   screenshots can assert the active path.
 - Pixel 8 USB E2E with Doppler-backed local cloud verified:
   - phone subject-token exchange succeeds only when the local core has
-    `MENTRA_CORE_JWT_SECRET` / `SUPABASE_JWT_SECRET`;
+    `VEILLER_CORE_JWT_SECRET` / `SUPABASE_JWT_SECRET`;
   - killing local cloud transitions Local Captions from `Cloud captions` to
     `Offline captions`, starts `LocalSttFallback`, and keeps retrying;
   - restarting local cloud reconnects without phone app restart, refreshes auth,
@@ -108,7 +108,7 @@ Use distinct spoken markers so screenshots prove ordering:
     `Cloud captions`;
   - real Soniox provider produced a cloud transcript after recovery.
 - Local cloud without Doppler auth env failed exchange with
-  `500 server_error` (`MENTRA_CORE_JWT_SECRET` missing). Treat that as a setup
+  `500 server_error` (`VEILLER_CORE_JWT_SECRET` missing). Treat that as a setup
   fault, not a reconnect-loop failure.
 - `scripts/dev-stack.ts` now defaults the test-OEM to port `3102` so it does not
   collide with the Local Captions dev server on `3100`, and auto-advertises a
@@ -125,7 +125,7 @@ Use distinct spoken markers so screenshots prove ordering:
 - 2026-06-14 Pixel 8 run reproduced AUD-F29: after closing Local Merge and
   opening Local Captions, the WebView connected but captions appeared offline for
   about 30 seconds. Logs showed repeated `QuickJSJni: Cannot get jni env because
-  the vm is not cached`, then `com.mentra.local-captions missed 6 pings`,
+  the vm is not cached`, then `com.veiller.local-captions missed 6 pings`,
   followed by crash-recovery respawn, `SUBSCRIBE transcription:auto`, PCM
   restart, and healthy `Cloud captions / UDP audio`. The mitigation is the
   foreground liveness probe documented in

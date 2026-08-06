@@ -50,7 +50,7 @@ export interface PaginatedIncidents {
 export function createAgentClient(config: ConsoleMcpConfig) {
   const apiKey = config.agentApiKey;
   if (!apiKey) {
-    throw new Error("Agent client requires MENTRA_AGENT_API_KEY");
+    throw new Error("Agent client requires VEILLER_AGENT_API_KEY");
   }
 
   async function request<T>(path: string, query?: Record<string, string>): Promise<T> {

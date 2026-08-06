@@ -6,9 +6,9 @@
  *
  * This replaces the cloud app's SSE + REST transport seam:
  *   - SSE broadcast(type, payload)  ->  session.ui.send(channel, payload)
- *   - REST GET/POST settings        ->  mentra.send(set-* / clear)
+ *   - REST GET/POST settings        ->  veiller.send(set-* / clear)
  *
- * All channels here are broadcast (`mentra.send` / `session.ui.on`); the
+ * All channels here are broadcast (`veiller.send` / `session.ui.on`); the
  * captions UI never needs request/response RPC.
  */
 
@@ -53,5 +53,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>
 }

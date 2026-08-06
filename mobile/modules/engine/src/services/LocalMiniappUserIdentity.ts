@@ -5,7 +5,7 @@ export interface LocalMiniappUserIdentityBackend {
 }
 
 /**
- * Keeps the stable Mentra user id available to local miniapps across process
+ * Keeps the stable Veiller user id available to local miniapps across process
  * restarts. The id is non-secret and is deliberately stored separately from
  * the short-lived Core access token.
  */
@@ -19,7 +19,7 @@ export class LocalMiniappUserIdentity {
     if (available) return available
 
     const resolved = (await resolveOnline()).trim()
-    if (!resolved) throw new Error("Mentra user identity is unavailable")
+    if (!resolved) throw new Error("Veiller user identity is unavailable")
     this.remember(resolved)
     return resolved
   }
@@ -34,7 +34,7 @@ export class LocalMiniappUserIdentity {
 
   remember(userId: string): void {
     const resolved = userId.trim()
-    if (!resolved) throw new Error("Mentra user identity is unavailable")
+    if (!resolved) throw new Error("Veiller user identity is unavailable")
     this.backend.set(resolved)
     this.current = resolved
   }

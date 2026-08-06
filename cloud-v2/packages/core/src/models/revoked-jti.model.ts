@@ -1,8 +1,8 @@
 /**
  * @fileoverview `revokedJtis` collection. Blacklist for revoked
- * Mentra-issued access-token jtis.
+ * Veiller-issued access-token jtis.
  *
- * Mentra access tokens are JWTs. Their signatures stay cryptographically
+ * Veiller access tokens are JWTs. Their signatures stay cryptographically
  * valid until natural expiry; to revoke one early (admin action, OEM
  * termination, session kill), we add its `jti` to this collection. Every
  * access-token verification consults this blacklist.

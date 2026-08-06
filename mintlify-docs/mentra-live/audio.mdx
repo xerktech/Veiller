@@ -56,7 +56,7 @@ Your app owns user-facing microphone permission copy, should ask for microphone 
   <Tab title="React Native">
 
 ```tsx
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 export function TranscriptLogger() {
   useBluetoothEvent('local_transcription', (event) => {
@@ -80,7 +80,7 @@ override fun onLocalTranscription(event: LocalTranscriptionEvent) {
   <Tab title="iOS">
 
 ```swift
-func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEvent) {
+func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didReceive event: BluetoothEvent) {
     if case let .localTranscription(transcription) = event {
         print("\(transcription.text) final=\(transcription.isFinal)")
     }
@@ -95,7 +95,7 @@ func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didReceive event: BluetoothEv
 React Native can listen for microphone PCM events. PCM events are self-describing so apps can pass the buffer directly to STT, WAV writing, or playback code without reading native SDK sources:
 
 ```tsx
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 export function MicPcmLogger() {
   useBluetoothEvent('mic_pcm', (event) => {
@@ -123,7 +123,7 @@ Voice Activity Detection means the glasses firmware is detecting whether the mic
 - `speaking_status` reports the current speaking/not-speaking state when the connected glasses provide it.
 
 ```tsx
-import {useBluetoothEvent} from '@mentra/bluetooth-sdk/react';
+import {useBluetoothEvent} from '@veiller/bluetooth-sdk/react';
 
 export function SpeakingLogger() {
   useBluetoothEvent('speaking_status', (event) => {
@@ -142,7 +142,7 @@ loudness gate, also called Barrier:
 - When enabled, quiet input is represented as silence while audio frames
   continue. This preserves a continuous audio timeline for voice agents.
 - When disabled, quiet center-microphone input passes through unchanged.
-- The standalone public Bluetooth SDK default is enabled. The Mentra App
+- The standalone public Bluetooth SDK default is enabled. The Veiller App
   manages separate persisted OS-level microphone preferences.
 - The SDK retains the setting and reapplies it when Mentra Live reconnects.
 

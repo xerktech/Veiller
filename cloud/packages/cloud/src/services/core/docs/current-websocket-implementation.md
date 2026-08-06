@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the current implementation of the WebSocket service in MentraOS, focusing on how it manages connections, sessions, and communication between clients (glasses) and Third-Party Applications (Apps). This service is critical for deaf and hard of hearing users who rely on the system's functionality.
+This document outlines the current implementation of the WebSocket service in Veiller, focusing on how it manages connections, sessions, and communication between clients (glasses) and Third-Party Applications (Apps). This service is critical for deaf and hard of hearing users who rely on the system's functionality.
 
 ## Key Files
 

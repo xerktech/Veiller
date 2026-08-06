@@ -10,15 +10,15 @@ import com.mentra.asg_client.service.core.AsgClientService;
 import com.mentra.asg_client.service.core.processors.CommandProcessor;
 
 /**
- * Debug receiver for polling BES trace logs into MentraBleTrace.
+ * Debug receiver for polling BES trace logs into VeillerBleTrace.
  *
  * Usage:
- *   adb shell am broadcast -a com.mentra.DEBUG_BES_TRACE --ez enabled true --ei interval_ms 5000
- *   adb shell am broadcast -a com.mentra.DEBUG_BES_TRACE --ez enabled false
+ *   adb shell am broadcast -a com.veiller.DEBUG_BES_TRACE --ez enabled true --ei interval_ms 5000
+ *   adb shell am broadcast -a com.veiller.DEBUG_BES_TRACE --ez enabled false
  */
 public class DebugBesTraceReceiver extends BroadcastReceiver {
     private static final String TAG = "DebugBesTraceReceiver";
-    public static final String ACTION_DEBUG_BES_TRACE = "com.mentra.DEBUG_BES_TRACE";
+    public static final String ACTION_DEBUG_BES_TRACE = "com.veiller.DEBUG_BES_TRACE";
     private static final long DEFAULT_INTERVAL_MS = 5000;
 
     @Override

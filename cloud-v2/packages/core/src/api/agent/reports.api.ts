@@ -1,5 +1,5 @@
 /**
- * Read-only report access for the private Mentra Dev Agent.
+ * Read-only report access for the private Veiller Dev Agent.
  *
  * This route intentionally exposes only report detail and artifact reads. It
  * does not share the broader admin router or accept human session credentials.

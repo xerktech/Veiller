@@ -1,14 +1,14 @@
-# Maestro Configuration for MentraOS
+# Maestro Configuration for Veiller
 
 # Global test configuration
 appId: ${MAESTRO_APP_ID:-com.xerktech.veiller}
-name: "MentraOS E2E Tests"
+name: "Veiller E2E Tests"
 
 # Test tags for organizing test runs
 tags:
   - mobile
   - react-native
-  - mentraos
+  - veiller
 
 # Global environment variables
 env:

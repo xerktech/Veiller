@@ -1,6 +1,6 @@
 # Dashboard Message Types
 
-This document explains the dashboard message types used for communication between Apps and the MentraOS Cloud.
+This document explains the dashboard message types used for communication between Apps and the Veiller Cloud.
 
 ## Message Flow
 
@@ -112,4 +112,4 @@ function handleMessage(message: CloudToAppMessage): void {
 }
 ```
 
-This message type system ensures reliable and type-safe communication between Apps and the MentraOS Cloud.
+This message type system ensures reliable and type-safe communication between Apps and the Veiller Cloud.

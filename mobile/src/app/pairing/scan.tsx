@@ -1,11 +1,11 @@
-import {type Device, type DeviceModel} from "@mentra/bluetooth-sdk"
-import {engine} from "@mentra/engine"
+import {type Device, type DeviceModel} from "@veiller/bluetooth-sdk"
+import {engine} from "@veiller/engine"
 import {useLocalSearchParams} from "expo-router"
 import {useEffect, useMemo, useRef, useState} from "react"
 import {ActivityIndicator, Image, Platform, ScrollView, TouchableOpacity, View} from "react-native"
 
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {Icon, Button, Header, Screen, Text} from "@/components/ignite"
 import GlassesTroubleshootingModal from "@/components/glasses/GlassesTroubleshootingModal"
 import Divider from "@/components/ui/Divider"
@@ -205,7 +205,7 @@ export default function SelectGlassesBluetoothScreen() {
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]} extraAndroidInsets>
-      <Header leftIcon="chevron-left" onLeftPress={handleBackOut} RightActionComponent={<MentraLogoStandalone />} />
+      <Header leftIcon="chevron-left" onLeftPress={handleBackOut} RightActionComponent={<VeillerLogoStandalone />} />
       <View className="flex-1 justify-center">
         <GlassView className="gap-6 rounded-3xl p-6 bg-primary-foreground" transparent={false}>
           <Image source={selectedImage} className="h-[90px] w-[156px] mx-auto" resizeMode="contain" />

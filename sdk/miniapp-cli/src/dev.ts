@@ -8,7 +8,7 @@ import { getLanIp, getMdnsHostname } from './lan.js';
 
 const DEFAULT_DEV_PORT = 3000;
 const DEV_PORT_SCAN_LIMIT = 50;
-/** How often to re-check Wi-Fi / LAN IP while `mentra-miniapp dev` is running. */
+/** How often to re-check Wi-Fi / LAN IP while `veiller-miniapp dev` is running. */
 const LAN_IP_POLL_MS = 2_000;
 
 export interface DevAttestationInput {
@@ -61,7 +61,7 @@ function pickDevPort(start: number): number {
   const end = start + DEV_PORT_SCAN_LIMIT - 1;
   console.error(
     `Error: no free adjacent dev port pair found between base ports ${start} and ${end}. ` +
-      '`mentra-miniapp dev` needs one port for static files and the next port for live reload.',
+      '`veiller-miniapp dev` needs one port for static files and the next port for live reload.',
   );
   process.exit(1);
 }
@@ -194,7 +194,7 @@ export async function dev(options: DevOptions = {}): Promise<void> {
     process.exit(1);
   }
 
-  // Sidecar on userPort + 1 — hosts the `__mentra_dev` WebSocket the
+  // Sidecar on userPort + 1 — hosts the `__veiller_dev` WebSocket the
   // phone uses for live reload + console-log forwarding. The
   // `onBeforeBroadcast` hook rebuilds `dist/` before the phone is
   // notified, so the next `bundle.zip` fetch ships current code.
@@ -246,7 +246,7 @@ export async function dev(options: DevOptions = {}): Promise<void> {
     console.log('\n╔══════════════════════════════════════════════════════════════╗');
     console.log('║  To test your miniapp on glasses:                            ║');
     console.log('║                                                              ║');
-    console.log('║    1. Open the Mentra App on your phone                      ║');
+    console.log('║    1. Open the Veiller App on your phone                      ║');
     console.log('║    2. Settings → Developer settings                          ║');
     console.log('║    3. Under "Mini App Development", tap                      ║');
     console.log('║       "Scan Mini App QR Code" and scan the QR below          ║');
@@ -257,13 +257,13 @@ export async function dev(options: DevOptions = {}): Promise<void> {
     console.log('║    • Keep this process and computer running.                 ║');
     console.log('║    • Each package gets its own dev entry, so you can scan    ║');
     console.log('║      and test multiple dev miniapps side by side.            ║');
-    console.log('║    • The Mentra App caches each miniapp name and icon.       ║');
+    console.log('║    • The Veiller App caches each miniapp name and icon.       ║');
     console.log('║                                                              ║');
     console.log('║  For a persistent install, run: bun run release              ║');
     console.log('╚══════════════════════════════════════════════════════════════╝\n');
   };
 
-  const defaultQrPath = join(os.tmpdir(), `mentra-dev-qr-${packageName}-${port}.png`);
+  const defaultQrPath = join(os.tmpdir(), `veiller-dev-qr-${packageName}-${port}.png`);
   const qrOutputPath = resolve(options.qrOutput ?? defaultQrPath);
   const cleanupQrOnExit = !options.qrOutput;
 
@@ -309,7 +309,7 @@ export async function dev(options: DevOptions = {}): Promise<void> {
         const previous = lanIp;
         lanIp = newIp;
         console.log(`LAN IP committed: ${previous} → ${newIp}`);
-        console.log('New QR (re-scan if the Mentra App still has the old IP):');
+        console.log('New QR (re-scan if the Veiller App still has the old IP):');
         printBanner();
         if (mdnsHost) {
           console.log(`mDNS: ${mdnsHost}\n`);

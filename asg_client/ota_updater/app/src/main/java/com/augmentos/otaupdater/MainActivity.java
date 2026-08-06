@@ -1,4 +1,4 @@
-package com.mentra.otaupdater;
+package com.veiller.otaupdater;
 
 import android.content.Intent;
 import android.os.Build;
@@ -6,12 +6,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import com.mentra.otaupdater.helper.Constants;
+import com.veiller.otaupdater.helper.Constants;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import com.mentra.otaupdater.events.DownloadProgressEvent;
-import com.mentra.otaupdater.events.InstallationProgressEvent;
+import com.veiller.otaupdater.events.DownloadProgressEvent;
+import com.veiller.otaupdater.events.InstallationProgressEvent;
 
 /**
  * Thin UI layer for OTA Updater

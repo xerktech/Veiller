@@ -1,5 +1,5 @@
 /**
- * PhotoTestApp — MentraOS AppServer for testing photo request flows.
+ * PhotoTestApp — Veiller AppServer for testing photo request flows.
  *
  * Specifically tests:
  * - Photo capture success path (glasses → /photo-upload → resolve)
@@ -11,7 +11,7 @@
  * can display whether we got a real error or a generic timeout.
  */
 
-import { AppServer, AppSession } from "@mentra/sdk"
+import { AppServer, AppSession } from "@veiller/sdk"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ class PhotoTestSession {
 
 // ─── Session Store ───────────────────────────────────────────────────────────
 
-const SESSIONS_KEY = Symbol.for("mentra.photo-test.sessions")
+const SESSIONS_KEY = Symbol.for("veiller.photo-test.sessions")
 ;(globalThis as any)[SESSIONS_KEY] ??= new Map<string, PhotoTestSession>()
 
 function getSessions(): Map<string, PhotoTestSession> {

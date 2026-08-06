@@ -53,7 +53,7 @@ Takes `"transcription:en-US?hints=ja"` → returns `"transcription:en-US"`.
 Takes `"transcription:auto?no-language-identification=true"` → returns `"transcription:auto"`.
 Takes `"transcription:en-US"` → returns `"transcription:en-US"` (no-op).
 
-Uses `parseLanguageStream()` internally — already available in `@mentra/sdk/types/streams`. Strips everything after `?`. Returns the input unchanged if it's not a language stream.
+Uses `parseLanguageStream()` internally — already available in `@veiller/sdk/types/streams`. Strips everything after `?`. Returns the input unchanged if it's not a language stream.
 
 **Updated `updateSubscriptions()`:**
 

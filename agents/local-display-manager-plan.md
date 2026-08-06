@@ -1,6 +1,6 @@
 # Local Display Manager Plan
 
-Branch: `mentra-miniapp-sdk`
+Branch: `veiller-miniapp-sdk`
 Scope: phone-side only; local miniapp path only. Cloud path is untouched.
 
 ## Goal

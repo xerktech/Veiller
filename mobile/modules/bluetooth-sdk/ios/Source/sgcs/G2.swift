@@ -1,6 +1,6 @@
 //
 //  G2.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Rewritten for EvenHub protocol (G2-native protobuf-based display system)
 //  Based on reverse-engineered protocol from ae_g2_rev
@@ -12,8 +12,8 @@ import Foundation
 import UIKit
 
 /// Keep a low-rate, non-audio EvenHub sensor stream active so iOS continues receiving BLE
-/// notifications while the Mentra App is backgrounded. The samples stay internal unless IMU was
-/// explicitly enabled through Mentra's developer-facing setting.
+/// notifications while the Veiller App is backgrounded. The samples stay internal unless IMU was
+/// explicitly enabled through Veiller's developer-facing setting.
 private let g2ImuKeepaliveEnabled = true
 private let g2ImuKeepaliveReportPace: Int32 = 1000
 private let g2ImuConfirmationDelay: TimeInterval = 2

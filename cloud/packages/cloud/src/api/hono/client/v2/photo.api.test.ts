@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 // The middleware reads AUGMENTOS_AUTH_JWT_SECRET at module load and throws if
 // unset. Set it BEFORE importing.
 process.env.AUGMENTOS_AUTH_JWT_SECRET = "test-secret";
-process.env.MENTRA_PHOTO_UPLOAD_SECRET = "test-upload-secret";
+process.env.VEILLER_PHOTO_UPLOAD_SECRET = "test-upload-secret";
 process.env.CLOUD_PUBLIC_HOST_NAME = "test.example.com";
 
 // Stub R2 storage so tests are offline and deterministic.
@@ -114,8 +114,8 @@ describe("v2 photo API", () => {
     });
 
     test("fails closed when the upload signing secret is missing", async () => {
-      const prev = process.env.MENTRA_PHOTO_UPLOAD_SECRET;
-      delete process.env.MENTRA_PHOTO_UPLOAD_SECRET;
+      const prev = process.env.VEILLER_PHOTO_UPLOAD_SECRET;
+      delete process.env.VEILLER_PHOTO_UPLOAD_SECRET;
       try {
         const res = await app.request("http://x/request", {
           method: "POST",
@@ -125,7 +125,7 @@ describe("v2 photo API", () => {
         const json = (await res.json()) as { code: string };
         expect(json.code).toBe("upload_secret_missing");
       } finally {
-        process.env.MENTRA_PHOTO_UPLOAD_SECRET = prev;
+        process.env.VEILLER_PHOTO_UPLOAD_SECRET = prev;
       }
     });
   });
@@ -268,8 +268,8 @@ describe("v2 photo API", () => {
 
     test("fails closed when the upload verification secret is missing", async () => {
       const requestId = await provision();
-      const prev = process.env.MENTRA_PHOTO_UPLOAD_SECRET;
-      delete process.env.MENTRA_PHOTO_UPLOAD_SECRET;
+      const prev = process.env.VEILLER_PHOTO_UPLOAD_SECRET;
+      delete process.env.VEILLER_PHOTO_UPLOAD_SECRET;
       try {
         const { body } = multipartBody("x");
         const res = await app.request(`http://x/upload/${requestId}`, {
@@ -282,7 +282,7 @@ describe("v2 photo API", () => {
         expect(json.code).toBe("upload_secret_missing");
         expect(putPhoto).not.toHaveBeenCalled();
       } finally {
-        process.env.MENTRA_PHOTO_UPLOAD_SECRET = prev;
+        process.env.VEILLER_PHOTO_UPLOAD_SECRET = prev;
       }
     });
 

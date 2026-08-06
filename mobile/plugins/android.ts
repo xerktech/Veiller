@@ -25,7 +25,7 @@ const withAndroidWorkingConfig: ConfigPlugin = (config) => {
   return config
 }
 
-// Derive the active Android applicationId. Honors MENTRAOS_BUILD_NAME so that
+// Derive the active Android applicationId. Honors VEILLER_BUILD_NAME so that
 // build-variant suffixes flow through manifest entries that would otherwise
 // hardcode the base package (e.g. the DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION).
 function getAndroidPackageName(config: any): string {
@@ -55,18 +55,18 @@ function withAppBuildGradleModifications(config: any) {
       const credentialsAndSentry = `
 /**
  * Release-Store credentials.
- * Looks for keystore in shared location (~/.mentra/credentials/) first,
+ * Looks for keystore in shared location (~/.veiller/credentials/) first,
  * then falls back to repo-local credentials/ folder.
  * Keystore filename is selected at prebuild time based on EXPO_PUBLIC_DEPLOYMENT_REGION.
  * If no keystore is found, falls back to debug keystore for local development.
  */
-def releaseStorePassword = project.hasProperty("MENTRAOS_UPLOAD_STORE_PASSWORD") ? project.property("MENTRAOS_UPLOAD_STORE_PASSWORD") : ""
-def releaseKeyPassword = project.hasProperty("MENTRAOS_UPLOAD_KEY_PASSWORD") ? project.property("MENTRAOS_UPLOAD_KEY_PASSWORD") : ""
-def releaseKeyAlias = project.hasProperty("MENTRAOS_UPLOAD_KEY_ALIAS") ? project.property("MENTRAOS_UPLOAD_KEY_ALIAS") : "upload"
+def releaseStorePassword = project.hasProperty("VEILLER_UPLOAD_STORE_PASSWORD") ? project.property("VEILLER_UPLOAD_STORE_PASSWORD") : ""
+def releaseKeyPassword = project.hasProperty("VEILLER_UPLOAD_KEY_PASSWORD") ? project.property("VEILLER_UPLOAD_KEY_PASSWORD") : ""
+def releaseKeyAlias = project.hasProperty("VEILLER_UPLOAD_KEY_ALIAS") ? project.property("VEILLER_UPLOAD_KEY_ALIAS") : "upload"
 def releaseRegion = "${regionLabel}"
 
 // Find keystore: check shared location first, then local
-def sharedKeystore = new File(System.getProperty("user.home"), ".mentra/credentials/${keystoreFilename}")
+def sharedKeystore = new File(System.getProperty("user.home"), ".veiller/credentials/${keystoreFilename}")
 def localKeystore = file('../../credentials/${keystoreFilename}')
 def releaseKeystoreFile = sharedKeystore.exists() ? sharedKeystore : (localKeystore.exists() ? localKeystore : null)
 
@@ -76,7 +76,7 @@ def hasReleaseSigningConfig = releaseKeystoreFile != null && releaseStorePasswor
 // Print signing configuration being used
 println ""
 println "=============================================="
-println "[MentraOS] Signing Configuration"
+println "[Veiller] Signing Configuration"
 println "=============================================="
 println "  Region: \${releaseRegion}"
 if (hasReleaseSigningConfig) {
@@ -88,7 +88,7 @@ if (hasReleaseSigningConfig) {
     println "    - \${sharedKeystore.absolutePath} (\${sharedKeystore.exists() ? 'exists' : 'not found'})"
     println "    - \${localKeystore.absolutePath} (\${localKeystore.exists() ? 'exists' : 'not found'})"
     if (releaseKeystoreFile != null && !releaseStorePassword) {
-        println "  NOTE: Keystore found but MENTRAOS_UPLOAD_STORE_PASSWORD not set"
+        println "  NOTE: Keystore found but VEILLER_UPLOAD_STORE_PASSWORD not set"
     }
     println ""
     println "  Release builds will be signed with debug key (NOT for production!)"

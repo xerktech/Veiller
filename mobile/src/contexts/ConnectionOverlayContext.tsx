@@ -6,7 +6,7 @@ import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 import {create} from "zustand"
 
 const CANCEL_BUTTON_DELAY_MS = 10000 // 10 seconds before enabling cancel button

@@ -10,7 +10,7 @@ export function registerAdminTools(server: McpServer, config: ConsoleMcpConfig):
   server.registerTool(
     "admin_check",
     {
-      description: "Verify Mentra admin JWT and return admin email.",
+      description: "Verify Veiller admin JWT and return admin email.",
       inputSchema: {},
     },
     async () => textContent(await admin().check()),

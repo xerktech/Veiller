@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * bstack — BetterStack CLI for MentraCloud SRE
+ * bstack — BetterStack CLI for VeillerCloud SRE
  *
  * A CLI tool that wraps BetterStack's SQL API with pre-built SRE queries.
  * Enables instant production diagnostics without constructing ClickHouse SQL by hand.
@@ -53,7 +53,7 @@ import {
 // ---------------------------------------------------------------------------
 // Doppler auto-load for SRE credentials
 // ---------------------------------------------------------------------------
-// If BETTERSTACK_USERNAME isn't set, try loading from Doppler mentra-sre project.
+// If BETTERSTACK_USERNAME isn't set, try loading from Doppler veiller-sre project.
 // This means you can just run `bstack health` without wrapping in `doppler run`.
 
 function tryDopplerLoad(): void {
@@ -62,7 +62,7 @@ function tryDopplerLoad(): void {
   try {
     const { execSync } = require("child_process");
     const get = (key: string): string =>
-      execSync(`doppler secrets get ${key} --project mentra-sre --config dev --plain 2>/dev/null`, {
+      execSync(`doppler secrets get ${key} --project veiller-sre --config dev --plain 2>/dev/null`, {
         encoding: "utf-8",
         timeout: 5000,
       }).trim();
@@ -80,9 +80,9 @@ function tryDopplerLoad(): void {
         /* optional — API token not required for SQL queries */
       }
     }
-    if (!process.env.MENTRA_ADMIN_JWT) {
+    if (!process.env.VEILLER_ADMIN_JWT) {
       try {
-        process.env.MENTRA_ADMIN_JWT = get("MENTRA_ADMIN_JWT");
+        process.env.VEILLER_ADMIN_JWT = get("VEILLER_ADMIN_JWT");
       } catch {
         /* optional — admin JWT only needed for admin API calls */
       }
@@ -98,7 +98,7 @@ tryDopplerLoad();
 const _SQL_USERNAME = process.env.BETTERSTACK_SQL_USERNAME || process.env.BETTERSTACK_USERNAME || "";
 const _SQL_PASSWORD = process.env.BETTERSTACK_SQL_PASSWORD || process.env.BETTERSTACK_PASSWORD || "";
 const _API_TOKEN = process.env.BETTERSTACK_API_TOKEN || "";
-const _ADMIN_JWT = process.env.MENTRA_ADMIN_JWT || "";
+const _ADMIN_JWT = process.env.VEILLER_ADMIN_JWT || "";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -158,8 +158,8 @@ function normalizeDuration(input: string): string {
  * Pick the BetterStack log source table for a region.
  */
 function getSourceForRegion(region: string): string {
-  // All regions send to the MentraCloud-Prod source.
-  // Regional collector sources (mentra-france, mentra-east-asia, etc.) exist
+  // All regions send to the VeillerCloud-Prod source.
+  // Regional collector sources (veiller-france, veiller-east-asia, etc.) exist
   // but the cloud process logs all go to prod via Vector/BetterStack collectors.
   return getLogsTable("prod");
 }
@@ -210,7 +210,7 @@ async function runSql(sql: string): Promise<QueryResult> {
 
   if (!username || !password) {
     console.error("❌ BetterStack SQL credentials not set.");
-    console.error("   Run: doppler run --project mentra-sre --config dev -- bstack <command>");
+    console.error("   Run: doppler run --project veiller-sre --config dev -- bstack <command>");
     console.error("   Or set BETTERSTACK_USERNAME and BETTERSTACK_PASSWORD env vars.");
     process.exit(1);
   }
@@ -1076,9 +1076,9 @@ async function cmdSession(flags: Record<string, string>, positional: string[]) {
     process.exit(1);
   }
 
-  const jwt = _ADMIN_JWT || process.env.MENTRA_ADMIN_JWT || "";
+  const jwt = _ADMIN_JWT || process.env.VEILLER_ADMIN_JWT || "";
   if (!jwt) {
-    console.error("❌ MENTRA_ADMIN_JWT not set. Set it in env or Doppler mentra-sre project.");
+    console.error("❌ VEILLER_ADMIN_JWT not set. Set it in env or Doppler veiller-sre project.");
     process.exit(1);
   }
 
@@ -1172,7 +1172,7 @@ async function cmdRunbook(positional: string[]) {
 
 function cmdHelp() {
   console.log(`
-bstack — BetterStack CLI for MentraCloud SRE
+bstack — BetterStack CLI for VeillerCloud SRE
 
 ═══════════════════════════════════════════════════════════════════════════
 HOW IT WORKS (for humans and AI agents)
@@ -1208,13 +1208,13 @@ Do NOT use json.field dot notation — it doesn't work on these tables.
 
 Credentials are loaded in this order:
   1. Environment variables (BETTERSTACK_USERNAME, BETTERSTACK_PASSWORD, etc.)
-  2. Auto-load from Doppler: doppler secrets get --project mentra-sre --config dev
+  2. Auto-load from Doppler: doppler secrets get --project veiller-sre --config dev
      (runs automatically if env vars are missing and doppler CLI is installed)
-SRE credentials live in Doppler project "mentra-sre" (NOT "mentraos-cloud").
-Cloud runtime secrets (MONGO_URL, etc.) are in "mentraos-cloud" — don't mix them.
+SRE credentials live in Doppler project "veiller-sre" (NOT "veiller-cloud").
+Cloud runtime secrets (MONGO_URL, etc.) are in "veiller-cloud" — don't mix them.
 
 The admin API (for 'session' command) hits the cloud's /api/admin/memory/now
-endpoint with a Bearer JWT. The JWT is MENTRA_ADMIN_JWT from mentra-sre.
+endpoint with a Bearer JWT. The JWT is VEILLER_ADMIN_JWT from veiller-sre.
 
 Health checks hit each region's /health endpoint directly (no BetterStack):
 ${Object.entries(REGIONS)
@@ -1252,7 +1252,7 @@ Investigation:
 
   bstack session <userId> --host <hostname>  Hits GET /api/admin/memory/now on the host,
     finds the user's session, shows running apps, subscriptions, mic state.
-    Requires MENTRA_ADMIN_JWT. Host must be the actual cloud hostname.
+    Requires VEILLER_ADMIN_JWT. Host must be the actual cloud hostname.
 
 Diagnostics:
   bstack health                              Fetches /health from ALL regions in parallel.

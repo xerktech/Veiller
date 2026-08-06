@@ -1,4 +1,4 @@
-# Updated Feedback on `@mentra/bluetooth-sdk` - Hackathon Follow-Up
+# Updated Feedback on `@veiller/bluetooth-sdk` - Hackathon Follow-Up
 
 Current as of May 19, 2026. This refreshes the older hackathon feedback against the current SDK and starter-kit worktrees. It separates issues that are fixed or mostly addressed from items that still need product or engineering follow-up.
 
@@ -8,7 +8,7 @@ The SDK is in a much better place than the original feedback implied:
 
 - The React Native starter kit now documents Bun-based setup and the iOS GStreamer requirement.
 - The starter kit includes `setup-gstreamer-ios.sh`, and the iOS podspec attempts to install GStreamer automatically when missing from the default path.
-- `connectFirst` is no longer the relevant API shape. The SDK now exposes `scan(model, {onResults, timeoutMs})`, and the React layer exposes `useBluetoothScan` / `useMentraBluetooth` for picker-oriented flows.
+- `connectFirst` is no longer the relevant API shape. The SDK now exposes `scan(model, {onResults, timeoutMs})`, and the React layer exposes `useBluetoothScan` / `useVeillerBluetooth` for picker-oriented flows.
 - `searchResults` now has an explicit stable-order contract in the SDK types.
 - The React Native public surface now directs apps to shaped hook state instead of manual status plumbing.
 
@@ -26,11 +26,11 @@ The main remaining problems are less about "does the demo run at all?" and more 
 
 Status: partially addressed.
 
-The original "fresh clone cannot build iOS because GStreamer is missing" report is no longer accurate in its strict form. The React Native README now tells developers to run `bun run ios:setup`, explains that the companion direct receiver needs the GStreamer iOS SDK, and documents `GSTREAMER_ROOT_IOS`. The starter kit also has `modules/mentra-direct-receiver/scripts/setup-gstreamer-ios.sh`, and the iOS podspec attempts to run it during pod install when GStreamer is absent from the default location.
+The original "fresh clone cannot build iOS because GStreamer is missing" report is no longer accurate in its strict form. The React Native README now tells developers to run `bun run ios:setup`, explains that the companion direct receiver needs the GStreamer iOS SDK, and documents `GSTREAMER_ROOT_IOS`. The starter kit also has `modules/veiller-direct-receiver/scripts/setup-gstreamer-ios.sh`, and the iOS podspec attempts to run it during pod install when GStreamer is absent from the default location.
 
 What remains open:
 
-- `MentraDirectReceiver.podspec` still links `GStreamer.framework` and includes all Objective-C/Swift sources by default.
+- `VeillerDirectReceiver.podspec` still links `GStreamer.framework` and includes all Objective-C/Swift sources by default.
 - A developer who only wants direct phone photo upload still pays the GStreamer install/build cost because the photo receiver and WebRTC receiver live in the same native module/podspec.
 - GStreamer-iOS is still a large, unusual dependency for a starter app. It may be fine as an advanced demo, but it should not be unavoidable for the common photo-only path.
 
@@ -103,7 +103,7 @@ Current good state:
 
 - `BluetoothSdk.scan(DeviceModels.MentraLive, {onResults, timeoutMs})` supports progressive picker updates.
 - Native Android and iOS scan APIs also expose progressive results callbacks.
-- `useBluetoothScan` and `useMentraBluetooth` give React apps a higher-level path without manually wiring status listeners.
+- `useBluetoothScan` and `useVeillerBluetooth` give React apps a higher-level path without manually wiring status listeners.
 - Docs now explicitly say `onResults` is for live UI updates and the returned list is the final scan result.
 
 Documented behavior:
@@ -166,18 +166,18 @@ Documented behavior:
 
 Status: addressed for React Native in the current worktree. Native Android/iOS status grouping remains a later docs/API cleanup.
 
-The current React Native direction is good: public docs are moving developers toward `useMentraBluetooth()` with shaped state:
+The current React Native direction is good: public docs are moving developers toward `useVeillerBluetooth()` with shaped state:
 
 - `mentra.glasses`
-- `mentra.sdk`
-- `mentra.scan`
+- `veiller.sdk`
+- `veiller.scan`
 
 This is better than asking apps to assemble their own status model from lower-level events.
 
 Current React Native boundary:
 
-- The root `@mentra/bluetooth-sdk` export is now an explicit app-facing command and event facade.
-- React app status is documented through `useMentraBluetooth()` and its `mentra.glasses`, `mentra.sdk`, and `mentra.scan` state.
+- The root `@veiller/bluetooth-sdk` export is now an explicit app-facing command and event facade.
+- React app status is documented through `useVeillerBluetooth()` and its `mentra.glasses`, `veiller.sdk`, and `veiller.scan` state.
 - For native Android/iOS, grouped status docs/API cleanup can wait; the current pass intentionally does not change those SDKs.
 
 ### 10. Native SDK Source Organization Needed The React Native Shape
@@ -186,8 +186,8 @@ Status: addressed in the current worktree.
 
 The React Native SDK is the clearest reference shape: a small public facade, typed models, React hooks, and private native bridge details. Native iOS and Android now follow that direction more closely:
 
-- iOS keeps `MentraBluetoothSDK.swift` as the public facade and moves models/callbacks/helpers into focused `Audio`, `Camera`, `Connection`, `Errors`, `Events`, `Internal`, `Requests`, `Status`, `Streaming`, and `Types` files.
-- Android keeps `MentraBluetoothSdk.kt` as the facade and splits the former broad model file into the same domain groups.
+- iOS keeps `VeillerBluetoothSDK.swift` as the public facade and moves models/callbacks/helpers into focused `Audio`, `Camera`, `Connection`, `Errors`, `Events`, `Internal`, `Requests`, `Status`, `Streaming`, and `Types` files.
+- Android keeps `VeillerBluetoothSdk.kt` as the facade and splits the former broad model file into the same domain groups.
 
 Recommended follow-up:
 
@@ -208,7 +208,7 @@ These should not be repeated as current blockers:
 
 - The starter-kit direct photo receiver has the right ergonomics: start a phone-local receiver, pass the upload URL to `requestPhoto`, and receive an on-disk JPEG URI.
 - `scan(..., {onResults})` is the right primitive for user-facing pickers.
-- `useMentraBluetooth()` is a strong React Native direction because it gives app developers shaped state instead of native-store snapshots.
+- `useVeillerBluetooth()` is a strong React Native direction because it gives app developers shaped state instead of native-store snapshots.
 - Stable scan-result ordering avoids UI churn when devices refresh.
 - The Expo plugin continues to hide most Android/iOS permission plumbing from React Native apps.
 - Continuous PCM is a good signal source for external STT.

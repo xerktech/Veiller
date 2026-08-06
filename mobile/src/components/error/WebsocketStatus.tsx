@@ -4,7 +4,7 @@ import {TouchableOpacity, View} from "react-native"
 import {Icon, Text, type IconTypes} from "@/components/ignite"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
-import {engine, useRefresh, BgTimer, SETTINGS, useSetting} from "@mentra/engine"
+import {engine, useRefresh, BgTimer, SETTINGS, useSetting} from "@veiller/engine"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 

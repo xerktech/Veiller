@@ -67,7 +67,7 @@ final class PcmStreamPlayer: @unchecked Sendable {
         self.streamId = streamId
         self.sampleRate = sampleRate
         self.format = format
-        stateQueue = DispatchQueue(label: "com.mentra.pcm-stream.\(streamId)")
+        stateQueue = DispatchQueue(label: "com.veiller.pcm-stream.\(streamId)")
 
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)

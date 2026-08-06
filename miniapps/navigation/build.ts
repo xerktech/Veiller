@@ -82,7 +82,7 @@ if (!backgroundResult.success) {
 
 const tailwind = (await import("bun-plugin-tailwind")).default
 
-// Force a SINGLE React copy in the UI bundle. The @mentra/miniapp SDK is
+// Force a SINGLE React copy in the UI bundle. The @veiller/miniapp SDK is
 // symlinked and can resolve its own (different-version) React from a separate
 // node_modules, which produces two React instances → "Invalid hook call /
 // more than one copy of React". This plugin rewrites every react / react-dom

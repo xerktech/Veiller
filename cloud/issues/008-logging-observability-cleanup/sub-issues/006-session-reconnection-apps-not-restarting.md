@@ -12,7 +12,7 @@ When a user's session disconnects and they reconnect, previously running apps do
 
 **Timeline:**
 
-1. **21:03:35** - `com.mentra.captions` started, working normally
+1. **21:03:35** - `com.veiller.captions` started, working normally
 2. **21:14:43** - App disconnected (code 1006), auto-resurrected at 21:14:48 ✅
 3. **21:27:21** - Phone WebSocket connection closing
 4. **21:28:21** - Grace period expired (60 seconds), session disposed

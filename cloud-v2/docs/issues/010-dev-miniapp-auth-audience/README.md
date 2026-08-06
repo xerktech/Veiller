@@ -10,15 +10,15 @@ foregrounding, WebView lifecycle, hot reload, and dev server bridge routing.
 
 Miniapp backend auth has a different requirement: the token audience must be the
 real miniapp package name that owns the backend, such as
-`com.mentra.local-merge`.
+`com.veiller.local-merge`.
 
 Those two identities are currently easy to confuse:
 
-1. Local Merge declares `packageName = "com.mentra.local-merge"` in
+1. Local Merge declares `packageName = "com.veiller.local-merge"` in
    `miniapp.json`.
 2. The scanner registers the dev bundle into the single host slot `com.dev`.
 3. The host mints a miniapp token for `com.dev`.
-4. Local Merge backend verifies `aud = "com.mentra.local-merge"`.
+4. Local Merge backend verifies `aud = "com.veiller.local-merge"`.
 5. The backend rejects the request, and the miniapp reports
    "Insight request failed".
 
@@ -115,7 +115,7 @@ to miniapp JavaScript.
 
 The intended flow:
 
-1. The user signs into the mobile app through the normal Mentra/OEM auth path.
+1. The user signs into the mobile app through the normal Veiller/OEM auth path.
 2. The mobile app/cloud-client gets Core/runtime credentials through the trusted
    host layer.
 3. A miniapp starts inside the local runtime.
@@ -123,14 +123,14 @@ The intended flow:
 5. The host/cloud-client asks Core to mint a miniapp token.
 6. Core mints a short-lived JWT:
    - `iss`: `cloud-core` by default
-   - `sub`: the Mentra user id
-   - `aud`: the miniapp package name, for example `com.mentra.local-merge`
+   - `sub`: the Veiller user id
+   - `aud`: the miniapp package name, for example `com.veiller.local-merge`
    - `exp`: short expiry
    - optional/custom claims: `tenantId`, `jti`, etc.
 7. The runtime passes only that miniapp token into the miniapp session via
    `CONNECT_ACK` and later `AUTH_UPDATE` refreshes.
 8. The miniapp calls its backend with `session.auth.fetch(...)`.
-9. The backend verifies the JWT with `@mentra/auth`, usually through
+9. The backend verifies the JWT with `@veiller/auth`, usually through
    `app.use("/api/*", mentraAuth.hono())`:
    - signature matches Core's JWKS,
    - `iss` is trusted,
@@ -148,7 +148,7 @@ Separate the identities explicitly:
 | Identity | Example | Owned by | Used for |
 | --- | --- | --- | --- |
 | Runtime package | `com.dev` | host dev runtime | foregrounding, WebView lifecycle, dev bridge routing |
-| Auth audience package | `com.mentra.local-merge` | trusted install/dev registration | miniapp backend token `aud` |
+| Auth audience package | `com.veiller.local-merge` | trusted install/dev registration | miniapp backend token `aud` |
 
 For installed or released miniapps, the runtime package and auth audience are
 normally the same package name.
@@ -207,7 +207,7 @@ constrain the grant:
 
 Observed while running Local Merge as a dev miniapp:
 
-1. Start Local Merge through `mentra-miniapp dev`.
+1. Start Local Merge through `veiller-miniapp dev`.
 2. Scan the dev QR in the mobile app.
 3. Speak enough text for Merge to request an insight.
 4. UI shows "Insight request failed".
@@ -220,13 +220,13 @@ cloudClient: debug: minted miniapp token {"packageName":"com.dev"}
 6. Local Merge backend expects:
 
 ```text
-aud = "com.mentra.local-merge"
+aud = "com.veiller.local-merge"
 ```
 
 Expected result after the fix:
 
 - Runtime still routes the live dev app as `com.dev`.
-- Auth token audience is `com.mentra.local-merge`.
+- Auth token audience is `com.veiller.local-merge`.
 - The backend accepts the token and can create an insight.
 
 ## Related Docs

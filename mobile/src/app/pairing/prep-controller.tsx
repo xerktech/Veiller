@@ -3,7 +3,7 @@ import {useRoute} from "@react-navigation/native"
 import {Linking, PermissionsAndroid, Image, Platform, View} from "react-native"
 import type {Permission} from "react-native"
 
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {Button, Header, Icon, Screen, Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
@@ -12,7 +12,7 @@ import {showAlert} from "@/utils/AlertUtils"
 import {PermissionFeatures, checkConnectivityRequirementsUI, requestFeaturePermissions} from "@/utils/PermissionsUtils"
 import {useState} from "react"
 import GlassesTroubleshootingModal from "@/components/glasses/GlassesTroubleshootingModal"
-import {engine} from "@mentra/engine"
+import {engine} from "@veiller/engine"
 
 type BluetoothPermission = Permission | "android.permission.BLUETOOTH" | "android.permission.BLUETOOTH_ADMIN"
 
@@ -275,7 +275,7 @@ export default function PairingPrepScreen() {
         title={deviceModel}
         leftIcon="chevron-left"
         onLeftPress={goBack}
-        RightActionComponent={<MentraLogoStandalone />}
+        RightActionComponent={<VeillerLogoStandalone />}
       />
       {renderGuide()}
       {renderButtons()}

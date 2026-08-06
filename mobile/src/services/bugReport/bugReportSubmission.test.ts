@@ -20,7 +20,7 @@ describe("buildReportSurfaceContext", () => {
         source: "applet_capsule_menu",
         sourceRoute: "/applet/local",
         reason: "manual_bug_report",
-        sourceAppletPackageName: " com.mentra.ai ",
+        sourceAppletPackageName: " com.veiller.ai ",
         sourceAppletName: " Mentra AI ",
       }),
     ).toEqual({
@@ -33,7 +33,7 @@ describe("buildReportSurfaceContext", () => {
           route: "/applet/local",
         },
         subject: {
-          packageName: "com.mentra.ai",
+          packageName: "com.veiller.ai",
           name: "Mentra AI",
           attribution: "launch_context",
         },
@@ -49,12 +49,12 @@ describe("buildReportSurfaceContext", () => {
         route: "/miniapps/settings/feedback",
         source: "feedback_screen",
         reason: "manual_bug_report",
-        sourceAppletPackageName: "com.mentra.notes",
+        sourceAppletPackageName: "com.veiller.notes",
         userSelectedSubject: true,
       }),
     ).toMatchObject({
       reporting: {
-        subject: {packageName: "com.mentra.notes", attribution: "user_selection"},
+        subject: {packageName: "com.veiller.notes", attribution: "user_selection"},
         userSelectedSubject: true,
       },
     })

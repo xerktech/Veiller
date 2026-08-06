@@ -28,11 +28,11 @@ If your app also uses Firebase with static frameworks, Firebase modular header c
 
 ## React Native Native Module Is Missing
 
-- Confirm you are running a development build or production native build. Expo Go cannot load `@mentra/bluetooth-sdk`.
+- Confirm you are running a development build or production native build. Expo Go cannot load `@veiller/bluetooth-sdk`.
 - Run `bunx expo prebuild` after adding the SDK plugin to `app.json`.
-- Confirm `@mentra/bluetooth-sdk` is installed in the app that is being prebuilt.
+- Confirm `@veiller/bluetooth-sdk` is installed in the app that is being prebuilt.
 - On iOS, rerun `bunx expo run:ios` after changing native module dependencies.
-- If you are testing a local SDK package, set `MENTRA_BLUETOOTH_SDK_PACKAGE_PATH` to the same package path you installed with Bun.
+- If you are testing a local SDK package, set `VEILLER_BLUETOOTH_SDK_PACKAGE_PATH` to the same package path you installed with Bun.
 
 ## Bluetooth Permission Problems
 
@@ -54,7 +54,7 @@ If your app also uses Firebase with static frameworks, Firebase modular header c
 ## Connected But No Events
 
 - Subscribe before connecting.
-- In React Native, render `useMentraBluetooth()` state for connection, battery, Wi-Fi, hotspot, scan, and SDK state. In native Android/iOS apps, log the SDK status objects.
+- In React Native, render `useVeillerBluetooth()` state for connection, battery, Wi-Fi, hotspot, scan, and SDK state. In native Android/iOS apps, log the SDK status objects.
 - Confirm the hardware feature is available on the connected model.
 - Watch SDK log callbacks for native diagnostics.
 
@@ -76,7 +76,7 @@ If your app uses SDK `0.1.21-beta.3`, [install the matching Mentra Live `0.1.21-
 
 ## React Native Or Expo Apps
 
-React Native and Expo apps use the `@mentra/bluetooth-sdk` package and must run as development builds or production native builds. Expo Go cannot load the native SDK. Start from `examples/react-native` for Expo, `examples/android` for bare Android, or `examples/ios` for bare iOS.
+React Native and Expo apps use the `@veiller/bluetooth-sdk` package and must run as development builds or production native builds. Expo Go cannot load the native SDK. Start from `examples/react-native` for Expo, `examples/android` for bare Android, or `examples/ios` for bare iOS.
 
 If Android prebuild succeeds but native linking fails, confirm the generated project includes `:lc3Lib` in `android/settings.gradle`. The SDK plugin adds this module automatically during prebuild.
 

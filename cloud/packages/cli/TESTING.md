@@ -1,6 +1,6 @@
 # CLI Testing Guide
 
-This document provides comprehensive testing instructions for the Mentra CLI tool.
+This document provides comprehensive testing instructions for the Veiller CLI tool.
 
 ## Table of Contents
 
@@ -83,7 +83,7 @@ Tests for secure credential storage and retrieval.
 - Saving credentials to OS keychain
 - Loading credentials from storage
 - File fallback when keychain unavailable
-- Environment variable override (`MENTRA_CLI_TOKEN`)
+- Environment variable override (`VEILLER_CLI_TOKEN`)
 - Clearing credentials
 - Security (no token leaking in logs)
 
@@ -157,7 +157,7 @@ E2E tests verify complete user workflows from CLI to backend and back.
 
 3. Export test token:
    ```bash
-   export MENTRA_CLI_TOKEN=<generated-token>
+   export VEILLER_CLI_TOKEN=<generated-token>
    ```
 
 ### E2E Test Scenarios
@@ -167,10 +167,10 @@ E2E tests verify complete user workflows from CLI to backend and back.
 ```bash
 # Generate CLI key in console
 # Authenticate via CLI
-mentra auth <token>
+veiller auth <token>
 
 # Verify authentication
-mentra auth whoami
+veiller auth whoami
 
 # Should display user email and key info
 ```
@@ -185,32 +185,32 @@ mentra auth whoami
 
 ```bash
 # Create app
-mentra app create \
+veiller app create \
   --package-name com.test.e2e \
   --name "E2E Test App" \
   --app-type standard \
   --public-url https://example.com
 
 # List apps (should include new app)
-mentra app list
+veiller app list
 
 # Get app details
-mentra app get com.test.e2e
+veiller app get com.test.e2e
 
 # Update app
-mentra app update com.test.e2e --name "Updated E2E App"
+veiller app update com.test.e2e --name "Updated E2E App"
 
 # Publish app
-mentra app publish com.test.e2e --force
+veiller app publish com.test.e2e --force
 
 # Regenerate API key
-mentra app api-key com.test.e2e --force
+veiller app api-key com.test.e2e --force
 
 # Export app
-mentra app export com.test.e2e -o /tmp/e2e-app.json
+veiller app export com.test.e2e -o /tmp/e2e-app.json
 
 # Delete app
-mentra app delete com.test.e2e --force
+veiller app delete com.test.e2e --force
 ```
 
 **Expected:**
@@ -224,16 +224,16 @@ mentra app delete com.test.e2e --force
 
 ```bash
 # List organizations
-mentra org list
+veiller org list
 
 # Get org details
-mentra org get <org-id>
+veiller org get <org-id>
 
 # Switch default org
-mentra org switch <org-id>
+veiller org switch <org-id>
 
 # List apps (filtered by org)
-mentra app list --org <org-id>
+veiller app list --org <org-id>
 ```
 
 **Expected:**
@@ -246,19 +246,19 @@ mentra app list --org <org-id>
 
 ```bash
 # List clouds
-mentra cloud list
+veiller cloud list
 
 # Switch to staging
-mentra cloud use staging
+veiller cloud use staging
 
 # Verify current cloud
-mentra cloud current
+veiller cloud current
 
 # List apps from staging
-mentra app list
+veiller app list
 
 # Switch back to production
-mentra cloud use production
+veiller cloud use production
 ```
 
 **Expected:**
@@ -273,42 +273,42 @@ mentra cloud use production
 
 #### Authentication
 
-- [ ] `mentra auth <token>` - saves credentials
-- [ ] `mentra auth whoami` - displays user info
-- [ ] `mentra auth logout` - clears credentials
-- [ ] Environment variable `MENTRA_CLI_TOKEN` works
+- [ ] `veiller auth <token>` - saves credentials
+- [ ] `veiller auth whoami` - displays user info
+- [ ] `veiller auth logout` - clears credentials
+- [ ] Environment variable `VEILLER_CLI_TOKEN` works
 - [ ] Invalid token shows proper error
 
 #### App Management
 
-- [ ] `mentra app list` - displays apps in table
-- [ ] `mentra app list --json` - outputs JSON
-- [ ] `mentra app get <pkg>` - shows app details
-- [ ] `mentra app create` - interactive mode works
-- [ ] `mentra app create --flags` - non-interactive works
-- [ ] `mentra app update <pkg>` - interactive mode works
-- [ ] `mentra app update <pkg> --flags` - non-interactive works
-- [ ] `mentra app delete <pkg>` - requires confirmation
-- [ ] `mentra app delete <pkg> --force` - skips confirmation
-- [ ] `mentra app publish <pkg>` - publishes to store
-- [ ] `mentra app api-key <pkg>` - regenerates key (shows once)
-- [ ] `mentra app export <pkg>` - outputs JSON
-- [ ] `mentra app export <pkg> -o file.json` - saves to file
-- [ ] `mentra app import file.json` - creates app from JSON
+- [ ] `veiller app list` - displays apps in table
+- [ ] `veiller app list --json` - outputs JSON
+- [ ] `veiller app get <pkg>` - shows app details
+- [ ] `veiller app create` - interactive mode works
+- [ ] `veiller app create --flags` - non-interactive works
+- [ ] `veiller app update <pkg>` - interactive mode works
+- [ ] `veiller app update <pkg> --flags` - non-interactive works
+- [ ] `veiller app delete <pkg>` - requires confirmation
+- [ ] `veiller app delete <pkg> --force` - skips confirmation
+- [ ] `veiller app publish <pkg>` - publishes to store
+- [ ] `veiller app api-key <pkg>` - regenerates key (shows once)
+- [ ] `veiller app export <pkg>` - outputs JSON
+- [ ] `veiller app export <pkg> -o file.json` - saves to file
+- [ ] `veiller app import file.json` - creates app from JSON
 
 #### Organization Management
 
-- [ ] `mentra org list` - displays orgs
-- [ ] `mentra org get <id>` - shows org details
-- [ ] `mentra org switch <id>` - sets default org
+- [ ] `veiller org list` - displays orgs
+- [ ] `veiller org get <id>` - shows org details
+- [ ] `veiller org switch <id>` - sets default org
 
 #### Cloud Management
 
-- [ ] `mentra cloud list` - shows available clouds
-- [ ] `mentra cloud current` - shows active cloud
-- [ ] `mentra cloud use <cloud>` - switches cloud
-- [ ] `mentra cloud add <key>` - adds custom cloud
-- [ ] `mentra cloud remove <cloud>` - removes cloud
+- [ ] `veiller cloud list` - shows available clouds
+- [ ] `veiller cloud current` - shows active cloud
+- [ ] `veiller cloud use <cloud>` - switches cloud
+- [ ] `veiller cloud add <key>` - adds custom cloud
+- [ ] `veiller cloud remove <cloud>` - removes cloud
 
 #### Error Handling
 
@@ -391,7 +391,7 @@ jobs:
         run: |
           cd cloud/packages/cli
           bun link
-          mentra --version
+          veiller --version
 
   e2e:
     runs-on: ubuntu-latest
@@ -418,11 +418,11 @@ jobs:
 
       - name: Run E2E tests
         env:
-          MENTRA_CLI_TOKEN: ${{ secrets.TEST_CLI_TOKEN }}
-          MENTRA_API_URL: http://localhost:8002
+          VEILLER_CLI_TOKEN: ${{ secrets.TEST_CLI_TOKEN }}
+          VEILLER_API_URL: http://localhost:8002
         run: |
-          mentra cloud use local
-          mentra app list
+          veiller cloud use local
+          veiller app list
           # Add more E2E test commands
 ```
 
@@ -445,7 +445,7 @@ bun run build
 
 # Test installation
 bun link
-mentra --version
+veiller --version
 ```
 
 ## Coverage Reports
@@ -491,10 +491,10 @@ Clean up test apps after testing:
 
 ```bash
 # List all test apps
-mentra app list | grep test
+veiller app list | grep test
 
 # Delete test apps
-mentra app delete com.test.* --force
+veiller app delete com.test.* --force
 ```
 
 ### Database Reset (Local Only)
@@ -513,7 +513,7 @@ bun run reset-test-db
 **Solution:**
 
 ```bash
-export MENTRA_CLI_TOKEN=<your-test-token>
+export VEILLER_CLI_TOKEN=<your-test-token>
 ```
 
 ### Issue: Tests Timeout
@@ -529,7 +529,7 @@ export MENTRA_CLI_TOKEN=<your-test-token>
 **Solution:**
 
 - Tests may fail if credentials already exist
-- Clear credentials before running: `mentra auth logout`
+- Clear credentials before running: `veiller auth logout`
 - Or use isolated test config directory
 
 ### Issue: Mock Not Working

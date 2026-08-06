@@ -9,7 +9,7 @@ import {getAllClouds, getCurrentCloud, switchCloud, addCloud, removeCloud} from 
 import {displayTable} from "../utils/output"
 import chalk from "chalk"
 
-export const cloudCommand = new Command("cloud").description("Manage Mentra clouds")
+export const cloudCommand = new Command("cloud").description("Manage Veiller clouds")
 
 // List clouds
 cloudCommand
@@ -87,8 +87,8 @@ cloudCommand
       // Check if all required arguments provided
       if (!cloudKey || !name || !url) {
         console.error(chalk.red("✗") + " Missing required arguments")
-        console.error("  Usage: mentra cloud add <key> --name <name> --url <url>")
-        console.error("  Example: mentra cloud add my-cloud --name 'My Cloud' --url https://api.example.com")
+        console.error("  Usage: veiller cloud add <key> --name <name> --url <url>")
+        console.error("  Example: veiller cloud add my-cloud --name 'My Cloud' --url https://api.example.com")
         process.exit(2)
       }
 

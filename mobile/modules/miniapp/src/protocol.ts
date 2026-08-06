@@ -1,12 +1,12 @@
 /**
- * @fileoverview Wire protocol for @mentra/miniapp.
+ * @fileoverview Wire protocol for @veiller/miniapp.
  *
  * Fresh miniapp-naming enum values. No legacy tpa_/app_/applet_ prefixes.
- * These values are the contract between @mentra/miniapp (running in a WebView)
+ * These values are the contract between @veiller/miniapp (running in a WebView)
  * and LocalMiniappRuntime (running on the phone).
  *
- * IMPORTANT: This file has NO runtime dependency on @mentra/sdk. The cloud SDK's
- * wire protocol enums live in @mentra/sdk/types/message-types.ts and are used
+ * IMPORTANT: This file has NO runtime dependency on @veiller/sdk. The cloud SDK's
+ * wire protocol enums live in @veiller/sdk/types/message-types.ts and are used
  * for cloud↔app communication, not phone↔miniapp.
  */
 

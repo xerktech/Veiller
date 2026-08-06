@@ -15,7 +15,7 @@ export function toPortableGalleryPath(path: string, documentDirectoryPath: strin
 
   if (!candidate || candidate.includes("\0")) return null
   const segments = candidate.split("/")
-  if (segments[0] !== "MentraPhotos" || segments.some((segment) => !segment || segment === "." || segment === "..")) {
+  if (segments[0] !== "VeillerPhotos" || segments.some((segment) => !segment || segment === "." || segment === "..")) {
     return null
   }
   return segments.join("/")

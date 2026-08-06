@@ -1,5 +1,5 @@
-import {TouchEvent} from "@mentra/bluetooth-sdk"
-import {engine} from "@mentra/engine"
+import {TouchEvent} from "@veiller/bluetooth-sdk"
+import {engine} from "@veiller/engine"
 
 // Helpers for onboarding steps that wait for a glasses interaction. Each takes
 // an AbortSignal and removes its listener both when it fires AND when the step

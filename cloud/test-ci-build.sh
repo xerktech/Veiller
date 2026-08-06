@@ -73,10 +73,10 @@ run_step "Install dependencies" "bun install" "" || exit 1
 run_step "Build @mentra/types" "bun run build" "packages/types" || exit 1
 
 # Step 3: Build SDK package
-run_step "Build @mentra/sdk" "bun run build" "packages/sdk" || exit 1
+run_step "Build @veiller/sdk" "bun run build" "packages/sdk" || exit 1
 
 # Step 4: Build cloud package
-run_step "Build @mentra/cloud" "bun run build" "packages/cloud" || exit 1
+run_step "Build @veiller/cloud" "bun run build" "packages/cloud" || exit 1
 
 # Verification steps
 echo ""
@@ -86,8 +86,8 @@ echo ""
 
 # Check that dist folders exist
 run_step "Verify @mentra/types dist/" "test -d packages/types/dist && test -f packages/types/dist/index.js" "" || BUILD_SUCCESS=false
-run_step "Verify @mentra/sdk dist/" "test -d packages/sdk/dist && test -f packages/sdk/dist/index.js" "" || BUILD_SUCCESS=false
-run_step "Verify @mentra/cloud dist/" "test -d packages/cloud/dist && test -f packages/cloud/dist/index.js" "" || BUILD_SUCCESS=false
+run_step "Verify @veiller/sdk dist/" "test -d packages/sdk/dist && test -f packages/sdk/dist/index.js" "" || BUILD_SUCCESS=false
+run_step "Verify @veiller/cloud dist/" "test -d packages/cloud/dist && test -f packages/cloud/dist/index.js" "" || BUILD_SUCCESS=false
 
 # Check that @mentra/types was bundled (not referenced)
 echo -e "${YELLOW}▶ Checking SDK doesn't reference @mentra/types externally${NC}"

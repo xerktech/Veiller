@@ -27,7 +27,7 @@ Build webview UI for live captions app. Displays real-time transcript history to
 
 - Auto-scroll behavior (disable when user scrolls up)
 - Speaker color coding (consistent per session)
-- Mobile-first UI matching MentraOS style
+- Mobile-first UI matching Veiller style
 - Empty state when no transcripts
 
 ### Success Metrics
@@ -164,7 +164,7 @@ interface CaptionSettings {
 ### Data Flow
 
 ```
-Transcription Event (from MentraOS)
+Transcription Event (from Veiller)
     ↓
 index.ts handleTranscription() [cleaned up, 90 lines]
     ↓ parallel

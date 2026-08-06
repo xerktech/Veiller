@@ -5,7 +5,7 @@
 # terminal. It does NOT modify or delete any credential file.
 #
 # Prereqs: `gh auth status` is logged in with repo admin on Mentra-Community/MentraOS.
-# Run from a machine that has ~/.mentra/credentials (e.g. bob, or your laptop if
+# Run from a machine that has ~/.veiller/credentials (e.g. bob, or your laptop if
 # you have the folder). Passwords are pulled from ~/.gradle/gradle.properties if
 # present, else you'll be prompted.
 #
@@ -16,7 +16,7 @@
 set -euo pipefail
 
 REPO="Mentra-Community/MentraOS"
-CRED="$HOME/.mentra/credentials"
+CRED="$HOME/.veiller/credentials"
 GP="$HOME/.gradle/gradle.properties"
 DRY_RUN="${DRY_RUN:-0}"
 
@@ -82,9 +82,9 @@ set_prop_secret ASG_KEY_PASSWORD   ASG_KEY_PASSWORD
 set_prop_secret ASG_KEY_ALIAS      ASG_KEY_ALIAS asg
 
 echo "== Mobile (upload) signing passwords =="
-set_prop_secret MENTRAOS_UPLOAD_STORE_PASSWORD MENTRAOS_UPLOAD_STORE_PASSWORD
-set_prop_secret MENTRAOS_UPLOAD_KEY_PASSWORD   MENTRAOS_UPLOAD_KEY_PASSWORD
-set_prop_secret MENTRAOS_UPLOAD_KEY_ALIAS      MENTRAOS_UPLOAD_KEY_ALIAS upload
+set_prop_secret VEILLER_UPLOAD_STORE_PASSWORD VEILLER_UPLOAD_STORE_PASSWORD
+set_prop_secret VEILLER_UPLOAD_KEY_PASSWORD   VEILLER_UPLOAD_KEY_PASSWORD
+set_prop_secret VEILLER_UPLOAD_KEY_ALIAS      VEILLER_UPLOAD_KEY_ALIAS upload
 
 echo "== OTA signing passwords (optional — skip if unused in CI) =="
 set_prop_secret OTA_STORE_PASSWORD OTA_STORE_PASSWORD "" 1
@@ -113,4 +113,4 @@ set_asc_secret ASC_API_KEY_ID    ASC_API_KEY_ID
 set_asc_secret ASC_API_ISSUER_ID ASC_API_ISSUER_ID
 
 echo
-echo "Done. Verify with: gh secret list --repo $REPO | grep -E 'KEYSTORE|ASG_|MENTRAOS_UPLOAD|OTA_|GOOGLE_PLAY|ASC_'"
+echo "Done. Verify with: gh secret list --repo $REPO | grep -E 'KEYSTORE|ASG_|VEILLER_UPLOAD|OTA_|GOOGLE_PLAY|ASC_'"

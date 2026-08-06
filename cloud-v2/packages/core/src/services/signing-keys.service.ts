@@ -1,7 +1,7 @@
 /**
  * @fileoverview Signing keys and the public JWKS.
  *
- * Owns everything crypto-key: lazy-loading Mentra's Ed25519 signing keypairs
+ * Owns everything crypto-key: lazy-loading Veiller's Ed25519 signing keypairs
  * from env (access, miniapp, account), the `kid` constants, and building the
  * public `/.well-known/jwks.json` document. Split out of session.service so
  * that file is about session lifecycle, not key management (issue 019).
@@ -10,20 +10,20 @@
  * for tests that mutate the key env vars mid-process.
  */
 import * as jose from "jose";
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 import { OauthServerError } from "../types/oauth.types";
 
 const logger = createLogger("core").child({ service: "signing-keys.service" });
 
-export const MENTRA_ALG = "EdDSA";
+export const VEILLER_ALG = "EdDSA";
 
 // Each token type is signed with its own key, tagged by `kid` so verifiers pick
 // the right public key from the JWKS. Distinct keys keep a leak's blast radius
 // to one token type.
-export const ACCESS_TOKEN_KID = "mentra-access-1";
+export const ACCESS_TOKEN_KID = "veiller-access-1";
 export const RUNTIME_TOKEN_KID = "cloud-core-runtime-1";
-export const MINIAPP_TOKEN_KID = "mentra-miniapp-1";
-export const ACCOUNT_TOKEN_KID = "mentra-account-1";
+export const MINIAPP_TOKEN_KID = "veiller-miniapp-1";
+export const ACCOUNT_TOKEN_KID = "veiller-account-1";
 
 export function requireEnv(name: string): string {
   const v = process.env[name];
@@ -46,35 +46,35 @@ async function loadKeypair(
   label: string,
 ): Promise<{ privateKey: jose.KeyLike; publicKey: jose.KeyLike }> {
   const [privateKey, publicKey] = await Promise.all([
-    jose.importPKCS8(toPem(requireEnv(privEnv), "PRIVATE KEY"), MENTRA_ALG, { extractable: false }),
+    jose.importPKCS8(toPem(requireEnv(privEnv), "PRIVATE KEY"), VEILLER_ALG, { extractable: false }),
     // Public key stays extractable so we can export it to JWK for the JWKS.
-    jose.importSPKI(toPem(requireEnv(pubEnv), "PUBLIC KEY"), MENTRA_ALG, { extractable: true }),
+    jose.importSPKI(toPem(requireEnv(pubEnv), "PUBLIC KEY"), VEILLER_ALG, { extractable: true }),
   ]);
-  logger.info(`loaded Mentra ${label} signing keypair`);
+  logger.info(`loaded Veiller ${label} signing keypair`);
   return { privateKey, publicKey };
 }
 
-let mentraKeys: Promise<{ privateKey: jose.KeyLike; publicKey: jose.KeyLike }> | null = null;
+let veillerKeys: Promise<{ privateKey: jose.KeyLike; publicKey: jose.KeyLike }> | null = null;
 let miniappKeys: Promise<{ privateKey: jose.KeyLike; publicKey: jose.KeyLike }> | null = null;
 let accountKeys: Promise<{ privateKey: jose.KeyLike; publicKey: jose.KeyLike }> | null = null;
 
-export async function getMentraKeys() {
-  if (!mentraKeys) mentraKeys = loadKeypair("MENTRA_JWT_PRIVATE_KEY", "MENTRA_JWT_PUBLIC_KEY", "access-token");
-  return mentraKeys;
+export async function getVeillerKeys() {
+  if (!veillerKeys) veillerKeys = loadKeypair("VEILLER_JWT_PRIVATE_KEY", "VEILLER_JWT_PUBLIC_KEY", "access-token");
+  return veillerKeys;
 }
 
 export async function getMiniappKeys() {
   // Falling back to the access-token key is intentionally NOT done: the keys
   // must be distinct for the blast-radius guarantee.
   if (!miniappKeys) {
-    miniappKeys = loadKeypair("MENTRA_MINIAPP_JWT_PRIVATE_KEY", "MENTRA_MINIAPP_JWT_PUBLIC_KEY", "miniapp-token");
+    miniappKeys = loadKeypair("VEILLER_MINIAPP_JWT_PRIVATE_KEY", "VEILLER_MINIAPP_JWT_PUBLIC_KEY", "miniapp-token");
   }
   return miniappKeys;
 }
 
 export async function getAccountKeys() {
   if (!accountKeys) {
-    accountKeys = loadKeypair("MENTRA_ACCOUNT_JWT_PRIVATE_KEY", "MENTRA_ACCOUNT_JWT_PUBLIC_KEY", "account-token");
+    accountKeys = loadKeypair("VEILLER_ACCOUNT_JWT_PRIVATE_KEY", "VEILLER_ACCOUNT_JWT_PUBLIC_KEY", "account-token");
   }
   return accountKeys;
 }
@@ -84,7 +84,7 @@ export async function getAccountKeys() {
  * dependent (JWKS entry, OEM-row seeding) must degrade gracefully, not 500. */
 export function accountKeysConfigured(): boolean {
   return Boolean(
-    process.env.MENTRA_ACCOUNT_JWT_PRIVATE_KEY && process.env.MENTRA_ACCOUNT_JWT_PUBLIC_KEY,
+    process.env.VEILLER_ACCOUNT_JWT_PRIVATE_KEY && process.env.VEILLER_ACCOUNT_JWT_PUBLIC_KEY,
   );
 }
 
@@ -94,44 +94,44 @@ export function accountKeysConfigured(): boolean {
  * files in the same Bun process need to discard the cached imports.
  */
 export function resetSigningKeyCache(): void {
-  mentraKeys = null;
+  veillerKeys = null;
   miniappKeys = null;
   accountKeys = null;
 }
 
-/** The account signing public key in SPKI PEM form, for seeding the `mentra`
+/** The account signing public key in SPKI PEM form, for seeding the `veiller`
  * OEM row (static key mode). */
 export function getAccountPublicKeyPem(): string {
-  return toPem(requireEnv("MENTRA_ACCOUNT_JWT_PUBLIC_KEY"), "PUBLIC KEY");
+  return toPem(requireEnv("VEILLER_ACCOUNT_JWT_PUBLIC_KEY"), "PUBLIC KEY");
 }
 
 /**
- * Build the public JWKS document Mentra publishes at /.well-known/jwks.json.
+ * Build the public JWKS document Veiller publishes at /.well-known/jwks.json.
  * Each public key is tagged with its `kid` so a verifier picks the right one:
  *   - access-token key (internal services verify access tokens),
  *   - runtime-token key (Runtime trusts Core-brokered runtime tokens),
  *   - miniapp-token key (developer backends verify miniapp tokens),
- *   - account-token key (audit visibility for Mentra's own OEM subject tokens).
+ *   - account-token key (audit visibility for Veiller's own OEM subject tokens).
  * Publishing keys ahead of need makes rotation a no-coordination change.
  */
 export async function getPublicJwks(): Promise<{ keys: jose.JWK[] }> {
-  const [access, miniapp] = await Promise.all([getMentraKeys(), getMiniappKeys()]);
+  const [access, miniapp] = await Promise.all([getVeillerKeys(), getMiniappKeys()]);
   const [accessJwk, miniappJwk] = await Promise.all([
     jose.exportJWK(access.publicKey),
     jose.exportJWK(miniapp.publicKey),
   ]);
   const keys: jose.JWK[] = [
-    { ...accessJwk, alg: MENTRA_ALG, use: "sig", kid: ACCESS_TOKEN_KID },
-    { ...accessJwk, alg: MENTRA_ALG, use: "sig", kid: RUNTIME_TOKEN_KID },
-    { ...miniappJwk, alg: MENTRA_ALG, use: "sig", kid: MINIAPP_TOKEN_KID },
+    { ...accessJwk, alg: VEILLER_ALG, use: "sig", kid: ACCESS_TOKEN_KID },
+    { ...accessJwk, alg: VEILLER_ALG, use: "sig", kid: RUNTIME_TOKEN_KID },
+    { ...miniappJwk, alg: VEILLER_ALG, use: "sig", kid: MINIAPP_TOKEN_KID },
   ];
   // The account key is optional: environments deployed before the account env
   // vars exist must keep serving the access/runtime/miniapp keys (the startup
-  // migration skips the mentra OEM seed the same way).
+  // migration skips the veiller OEM seed the same way).
   if (accountKeysConfigured()) {
     const account = await getAccountKeys();
     const accountJwk = await jose.exportJWK(account.publicKey);
-    keys.push({ ...accountJwk, alg: MENTRA_ALG, use: "sig", kid: ACCOUNT_TOKEN_KID });
+    keys.push({ ...accountJwk, alg: VEILLER_ALG, use: "sig", kid: ACCOUNT_TOKEN_KID });
   }
   return { keys };
 }

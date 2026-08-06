@@ -1,4 +1,4 @@
-// Imports the real ConnectionCoordinator by path (not via "@mentra/engine",
+// Imports the real ConnectionCoordinator by path (not via "@veiller/engine",
 // which jest mocks) so the actual decisions run under the mobile jest CI runner.
 import {decideConnectButtonAction, decideReconnect} from "../../modules/engine/src/services/ConnectionCoordinator"
 

@@ -10,7 +10,7 @@ synchronous boolean, `getAll()` returns the full record, and `onUpdate` /
 `onPermissionError` let you react to changes and to typed permission errors.
 
 ```typescript src/background/index.ts
-import { registerMiniapp } from "@mentra/miniapp/background";
+import { registerMiniapp } from "@veiller/miniapp/background";
 
 registerMiniapp((session) => {
   if (session.permissions.has("microphone")) {

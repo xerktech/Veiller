@@ -817,7 +817,7 @@ const en = {
   login: {
     title: "Veiller",
     subtitle: "The future of smart glasses starts here",
-    loginToMentra: "Log in to Veiller",
+    loginToVeiller: "Log in to Veiller",
     email: "Email",
     password: "Password",
     signUp: "Sign up",
@@ -922,7 +922,7 @@ const en = {
       confirmPasswordPlaceholder: "Re-enter password",
       continue: "Continue",
       createAccount: "Create an Account",
-      newToMentra: "New to Veiller?",
+      newToVeiller: "New to Veiller?",
       creatingAccount: "Creating your account...",
       edit: "Edit",
     },

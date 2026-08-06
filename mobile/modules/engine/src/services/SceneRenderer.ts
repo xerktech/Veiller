@@ -12,7 +12,7 @@
  */
 
 import displayProcessor from "./DisplayProcessor"
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import {useDisplayStore} from "../stores/display"
 import {SETTINGS, useSettingsStore} from "../stores/settings"
 import {useGlassesStore} from "../stores/glasses"

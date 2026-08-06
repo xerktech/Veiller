@@ -41,14 +41,14 @@ const variant = process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china" ? VARIANTS
  * https://docs.expo.dev/workflow/configuration/#configuration-resolution-rules
  */
 module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
-  // Optional build-variant suffix. Set MENTRAOS_BUILD_NAME=stable to produce
+  // Optional build-variant suffix. Set VEILLER_BUILD_NAME=stable to produce
   // a parallel-installable build with package com.xerktech.veiller.stable and
   // app label "stable". Leave unset for the normal Veiller build.
-  const variantName = process.env.MENTRAOS_BUILD_NAME?.trim() || null
+  const variantName = process.env.VEILLER_BUILD_NAME?.trim() || null
   const isValidVariant = variantName && /^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(variantName)
   if (variantName && !isValidVariant) {
     throw new Error(
-      `MENTRAOS_BUILD_NAME="${variantName}" is invalid. Must start with a letter and contain only letters, digits, spaces, or underscores.`,
+      `VEILLER_BUILD_NAME="${variantName}" is invalid. Must start with a letter and contain only letters, digits, spaces, or underscores.`,
     )
   }
   const appName = isValidVariant ? variantName : variant.appName
@@ -67,7 +67,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   // build-time-only and lives in ~/.gradle/gradle.properties (Android) / the
   // CocoaPods netrc (iOS), never here. Fail loudly in CI/EAS, warn in local
   // dev. See issues/mapbox-navigation-migration.md.
-  // The China build (cn variant) ships without Mentra Map, so it has no nav
+  // The China build (cn variant) ships without Veiller Map, so it has no nav
   const isChinaBuild = variant === VARIANTS.cn
   // Veiller: Mapbox / on-device navigation is disabled (NavigationManager is a
   // no-op stub, the crust gradle Mapbox deps are removed). A missing Mapbox
@@ -86,7 +86,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
     ...config,
     name: appName,
     slug: "Veiller",
-    version: process.env.EXPO_PUBLIC_MENTRAOS_VERSION || "2.9.1",
+    version: process.env.EXPO_PUBLIC_VEILLER_VERSION || "2.9.1",
     scheme: "com.xerktech.veiller",
     orientation: "portrait",
     userInterfaceStyle: "automatic",
@@ -197,7 +197,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
           "UIInterfaceOrientationPortrait",
           "UIInterfaceOrientationPortraitUpsideDown",
         ],
-        BGTaskSchedulerPermittedIdentifiers: ["com.mentra.background-timer"],
+        BGTaskSchedulerPermittedIdentifiers: ["com.veiller.background-timer"],
         // Mapbox Navigation SDK v3 (iOS) reads its public access token from
         // Info.plist under `MBXAccessToken` at boot. Replaces the old
         // GOOGLE_NAV_API_KEY now that iOS nav is Mapbox (matching Android,
@@ -218,7 +218,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       "./plugins/remove-ipad-orientations.js",
       // crust's own config plugin carries its Android build contract (Mapbox
       // downloads repo, protobuf-javalite exclusion, core-library desugaring).
-      "@mentra/crust",
+      "@veiller/crust",
       "./plugins/android.ts",
       // Mapbox Navigation SDK v3 for iOS — added as a Swift Package (SPM is the
       // ONLY supported v3 install path; CocoaPods can't resolve it). The
@@ -305,7 +305,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
               "-keep class ai.onnxruntime.** { *; }",
               // Bluetooth SDK: lc3/sherpa JNI and reflective glue resolve
               // these by name; the module is small, keep it all.
-              "-keep class com.mentra.bluetoothsdk.** { *; }",
+              "-keep class com.veiller.bluetoothsdk.** { *; }",
             ].join("\n"),
           },
           ios: {

@@ -6,8 +6,8 @@ usage() {
 Usage:
   scripts/export-bluetooth-sdk-ios-spm.sh [target-dir] [--verify]
 
-Exports the SwiftPM-ready iOS Bluetooth SDK from the MentraOS monorepo into a
-standalone package repository. The target defaults to ../mentra-bluetooth-sdk-ios.
+Exports the SwiftPM-ready iOS Bluetooth SDK from the Veiller monorepo into a
+standalone package repository. The target defaults to ../veiller-bluetooth-sdk-ios.
 
 Options:
   --target DIR   Export into DIR.
@@ -18,7 +18,7 @@ EOF
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 sdk_root="$repo_root/mobile/modules/bluetooth-sdk"
-target_root="$repo_root/../mentra-bluetooth-sdk-ios"
+target_root="$repo_root/../veiller-bluetooth-sdk-ios"
 verify=0
 
 while [[ $# -gt 0 ]]; do
@@ -64,7 +64,7 @@ fi
 
 case "$target_root" in
   "$repo_root"|"$repo_root"/*)
-    echo "Refusing to export inside the MentraOS source checkout: $target_root" >&2
+    echo "Refusing to export inside the Veiller source checkout: $target_root" >&2
     exit 1
     ;;
 esac
@@ -95,21 +95,21 @@ cat > "$target_root/Package.swift" <<'EOF'
 import PackageDescription
 
 let package = Package(
-  name: "MentraBluetoothSDK",
+  name: "VeillerBluetoothSDK",
   platforms: [
     .iOS("15.1")
   ],
   products: [
     .library(
-      name: "MentraBluetoothSDK",
-      targets: ["MentraBluetoothSDK"]
+      name: "VeillerBluetoothSDK",
+      targets: ["VeillerBluetoothSDK"]
     )
   ],
   targets: [
     .target(
-      name: "MentraBluetoothSDK",
+      name: "VeillerBluetoothSDK",
       dependencies: [
-        "MentraBluetoothSDKCoreObjC"
+        "VeillerBluetoothSDKCoreObjC"
       ],
       path: "ios/Source",
       resources: [
@@ -117,7 +117,7 @@ let package = Package(
       ]
     ),
     .target(
-      name: "MentraBluetoothSDKCoreObjC",
+      name: "VeillerBluetoothSDKCoreObjC",
       path: "ios/Packages/CoreObjC",
       publicHeadersPath: "include",
       cSettings: [
@@ -138,9 +138,9 @@ DerivedData/
 EOF
 
 cat > "$target_root/README.md" <<'EOF'
-# Mentra Bluetooth SDK for iOS
+# Veiller Bluetooth SDK for iOS
 
-Native Swift package for building iOS apps that connect directly to Mentra smart glasses over Bluetooth.
+Native Swift package for building iOS apps that connect directly to Veiller smart glasses over Bluetooth.
 
 ## Installation
 
@@ -150,7 +150,7 @@ Add this repository in Xcode with Swift Package Manager:
 https://github.com/Mentra-Community/mentra-bluetooth-sdk-ios.git
 ```
 
-Then add the `MentraBluetoothSDK` product to your app target.
+Then add the `VeillerBluetoothSDK` product to your app target.
 
 For `Package.swift` consumers:
 
@@ -162,7 +162,7 @@ For `Package.swift` consumers:
 ```
 
 ```swift
-.product(name: "MentraBluetoothSDK", package: "mentra-bluetooth-sdk-ios")
+.product(name: "VeillerBluetoothSDK", package: "veiller-bluetooth-sdk-ios")
 ```
 
 ## Requirements
@@ -174,11 +174,11 @@ For `Package.swift` consumers:
 ## Usage
 
 ```swift
-import MentraBluetoothSDK
+import VeillerBluetoothSDK
 
 @MainActor
-final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
-  private let sdk = MentraBluetoothSDK()
+final class GlassesController: NSObject, VeillerBluetoothSDKDelegate {
+  private let sdk = VeillerBluetoothSDK()
   private var selectedDevice: Device?
 
   override init() {
@@ -197,7 +197,7 @@ final class GlassesController: NSObject, MentraBluetoothSDKDelegate {
     try sdk.connect(to: selectedDevice)
   }
 
-  func mentraBluetoothSDK(_ sdk: MentraBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState) {
+  func veillerBluetoothSDK(_ sdk: VeillerBluetoothSDK, didUpdateGlasses glasses: GlassesRuntimeState) {
     print("Glasses changed: \(glasses)")
   }
 }
@@ -230,7 +230,7 @@ To keep the BLE link alive while the app is backgrounded, enable Core Bluetooth 
 
 ## Scope
 
-This Swift package contains the core iOS Bluetooth SDK. It intentionally excludes optional MentraOS-internal code paths for local STT, offline TTS, Nex/SwiftProtobuf, Vuzix/Ultralite, and tar.bz2 extraction.
+This Swift package contains the core iOS Bluetooth SDK. It intentionally excludes optional Veiller-internal code paths for local STT, offline TTS, Nex/SwiftProtobuf, Vuzix/Ultralite, and tar.bz2 extraction.
 EOF
 perl -0pi -e "s/__SDK_VERSION__/${sdk_version}/g" "$target_root/README.md"
 
@@ -257,10 +257,10 @@ rsync "${source_rsync_args[@]}" \
   "$sdk_root/ios/Source/" \
   "$target_root/ios/Source/"
 
-perl -0pi -e "s/__MENTRA_BLUETOOTH_SDK_VERSION__/${sdk_version}/g" \
+perl -0pi -e "s/__VEILLER_BLUETOOTH_SDK_VERSION__/${sdk_version}/g" \
   "$target_root/ios/Source/BluetoothSdkDefaults.swift"
 
-if grep -R "__MENTRA_BLUETOOTH_SDK_VERSION__" "$target_root/ios/Source" >/dev/null; then
+if grep -R "__VEILLER_BLUETOOTH_SDK_VERSION__" "$target_root/ios/Source" >/dev/null; then
   echo "SwiftPM export still contains the Bluetooth SDK version placeholder." >&2
   exit 1
 fi
@@ -279,7 +279,7 @@ if [[ "$verify" -eq 1 ]]; then
     cd "$target_root"
     xcrun swift package describe >/dev/null
     xcodebuild \
-      -scheme MentraBluetoothSDK \
+      -scheme VeillerBluetoothSDK \
       -destination 'generic/platform=iOS' \
       -sdk iphoneos \
       CODE_SIGNING_ALLOWED=NO \
@@ -287,4 +287,4 @@ if [[ "$verify" -eq 1 ]]; then
   )
 fi
 
-echo "Exported MentraBluetoothSDK Swift package to $target_root"
+echo "Exported VeillerBluetoothSDK Swift package to $target_root"

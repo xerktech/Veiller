@@ -1,5 +1,5 @@
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
-import type {OtaUpdateInfo} from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
+import type {OtaUpdateInfo} from "@veiller/bluetooth-sdk/internal"
 import {getGlassesSystemTimeMs, isGlassesConnected, useGlassesStore, waitForGlassesState} from "../stores/glasses"
 import {SETTINGS, useSettingsStore} from "../stores/settings"
 import {maybeFixGlassesClockFromVersionInfo} from "./glassesClockSync"

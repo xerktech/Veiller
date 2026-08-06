@@ -14,7 +14,7 @@
  *     resolve+spawn recipe instead of three copies.
  *
  * The launcher is **headless**: no React, no RN components. The engine-owned
- * MiniappEngine hands it the {@link MentraJSRouter} instance once during
+ * MiniappEngine hands it the {@link VeillerJSRouter} instance once during
  * engine construction. OEMs embedding the runtime drive miniapp lifecycle
  * through the engine facade and stores, not a separate launcher configure API.
  *
@@ -30,11 +30,11 @@ import {storage} from "../utils/storage/storage"
 import appRegistry, {getLocalAppRunningState, saveLocalAppRunningState} from "./AppRegistry"
 import devServerBridge from "./DevServerBridge"
 import localMiniappRuntime, {type InstalledMiniappManifest} from "./LocalMiniappRuntime"
-import type {MentraJSRouter} from "./MentraJSRouter"
+import type {VeillerJSRouter} from "./VeillerJSRouter"
 
 interface LauncherDeps {
   /** The host-constructed router (needs the native Crust binding). */
-  router: MentraJSRouter
+  router: VeillerJSRouter
 }
 
 /** Hints the host may pass from a view's props to avoid re-deriving them. */
@@ -79,7 +79,7 @@ class MiniappLauncher {
     this.deps = deps
   }
 
-  private requireRouter(): MentraJSRouter {
+  private requireRouter(): VeillerJSRouter {
     if (!this.deps) {
       throw new Error("MiniappLauncher not configured — ensureMiniappEngine() has not run")
     }

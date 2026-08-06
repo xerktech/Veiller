@@ -8,12 +8,12 @@
  * - packageName: The calling app's package name
  * - userId: The user's email/ID
  *
- * Only whitelisted packages (MentraAI, Mira) can use these endpoints.
+ * Only whitelisted packages (VeillerAI, Mira) can use these endpoints.
  */
 
 import { Hono } from "hono";
 import axios from "axios";
-import { ToolCall, ToolSchema } from "@mentra/sdk";
+import { ToolCall, ToolSchema } from "@veiller/sdk";
 import { logger as rootLogger } from "../../../../services/logging/pino-logger";
 import type { AppEnv, AppContext } from "../../../../types/hono";
 import { User } from "../../../../models/user.model";
@@ -34,11 +34,11 @@ const ALLOWED_API_KEY_PACKAGES = [
   "test.augmentos.mira",
   "cloud.augmentos.mira",
   "com.augmentos.mira",
-  "com.mentra.mentraai.beta",
-  "com.mentra.mentraai.dev",
-  "com.mentra.ai.noporter",
-  "com.mentra.ai.dev",
-  "com.mentra.ai",
+  "com.veiller.veillerai.beta",
+  "com.veiller.veillerai.dev",
+  "com.veiller.ai.noporter",
+  "com.veiller.ai.dev",
+  "com.veiller.ai",
 ];
 
 // ============================================================================

@@ -99,7 +99,7 @@ Add flags to automatically set env vars after creating the UDP service.
    └─ porter env set --app $APP -v UDP_HOST=$IP -v UDP_PORT=8000 [--skip-redeploys]
 6. NEW: If --set-doppler-env or --set-env:
    └─ Map app+cluster → Doppler config
-   └─ doppler secrets set UDP_HOST=$IP UDP_PORT=8000 --project mentraos-cloud --config $CONFIG
+   └─ doppler secrets set UDP_HOST=$IP UDP_PORT=8000 --project veiller-cloud --config $CONFIG
 7. Display summary
 ```
 
@@ -157,7 +157,7 @@ porter env set \
 doppler secrets set \
   UDP_HOST=172.168.226.103 \
   UDP_PORT=8000 \
-  --project mentraos-cloud \
+  --project veiller-cloud \
   --config dev
 ```
 

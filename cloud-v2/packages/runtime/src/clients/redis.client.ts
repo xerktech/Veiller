@@ -18,7 +18,7 @@
  */
 
 import { Redis } from "ioredis";
-import { createLogger, type ReadinessCheck } from "@mentra/cloud-shared";
+import { createLogger, type ReadinessCheck } from "@veiller/cloud-shared";
 
 const logger = createLogger("audio").child({ component: "redis" });
 

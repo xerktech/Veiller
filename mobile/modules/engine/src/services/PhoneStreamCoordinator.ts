@@ -28,13 +28,13 @@
  * the legacy path.
  */
 
-import BluetoothSdk from "@mentra/bluetooth-sdk/internal"
+import BluetoothSdk from "@veiller/bluetooth-sdk/internal"
 import type {
   KeepAliveAckEvent,
   StreamResolvedConfig,
   StreamStartRequest,
   StreamStatusEvent,
-} from "@mentra/bluetooth-sdk/internal"
+} from "@veiller/bluetooth-sdk/internal"
 import {isGlassesConnected} from "./GlassesReadiness"
 import {useGlassesStore} from "../stores/glasses"
 

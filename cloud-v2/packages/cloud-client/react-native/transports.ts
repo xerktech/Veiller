@@ -99,7 +99,7 @@ function makeWsFactory(): (url: string) => WebSocketLike {
     if (!Ctor) {
       throw new Error(
         "reactNativeTransports: global WebSocket is not available. " +
-          "Use @mentra/cloud-client/node off-device, or run on React Native.",
+          "Use @veiller/cloud-client/node off-device, or run on React Native.",
       );
     }
     return adaptWebSocket(new Ctor(url));

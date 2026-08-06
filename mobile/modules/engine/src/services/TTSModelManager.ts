@@ -1,4 +1,4 @@
-import BluetoothSdk from "@mentra/bluetooth-sdk"
+import BluetoothSdk from "@veiller/bluetooth-sdk"
 import * as RNFS from "@dr.pogodin/react-native-fs"
 
 /**
@@ -421,7 +421,7 @@ class TTSModelManager {
 
     const outputDir = RNFS.CachesDirectoryPath || RNFS.TemporaryDirectoryPath
     const safeId = `${Date.now()}_${Math.random().toString(36).slice(2)}`
-    const outputPath = `${outputDir}/mentra_tts_${safeId}.wav`
+    const outputPath = `${outputDir}/veiller_tts_${safeId}.wav`
     const ok = await BluetoothSdk.generateTtsAudio(
       text,
       this.getModelPath(),

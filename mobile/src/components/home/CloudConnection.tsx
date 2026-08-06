@@ -7,9 +7,9 @@ import {Icon, Text, type IconTypes} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
-import {engine, useRefresh} from "@mentra/engine"
+import {engine, useRefresh} from "@veiller/engine"
 import {ThemedStyle} from "@/theme"
-import {BgTimer} from "@mentra/engine"
+import {BgTimer} from "@veiller/engine"
 
 // Mirrors engine's CloudClientConnectionStatus (not exported from the public
 // engine surface). The banner now renders the cloud-v2 runtime connection,

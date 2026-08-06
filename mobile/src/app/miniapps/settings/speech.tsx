@@ -8,14 +8,14 @@ import {Spacer} from "@/components/ui/Spacer"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n"
-import {engine, useStopAll} from "@mentra/engine"
+import {engine, useStopAll} from "@veiller/engine"
 import {
   offlineSpeechModelService,
   sttModelManager as STTModelManager,
   ttsModelManager as TTSModelManager,
   type OfflineModelDownloadStatus as DownloadStatus,
-} from "@mentra/engine/internal"
-import {SETTINGS, useSetting} from "@mentra/engine"
+} from "@veiller/engine/internal"
+import {SETTINGS, useSetting} from "@veiller/engine"
 import showAlert from "@/utils/AlertUtils"
 
 export default function SpeechSettingsScreen() {

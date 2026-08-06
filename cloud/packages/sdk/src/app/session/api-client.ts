@@ -1,7 +1,7 @@
 /**
  * 🔌 API Client Module
  *
- * Provides HTTP API access to MentraOS Cloud services.
+ * Provides HTTP API access to Veiller Cloud services.
  * Automatically uses the correct server URL derived from the WebSocket URL.
  */
 
@@ -30,7 +30,7 @@ export function wsUrlToHttpUrl(wsUrl?: string): string | undefined {
 }
 
 /**
- * API client class for making HTTP requests to MentraOS Cloud
+ * API client class for making HTTP requests to Veiller Cloud
  */
 export class ApiClient {
   private baseUrl: string | undefined;
@@ -72,7 +72,7 @@ export class ApiClient {
   }
 
   /**
-   * Fetch settings from MentraOS Cloud
+   * Fetch settings from Veiller Cloud
    *
    * @returns Promise resolving to settings array
    * @throws Error if client is not configured correctly or if request fails

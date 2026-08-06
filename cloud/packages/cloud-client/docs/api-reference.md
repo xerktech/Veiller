@@ -2,7 +2,7 @@
 
 Complete API documentation for the AugmentOS Cloud Client.
 
-## MentraClient
+## VeillerClient
 
 The main client class for connecting to and interacting with the AugmentOS cloud platform.
 
@@ -12,14 +12,14 @@ The main client class for connecting to and interacting with the AugmentOS cloud
 constructor(config: ClientConfig)
 ```
 
-Creates a new MentraClient instance with the specified configuration.
+Creates a new VeillerClient instance with the specified configuration.
 
 #### Parameters
 - `config: ClientConfig` - Client configuration object
 
 #### Example
 ```typescript
-const client = new MentraClient({
+const client = new VeillerClient({
   email: 'user@example.com',
   serverUrl: 'ws://localhost:3001'
 });

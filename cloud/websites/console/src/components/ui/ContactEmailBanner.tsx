@@ -1,7 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { Link } from 'react-router-dom';
-import { Alert, AlertTitle, AlertDescription } from '@mentra/shared';
+import { Alert, AlertTitle, AlertDescription } from '@veiller/shared';
 
 /**
  * Banner component that displays a warning when the current organization
@@ -26,7 +26,7 @@ export function ContactEmailBanner() {
       <AlertDescription>
         <p>
           Your organization needs a contact email before you can publish MiniApps.
-          This email will be used for Mentra MiniApp Store communications and user support.
+          This email will be used for Veiller MiniApp Store communications and user support.
         </p>
         <Link
           to="/org-settings"

@@ -14,14 +14,14 @@ import java.io.File;
  * Debug receiver for testing BES firmware updates directly via adb.
  *
  * <p>Usage: 1. Push firmware file: adb push firmware.bin /storage/emulated/0/asg/bes_firmware.bin
- * 2. Trigger update: adb shell am broadcast -a com.mentra.DEBUG_BES_OTA
+ * 2. Trigger update: adb shell am broadcast -a com.veiller.DEBUG_BES_OTA
  *
  * <p>This bypasses all cloud/phone logic and directly triggers BesOtaManager. FOR
  * DEVELOPMENT/TESTING ONLY.
  */
 public class DebugBesOtaReceiver extends BroadcastReceiver {
     private static final String TAG = "DebugBesOtaReceiver";
-    public static final String ACTION_DEBUG_BES_OTA = "com.mentra.DEBUG_BES_OTA";
+    public static final String ACTION_DEBUG_BES_OTA = "com.veiller.DEBUG_BES_OTA";
 
     @Override
     public void onReceive(Context context, Intent intent) {

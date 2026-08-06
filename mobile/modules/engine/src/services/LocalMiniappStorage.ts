@@ -1,7 +1,7 @@
 /**
  * Phone-local SimpleStorage for bundled miniapps.
  *
- * Keys are scoped to the stable Mentra user id and package name. Access tokens
+ * Keys are scoped to the stable Veiller user id and package name. Access tokens
  * must never be part of the namespace: Core access tokens rotate and are held
  * in memory only, so using one makes every app restart look like a new user.
  */
@@ -19,7 +19,7 @@ export interface LocalMiniappStorageHooks {
   backend: LocalMiniappStorageBackend
 }
 
-const KEY_ROOT = "mentraos_localstorage_"
+const KEY_ROOT = "veiller_localstorage_"
 
 export class LocalMiniappStorage {
   constructor(private readonly hooks: LocalMiniappStorageHooks) {}
@@ -76,7 +76,7 @@ export class LocalMiniappStorage {
 
   private async prefix(packageName: string): Promise<string> {
     const userId = (await this.hooks.getUserId()).trim()
-    if (!userId) throw new Error("Mentra user identity is unavailable")
+    if (!userId) throw new Error("Veiller user identity is unavailable")
     return `${KEY_ROOT}${userId}_${packageName}_`
   }
 }

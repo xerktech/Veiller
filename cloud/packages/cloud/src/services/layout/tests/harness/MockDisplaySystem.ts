@@ -5,7 +5,7 @@
  * and provides a console-based representation for testing purposes.
  */
 
-import { ActiveDisplay, DisplayRequest, LayoutType } from '@mentra/sdk';
+import { ActiveDisplay, DisplayRequest, LayoutType } from '@veiller/sdk';
 import { systemApps } from '../../../core/system-apps';
 import { TimeMachine } from './TimeMachine';
 

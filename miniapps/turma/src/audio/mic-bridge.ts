@@ -1,4 +1,4 @@
-// The Mentra `AudioBridge` for audio.ts's AudioRecorder (Veiller port).
+// The Veiller `AudioBridge` for audio.ts's AudioRecorder (Veiller port).
 //
 // Upstream, `audioControl(true/false)` was a literal Even Hub hardware call
 // and PCM frames rode the display's single `onEvenHubEvent` subscription.
@@ -22,7 +22,7 @@ export interface AudioChunkLike {
 }
 
 // The slice of the miniapp SDK session this bridge needs — structural, so
-// tests can hand in a fake without importing @mentra/miniapp.
+// tests can hand in a fake without importing @veiller/miniapp.
 export interface MicSessionLike {
   mic: {
     onAudioChunk(handler: (data: AudioChunkLike) => void): () => void;
@@ -36,7 +36,7 @@ export function base64ToBytes(b64: string): Uint8Array {
   return out;
 }
 
-export class MentraMicBridge implements AudioBridge {
+export class VeillerMicBridge implements AudioBridge {
   private readonly session: MicSessionLike;
   private readonly frameCbs = new Set<(pcm: Uint8Array) => void>();
   private unsubscribeChunks: (() => void) | null = null;

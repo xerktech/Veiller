@@ -1,11 +1,11 @@
-import { createLogger } from "@mentra/cloud-shared";
+import { createLogger } from "@veiller/cloud-shared";
 
 const logger = createLogger("core").child({ component: "email" });
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
 function sender(): string {
-  return process.env.EMAIL_SENDER || "Mentra <noreply@mentra.glass>";
+  return process.env.EMAIL_SENDER || "Veiller <noreply@mentra.glass>";
 }
 
 /**
@@ -56,7 +56,7 @@ export async function sendOrgInviteEmail(opts: {
       <h2 style="font-size:20px;margin:0 0 12px">You're invited to ${escapeHtml(opts.orgName)}</h2>
       <p style="font-size:15px;line-height:1.6;color:#3c3f46;margin:0 0 20px">
         ${escapeHtml(opts.inviterName)} invited you to join <strong>${escapeHtml(opts.orgName)}</strong>
-        as ${roleLabel} on the Mentra developer console.
+        as ${roleLabel} on the Veiller developer console.
       </p>
       <p style="margin:0 0 28px">
         <a href="${escapeHtml(opts.acceptUrl)}" style="display:inline-block;background:#111217;color:#fff;text-decoration:none;padding:11px 22px;border-radius:999px;font-size:15px;font-weight:600">Accept invitation</a>
@@ -66,7 +66,7 @@ export async function sendOrgInviteEmail(opts: {
         <span style="word-break:break-all">${escapeHtml(opts.acceptUrl)}</span>
       </p>
     </div>`;
-  return sendEmail({ to: opts.to, subject: `You're invited to ${opts.orgName} on Mentra`, html });
+  return sendEmail({ to: opts.to, subject: `You're invited to ${opts.orgName} on Veiller`, html });
 }
 
 function escapeHtml(value: string): string {

@@ -2,7 +2,7 @@
  * @fileoverview `users` collection. One document per `mentraUserId`.
  *
  * Identity-only record. No PII (no email, no display name, no avatar). The
- * sole purpose is to give Mentra a stable internal identifier for an
+ * sole purpose is to give Veiller a stable internal identifier for an
  * (tenantId, tenantUserId) pair.
  *
  * Created on first sight during token exchange: if the (tenantId, tenantUserId)
@@ -18,7 +18,7 @@ import { registerModel } from "./register-model";
 const UserSchema = new Schema(
   {
     /**
-     * Opaque Mentra-internal user identifier. Format: `mu_<ULID>`.
+     * Opaque Veiller-internal user identifier. Format: `mu_<ULID>`.
      * Stable across the user's lifetime under this OEM.
      */
     mentraUserId: { type: String, required: true, unique: true },

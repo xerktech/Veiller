@@ -19,7 +19,7 @@ export type OauthErrorCode =
   | "invalid_grant"          // subject_token bad signature, expired, replayed
   | "unauthorized_client"    // OEM unknown or disabled
   | "unsupported_grant_type" // grant_type not the token-exchange URN
-  | "server_error";          // Mentra-side problem (DB, key fetch, ...)
+  | "server_error";          // Veiller-side problem (DB, key fetch, ...)
 
 /**
  * Base error thrown by auth-related services. Each subclass fixes its

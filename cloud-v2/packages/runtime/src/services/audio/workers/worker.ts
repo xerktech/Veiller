@@ -24,7 +24,7 @@
  */
 
 import {Redis} from "ioredis"
-import {createLogger} from "@mentra/cloud-shared"
+import {createLogger} from "@veiller/cloud-shared"
 import {AUDIO_STREAM_GROUP, audioStreamKey} from "../../session/stream"
 import {CONTROL_STREAM_GROUP, controlStreamKey} from "../../session/control-stream"
 import type {SubscriptionRecord} from "../../session/subscriptions-store"

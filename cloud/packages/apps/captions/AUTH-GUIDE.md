@@ -1,6 +1,6 @@
-# Authentication Guide for MentraOS Apps
+# Authentication Guide for Veiller Apps
 
-This guide explains how authentication works in MentraOS apps with the two-server architecture (Express + Bun).
+This guide explains how authentication works in Veiller apps with the two-server architecture (Express + Bun).
 
 ## Table of Contents
 
@@ -18,12 +18,12 @@ This guide explains how authentication works in MentraOS apps with the two-serve
 
 ## Overview
 
-MentraOS apps use a **hybrid two-server architecture**:
+Veiller apps use a **hybrid two-server architecture**:
 
-- **Port 3333 (Express)**: Handles MentraOS integration, webhooks, and authentication middleware
+- **Port 3333 (Express)**: Handles Veiller integration, webhooks, and authentication middleware
 - **Port 3334 (Bun)**: Serves React webview and API routes with hot reloading
 
-Authentication happens in **Express** via the `createAuthMiddleware` from `@mentra/sdk`, then gets forwarded to **Bun** routes via headers.
+Authentication happens in **Express** via the `createAuthMiddleware` from `@veiller/sdk`, then gets forwarded to **Bun** routes via headers.
 
 ---
 
@@ -33,7 +33,7 @@ Authentication happens in **Express** via the `createAuthMiddleware` from `@ment
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ 1. User visits: http://localhost:3333/mentra-auth              │
+│ 1. User visits: http://localhost:3333/veiller-auth              │
 │    ↓                                                             │
 │ 2. Redirect to: https://account.mentra.glass/auth?packagename=...│
 │    ↓                                                             │
@@ -81,12 +81,12 @@ This starts:
 Visit the auth endpoint:
 
 ```
-http://localhost:3333/mentra-auth
+http://localhost:3333/veiller-auth
 ```
 
 This will:
 
-1. Redirect you to the MentraOS login page
+1. Redirect you to the Veiller login page
 2. Ask you to authorize the app
 3. Redirect back with a token
 4. Set a session cookie
@@ -248,7 +248,7 @@ if (!userId) {
 
 #### `hasActiveSession(req: Request): boolean`
 
-Check if there's an active MentraOS session (glasses connected):
+Check if there's an active Veiller session (glasses connected):
 
 ```typescript
 if (hasActiveSession(req)) {
@@ -305,7 +305,7 @@ Wrapper for routes that work with or without auth:
 2. **Open browser to:**
 
    ```
-   http://localhost:3333/mentra-auth
+   http://localhost:3333/veiller-auth
    ```
 
 3. **Log in and authorize**
@@ -321,7 +321,7 @@ Wrapper for routes that work with or without auth:
 **Get auth token:**
 
 ```bash
-# Visit /mentra-auth in browser first, then copy the aos_session cookie
+# Visit /veiller-auth in browser first, then copy the aos_session cookie
 
 curl http://localhost:3333/api/me \
   -H "Cookie: aos_session=your-session-cookie-here"
@@ -337,7 +337,7 @@ curl http://localhost:3333/api/me
 **Test with auth:**
 
 ```bash
-# After authenticating via /mentra-auth
+# After authenticating via /veiller-auth
 curl http://localhost:3333/api/me \
   --cookie-jar cookies.txt \
   --cookie cookies.txt
@@ -352,10 +352,10 @@ curl http://localhost:3333/api/me \
 **Possible causes:**
 
 1. **Haven't authenticated yet**
-   - Solution: Visit `http://localhost:3333/mentra-auth`
+   - Solution: Visit `http://localhost:3333/veiller-auth`
 
 2. **Session cookie expired**
-   - Solution: Re-authenticate via `/mentra-auth`
+   - Solution: Re-authenticate via `/veiller-auth`
 
 3. **Cookies not being sent**
    - Solution: Check browser dev tools → Application → Cookies
@@ -440,11 +440,11 @@ For consistency, pick either:
 
 - **All Express routes** (if you prefer traditional patterns)
 - **All Bun routes** (if you want hot reloading)
-- **Hybrid** (MentraOS/auth in Express, app logic in Bun)
+- **Hybrid** (Veiller/auth in Express, app logic in Bun)
 
-### 2. Always Use `/mentra-auth` for Local Dev
+### 2. Always Use `/veiller-auth` for Local Dev
 
-Don't try to generate tokens manually. The `/mentra-auth` endpoint handles the entire OAuth flow for you.
+Don't try to generate tokens manually. The `/veiller-auth` endpoint handles the entire OAuth flow for you.
 
 ### 3. Check Authentication Early
 
@@ -474,7 +474,7 @@ const userId = getAuthUserId(req)
 
 Always test your routes in two states:
 
-- **Authenticated** (after visiting `/mentra-auth`)
+- **Authenticated** (after visiting `/veiller-auth`)
 - **Unauthenticated** (in incognito window)
 
 ---
@@ -497,7 +497,7 @@ bun run dev
 ngrok http 3333
 
 # Visit the ngrok URL
-https://your-subdomain.ngrok.app/mentra-auth
+https://your-subdomain.ngrok.app/veiller-auth
 ```
 
 ---
@@ -518,6 +518,6 @@ https://your-subdomain.ngrok.app/mentra-auth
 
 ## Questions?
 
-- Check the [MentraOS Discord](https://discord.gg/5ukNvkEAqT)
+- Check the [Veiller Discord](https://discord.gg/5ukNvkEAqT)
 - Read the [SDK Documentation](https://docs.mentra.glass)
 - Open an issue on [GitHub](https://github.com/Mentra-Community/MentraOS-2)

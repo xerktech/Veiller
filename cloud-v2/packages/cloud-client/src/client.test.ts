@@ -116,7 +116,7 @@ describe("CloudClient construction", () => {
 
   test("uses the configured HTTP transport for refresh and subject exchange", async () => {
     const nowSeconds = Math.floor(Date.now() / 1000);
-    const storage = memoryStorage({ "mentra.cloud-client.refreshToken": "stale-refresh" });
+    const storage = memoryStorage({ "veiller.cloud-client.refreshToken": "stale-refresh" });
     const calls: string[] = [];
     let expiredCalls = 0;
 
@@ -160,7 +160,7 @@ describe("CloudClient construction", () => {
       "https://core.example.test/api/client/auth/exchange",
     ]);
     expect(expiredCalls).toBe(0);
-    expect(await storage.get("mentra.cloud-client.refreshToken")).toBe("refresh-2");
+    expect(await storage.get("veiller.cloud-client.refreshToken")).toBe("refresh-2");
   });
 });
 

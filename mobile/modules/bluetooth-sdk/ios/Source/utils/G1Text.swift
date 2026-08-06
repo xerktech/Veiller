@@ -1,6 +1,6 @@
 //
 //  G1Text.swift
-//  MentraOS_Manager
+//  Veiller_Manager
 //
 //  Created by Matthew Fosse on 3/5/25.
 //
@@ -67,7 +67,7 @@ class G1Text {
     ///
     /// IMPORTANT: Text is expected to come pre-wrapped from the DisplayProcessor in React Native.
     /// This function does NOT perform any text wrapping - it only chunks the text for BLE transmission.
-    /// The DisplayProcessor handles all pixel-accurate wrapping using @mentra/display-utils.
+    /// The DisplayProcessor handles all pixel-accurate wrapping using @veiller/display-utils.
     ///
     /// - Parameter text: Pre-wrapped text with newlines already in place
     /// - Returns: Array of BLE chunks ready for transmission

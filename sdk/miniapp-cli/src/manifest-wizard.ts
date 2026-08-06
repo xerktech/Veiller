@@ -1,4 +1,4 @@
-// `mentra-miniapp manifest` — interactive top-level wizard.
+// `veiller-miniapp manifest` — interactive top-level wizard.
 //
 // Uses the same mutation backend as the object-verb subcommands, so behavior
 // is identical. Loop-driven: read manifest, prompt for an action, mutate,
@@ -20,7 +20,7 @@ import {formatLoadError, formatWriteError, loadManifest, writeManifest} from "./
 import {hardwareDescription, permissionDescription} from "./permission-hints.js"
 
 export async function runManifestWizard(): Promise<void> {
-  p.intro("Mentra miniapp manifest editor")
+  p.intro("Veiller miniapp manifest editor")
 
   const loaded = loadManifest(process.cwd())
   if (!loaded.ok) {

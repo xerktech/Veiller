@@ -16,7 +16,7 @@
  *                 key upstream used) + a config-changed nudge
  */
 
-import type { Rpc } from "@mentra/miniapp/ui";
+import type { Rpc } from "@veiller/miniapp/ui";
 
 import type { TailEntry } from "../core/types.ts";
 import type { PhoneStatePayload } from "./phone-state.ts";
@@ -75,5 +75,5 @@ export interface Channels {
 
 declare global {
   // eslint-disable-next-line no-var
-  var mentra: import("@mentra/miniapp/ui").MentraTyped<Channels>;
+  var veiller: import("@veiller/miniapp/ui").VeillerTyped<Channels>;
 }

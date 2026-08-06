@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { SimplePermissionChecker } from '../simple-permission-checker';
-import { PermissionType } from '@mentra/sdk';
-import { StreamType, createTranscriptionStream, createTranslationStream } from '@mentra/sdk';
+import { PermissionType } from '@veiller/sdk';
+import { StreamType, createTranscriptionStream, createTranslationStream } from '@veiller/sdk';
 import { AppI } from '../../../models/app.model';
 import { expect, test, describe, it } from "bun:test";
 

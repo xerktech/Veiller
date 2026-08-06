@@ -5,7 +5,7 @@ description: "Third-party application data model"
 
 ## Overview
 
-The App model represents third-party applications (TPAs) in the MentraOS ecosystem. It stores app metadata, authentication credentials, webhook configurations, and app store status.
+The App model represents third-party applications (TPAs) in the Veiller ecosystem. It stores app metadata, authentication credentials, webhook configurations, and app store status.
 
 ## Location
 
@@ -249,7 +249,7 @@ await app.save();
 
 // Review decision
 app.appStoreStatus = 'PUBLISHED';
-app.reviewedBy = 'reviewer@mentraos.com';
+app.reviewedBy = 'reviewer@veiller.com';
 app.reviewedAt = new Date();
 await app.save();
 ```

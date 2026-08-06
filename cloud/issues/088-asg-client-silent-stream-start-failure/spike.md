@@ -74,7 +74,7 @@ went live and video played in the webview.
 
 ```sql
 SELECT dt, level, service, msg, pkg
-FROM s3Cluster(primary, t373499_mentra_us_central_s3)
+FROM s3Cluster(primary, t373499_veiller_us_central_s3)
 WHERE _row_type = 1
   AND dt > now() - INTERVAL 20 MINUTE
   AND userId = 'isaiahballah@gmail.com'

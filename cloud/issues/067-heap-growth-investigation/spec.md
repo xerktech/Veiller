@@ -187,7 +187,7 @@ porter helm --cluster <CLUSTER_ID> -- repo update
 
 # Get source token from Doppler
 TOKEN=$(doppler secrets get BETTERSTACK_SOURCE_TOKEN \
-  --project mentraos-cloud --config <DOPPLER_CONFIG> --plain)
+  --project veiller-cloud --config <DOPPLER_CONFIG> --plain)
 
 INGESTING_HOST="s2324289.eu-nbg-2.betterstackdata.com"
 
@@ -217,7 +217,7 @@ porter helm --cluster <CLUSTER_ID> -- install betterstack-logs \
 
 ```bash
 doppler secrets set LOG_STDOUT_JSON="true" \
-  --project mentraos-cloud --config <DOPPLER_CONFIG>
+  --project veiller-cloud --config <DOPPLER_CONFIG>
 ```
 
 ## Rollout Plan
@@ -315,8 +315,8 @@ kubernetes_container="konnectivity-agent"  → 0 results
 After removing @logtail/pino on France:
 
 ```bash
-MENTRA_ADMIN_JWT=$(grep "^MENTRA_ADMIN_JWT=" cloud/.env | cut -d'=' -f2-)
-export MENTRA_ADMIN_JWT
+VEILLER_ADMIN_JWT=$(grep "^VEILLER_ADMIN_JWT=" cloud/.env | cut -d'=' -f2-)
+export VEILLER_ADMIN_JWT
 cd cloud/packages/cloud
 
 # Monitor for 10 minutes — heap should be stable (sawtooth GC pattern, not climbing)

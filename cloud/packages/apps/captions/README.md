@@ -1,6 +1,6 @@
 # Captions App
 
-A real-time live captions app for MentraOS smart glasses. Displays transcriptions from the glasses microphone directly in the user's field of view.
+A real-time live captions app for Veiller smart glasses. Displays transcriptions from the glasses microphone directly in the user's field of view.
 
 ## 📚 Documentation
 
@@ -16,13 +16,13 @@ captions/
 ├── src/
 │   ├── index.ts           # 🎯 Main entry - coordinates everything
 │   ├── server.ts          # 🌐 Bun web server (webview + API)
-│   ├── mentra-app.ts      # 📱 MentraOS AppServer integration
+│   ├── veiller-app.ts      # 📱 Veiller AppServer integration
 │   │
 │   ├── api/               # API Routes
 │   │   ├── routes.ts      # HTTP API endpoints (Bun)
 │   │   └── auth-helpers.ts # Auth utilities for Bun routes
 │   │
-│   ├── app/               # MentraOS App Logic
+│   ├── app/               # Veiller App Logic
 │   │   └── CaptionsApp.ts # AppServer handler (onStart, onStop)
 │   │
 │   └── webview/           # Frontend (React)
@@ -43,7 +43,7 @@ captions/
 **Two-Server Hybrid Architecture:**
 
 1. **Express Server (Port 3333)** - "Front Door"
-   - MentraOS AppServer integration
+   - Veiller AppServer integration
    - Authentication middleware
    - Session/webhook endpoints
    - Proxies to Bun for unmatched routes
@@ -59,15 +59,15 @@ captions/
 - User info forwarded to Bun via headers (`x-auth-user-id`)
 - Developers can build routes in either Express or Bun
   - 3 lines of code
-  - Can disable MentraOS if needed
+  - Can disable Veiller if needed
 
 ## Getting Started
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) installed
-- MentraOS account at [console.mentra.glass](https://console.mentra.glass)
-- Smart glasses connected to MentraOS app (optional)
+- Veiller account at [console.mentra.glass](https://console.mentra.glass)
+- Smart glasses connected to Veiller app (optional)
 
 ### Installation
 
@@ -87,8 +87,8 @@ Edit `.env`:
 
 ```env
 PORT=3333
-PACKAGE_NAME=com.mentra.captions
-MENTRAOS_API_KEY=your_api_key_here  # Required
+PACKAGE_NAME=com.veiller.captions
+VEILLER_API_KEY=your_api_key_here  # Required
 NODE_ENV=development
 ```
 
@@ -97,12 +97,12 @@ NODE_ENV=development
 For local development, authenticate by visiting:
 
 ```
-http://localhost:3333/mentra-auth
+http://localhost:3333/veiller-auth
 ```
 
 This will:
 
-1. Redirect you to the MentraOS login page
+1. Redirect you to the Veiller login page
 2. Ask you to authorize the app
 3. Redirect back with authentication
 4. Set a session cookie
@@ -117,10 +117,10 @@ See **[AUTH-GUIDE.md](./AUTH-GUIDE.md)** for complete authentication documentati
 bun run dev
 ```
 
-**Webview only (no MentraOS):**
+**Webview only (no Veiller):**
 
 ```bash
-# Leave MENTRAOS_API_KEY empty in .env
+# Leave VEILLER_API_KEY empty in .env
 bun run dev
 ```
 
@@ -135,28 +135,28 @@ The app will start:
 ### Testing the Webview
 
 1. Start the server: `bun run dev`
-2. Authenticate: Visit `http://localhost:3333/mentra-auth`
+2. Authenticate: Visit `http://localhost:3333/veiller-auth`
 3. Open browser: `http://localhost:3333`
 4. Check auth status: `http://localhost:3333/api/me`
 
 ### Testing with Glasses
 
-1. Ensure `MENTRAOS_API_KEY` is set in `.env`
+1. Ensure `VEILLER_API_KEY` is set in `.env`
 2. Start the server: `bun run dev`
-3. Launch app from MentraOS phone app
+3. Launch app from Veiller phone app
 4. Captions appear on glasses
 
 ### As an Importable Module
 
 ```typescript
 import {startWebServer} from "./src/server"
-import {startMentraApp} from "./src/mentra-app"
+import {startVeillerApp} from "./src/veiller-app"
 
 // Start just the web server
 const server = startWebServer({port: 3333})
 
-// Or start MentraOS integration
-const app = await startMentraApp({
+// Or start Veiller integration
+const app = await startVeillerApp({
   packageName: "com.example.app",
   apiKey: "your-key",
   port: 3333,
@@ -187,12 +187,12 @@ export function startWebServer(config) {
 - HMR enabled for instant updates
 - Zero build step needed
 
-### MentraOS Integration (`mentra-app.ts`)
+### Veiller Integration (`veiller-app.ts`)
 
 ```typescript
 import {CaptionsApp} from "./app/CaptionsApp"
 
-export async function startMentraApp(config) {
+export async function startVeillerApp(config) {
   const app = new CaptionsApp({
     packageName: config.packageName,
     apiKey: config.apiKey,
@@ -212,14 +212,14 @@ export async function startMentraApp(config) {
 
 ```typescript
 import { startWebServer } from "./server";
-import { startMentraApp } from "./mentra-app";
+import { startVeillerApp } from "./veiller-app";
 
 // Always start web server
 const server = startWebServer({ port: 3333 });
 
-// Optionally start MentraOS
+// Optionally start Veiller
 if (API_KEY) {
-  const app = await startMentraApp({ ... });
+  const app = await startVeillerApp({ ... });
 }
 ```
 
@@ -307,15 +307,15 @@ private async onStart(session: AppSession) {
 | Variable           | Required | Default               | Description                     |
 | ------------------ | -------- | --------------------- | ------------------------------- |
 | `PORT`             | No       | `3333`                | Server port                     |
-| `PACKAGE_NAME`     | No       | `com.mentra.captions` | MentraOS package name           |
-| `MENTRAOS_API_KEY` | No       | -                     | API key from console (optional) |
+| `PACKAGE_NAME`     | No       | `com.veiller.captions` | Veiller package name           |
+| `VEILLER_API_KEY` | No       | -                     | API key from console (optional) |
 | `NODE_ENV`         | No       | `development`         | Environment mode                |
 
 ## Troubleshooting
 
 **Authentication not working?**
 
-- Visit `http://localhost:3333/mentra-auth` to authenticate
+- Visit `http://localhost:3333/veiller-auth` to authenticate
 - Check `/api/me` returns `authenticated: true`
 - See [AUTH-GUIDE.md](./AUTH-GUIDE.md#troubleshooting)
 
@@ -327,7 +327,7 @@ private async onStart(session: AppSession) {
 
 **API routes returning 401?**
 
-- Authenticate first via `/mentra-auth`
+- Authenticate first via `/veiller-auth`
 - Use `getAuthUserId(req)` in Bun routes
 - Use `req.authUserId` in Express routes
 - See [AUTH-GUIDE.md](./AUTH-GUIDE.md)
@@ -350,7 +350,7 @@ PORT=4000 bun run dev  # Uses 4000 and 4001
 
 ## Resources
 
-- [MentraOS Documentation](https://docs.mentra.glass)
+- [Veiller Documentation](https://docs.mentra.glass)
 - [Bun Documentation](https://bun.sh/docs)
 - [Developer Console](https://console.mentra.glass)
 - [Discord Community](https://discord.gg/5ukNvkEAqT)

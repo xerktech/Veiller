@@ -1,6 +1,6 @@
-# @mentra/sdk
+# @veiller/sdk
 
-A TypeScript client library for building Apps for MentraOS Cloud. This library provides a flexible, type-safe interface for handling WebSocket connections, managing layouts, and processing real-time data streams.
+A TypeScript client library for building Apps for Veiller Cloud. This library provides a flexible, type-safe interface for handling WebSocket connections, managing layouts, and processing real-time data streams.
 
 ## Table of Contents
 
@@ -57,18 +57,18 @@ A TypeScript client library for building Apps for MentraOS Cloud. This library p
 
 ## Introduction
 
-Welcome to the `@mentra/sdk` documentation. This SDK simplifies the process of building Apps for MentraOS smartglasses. It provides tools for connecting to MentraOS Cloud, handling real-time data streams, and managing user interfaces in the AR environment.
+Welcome to the `@veiller/sdk` documentation. This SDK simplifies the process of building Apps for Veiller smartglasses. It provides tools for connecting to Veiller Cloud, handling real-time data streams, and managing user interfaces in the AR environment.
 
-**Target Audience:** MentraOS App Developers
+**Target Audience:** Veiller App Developers
 
-**Purpose:** To provide a comprehensive guide for using the `@mentra/sdk` to develop Apps.
+**Purpose:** To provide a comprehensive guide for using the `@veiller/sdk` to develop Apps.
 
 ## Core Concepts
 
-The `@mentra/sdk` is built upon these core concepts:
+The `@veiller/sdk` is built upon these core concepts:
 
-*   **WebSocket Communication:** Establishes and manages persistent WebSocket connections with MentraOS Cloud for real-time data exchange.
-*   **Event-Driven Architecture:**  Handles asynchronous data streams and system events from MentraOS Cloud using an event-driven model.
+*   **WebSocket Communication:** Establishes and manages persistent WebSocket connections with Veiller Cloud for real-time data exchange.
+*   **Event-Driven Architecture:**  Handles asynchronous data streams and system events from Veiller Cloud using an event-driven model.
 *   **Type Safety with TypeScript:**  Leverages TypeScript to provide strong type definitions, improving code reliability and developer experience.
 *   **Layout Management:** Offers a type-safe and declarative approach to define and display UI layouts within the AR environment.
 *   **Modular Design:**  Organized into logical modules for clarity, maintainability, and ease of use.
@@ -88,7 +88,7 @@ The SDK is structured into these key directories:
 *   **Multiple Event Handling Patterns:**  Flexibility in event handling (direct methods, pub/sub, organized events).
 *   **Type-Safe Layouts:**  Reduces UI errors with type-safe layout definitions.
 *   **Comprehensive Type Definitions:**  Complete type coverage for data streams, messages, and SDK components.
-*   **Easy Installation and Setup:**  Installation via `bun add @mentra/sdk`.
+*   **Easy Installation and Setup:**  Installation via `bun add @veiller/sdk`.
 *   **Well-Documented API and Design:**  Clear documentation with examples and design overviews.
 
 ## Getting Started
@@ -98,17 +98,17 @@ The SDK is structured into these key directories:
       ### bun
 
       ```bash
-      bun add @mentra/sdk
+      bun add @veiller/sdk
       ```
 
       ### npm
       ```bash
-      npm install @mentra/sdk
+      npm install @veiller/sdk
       ```
 
 2.  **Initialization:** Instantiate `AppClient` with your package name and API key.
     ```typescript
-    import { AppClient } from '@mentra/sdk';
+    import { AppClient } from '@veiller/sdk';
 
     const app = new AppClient({
       packageName: 'org.example.myapp',
@@ -116,7 +116,7 @@ The SDK is structured into these key directories:
     });
     ```
 
-3.  **Connect to MentraOS Cloud:** Establish a WebSocket connection.
+3.  **Connect to Veiller Cloud:** Establish a WebSocket connection.
     ```typescript
     await app.connect('session_123');
     ```
@@ -130,7 +130,7 @@ The SDK is structured into these key directories:
 
 5.  **Display Layouts:** Show content on the AR display.
     ```typescript
-    app.layouts.showTextWall('Hello MentraOS!');
+    app.layouts.showTextWall('Hello Veiller!');
     ```
 
 ## Usage Guide
@@ -150,7 +150,7 @@ const app = new AppClient({
 
 ### 2. Event Handling
 
-The SDK provides three patterns for handling real-time events from MentraOS Cloud.
+The SDK provides three patterns for handling real-time events from Veiller Cloud.
 
 #### Direct Methods
 
@@ -225,7 +225,7 @@ app.layouts.showReferenceCard(
 Control and monitor the WebSocket connection.
 
 ```typescript
-// Connect to MentraOS Cloud
+// Connect to Veiller Cloud
 try {
   await app.connect('session_123');
   console.log('Connected!');
@@ -352,7 +352,7 @@ Detailed API documentation for key classes and interfaces.
 
 ### AppClient
 
-Main class for interacting with MentraOS Cloud.
+Main class for interacting with Veiller Cloud.
 
 #### Constructor
 
@@ -375,7 +375,7 @@ interface AppClientConfig {
 
 #### Methods
 
-- `connect(sessionId: string): Promise<void>`: Establishes a WebSocket connection to MentraOS Cloud for the given session ID. Returns a Promise that resolves on successful connection or rejects on failure.
+- `connect(sessionId: string): Promise<void>`: Establishes a WebSocket connection to Veiller Cloud for the given session ID. Returns a Promise that resolves on successful connection or rejects on failure.
 - `disconnect(): void`: Closes the WebSocket connection gracefully.
 - `onTranscription(handler: (data: TranscriptionData) => void): () => void`: Registers a handler for transcription events. Returns an unsubscribe function.
 - `onHeadPosition(handler: (data: HeadPosition) => void): () => void`: Registers a handler for head position events. Returns an unsubscribe function.
@@ -414,7 +414,7 @@ Manages event subscriptions and emissions. Accessible via `app.events`.
 
 ## Design Overview: Types
 
-This section details the type system of the `@mentra/sdk`, which uses TypeScript to provide robust interfaces and data structures for building reliable Apps.
+This section details the type system of the `@veiller/sdk`, which uses TypeScript to provide robust interfaces and data structures for building reliable Apps.
 
 ### Organization of Types
 
@@ -458,7 +458,7 @@ export interface DisplayRequest extends BaseMessage {
 
 #### 2. Data Types and Models (`./models.ts`, `./streams.ts`)
 
-Represent data streams and entities in MentraOS.
+Represent data streams and entities in Veiller.
 
 *   `StreamType` Enum (`./streams.ts`): Available data streams (e.g., `StreamType.TRANSCRIPTION`).
 *   Data Stream Interfaces: Data structure for each `StreamType` (e.g., `TranscriptionData`).
@@ -519,7 +519,7 @@ Type-safe named constants for system states and options.
 
 ## Design Overview: App Modules
 
-This section outlines the `src/app` directory, which contains modules for building MentraOS Apps.
+This section outlines the `src/app` directory, which contains modules for building Veiller Apps.
 
 ### Module Breakdown
 
@@ -534,7 +534,7 @@ This section outlines the `src/app` directory, which contains modules for buildi
 
 #### 1. `AppClient` Class (`session/index.ts`)
 
-Main class for App interaction with MentraOS Cloud.
+Main class for App interaction with Veiller Cloud.
 
 **Responsibilities:**
 
@@ -542,7 +542,7 @@ Main class for App interaction with MentraOS Cloud.
 *   Authentication using API key and package name.
 *   Event handling via `EventManager`.
 *   Layout management via `LayoutManager`.
-*   Message sending to MentraOS Cloud.
+*   Message sending to Veiller Cloud.
 
 **Usage:** See [Getting Started](#getting-started) and [Usage Guide](#usage-guide).
 
@@ -573,7 +573,7 @@ Provides type-safe layout display methods.
 
 *   Methods for layout definition (`showTextWall`, `showReferenceCard`, etc.).
 *   Constructs `DisplayRequest` messages.
-*   Sends messages to MentraOS Cloud.
+*   Sends messages to Veiller Cloud.
 *   Manages layout views (`main`, `dashboard`) and durations.
 
 **Usage:**
@@ -597,7 +597,7 @@ Base class for App servers responding to webhooks.
 **Usage (Extend `AppServer` in your application):**
 
 ```typescript
-import { AppServer, AppSession } from '@mentra/sdk';
+import { AppServer, AppSession } from '@veiller/sdk';
 
 class MyAppServer extends AppServer {
   // ... override onSession and onStop ...
@@ -608,7 +608,7 @@ class MyAppServer extends AppServer {
 
 1.  Choose App type (server-based with `AppServer` or client-side with `AppSession`).
 2.  Instantiate `AppSession` or extend `AppServer`.
-3.  Connect to MentraOS Cloud using `app.connect(sessionId)`.
+3.  Connect to Veiller Cloud using `app.connect(sessionId)`.
 4.  Register event handlers using `app.events` methods.
 5.  Manage layouts using `app.layouts` methods.
 6.  Implement webhook handlers (`onSession`, `onStop`) for server-based Apps.

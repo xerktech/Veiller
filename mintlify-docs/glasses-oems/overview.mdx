@@ -1,17 +1,17 @@
 ---
 title: "OEM Integration Overview"
-description: "Embed the full MentraOS experience (miniapps, the Mentra Miniapp Store, and the developer ecosystem) inside your own phone app, driving your own smart glasses."
+description: "Embed the full Veiller experience (miniapps, the Veiller Miniapp Store, and the developer ecosystem) inside your own phone app, driving your own smart glasses."
 ---
 
 ## What it is
 
-The **Mentra OEM Integration Engine** is all of MentraOS's phone-side logic packaged as a library you embed in your **own** app. Your users stay in your app and on your brand, but they get the full MentraOS experience: the Mentra Miniapp Store, installable miniapps, and the same developer ecosystem that powers the Mentra App.
+The **Veiller OEM Integration Engine** is all of Veiller's phone-side logic packaged as a library you embed in your **own** app. Your users stay in your app and on your brand, but they get the full Veiller experience: the Veiller Miniapp Store, installable miniapps, and the same developer ecosystem that powers the Veiller App.
 
-The engine owns everything between your glasses and Mentra's backend services:
+The engine owns everything between your glasses and Veiller's backend services:
 
-- **Mentra Miniapp Store + runtime**: discover, install, and run miniapps on the phone.
+- **Veiller Miniapp Store + runtime**: discover, install, and run miniapps on the phone.
 - **Glasses I/O**: display rendering, microphone/audio routing, and the rest of the glasses feature set.
-- **Backend connectivity**: talking to Mentra's backend services for the store, transcription, translation, streaming, and photos.
+- **Backend connectivity**: talking to Veiller's backend services for the store, transcription, translation, streaming, and photos.
 
 You bring two things: **your glasses** (and however you talk to them over Bluetooth) and **your app** (its shell, navigation, and branding).
 
@@ -20,10 +20,10 @@ You bring two things: **your glasses** (and however you talk to them over Blueto
 flowchart TB
   subgraph App["Your App: your branding, your user experience, your customer relationship"]
     direction TB
-    subgraph Engine["Mentra OEM Integration Engine Library"]
+    subgraph Engine["Veiller OEM Integration Engine Library"]
       direction TB
       F1["Miniapp Runtime"]
-      F2["Mentra Miniapp Store"]
+      F2["Veiller Miniapp Store"]
       F3["Developer ecosystem"]
       F1 ~~~ F2
       F2 ~~~ F3
@@ -66,24 +66,24 @@ Add the engine to your app, using the path that matches how your app is built:
 You give the engine a single configuration when your app boots. The engine manages its own settings internally. The only things you hand it are what's yours:
 
 - **Your identity**: how your users are signed in (see [Backend connectivity](#3-connect-to-the-backend-services)).
-- **Optional proxy**: if you route Mentra's backend services through your own infrastructure, you pass your proxy here (see below).
+- **Optional proxy**: if you route Veiller's backend services through your own infrastructure, you pass your proxy here (see below).
 
 ### 3. Connect to the backend services
 
-The engine talks to two tiers of Mentra backend services:
+The engine talks to two tiers of Veiller backend services:
 
-- **Mentra Runtime Services.** The capabilities the engine relies on: speech-to-text, text-to-speech, translation, live streaming, and photo handling. Self-hostable and/or proxyable (run your own, route through your proxy, or both).
-- **Mentra Cloud Core Services.** The Mentra Miniapp Store, the developer console, and the OEM APIs. Proxyable only (always Mentra-hosted, optionally reached through your proxy).
+- **Veiller Runtime Services.** The capabilities the engine relies on: speech-to-text, text-to-speech, translation, live streaming, and photo handling. Self-hostable and/or proxyable (run your own, route through your proxy, or both).
+- **Veiller Cloud Core Services.** The Veiller Miniapp Store, the developer console, and the OEM APIs. Proxyable only (always Veiller-hosted, optionally reached through your proxy).
 
 The engine also includes **on-device STT/TTS** as a fallback for offline or degraded-network scenarios. Cloud STT/TTS is the recommended path for production quality; on-device is the safety net.
 
-**Identity.** Your users sign in through *your* identity system. They never create a Mentra account. The engine exchanges your app's signed-in identity for a Mentra-scoped session, so your users see only your login.
+**Identity.** Your users sign in through *your* identity system. They never create a Veiller account. The engine exchanges your app's signed-in identity for a Veiller-scoped session, so your users see only your login.
 
 **Routing through your proxy.** You don't stand up a separate proxy service. When you configure the engine, you give it your proxy details and it routes all backend traffic through your infrastructure. Without a proxy, the engine talks to the backend services directly.
 
 ### 4. Register your glasses
 
-The engine talks to glasses through a **Glasses Adapter**: a contract that describes one model of glasses. You implement an adapter for your hardware, in your own app, against your own Bluetooth stack, and register it at startup. The engine then treats your glasses as a first-class device, exactly like the glasses Mentra ships.
+The engine talks to glasses through a **Glasses Adapter**: a contract that describes one model of glasses. You implement an adapter for your hardware, in your own app, against your own Bluetooth stack, and register it at startup. The engine then treats your glasses as a first-class device, exactly like the glasses Veiller ships.
 
 An adapter declares two things: **capabilities** (what your glasses have) and **behavior** (how to drive each feature over your BLE link). You declare and implement only what your hardware actually has.
 
@@ -169,15 +169,15 @@ registerGlassesAdapter(acmeAdapter)
 
 That's the whole integration. The engine handles everything above it: which miniapps run, how their content is laid out for your screen, routing your mic audio to speech-to-text.
 
-Your adapter lives **in your app**: your Bluetooth protocol, your firmware, your transport stay private to you. You never submit glasses code to Mentra, and you never wait on a Mentra release to ship a hardware change.
+Your adapter lives **in your app**: your Bluetooth protocol, your firmware, your transport stay private to you. You never submit glasses code to Veiller, and you never wait on a Veiller release to ship a hardware change.
 
 ## Why this works
 
 - **Your hardware, no fork.** The Glasses Adapter is your private extension point. Add or change a model entirely within your app.
-- **Your app, your brand.** Users never leave your app or see a Mentra account. The engine is a library inside your experience, not a separate app.
-- **One shared ecosystem.** Every OEM's users and developers live in the same MentraOS ecosystem. That's what makes the Mentra Miniapp Store worth being part of.
-- **You decide what you host.** Use Mentra's backend services as-is or route them all through your own proxy.
+- **Your app, your brand.** Users never leave your app or see a Veiller account. The engine is a library inside your experience, not a separate app.
+- **One shared ecosystem.** Every OEM's users and developers live in the same Veiller ecosystem. That's what makes the Veiller Miniapp Store worth being part of.
+- **You decide what you host.** Use Veiller's backend services as-is or route them all through your own proxy.
 
 ## Availability
 
-The Mentra OEM Integration Engine is planned for release by the **end of 2026**. To start an integration, reach out to [help@mentra.glass](mailto:help@mentra.glass).
+The Veiller OEM Integration Engine is planned for release by the **end of 2026**. To start an integration, reach out to [help@mentra.glass](mailto:help@mentra.glass).
