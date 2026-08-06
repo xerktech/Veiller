@@ -1,7 +1,7 @@
 {
   "name": "local-turma",
   "private": true,
-  "description": "Foverlay port of the Turma Even G2 glasses app (self-hosted Claude Code session manager) as a local Mentra miniapp",
+  "description": "Veiller port of the Turma Even G2 glasses app (self-hosted Claude Code session manager) as a local Mentra miniapp",
   "scripts": {
     "dev": "mentra-miniapp dev",
     "build": "bun run build.ts",

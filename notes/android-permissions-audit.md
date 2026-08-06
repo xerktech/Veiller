@@ -3,9 +3,9 @@ status: active
 owner: Malcolm Habeeb
 ---
 
-# Android permission audit (Foverlay) — XERK-207
+# Android permission audit (Veiller) — XERK-207
 
-Evaluation of every Android permission the Foverlay mobile app declares, which
+Evaluation of every Android permission the Veiller mobile app declares, which
 **component** needs it, and whether it can be killed. Ticket:
 [XERK-207](https://xerktech.atlassian.net/browse/XERK-207).
 

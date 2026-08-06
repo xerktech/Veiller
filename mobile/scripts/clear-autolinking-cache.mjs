@@ -10,7 +10,7 @@ import {rm} from "fs/promises"
  * ReactNativeApplicationEntryPoint.java) and only re-runs the resolver when
  * yarn.lock / package-lock.json / package.json / react-native.config.js
  * change. This repo uses bun.lock, which is NOT on that list, so a stale or
- * wrong packageName (e.g. "com.mentra" instead of "com.xerktech.foverlay")
+ * wrong packageName (e.g. "com.mentra" instead of "com.xerktech.veiller")
  * survives indefinitely and breaks :app:compileReleaseJavaWithJavac with
  * "cannot find symbol: class BuildConfig". Regenerating costs a few seconds,
  * a poisoned cache costs a 4-minute failed build.

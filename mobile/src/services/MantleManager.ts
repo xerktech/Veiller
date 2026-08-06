@@ -6,7 +6,7 @@ import {AppState} from "react-native"
 
 import {bootstrapMentraJS} from "@/services/mentraJsBootstrap"
 import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
-import {foverlayMiniappSync} from "@/services/miniapps/foverlayMiniappSync"
+import {veillerMiniappSync} from "@/services/miniapps/veillerMiniappSync"
 import builtInMiniappCatalog from "@/services/miniapps/BuiltInMiniappCatalog"
 import {notifyPackageName} from "@/constants/miniapps"
 import {migrate} from "@/services/Migrations"
@@ -36,9 +36,9 @@ import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
 import {showAlert} from "@/utils/AlertUtils"
 import {Buffer} from "@craftzdog/react-native-buffer"
 
-// Foverlay ships NO miniapps inside the APK (XERK-214). Miniapps are installed
+// Veiller ships NO miniapps inside the APK (XERK-214). Miniapps are installed
 // at startup from their repos' GitHub Releases — see initMiniapps() below and
-// src/services/miniapps/foverlayMiniappSync.ts.
+// src/services/miniapps/veillerMiniappSync.ts.
 
 // The background phone-location task + its tier control moved into island
 // (PhoneLocationService). MantleManager now drives it through the island service
@@ -322,13 +322,13 @@ class MantleManager {
     // startup, not an island configuration seam.
     engine.configure({
       auth: {
-        // Foverlay has no user account (XERK-198). The engine runs local-only
+        // Veiller has no user account (XERK-198). The engine runs local-only
         // (config.localOnly below), so it never opens the authenticated cloud
         // connection and this seam is never asked for a real subject token.
         // It still has to satisfy the required IslandAuth contract; if some
         // on-demand cloud call reaches it anyway, fail loudly rather than hang.
         getSubjectToken: async () => {
-          throw new Error("Foverlay local-only build: no cloud account, no subject token")
+          throw new Error("Veiller local-only build: no cloud account, no subject token")
         },
         // No login means no auth-state changes to listen for, so onStateChange
         // is intentionally omitted (it is optional on IslandAuth).
@@ -481,21 +481,21 @@ class MantleManager {
     // Initialize local miniapp runtime
     localMiniappRuntime.initialize()
 
-    // Foverlay bundles no miniapps in the APK (XERK-214). Install the latest
-    // bundle for each repo in config/foverlayMiniapps.ts straight from its
+    // Veiller bundles no miniapps in the APK (XERK-214). Install the latest
+    // bundle for each repo in config/veillerMiniapps.ts straight from its
     // GitHub Releases. Runs after the registry is warm so the already-installed
     // check sees real on-disk state, and is best-effort — an unreachable or
     // rate-limited repo must not block boot; the app then runs with whatever
     // versions a prior run already put on disk.
     try {
-      await foverlayMiniappSync.sync()
+      await veillerMiniappSync.sync()
     } catch (err) {
-      console.warn("MANTLE: foverlay miniapp sync failed (offline / GitHub unavailable):", err)
+      console.warn("MANTLE: veiller miniapp sync failed (offline / GitHub unavailable):", err)
     }
 
     // Then reconcile the admin-managed preinstall registry from Cloud V2. This
     // lets Core move users to newer bundled miniapp releases without shipping a
-    // new mobile binary. Best-effort: Foverlay runs local-only with no cloud
+    // new mobile binary. Best-effort: Veiller runs local-only with no cloud
     // account, so the registry fetch is expected to fail — the bundled miniapps
     // installed above are what ship, and a failure here must not abort boot.
     try {

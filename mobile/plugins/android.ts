@@ -29,7 +29,7 @@ const withAndroidWorkingConfig: ConfigPlugin = (config) => {
 // build-variant suffixes flow through manifest entries that would otherwise
 // hardcode the base package (e.g. the DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION).
 function getAndroidPackageName(config: any): string {
-  return config?.android?.package || "com.xerktech.foverlay"
+  return config?.android?.package || "com.xerktech.veiller"
 }
 
 /**
@@ -393,9 +393,9 @@ function withAndroidManifestModifications(config: any) {
     // Add additional scheme to MainActivity intent-filter
     const mainActivity = app?.activity?.find((a: any) => a.$["android:name"] === ".MainActivity")
     if (mainActivity && mainActivity["intent-filter"]) {
-      // Find the intent-filter with the com.xerktech.foverlay scheme
+      // Find the intent-filter with the com.xerktech.veiller scheme
       const schemeFilter = mainActivity["intent-filter"].find((filter: any) => {
-        return filter.data?.some((d: any) => d.$["android:scheme"] === "com.xerktech.foverlay")
+        return filter.data?.some((d: any) => d.$["android:scheme"] === "com.xerktech.veiller")
       })
 
       if (schemeFilter && schemeFilter.data) {

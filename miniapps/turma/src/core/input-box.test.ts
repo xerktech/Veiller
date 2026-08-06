@@ -61,7 +61,7 @@ describe("inputBoxBody", () => {
   });
 
   it("windows long text down to at most BOTTOM_MAX_LINES, keeping the tail visible", () => {
-    // Foverlay port: expectations recomputed for the 7-line canvas
+    // Veiller port: expectations recomputed for the 7-line canvas
     // (BOTTOM_MAX_LINES 5 -> 3; see core/layout.ts).
     const text = "line1\nline2\nline3\nline4\nline5\nline6\nline7";
     const lines = inputBoxBody({ text, focused: true, mic: "idle", viewOffset: 0 });
@@ -85,7 +85,7 @@ describe("inputBoxBody", () => {
 describe("sheetBody", () => {
   it("wraps the question, numbers options, and appends a Dictate answer row", () => {
     const lines = sheetBody({ question: "Pick one?", options: ["Red", "Green"], selected: 0 });
-    // Foverlay port: the 3-line box windows the option list (2 rows fit under
+    // Veiller port: the 3-line box windows the option list (2 rows fit under
     // a 1-line question) — the Dictate answer row scrolls into view when
     // selection moves down (see the tests below).
     expect(lines).toEqual(["Pick one?", "> 1. Red", "  2. Green"]);
@@ -166,7 +166,7 @@ describe("menuBox", () => {
   });
 
   it("MENU_MAX_LINES leaves at least two transcript lines", () => {
-    // Foverlay port: 7-line canvas -> 5 (upstream: 10 -> 8).
+    // Veiller port: 7-line canvas -> 5 (upstream: 10 -> 8).
     expect(MENU_MAX_LINES).toBe(5);
   });
 });

@@ -26,14 +26,14 @@ import Foundation
 import JavaScriptCore
 import os.log
 
-private let jscLog = OSLog(subsystem: "com.xerktech.foverlay", category: "JSCSpike")
+private let jscLog = OSLog(subsystem: "com.xerktech.veiller", category: "JSCSpike")
 
 /// Log to BOTH jlog (forwarded into JS) AND os_log AND a flat file in
 /// the app's Documents directory. Release builds don't pipe RN's
 /// console.log or Swift print() to syslog, and os_log filtering through
 /// idevicesyslog is unreliable. The Documents file is the agentic-test
 /// path: `xcrun devicectl device copy from --domain-type appDataContainer
-/// --domain-identifier com.xerktech.foverlay --source Documents/jsc-spike.log`.
+/// --domain-identifier com.xerktech.veiller --source Documents/jsc-spike.log`.
 private let logFileURL: URL = {
     let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     return docs.appendingPathComponent("jsc-spike.log")

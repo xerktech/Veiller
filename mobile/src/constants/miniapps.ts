@@ -5,7 +5,7 @@ export const simulatedPackageName = "com.mentra.simulated"
 export const mirrorPackageName = "com.mentra.mirror"
 export const notifyPackageName = "cloud.augmentos.notify"
 
-/** True when this binary is the China (com.xerktech.foverlay.cn) build. */
+/** True when this binary is the China (com.xerktech.veiller.cn) build. */
 export const isChinaBuild = (): boolean => process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china"
 
 /**

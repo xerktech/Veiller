@@ -517,7 +517,7 @@ function construct(): void {
     console.warn(`${LOG_TAG}: runtime error: ${err.code}`)
   })
 
-  // Local-only mode (Foverlay): the client is fully wired for the local runtime
+  // Local-only mode (Veiller): the client is fully wired for the local runtime
   // surface, but there is no account to authenticate with, so never open the
   // backend connection. Skipping connect() is what keeps a no-account build off
   // the infinite auth-failing reconnect loop (and its persistent-failure alarm).

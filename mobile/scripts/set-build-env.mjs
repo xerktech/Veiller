@@ -40,7 +40,7 @@ async function syncMapboxNetrc() {
 }
 
 export async function setBuildEnv() {
-  // Foverlay bundles no miniapps in the APK (XERK-214); they're installed at
+  // Veiller bundles no miniapps in the APK (XERK-214); they're installed at
   // startup from GitHub Releases, so there's no bundled-miniapp codegen here.
 
   // If running under `doppler run`, mirror the Mapbox sk. token into ~/.netrc

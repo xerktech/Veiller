@@ -1,6 +1,6 @@
 // Mentra scene-display backend — implements `GlassesDisplay` over
 // `session.display.render()` (replace-the-frame scene rendering) for the
-// Foverlay port (XERK-211). Mirrors the structure of upstream's
+// Veiller port (XERK-211). Mirrors the structure of upstream's
 // display/evenhub.ts: the same debounce/page-shape discipline, the same
 // content caps, but scene elements instead of Even Hub containers.
 //
@@ -203,7 +203,7 @@ export class MentraDisplay implements GlassesDisplay {
   }
 
   requestExit(): void {
-    // No-op: Foverlay owns the miniapp lifecycle — there is no Even Hub
+    // No-op: Veiller owns the miniapp lifecycle — there is no Even Hub
     // exit-confirmation dialog to request. A root double-tap simply stays on
     // the home screen.
   }

@@ -3,20 +3,20 @@ status: active
 owner: malcolm.habeeb
 ---
 
-# Port the Tenir and Turma Even G2 apps to Foverlay bundled miniapps (XERK-211)
+# Port the Tenir and Turma Even G2 apps to Veiller bundled miniapps (XERK-211)
 
 ## What / why
 
 Tenir (self-hosted live captions) and Turma (self-hosted Claude Code session
 manager) each ship an Even Realities G2 glasses app built for **Even Hub**
 (`.ehpk` WebView apps on `@evenrealities/even_hub_sdk`, sideloaded/published
-through Even's portal). Foverlay replaces the Even phone app entirely: it
+through Even's portal). Veiller replaces the Even phone app entirely: it
 drives the G2 over BLE itself and runs **local Mentra miniapps** (background
 JS + optional phone WebView, shipped as flat zips bundled into the APK).
 
 This spec covers porting both glasses apps to local miniapps that live in this
 repo under `miniapps/tenir` and `miniapps/turma`, and bundling them in
-`mobile/assets/miniapps/` so every Foverlay release includes them.
+`mobile/assets/miniapps/` so every Veiller release includes them.
 
 Upstream sources ported (latest at time of port):
 
@@ -102,7 +102,7 @@ hub REST uses the proxied fetch RPC.
 
 Not ported: the ttyd terminal pane (needs WebView-jar cookies the background
 proxy can't plant — the Terminal toggle is hidden), and the Even exit-confirm
-dialog (`requestExit` is a no-op; Foverlay owns app lifecycle).
+dialog (`requestExit` is a no-op; Veiller owns app lifecycle).
 
 ## Shipping
 

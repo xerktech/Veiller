@@ -12,7 +12,7 @@ process.env.ORG_GRADLE_PROJECT_reactNativeArchitectures = 'arm64-v8a'
 // suffixed package name and matching app label. Validation lives in
 // app.config.ts (which reads MENTRAOS_BUILD_NAME). e.g.
 //   bun android-release --name stable
-//   → applicationId: com.xerktech.foverlay.stable
+//   → applicationId: com.xerktech.veiller.stable
 //   → app label:     stable
 const nameSuffix = argv.name ? String(argv.name).trim() : null
 if (nameSuffix) {
@@ -33,9 +33,9 @@ await $({ stdio: 'inherit' })`bun expo prebuild --platform android`;
 if (nameSuffix) {
   const gsPath = 'android/app/google-services.json'
   const gs = JSON.parse(await readFile(gsPath, 'utf-8'))
-  const newPkg = `com.xerktech.foverlay.${nameSuffix}`
+  const newPkg = `com.xerktech.veiller.${nameSuffix}`
   const baseClient = gs.client?.find(
-    (c) => c.client_info?.android_client_info?.package_name === 'com.xerktech.foverlay',
+    (c) => c.client_info?.android_client_info?.package_name === 'com.xerktech.veiller',
   )
   const alreadyHas = gs.client?.some(
     (c) => c.client_info?.android_client_info?.package_name === newPkg,
@@ -59,6 +59,6 @@ await $({ stdio: 'inherit' })`adb install -r android/app/build/outputs/apk/relea
 
 console.log('✅ Android release built and installed successfully!');
 if (nameSuffix) {
-  console.log(`   Package: com.xerktech.foverlay.${nameSuffix}`)
+  console.log(`   Package: com.xerktech.veiller.${nameSuffix}`)
   console.log(`   App label: ${nameSuffix}`)
 }

@@ -121,7 +121,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--alert-intent-component",
-        default="com.xerktech.foverlay/com.mentra.crust.receivers.CaptionsTesterIncidentReceiver",
+        default="com.xerktech.veiller/com.mentra.crust.receivers.CaptionsTesterIncidentReceiver",
         help="Optional explicit Android broadcast component for alert dispatch.",
     )
     parser.add_argument(
@@ -1758,7 +1758,7 @@ class MonitorWorker:
                         focused_app = candidate_focus
             if focused_app is None:
                 focused_app = fallback_focus
-            is_app_foreground = bool(focused_app and "com.xerktech.foverlay" in focused_app and "MainActivity" in focused_app)
+            is_app_foreground = bool(focused_app and "com.xerktech.veiller" in focused_app and "MainActivity" in focused_app)
         except Exception as exc:
             error_message = str(exc)
             if device_state.last_foreground_app_check_ts_ms:
@@ -1803,7 +1803,7 @@ class MonitorWorker:
                 self.state.end_incident(device_id, ongoing_incident["incident_id"], now_ms, {"reason": "incident_disabled"})
             return
         is_app_foreground, current_focus, probe_error = self.get_foreground_app_probe(device_id, device_state, now_ms)
-        details = {"current_focus": current_focus, "expected_package": "com.xerktech.foverlay", "expected_activity": "MainActivity"}
+        details = {"current_focus": current_focus, "expected_package": "com.xerktech.veiller", "expected_activity": "MainActivity"}
         if probe_error is not None:
             incident_id = ongoing_incident["incident_id"] if ongoing_incident is not None else self.state.start_incident(
                 device_id,

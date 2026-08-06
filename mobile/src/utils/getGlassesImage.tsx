@@ -1,7 +1,7 @@
 import {Platform, type ImageSourcePropType} from "react-native"
 import {DeviceTypes} from "@/../../cloud/packages/types/src"
 
-// XERK-206/XERK-200: Foverlay supports only the Even Realities G2 and the Tap
+// XERK-206/XERK-200: Veiller supports only the Even Realities G2 and the Tap
 // Strap 2. The imagery for parked devices (Mentra Live/Display, AR99, the G1
 // style/color variant set, onboarding art) has been removed from the bundle to
 // slim the APK — restore the assets from git history alongside the device if

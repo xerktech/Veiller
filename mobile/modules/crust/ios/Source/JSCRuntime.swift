@@ -31,8 +31,8 @@ public final class JSCRuntime: NSObject {
     public static let shared = JSCRuntime()
 
     /// Tag for os_log lines; visible via Console.app under
-    /// `subsystem == "com.xerktech.foverlay" && category == "MentraJS"`.
-    static let log = OSLog(subsystem: "com.xerktech.foverlay", category: "MentraJS")
+    /// `subsystem == "com.xerktech.veiller" && category == "MentraJS"`.
+    static let log = OSLog(subsystem: "com.xerktech.veiller", category: "MentraJS")
 
     /// Message emitted back to RN via `Crust.addListener("mentrajs_message", …)`.
     /// `payload` is JSON-friendly so the bridge can ship it verbatim.
@@ -166,7 +166,7 @@ public final class JSCRuntime: NSObject {
         }
 
         let vm = JSVirtualMachine()!
-        let queue = DispatchQueue(label: "com.xerktech.foverlayjs.\(packageName)", qos: .userInitiated)
+        let queue = DispatchQueue(label: "com.xerktech.veillerjs.\(packageName)", qos: .userInitiated)
         let ctx = JSContext(virtualMachine: vm)!
         ctx.name = "MentraJS: \(packageName)"
         #if DEBUG
@@ -337,7 +337,7 @@ public final class JSCRuntime: NSObject {
     /// timer runs on a dedicated dispatch queue (NOT the per-context
     /// one) so it can observe the queue being wedged.
     private static let watchdogScheduler = DispatchQueue(
-        label: "com.xerktech.foverlayjs.watchdog",
+        label: "com.xerktech.veillerjs.watchdog",
         qos: .utility,
     )
 

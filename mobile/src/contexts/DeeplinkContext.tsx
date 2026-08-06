@@ -13,7 +13,7 @@ export interface DeepLinkRoute {
 /**
  * Define all deep link routes for the app.
  *
- * Foverlay has no user account / login (XERK-198), so no route requires auth
+ * Veiller has no user account / login (XERK-198), so no route requires auth
  * and there are no /auth/* routes. Individual miniapps handle their own auth if
  * they need it.
  */
@@ -199,7 +199,7 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   const {setSplashEnabled} = useSplashLoader()
   const nav = useNavigationStore.getState()
   const config = {
-    scheme: "com.xerktech.foverlay",
+    scheme: "com.xerktech.veiller",
     host: "apps.mentra.glass",
     routes: deepLinkRoutes,
     fallbackHandler: (url: string) => {

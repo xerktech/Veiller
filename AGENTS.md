@@ -193,15 +193,15 @@ you are otherwise asked to change one of those miniapps:
    push the changes directly to that repository's `main` branch.
 3. Package the updated miniapp as a flat Mentra bundle ZIP (miniapp.json at the
    root) and publish it as an asset on a GitHub Release in that public repo. The
-   asset name must contain `foverlay` and end in `.zip` (the Turma/Tenir
-   pipelines name it `<repo>-foverlay-v<version>.zip`), and the release must be
+   asset name must contain `veiller` and end in `.zip` (the Turma/Tenir
+   pipelines name it `<repo>-veiller-v<version>.zip`), and the release must be
    tagged `v<version>` where `<version>` equals the bundle's miniapp.json
    version.
-4. Foverlay ships **no** miniapps inside the APK (XERK-214). To have Foverlay
+4. Veiller ships **no** miniapps inside the APK (XERK-214). To have Veiller
    install the miniapp, add an entry for its repo to
-   `mobile/src/config/foverlayMiniapps.ts`; the app downloads the latest release
+   `mobile/src/config/veillerMiniapps.ts`; the app downloads the latest release
    bundle for each listed repo at startup (see
-   `mobile/src/services/miniapps/foverlayMiniappSync.ts`). No zip is added to the
+   `mobile/src/services/miniapps/veillerMiniappSync.ts`). No zip is added to the
    monorepo.
 
 ## Bug Report Logs

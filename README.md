@@ -1,3 +1,14 @@
+# Veiller
+
+**Veiller** — /VAY-lur/ — from the French *veiller* (Latin *vigilāre*), "to keep
+watch, to watch over": it keeps watch at the edge of your vision.
+
+Veiller (formerly **Foverlay**) is a self-hosted Android companion app for the
+Even Realities G2 smart glasses, built as a fork of MentraOS (upstream README
+below).
+
+---
+
 <div align="center">
   <img src="./images/Github-Readme.png" alt="Mentra: The open source smart glasses operating system" width="100%" />
 

@@ -96,9 +96,9 @@ dependencies {
   // `voice`, and `copilot`, which a custom glasses HUD doesn't use (dead
   // APK weight). `:navigation` is the core engine; `:tripdata` carries the
   // banner/maneuver formatting used to label turns.
-  // Foverlay: Mapbox Navigation SDK removed. The upstream NavigationManager.kt
+  // Veiller: Mapbox Navigation SDK removed. The upstream NavigationManager.kt
   // drove headless turn-by-turn via com.mapbox.navigationcore:navigation/tripdata
-  // (authenticated Mapbox Downloads Maven repo, MAPBOX_DOWNLOADS_TOKEN). Foverlay
+  // (authenticated Mapbox Downloads Maven repo, MAPBOX_DOWNLOADS_TOKEN). Veiller
   // doesn't use on-device routing; NavigationManager.kt is a no-op stub with the
   // same public surface, so the app builds with no Mapbox credentials.
 

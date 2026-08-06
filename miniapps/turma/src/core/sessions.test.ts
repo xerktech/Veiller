@@ -32,7 +32,7 @@ describe("liveState", () => {
     expect(liveState(s)).toBe("error");
   });
 
-  // Foverlay-port fix: upstream never handled the newer "queued" SessionStatus
+  // Veiller-port fix: upstream never handled the newer "queued" SessionStatus
   // (a queued session read as "idle"); it now renders like the pending overlay.
   it("is 'queued' when status is queued, with the pending-style '…' glyph", () => {
     const s = session({ status: "queued", session: null });

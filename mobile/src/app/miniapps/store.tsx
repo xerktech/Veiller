@@ -1,7 +1,7 @@
 /**
  * Miniapp Store (XERK-217).
  *
- * Lists the Foverlay-managed miniapps (see config/foverlayMiniapps.ts) and lets
+ * Lists the Veiller-managed miniapps (see config/veillerMiniapps.ts) and lets
  * the user:
  *   - check/uncheck each one — checked installs + auto-updates on startup,
  *     unchecked pauses future install/update (the app stays installed if it
@@ -18,12 +18,12 @@ import {ActivityIndicator, ScrollView, View} from "react-native"
 
 import {Button, Header, Screen, Switch, Text} from "@/components/ignite"
 import GlassView from "@/components/ui/GlassView"
-import {FOVERLAY_MINIAPPS, type FoverlayMiniappSource} from "@/config/foverlayMiniapps"
+import {VEILLER_MINIAPPS, type VeillerMiniappSource} from "@/config/veillerMiniapps"
 import {showAlert} from "@/contexts/ModalContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {translate} from "@/i18n"
-import {isFoverlayMiniappEnabled, setFoverlayMiniappEnabled} from "@/services/miniapps/foverlayMiniappPrefs"
-import {foverlayMiniappSync, resolveLatestBundle} from "@/services/miniapps/foverlayMiniappSync"
+import {isVeillerMiniappEnabled, setVeillerMiniappEnabled} from "@/services/miniapps/veillerMiniappPrefs"
+import {veillerMiniappSync, resolveLatestBundle} from "@/services/miniapps/veillerMiniappSync"
 import {useNavigationStore} from "@/stores/navigation"
 import {engine, type ClientApp} from "@mentra/engine"
 
@@ -48,9 +48,9 @@ export default function MiniappStorePage() {
   const [apps, setApps] = useState<ClientApp[]>(() => engine.miniapps.list())
   const [rows, setRows] = useState<Record<string, RowState>>(() => {
     const initial: Record<string, RowState> = {}
-    for (const source of FOVERLAY_MINIAPPS) {
+    for (const source of VEILLER_MINIAPPS) {
       initial[source.packageName] = {
-        enabled: isFoverlayMiniappEnabled(source.packageName),
+        enabled: isVeillerMiniappEnabled(source.packageName),
         availableVersion: null,
         availability: "loading",
         installing: false,
@@ -70,7 +70,7 @@ export default function MiniappStorePage() {
   }, [])
 
   const resolveAvailable = useCallback(
-    async (source: FoverlayMiniappSource) => {
+    async (source: VeillerMiniappSource) => {
       patchRow(source.packageName, {availability: "loading"})
       try {
         const bundle = await resolveLatestBundle(source)
@@ -85,18 +85,18 @@ export default function MiniappStorePage() {
 
   // Resolve the latest available version for each app once on mount.
   useEffect(() => {
-    for (const source of FOVERLAY_MINIAPPS) void resolveAvailable(source)
+    for (const source of VEILLER_MINIAPPS) void resolveAvailable(source)
   }, [resolveAvailable])
 
-  const handleToggle = (source: FoverlayMiniappSource, value: boolean) => {
-    setFoverlayMiniappEnabled(source.packageName, value)
+  const handleToggle = (source: VeillerMiniappSource, value: boolean) => {
+    setVeillerMiniappEnabled(source.packageName, value)
     patchRow(source.packageName, {enabled: value})
   }
 
-  const handleInstall = async (source: FoverlayMiniappSource) => {
+  const handleInstall = async (source: VeillerMiniappSource) => {
     patchRow(source.packageName, {installing: true})
     try {
-      await foverlayMiniappSync.installLatest(source)
+      await veillerMiniappSync.installLatest(source)
       engine.miniapps.refresh()
     } catch (error) {
       await showAlert({
@@ -114,7 +114,7 @@ export default function MiniappStorePage() {
 
   const handleCheckAll = () => {
     engine.miniapps.refresh()
-    for (const source of FOVERLAY_MINIAPPS) void resolveAvailable(source)
+    for (const source of VEILLER_MINIAPPS) void resolveAvailable(source)
   }
 
   return (
@@ -129,7 +129,7 @@ export default function MiniappStorePage() {
       <ScrollView className="pt-6 px-6 -mx-6" contentContainerClassName="gap-4">
         <Text text={translate("miniappStore:description")} className="text-sm text-muted-foreground px-1" />
 
-        {FOVERLAY_MINIAPPS.map((source) => {
+        {VEILLER_MINIAPPS.map((source) => {
           const row = rows[source.packageName]
           const installed = installedApp(apps, source.packageName)
           const installedVersion = installed?.version ?? null

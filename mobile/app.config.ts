@@ -4,8 +4,8 @@ import {getBuildNumber} from "./scripts/build-number.mjs"
 
 const VARIANTS = {
   default: {
-    appName: "Foverlay",
-    packageName: "com.xerktech.foverlay",
+    appName: "Veiller",
+    packageName: "com.xerktech.veiller",
     includeFirebase: true,
     googleServicesFile: "./google-services.json",
     googleServicesPlist: "./GoogleService-Info.plist",
@@ -13,8 +13,8 @@ const VARIANTS = {
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground.png",
   },
   cn: {
-    appName: "Foverlay",
-    packageName: "com.xerktech.foverlay.cn",
+    appName: "Veiller",
+    packageName: "com.xerktech.veiller.cn",
     includeFirebase: false,
     googleServicesFile: null,
     googleServicesPlist: null,
@@ -22,8 +22,8 @@ const VARIANTS = {
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground_china.png",
   },
   stable: {
-    appName: "Foverlay Stable",
-    packageName: "com.xerktech.foverlay.stable",
+    appName: "Veiller Stable",
+    packageName: "com.xerktech.veiller.stable",
     includeFirebase: true,
     googleServicesFile: "./google-services.json",
     googleServicesPlist: "./GoogleService-Info.plist",
@@ -42,8 +42,8 @@ const variant = process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china" ? VARIANTS
  */
 module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   // Optional build-variant suffix. Set MENTRAOS_BUILD_NAME=stable to produce
-  // a parallel-installable build with package com.xerktech.foverlay.stable and
-  // app label "stable". Leave unset for the normal Foverlay build.
+  // a parallel-installable build with package com.xerktech.veiller.stable and
+  // app label "stable". Leave unset for the normal Veiller build.
   const variantName = process.env.MENTRAOS_BUILD_NAME?.trim() || null
   const isValidVariant = variantName && /^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(variantName)
   if (variantName && !isValidVariant) {
@@ -69,14 +69,14 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   // dev. See issues/mapbox-navigation-migration.md.
   // The China build (cn variant) ships without Mentra Map, so it has no nav
   const isChinaBuild = variant === VARIANTS.cn
-  // Foverlay: Mapbox / on-device navigation is disabled (NavigationManager is a
+  // Veiller: Mapbox / on-device navigation is disabled (NavigationManager is a
   // no-op stub, the crust gradle Mapbox deps are removed). A missing Mapbox
   // token is therefore expected and must NOT fail the build — upstream threw in
   // CI when the token was absent. Warn only.
   const mapboxAccessToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ?? ""
   if (!mapboxAccessToken && !isChinaBuild) {
     console.warn(
-      "[mobile/app.config] EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN not set — navigation is disabled in Foverlay (expected).",
+      "[mobile/app.config] EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN not set — navigation is disabled in Veiller (expected).",
     )
   }
 
@@ -85,9 +85,9 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
   return {
     ...config,
     name: appName,
-    slug: "Foverlay",
+    slug: "Veiller",
     version: process.env.EXPO_PUBLIC_MENTRAOS_VERSION || "2.9.1",
-    scheme: "com.xerktech.foverlay",
+    scheme: "com.xerktech.veiller",
     orientation: "portrait",
     userInterfaceStyle: "automatic",
     icon: variant.icon,
@@ -154,31 +154,31 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       infoPlist: {
         NSCameraUsageDescription: "This app needs access to your camera to capture images.",
         NSMicrophoneUsageDescription:
-          "Foverlay uses your microphone to enable the 'Hey Mira' AI assistant and provide live captions for deaf and hard-of-hearing users on smart glasses. For example, you can say 'Hey Mira, what's on my calendar today?' or the app can caption conversations in real-time on your glasses display.",
+          "Veiller uses your microphone to enable the 'Hey Mira' AI assistant and provide live captions for deaf and hard-of-hearing users on smart glasses. For example, you can say 'Hey Mira, what's on my calendar today?' or the app can caption conversations in real-time on your glasses display.",
         NSBluetoothAlwaysUsageDescription: "This app needs access to your Bluetooth to connect to your glasses.",
         NSLocationWhenInUseUsageDescription:
-          "Foverlay uses your location to display nearby points of interest, weather updates, and navigation directions on your smart glasses. For example, when you're walking, the app can show restaurants within 100 meters or provide turn-by-turn directions to your destination on your glasses display.",
+          "Veiller uses your location to display nearby points of interest, weather updates, and navigation directions on your smart glasses. For example, when you're walking, the app can show restaurants within 100 meters or provide turn-by-turn directions to your destination on your glasses display.",
         NSBluetoothPeripheralUsageDescription: "This app needs access to your Bluetooth to connect to your glasses.",
         NSCalendarsUsageDescription:
-          "Foverlay accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
+          "Veiller accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
         NSCalendarsFullAccessUsageDescription:
-          "Foverlay accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
+          "Veiller accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
         NSCalendarUsageDescription:
-          "Foverlay accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
+          "Veiller accesses your calendar to display upcoming events and reminders directly on your smart glasses. For example, the app can show 'Meeting with John at 3 PM in Conference Room A' or remind you '15 minutes until dentist appointment' on your glasses display.",
         NSPhotoLibraryUsageDescription:
           "This app needs access to your photo library to provide you with photo based information on your glasses.",
         NSPhotoLibraryAddUsageDescription:
-          "Allow Foverlay to save photos and videos from your glasses to your camera roll.",
+          "Allow Veiller to save photos and videos from your glasses to your camera roll.",
         NSUserNotificationUsageDescription:
           "This app needs access to your notifications to provide you with notifications.",
         NSLocalNetworkUsageDescription:
-          "Foverlay needs to access your local network to connect to Mentra Live glasses for viewing photos and media stored on the device.",
+          "Veiller needs to access your local network to connect to Mentra Live glasses for viewing photos and media stored on the device.",
         // Required because miniapps subscribed to `heading_update` cause
         // the host's HeadingService to read the device compass via
         // CoreMotion. iOS hard-crashes any access to motion sensors
         // without this usage string declared.
         NSMotionUsageDescription:
-          "Foverlay reads your device compass to show heading direction in navigation and similar miniapps on your glasses.",
+          "Veiller reads your device compass to show heading direction in navigation and similar miniapps on your glasses.",
         NSBonjourServices: ["_mentra-live._tcp", "_http._tcp"],
         NSAppTransportSecurity: {
           NSAllowsLocalNetworking: true,
@@ -191,7 +191,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         },
         UIBackgroundModes: ["bluetooth-central", "audio", "location", "processing", "fetch"],
         NSLocationAlwaysAndWhenInUseUsageDescription:
-          "Foverlay requires background location access to deliver continuous updates for apps like navigation and running, even when the app isn't in the foreground.",
+          "Veiller requires background location access to deliver continuous updates for apps like navigation and running, even when the app isn't in the foreground.",
         UIRequiresFullScreen: true,
         UISupportedInterfaceOrientations: [
           "UIInterfaceOrientationPortrait",
@@ -346,7 +346,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       [
         "expo-location",
         {
-          locationAlwaysAndWhenInUsePermission: "Allow Foverlay to use your location.",
+          locationAlwaysAndWhenInUsePermission: "Allow Veiller to use your location.",
         },
       ],
       "expo-audio",

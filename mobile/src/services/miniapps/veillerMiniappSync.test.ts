@@ -1,21 +1,21 @@
 /**
- * Unit tests for the Foverlay GitHub-release miniapp installer (XERK-214).
+ * Unit tests for the Veiller GitHub-release miniapp installer (XERK-214).
  *
  * The whole pipeline is mocked at its edges — the GitHub Releases API (fetch),
  * the on-disk registry (appRegistry), and the downloader (expo-file-system) —
  * so the tests exercise the resolution/skip/install decision logic, which is
  * where the real behavior lives. Asset names and tags mirror the actual
- * Turma/Tenir release pipelines (`<repo>-foverlay-v<version>.zip`).
+ * Turma/Tenir release pipelines (`<repo>-veiller-v<version>.zip`).
  */
 
 // Mutable so each test can set the repo list. Must be `mock`-prefixed to be
 // referenceable inside the hoisted jest.mock factory.
-import {foverlayMiniappSync} from "./foverlayMiniappSync"
+import {veillerMiniappSync} from "./veillerMiniappSync"
 
 let mockSources: Array<{repo: string; packageName: string; assetPattern?: string}> = []
 
-jest.mock("@/config/foverlayMiniapps", () => ({
-  get FOVERLAY_MINIAPPS() {
+jest.mock("@/config/veillerMiniapps", () => ({
+  get VEILLER_MINIAPPS() {
     return mockSources
   },
 }))
@@ -32,8 +32,8 @@ jest.mock("@mentra/engine/internal", () => ({
 // Store enable/disable state (XERK-217). Defaults to enabled; a test flips it to
 // exercise the disabled-source skip.
 const mockIsEnabled = jest.fn<boolean, [string]>()
-jest.mock("@/services/miniapps/foverlayMiniappPrefs", () => ({
-  isFoverlayMiniappEnabled: (pkg: string) => mockIsEnabled(pkg),
+jest.mock("@/services/miniapps/veillerMiniappPrefs", () => ({
+  isVeillerMiniappEnabled: (pkg: string) => mockIsEnabled(pkg),
 }))
 
 const mockDownloadFileAsync = jest.fn()
@@ -48,7 +48,7 @@ jest.mock("expo-file-system", () => {
     exists = false
     constructor(_dir: unknown, name: string) {
       this.name = name
-      this.uri = `file:///cache/foverlay_miniapps/${name}`
+      this.uri = `file:///cache/veiller_miniapps/${name}`
     }
     delete() {}
     static downloadFileAsync(...args: unknown[]) {
@@ -98,31 +98,31 @@ afterEach(() => {
   jest.restoreAllMocks()
 })
 
-describe("foverlayMiniappSync", () => {
+describe("veillerMiniappSync", () => {
   it("downloads and installs the latest release bundle when nothing is installed", async () => {
     mockSources = [{repo: "xerktech/Turma", packageName: "com.xerktech.turma"}]
     ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
       releasesResponse([
-        {tag: "v0.6.47", assets: ["manifest.json", "turma-android-v0.6.38.apk", "turma-foverlay-v0.6.47.zip"]},
+        {tag: "v0.6.47", assets: ["manifest.json", "turma-android-v0.6.38.apk", "turma-veiller-v0.6.47.zip"]},
       ]),
     )
-    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/foverlay_miniapps/turma-foverlay-v0.6.47.zip"})
+    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/veiller_miniapps/turma-veiller-v0.6.47.zip"})
     mockInstallFromLocalZip.mockResolvedValue(okResult("com.xerktech.turma", "0.6.47"))
 
-    await foverlayMiniappSync.sync()
+    await veillerMiniappSync.sync()
 
     expect(global.fetch).toHaveBeenCalledWith(
       "https://api.github.com/repos/xerktech/Turma/releases?per_page=30",
       expect.objectContaining({headers: expect.objectContaining({Accept: "application/vnd.github+json"})}),
     )
     expect(mockDownloadFileAsync).toHaveBeenCalledWith(
-      "https://example.test/turma-foverlay-v0.6.47.zip",
+      "https://example.test/turma-veiller-v0.6.47.zip",
       expect.anything(),
       expect.objectContaining({idempotent: true}),
     )
     // Version is derived from the tag (v0.6.47 -> 0.6.47), matching miniapp.json.
     expect(mockInstallFromLocalZip).toHaveBeenCalledWith(
-      "file:///cache/foverlay_miniapps/turma-foverlay-v0.6.47.zip",
+      "file:///cache/veiller_miniapps/turma-veiller-v0.6.47.zip",
       expect.objectContaining({
         releaseIdentity: expect.objectContaining({source: "github_release", releaseId: "0.6.47"}),
       }),
@@ -133,10 +133,10 @@ describe("foverlayMiniappSync", () => {
     mockSources = [{repo: "xerktech/Turma", packageName: "com.xerktech.turma"}]
     mockGetInstalledVersions.mockReturnValue(["0.6.47"])
     ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
-      releasesResponse([{tag: "v0.6.47", assets: ["turma-foverlay-v0.6.47.zip"]}]),
+      releasesResponse([{tag: "v0.6.47", assets: ["turma-veiller-v0.6.47.zip"]}]),
     )
 
-    await foverlayMiniappSync.sync()
+    await veillerMiniappSync.sync()
 
     expect(mockGetInstalledVersions).toHaveBeenCalledWith("com.xerktech.turma")
     expect(mockDownloadFileAsync).not.toHaveBeenCalled()
@@ -147,7 +147,7 @@ describe("foverlayMiniappSync", () => {
     mockSources = [{repo: "xerktech/Tenir", packageName: "com.xerktech.tenir"}]
     mockIsEnabled.mockReturnValue(false)
 
-    await foverlayMiniappSync.sync()
+    await veillerMiniappSync.sync()
 
     // Disabled sources are skipped before any network/registry work.
     expect(mockIsEnabled).toHaveBeenCalledWith("com.xerktech.tenir")
@@ -163,48 +163,48 @@ describe("foverlayMiniappSync", () => {
     mockIsEnabled.mockReturnValue(false)
     mockGetInstalledVersions.mockReturnValue(["0.6.46"])
     ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
-      releasesResponse([{tag: "v0.6.47", assets: ["turma-foverlay-v0.6.47.zip"]}]),
+      releasesResponse([{tag: "v0.6.47", assets: ["turma-veiller-v0.6.47.zip"]}]),
     )
-    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/foverlay_miniapps/turma-foverlay-v0.6.47.zip"})
+    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/veiller_miniapps/turma-veiller-v0.6.47.zip"})
     mockInstallFromLocalZip.mockResolvedValue(okResult("com.xerktech.turma", "0.6.47"))
 
-    const result = await foverlayMiniappSync.installLatest(source)
+    const result = await veillerMiniappSync.installLatest(source)
 
     expect(result).toEqual({packageName: "com.xerktech.turma", version: "0.6.47"})
     expect(mockInstallFromLocalZip).toHaveBeenCalledTimes(1)
   })
 
-  it("picks the newest release that actually carries the foverlay bundle", async () => {
+  it("picks the newest release that actually carries the veiller bundle", async () => {
     // Mirrors the Turma repo: it cuts multiple release trains, and some (the
-    // native-agent tarball) don't publish a foverlay bundle at all.
+    // native-agent tarball) don't publish a veiller bundle at all.
     mockSources = [{repo: "xerktech/Turma", packageName: "com.xerktech.turma"}]
     ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
       releasesResponse([
         {tag: "agent-native-v0.6.46", assets: ["turma-agent-native-v0.6.46.tar.gz"]},
-        {tag: "v0.6.47", assets: ["turma-foverlay-v0.6.47.zip", "manifest.json"]},
-        {tag: "v0.6.46", assets: ["turma-foverlay-v0.6.46.zip"]},
+        {tag: "v0.6.47", assets: ["turma-veiller-v0.6.47.zip", "manifest.json"]},
+        {tag: "v0.6.46", assets: ["turma-veiller-v0.6.46.zip"]},
       ]),
     )
-    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/foverlay_miniapps/turma-foverlay-v0.6.47.zip"})
+    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/veiller_miniapps/turma-veiller-v0.6.47.zip"})
     mockInstallFromLocalZip.mockResolvedValue(okResult("com.xerktech.turma", "0.6.47"))
 
-    await foverlayMiniappSync.sync()
+    await veillerMiniappSync.sync()
 
     expect(mockInstallFromLocalZip).toHaveBeenCalledTimes(1)
     expect(mockDownloadFileAsync).toHaveBeenCalledWith(
-      "https://example.test/turma-foverlay-v0.6.47.zip",
+      "https://example.test/turma-veiller-v0.6.47.zip",
       expect.anything(),
       expect.anything(),
     )
   })
 
-  it("ignores .zip assets that aren't foverlay bundles", async () => {
+  it("ignores .zip assets that aren't veiller bundles", async () => {
     mockSources = [{repo: "xerktech/Turma", packageName: "com.xerktech.turma"}]
     ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
       releasesResponse([{tag: "v0.6.47", assets: ["Source-code.zip", "turma-android-v0.6.38.apk"]}]),
     )
 
-    await foverlayMiniappSync.sync()
+    await veillerMiniappSync.sync()
 
     expect(mockInstallFromLocalZip).not.toHaveBeenCalled()
   })
@@ -216,26 +216,26 @@ describe("foverlayMiniappSync", () => {
     ]
     ;(global.fetch as unknown as jest.Mock)
       .mockRejectedValueOnce(new Error("network down"))
-      .mockResolvedValueOnce(releasesResponse([{tag: "v0.5.10", assets: ["tenir-foverlay-v0.5.10.zip"]}]))
-    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/foverlay_miniapps/tenir-foverlay-v0.5.10.zip"})
+      .mockResolvedValueOnce(releasesResponse([{tag: "v0.5.10", assets: ["tenir-veiller-v0.5.10.zip"]}]))
+    mockDownloadFileAsync.mockResolvedValue({uri: "file:///cache/veiller_miniapps/tenir-veiller-v0.5.10.zip"})
     mockInstallFromLocalZip.mockResolvedValue(okResult("com.xerktech.tenir", "0.5.10"))
 
-    await expect(foverlayMiniappSync.sync()).resolves.toBeUndefined()
+    await expect(veillerMiniappSync.sync()).resolves.toBeUndefined()
 
     expect(mockInstallFromLocalZip).toHaveBeenCalledTimes(1)
     expect(mockInstallFromLocalZip).toHaveBeenCalledWith(
-      "file:///cache/foverlay_miniapps/tenir-foverlay-v0.5.10.zip",
+      "file:///cache/veiller_miniapps/tenir-veiller-v0.5.10.zip",
       expect.anything(),
     )
   })
 
-  it("logs (no throw) when a repo has no foverlay bundle in any release", async () => {
+  it("logs (no throw) when a repo has no veiller bundle in any release", async () => {
     mockSources = [{repo: "xerktech/Turma", packageName: "com.xerktech.turma"}]
     ;(global.fetch as unknown as jest.Mock).mockResolvedValue(
       releasesResponse([{tag: "v1", assets: ["something-else.tar.gz"]}]),
     )
 
-    await expect(foverlayMiniappSync.sync()).resolves.toBeUndefined()
+    await expect(veillerMiniappSync.sync()).resolves.toBeUndefined()
     expect(mockInstallFromLocalZip).not.toHaveBeenCalled()
   })
 })

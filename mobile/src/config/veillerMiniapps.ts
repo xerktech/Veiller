@@ -1,21 +1,21 @@
 /**
- * Foverlay miniapp source list — the single file that decides which miniapps
+ * Veiller miniapp source list — the single file that decides which miniapps
  * this build installs (XERK-214).
  *
- * Foverlay ships with ZERO miniapps bundled into the APK. Instead, every time
+ * Veiller ships with ZERO miniapps bundled into the APK. Instead, every time
  * the app starts it reads this list and, for each entry, pulls the latest
  * miniapp bundle straight from that repo's GitHub Releases and installs it
- * (see src/services/miniapps/foverlayMiniappSync.ts).
+ * (see src/services/miniapps/veillerMiniappSync.ts).
  *
- * To ship a new miniapp with Foverlay: publish its bundle as a Release asset in
+ * To ship a new miniapp with Veiller: publish its bundle as a Release asset in
  * a public GitHub repo (see the naming contract below) and add an entry here.
  *
  * ── Release-asset contract ────────────────────────────────────────────────
  * The sync scans a repo's Releases (newest first) and picks the newest
- * non-draft release that carries a Foverlay bundle asset. By default a bundle
- * asset is any asset whose name matches /foverlay.*\.zip$/i — the Turma/Tenir
- * pipelines publish `<repo>-foverlay-v<version>.zip` (e.g.
- * `turma-foverlay-v0.6.47.zip`) next to their other release assets. Override
+ * non-draft release that carries a Veiller bundle asset. By default a bundle
+ * asset is any asset whose name matches /veiller.*\.zip$/i — the Turma/Tenir
+ * pipelines publish `<repo>-veiller-v<version>.zip` (e.g.
+ * `turma-veiller-v0.6.47.zip`) next to their other release assets. Override
  * `assetPattern` per entry if a repo names its bundle differently.
  *
  * The release must be tagged `v<version>` (or `<version>`), where `<version>`
@@ -27,7 +27,7 @@
  * The repos must be public (release assets are fetched unauthenticated).
  */
 
-export interface FoverlayMiniappSource {
+export interface VeillerMiniappSource {
   /** GitHub "owner/repo" whose Releases publish the miniapp bundle. */
   repo: string
   /** The miniapp package id, e.g. "com.xerktech.turma". Used for the already-installed check. */
@@ -40,12 +40,12 @@ export interface FoverlayMiniappSource {
   name: string
   /**
    * Optional case-insensitive regex (as a string) matched against release asset
-   * names to locate the bundle. Defaults to /foverlay.*\.zip$/i.
+   * names to locate the bundle. Defaults to /veiller.*\.zip$/i.
    */
   assetPattern?: string
 }
 
-export const FOVERLAY_MINIAPPS: FoverlayMiniappSource[] = [
+export const VEILLER_MINIAPPS: VeillerMiniappSource[] = [
   {repo: "xerktech/Turma", packageName: "com.xerktech.turma", name: "Turma"},
   {repo: "xerktech/Tenir", packageName: "com.xerktech.tenir", name: "Tenir"},
 ]

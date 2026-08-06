@@ -1,4 +1,4 @@
-// The Mentra `AudioBridge` for audio.ts's AudioRecorder (Foverlay port).
+// The Mentra `AudioBridge` for audio.ts's AudioRecorder (Veiller port).
 //
 // Upstream, `audioControl(true/false)` was a literal Even Hub hardware call
 // and PCM frames rode the display's single `onEvenHubEvent` subscription.

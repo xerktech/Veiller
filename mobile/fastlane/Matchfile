@@ -29,6 +29,6 @@ storage_mode("git")
 type("appstore")
 
 # Bundle ids that match should manage. Keep this list in sync with
-# app.config.ts. Variant ids (com.xerktech.foverlay.<name>) are created on
+# app.config.ts. Variant ids (com.xerktech.veiller.<name>) are created on
 # demand via MENTRAOS_BUILD_NAME and don't need pre-provisioned profiles.
-app_identifier(["com.xerktech.foverlay"])
+app_identifier(["com.xerktech.veiller"])

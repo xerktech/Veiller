@@ -1,5 +1,5 @@
 /**
- * Background JSContext entry — Turma miniapp (Foverlay port of the Turma
+ * Background JSContext entry — Turma miniapp (Veiller port of the Turma
  * Even G2 glasses app, XERK-211).
  *
  * Plays the role of upstream's main.ts boot: load the persisted config,

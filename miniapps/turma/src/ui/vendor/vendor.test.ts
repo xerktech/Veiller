@@ -8,7 +8,7 @@ import { Board, Chat, renderTranscript } from "./engines.ts";
 // (turma/public/chat.js and board.js @ Turma main 24437fc / v0.6.45), so the
 // phone renders exactly what the web/Android show and never silently drifts.
 //
-// Foverlay-port adaptation of upstream vendor.test.ts: the Turma repo isn't
+// Veiller-port adaptation of upstream vendor.test.ts: the Turma repo isn't
 // checkable-out at this monorepo's CI time, so instead of comparing against
 // `../../../turma/public/<name>.js` the copied-at-port-time sha256 hashes are
 // baked in. Re-copy from turma/public/ AND update the hash when upstream
