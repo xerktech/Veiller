@@ -31,8 +31,8 @@ jest.mock("expo-image", () => ({
   Image: () => null,
 }))
 
-jest.mock("@/components/brands/MentraLogoStandalone", () => ({
-  MentraLogoStandalone: () => null,
+jest.mock("@/components/brands/VeillerLogo", () => ({
+  VeillerLogo: () => null,
 }))
 
 jest.mock("@/contexts/ThemeContext", () => ({

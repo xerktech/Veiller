@@ -5,7 +5,7 @@ import type {ReactNode} from "react"
 import {Linking} from "react-native"
 
 import MentraOSOnboarding from "@/app/onboarding/os"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import showAlertMock from "@/utils/AlertUtils"
 
 const mockPushPrevious = jest.fn()
@@ -171,7 +171,7 @@ describe("MentraOS onboarding", () => {
     expect(steps[5].action).toBeUndefined()
 
     const {getByTestId, UNSAFE_getByType} = render(steps[5].content)
-    expect(UNSAFE_getByType(MentraLogoStandalone).props.colorOverride).toBe("#00B869")
+    expect(UNSAFE_getByType(VeillerLogo).props.colorOverride).toBe("#00B869")
     fireEvent.press(getByTestId("mentraos-onboarding-open-legacy"))
 
     expect(openUrl).toHaveBeenCalledWith("https://mentraglass.com/legacy")

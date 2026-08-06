@@ -6,7 +6,7 @@ import {View, TouchableOpacity, Platform, ScrollView, Image} from "react-native"
 
 import {EvenRealitiesLogo} from "@/components/brands/EvenRealitiesLogo"
 import {MentraLogo} from "@/components/brands/MentraLogo"
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import {VuzixLogo} from "@/components/brands/VuzixLogo"
 import {Text, Header} from "@/components/ignite"
 import {Screen} from "@/components/ignite/Screen"
@@ -75,7 +75,7 @@ export default function SelectControllerScreen() {
         onLeftPress={() => {
           goBack()
         }}
-        RightActionComponent={<MentraLogoStandalone />}
+        RightActionComponent={<VeillerLogo />}
       />
       <Spacer className="h-4" />
       <ScrollView className="-mr-4 pr-4 pt-6">

@@ -3,7 +3,7 @@ import {useRoute} from "@react-navigation/native"
 import {Linking, PermissionsAndroid, Image, Platform, View} from "react-native"
 import type {Permission} from "react-native"
 
-import {MentraLogoStandalone} from "@/components/brands/MentraLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import {Button, Header, Icon, Screen, Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
@@ -275,7 +275,7 @@ export default function PairingPrepScreen() {
         title={deviceModel}
         leftIcon="chevron-left"
         onLeftPress={goBack}
-        RightActionComponent={<MentraLogoStandalone />}
+        RightActionComponent={<VeillerLogo />}
       />
       {renderGuide()}
       {renderButtons()}
