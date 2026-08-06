@@ -615,6 +615,9 @@ const en = {
     transcriptionSettings: "Transcription",
     speechSettings: "Speech",
     notificationsSettings: "Notifications",
+    notificationsForwardLabel: "Show notifications on glasses",
+    notificationsForwardSubtitle:
+      "Display phone notifications on your glasses, and read them aloud on glasses without a screen.",
     notificationsDescription:
       "Control which apps can send notifications to Mentra. When enabled, notifications from these apps will be available to Mentra.",
     notificationsLoadingApps: "Loading apps...",
@@ -1130,7 +1133,6 @@ const en = {
     mirror: "Glasses Mirror",
     simulated: "Simulated Glasses",
     store: "MiniApp Store",
-    notify: "Notifications",
     feedback: "Give Feedback",
     tapTester: "Tap Strap Tester",
   },

@@ -8,8 +8,9 @@
  * default now that its cold start is isolated from React Native. Native code
  * keeps the component discoverable in Android's notification-access Settings,
  * but only binds the service after access is granted. The debug setting remains
- * a hidden emergency kill switch; Notify's running state gates presentation,
- * not capture. Android-only; a no-op elsewhere. Started by `engine.start()`.
+ * a hidden emergency kill switch; the `enable_phone_notifications` setting
+ * gates presentation (host-side), not capture. Android-only; a no-op elsewhere.
+ * Started by `engine.start()`.
  */
 import {shallow} from "zustand/shallow"
 import CrustModule from "@mentra/crust"
