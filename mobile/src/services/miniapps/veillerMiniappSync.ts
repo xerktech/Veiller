@@ -48,16 +48,35 @@ function isBundleAsset(assetName: string, source: VeillerMiniappSource): boolean
 }
 
 /**
- * The version to record for a release. The repos tag releases `v<version>` and
- * the bundle's miniapp.json carries the same `<version>` without the `v`
- * (verified: tag `v0.6.47` ↔ miniapp.json `0.6.47`). Stripping the leading `v`
- * off the tag therefore gives the exact version AppRegistry records on install,
- * so the already-installed skip below is precise. It's only an optimization: if
- * a repo's tag doesn't follow this shape, the worst case is a redundant
- * re-download, since installFromLocalZip records the real miniapp.json version.
+ * Version embedded in a bundle asset name, e.g. `turma-veiller-v0.6.53.zip` →
+ * `0.6.53`. The publishing pipelines name the asset after the version inside
+ * its miniapp.json, so this is the authoritative source (see
+ * {@link bundleVersion}).
  */
-function versionFromTag(tag: string): string {
-  return tag.replace(/^v/i, "")
+const ASSET_VERSION_PATTERN = /-v?(\d+(?:\.\d+)+(?:[-+][0-9A-Za-z.-]+)?)\.zip$/i
+
+/**
+ * The version to record for a release bundle (XERK-225).
+ *
+ * This must equal the `version` in the bundle's miniapp.json, because that is
+ * what AppRegistry records on install and what the store compares against to
+ * decide whether an update is available.
+ *
+ * The asset name is the reliable source: the pipelines publish
+ * `<repo>-veiller-v<version>.zip` where `<version>` is the bundle's own
+ * version. The release *tag* is not — a repo cuts a release for every change,
+ * but re-attaches the previous bundle asset when the miniapp itself didn't
+ * change, so tag `v0.6.57` can legitimately carry `turma-veiller-v0.6.53.zip`.
+ * Deriving the version from the tag there reports 0.6.57 as "available" while
+ * the install records 0.6.53, leaving the store stuck on "Update available"
+ * and re-downloading the same bundle on every startup.
+ *
+ * Falls back to the tag (minus a leading `v`) for assets that don't encode a
+ * version — worst case that's a redundant re-download, since
+ * installFromLocalZip records the real miniapp.json version regardless.
+ */
+function bundleVersion(assetName: string, tag: string): string {
+  return ASSET_VERSION_PATTERN.exec(assetName)?.[1] ?? tag.replace(/^v/i, "")
 }
 
 /**
@@ -103,7 +122,7 @@ export async function resolveLatestBundle(source: VeillerMiniappSource): Promise
     if (asset) {
       return {
         packageName: source.packageName,
-        version: versionFromTag(release.tag_name),
+        version: bundleVersion(asset.name, release.tag_name),
         downloadUrl: asset.browser_download_url,
         assetName: asset.name,
       }
@@ -136,9 +155,22 @@ export interface InstalledBundle {
   version: string
 }
 
+/**
+ * Stages an on-demand install passes through, reported to the caller so the
+ * store screen can tell the user what is happening (XERK-225). Each stage is a
+ * network or disk step that can take seconds; without them the UI can only show
+ * an undifferentiated spinner.
+ */
+export type InstallStage = "checking" | "downloading" | "installing"
+
+/** Optional per-stage callback for on-demand installs. */
+export type InstallProgress = (stage: InstallStage) => void
+
 /** Download a resolved bundle and install it, replacing any prior version. */
-async function installResolvedBundle(bundle: ResolvedBundle): Promise<InstalledBundle> {
+async function installResolvedBundle(bundle: ResolvedBundle, onProgress?: InstallProgress): Promise<InstalledBundle> {
+  onProgress?.("downloading")
   const zipUri = await downloadBundle(bundle)
+  onProgress?.("installing")
   const result = await appRegistry.installFromLocalZip(zipUri, {
     releaseIdentity: {source: "github_release", releaseId: bundle.version},
   })
@@ -202,12 +234,16 @@ export const veillerMiniappSync = {
    * screen's explicit "Install"/"Update" button, where the user has asked for
    * this specific app regardless of its checkbox. Throws if the repo has no
    * bundle or the download/install fails.
+   *
+   * `onProgress` fires as the install moves between stages so the caller can
+   * show what it is doing rather than an opaque spinner (XERK-225).
    */
-  async installLatest(source: VeillerMiniappSource): Promise<InstalledBundle> {
+  async installLatest(source: VeillerMiniappSource, onProgress?: InstallProgress): Promise<InstalledBundle> {
+    onProgress?.("checking")
     const bundle = await resolveLatestBundle(source)
     if (!bundle) {
       throw new Error(`no miniapp bundle found in ${source.repo} releases`)
     }
-    return installResolvedBundle(bundle)
+    return installResolvedBundle(bundle, onProgress)
   },
 }
