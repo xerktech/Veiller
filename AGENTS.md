@@ -135,16 +135,19 @@ validates the public Maven artifact dependency shape.
   identifiers, and workspace packages (`@veiller/*`) all use the Veiller name —
   never "Mentra" or "MentraOS", in user-facing copy or in code.
 - **"Mentra" survives only where it names the Mentra glasses hardware or is
-  functionally load-bearing.** Do not rename: device names ("Mentra Live",
-  "Mentra Mach1", "Mentra Display" / "Mentra Nex") and their BLE protocol
-  (`mentraos_ble` / `MentraosBle`); mentra.glass / mentraglass.com domains and
-  URLs (incl. the `com.mentraglass` Maven group); Mentra-Community GitHub
-  repositories; the published `@mentra/types` npm package; auth/wire/persisted
-  fields (`mentraUserId`, `mentraAuth`, `mentraosSettings`,
-  `mentraOSWebsocketUrl`); external Mentra products ("MentraOS Legacy", the
-  "Mentra AI" miniapp); the glasses-side `com.mentra.asg_client` application
-  id and Java package; and the `mentra-miniapp` CLI bin alias that external
-  miniapp pipelines invoke (`veiller-miniapp` is the primary name).
+  functionally load-bearing for this fork.** Do not rename: device names
+  ("Mentra Live", "Mentra Mach1", "Mentra Display" / "Mentra Nex"), their BLE
+  protocol (`mentraos_ble` / `MentraosBle`), and the Mentra vendor logo
+  (`MentraLogo`); the live mentraglass.com domains (backend, CDNs, privacy /
+  legacy pages) and the `com.mentraglass` Maven group; mentra.glass URLs
+  inside parked device code and historical docs; Mentra-Community GitHub
+  repositories (firmware/OTA downloads, upstream history); the published
+  `@mentra/types` npm package used by the engine; the JWT claims
+  `mentraUserId` / `mentraAuth` minted by the deployed cloud-v2 backend;
+  external Mentra products ("MentraOS Legacy", the "Mentra AI" miniapp); the
+  glasses-side `com.mentra.asg_client` application id and Java package; and
+  the `mentra-miniapp` CLI bin alias that the Tenir pipeline still invokes
+  (`veiller-miniapp` is the primary name).
 - When you write "miniapp SDK" capitalize it as "**Miniapp SDK**".
 
 ## Testing Guidelines

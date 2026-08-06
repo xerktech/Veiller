@@ -212,10 +212,10 @@ export interface PhoneNotificationDismissed extends BaseMessage {
 /**
  * Veiller settings update from glasses
  */
-export interface MentraosSettingsUpdateRequest extends BaseMessage {
+export interface VeillerSettingsUpdateRequest extends BaseMessage {
   type: GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST;
 }
-export interface MentraosSettingsUpdateRequest extends BaseMessage {
+export interface VeillerSettingsUpdateRequest extends BaseMessage {
   type: GlassesToCloudMessageType.VEILLER_SETTINGS_UPDATE_REQUEST;
 }
 
@@ -479,7 +479,7 @@ export type GlassesToCloudMessage =
   | Vad
   | PhoneNotification
   | PhoneNotificationDismissed
-  | MentraosSettingsUpdateRequest
+  | VeillerSettingsUpdateRequest
   | CoreStatusUpdate
   | StreamStatus
   | KeepAliveAck

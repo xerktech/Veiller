@@ -208,9 +208,9 @@ export class _SessionManager {
     session: VeillerSession;
     compatSession: _V2SessionShim;
   } {
-    const websocketUrl = request.websocketUrl || request.mentraOSWebsocketUrl || request.augmentOSWebsocketUrl;
+    const websocketUrl = request.websocketUrl || request.veillerWebsocketUrl || request.augmentOSWebsocketUrl;
     if (!websocketUrl) {
-      throw new Error("Session webhook is missing websocketUrl/mentraOSWebsocketUrl/augmentOSWebsocketUrl");
+      throw new Error("Session webhook is missing websocketUrl/veillerWebsocketUrl/augmentOSWebsocketUrl");
     }
 
     const transport = new WebSocketTransport({

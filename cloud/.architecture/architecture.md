@@ -112,7 +112,7 @@ The webhook payload tells the SDK *where* to connect:
   "sessionId": "user@email.com-com.developer.myapp",
   "userId": "user@email.com",
   "timestamp": "2025-01-01T00:00:00.000Z",
-  "mentraOSWebsocketUrl": "wss://api.mentra.glass/app-ws"
+  "veillerWebsocketUrl": "wss://api.mentra.glass/app-ws"
 }
 ```
 
@@ -329,7 +329,7 @@ AppServer extends Hono
 AppSession
 ├── ws: WebSocket              — Connection to cloud's /app-ws
 ├── sessionId, userId
-├── config: { packageName, apiKey, mentraOSWebsocketUrl }
+├── config: { packageName, apiKey, veillerWebsocketUrl }
 │
 ├── Modules (developer-facing API):
 │   ├── events: EventManager       — Subscribe to data streams
@@ -427,7 +427,7 @@ Phone                        Cloud                         SDK (Developer App)
   │                            │ 4. POST /webhook ──────────► │
   │                            │    { type: session_request,  │
   │                            │      sessionId, userId,      │
-  │                            │      mentraOSWebsocketUrl }  │
+  │                            │      veillerWebsocketUrl }  │
   │                            │                              │
   │                            │    ◄── 200 OK ────────────── │
   │                            │                              │
@@ -443,7 +443,7 @@ Phone                        Cloud                         SDK (Developer App)
   │                            │                              │
   │                            │ ── tpa_connection_ack ─────► │
   │                            │    { settings, capabilities, │
-  │                            │      mentraosSettings }      │
+  │                            │      veillerSettings }      │
   │                            │                              │
   │                            │                              │ 8. onSession() fires
   │                            │                              │ 9. Developer registers handlers

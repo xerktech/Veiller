@@ -79,7 +79,7 @@ In `handleSessionRequest()`, add cleanup before creating new session:
 
 ```typescript
 private async handleSessionRequest(request: SessionWebhookRequest, res: express.Response): Promise<void> {
-  const {sessionId, userId, mentraOSWebsocketUrl, augmentOSWebsocketUrl} = request
+  const {sessionId, userId, veillerWebsocketUrl, augmentOSWebsocketUrl} = request
   this.logger.info({userId, sessionId}, `🗣️ Received session request for user ${userId}, session ${sessionId}`)
 
   // NEW: Clean up any existing session for this user to prevent orphaned sessions

@@ -166,7 +166,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     },
   },
 
-  // Universal app link routes (for apps.mentra.glass). The /applet/webview
+  // Universal app link routes (for apps.mentraglass.com). The /applet/webview
   // target for Cloud V1 apps is gone (Cloud V1 app end-of-life); app links
   // land on the installed app's info screen instead.
   {
@@ -200,7 +200,7 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   const nav = useNavigationStore.getState()
   const config = {
     scheme: "com.xerktech.veiller",
-    host: "apps.mentra.glass",
+    host: "apps.mentraglass.com",
     routes: deepLinkRoutes,
     fallbackHandler: (url: string) => {
       console.warn("Fallback handler called for URL:", url)
@@ -323,7 +323,7 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
 
       // small hack since some sources strip the host and we want to put the url into URL object here
       if (url.startsWith("/")) {
-        url = "https://apps.mentra.glass" + url
+        url = "https://apps.mentraglass.com" + url
       }
 
       const parsedUrl = new URL(url)

@@ -69,7 +69,7 @@ export class VeillerSession {
   readonly time: TimeUtils;
 
   settingsData: AppSettings = [];
-  mentraosSettings: Record<string, any> = {};
+  veillerSettings: Record<string, any> = {};
   appConfig: AppConfig | null = null;
   capabilities: Capabilities | null = null;
   private runtimeSessionId: string;
@@ -361,7 +361,7 @@ export class VeillerSession {
 
     this.cleanupTasks.push(
       this._router.messageHandlers.register("augmentos_settings_update", (message) => {
-        this.applyMentraosSettings(message.settings ?? {});
+        this.applyVeillerSettings(message.settings ?? {});
       }),
     );
   }
@@ -380,8 +380,8 @@ export class VeillerSession {
     this.capabilities = message.capabilities ?? null;
     this.runtimeSessionId = message.sessionId ?? this.runtimeSessionId;
 
-    this.permissions.updateFromSettings(message.mentraosSettings ?? message.settings ?? {});
-    this.applyMentraosSettings(message.mentraosSettings ?? {});
+    this.permissions.updateFromSettings(message.veillerSettings ?? message.settings ?? {});
+    this.applyVeillerSettings(message.veillerSettings ?? {});
 
     if (message.capabilities) {
       this.device.handleCapabilitiesUpdate({
@@ -414,8 +414,8 @@ export class VeillerSession {
     this.emit("settings", this.settingsData);
   }
 
-  private applyMentraosSettings(settings: Record<string, any>): void {
-    this.mentraosSettings = settings;
+  private applyVeillerSettings(settings: Record<string, any>): void {
+    this.veillerSettings = settings;
     const timezone = settings?.timezone;
 
     if (typeof timezone === "string" && timezone.length > 0) {

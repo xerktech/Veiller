@@ -857,7 +857,7 @@ The app settings system (dev-defined schemas in dev console, user-configured val
 | `session.settings.fetch()`                                             | ⚠️ Deprecated                                               | ⚠️ Deprecate        |
 | `session.settings.getVeiller(key, default?)`                          | TBD — Veiller system settings may move to `session.device` | ❓ Open             |
 | `session.settings.onVeillerChange(key, handler)`                      | TBD — same as above                                         | ❓ Open             |
-| `session.settings.onMentraosSettingsChange(key, handler)` (deprecated) | —                                                           | ❌ Remove           |
+| `session.settings.onVeillerSettingsChange(key, handler)` (deprecated) | —                                                           | ❌ Remove           |
 | `session.settings.getVeillerSetting(key, default?)` (duplicate)       | —                                                           | ❌ Remove           |
 | `session.events.onSettingsUpdate(handler)`                             | —                                                           | ❌ Remove duplicate |
 | `session.events.onSettingChange(key, handler)`                         | —                                                           | ❌ Remove duplicate |

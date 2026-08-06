@@ -37,7 +37,7 @@ class UserSession {
   type: "SESSION_REQUEST",
   sessionId: userSession.id,  // UUID
   userId: "user@example.com",
-  mentraOSWebsocketUrl: "wss://debug.cloud/app-ws"
+  veillerWebsocketUrl: "wss://debug.cloud/app-ws"
 }
 ```
 
@@ -166,13 +166,13 @@ enum AppConnectionState {
 ```typescript
 // In AppServer.handleSessionRequest()
 private async handleSessionRequest(request, res) {
-  const { userId, mentraOSWebsocketUrl } = request;
+  const { userId, veillerWebsocketUrl } = request;
 
   const existing = this.activeSessionsByUserId.get(userId);
   if (existing) {
     // Same user, different cloud - transfer ownership
-    this.logger.info(`Transferring ownership for ${userId} to ${mentraOSWebsocketUrl}`);
-    await existing.transferOwnership(mentraOSWebsocketUrl);
+    this.logger.info(`Transferring ownership for ${userId} to ${veillerWebsocketUrl}`);
+    await existing.transferOwnership(veillerWebsocketUrl);
     res.status(200).json({ status: "success" });
     return;
   }
@@ -197,7 +197,7 @@ async transferOwnership(newCloudUrl: string): Promise<void> {
   this.ws?.close(1000, "Ownership transferred");
 
   // Connect to new cloud
-  this.config.mentraOSWebsocketUrl = newCloudUrl;
+  this.config.veillerWebsocketUrl = newCloudUrl;
   await this.reconnect();
 }
 ```

@@ -844,14 +844,14 @@ Both route to the same handler. Legacy aliases removed when v2 is fully deprecat
 // Cloud → App Server (same webhook for fresh start AND resurrection)
 {
   type: "session_request",           // same as today
-  cloudHostname: "cloud-a.mentra.glass",  // NEW — replaces mentraOSWebsocketUrl
+  cloudHostname: "cloud-a.mentra.glass",  // NEW — replaces veillerWebsocketUrl
   userId: "mongo_id_123",           // NEW — MongoDB _id
   email: "user@example.com",        // NEW — optional, for display/logging
   sessionId: "previous-session-uuid", // NEW — if resurrecting, the preserved session's ID
   timestamp: "...",
 
   // Backward compat — v2 SDKs need these
-  mentraOSWebsocketUrl: "wss://cloud-a.mentra.glass/app-ws",  // DEPRECATED but still sent
+  veillerWebsocketUrl: "wss://cloud-a.mentra.glass/app-ws",  // DEPRECATED but still sent
   augmentOSWebsocketUrl: "wss://cloud-a.mentra.glass/app-ws", // DEPRECATED but still sent
 }
 ```
@@ -994,7 +994,7 @@ Cloud behavior on `RECONNECT_DEFERRED`:
   subscriptions: string[],       // NEW — cloud's current subs (for reconciliation)
   resurrected: boolean,          // NEW — true if this was a resurrection
   settings: AppSettings,
-  mentraosSettings: object,
+  veillerSettings: object,
   capabilities: object,
   timestamp: string
 }
@@ -1116,7 +1116,7 @@ It does **not** fire on a true fresh start.
 
 - `onSession`: only called on fresh starts and resurrections (not reconnects)
 - `session.wasResurrected: boolean` available in `onSession` callback
-- Webhooks: read `cloudHostname` (new) with fallback to `mentraOSWebsocketUrl` (v2 compat)
+- Webhooks: read `cloudHostname` (new) with fallback to `veillerWebsocketUrl` (v2 compat)
 
 ---
 

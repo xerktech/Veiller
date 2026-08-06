@@ -40,7 +40,7 @@ The fix: just send the timezone name once, use the existing settings system.
 - [x] Cloud implementation complete
   - [x] Added `userTimezone` to UserSession
   - [x] Added timezone loading in UserSettingsManager
-  - [x] Added `userTimezone` to mentraosSettings in CONNECTION_ACK
+  - [x] Added `userTimezone` to veillerSettings in CONNECTION_ACK
   - [x] Removed `userDatetime` property
   - [x] Deleted `routes/user-data.routes.ts` (express)
   - [x] Deleted `api/hono/routes/user-data.routes.ts` (hono)
@@ -63,13 +63,13 @@ The fix: just send the timezone name once, use the existing settings system.
 - [x] PR Review fix (PR #1986)
   - [x] Fixed settings broadcast to send full snapshot instead of single key
   - [x] Refactored UserSettingsManager to use single `broadcastSettingsUpdate()` method
-  - [x] Added `buildMentraosSettings()` as single source of truth for key mapping
+  - [x] Added `buildVeillerSettings()` as single source of truth for key mapping
   - [x] Added `getAllAppsWithAugmentosSubscriptions()` to SubscriptionManager
-  - [x] Updated AppManager to use shared `buildMentraosSettings()` method
+  - [x] Updated AppManager to use shared `buildVeillerSettings()` method
 - [x] PR Review fix (PR #1984 - base branch)
   - [x] Added `getIndexedSetting()` for device-indexed keys like `preferred_mic:<deviceId>`
   - [x] Added `waitForLoad()` to fix race condition where CONNECTION_ACK sent before settings loaded
-  - [x] Updated `buildMentraosSettings()` to use `getIndexedSetting("preferred_mic")`
+  - [x] Updated `buildVeillerSettings()` to use `getIndexedSetting("preferred_mic")`
   - [x] Updated `UserSession.createOrReconnect()` to await settings load
 - [ ] Testing
 
@@ -87,12 +87,12 @@ The fix: just send the timezone name once, use the existing settings system.
 **Add:**
 
 - `userSession.userTimezone` property
-- `UserSettingsManager.buildMentraosSettings()` - single source of truth for settings mapping
+- `UserSettingsManager.buildVeillerSettings()` - single source of truth for settings mapping
 - `UserSettingsManager.broadcastSettingsUpdate()` - sends full snapshot to subscribed apps
 - `UserSettingsManager.getIndexedSetting()` - handles device-indexed keys like `preferred_mic:<deviceId>`
 - `UserSettingsManager.waitForLoad()` - ensures settings are loaded before use
 - `SubscriptionManager.getAllAppsWithAugmentosSubscriptions()` - helper for broadcast
-- `userTimezone` in `mentraosSettings` (CONNECTION_ACK)
+- `userTimezone` in `veillerSettings` (CONNECTION_ACK)
 - Dashboard reads timezone from settings system
 
 **Deprecate (SDK):**
@@ -112,29 +112,29 @@ settings: {
 }
 ```
 
-The SDK's `updateMentraosSettings()` replaces the entire settings object, so apps would lose all other settings (metricSystemEnabled, brightness, etc.) when receiving a partial update.
+The SDK's `updateVeillerSettings()` replaces the entire settings object, so apps would lose all other settings (metricSystemEnabled, brightness, etc.) when receiving a partial update.
 
 **Fix:** Refactored to always broadcast the **full settings snapshot**:
 
 ```typescript
 // AFTER (fixed): Sends complete snapshot
-settings: buildMentraosSettings() // All settings included
+settings: buildVeillerSettings() // All settings included
 ```
 
 ### Files Changed
 
 | File                     | Change                                                                                           |
 | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `UserSettingsManager.ts` | Added `buildMentraosSettings()`, replaced bridge methods with single `broadcastSettingsUpdate()` |
+| `UserSettingsManager.ts` | Added `buildVeillerSettings()`, replaced bridge methods with single `broadcastSettingsUpdate()` |
 | `SubscriptionManager.ts` | Added `getAllAppsWithAugmentosSubscriptions()` helper                                            |
-| `AppManager.ts`          | Now uses `userSettingsManager.buildMentraosSettings()` for CONNECTION_ACK                        |
+| `AppManager.ts`          | Now uses `userSettingsManager.buildVeillerSettings()` for CONNECTION_ACK                        |
 
 ### Key Benefits
 
-1. **Single source of truth** - `buildMentraosSettings()` defines the snake_case → camelCase mapping once
+1. **Single source of truth** - `buildVeillerSettings()` defines the snake_case → camelCase mapping once
 2. **No data loss** - Apps always receive complete settings, SDK replace behavior is safe
 3. **Simpler code** - One broadcast method instead of per-setting bridge methods
-4. **Easier to extend** - Adding new settings only requires updating `buildMentraosSettings()`
+4. **Easier to extend** - Adding new settings only requires updating `buildVeillerSettings()`
 
 ## PR #1984 Review Fixes (Base Branch)
 
@@ -145,7 +145,7 @@ Additional fixes from the base settings-cleanup PR review:
 Mobile stores `preferred_mic` with a device-specific indexer (e.g., `preferred_mic:G1` or `preferred_mic:Frame`). The plain `preferred_mic` key doesn't exist, so apps were always getting the default `"auto"`.
 
 - Added `getIndexedSetting(key, indexer?)` method to `UserSettingsManager`
-- Updated `buildMentraosSettings()` to use `getIndexedSetting("preferred_mic")`
+- Updated `buildVeillerSettings()` to use `getIndexedSetting("preferred_mic")`
 
 ### Fix 2: Race condition on settings load
 

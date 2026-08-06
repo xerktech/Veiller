@@ -109,7 +109,7 @@ export type {
   ManagedStreamStatus,
   StreamStatusCheckResponse,
   OutputStatus,
-  MentraosSettingsUpdate,
+  VeillerSettingsUpdate,
   TranscriptionData,
   TranscriptionMetadata,
   SonioxToken,

@@ -296,7 +296,7 @@ This is the full implementation for when SDK tracks cloud URL and handles switch
  * Releases ownership from current cloud and connects to new one
  */
 async transferToCloud(newCloudUrl: string, sessionId: string): Promise<void> {
-  const oldUrl = this.config.mentraOSWebsocketUrl
+  const oldUrl = this.config.veillerWebsocketUrl
 
   if (oldUrl === newCloudUrl) {
     this.logger.debug("Same cloud URL, no transfer needed")
@@ -312,7 +312,7 @@ async transferToCloud(newCloudUrl: string, sessionId: string): Promise<void> {
   await this.releaseOwnership("switching_clouds")
 
   // Update config and connect to new cloud
-  this.config.mentraOSWebsocketUrl = newCloudUrl
+  this.config.veillerWebsocketUrl = newCloudUrl
   
   // Reset terminated flag for fresh start
   this.terminated = false

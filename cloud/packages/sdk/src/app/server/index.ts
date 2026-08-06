@@ -609,7 +609,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
     request: SessionWebhookRequest,
     c: Context<{ Variables: AuthVariables }>,
   ): Promise<Response> {
-    const { sessionId, userId, websocketUrl, mentraOSWebsocketUrl, augmentOSWebsocketUrl } = request;
+    const { sessionId, userId, websocketUrl, veillerWebsocketUrl, augmentOSWebsocketUrl } = request;
     this.logger.debug({ userId, sessionId }, "Session request received");
 
     // Check for existing session (user might be switching clouds)
@@ -646,7 +646,7 @@ export class AppServer extends Hono<{ Variables: AuthVariables }> {
     const session = new AppSession({
       packageName: this.config.packageName,
       apiKey: this.config.apiKey,
-      mentraOSWebsocketUrl: websocketUrl || mentraOSWebsocketUrl || augmentOSWebsocketUrl,
+      veillerWebsocketUrl: websocketUrl || veillerWebsocketUrl || augmentOSWebsocketUrl,
       appServer: this,
       userId,
     });

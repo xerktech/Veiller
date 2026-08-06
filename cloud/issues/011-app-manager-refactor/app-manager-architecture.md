@@ -293,7 +293,7 @@ private async sendConnectionAck(userSession: UserSession): Promise<void> {
     sessionId: `${userSession.userId}-${this.packageName}`,
     userId: userSession.userId,
     capabilities: userSession.getCapabilities(),
-    mentraosSettings: await this.getMentraosSettings(userSession),
+    veillerSettings: await this.getVeillerSettings(userSession),
     timestamp: new Date(),
   };
   this._webSocket?.send(JSON.stringify(ack));
