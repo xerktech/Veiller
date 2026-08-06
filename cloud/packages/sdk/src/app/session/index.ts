@@ -71,7 +71,7 @@ import {
   CapabilitiesUpdate,
 } from "../../types";
 import { DashboardAPI } from "../../types/dashboard";
-import { MentraosSettingsUpdate } from "../../types/messages/cloud-to-app";
+import { VeillerSettingsUpdate } from "../../types/messages/cloud-to-app";
 import { Logger } from "pino";
 import { AppServer } from "../server";
 import axios from "axios";
@@ -112,7 +112,7 @@ export interface AppSessionConfig {
   /** 🔑 API key for authentication with Veiller Cloud */
   apiKey: string;
   /** 🔌 WebSocket server URL (default: 'ws://localhost:7002/app-ws') */
-  mentraOSWebsocketUrl?: string;
+  veillerWebsocketUrl?: string;
   /** 🔄 Automatically attempt to reconnect on disconnect (default: true) */
   autoReconnect?: boolean;
   /** 🔁 Maximum number of reconnection attempts (default: 3) */
@@ -256,7 +256,7 @@ export class AppSession {
   constructor(private config: AppSessionConfig) {
     // Set defaults and merge with provided config
     this.config = {
-      mentraOSWebsocketUrl: `ws://localhost:8002/app-ws`, // Use localhost as default
+      veillerWebsocketUrl: `ws://localhost:8002/app-ws`, // Use localhost as default
       autoReconnect: true, // Enable auto-reconnection by default for better reliability
       maxReconnectAttempts: 3, // Default to 3 reconnection attempts for better resilience
       reconnectDelay: 1000, // Start with 1 second delay (uses exponential backoff)
@@ -290,17 +290,17 @@ export class AppSession {
     );
 
     // Make sure the URL is correctly formatted to prevent double protocol issues
-    if (this.config.mentraOSWebsocketUrl) {
+    if (this.config.veillerWebsocketUrl) {
       try {
-        const url = new URL(this.config.mentraOSWebsocketUrl);
+        const url = new URL(this.config.veillerWebsocketUrl);
         if (!["ws:", "wss:"].includes(url.protocol)) {
           // Fix URLs with incorrect protocol (e.g., 'ws://http://host')
-          const fixedUrl = this.config.mentraOSWebsocketUrl.replace(/^ws:\/\/http:\/\//, "ws://");
-          this.config.mentraOSWebsocketUrl = fixedUrl;
+          const fixedUrl = this.config.veillerWebsocketUrl.replace(/^ws:\/\/http:\/\//, "ws://");
+          this.config.veillerWebsocketUrl = fixedUrl;
           this.logger.warn(`Fixed malformed WebSocket URL: ${fixedUrl}`);
         }
       } catch (error) {
-        this.logger.error(error, `Invalid WebSocket URL format: ${this.config.mentraOSWebsocketUrl}`);
+        this.logger.error(error, `Invalid WebSocket URL format: ${this.config.veillerWebsocketUrl}`);
       }
     }
 
@@ -308,9 +308,9 @@ export class AppSession {
 
     // Validate URL format - give early warning for obvious issues
     // Check URL format but handle undefined case
-    if (this.config.mentraOSWebsocketUrl) {
+    if (this.config.veillerWebsocketUrl) {
       try {
-        const url = new URL(this.config.mentraOSWebsocketUrl);
+        const url = new URL(this.config.veillerWebsocketUrl);
         if (!["ws:", "wss:"].includes(url.protocol)) {
           this.logger.error(
             { config: this.config },
@@ -320,7 +320,7 @@ export class AppSession {
       } catch (error) {
         this.logger.error(
           error,
-          `⚠️ [${this.config.packageName}] Invalid WebSocket URL format: ${this.config.mentraOSWebsocketUrl}`,
+          `⚠️ [${this.config.packageName}] Invalid WebSocket URL format: ${this.config.veillerWebsocketUrl}`,
         );
       }
     }
@@ -338,7 +338,7 @@ export class AppSession {
     this.settings = new SettingsManager(
       this.settingsData,
       this.config.packageName,
-      this.config.mentraOSWebsocketUrl,
+      this.config.veillerWebsocketUrl,
       this.sessionId ?? undefined,
       async (streams: string[]) => {
         // NOTE: With Bug 007 fix, subscriptions are derived from EventManager.handlers
@@ -657,7 +657,7 @@ export class AppSession {
 
     // Configure settings API client with the WebSocket URL and session ID
     // This allows settings to be fetched from the correct server
-    this.settings.configureApiClient(this.config.packageName, this.config.mentraOSWebsocketUrl || "", sessionId);
+    this.settings.configureApiClient(this.config.packageName, this.config.veillerWebsocketUrl || "", sessionId);
 
     // Update the sessionId in the camera module
     if (this.camera) {
@@ -688,16 +688,16 @@ export class AppSession {
         }
 
         // Validate WebSocket URL before attempting connection
-        if (!this.config.mentraOSWebsocketUrl) {
+        if (!this.config.veillerWebsocketUrl) {
           this.logger.error("WebSocket URL is missing or undefined");
           reject(new VeillerConnectionError("WebSocket URL is required"));
           return;
         }
 
-        this.logger.debug(`Connecting to ${this.config.mentraOSWebsocketUrl}`);
+        this.logger.debug(`Connecting to ${this.config.veillerWebsocketUrl}`);
 
         // Create connection with error handling
-        this.ws = new WebSocket(this.config.mentraOSWebsocketUrl);
+        this.ws = new WebSocket(this.config.veillerWebsocketUrl);
 
         // Track WebSocket for automatic cleanup
         this.resources.track(() => {
@@ -1157,14 +1157,14 @@ export class AppSession {
    * @returns The WebSocket server URL used by this session
    */
   getServerUrl(): string | undefined {
-    return this.config.mentraOSWebsocketUrl;
+    return this.config.veillerWebsocketUrl;
   }
 
   public getHttpsServerUrl(): string | undefined {
-    if (!this.config.mentraOSWebsocketUrl) {
+    if (!this.config.veillerWebsocketUrl) {
       return undefined;
     }
-    return AppSession.convertToHttps(this.config.mentraOSWebsocketUrl);
+    return AppSession.convertToHttps(this.config.veillerWebsocketUrl);
   }
 
   private static convertToHttps(rawUrl: string | undefined): string {
@@ -1306,17 +1306,17 @@ export class AppSession {
 
           // Handle Veiller system settings if provided
           this.logger.debug(
-            { mentraosSettings: JSON.stringify(message.mentraosSettings) },
-            `[AppSession] CONNECTION_ACK mentraosSettings}`,
+            { veillerSettings: JSON.stringify(message.veillerSettings) },
+            `[AppSession] CONNECTION_ACK veillerSettings}`,
           );
-          if (message.mentraosSettings) {
+          if (message.veillerSettings) {
             this.logger.info(
-              { mentraosSettings: JSON.stringify(message.mentraosSettings) },
-              `[AppSession] Calling updatementraosSettings with`,
+              { veillerSettings: JSON.stringify(message.veillerSettings) },
+              `[AppSession] Calling updateveillerSettings with`,
             );
-            this.settings.updateMentraosSettings(message.mentraosSettings);
+            this.settings.updateVeillerSettings(message.veillerSettings);
           } else {
-            this.logger.warn(`[AppSession] CONNECTION_ACK message missing mentraosSettings field`);
+            this.logger.warn(`[AppSession] CONNECTION_ACK message missing veillerSettings field`);
           }
 
           // Handle device capabilities if provided
@@ -1437,9 +1437,9 @@ export class AppSession {
           this.events.emit("settings_update", this.settingsData);
 
           // --- Veiller settings update logic ---
-          // If the message.settings looks like Veiller settings (object with known keys), update mentraosSettings
+          // If the message.settings looks like Veiller settings (object with known keys), update veillerSettings
           if (message.settings && typeof message.settings === "object") {
-            this.settings.updateMentraosSettings(message.settings);
+            this.settings.updateVeillerSettings(message.settings);
           }
 
           // Check if we should update subscriptions
@@ -1540,9 +1540,9 @@ export class AppSession {
             this.pendingDirectMessages.delete(response.messageId);
           }
         } else if (message.type === "augmentos_settings_update") {
-          const veillerMsg = message as MentraosSettingsUpdate;
+          const veillerMsg = message as VeillerSettingsUpdate;
           if (veillerMsg.settings && typeof veillerMsg.settings === "object") {
-            this.settings.updateMentraosSettings(veillerMsg.settings);
+            this.settings.updateVeillerSettings(veillerMsg.settings);
           }
         }
         // Handle 'connection_error' as a specific case if cloud sends this string literal

@@ -500,20 +500,20 @@ import {
 ```typescript
 // REMOVE these debug lines (lines 269-270):
 this.logger.debug(`🚀 [${this.config.packageName}] App Session initialized`)
-this.logger.debug(`🚀 [${this.config.packageName}] WebSocket URL: ${this.config.mentraOSWebsocketUrl}`)
+this.logger.debug(`🚀 [${this.config.packageName}] WebSocket URL: ${this.config.veillerWebsocketUrl}`)
 
 // The URL validation block (lines 253-290) has duplicate try/catch blocks.
 // Consolidate into one and log at debug level:
-if (this.config.mentraOSWebsocketUrl) {
+if (this.config.veillerWebsocketUrl) {
   try {
-    const url = new URL(this.config.mentraOSWebsocketUrl)
+    const url = new URL(this.config.veillerWebsocketUrl)
     if (!["ws:", "wss:"].includes(url.protocol)) {
-      const fixedUrl = this.config.mentraOSWebsocketUrl.replace(/^ws:\/\/http:\/\//, "ws://")
-      this.config.mentraOSWebsocketUrl = fixedUrl
+      const fixedUrl = this.config.veillerWebsocketUrl.replace(/^ws:\/\/http:\/\//, "ws://")
+      this.config.veillerWebsocketUrl = fixedUrl
       this.logger.debug(`Fixed malformed WebSocket URL: ${fixedUrl}`)
     }
   } catch {
-    this.logger.error(`Invalid WebSocket URL: ${this.config.mentraOSWebsocketUrl}`)
+    this.logger.error(`Invalid WebSocket URL: ${this.config.veillerWebsocketUrl}`)
   }
 }
 ```
@@ -537,11 +537,11 @@ reject(new VeillerValidationError("WebSocket URL is required"))
 ```typescript
 // Before:
 this.logger.info(
-  `🔌🔌🔌 [${this.config.packageName}] Attempting to connect to: ${this.config.mentraOSWebsocketUrl} for session ${this.sessionId}`,
+  `🔌🔌🔌 [${this.config.packageName}] Attempting to connect to: ${this.config.veillerWebsocketUrl} for session ${this.sessionId}`,
 )
 
 // After:
-this.logger.debug(`Connecting to ${this.config.mentraOSWebsocketUrl}`)
+this.logger.debug(`Connecting to ${this.config.veillerWebsocketUrl}`)
 // Connection success is logged at info level in the ACK handler.
 ```
 
@@ -633,10 +633,10 @@ if (errorMessage.toLowerCase().includes("invalid api key") || errorMessage.toLow
 **CONNECTION_ACK logging (lines 1280-1311):**
 
 ```typescript
-// Before: ~8 lines of info/debug about mentraosSettings and patch version
+// Before: ~8 lines of info/debug about veillerSettings and patch version
 
 // After:
-this.logger.debug({mentraosSettings: message.mentraosSettings}, `CONNECTION_ACK received`)
+this.logger.debug({veillerSettings: message.veillerSettings}, `CONNECTION_ACK received`)
 // The patch version log is internal debug — move to debug:
 this.logger.debug(`Subscriptions derived from ${handlerCount} handler(s)`)
 // The info-level "Connected" message is emitted once from AppServer when the

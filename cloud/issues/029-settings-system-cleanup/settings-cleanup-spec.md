@@ -56,7 +56,7 @@ const ackMessage = {
 
 ### 3. CONNECTION_ACK Field Name Mismatch
 
-The cloud sends `augmentosSettings` but the SDK expects `mentraosSettings`:
+The cloud sends `augmentosSettings` but the SDK expects `veillerSettings`:
 
 **Cloud sends** (`AppManager.ts`):
 
@@ -70,18 +70,18 @@ const ackMessage = {
 
 ```typescript
 export interface AppConnectionAck extends BaseMessage {
-  mentraosSettings?: Record<string, any> // <-- SDK looks for this!
+  veillerSettings?: Record<string, any> // <-- SDK looks for this!
 }
 ```
 
 **SDK reads** (`AppSession.handleMessage()`):
 
 ```typescript
-if (message.mentraosSettings) {
-  this.settings.updateMentraosSettings(message.mentraosSettings)
+if (message.veillerSettings) {
+  this.settings.updateVeillerSettings(message.veillerSettings)
 } else {
-  this.logger.warn(`[AppSession] CONNECTION_ACK message missing mentraosSettings field`)
-  // ^ This always fires because cloud sends augmentosSettings, not mentraosSettings!
+  this.logger.warn(`[AppSession] CONNECTION_ACK message missing veillerSettings field`)
+  // ^ This always fires because cloud sends augmentosSettings, not veillerSettings!
 }
 ```
 
@@ -128,7 +128,7 @@ session.settings.onVeillerSettingChange("metricSystemEnabled", (newValue, oldVal
 ## Goals
 
 1. **Fix live updates**: When mobile changes `metric_system`, apps receive `metricSystemEnabled` update
-2. **Fix field name**: CONNECTION_ACK sends `mentraosSettings` (not `augmentosSettings`) to match SDK
+2. **Fix field name**: CONNECTION_ACK sends `veillerSettings` (not `augmentosSettings`) to match SDK
 3. **Fix initial values**: CONNECTION_ACK loads settings from `UserSettings` model (not deprecated `user.augmentosSettings`)
 4. **Remove dead code**: Clean up deprecated `augmentosSettings` from User model
 5. **Document key mapping**: Clear mapping between REST keys and SDK keys

@@ -103,7 +103,7 @@ POST /user/settings ─────────► UserSettings.timezone = "Amer
                                3. broadcastSettingsUpdate()
                                         │
                                         ▼
-                               buildMentraosSettings() ──────────► Full snapshot sent
+                               buildVeillerSettings() ──────────► Full snapshot sent
                                { metricSystemEnabled, brightness,   to all subscribed apps
                                  userTimezone, ... }                      │
                                                                           ▼
@@ -121,8 +121,8 @@ POST /user/settings ─────────► UserSettings.timezone = "Amer
 
 1. **Add `timezone` to UserSettings** - Stored in DB, loaded on session start
 2. **Single broadcast method** - `broadcastSettingsUpdate()` sends full snapshot to all subscribed apps
-3. **Single source of truth** - `buildMentraosSettings()` defines snake_case → camelCase mapping once
-4. **Include in CONNECTION_ACK** - Apps get timezone on connect (uses same `buildMentraosSettings()`)
+3. **Single source of truth** - `buildVeillerSettings()` defines snake_case → camelCase mapping once
+4. **Include in CONNECTION_ACK** - Apps get timezone on connect (uses same `buildVeillerSettings()`)
 5. **Remove all datetime cruft** - userDatetime, set-datetime endpoint, custom_message relay
 
 ## Implementation Details
@@ -150,11 +150,11 @@ export class UserSession {
 // cloud/src/services/session/UserSettingsManager.ts
 
 /**
- * Build the full mentraosSettings object for SDK apps.
+ * Build the full veillerSettings object for SDK apps.
  * Maps from REST keys (snake_case) to SDK keys (camelCase).
  * This is the SINGLE SOURCE OF TRUTH for settings mapping.
  */
-buildMentraosSettings(): Record<string, any> {
+buildVeillerSettings(): Record<string, any> {
   return {
     metricSystemEnabled: this.snapshot.metric_system ?? false,
     contextualDashboard: this.snapshot.contextual_dashboard ?? true,
@@ -197,7 +197,7 @@ async onSettingsUpdatedViaRest(updated: Record<string, any>): Promise<void> {
 }
 
 /**
- * Broadcast the full mentraosSettings snapshot to all connected apps.
+ * Broadcast the full veillerSettings snapshot to all connected apps.
  * Sends to any app that has subscribed to any augmentos setting.
  *
  * IMPORTANT: Always sends the FULL snapshot, not partial updates.
@@ -207,7 +207,7 @@ private async broadcastSettingsUpdate(): Promise<void> {
   const subscribedApps = this.userSession.subscriptionManager.getAllAppsWithAugmentosSubscriptions();
   if (!subscribedApps || subscribedApps.length === 0) return;
 
-  const mentraosSettings = this.buildMentraosSettings();  // Full snapshot!
+  const veillerSettings = this.buildVeillerSettings();  // Full snapshot!
   const timestamp = new Date();
 
   for (const packageName of subscribedApps) {
@@ -217,7 +217,7 @@ private async broadcastSettingsUpdate(): Promise<void> {
     ws.send(JSON.stringify({
       type: "augmentos_settings_update",
       sessionId: `${this.userSession.sessionId}-${packageName}`,
-      settings: mentraosSettings,
+      settings: veillerSettings,
       timestamp,
     }));
   }
@@ -254,8 +254,8 @@ getAllAppsWithAugmentosSubscriptions(): string[] {
 
 ```typescript
 // cloud/src/services/session/AppManager.ts
-// Uses the same buildMentraosSettings() for consistency
-const mentraosSettings = this.userSession.userSettingsManager.buildMentraosSettings();
+// Uses the same buildVeillerSettings() for consistency
+const veillerSettings = this.userSession.userSettingsManager.buildVeillerSettings();
 ```
 
 ### Phase 2: Remove datetime cruft from cloud
@@ -535,7 +535,7 @@ onCustomMessage(action: string, handler: (payload: any) => void): () => void {
 | ------------------------ | ----- | ------------------------------------------ |
 | `UserSession.ts`         | ~3    | Add `userTimezone` property                |
 | `UserSettingsManager.ts` | ~40   | Add timezone loading and bridging          |
-| `AppManager.ts`          | ~2    | Include `userTimezone` in mentraosSettings |
+| `AppManager.ts`          | ~2    | Include `userTimezone` in veillerSettings |
 
 ### Dashboard - Modify
 
@@ -558,7 +558,7 @@ onCustomMessage(action: string, handler: (payload: any) => void): () => void {
 3. **Cross-timezone event**: SF creates event, NY user sees correct local time
 4. **Timezone change**: User updates setting, Dashboard updates display
 5. **Old mobile**: No timezone sent, GPS fallback works
-6. **CONNECTION_ACK**: New app receives `userTimezone` in mentraosSettings
+6. **CONNECTION_ACK**: New app receives `userTimezone` in veillerSettings
 
 ## Open Questions
 

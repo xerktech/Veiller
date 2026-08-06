@@ -108,7 +108,7 @@ Developers might call `disconnect()` thinking it just closes the WebSocket:
 ```typescript
 // Developer thinks: "I'll disconnect and reconnect with new URL"
 await session.disconnect()
-session.config.mentraOSWebsocketUrl = newUrl
+session.config.veillerWebsocketUrl = newUrl
 await session.connect(sessionId)
 // SURPRISE: subscriptions are gone!
 ```

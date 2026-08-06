@@ -374,7 +374,7 @@ class AppSession {
 
     // Update to new cloud
     this.cloudUrl = newCloudUrl
-    this.config.mentraOSWebsocketUrl = newCloudUrl
+    this.config.veillerWebsocketUrl = newCloudUrl
 
     // Connect to new cloud
     // Subscriptions are preserved in this.subscriptions

@@ -26,7 +26,7 @@ import type { GlassesInfo } from "@mentra/types";
 export interface AppConnectionAck extends BaseMessage {
   type: CloudToAppMessageType.CONNECTION_ACK;
   settings?: AppSettings;
-  mentraosSettings?: Record<string, any>; // Veiller system settings
+  veillerSettings?: Record<string, any>; // Veiller system settings
   config?: AppConfig; // App config sent from cloud
   capabilities?: Capabilities; // Device capability profile
 }
@@ -136,7 +136,7 @@ export interface DeviceStateUpdate extends BaseMessage {
 /**
  * Veiller settings update to App
  */
-export interface MentraosSettingsUpdate extends BaseMessage {
+export interface VeillerSettingsUpdate extends BaseMessage {
   type: "augmentos_settings_update";
   sessionId: string;
   settings: Record<string, any>;
@@ -409,7 +409,7 @@ export type CloudToAppMessage =
   | CustomMessage
   | ManagedStreamStatus
   | StreamStatusCheckResponse
-  | MentraosSettingsUpdate
+  | VeillerSettingsUpdate
   // New App-to-App communication response messages
   | AppMessageReceived
   | AppUserJoined

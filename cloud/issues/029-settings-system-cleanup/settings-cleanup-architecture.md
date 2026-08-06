@@ -36,8 +36,8 @@ App connects ─────────────►  AppManager.handleAppIni
                              - augmentosSettings: {...}          ◄── WRONG FIELD NAME!
                                       │
                                       ▼
-                             SDK looks for mentraosSettings
-                             Field not found! ──────────────────►  mentraosSettings: undefined
+                             SDK looks for veillerSettings
+                             Field not found! ──────────────────►  veillerSettings: undefined
                                                                    (apps get nothing)
 ```
 
@@ -112,20 +112,20 @@ const ackMessage = {
 
 **5. CONNECTION_ACK field name mismatch (BROKEN):**
 
-Cloud sends `augmentosSettings` but SDK expects `mentraosSettings`:
+Cloud sends `augmentosSettings` but SDK expects `veillerSettings`:
 
 ```typescript
 // SDK: cloud/packages/sdk/src/types/messages/cloud-to-app.ts
 export interface AppConnectionAck extends BaseMessage {
-  mentraosSettings?: Record<string, any> // SDK looks for this field
+  veillerSettings?: Record<string, any> // SDK looks for this field
 }
 
 // SDK: cloud/packages/sdk/src/app/session/index.ts:1286-1293
-if (message.mentraosSettings) {
-  this.settings.updateMentraosSettings(message.mentraosSettings)
+if (message.veillerSettings) {
+  this.settings.updateVeillerSettings(message.veillerSettings)
 } else {
-  this.logger.warn(`[AppSession] CONNECTION_ACK message missing mentraosSettings field`)
-  // ^ This always fires because cloud sends "augmentosSettings", not "mentraosSettings"!
+  this.logger.warn(`[AppSession] CONNECTION_ACK message missing veillerSettings field`)
+  // ^ This always fires because cloud sends "augmentosSettings", not "veillerSettings"!
 }
 ```
 
@@ -140,7 +140,7 @@ if (message.mentraosSettings) {
 ### Summary of All Issues
 
 1. **Key mismatch**: Mobile sends `metric_system`, bridge looks for `metric_system_enabled`
-2. **Field name mismatch**: Cloud sends `augmentosSettings`, SDK expects `mentraosSettings`
+2. **Field name mismatch**: Cloud sends `augmentosSettings`, SDK expects `veillerSettings`
 3. **Stale data source**: CONNECTION_ACK reads from deprecated `user.augmentosSettings`
 4. **Dead code**: ~95 lines in User model never used
 
@@ -177,10 +177,10 @@ App connects ─────────────►  AppManager.handleAppIni
                                       │
                                       ▼
                              CONNECTION_ACK with:
-                             - mentraosSettings: {...}          ◄── FIXED FIELD NAME!
+                             - veillerSettings: {...}          ◄── FIXED FIELD NAME!
                                       │
                                       ▼
-                             SDK finds mentraosSettings ───────►  metricSystemEnabled: true ✓
+                             SDK finds veillerSettings ───────►  metricSystemEnabled: true ✓
 ```
 
 ## Implementation Plan
@@ -221,7 +221,7 @@ private async bridgeMetricSystemIfPresent(
 
 **Changes**:
 
-1. Rename field from `augmentosSettings` to `mentraosSettings` to match SDK
+1. Rename field from `augmentosSettings` to `veillerSettings` to match SDK
 2. Load settings from `UserSettings` model instead of deprecated `user.augmentosSettings`
 
 ```typescript
@@ -241,7 +241,7 @@ const ackMessage = {
 const userSettingsDoc = await UserSettings.findOne({email: this.userSession.userId})
 const rawSettings = userSettingsDoc?.getSettings() || {}
 
-const mentraosSettings = {
+const veillerSettings = {
   // Map REST keys (snake_case) to SDK keys (camelCase)
   metricSystemEnabled: rawSettings.metric_system ?? false,
   contextualDashboard: rawSettings.contextual_dashboard ?? true,
@@ -260,7 +260,7 @@ const ackMessage = {
   type: CloudToAppMessageType.CONNECTION_ACK,
   sessionId: sessionId,
   settings: userSettings,
-  mentraosSettings: mentraosSettings, // Fixed name + real data!
+  veillerSettings: veillerSettings, // Fixed name + real data!
   capabilities: this.userSession.getCapabilities(),
   timestamp: new Date(),
 }
@@ -270,7 +270,7 @@ const ackMessage = {
 
 ```typescript
 const snapshot = this.userSession.userSettingsManager.getSnapshot()
-const mentraosSettings = {
+const veillerSettings = {
   metricSystemEnabled: snapshot.metric_system ?? false,
   // ...
 }
@@ -295,13 +295,13 @@ const mentraosSettings = {
 
 **File**: `cloud/packages/sdk/src/types/messages/cloud-to-app.ts`
 
-**Change**: Rename `augmentosSettings` to `mentraosSettings` in `AppConnectionAck` interface (already done, just needs verification)
+**Change**: Rename `augmentosSettings` to `veillerSettings` in `AppConnectionAck` interface (already done, just needs verification)
 
 ```typescript
 export interface AppConnectionAck extends BaseMessage {
   type: CloudToAppMessageType.CONNECTION_ACK
   settings?: AppSettings
-  mentraosSettings?: Record<string, any> // Already renamed in SDK
+  veillerSettings?: Record<string, any> // Already renamed in SDK
   // ...
 }
 ```
@@ -370,7 +370,7 @@ describe("UserSettingsManager", () => {
 })
 
 describe("AppManager.handleAppInit", () => {
-  it("loads mentraosSettings from UserSettings model", async () => {
+  it("loads veillerSettings from UserSettings model", async () => {
     // Set up UserSettings with metric_system: true
     // Connect app
     // Verify CONNECTION_ACK contains metricSystemEnabled: true
@@ -382,7 +382,7 @@ describe("AppManager.handleAppInit", () => {
 
 1. **No data migration needed**: `UserSettings` is already the source of truth
 2. **No client changes needed**: Mobile already uses correct REST endpoints
-3. **No SDK changes needed**: SDK already handles `mentraosSettings` in CONNECTION_ACK
+3. **No SDK changes needed**: SDK already handles `veillerSettings` in CONNECTION_ACK
 
 **Rollout**:
 
@@ -397,7 +397,7 @@ Each phase can be deployed independently and is backward compatible.
 | File                     | Change Type | Description                                                                               |
 | ------------------------ | ----------- | ----------------------------------------------------------------------------------------- |
 | `UserSettingsManager.ts` | Modify      | Fix key from `metric_system_enabled` to `metric_system`                                   |
-| `AppManager.ts`          | Modify      | 1) Rename field `augmentosSettings` → `mentraosSettings`, 2) Load from UserSettings model |
+| `AppManager.ts`          | Modify      | 1) Rename field `augmentosSettings` → `veillerSettings`, 2) Load from UserSettings model |
 | `user.model.ts`          | Remove      | Delete augmentosSettings schema and methods (~95 lines)                                   |
 | Docs (various)           | Update      | Update references to deprecated augmentosSettings                                         |
 
@@ -415,5 +415,5 @@ Each phase can be deployed independently and is backward compatible.
 
 3. **What about UserSettingsManager.load() on session start?**
    - Currently loads snapshot from UserSettings
-   - Should it also populate mentraosSettings for CONNECTION_ACK?
+   - Should it also populate veillerSettings for CONNECTION_ACK?
    - **Decision**: Yes, ensure snapshot is loaded before CONNECTION_ACK is sent

@@ -18,7 +18,7 @@ Fix broken settings flow between mobile client, cloud, and apps after migration 
 The mobile client migrated from native "core" (WebSocket-based settings) to React Native "mantle" (REST-based settings). The cloud was partially updated but has broken code paths:
 
 1. Mobile sends `metric_system` but bridge looks for `metric_system_enabled` - **updates never broadcast**
-2. Cloud sends `augmentosSettings` but SDK expects `mentraosSettings` - **field name mismatch, apps get nothing**
+2. Cloud sends `augmentosSettings` but SDK expects `veillerSettings` - **field name mismatch, apps get nothing**
 3. CONNECTION_ACK reads from deprecated `user.augmentosSettings` - **apps get stale/default values**
 4. ~95 lines of dead code in User model that's never written to
 
@@ -26,7 +26,7 @@ The mobile client migrated from native "core" (WebSocket-based settings) to Reac
 
 - [x] Investigation complete
 - [x] Key mismatch identified (`metric_system` vs `metric_system_enabled`)
-- [x] Field name mismatch identified (`augmentosSettings` vs `mentraosSettings`)
+- [x] Field name mismatch identified (`augmentosSettings` vs `veillerSettings`)
 - [x] Broken CONNECTION_ACK flow identified
 - [x] Spec written
 - [x] Architecture doc written
@@ -47,7 +47,7 @@ The mobile client migrated from native "core" (WebSocket-based settings) to Reac
 
 ### Phase 2: `AppManager.ts`
 
-- Changed field name from `augmentosSettings` to `mentraosSettings` (matches SDK expectation)
+- Changed field name from `augmentosSettings` to `veillerSettings` (matches SDK expectation)
 - Now loads settings from `userSettingsManager.getSnapshot()` instead of deprecated `user.augmentosSettings`
 - Maps REST keys (snake_case) to SDK keys (camelCase)
 

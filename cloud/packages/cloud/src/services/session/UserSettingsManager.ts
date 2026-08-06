@@ -123,11 +123,11 @@ export class UserSettingsManager {
   }
 
   /**
-   * Build the full mentraosSettings object for SDK apps.
+   * Build the full veillerSettings object for SDK apps.
    * Maps from REST keys (snake_case) to SDK keys (camelCase).
    * This must stay in sync with AppManager.handleAppInit() CONNECTION_ACK.
    */
-  buildMentraosSettings(): Record<string, any> {
+  buildVeillerSettings(): Record<string, any> {
     // preferred_mic is indexed by device (stored as preferred_mic:<deviceId>)
     const preferredMic = this.getIndexedSetting("preferred_mic") ?? "auto";
 
@@ -212,7 +212,7 @@ export class UserSettingsManager {
   }
 
   /**
-   * Broadcast the full mentraosSettings snapshot to all connected apps.
+   * Broadcast the full veillerSettings snapshot to all connected apps.
    * Sends to any app that has subscribed to any augmentos setting.
    */
   private async broadcastSettingsUpdate(): Promise<void> {
@@ -228,7 +228,7 @@ export class UserSettingsManager {
         return;
       }
 
-      const mentraosSettings = this.buildMentraosSettings();
+      const veillerSettings = this.buildVeillerSettings();
       const timestamp = new Date();
 
       for (const packageName of subscribedApps) {
@@ -238,7 +238,7 @@ export class UserSettingsManager {
         const message = {
           type: "augmentos_settings_update",
           sessionId: this.userSession.getAppSessionId(packageName),
-          settings: mentraosSettings,
+          settings: veillerSettings,
           timestamp,
         };
 
@@ -253,7 +253,7 @@ export class UserSettingsManager {
         {
           userId: this.userSession.userId,
           appCount: subscribedApps.length,
-          settingsKeys: Object.keys(mentraosSettings),
+          settingsKeys: Object.keys(veillerSettings),
         },
         "Broadcast settings update to apps",
       );

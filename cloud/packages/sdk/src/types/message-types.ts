@@ -204,7 +204,7 @@ export enum CloudToAppMessageType {
   REQUEST_TELEMETRY = "request_telemetry",
 
   /**
-   * @deprecated Use the settings system (mentraosSettings) instead.
+   * @deprecated Use the settings system (veillerSettings) instead.
    * This message type was used for datetime updates but is no longer needed.
    * Will be removed in a future version.
    */

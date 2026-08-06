@@ -43,7 +43,7 @@ export interface SessionWebhookRequest extends BaseWebhookRequest {
   /**
    * @deprecated Prefer `websocketUrl`.
    */
-  mentraOSWebsocketUrl?: string;
+  veillerWebsocketUrl?: string;
   /**
    * @deprecated Prefer `websocketUrl`.
    */

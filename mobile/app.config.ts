@@ -6,27 +6,18 @@ const VARIANTS = {
   default: {
     appName: "Veiller",
     packageName: "com.xerktech.veiller",
-    includeFirebase: true,
-    googleServicesFile: "./google-services.json",
-    googleServicesPlist: "./GoogleService-Info.plist",
     icon: "./assets/app-icons/ic_launcher.png",
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground.png",
   },
   cn: {
     appName: "Veiller",
     packageName: "com.xerktech.veiller.cn",
-    includeFirebase: false,
-    googleServicesFile: null,
-    googleServicesPlist: null,
     icon: "./assets/app-icons/ic_launcher_china.png",
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground_china.png",
   },
   stable: {
     appName: "Veiller Stable",
     packageName: "com.xerktech.veiller.stable",
-    includeFirebase: true,
-    googleServicesFile: "./google-services.json",
-    googleServicesPlist: "./GoogleService-Info.plist",
     icon: "./assets/app-icons/ic_launcher.png",
     adaptiveIcon: "./assets/app-icons/ic_launcher_foreground.png",
   },
@@ -99,7 +90,6 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
     android: {
       // icon: "./assets/app-icons/ic_launcher.png",
       package: androidPackage,
-      ...(variant.googleServicesFile ? {googleServicesFile: variant.googleServicesFile} : {}),
       versionCode: buildNumber,
       adaptiveIcon: {
         foregroundImage: variant.adaptiveIcon,
@@ -129,11 +119,6 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
           data: [
             {
               scheme: "https",
-              host: "apps.mentra.glass",
-              pathPrefix: "/package/",
-            },
-            {
-              scheme: "https",
               host: "apps.mentraglass.com",
               pathPrefix: "/package/",
             },
@@ -149,8 +134,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       buildNumber: String(buildNumber),
       bundleIdentifier: iosBundleId,
       appleTeamId: "T5XXXL6N36",
-      ...(variant.googleServicesPlist ? {googleServicesFile: variant.googleServicesPlist} : {}),
-      associatedDomains: ["applinks:apps.mentra.glass", "applinks:apps.mentraglass.com"],
+      associatedDomains: ["applinks:apps.mentraglass.com"],
       infoPlist: {
         NSCameraUsageDescription: "This app needs access to your camera to capture images.",
         NSMicrophoneUsageDescription:
@@ -329,8 +313,8 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "@sentry/react-native/expo",
         {
           url: "https://sentry.io/",
-          project: "mentra-os",
-          organization: "mentra-labs",
+          project: "veiller",
+          organization: "xerktech",
           experimental_android: {
             enableAndroidGradlePlugin: false,
             autoUploadProguardMapping: true,

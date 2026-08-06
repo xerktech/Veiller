@@ -123,7 +123,7 @@ The `ColumnComposer` in `@veiller/display-utils` has a known bug where character
 - Export data endpoint returns empty arrays with TODOs: `apps: [], // TODO: Add installed apps`
 - `audio.routes.ts` has a TODO about improving the audio manager for last-10-seconds retrieval
 - `transcripts.routes.ts` has a TODO about `startTime/endTime` filter handling
-- Various `onMentraosSettingsChange` / `onVeillerSettingChange` duplicate methods in the SDK that need to be removed
+- Various `onVeillerSettingsChange` / `onVeillerSettingChange` duplicate methods in the SDK that need to be removed
 - `DisplayManager6.1.ts` — has a version number in the filename
 
 ### 13. No consistent error handling pattern

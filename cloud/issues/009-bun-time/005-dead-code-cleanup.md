@@ -55,7 +55,7 @@ New (mantle):
 - `handleRequestSettings()` - ~30 lines
 - `handleVeillerSettingsUpdateRequest()` - ~35 lines
 - `DEFAULT_AUGMENTOS_SETTINGS` constant
-- Related imports (`CoreStatusUpdate`, `RequestSettings`, `MentraosSettingsUpdateRequest`)
+- Related imports (`CoreStatusUpdate`, `RequestSettings`, `VeillerSettingsUpdateRequest`)
 
 **Update switch statement:**
 
@@ -141,7 +141,7 @@ Check `cloud-client` package - it still sends `CORE_STATUS_UPDATE` for testing. 
 - `handleVeillerSettingsUpdateRequest()` - ~35 lines
 - `DEFAULT_AUGMENTOS_SETTINGS` constant from both files
 - `getChangedKeys()` utility function
-- Unused imports: `CoreStatusUpdate`, `RequestSettings`, `MentraosSettingsUpdateRequest`, `CloudToGlassesMessageType`, `User`
+- Unused imports: `CoreStatusUpdate`, `RequestSettings`, `VeillerSettingsUpdateRequest`, `CloudToGlassesMessageType`, `User`
 
 **Kept (for backward compatibility):**
 

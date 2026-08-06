@@ -299,7 +299,7 @@ function createFakeUserSession(userIndex: number): any {
     installedApps: new Map(),
     websocket: new FakeBunWebSocket(`${userId}:glasses`),
     userSettingsManager: {
-      buildMentraosSettings: () => [],
+      buildVeillerSettings: () => [],
     },
     deviceManager: {
       sendFullStateSnapshot: (ws: FakeBunWebSocket) => {

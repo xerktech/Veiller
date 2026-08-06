@@ -60,7 +60,7 @@ export class SettingsManager {
   private logger: Logger;
 
   // --- Veiller settings event system ---
-  private mentraosSettings: Record<string, any> = {};
+  private veillerSettings: Record<string, any> = {};
   private veillerEmitter = new EventEmitter();
   private subscribeFn?: (streams: string[]) => Promise<void>; // Added for auto-subscriptions
 
@@ -288,7 +288,7 @@ export class SettingsManager {
    * ```
    */
   getVeiller<T = any>(key: string, defaultValue?: T): T {
-    const value = this.mentraosSettings[key];
+    const value = this.veillerSettings[key];
 
     if (value !== undefined) {
       return value as T;
@@ -333,7 +333,7 @@ export class SettingsManager {
   /**
    * 🎛️ Listen for changes to a specific Veiller setting (e.g., metricSystemEnabled)
    *
-   * @param key The mentraosSettings key to listen for (e.g., 'metricSystemEnabled')
+   * @param key The veillerSettings key to listen for (e.g., 'metricSystemEnabled')
    * @param handler Function to call when the value changes
    * @returns Function to remove the listener
    *
@@ -350,13 +350,13 @@ export class SettingsManager {
 
   /**
    * Listen for changes to a specific Veiller setting (e.g., metricSystemEnabled)
-   * This is a convenience wrapper for onValueChange for well-known mentraosSettings keys.
-   * @param key The mentraosSettings key to listen for (e.g., 'metricSystemEnabled')
+   * This is a convenience wrapper for onValueChange for well-known veillerSettings keys.
+   * @param key The veillerSettings key to listen for (e.g., 'metricSystemEnabled')
    * @param handler Function to call when the value changes
    * @returns Function to remove the listener
    * @deprecated Use onVeillerChange instead
    */
-  onMentraosSettingsChange<T = any>(key: string, handler: SettingValueChangeHandler<T>): () => void {
+  onVeillerSettingsChange<T = any>(key: string, handler: SettingValueChangeHandler<T>): () => void {
     return this.onVeillerSettingChange(key, handler);
   }
 
@@ -365,8 +365,8 @@ export class SettingsManager {
    * Compares new and old values, emits per-key events, and updates stored values.
    * @param newSettings The new Veiller settings object
    */
-  updateMentraosSettings(newSettings: Record<string, any>): void {
-    const oldSettings = this.mentraosSettings;
+  updateVeillerSettings(newSettings: Record<string, any>): void {
+    const oldSettings = this.veillerSettings;
     this.logger.debug({ newSettings }, `[SettingsManager] Updating Veiller settings. New settings`);
     for (const key of Object.keys(newSettings)) {
       const oldValue = oldSettings[key];
@@ -387,9 +387,9 @@ export class SettingsManager {
         this.veillerEmitter.emit(`augmentos:value:${key}`, undefined, oldSettings[key]);
       }
     }
-    this.mentraosSettings = { ...newSettings };
+    this.veillerSettings = { ...newSettings };
     this.logger.debug(
-      { mentraosSettings: this.mentraosSettings },
+      { veillerSettings: this.veillerSettings },
       `[SettingsManager] Finished updating Veiller settings. Current state:`,
     );
   }
@@ -436,9 +436,9 @@ export class SettingsManager {
    * Get the current value of an Veiller setting
    */
   getVeillerSetting<T = any>(key: string, defaultValue?: T): T {
-    this.logger.debug({ key, mentraosSettings: this.mentraosSettings }, `Getting Veiller setting '${key}'`);
-    if (key in this.mentraosSettings) {
-      return this.mentraosSettings[key] as T;
+    this.logger.debug({ key, veillerSettings: this.veillerSettings }, `Getting Veiller setting '${key}'`);
+    if (key in this.veillerSettings) {
+      return this.veillerSettings[key] as T;
     }
     return defaultValue as T;
   }

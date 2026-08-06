@@ -82,7 +82,7 @@ No other apps use it. It exists solely for this bad design that **isn't even bei
 ## Goals
 
 1. **Add `timezone` to UserSettings** - IANA timezone name like "America/New_York"
-2. **Flow timezone through settings system** - mentraosSettings in CONNECTION_ACK, bridge for live updates
+2. **Flow timezone through settings system** - veillerSettings in CONNECTION_ACK, bridge for live updates
 3. **Fix Dashboard calendar/time display** - Use timezone properly
 4. **Remove datetime cruft from cloud** - userDatetime, set-datetime endpoint, custom_message relay
 5. **Deprecate custom_message in SDK** - Mark for removal, don't break existing apps
@@ -128,10 +128,10 @@ No other apps use it. It exists solely for this bad design that **isn't even bei
 | File                     | What to Add                                                          |
 | ------------------------ | -------------------------------------------------------------------- |
 | `UserSession.ts`         | `userTimezone?: string` property                                     |
-| `UserSettingsManager.ts` | `buildMentraosSettings()` - single source of truth for key mapping   |
+| `UserSettingsManager.ts` | `buildVeillerSettings()` - single source of truth for key mapping   |
 | `UserSettingsManager.ts` | `broadcastSettingsUpdate()` - sends full snapshot to subscribed apps |
 | `SubscriptionManager.ts` | `getAllAppsWithAugmentosSubscriptions()` - helper for broadcast      |
-| `AppManager.ts`          | Use `userSettingsManager.buildMentraosSettings()` for CONNECTION_ACK |
+| `AppManager.ts`          | Use `userSettingsManager.buildVeillerSettings()` for CONNECTION_ACK |
 
 ### Dashboard App
 

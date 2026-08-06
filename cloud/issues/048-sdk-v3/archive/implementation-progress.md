@@ -323,7 +323,7 @@ Passed:
   - `AppManager.startApp()` can consume a deferred socket instead of always issuing a fresh webhook
 - webhook/bootstrap contract cleanup has also advanced:
   - `SessionWebhookRequest` now has canonical `websocketUrl`
-  - legacy `mentraOSWebsocketUrl` and `augmentOSWebsocketUrl` remain as compatibility aliases
+  - legacy `veillerWebsocketUrl` and `augmentOSWebsocketUrl` remain as compatibility aliases
   - cloud now emits the canonical namespaced websocket URL (`/ws/miniapp`) while still including legacy aliases
   - JWT-authenticated fresh app websocket init no longer requires `x-session-id`; reconnect still does
 
