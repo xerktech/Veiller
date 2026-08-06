@@ -51,9 +51,9 @@ export async function checkAndRequestNotificationAccessSpecialPermission(): Prom
 
     showAlert(
       "Enable Notification Access",
-      "MentraOS needs permission to read your phone notifications to display them on your smart glasses.\n\n" +
+      "Veiller needs permission to read your phone notifications to display them on your smart glasses.\n\n" +
         "On the next screen:\n" +
-        '1. Find "MentraOS" in the list\n' +
+        '1. Find "Veiller" in the list\n' +
         '2. Toggle the switch to "on"\n' +
         '3. Tap "Allow" when prompted',
       [

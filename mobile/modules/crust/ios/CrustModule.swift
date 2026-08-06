@@ -5,7 +5,7 @@ import Photos
 
 /// User-visible album in Apple Photos for glasses sync (matches dedicated-folder behavior on Android).
 private enum MentraSyncedMediaAlbum {
-    static let localizedTitle = "Mentra"
+    static let localizedTitle = "Veiller"
 }
 
 /// Serializes callback and timeout delivery for PhotoKit APIs that may call back more than once.

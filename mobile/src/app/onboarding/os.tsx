@@ -37,7 +37,7 @@ export default function MentraOSOnboarding() {
     () => [
       {
         type: "image",
-        name: "Welcome to Mentra",
+        name: "Welcome to Veiller",
         transition: true,
         duration: 500,
         title: translate("onboarding:osWelcomeTitle"),

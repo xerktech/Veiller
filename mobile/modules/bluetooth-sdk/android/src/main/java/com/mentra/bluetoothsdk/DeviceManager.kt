@@ -1301,7 +1301,7 @@ class DeviceManager {
         if (shouldSendBootingMessage) {
             shouldSendBootingMessage = false
             executor.execute {
-                sgc?.sendTextWall("// MentraOS Connected")
+                sgc?.sendTextWall("// Veiller Connected")
                 Thread.sleep(3000)
                 sgc?.clearDisplay()
             }

@@ -1,5 +1,5 @@
 import {Capabilities, getModelCapabilities} from "@/../../cloud/packages/types/src"
-import {engine} from "@mentra/engine"
+import {engine, SETTINGS, useSetting} from "@mentra/engine"
 import {useEffect, useState} from "react"
 import {ScrollView, TextInput, TextStyle, TouchableOpacity, View, ViewStyle} from "react-native"
 
@@ -9,7 +9,6 @@ import {RouteButton} from "@/components/ui/RouteButton"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 import {translate} from "@/i18n/translate"
-import {SETTINGS, useSetting} from "@mentra/engine"
 import {ThemedStyle} from "@/theme"
 import showAlert from "@/utils/AlertUtils"
 import {MOCK_CONNECTION} from "@/utils/Constants"
@@ -120,8 +119,8 @@ const PatternPreview = ({imageType, imageSize, isDark = false, showDualLayout = 
             marginBottom: 20,
             letterSpacing: 0.5,
           }}>
-          {/* MentraOS Connected */}
-          {"/// MentraOS Connected \\\\\\"}
+          {/* Veiller Connected */}
+          {"/// Veiller Connected \\\\\\"}
         </Text>
 
         <Text

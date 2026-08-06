@@ -30,5 +30,5 @@ appId: ${MAESTRO_APP_ID}
 - tapOn: "Retry"
 
 # Should now connect successfully
-- assertVisible: "Welcome to MentraOS"
+- assertVisible: "Welcome to Veiller"
 - takeScreenshot: "connected-after-retry"

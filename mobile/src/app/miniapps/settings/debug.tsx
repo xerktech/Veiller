@@ -145,8 +145,8 @@ export default function DebugSettingsScreen() {
             />
 
             <RouteButton
-              label="MentraOS Onboarding"
-              subtitle="Reset and start the MentraOS onboarding"
+              label="Veiller Onboarding"
+              subtitle="Reset and start the Veiller onboarding"
               onPress={() => {
                 setOnboardingOsCompleted(false)
                 clearHistoryAndGoHome()

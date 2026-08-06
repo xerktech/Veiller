@@ -131,18 +131,19 @@ validates the public Maven artifact dependency shape.
 ### Product & terminology (user-facing copy, docs, marketing)
 
 - **`miniapp`** is always one word, lowercase, in running text.
-- **Products take a capital `M`**: "Mentra Miniapp SDK", "Mentra Miniapp Store".
-  When you write "miniapp SDK" capitalize it as "**Miniapp SDK**"; the full
-  product name is "**Mentra Miniapp SDK**" (not "MentraOS miniapp SDK").
-- The **iOS/Android mobile app** is the "**Mentra App**" (not "MentraOS app",
-  not "Mentra app").
-- **Miniapps in general** (apps that run on the Mentra platform) are "**Mentra
-  miniapp**" / "**Mentra miniapps**" (not "MentraOS apps").
-- The store is the "**Mentra Miniapp Store**".
-- "**MentraOS**" stays as-is when it names the operating system / platform /
-  repo (e.g. "MentraOS is the operating system for smart glasses"). Don't swap
-  it for "Mentra" in those cases.
-- The package identifier `@mentra/miniapp` is code; leave it in code formatting.
+- **The product users see is "Veiller"** (XERK-220). In user-facing copy the
+  mobile app and the platform it presents are called "**Veiller**" (or "the
+  Veiller app") — never "Mentra", "the Mentra App", or "MentraOS".
+- **Mentra device names keep the Mentra name**: "Mentra Live", "Mentra Mach1",
+  "Mentra Display" / "Mentra Nex". Devices are named Mentra; don't rename them.
+- **External Mentra products and identifiers also keep their names**:
+  "MentraOS Legacy" (mentraglass.com/legacy), the "Mentra AI" miniapp,
+  `@mentra/*` package identifiers, Mentra-Community repositories, and
+  mentra.glass / mentraglass.com domains and URLs.
+- "**MentraOS**" is still fine in developer-facing docs when it names the
+  upstream open-source operating system / repo this project builds on — just
+  not in copy shown to Veiller users.
+- When you write "miniapp SDK" capitalize it as "**Miniapp SDK**".
 
 ## Testing Guidelines
 

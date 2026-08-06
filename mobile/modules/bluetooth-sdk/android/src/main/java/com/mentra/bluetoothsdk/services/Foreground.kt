@@ -56,7 +56,7 @@ class ForegroundService : Service() {
 
         val notification =
                 NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setContentTitle("Mentra Connected")
+                        .setContentTitle("Veiller Connected")
                         .setContentText(getNotificationText(serviceType))
                         .setSmallIcon(android.R.drawable.ic_dialog_info)
                         .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -222,7 +222,7 @@ class ForegroundService : Service() {
             val channel =
                     NotificationChannel(
                                     CHANNEL_ID,
-                                    "Mentra Service",
+                                    "Veiller Service",
                                     NotificationManager.IMPORTANCE_LOW
                             )
                             .apply { description = "Maintains connection to smart glasses" }

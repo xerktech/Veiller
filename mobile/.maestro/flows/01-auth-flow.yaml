@@ -7,7 +7,7 @@ appId: ${MAESTRO_APP_ID}
     clearState: true
 
 # Should see welcome screen after clearState
-- assertVisible: "Welcome to MentraOS"
+- assertVisible: "Welcome to Veiller"
 
 # Tap on Sign In button
 - tapOn: "Sign In"

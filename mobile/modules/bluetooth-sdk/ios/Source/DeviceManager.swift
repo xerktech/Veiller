@@ -573,7 +573,7 @@ struct ViewState {
             // Check if we've completed all cycles
             if cycles >= totalCycles {
                 // End animation with final message
-                Task { await sgc?.sendTextWall("                  /// MentraOS Connected \\\\\\") }
+                Task { await sgc?.sendTextWall("                  /// Veiller Connected \\\\\\") }
                 animationQueue.asyncAfter(deadline: .now() + 1.0) {
                     self.sgc?.clearDisplay()
                 }
@@ -582,7 +582,7 @@ struct ViewState {
 
             // Display current animation frame
             let frameText =
-                "                    \(arrowFrames[frameIndex]) MentraOS Booting \(arrowFrames[frameIndex])"
+                "                    \(arrowFrames[frameIndex]) Veiller Booting \(arrowFrames[frameIndex])"
             Task { await sgc?.sendTextWall(frameText) }
 
             // Move to next frame
@@ -948,7 +948,7 @@ struct ViewState {
         // Show welcome message on first connect for all display glasses
         if shouldSendBootingMessage {
             Task {
-                await sgc.sendTextWall("// MentraOS Connected")
+                await sgc.sendTextWall("// Veiller Connected")
                 try? await Task.sleep(nanoseconds: 3_000_000_000) // 1 second
                 sgc.clearDisplay()
             }
