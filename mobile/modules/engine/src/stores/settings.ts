@@ -328,6 +328,11 @@ export const SETTINGS: Record<string, Setting> = {
     saveOnServer: true,
     persist: true,
   },
+  // Master switch for PRESENTING phone notifications on the glasses (card on
+  // display models, speech on speaker-only ones). Toggled from Settings >
+  // Notifications; the host (MantleManager) gates presentation on it since the
+  // Notify miniapp was retired (XERK-219). Capture is separate — see
+  // android_notification_listener_enabled above.
   enable_phone_notifications: {
     key: "enable_phone_notifications",
     defaultValue: () => false,

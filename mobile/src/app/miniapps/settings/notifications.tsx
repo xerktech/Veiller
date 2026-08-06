@@ -1,14 +1,15 @@
 import CrustModule from "@mentra/crust"
-import {useState, useEffect, useCallback, useMemo, useRef} from "react"
+import {useState, useEffect, useCallback, useMemo} from "react"
 import {View, Platform, TextInput, FlatList, ActivityIndicator, Image} from "react-native"
 import Toast from "react-native-toast-message"
 
 import {Screen, Text, Header, Switch} from "@/components/ignite"
+import ToggleSetting from "@/components/settings/ToggleSetting"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {translate} from "@/i18n"
-import {notifyPackageName} from "@/constants/miniapps"
+import {isChinaBuild} from "@/constants/miniapps"
+import {checkAndRequestNotificationAccessSpecialPermission} from "@/utils/NotificationServiceUtils"
 import {SETTINGS, useSetting} from "@mentra/engine"
-import {useRegisterCapsule} from "@/stores/capsule"
 
 interface InstalledApp {
   packageName: string
@@ -22,22 +23,36 @@ const ITEM_HEIGHT = 64
 
 export default function NotificationSettingsScreen() {
   const {theme} = useAppTheme()
-  const viewShotRef = useRef<View>(null)
 
-  // Render the global capsule (minimize / close) button over this screen, like
-  // the other miniapp screens. The import + viewShotRef were already here but the
-  // hook was never called, so the Notify miniapp had no capsule menu.
-  useRegisterCapsule({
-    packageName: notifyPackageName,
-    viewShotRef,
-    visibleOnRoutes: ["/miniapps/settings/notifications"],
-  })
+  // (This screen used to be the Notify miniapp's UI and registered a capsule
+  // button under its package name. The miniapp was deregistered — XERK-219 —
+  // and the screen is now an ordinary settings page, like taptester.)
 
   const [apps, setApps] = useState<InstalledApp[]>([])
   const [blocklist, setBlocklist] = useSetting(SETTINGS.notifications_blocklist.key)
+  // Master switch for presenting notifications on the glasses (card + speech).
+  // Replaces starting/stopping the old Notify miniapp from the home screen.
+  const [presentationEnabled, setPresentationEnabled] = useSetting(SETTINGS.enable_phone_notifications.key)
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+
+  const togglePresentation = useCallback(
+    async (next: boolean) => {
+      if (!next) {
+        setPresentationEnabled(false)
+        return
+      }
+      // Presenting requires capturing, and capturing requires the Android
+      // notification-access grant — the old home-screen launcher requested it
+      // through the miniapp's manifest permissions, so ask here instead.
+      const access = await checkAndRequestNotificationAccessSpecialPermission()
+      if (access === "granted") {
+        setPresentationEnabled(true)
+      }
+    },
+    [setPresentationEnabled],
+  )
 
   useEffect(() => {
     loadInstalledApps()
@@ -199,7 +214,7 @@ export default function NotificationSettingsScreen() {
 
   if (loading) {
     return (
-      <Screen preset="fixed" ref={viewShotRef}>
+      <Screen preset="fixed">
         <Header title={translate("settings:notificationsSettings")} />
         <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
           <ActivityIndicator size="large" color={theme.colors.foreground} />
@@ -214,7 +229,7 @@ export default function NotificationSettingsScreen() {
   // Show iOS message if on iOS
   if (Platform.OS === "ios") {
     return (
-      <Screen preset="fixed" ref={viewShotRef}>
+      <Screen preset="fixed">
         <Header title={translate("settings:notificationsSettings")} />
         <View style={{flex: 1, justifyContent: "center", alignItems: "center", padding: theme.spacing.s6}}>
           <Text
@@ -236,8 +251,26 @@ export default function NotificationSettingsScreen() {
   }
 
   return (
-    <Screen preset="fixed" ref={viewShotRef}>
+    <Screen preset="fixed">
       <Header title={translate("settings:notificationsSettings")} />
+
+      {/* Master switch. Not offered in the China build, where notification
+          presentation is not shipped (formerly enforced by omitting the
+          Notify miniapp via CHINA_HIDDEN_APPS). */}
+      {!isChinaBuild() && (
+        <View
+          style={{
+            paddingHorizontal: theme.spacing.s4,
+            paddingTop: theme.spacing.s3,
+          }}>
+          <ToggleSetting
+            label={translate("settings:notificationsForwardLabel")}
+            subtitle={translate("settings:notificationsForwardSubtitle")}
+            value={Boolean(presentationEnabled)}
+            onValueChange={(next) => void togglePresentation(next)}
+          />
+        </View>
+      )}
 
       {/* Explanatory Text */}
       <View
