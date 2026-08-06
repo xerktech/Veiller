@@ -1,5 +1,3 @@
-import {Platform} from "react-native"
-
 import {HardwareRequirementLevel, HardwareType, engine, type ClientApp} from "@veiller/engine"
 import {appRegistry, installAppStoreHooks} from "@veiller/engine/internal"
 
@@ -15,7 +13,6 @@ import {
   CHINA_HIDDEN_APPS,
   isChinaBuild,
   mirrorPackageName,
-  notifyPackageName,
   settingsPackageName,
 } from "@/constants/miniapps"
 
@@ -213,38 +210,12 @@ class BuiltInMiniappCatalog {
       },
     ]
 
-    if (Platform.OS !== "ios") {
-      // The Tap Strap tester is no longer a dedicated miniapp — it lives in
-      // Settings at /miniapps/settings/taptester (XERK-213).
-      apps.push({
-        packageName: notifyPackageName,
-        name: translate("miniApps:notify"),
-        // Notifications is a persistent system helper, not the foreground
-        // miniapp. Starting its settings UI must not stop Captions (or any
-        // other running standard miniapp).
-        type: "background",
-        offline: true,
-        logoUrl: require("@assets/applet-icons/notification.png"),
-        webviewUrl: "",
-        healthy: true,
-        hidden: false,
-        // The home-screen launcher uses manifest permissions to request the
-        // Android NotificationListenerService grant before opening this UI.
-        permissions: [{type: "READ_NOTIFICATIONS", required: true}],
-        offlineRoute: "/miniapps/settings/notifications",
-        running: false,
-        loading: false,
-        local: false,
-        // A display is the nicest way to surface a notification, not the only
-        // one: camera-only glasses (Mentra Live) speak it instead. Requiring
-        // DISPLAY greyed the app out entirely there, so notifications could not
-        // even be captured or stored on those glasses (OS-1821).
-        hardwareRequirements: [
-          {type: HardwareType.DISPLAY, level: HardwareRequirementLevel.OPTIONAL},
-          {type: HardwareType.EXIST, level: HardwareRequirementLevel.REQUIRED},
-        ],
-      })
-    }
+    // The Tap Strap tester is no longer a dedicated miniapp — it lives in
+    // Settings at /miniapps/settings/taptester (XERK-213). Likewise Notify:
+    // the home icon opened the same screen as Settings > Notifications, so the
+    // miniapp is deregistered and glasses notification presentation is gated
+    // by SETTINGS.enable_phone_notifications, toggled from that settings page
+    // (XERK-219).
 
     return isChinaBuild() ? apps.filter((app) => !CHINA_HIDDEN_APPS.includes(app.packageName)) : apps
   }

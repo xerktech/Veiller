@@ -2,8 +2,8 @@ import {DeviceTypes} from "@/../../cloud/packages/types/src"
 import {View, TouchableOpacity, Platform, ScrollView, Image} from "react-native"
 
 import {EvenRealitiesLogo} from "@/components/brands/EvenRealitiesLogo"
+import {MentraLogo} from "@/components/brands/MentraLogo"
 import {VeillerLogo} from "@/components/brands/VeillerLogo"
-import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
 import {NimoLogo} from "@/components/brands/NimoLogo"
 import {VuzixLogo} from "@/components/brands/VuzixLogo"
 import {XingyiLogo} from "@/components/brands/XingyiLogo"
@@ -44,7 +44,7 @@ export default function SelectGlassesModelScreen() {
       case DeviceTypes.LIVE:
       case DeviceTypes.NEX:
       case DeviceTypes.MACH1:
-        return <VeillerLogo color={theme.colors.text} />
+        return <MentraLogo color={theme.colors.text} />
       case DeviceTypes.Z100:
         return <VuzixLogo color={theme.colors.text} />
       case DeviceTypes.NIMO:
@@ -99,7 +99,7 @@ export default function SelectGlassesModelScreen() {
         onLeftPress={() => {
           goBack()
         }}
-        RightActionComponent={<VeillerLogoStandalone />}
+        RightActionComponent={<VeillerLogo />}
       />
       <Spacer className="h-4" />
       <ScrollView className="-mx-6 px-6 pt-6">

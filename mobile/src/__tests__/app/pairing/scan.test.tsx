@@ -63,8 +63,8 @@ jest.mock("@/contexts/ThemeContext", () => ({
   }),
 }))
 
-jest.mock("@/components/brands/VeillerLogoStandalone", () => ({
-  VeillerLogoStandalone: function MockVeillerLogoStandalone() {
+jest.mock("@/components/brands/VeillerLogo", () => ({
+  VeillerLogo: function MockVeillerLogo() {
     return null
   },
 }))

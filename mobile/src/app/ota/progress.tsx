@@ -2,7 +2,7 @@ import {engine} from "@veiller/engine"
 import {useCallback, useEffect} from "react"
 import {View, ActivityIndicator} from "react-native"
 
-import {VeillerLogoStandalone} from "@/components/brands/VeillerLogoStandalone"
+import {VeillerLogo} from "@/components/brands/VeillerLogo"
 import {Screen, Header, Button, Text, Icon} from "@/components/ignite"
 import {focusEffectPreventBack} from "@/contexts/NavigationHistoryContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
@@ -290,7 +290,7 @@ export default function OtaProgressScreen() {
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]}>
-      <Header RightActionComponent={<VeillerLogoStandalone />} />
+      <Header RightActionComponent={<VeillerLogo />} />
       {renderContent()}
     </Screen>
   )

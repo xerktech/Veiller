@@ -2,13 +2,13 @@ import BluetoothSdk from "@veiller/bluetooth-sdk-internal"
 import CrustModule from "@veiller/crust"
 import * as Calendar from "expo-calendar"
 import {router} from "expo-router"
-import {AppState} from "react-native"
+import {AppState, Platform} from "react-native"
 
 import {bootstrapVeillerJS} from "@/services/veillerJsBootstrap"
 import {preinstalledMiniappSync} from "@/services/miniapps/preinstalledMiniappSync"
 import {veillerMiniappSync} from "@/services/miniapps/veillerMiniappSync"
 import builtInMiniappCatalog from "@/services/miniapps/BuiltInMiniappCatalog"
-import {notifyPackageName} from "@/constants/miniapps"
+import {isChinaBuild, notifyPackageName} from "@/constants/miniapps"
 import {migrate} from "@/services/Migrations"
 import {buildSpokenNotification} from "@/services/notifications/spokenNotification"
 import {shapeCalendarEventsForGlasses, type GlassesCalendarEvent} from "@/services/calendar/shapeCalendarEvents"
@@ -90,15 +90,24 @@ class MantleManager {
 
   private constructor() {}
 
-  private isNotifyRunning(): boolean {
-    return useAppStatusStore
-      .getState()
-      .apps.some((miniapp) => miniapp.packageName === notifyPackageName && miniapp.running)
+  /**
+   * Whether phone notifications may be PRESENTED to the wearer (glasses card +
+   * speech). Formerly this was "is the Notify miniapp running"; the miniapp was
+   * deregistered (XERK-219) and the switch is now the enable_phone_notifications
+   * setting, toggled from Settings > Notifications. Android-only and off in the
+   * China build, matching the old catalog gates (Notify was never registered on
+   * iOS or in China builds) — the setting syncs to the server, so a value
+   * enabled on another device must not activate presentation here.
+   */
+  private isNotificationPresentationEnabled(): boolean {
+    if (Platform.OS !== "android" || isChinaBuild()) return false
+    return Boolean(engine.settings.get(SETTINGS.enable_phone_notifications.key))
   }
 
   /**
-   * Stop every wearer-facing notification artifact as soon as Notify stops.
-   * Event forwarding remains independent and continues for subscribed miniapps.
+   * Stop every wearer-facing notification artifact as soon as presentation is
+   * disabled. Event forwarding remains independent and continues for
+   * subscribed miniapps.
    */
   private stopPhoneNotificationPresentation(): void {
     this.activePhoneNotificationId = null
@@ -569,21 +578,27 @@ class MantleManager {
     // temporary background frames (notably phone notifications). Keep its
     // core owner projected from the app store so a notification can briefly
     // replace Captions and then restore the latest caption frame.
-    let notifyWasRunning = this.isNotifyRunning()
     const syncAppPresentationState = () => {
       const apps = useAppStatusStore.getState().apps
       const coreApp = apps.find((app) => app.running && (app.type === "standard" || !app.type))
       localDisplayManager.onCoreAppChange(coreApp?.packageName ?? null)
-
-      const notifyIsRunning = apps.some((app) => app.packageName === notifyPackageName && app.running)
-      if (notifyWasRunning && !notifyIsRunning) {
-        this.stopPhoneNotificationPresentation()
-      }
-      notifyWasRunning = notifyIsRunning
     }
     syncAppPresentationState()
     const unsubscribeAppPresentationState = useAppStatusStore.subscribe(syncAppPresentationState)
     this.subs.push({remove: unsubscribeAppPresentationState})
+
+    // Turning notification presentation OFF must also clear anything already
+    // on the wearer's face/ears (active card, queued or playing speech) — the
+    // same teardown that used to run when the Notify miniapp was stopped.
+    const unsubscribePresentationEnabled = engine.settings.onChanged(
+      SETTINGS.enable_phone_notifications.key,
+      (enabled) => {
+        if (!enabled) {
+          this.stopPhoneNotificationPresentation()
+        }
+      },
+    )
+    this.subs.push({remove: unsubscribePresentationEnabled})
 
     // A remembered speaker-capable model survives disconnects, but its audio
     // route does not. Tear down queued and active Notify speech on the
@@ -716,12 +731,12 @@ class MantleManager {
           packageName: event.packageName,
         })
 
-        // Capture/forwarding is independent from presentation. Notify is the
-        // user-controlled presentation surface: if it is not running, no card
-        // and no speech may interrupt the wearer. This also keeps presentation
-        // intentionally unavailable on iOS while Notify is omitted from the
-        // built-in catalog there.
-        if (!this.isNotifyRunning()) return
+        // Capture/forwarding is independent from presentation. Presentation is
+        // the user-controlled surface (Settings > Notifications): while it is
+        // disabled, no card and no speech may interrupt the wearer. The gate
+        // also keeps presentation intentionally unavailable on iOS and in the
+        // China build, as it was when the Notify miniapp existed (XERK-219).
+        if (!this.isNotificationPresentationEnabled()) return
 
         // Cloud V1 used to relay this event to the Notify miniapp, which then
         // painted the glasses. Notify is now an offline built-in, so render the

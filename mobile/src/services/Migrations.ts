@@ -60,6 +60,28 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    version: 5,
+    run: async () => {
+      // migrates from 4 → 5: the Notify built-in miniapp was removed — its
+      // home-screen icon duplicated Settings > Notifications (XERK-219).
+      // Glasses notification presentation is now gated by the
+      // enable_phone_notifications setting, so carry over the old opt-in:
+      // a user who had Notify running keeps notifications on their glasses.
+      const notifyRunningRes = storage.load<boolean>("cloud.augmentos.notify_running")
+      if (notifyRunningRes.is_ok() && notifyRunningRes.value === true) {
+        const res = await engine.settings.set(SETTINGS.enable_phone_notifications.key, true, false)
+        if (res.is_error()) {
+          throw res.error
+        }
+      }
+      // Clear the retired miniapp's persisted app-tray state so nothing
+      // resurrects a now-nonexistent app (same cleanup as offline captions).
+      storage.remove("cloud.augmentos.notify_running")
+      storage.remove("cloud.augmentos.notify_screenshot")
+      storage.remove("cloud.augmentos.notify_hidden")
+    },
+  },
 ]
 
 const migration_version_key = "migration_version"

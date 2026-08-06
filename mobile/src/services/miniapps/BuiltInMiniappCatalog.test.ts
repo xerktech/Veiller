@@ -2,7 +2,7 @@ import {Platform} from "react-native"
 
 import {appRegistry} from "@veiller/engine/internal"
 
-import {notifyPackageName} from "@/constants/miniapps"
+import {notifyPackageName, settingsPackageName} from "@/constants/miniapps"
 
 import builtInMiniappCatalog from "./BuiltInMiniappCatalog"
 
@@ -17,19 +17,13 @@ describe("BuiltInMiniappCatalog", () => {
     Object.defineProperty(Platform, "OS", {configurable: true, value: originalPlatform})
   })
 
-  it("registers Notifications as a permission-gated background miniapp", () => {
+  it("does not register Notify — notifications live in Settings (XERK-219)", () => {
     builtInMiniappCatalog.init()
 
-    const notifyCall = (appRegistry.installOfflineApp as jest.Mock).mock.calls.find(
-      ([app]) => app.packageName === notifyPackageName,
-    )
+    const installed = (appRegistry.installOfflineApp as jest.Mock).mock.calls.map(([app]) => app.packageName)
 
-    expect(notifyCall?.[0]).toEqual(
-      expect.objectContaining({
-        packageName: notifyPackageName,
-        type: "background",
-        permissions: [{type: "READ_NOTIFICATIONS", required: true}],
-      }),
-    )
+    expect(installed).not.toContain(notifyPackageName)
+    // Sanity check that registration itself ran.
+    expect(installed).toContain(settingsPackageName)
   })
 })

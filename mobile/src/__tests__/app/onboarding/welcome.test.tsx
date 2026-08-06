@@ -21,10 +21,10 @@ jest.mock("@/stores/navigation", () => ({
   useNavigationStore: {getState: jest.fn()},
 }))
 
-jest.mock("@/components/brands/VeillerLogoStandalone", () => {
+jest.mock("@/components/brands/VeillerLogo", () => {
   const {View} = require("react-native")
   return {
-    VeillerLogoStandalone: () => <View testID="veiller-logo" />,
+    VeillerLogo: () => <View testID="veiller-logo" />,
   }
 })
 

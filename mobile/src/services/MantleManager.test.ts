@@ -1,5 +1,6 @@
 import {waitFor} from "@testing-library/react-native"
 import {router} from "expo-router"
+import {Platform} from "react-native"
 
 import mantle from "@/services/MantleManager"
 import {
@@ -107,6 +108,19 @@ function resetMantleTestState() {
   useDisplayStore.setState({view: "main"})
 }
 
+// Notification presentation (glasses card + speech) is Android-only; the jest
+// platform is not android, so presentation tests stamp it per-test (restored in
+// afterEach). The gate reads Platform.OS at event time, so this is safe after init.
+const originalPlatformOS = Platform.OS
+const setPlatformOS = (os: string) => Object.defineProperty(Platform, "OS", {configurable: true, value: os})
+
+// Enable the notification-presentation master switch (Settings > Notifications).
+// Replaces the retired "Notify miniapp running" gate (XERK-219).
+const enableNotificationPresentation = async () => {
+  setPlatformOS("android")
+  await useSettingsStore.getState().setSetting(SETTINGS.enable_phone_notifications.key, true, false)
+}
+
 let requestWifiSetup: (reason?: string, packageName?: string) => Promise<void>
 let routerPushSpy: jest.SpiedFunction<typeof router.push>
 let syncCoreDisplayOwner: () => void
@@ -132,6 +146,7 @@ describe("MantleManager", () => {
 
   afterEach(() => {
     resetMantleTestState()
+    setPlatformOS(originalPlatformOS)
     jest.clearAllTimers()
     jest.clearAllMocks()
   })
@@ -236,11 +251,11 @@ describe("MantleManager", () => {
     )
   })
 
-  it("keeps the running standard miniapp as display core when Notifications is background", () => {
+  it("keeps the running standard miniapp as display core when a background app runs", () => {
     useAppStatusStore.setState({
       apps: [
         {packageName: "com.veiller.captions", type: "standard", running: true},
-        {packageName: "cloud.augmentos.notify", type: "background", running: true},
+        {packageName: "com.example.background", type: "background", running: true},
       ] as any,
     })
 
@@ -313,9 +328,7 @@ describe("MantleManager", () => {
   it("routes notification events without the retired V1 upload", async () => {
     // The Cloud V1 REST upload is gone; the events still flow through the
     // local-miniapp forward path without a server roundtrip.
-    useAppStatusStore.setState({
-      apps: [{packageName: "cloud.augmentos.notify", type: "background", running: true}] as any,
-    })
+    await enableNotificationPresentation()
     const forwardEvent = jest.spyOn(localMiniappRuntime, "forwardEvent")
     emitCrustEvent("phone_notification", {
       notificationId: "n-1",
@@ -383,7 +396,10 @@ describe("MantleManager", () => {
     await Promise.resolve()
   })
 
-  it("forwards notifications without presenting them when Notify is not running", () => {
+  it("forwards notifications without presenting them when presentation is disabled", () => {
+    // Android, but the enable_phone_notifications setting is at its default
+    // (false) — forwarding must still happen, presentation must not.
+    setPlatformOS("android")
     const forwardEvent = jest.spyOn(localMiniappRuntime, "forwardEvent")
 
     emitCrustEvent("phone_notification", {
@@ -408,10 +424,8 @@ describe("MantleManager", () => {
     expect(localDisplayManager.request).not.toHaveBeenCalled()
   })
 
-  it("does not speak notifications through the phone after glasses disconnect", () => {
-    useAppStatusStore.setState({
-      apps: [{packageName: "cloud.augmentos.notify", type: "background", running: true}] as any,
-    })
+  it("does not speak notifications through the phone after glasses disconnect", async () => {
+    await enableNotificationPresentation()
     ;(engine.glasses.status as jest.Mock).mockReturnValue({state: "disconnected"})
     ;(engine.glasses.capabilities as jest.Mock).mockReturnValue({
       hasDisplay: false,
@@ -446,11 +460,8 @@ describe("MantleManager", () => {
     expect(manager.speechGeneration).toBe(generation + 1)
   })
 
-  it("dismisses presentation and stops queued speech when Notify stops", async () => {
-    useAppStatusStore.setState({
-      apps: [{packageName: "cloud.augmentos.notify", type: "background", running: true}] as any,
-    })
-    syncCoreDisplayOwner()
+  it("dismisses presentation and stops queued speech when presentation is turned off", async () => {
+    await enableNotificationPresentation()
     emitCrustEvent("phone_notification", {
       notificationId: "n-active",
       app: "Calendar",
@@ -463,10 +474,9 @@ describe("MantleManager", () => {
     ;(localDisplayManager.dismiss as jest.Mock).mockClear()
     ;(audioPlaybackService.stopForApp as jest.Mock).mockClear()
 
-    useAppStatusStore.setState({
-      apps: [{packageName: "cloud.augmentos.notify", type: "background", running: false}] as any,
-    })
-    syncCoreDisplayOwner()
+    // Flipping the Settings > Notifications master switch off must clear the
+    // active card and any queued speech (the old Notify-stop teardown).
+    await useSettingsStore.getState().setSetting(SETTINGS.enable_phone_notifications.key, false, false)
 
     expect(localDisplayManager.dismiss).toHaveBeenCalledWith("cloud.augmentos.notify")
     expect(audioPlaybackService.stopForApp).toHaveBeenCalledWith("cloud.augmentos.notify")

@@ -1,5 +1,43 @@
-<svg width="50" height="27" viewBox="0 0 50 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect y="14.8072" width="11.8457" height="11.8457" fill="#36DD89"/>
-<path d="M9.36639 0L30.7163 14.8072V26.6529L9.36639 11.8457V0Z" fill="#36DD89"/>
-<path d="M28.6501 0L50 14.8072V26.6529L28.6501 11.8457V0Z" fill="#36DD89"/>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Veiller">
+  <defs>
+    <linearGradient id="green" x1="256" y1="130" x2="256" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4FE98D"/>
+      <stop offset="1" stop-color="#1FCCA8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#2EDB86" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#2EDB86" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="innerlight" x1="256" y1="300" x2="256" y2="138" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F0FFF8" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#9AF7C6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#7CF2B0" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="ray" x1="256" y1="300" x2="256" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9AF7C6" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#9AF7C6" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#F7FFFB" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#8BF5BD" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#8BF5BD" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="295" x2="0" y2="145" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C4FFE0" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#C4FFE0" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0E1116"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <!-- light shining out from inside the V: crisp stepped rays -->
+  <polygon points="256,302 105,20 407,20" fill="url(#ray)" opacity="0.35"/>
+  <polygon points="256,302 160,20 352,20" fill="url(#ray)" opacity="0.6"/>
+  <polygon points="256,300 183,138 329,138" fill="url(#innerlight)"/>
+  <circle cx="256" cy="288" r="80" fill="url(#core)"/>
+  <!-- the V: two rounded bars converging -->
+  <path d="M 150 150 L 256 366 L 362 150" stroke="url(#green)" stroke-width="74" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- lit inner edges -->
+  <rect x="227" y="145" width="10" height="150" rx="5" fill="url(#rim)" transform="rotate(-26 200 265)"/>
+  <rect x="275" y="145" width="10" height="150" rx="5" fill="url(#rim)" transform="rotate(26 312 265)"/>
+  <rect width="512" height="512" rx="112" fill="none" stroke="#FFFFFF" stroke-opacity="0.04" stroke-width="2"/>
 </svg>

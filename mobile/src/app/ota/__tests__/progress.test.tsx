@@ -30,8 +30,8 @@ jest.mock("@/contexts/ThemeContext", () => ({
   }),
 }))
 
-jest.mock("@/components/brands/VeillerLogoStandalone", () => ({
-  VeillerLogoStandalone: () => null,
+jest.mock("@/components/brands/VeillerLogo", () => ({
+  VeillerLogo: () => null,
 }))
 
 // NOTE: @/utils/GlobalEventEmitter is intentionally NOT re-mocked here — the shim
