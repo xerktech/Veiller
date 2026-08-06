@@ -203,9 +203,17 @@ export default function GlassesMenuScreen() {
       <RouteButton
         label={translate("settings:glassesMenuReset")}
         onPress={async () => {
+          // Persist the RESOLVED default list, not null. `menu_apps = null` is the
+          // "unconfigured" sentinel that only BuiltInMiniappCatalog.syncGlassesMenuApps
+          // resolves into a concrete list — and that sync isn't triggered by this reset
+          // (it fires on app-catalog events), so the null would reach the native driver's
+          // `value as? List` guard in DeviceStore.apply(), fail the cast, and never call
+          // setDashboardMenu. The glasses would keep the stale menu until the next
+          // reconnect. Writing the concrete defaults pushes through the same proven path
+          // as add/remove.
           const defaults = await getDefaultMenuApps(applets)
           setMenuItems(defaults)
-          await setSavedMenuApps(null)
+          await setSavedMenuApps(defaults)
         }}
       />
     </View>

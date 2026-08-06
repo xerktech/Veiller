@@ -3164,7 +3164,13 @@ class G2 : SGCManager() {
     }
 
     override fun setDashboardDepthOnly(depth: Int) {
-        val clamped = depth.coerceIn(0, 2)
+        // Depth UI exposes levels 1-3 (position.tsx `depthMax = 3` for G2), but this
+        // clamp used to cap at 2 — so UI depth 2 and 3 sent the SAME firmware value and
+        // the top slider notch was dead (verified on-device: fw commands for depth 2 and
+        // 3 were byte-identical). Raise the ceiling to 3 so all three UI positions map to
+        // distinct firmware levels (1->1, 2->2, 3->3). Levels 1 and 2 are unchanged, so
+        // the positions users already rely on are preserved.
+        val clamped = depth.coerceIn(0, 3)
         Bridge.log("G2: setDashboardDepthOnly($clamped)")
         val msg = G2SettingProto.setScreenDepth(sendManager.nextMagicRandom(), clamped)
         sendG2SettingCommand(msg)
