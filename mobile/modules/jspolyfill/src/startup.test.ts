@@ -357,6 +357,66 @@ describe("startup bundle", () => {
   })
 })
 
+/**
+ * XERK-229: the `__veiller*` globals are the wire contract with the miniapp
+ * SDK compiled INTO each published bundle. Before the Veiller rename
+ * (XERK-220) they were spelled `__mentra*`, and bundles built against that SDK
+ * are immutable release artifacts (Turma/Tenir install theirs straight from
+ * GitHub Releases). If the polyfill only speaks the new spelling, a legacy
+ * bundle evaluates fine but never receives its init callback — no session is
+ * constructed, nothing is ever dispatched, and the miniapp hangs on its splash.
+ */
+describe("startup bundle — pre-rename SDK compatibility", () => {
+  test("polyfill-provided helpers are installed under both spellings", () => {
+    const sandbox = evalBundle()
+    for (const name of ["SendOneShot", "SendRequest", "Subscribe", "EventListeners", "DispatchSync"] as const) {
+      expect(sandbox[`__mentra${name}`]).toBe(sandbox[`__veiller${name}`])
+    }
+  })
+
+  test("__deliver init fires a legacy __mentraInitCallback", () => {
+    const sandbox = evalBundle()
+    const seen: string[] = []
+    ;(sandbox as Record<string, unknown>).__mentraInitCallback = (sid: string) => seen.push(sid)
+    ;(sandbox.__deliver as (j: string) => void)(JSON.stringify({kind: "init", sessionId: "legacy-1"}))
+    expect(seen).toEqual(["legacy-1"])
+    // The session id is stamped under both names for the same reason.
+    expect(sandbox.__mentraSessionId).toBe("legacy-1")
+    expect(sandbox.__veillerSessionId).toBe("legacy-1")
+  })
+
+  test("a current-SDK init callback still wins over a legacy one", () => {
+    const sandbox = evalBundle()
+    const seen: string[] = []
+    ;(sandbox as Record<string, unknown>).__veillerInitCallback = () => seen.push("veiller")
+    ;(sandbox as Record<string, unknown>).__mentraInitCallback = () => seen.push("mentra")
+    ;(sandbox.__deliver as (j: string) => void)(JSON.stringify({kind: "init", sessionId: "x"}))
+    expect(seen).toEqual(["veiller"])
+  })
+
+  test("kind=bridge envelope forwards to a legacy __mentraDeliverBridgeRaw", () => {
+    const sandbox = evalBundle()
+    const received: string[] = []
+    ;(sandbox as Record<string, unknown>).__mentraDeliverBridgeRaw = (raw: string) => received.push(raw)
+    ;(sandbox.__deliver as (j: string) => void)(
+      JSON.stringify({kind: "bridge", raw: '{"type":"DISPLAY","text":"hi"}'}),
+    )
+    expect(received).toEqual(['{"type":"DISPLAY","text":"hi"}'])
+  })
+
+  test("legacy __mentraSubscribe receives the same event fan-out", () => {
+    const sandbox = evalBundle()
+    const received: unknown[] = []
+    ;(sandbox.__mentraSubscribe as (i: string, cb: (p: unknown) => void) => () => void)("button", (p) =>
+      received.push(p),
+    )
+    ;(sandbox.__deliver as (j: string) => void)(
+      JSON.stringify({kind: "event", iface: "button", payload: {which: "main"}}),
+    )
+    expect(received).toEqual([{which: "main"}])
+  })
+})
+
 describe("startup bundle — WebSocket", () => {
   test("installs a real WebSocket constructor (not the placeholder)", () => {
     const sandbox = evalBundle()

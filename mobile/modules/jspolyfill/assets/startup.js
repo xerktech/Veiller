@@ -248,6 +248,16 @@
       g.AbortSignal = VeillerAbortSignal;
     }
     installAbortController();
+    const legacyName = (name) => name.replace(/^__veiller/, "__mentra");
+    const installHostGlobal = (name, value) => {
+      ;
+      g[name] = value;
+      g[legacyName(name)] = value;
+    };
+    const readMiniappHook = (name) => {
+      const rec = g;
+      return rec[name] ?? rec[legacyName(name)];
+    };
     const pending = /* @__PURE__ */ new Map();
     let nextReqId = 1;
     g.__deliver = (envelopeJson) => {
@@ -306,20 +316,19 @@
         return;
       }
       if (env.kind === "bridge" && typeof env.raw === "string") {
-        const deliver = g.__veillerDeliverBridgeRaw;
+        const deliver = readMiniappHook("__veillerDeliverBridgeRaw");
         if (typeof deliver === "function") {
           deliver(env.raw);
         }
         return;
       }
       if (env.kind === "init" && typeof env.sessionId === "string") {
-        ;
-        g.__veillerSessionId = env.sessionId;
-        const initCb = g.__veillerInitCallback;
+        installHostGlobal("__veillerSessionId", env.sessionId);
+        const initCb = readMiniappHook("__veillerInitCallback");
         if (initCb) initCb(env.sessionId);
       }
     };
-    g.__veillerSendOneShot = (iface, method, args) => {
+    installHostGlobal("__veillerSendOneShot", (iface, method, args) => {
       try {
         __dispatch(iface, method, JSON.stringify(args ?? []));
       } catch (e) {
@@ -333,8 +342,8 @@
         } catch {
         }
       }
-    };
-    g.__veillerSendRequest = (iface, method, args) => {
+    });
+    installHostGlobal("__veillerSendRequest", (iface, method, args) => {
       return new g.Promise((resolve, reject) => {
         const reqId = `${nextReqId++}`;
         pending.set(reqId, { resolve, reject });
@@ -345,20 +354,20 @@
           reject({ code: "NATIVE_THROW", message: e instanceof Error ? e.message : String(e) });
         }
       });
-    };
-    g.__veillerEventListeners = /* @__PURE__ */ new Map();
-    g.__veillerSubscribe = (iface, cb) => {
-      const map = g.__veillerEventListeners;
-      let set = map.get(iface);
+    });
+    const eventListeners = /* @__PURE__ */ new Map();
+    installHostGlobal("__veillerEventListeners", eventListeners);
+    installHostGlobal("__veillerSubscribe", (iface, cb) => {
+      let set = eventListeners.get(iface);
       if (!set) {
         set = /* @__PURE__ */ new Set();
-        map.set(iface, set);
+        eventListeners.set(iface, set);
       }
       set.add(cb);
       return () => {
         set.delete(cb);
       };
-    };
+    });
     const dispatchSyncOrNull = (iface, method, args) => {
       try {
         const raw = __dispatch(iface, method, JSON.stringify(args ?? []));
@@ -372,7 +381,7 @@
         return null;
       }
     };
-    g.__veillerDispatchSync = dispatchSyncOrNull;
+    installHostGlobal("__veillerDispatchSync", dispatchSyncOrNull);
     const localStorage = {
       getItem(key) {
         const v = dispatchSyncOrNull("localStorage", "getItem", [String(key)]);

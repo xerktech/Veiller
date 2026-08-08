@@ -121,8 +121,12 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
     // capsule: capsule width + 16px breathing room.
     "--veiller-capsule-gutter": `${capsule.width + 16}px`,
   }
+  // Legacy pre-rename alias (XERK-229): bundles published before the Veiller
+  // rename (XERK-220) style themselves off `var(--mentra-safe-top)` etc. Emit
+  // both prefixes so those bundles keep their safe-area padding instead of
+  // silently collapsing to the `var(..., 0px)` fallback under the notch.
   const cssVarsBlock = Object.entries(cssVars)
-    .map(([k, v]) => `${k}: ${v};`)
+    .flatMap(([k, v]) => [`${k}: ${v};`, `${k.replace("--veiller-", "--mentra-")}: ${v};`])
     .join(" ")
 
   // Console-tap shim: wrap console.log/warn/error/info/debug so each call
@@ -226,6 +230,10 @@ export function buildMiniappGlobalsScript(opts: BuildMiniappGlobalsOptions): str
   // miniapp re-writes <head> during boot.
   return `
     window.Veiller = ${JSON.stringify(globals)};
+    // Legacy pre-rename alias (XERK-229): pre-XERK-220 SDK builds read
+    // window.MentraOS for packageName / colorScheme / safe-area insets. Same
+    // object, so a host update to one is visible through both names.
+    window.MentraOS = window.Veiller;
     window.receiveNativeMessage = window.receiveNativeMessage || function() {};
     (function() {
       try {

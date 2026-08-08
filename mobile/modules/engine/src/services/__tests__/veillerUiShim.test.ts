@@ -14,6 +14,9 @@ interface ShimGlobals {
     ready: () => void
   }
   __veiller?: {recv: (env: unknown) => void}
+  /** Pre-rename aliases kept for bundles published before XERK-220. */
+  mentra?: ShimGlobals["veiller"]
+  __mentra?: ShimGlobals["__veiller"]
   ReactNativeWebView?: {postMessage: (s: string) => void}
   outboundQueue: string[]
   setInterval: typeof setInterval
@@ -195,5 +198,38 @@ describe("buildVeillerUiShim", () => {
     const b: unknown[] = []
     g.veiller!.on("b", (p) => b.push(p))
     expect(b).toEqual(["beta"])
+  })
+})
+
+/**
+ * XERK-229: miniapp bundles published before the Veiller rename (XERK-220)
+ * call this global by its old name. They are immutable release artifacts, so
+ * the shim keeps `window.mentra` / `window.__mentra` bound to the very same
+ * objects. A legacy UI that can't reach `mentra.ready()` never completes the
+ * ready handshake and hangs on its splash forever.
+ */
+describe("buildVeillerUiShim — pre-rename aliases", () => {
+  test("window.mentra / window.__mentra are the same objects as the veiller ones", () => {
+    const g = evalShim()
+    expect(g.mentra).toBe(g.veiller)
+    expect(g.__mentra).toBe(g.__veiller)
+  })
+
+  test("a legacy UI can complete the ready handshake through window.mentra", () => {
+    const g = evalShim()
+    g.mentra!.send("greet", {hi: 1})
+    expect(g.outboundQueue).toHaveLength(0)
+    g.mentra!.ready()
+    const types = g.outboundQueue.map((s) => JSON.parse(s).type)
+    expect(types).toContain("ready")
+    expect(types).toContain("msg")
+  })
+
+  test("host-pushed envelopes reach legacy `mentra.on` subscribers", () => {
+    const g = evalShim()
+    const got: unknown[] = []
+    g.mentra!.on("greeting", (p) => got.push(p))
+    g.__mentra!.recv({type: "msg", channel: "greeting", payload: "hello", seq: 1})
+    expect(got).toEqual(["hello"])
   })
 })

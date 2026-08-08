@@ -361,6 +361,18 @@ export function buildVeillerUiShim(options: VeillerUiShimOptions): string {
     _packageName: packageName,
   };
   window.__veiller = { recv: recv };
+
+  // ---- Legacy pre-rename bundle ABI (XERK-229) ---------------------------
+  // Bundles built before the Veiller rename (XERK-220) call the global under
+  // its old name — \`mentra.ready()\` / \`mentra.on()\` / \`mentra.request()\` —
+  // and the host pushed inbound envelopes through \`window.__mentra.recv\`.
+  // Those bundles are immutable published artifacts (Turma/Tenir ship them
+  // from GitHub Releases), so the host keeps both names bound to the SAME
+  // objects. Without this a legacy UI throws on its first \`mentra.ready()\`,
+  // the ready handshake never reaches the host, and the miniapp hangs on its
+  // splash forever.
+  window.mentra = window.veiller;
+  window.__mentra = window.__veiller;
 })();
 `.trim()
 }
