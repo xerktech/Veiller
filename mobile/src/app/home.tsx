@@ -16,6 +16,7 @@ import AppSwitcherButton from "@/components/home/AppSwitcherButtton"
 import AppSwitcher from "@/components/home/AppSwitcher"
 // XERK-206: ControllerStatus unused while the R1 controller is disabled.
 import {GlassesStatus, TapStrapStatus} from "@/components/home/DeviceStatus"
+import {UpdateBanner} from "@/components/home/UpdateBanner"
 import {attemptReconnectToDefaultWearable} from "@/effects/Reconnect"
 import {useSaferAreaInsets} from "@/contexts/SaferAreaContext"
 import AllAppsGridSheet from "@/components/home/AllAppsGridSheet"
@@ -168,6 +169,9 @@ export default function Homepage() {
             scrollEventThrottle={16}>
             {Platform.OS === "android" && <View style={{paddingTop: insets.top}} />}
             <View className="h-4" />
+            {/* Slides in above everything else when a newer APK is published
+                (XERK-232). Renders nothing when there's nothing to offer. */}
+            <UpdateBanner />
             {renderContent()}
             <View className="h-4" />
           </ScrollView>

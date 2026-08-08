@@ -340,7 +340,7 @@
       },
       "devDependencies": {
         "@types/qrcode": "^1.5.5",
-        "@veiller/miniapp-simulator": "workspace:*",
+        "@veiller/miniapp-simulator": "file:../miniapp-simulator",
         "bun-types": "^1.3.14",
       },
     },
@@ -1866,6 +1866,8 @@
     "@typescript-eslint/typescript-estree/semver": ["semver@7.7.3", "", { "bin": "bin/semver.js" }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
 
     "@veiller/miniapp/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "@veiller/miniapp-cli/@veiller/miniapp-simulator": ["@veiller/miniapp-simulator@file:sdk/miniapp-simulator", { "dependencies": { "jszip": "^3.10.1" }, "devDependencies": { "bun-types": "^1.3.14", "typescript": "^5.0.0" }, "bin": { "veiller-simulate": "./src/cli.ts" } }],
 
     "@veiller/miniapp-cli/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 

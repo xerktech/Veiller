@@ -104,6 +104,11 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "ACCESS_NETWORK_STATE",
         "CHANGE_WIFI_STATE",
         "CHANGE_NETWORK_STATE",
+        // In-app self-update (XERK-232): Veiller is sideloaded, so the app
+        // downloads its own newer APK from GitHub Releases and hands it to the
+        // system package installer. Play-Store-sensitive, but this build has no
+        // Play channel — see .github/workflows/release.yml.
+        "android.permission.REQUEST_INSTALL_PACKAGES",
       ],
       // Some merged library manifests pull in ACCESS_BACKGROUND_LOCATION, but we
       // only need while-in-use location: it is used for BLE scanning and for the

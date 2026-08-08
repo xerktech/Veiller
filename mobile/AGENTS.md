@@ -42,6 +42,28 @@ The user-facing app version (`CFBundleShortVersionString` on iOS,
   without a pin fail closed; a Super Mode manifest override remains available
   for deliberate local OTA testing.
 
+### App self-update (Android, XERK-232)
+
+Veiller is sideloaded, so the app updates *itself*: `src/services/update/`
+polls `xerktech/Veiller`'s public GitHub Releases, and when a
+`veiller-v<version>.apk` newer than `EXPO_PUBLIC_VEILLER_VERSION` appears, the
+banner in `src/components/home/UpdateBanner.tsx` slides into the top of the home
+screen and offers a one-tap download + install. Ported from Turma's
+`net/Updater.kt` + `ui/UpdateBanner.kt`.
+
+- The version compared is the one in the **asset filename**, never the release
+  tag — the same rule the miniapp bundle sync follows (XERK-225).
+- Checks fire on home-screen focus and on foreground, throttled to 15 minutes,
+  and fail silently (offline, rate-limited): an update banner must never become
+  an error nag. A dismissal is session-scoped, so the offer returns next launch.
+- The fetch is anonymous — **it only works while `xerktech/Veiller` is a public
+  repo.** Against a private repo the API 404s and the banner never appears.
+- Android only. iOS updates via TestFlight/the App Store.
+- Requires `REQUEST_INSTALL_PACKAGES` (declared in `app.config.ts`). Android
+  additionally makes the user grant "install unknown apps" the first time; the
+  OS raises that prompt itself, and the banner stays on **Install** so the tap
+  after granting completes the update.
+
 ### Testing
 
 - Run tests: `bun test`
