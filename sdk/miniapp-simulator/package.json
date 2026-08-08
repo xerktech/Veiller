@@ -1,0 +1,26 @@
+{
+  "name": "@veiller/miniapp-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Glasses + phone simulator for Veiller miniapps — runs a real background bundle against a real host implementation and renders the lens",
+  "type": "module",
+  "bin": {
+    "veiller-simulate": "./src/cli.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./cli": "./src/cli.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "bun x tsc --noEmit"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.14",
+    "typescript": "^5.0.0"
+  }
+}

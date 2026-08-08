@@ -7,6 +7,7 @@ import { schemaPrint, regenerateSchemaFile } from './schema.js';
 import { addPermissionCmd, listPermissionsCmd, removePermissionCmd } from './permission.js';
 import { addHardwareCmd, listHardwareCmd, removeHardwareCmd } from './hardware.js';
 import { runManifestWizard } from './manifest-wizard.js';
+import { simulate } from './simulate.js';
 
 const subcommand = process.argv[2];
 const subcommandArg = process.argv[3];
@@ -19,6 +20,8 @@ function printUsage(): void {
   console.log('  release                          Build, pack, and serve a QR to install on a phone');
   console.log('                                   Options: --no-cache  --qr-output <path>');
   console.log('  pack                             Production-build and package miniapp into build/<pkg>-<version>.zip (--no-build to skip build)');
+  console.log('  simulate [bundle]                Run the miniapp on simulated glasses (Veiller monorepo only)');
+  console.log('                                   Options: --port <n>  --headless  --model <g1|g2>');
   console.log('  manifest                         Edit miniapp.json interactively');
   console.log('  permission list                  List declared permissions');
   console.log('  permission add [TYPE]            Add a permission (interactive without TYPE)');
@@ -56,6 +59,11 @@ switch (subcommand) {
     // a stale dev-mode dist/ left behind by `dev`. `--no-build` zips dist/
     // as-is for callers that manage the build themselves.
     await pack({build: !process.argv.includes('--no-build')});
+    break;
+  case 'simulate':
+    // Default to the current directory so `veiller-miniapp simulate` inside a
+    // miniapp behaves like every other subcommand here.
+    await simulate(process.argv.slice(3).length ? process.argv.slice(3) : ['.']);
     break;
   case 'manifest':
     await runManifestWizard();
