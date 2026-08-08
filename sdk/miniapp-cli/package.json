@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",
+    "@veiller/miniapp-simulator": "workspace:*",
     "bun-types": "^1.3.14"
   },
   "files": [
