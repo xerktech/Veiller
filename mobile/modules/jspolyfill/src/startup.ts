@@ -346,6 +346,30 @@ declare const __nativeClearTimer: (token: number) => void
   }
   installAbortController()
 
+  // ---------- legacy pre-rename bundle ABI (XERK-229) -----------------------
+  // The `__veiller*` globals below are the wire contract between this polyfill
+  // and the miniapp SDK bundled INTO each miniapp. Before the Veiller rename
+  // (XERK-220) every one of them was spelled `__mentra*`, and miniapp bundles
+  // published against that SDK are immutable artifacts (Turma/Tenir ship theirs
+  // from GitHub Releases). So the polyfill speaks both spellings: it installs
+  // its own globals under both names, and reads miniapp-installed hooks under
+  // either. Without this a legacy bundle never receives its `init` callback —
+  // the background context evaluates fine but no session is ever constructed,
+  // and the miniapp hangs on its splash forever.
+  const legacyName = (name: string): string => name.replace(/^__veiller/, "__mentra")
+
+  /** Install a polyfill-provided global under the current AND pre-rename names. */
+  const installHostGlobal = (name: string, value: unknown): void => {
+    ;(g as Record<string, unknown>)[name] = value
+    ;(g as Record<string, unknown>)[legacyName(name)] = value
+  }
+
+  /** Read a hook the miniapp's SDK installed, under either spelling. */
+  const readMiniappHook = <T>(name: string): T | undefined => {
+    const rec = g as Record<string, unknown>
+    return (rec[name] ?? rec[legacyName(name)]) as T | undefined
+  }
+
   // ---------- dispatch / deliver -------------------------------------------
   // Request/response correlator. SDK code calls into __dispatch through a
   // thin helper that returns a Promise; the host posts back via __deliver.
@@ -415,6 +439,8 @@ declare const __nativeClearTimer: (token: number) => void
       return
     }
     if (env.kind === "ws-event") {
+      // Polyfill-internal (installed by the WebSocket polyfill below), so no
+      // legacy alias lookup is needed here.
       const wsHook = (g as Record<string, unknown>).__veillerDeliverWebSocketEvent as
         | ((sid: string, type: string, payload: Record<string, unknown>) => void)
         | undefined
@@ -429,7 +455,7 @@ declare const __nativeClearTimer: (token: number) => void
       // Host pushes a raw SDK envelope (DISPLAY / SUBSCRIBE /
       // STATE_FOR_BRIDGE / etc.) to be delivered into DispatchTransport's
       // onMessage handler. The transport installs this hook on open().
-      const deliver = (g as Record<string, unknown>).__veillerDeliverBridgeRaw as ((raw: string) => void) | undefined
+      const deliver = readMiniappHook<(raw: string) => void>("__veillerDeliverBridgeRaw")
       if (typeof deliver === "function") {
         deliver((env as {raw: string}).raw)
       }
@@ -438,14 +464,14 @@ declare const __nativeClearTimer: (token: number) => void
     if (env.kind === "init" && typeof env.sessionId === "string") {
       // Stamp the global; the SDK's session factory consumes this to build
       // the typed MiniappSession.
-      ;(g as Record<string, unknown>).__veillerSessionId = env.sessionId
-      const initCb = (g as Record<string, unknown>).__veillerInitCallback as ((sid: string) => void) | undefined
+      installHostGlobal("__veillerSessionId", env.sessionId)
+      const initCb = readMiniappHook<(sid: string) => void>("__veillerInitCallback")
       if (initCb) initCb(env.sessionId)
     }
   }
 
   // SDK helpers exposed for the typed wrappers. The SDK is the only caller.
-  ;(g as Record<string, unknown>).__veillerSendOneShot = (iface: string, method: string, args: unknown[]) => {
+  installHostGlobal("__veillerSendOneShot", (iface: string, method: string, args: unknown[]) => {
     try {
       __dispatch(iface, method, JSON.stringify(args ?? []))
     } catch (e) {
@@ -460,13 +486,9 @@ declare const __nativeClearTimer: (token: number) => void
         /* ignore */
       }
     }
-  }
+  })
 
-  ;(g as Record<string, unknown>).__veillerSendRequest = (
-    iface: string,
-    method: string,
-    args: unknown[],
-  ): Promise<unknown> => {
+  installHostGlobal("__veillerSendRequest", (iface: string, method: string, args: unknown[]): Promise<unknown> => {
     return new g.Promise<unknown>((resolve, reject) => {
       const reqId = `${nextReqId++}`
       pending.set(reqId, {resolve, reject})
@@ -477,24 +499,24 @@ declare const __nativeClearTimer: (token: number) => void
         reject({code: "NATIVE_THROW", message: e instanceof Error ? e.message : String(e)})
       }
     })
-  }
+  })
 
   // Event subscribe / unsubscribe helpers — the SDK's session._subscribe()
   // path calls these. We keep the map on globalThis so __deliver can fan
   // out without re-importing this module.
-  ;(g as Record<string, unknown>).__veillerEventListeners = new Map<string, Set<(p: unknown) => void>>()
-  ;(g as Record<string, unknown>).__veillerSubscribe = (iface: string, cb: (p: unknown) => void) => {
-    const map = (g as Record<string, unknown>).__veillerEventListeners as Map<string, Set<(p: unknown) => void>>
-    let set = map.get(iface)
+  const eventListeners = new Map<string, Set<(p: unknown) => void>>()
+  installHostGlobal("__veillerEventListeners", eventListeners)
+  installHostGlobal("__veillerSubscribe", (iface: string, cb: (p: unknown) => void) => {
+    let set = eventListeners.get(iface)
     if (!set) {
       set = new Set()
-      map.set(iface, set)
+      eventListeners.set(iface, set)
     }
     set.add(cb)
     return () => {
       set!.delete(cb)
     }
-  }
+  })
 
   // ---------- localStorage --------------------------------------------------
   // Bridged through __dispatch — `localStorage` iface. Storage is per-miniapp
@@ -514,7 +536,7 @@ declare const __nativeClearTimer: (token: number) => void
       return null
     }
   }
-  ;(g as Record<string, unknown>).__veillerDispatchSync = dispatchSyncOrNull as DispatchLike
+  installHostGlobal("__veillerDispatchSync", dispatchSyncOrNull as DispatchLike)
 
   const localStorage = {
     getItem(key: string): string | null {
