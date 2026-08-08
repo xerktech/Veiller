@@ -429,6 +429,19 @@ const en = {
     glassesDisconnected: "Glasses Disconnected",
     glassesDisconnectedMessage: "Your glasses disconnected during the update. Please reconnect and try again.",
   },
+  /** In-app self-update of the Veiller Android app itself (XERK-232). */
+  appUpdate: {
+    updateAvailable: "Veiller {{version}} is available",
+    updateAvailableDescription: "Download and install the newest version of the Veiller app.",
+    downloading: "Downloading Veiller {{version}}…",
+    readyToInstall: "Veiller {{version}} is ready to install",
+    readyToInstallDescription: "Tap Install to finish. Allow Veiller to install unknown apps if Android asks.",
+    updateFailed: "Update failed",
+    update: "Update",
+    install: "Install",
+    later: "Later",
+    retry: "Retry",
+  },
   home: {
     title: "Veiller",
     pairGlasses: "Pair glasses",
