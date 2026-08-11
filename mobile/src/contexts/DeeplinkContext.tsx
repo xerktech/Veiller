@@ -32,15 +32,8 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/home",
     handler: (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      // On a cold start this fires before the index route has run
-      // mantle.init(), which is what registers the built-in miniapp catalog.
-      // Going straight to /home then produced a home screen with no Settings
-      // tile, no Glasses Mirror and no bottom bar, unrecoverable without a
-      // force-stop. Boot first; index.tsx lands on home by itself.
-      if (!mantle.isInitialized) {
-        nav.replace("/")
-        return
-      }
+      // processUrl guarantees the app has booted before any handler runs, so
+      // the built-in catalog is registered by the time we get here.
       nav.replaceAll("/home")
     },
   },
@@ -114,7 +107,9 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/pairing",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/pairing/prep")
+      // The model picker, not /pairing/prep: prep renders a per-model guide
+      // and has nothing to show without a deviceModel param.
+      nav.push("/pairing/select-glasses-model")
     },
   },
   {
@@ -126,8 +121,10 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       // "guide" and "bluetooth" had no route; the guide is /pairing/prep and
       // the Bluetooth-classic step is /pairing/btclassic.
       const pairingRoutes: Record<string, string> = {
-        "guide": "/pairing/prep",
-        "prep": "/pairing/prep",
+        // "guide"/"prep" render a per-model guide, which needs a deviceModel
+        // the URL does not carry — send them to the picker that supplies one.
+        "guide": "/pairing/select-glasses-model",
+        "prep": "/pairing/select-glasses-model",
         "bluetooth": "/pairing/btclassic",
         "btclassic": "/pairing/btclassic",
         "scan": "/pairing/scan",
@@ -139,7 +136,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       if (route) {
         nav.push(route as any)
       } else {
-        nav.push("/pairing/prep")
+        nav.push("/pairing/select-glasses-model")
       }
     },
   },
@@ -270,13 +267,25 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   /**
    * Find matching route for the given URL
    */
-  const findMatchingRoute = (url: URL): DeepLinkRoute | null => {
+  /**
+   * The path a route pattern is matched against.
+   *
+   * For the custom scheme, `com.xerktech.veiller://pairing/bluetooth` parses
+   * with host "pairing" and pathname "/bluetooth", so the host has to be
+   * folded back in to recover "/pairing/bluetooth". Both matching AND param
+   * extraction must use this — they used to disagree, so every `:param` in an
+   * app-scheme URL came out one segment short (empty), silently disabling
+   * /apps/:packageName, /package/:packageName, /pairing/:step,
+   * /miniapps/settings/:section and /mirror/video/:videoId.
+   */
+  const effectivePathname = (url: URL): string => {
     const host = url.host
-    let pathname = url.pathname
     const isAppScheme = url.protocol === `${config.scheme}:`
-    if (isAppScheme && host) {
-      pathname = `/${host}${pathname}`
-    }
+    return isAppScheme && host ? `/${host}${url.pathname}` : url.pathname
+  }
+
+  const findMatchingRoute = (url: URL): DeepLinkRoute | null => {
+    const pathname = effectivePathname(url)
 
     for (const route of config.routes) {
       if (matchesPattern(pathname, route.pattern)) {
@@ -302,8 +311,8 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   const extractParams = (url: URL, pattern: string): Record<string, string> => {
     const params: Record<string, string> = {}
 
-    // Extract path parameters
-    const pathParts = url.pathname.split("/").filter(Boolean)
+    // Extract path parameters — against the same path findMatchingRoute used.
+    const pathParts = effectivePathname(url).split("/").filter(Boolean)
     const patternParts = pattern.split("/").filter(Boolean)
 
     for (let i = 0; i < patternParts.length; i++) {
@@ -367,6 +376,20 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       // small hack since some sources strip the host and we want to put the url into URL object here
       if (url.startsWith("/")) {
         url = "https://apps.mentraglass.com" + url
+      }
+
+      // Nothing may navigate before the app has booted. mantle.init() — run by
+      // the index route — is what registers the built-in miniapp catalog, so a
+      // handler that lands on /home first produces a home screen with no
+      // Settings tile, no Glasses Mirror and no bottom bar, unrecoverable
+      // without a force-stop. This guard sits here rather than in individual
+      // handlers because every entry point needs it: cold deep links, the
+      // +not-found fallback, and any handler that ends up at home (XERK-249).
+      if (!mantle.isInitialized) {
+        console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
+        nav.setPendingRoute(url)
+        nav.replace("/")
+        return
       }
 
       const parsedUrl = new URL(url)

@@ -24,6 +24,7 @@ import {showAlert} from "@/contexts/ModalContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {translate} from "@/i18n"
 import {isVeillerMiniappEnabled, setVeillerMiniappEnabled} from "@/services/miniapps/veillerMiniappPrefs"
+import {deriveStoreRowState} from "@/services/miniapps/storeRowState"
 import {veillerMiniappSync, resolveLatestBundle, type InstallStage} from "@/services/miniapps/veillerMiniappSync"
 import {useNavigationStore} from "@/stores/navigation"
 import {engine, type ClientApp} from "@veiller/engine"
@@ -190,39 +191,37 @@ export default function MiniappStorePage() {
           const displayName = installed?.name ?? source.name
           const available = row.availableVersion
           const isInstalled = !!installedVersion
-          // An update is only "available" for something you actually have. When
-          // nothing is installed the row read "Update available" above an
-          // Install button.
-          const updateAvailable =
-            row.availability === "resolved" && available != null && isInstalled && available !== installedVersion
           const install = row.install
           const busy = isBusy(install)
 
-          // An in-flight install owns the status line — the user needs to see
-          // that their tap is doing something, and which step it is on
-          // (XERK-225). Otherwise fall back to the availability summary.
-          let statusText: string
-          let statusColor: string = theme.colors.textDim
-          if (busy) {
-            statusText = translate(STAGE_LABELS[install.stage])
-            statusColor = theme.colors.text
-          } else if (row.availability === "loading") {
-            statusText = translate("miniappStore:checking")
-          } else if (updateAvailable) {
-            statusText = translate("miniappStore:updateAvailable")
-            statusColor = theme.colors.text
-          } else if (row.availability === "error") {
-            // Checked before the installed-state branches: offline, the row
-            // used to keep claiming "Up to date", which the app cannot know.
-            statusText = translate("miniappStore:checkFailed")
-            statusColor = theme.colors.textDim
-          } else if (isInstalled) {
-            statusText = translate("miniappStore:upToDate")
-          } else {
-            statusText = translate("miniappStore:notInstalled")
-          }
+          // Status line and button availability are derived together, and
+          // tested, in storeRowState.ts — see the note there.
+          const rowState = deriveStoreRowState({
+            availability: row.availability,
+            availableVersion: available,
+            installedVersion,
+            busy,
+            failed: install.stage === "failed",
+            enabled: row.enabled,
+          })
+          const updateAvailable = rowState.status === "updateAvailable"
 
-          const actionLabel = isInstalled ? translate("miniappStore:update") : translate("miniappStore:install")
+          const stageLabel =
+            install.stage in STAGE_LABELS
+              ? STAGE_LABELS[install.stage as keyof typeof STAGE_LABELS]
+              : "miniappStore:checking"
+          const statusText =
+            rowState.status === "stage"
+              ? translate(stageLabel)
+              : translate(`miniappStore:${rowState.status}` as Parameters<typeof translate>[0])
+          const statusColor = rowState.emphasise ? theme.colors.text : theme.colors.textDim
+
+          const actionLabel =
+            rowState.action === "retry"
+              ? translate("miniappStore:retry")
+              : rowState.action === "update"
+                ? translate("miniappStore:update")
+                : translate("miniappStore:install")
 
           return (
             <GlassView key={source.packageName} className="rounded-2xl p-4 gap-3">
@@ -277,10 +276,10 @@ export default function MiniappStorePage() {
               {/* Only checked apps offer install/update — an unchecked app is
                   paused, so re-check it to act on it now. A failed attempt keeps
                   the button around (labelled "Retry") so the user can try again. */}
-              {row.enabled && (updateAvailable || busy || install.stage === "failed") && (
+              {rowState.showAction && (
                 <Button
                   preset="primary"
-                  text={busy ? "" : install.stage === "failed" ? translate("miniappStore:retry") : actionLabel}
+                  text={busy ? "" : actionLabel}
                   disabled={busy}
                   onPress={() => handleInstall(source)}>
                   {busy && <ActivityIndicator color={theme.colors.background} />}

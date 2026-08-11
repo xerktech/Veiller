@@ -14,7 +14,13 @@ let projectDir: string;
 
 /** Minimal valid two-layer project: dist/ + a manifest that points into it. */
 function scaffoldProject(overrides: Record<string, unknown> = {}): string {
-  const dir = mkdtempSync(join(tmpdir(), 'veiller-pack-test-'));
+  // The project lives one level *inside* a unique temp root, so a test that
+  // asserts nothing was written to the project's parent (`..`) is checking a
+  // directory this test owns — not the shared system tmpdir, where a stale
+  // artifact from an earlier run would make the assertion lie.
+  const root = mkdtempSync(join(tmpdir(), 'veiller-pack-test-'));
+  const dir = join(root, 'project');
+  mkdirSync(dir, { recursive: true });
   mkdirSync(join(dir, 'dist', 'background'), { recursive: true });
   mkdirSync(join(dir, 'dist', 'ui'), { recursive: true });
   writeFileSync(join(dir, 'dist', 'background', 'index.js'), 'export default {}\n');
@@ -52,7 +58,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  rmSync(projectDir, { recursive: true, force: true });
+  // Remove the temp root, not just the project inside it.
+  rmSync(join(projectDir, '..'), { recursive: true, force: true });
 });
 
 describe('pack', () => {
@@ -136,7 +143,7 @@ describe('pack — bundle contract', () => {
       expect(code).toBe(1);
       expect(stderr).toContain('entry.background');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      rmSync(join(dir, '..'), { recursive: true, force: true });
     }
   });
 
@@ -152,7 +159,7 @@ describe('pack — bundle contract', () => {
       // and nothing was written above the project
       expect(existsSync(join(dir, '..', 'ESCAPED-1.0.0.zip'))).toBe(false);
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      rmSync(join(dir, '..'), { recursive: true, force: true });
     }
   });
 
@@ -164,7 +171,7 @@ describe('pack — bundle contract', () => {
       expect(code).toBe(1);
       expect(stderr).toContain('dist/');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      rmSync(join(dir, '..'), { recursive: true, force: true });
     }
   });
 
@@ -176,7 +183,7 @@ describe('pack — bundle contract', () => {
       expect(code).toBe(1);
       expect(stderr).toContain('miniapp.json');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      rmSync(join(dir, '..'), { recursive: true, force: true });
     }
   });
 });

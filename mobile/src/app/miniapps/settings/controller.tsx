@@ -72,7 +72,12 @@ function DeviceSettings() {
 
   return (
     <View className="gap-6">
-      <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
+      {/* Hidden (XERK-249) for the same reason as the copy in
+          DeviceSettingsSection: /miniapps/settings/layout is still the
+          react-native-draggable-masonry sample ("Item 1"…"Item 5" in random
+          colours). This one is reached from the Tap Straps card on home, so
+          hiding only the other entry point left the demo shipping. */}
+      {/* <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} /> */}
 
       <Group title={translate("deviceSettings:general")}>
         {controllerConnected && defaultController !== DeviceTypes.SIMULATED && (

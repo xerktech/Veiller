@@ -5,7 +5,6 @@ import {ActivityIndicator, View} from "react-native"
 import {Screen} from "@/components/ignite"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {useNavigationStore} from "@/stores/navigation"
 
 /**
  * Catch-all for paths expo-router cannot resolve to a file route.
@@ -40,9 +39,10 @@ export default function NotFoundScreen() {
 
     console.warn("NOT_FOUND: no file route for", path, "— handing back to the deep-link processor")
 
-    // Go home first so the deep link has a real back destination, then let the
-    // processor translate the path. An unknown path simply stays home.
-    useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
+    // Hand straight to the processor: it boots the app first when needed, and
+    // its fallback handler routes an unrecognised path through the index route.
+    // Going home here first was wrong — before boot that renders the home
+    // screen without its built-in miniapps (no Settings, no Glasses Mirror).
     void processUrl(`com.xerktech.veiller://${path.replace(/^\/+/, "")}`)
   }, [pathname, params, processUrl])
 

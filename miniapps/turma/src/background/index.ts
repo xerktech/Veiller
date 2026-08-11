@@ -180,8 +180,15 @@ class TurmaBackground {
       // phone-login validates credentials against a hub the user has just
       // typed, before that hub is saved (postLogin runs ahead of saveConfig),
       // so the sign-in probe is the one call allowed to reach another origin.
-      const isLoginProbe = method.toUpperCase() === "POST" && target.pathname === "/api/login";
-      if (target.origin !== hubOrigin && !isLoginProbe) {
+      // Exact path, no query and no fragment: phone-login posts precisely
+      // `${hubBase}/api/login`, so anything else is not the sign-in probe.
+      const isLoginProbe =
+        method.toUpperCase() === "POST" &&
+        target.pathname === "/api/login" &&
+        target.search === "" &&
+        target.hash === "";
+      const isConfiguredHub = hubOrigin !== null && target.origin === hubOrigin;
+      if (!isConfiguredHub && !isLoginProbe) {
         return {
           status: 0,
           ok: false,
@@ -189,11 +196,31 @@ class TurmaBackground {
         };
       }
 
-      const res = await fetch(req.url, {
-        method,
-        headers: req.headers,
-        body: req.body,
-      });
+      let res: Response;
+      try {
+        res = await fetch(req.url, {
+          method,
+          headers: req.headers,
+          body: req.body,
+        });
+      } catch (err) {
+        // A network failure here used to escape as an unhandled rejection and
+        // tear down the caller; the UI expects a value it can branch on.
+        return {
+          status: 0,
+          ok: false,
+          bodyText: `turma:fetch: request failed: ${err instanceof Error ? err.message : String(err)}`,
+        };
+      }
+
+      // The cross-origin sign-in probe is allowed to report *whether* the
+      // credentials were accepted, not to read the response. phone-login only
+      // branches on ok/status; returning the body would make this handler a
+      // usable read primitive against any host on the phone's network.
+      if (!isConfiguredHub) {
+        return { status: res.status, ok: res.ok, bodyText: "" };
+      }
+
       const bodyText = await res.text();
       return { status: res.status, ok: res.ok, bodyText };
     });
