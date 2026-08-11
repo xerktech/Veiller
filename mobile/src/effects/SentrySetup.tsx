@@ -40,6 +40,17 @@ const installKnownErrorFilter = () => {
   })
 }
 
+/**
+ * Did Sentry.init() actually run? False whenever there is no DSN (the default
+ * in .env.example) or on the China build.
+ *
+ * `_layout.tsx` must not apply `Sentry.wrap` when this is false: wrapping an
+ * uninitialized Sentry logs "App Start Span could not be finished. `Sentry.wrap`
+ * was called before `Sentry.init`" on every navigation — 16 times in a single
+ * QA session — and drops the app-start spans it was meant to record.
+ */
+export let sentryInitialized = false
+
 export const SentrySetup = () => {
   // Always install — the filter prevents a known-fatal PostHog bug from killing
   // the app even when Sentry itself isn't initialized.
@@ -62,6 +73,7 @@ export const SentrySetup = () => {
   // const sampleRate = isProd ? 0.1 : 1.0
   const sampleRate = 1.0
 
+  sentryInitialized = true
   Sentry.init({
     dsn: sentryDsn,
 

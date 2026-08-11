@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 
-import { TextMeasurer } from "../measurer/TextMeasurer";
-import { G2_PROFILE } from "../profiles";
-import { TextWrapper } from "./TextWrapper";
+import { TextMeasurer } from "../../measurer/TextMeasurer";
+import { G2_PROFILE } from "../../profiles";
+import { TextWrapper } from "../TextWrapper";
 
 // The word-break modes tokenise CJK per character, because CJK can break
 // between any two characters. Nothing covered what happens when those tokens

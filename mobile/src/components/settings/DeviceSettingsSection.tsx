@@ -191,8 +191,15 @@ export function DeviceSettingsSection() {
         />
       )}
 
-      {/* Layout settings (display layout tooling) */}
-      <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} />
+      {/* Layout settings (display layout tooling)
+          Hidden (XERK-249): /miniapps/settings/layout is still the
+          react-native-draggable-masonry sample — five boxes labelled "Item 1"…
+          "Item 5" with randomly generated background colours and an onDragEnd
+          that console.logs. It was reachable from the shipping Settings menu,
+          behind neither Super Mode nor __DEV__, and was the only row in this
+          section with no icon. The route file is kept so the work in progress
+          isn't lost; restore this button when the screen does something. */}
+      {/* <RouteButton label={translate("settings:layoutSettings")} onPress={() => push("/miniapps/settings/layout")} /> */}
 
       {/* Button Settings — Mentra Live only (G2's button is a touchpad and conflicts with the native menu).
           Hidden for now: the action button always launches the camera. ButtonActions.tsx already forces

@@ -24,12 +24,17 @@ import {AR99_MODEL_OPTIONS, getAr99DisplayName, getAr99ImageSource, getGlassesOp
 const normalizeProjectName = (value?: string | null) => value?.trim().toUpperCase() ?? ""
 const SUPPORTED_AR99_PROJECT_NAMES = new Set<string>(AR99_MODEL_OPTIONS.map((option) => option.projectName))
 
+/** How long an empty scan runs before the screen offers a way out. */
+const SCAN_EMPTY_STATE_MS = 30_000
+
 export default function SelectGlassesBluetoothScreen() {
   const {deviceModel, ar99ProjectName} = useLocalSearchParams() as {deviceModel: DeviceModel; ar99ProjectName?: string}
   const {theme} = useAppTheme()
   const {goBack, replace, push} = useNavigationStore.getState()
   const pushUnder = usePushUnder()
   const [showTroubleshootingModal, setShowTroubleshootingModal] = useState(false)
+  const [scanTimedOut, setScanTimedOut] = useState(false)
+  const [scanAttempt, setScanAttempt] = useState(0)
   const bluetoothClassicConnected = useEngineSnapshot(engine.pairing.readiness, (onChange) =>
     engine.pairing.onReadiness(onChange),
   ).bluetoothClassicConnected
@@ -202,6 +207,23 @@ export default function SelectGlassesBluetoothScreen() {
   const visibleResults = rememberedSearchResults.filter(
     (r) => r.name !== "NOTREQUIREDSKIP" && matchesSelectedModel(r),
   )
+  const visibleResultCount = visibleResults.length
+
+  // Stop pretending indefinitely. The scan itself keeps running — BLE
+  // discovery is legitimately slow and the glasses may come out of the case a
+  // moment later — but a spinner with no end state reads as a hang. Before
+  // this the screen span forever with no empty state (observed at 6+ minutes
+  // with no BLE device present).
+  useEffect(() => {
+    if (visibleResultCount > 0) {
+      setScanTimedOut(false)
+      return
+    }
+    setScanTimedOut(false)
+    const timer = setTimeout(() => setScanTimedOut(true), SCAN_EMPTY_STATE_MS)
+    return () => clearTimeout(timer)
+  }, [visibleResultCount, scanAttempt])
+
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]} extraAndroidInsets>
@@ -215,9 +237,29 @@ export default function SelectGlassesBluetoothScreen() {
           />
 
           {visibleResults.length === 0 ? (
-            <View className="justify-center min-h-20 py-4">
-              <ActivityIndicator size="large" color={theme.colors.foreground} />
-            </View>
+            scanTimedOut ? (
+              <View className="justify-center min-h-20 py-4 gap-3">
+                <Text
+                  className="text-center text-base font-semibold"
+                  tx="pairing:noGlassesFound"
+                />
+                <Text
+                  className="text-center text-sm text-muted-foreground"
+                  tx="pairing:noGlassesFoundHint"
+                />
+                <Button
+                  preset="secondary"
+                  compact
+                  tx="pairing:keepScanning"
+                  onPress={() => setScanAttempt((n) => n + 1)}
+                  className="self-center min-w-[140px]"
+                />
+              </View>
+            ) : (
+              <View className="justify-center min-h-20 py-4">
+                <ActivityIndicator size="large" color={theme.colors.foreground} />
+              </View>
+            )
           ) : (
             <ScrollView className="max-h-[300px] -mr-4 pr-4" contentContainerClassName="my-4">
               <Group>

@@ -44,15 +44,22 @@ export default function PairingPrepScreen() {
     try {
       // Check for Android-specific permissions
       if (Platform.OS === "android") {
-        // Android-specific Phone State permission - request for ALL glasses including simulated
-        console.log("Requesting PHONE_STATE permission...")
-        const phoneStateGranted = await requestFeaturePermissions(PermissionFeatures.PHONE_STATE)
-        console.log("PHONE_STATE permission result:", phoneStateGranted)
+        // PHONE_STATE backs BLE identity handling on real glasses. Simulated
+        // Glasses have no radio at all, so gating them on it made "Allow
+        // Veiller to make and manage phone calls?" the first prompt a new
+        // user sees with no way past it — for a device that cannot use the
+        // permission.
+        const needsPhoneState = !deviceModel.startsWith(DeviceTypes.SIMULATED)
+        if (needsPhoneState) {
+          console.log("Requesting PHONE_STATE permission...")
+          const phoneStateGranted = await requestFeaturePermissions(PermissionFeatures.PHONE_STATE)
+          console.log("PHONE_STATE permission result:", phoneStateGranted)
 
-        if (!phoneStateGranted) {
-          // The specific alert for previously denied permission is already handled in requestFeaturePermissions
-          // We just need to stop the flow here
-          return
+          if (!phoneStateGranted) {
+            // The specific alert for previously denied permission is already handled in requestFeaturePermissions
+            // We just need to stop the flow here
+            return
+          }
         }
 
         // Bluetooth permissions only for physical glasses

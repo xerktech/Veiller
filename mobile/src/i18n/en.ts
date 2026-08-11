@@ -133,6 +133,10 @@ const en = {
     scanningForGlasses: "Scanning",
     scanningForGlassesModel: "Scanning for {{model}}",
     scanningForGlasses2: "Ensure your glasses are in range.",
+    noGlassesFound: "No glasses found",
+    noGlassesFoundHint:
+      "Make sure your glasses are charged, out of the case, and close to your phone, then try again.",
+    keepScanning: "Keep scanning",
     preorderNow: "PREORDER NOW",
     buyNow: "BUY NOW",
     preorderNowShipMessage: "Ships December 2025",
@@ -592,6 +596,7 @@ const en = {
     updateAvailable: "Update available",
     checking: "Checking for updates…",
     checkFailed: "Couldn't check for updates",
+    checkComplete: "Miniapps are up to date",
     updatesPaused: "Updates paused",
     install: "Install",
     update: "Update",
@@ -1074,6 +1079,7 @@ const en = {
     giveFeedback: "Give Feedback",
     errorSendingFeedback: "There was an error sending your feedback. Please try again.",
     email: "Email",
+    emailInvalid: "Enter a valid email address, or leave the field empty.",
     emailOptional: "Email",
     emailInfoMessage:
       "Your Apple ID uses a private relay email. We need your real email so we can contact you about your feedback.",

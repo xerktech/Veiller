@@ -3,6 +3,7 @@ import {FC, ReactNode, createContext, useContext, useEffect} from "react"
 
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
 import {BgTimer} from "@veiller/engine"
+import mantle from "@/services/MantleManager"
 import {useNavigationStore} from "@/stores/navigation"
 
 export interface DeepLinkRoute {
@@ -31,6 +32,15 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/home",
     handler: (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
+      // On a cold start this fires before the index route has run
+      // mantle.init(), which is what registers the built-in miniapp catalog.
+      // Going straight to /home then produced a home screen with no Settings
+      // tile, no Glasses Mirror and no bottom bar, unrecoverable without a
+      // force-stop. Boot first; index.tsx lands on home by itself.
+      if (!mantle.isInitialized) {
+        nav.replace("/")
+        return
+      }
       nav.replaceAll("/home")
     },
   },
@@ -40,7 +50,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/settings",
     handler: (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/miniapps/settings")
+      nav.push("/miniapps/settings/main")
     },
   },
   {
@@ -49,11 +59,19 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {section} = params
       const nav = useNavigationStore.getState()
       // Map section names to actual routes
+      // Every entry must name a route that exists under mobile/src/app —
+      // an unknown target lands the user on expo-router's "Unmatched Route"
+      // screen. "developer" (removed by XERK-214) and "theme" (folded into
+      // appearance) used to be listed here and had no such route.
       const sectionRoutes: Record<string, string> = {
         "privacy": "/miniapps/settings/privacy",
-        "developer": "/miniapps/settings/developer",
-        "theme": "/miniapps/settings/theme",
+        "appearance": "/miniapps/settings/appearance",
         "dashboard": "/miniapps/settings/dashboard",
+        "glasses": "/miniapps/settings/glasses",
+        "microphone": "/miniapps/settings/microphone",
+        "notifications": "/miniapps/settings/notifications",
+        "speech": "/miniapps/settings/speech",
+        "device-info": "/miniapps/settings/device-info",
         // Test/benchmark route — only useful behind Super Mode.
         "stress-test": "/miniapps/settings/stress-test",
       }
@@ -79,7 +97,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/glasses",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/glasses")
+      nav.push("/miniapps/settings/glasses")
     },
   },
   // XERK-200/XERK-206: ASG gallery route removed while the camera miniapp is parked.
@@ -96,7 +114,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/pairing",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/pairing/guide")
+      nav.push("/pairing/prep")
     },
   },
   {
@@ -105,10 +123,14 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {step} = params
       const nav = useNavigationStore.getState()
 
+      // "guide" and "bluetooth" had no route; the guide is /pairing/prep and
+      // the Bluetooth-classic step is /pairing/btclassic.
       const pairingRoutes: Record<string, string> = {
-        "guide": "/pairing/guide",
+        "guide": "/pairing/prep",
         "prep": "/pairing/prep",
-        "bluetooth": "/pairing/bluetooth",
+        "bluetooth": "/pairing/btclassic",
+        "btclassic": "/pairing/btclassic",
+        "scan": "/pairing/scan",
         "select-glasses": "/pairing/select-glasses-model",
         "wifi-setup": "/wifi/scan",
       }
@@ -117,19 +139,24 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       if (route) {
         nav.push(route as any)
       } else {
-        nav.push("/pairing/guide")
+        nav.push("/pairing/prep")
       }
     },
   },
 
   // Mirror/Gallery routes
-  {
-    pattern: "/mirror/gallery",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      nav.push("/mirror/gallery")
-    },
-  },
+  //
+  // XERK-200/XERK-206: the ASG gallery is parked with the camera miniapp, so
+  // there is no /mirror/gallery route. Registering the pattern anyway sent the
+  // user to expo-router's "Unmatched Route" screen; leave it unregistered so
+  // the link falls through to the fallback handler (home) instead.
+  // {
+  //   pattern: "/mirror/gallery",
+  //   handler: async (url: string, params: Record<string, string>) => {
+  //     const nav = useNavigationStore.getState()
+  //     nav.push("/mirror/gallery")
+  //   },
+  // },
   {
     pattern: "/mirror/video/:videoId",
     handler: async (url: string, params: Record<string, string>) => {
@@ -140,22 +167,26 @@ const deepLinkRoutes: DeepLinkRoute[] = [
   },
 
   // Search routes
-  {
-    pattern: "/search",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      const {q} = params
-      const route = q ? `/search/search?q=${encodeURIComponent(q)}` : "/search/search"
-      nav.push(route as any)
-    },
-  },
+  //
+  // There is no search screen in this fork — /search/search does not exist
+  // under mobile/src/app. Kept commented rather than pointing at a route that
+  // renders "Unmatched Route".
+  // {
+  //   pattern: "/search",
+  //   handler: async (url: string, params: Record<string, string>) => {
+  //     const nav = useNavigationStore.getState()
+  //     const {q} = params
+  //     const route = q ? `/search/search?q=${encodeURIComponent(q)}` : "/search/search"
+  //     nav.push(route as any)
+  //   },
+  // },
 
   // Onboarding routes
   {
     pattern: "/welcome",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/welcome")
+      nav.push("/onboarding/welcome")
     },
   },
   {
@@ -169,6 +200,18 @@ const deepLinkRoutes: DeepLinkRoute[] = [
   // Universal app link routes (for apps.mentraglass.com). The /applet/webview
   // target for Cloud V1 apps is gone (Cloud V1 app end-of-life); app links
   // land on the installed app's info screen instead.
+  {
+    // The verified App Link declared in app.config.ts is `/package/` — that is
+    // the path the manifest autoVerifies and the only one a browser will hand
+    // us. Only `/apps/` was registered, so every verified link fell through to
+    // the fallback handler and did nothing.
+    pattern: "/package/:packageName",
+    handler: async (url: string, params: Record<string, string>) => {
+      const nav = useNavigationStore.getState()
+      const {packageName} = params
+      nav.push(`/applet/settings?packageName=${encodeURIComponent(packageName)}`)
+    },
+  },
   {
     pattern: "/apps/:packageName",
     handler: async (url: string, params: Record<string, string>) => {

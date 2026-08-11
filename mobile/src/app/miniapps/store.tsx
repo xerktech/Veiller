@@ -15,6 +15,7 @@
  */
 import {useCallback, useEffect, useState} from "react"
 import {ActivityIndicator, ScrollView, View} from "react-native"
+import Toast from "react-native-toast-message"
 
 import {Button, Header, Screen, Switch, Text} from "@/components/ignite"
 import GlassView from "@/components/ui/GlassView"
@@ -93,15 +94,18 @@ export default function MiniappStorePage() {
     return engine.miniapps.onChanged(setApps)
   }, [])
 
+  /** Returns true when the check reached the registry, false on failure. */
   const resolveAvailable = useCallback(
-    async (source: VeillerMiniappSource) => {
+    async (source: VeillerMiniappSource): Promise<boolean> => {
       patchRow(source.packageName, {availability: "loading"})
       try {
         const bundle = await resolveLatestBundle(source)
         patchRow(source.packageName, {availableVersion: bundle?.version ?? null, availability: "resolved"})
+        return true
       } catch (error) {
         console.warn("MiniappStore: failed to resolve latest for", source.repo, error)
         patchRow(source.packageName, {availability: "error"})
+        return false
       }
     },
     [patchRow],
@@ -144,13 +148,27 @@ export default function MiniappStorePage() {
     }
   }
 
-  const handleCheckAll = () => {
+  const handleCheckAll = async () => {
     engine.miniapps.refresh()
     // A fresh check supersedes whatever the last install attempt reported.
-    for (const source of VEILLER_MINIAPPS) {
+    const checks = VEILLER_MINIAPPS.map((source) => {
       patchRow(source.packageName, {install: {stage: "idle"}})
-      void resolveAvailable(source)
-    }
+      return resolveAvailable(source)
+    })
+    const results = await Promise.all(checks)
+    // Acknowledge the tap. Without this the refresh button produced no toast,
+    // no spinner and no result — indistinguishable from a dead control,
+    // especially offline where every check fails.
+    const failed = results.filter((ok) => !ok).length
+    Toast.show({
+      type: failed > 0 ? "error" : "success",
+      text1:
+        failed > 0
+          ? translate("miniappStore:checkFailed")
+          : translate("miniappStore:checkComplete"),
+      position: "bottom",
+      visibilityTime: 2000,
+    })
   }
 
   return (
@@ -160,7 +178,7 @@ export default function MiniappStorePage() {
         leftIcon="chevron-left"
         onLeftPress={() => goBack()}
         rightIcon="refresh"
-        onRightPress={handleCheckAll}
+        onRightPress={() => void handleCheckAll()}
       />
       <ScrollView className="pt-6 px-6 -mx-6" contentContainerClassName="gap-4">
         <Text text={translate("miniappStore:description")} className="text-sm text-muted-foreground px-1" />
@@ -172,8 +190,11 @@ export default function MiniappStorePage() {
           const displayName = installed?.name ?? source.name
           const available = row.availableVersion
           const isInstalled = !!installedVersion
+          // An update is only "available" for something you actually have. When
+          // nothing is installed the row read "Update available" above an
+          // Install button.
           const updateAvailable =
-            row.availability === "resolved" && available != null && (!isInstalled || available !== installedVersion)
+            row.availability === "resolved" && available != null && isInstalled && available !== installedVersion
           const install = row.install
           const busy = isBusy(install)
 
@@ -190,10 +211,13 @@ export default function MiniappStorePage() {
           } else if (updateAvailable) {
             statusText = translate("miniappStore:updateAvailable")
             statusColor = theme.colors.text
+          } else if (row.availability === "error") {
+            // Checked before the installed-state branches: offline, the row
+            // used to keep claiming "Up to date", which the app cannot know.
+            statusText = translate("miniappStore:checkFailed")
+            statusColor = theme.colors.textDim
           } else if (isInstalled) {
             statusText = translate("miniappStore:upToDate")
-          } else if (row.availability === "error") {
-            statusText = translate("miniappStore:checkFailed")
           } else {
             statusText = translate("miniappStore:notInstalled")
           }

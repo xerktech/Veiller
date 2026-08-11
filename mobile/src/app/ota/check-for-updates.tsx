@@ -180,7 +180,12 @@ export default function OtaCheckForUpdatesScreen() {
   // Navigate to next step based on onboarding status
   const handleContinue = () => {
     const nextRoute = getNextOnboardingRoute({
-      includeMentraLive: true,
+      // XERK-206: the Mentra Live is parked, so its onboarding must never be
+      // offered. Hardcoding true sent every user — G2 or Simulated — to
+      // /onboarding/live, which opens "Welcome to Mentra Live" and then
+      // dead-ends: steps 2+ wait on a Mentra Live button press that can never
+      // arrive, and the screen has no Continue control.
+      includeMentraLive: false,
       onboardingLiveCompleted,
       onboardingOsCompleted,
     })
