@@ -42,27 +42,43 @@ function parseArgs(argv: string[]): Args {
       case "--help":
         args.help = true
         break
-      case "--model":
-        args.model = argv[++i]
+      case "--model": {
+        const value = argv[++i]
+        if (!value || value.startsWith("-")) throw new Error("--model requires a value (g1 or g2)")
+        args.model = value
         break
-      case "--port":
-        args.port = Number(argv[++i])
+      }
+      case "--port": {
+        const raw = argv[++i]
+        const value = Number(raw)
+        // Number("abc") is NaN, which Bun.serve treats as "pick any free
+        // port" — the simulator then printed the port the user asked for
+        // while listening somewhere else entirely.
+        if (!raw || !Number.isInteger(value) || value < 1 || value > 65535) {
+          throw new Error(`--port requires an integer between 1 and 65535 (got ${raw ?? "nothing"})`)
+        }
+        args.port = value
         break
+      }
       case "--headless":
         args.headless = true
         break
       case "--verbose":
         args.verbose = true
         break
-      case "--scenario":
-        args.scenario = argv[++i]
+      case "--scenario": {
+        const value = argv[++i]
+        if (!value || value.startsWith("-")) throw new Error("--scenario requires a file path")
+        args.scenario = value
         break
+      }
       case "--storage": {
         // --storage key=value, repeatable. Seeds session.storage so a run can
         // start already signed in / already configured.
         const pair = argv[++i] ?? ""
         const eq = pair.indexOf("=")
-        if (eq > 0) args.storage[pair.slice(0, eq)] = pair.slice(eq + 1)
+        if (eq <= 0) throw new Error(`--storage expects key=value (got ${pair || "nothing"})`)
+        args.storage[pair.slice(0, eq)] = pair.slice(eq + 1)
         break
       }
       default:
@@ -145,4 +161,13 @@ async function main(): Promise<void> {
   for (;;) await delay(60_000)
 }
 
-await main()
+// A bad flag, an unknown model or a bundle path that does not exist are user
+// errors, not simulator crashes — report them as one line rather than a stack
+// trace into someone else's source.
+try {
+  await main()
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err)
+  process.stderr.write(`veiller-simulate: ${message}\n`)
+  process.exit(1)
+}

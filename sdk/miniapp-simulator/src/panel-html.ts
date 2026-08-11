@@ -75,6 +75,8 @@ export function panelHtml(): string {
         <button data-gesture="swipe_down">Swipe down</button>
         <button data-gesture="triple_tap">Triple tap</button>
         <button data-gesture="long_press">Long press</button>
+        <button data-cmd="button" data-arg="short">Button press</button>
+        <button data-cmd="button" data-arg="long">Button long-press</button>
         <button data-cmd="mic" data-arg="500">Mic burst</button>
         <button data-cmd="background">Background</button>
         <button data-cmd="foreground">Foreground</button>
@@ -139,8 +141,15 @@ export function panelHtml(): string {
     document.getElementById("meta").textContent =
       s.packageName + " v" + s.version + " · " + s.model + " · " + s.width + "×" + s.height +
       " · phone " + s.visibility;
-    document.getElementById("hint").textContent = s.unimplemented.length
-      ? "Host calls the simulator does not implement: " + s.unimplemented.join(", ")
+    const gaps = [];
+    if (s.unimplemented && s.unimplemented.length)
+      gaps.push("not implemented (answered NOT_IMPLEMENTED): " + s.unimplemented.join(", "));
+    // Stubs answer ok without doing anything, so they are invisible to the
+    // miniapp — call them out or a green run reads as a working feature.
+    if (s.stubbed && s.stubbed.length)
+      gaps.push("acknowledged but not simulated: " + s.stubbed.join(", "));
+    document.getElementById("hint").textContent = gaps.length
+      ? "Host calls with no real behaviour — " + gaps.join(" | ")
       : "";
 
     var subs = document.getElementById("subs");

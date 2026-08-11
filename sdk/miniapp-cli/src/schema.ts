@@ -23,7 +23,10 @@ import {
   ALLOWED_ACTION_PARAM_TYPES,
 } from './manifest.js';
 
-const SCHEMA_ID = 'https://schemas.mentra.glass/miniapp/v1.json';
+// Identity only — nothing dereferences this URL. Scaffolded manifests point
+// `$schema` at the copy inside node_modules, and the CLI validates against the
+// in-process schema object.
+const SCHEMA_ID = 'https://schemas.veiller.app/miniapp/v1.json';
 
 export function generateSchema(): Record<string, unknown> {
   return {

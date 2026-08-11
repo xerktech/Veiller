@@ -11,7 +11,10 @@ const photoResult = {
   mimeType: "image/jpeg",
   size: 2048,
 }
-const cameraInvokeMock = mock(async () => photoResult)
+// Declared with the signature the tests actually install below —
+// `warmUp` resolves undefined, everything else resolves a photo — so
+// mockImplementation type-checks against it.
+const cameraInvokeMock = mock(async (_method: string): Promise<typeof photoResult | undefined> => photoResult)
 const systemInvokeMock = mock(async () => ({success: true}))
 
 // Tiny external store so tests can push tester:event payloads (button
@@ -229,7 +232,7 @@ describe("CameraPage", () => {
         {
           url: photoResult.photoUrl,
           mimeType: photoResult.mimeType,
-          filename: "mentra-photo-photo-1.jpg",
+          filename: "veiller-photo-photo-1.jpg",
         },
       ])
     })

@@ -22,8 +22,14 @@ see is what a G2 would show:
 | The device | `evenRealitiesG2` capabilities and the `G2_PROFILE` glyph metrics — 576×288, 40px lines, a 6-container text budget |
 | The phone page | The miniapp's real UI bundle, served with `buildVeillerUiShim` and the host globals injected |
 
-Everything the simulator does *not* implement answers with `NOT_IMPLEMENTED`
-and is listed in the panel, so a gap looks like a gap rather than a success.
+Gaps are surfaced, never silently papered over. Calls the simulator has no
+implementation for answer with `NOT_IMPLEMENTED` (`sim.host.unimplemented`).
+A few — `openUrl`, `share`, `copyToClipboard`, `download`, the mic VAD/gate and
+IMU toggles, transcription config, dashboard updates, calendar, and
+`location.getOnce` (a fixed San Francisco fix) — answer *ok* so a happy path
+keeps running, but do nothing; those are listed separately as
+`sim.host.stubbed`. Both lists show in the panel. Treat a stubbed call as
+untested, not working.
 
 ## The panel
 

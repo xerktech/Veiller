@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, copyFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, copyFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve, join } from 'path';
 import { buildProduction } from './build.js';
 import { validateManifest } from './manifest.js';
@@ -106,6 +106,27 @@ export async function pack(opts: PackOptions = {}): Promise<string> {
 
   const packageName = manifest.packageName as string;
   const version = manifest.version as string;
+
+  // The store records the version from the bundle filename, so a manifest
+  // version that has drifted from package.json ships a bundle labelled with a
+  // version the project does not think it is on (XERK-225). Warn rather than
+  // fail — miniapp.json is the authority, and some projects deliberately keep
+  // package.json at 0.0.0 — but do not let the drift pass silently.
+  const packageJsonPath = resolve(cwd, 'package.json');
+  if (existsSync(packageJsonPath)) {
+    try {
+      const pkgVersion = JSON.parse(readFileSync(packageJsonPath, 'utf-8')).version;
+      if (typeof pkgVersion === 'string' && pkgVersion && pkgVersion !== version) {
+        console.warn(
+          `Warning: miniapp.json version (${version}) does not match package.json version (${pkgVersion}).\n` +
+            `         The bundle will be published as ${packageName}-${version}.zip and installed as ${version}.`,
+        );
+      }
+    } catch {
+      // A miniapp does not need a readable package.json; ignore.
+    }
+  }
+
   const outputName = `${packageName}-${version}.zip`;
   const outDir = resolve(cwd, opts.outDir ?? 'build');
   if (!existsSync(outDir)) {
@@ -117,12 +138,34 @@ export async function pack(opts: PackOptions = {}): Promise<string> {
   }
   const outputPath = resolve(outDir, outputName);
 
+  // `zip` *adds to* an existing archive rather than replacing it, so repacking
+  // the same version after a rebuild would keep every stale content-hashed
+  // chunk forever — the shipped bundle grows on each pack and carries dead
+  // code. Start from a clean archive every time.
+  if (existsSync(outputPath)) {
+    unlinkSync(outputPath);
+  }
+
   // Create ZIP using system zip command
-  const zipProc = Bun.spawn(['zip', '-r', outputPath, '.'], {
-    cwd: distDir,
-    stdout: opts.silent ? 'pipe' : 'inherit',
-    stderr: opts.silent ? 'pipe' : 'inherit',
-  });
+  let zipProc;
+  try {
+    zipProc = Bun.spawn(['zip', '-r', outputPath, '.'], {
+      cwd: distDir,
+      stdout: opts.silent ? 'pipe' : 'inherit',
+      stderr: opts.silent ? 'pipe' : 'inherit',
+    });
+  } catch {
+    // Bun throws rather than returning a non-zero exit when the binary is
+    // missing entirely. A raw stack trace here reads as a CLI bug; say what
+    // is actually missing instead.
+    console.error(
+      'Error: `zip` is required to pack a miniapp but was not found on PATH.\n' +
+        '  Debian/Ubuntu: apt-get install zip\n' +
+        '  macOS:         zip ships with the OS\n' +
+        '  Alpine:        apk add zip',
+    );
+    process.exit(1);
+  }
 
   const exitCode = await zipProc.exited;
   if (exitCode !== 0) {

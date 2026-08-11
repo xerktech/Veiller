@@ -17,8 +17,13 @@ export interface Channels {
   "rec:status": RecorderStatus
   /** Stop was accepted and the capture is being finalized. */
   "rec:stopping": Record<string, never>
-  /** Recording ended — clears the live status. */
-  "rec:stopped": Record<string, never>
+  /**
+   * Recording ended — clears the live status. `error` is set when the capture
+   * ended because it could not start (mic denied, bridge unavailable) rather
+   * than because the user stopped it; without it a failed start was
+   * indistinguishable from a normal stop and the UI said nothing at all.
+   */
+  "rec:stopped": {error?: string}
   /** Updated recordings list + usage (after save/delete/clear). */
   "rec:list": {recordings: RecordingItem[]; usage: Usage}
   /** Which recording (if any) is currently playing back. */

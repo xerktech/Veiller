@@ -314,7 +314,12 @@ export class RecorderController {
     } catch (err) {
       console.log("Recorder: start failed", err)
       await this.resetCapture(true)
-      this.ui.send("rec:stopped", {})
+      // Tell the phone *why*. Previously this was an empty rec:stopped, which
+      // the UI treats as an ordinary end-of-recording — so a start that failed
+      // outright looked like nothing had happened.
+      this.ui.send("rec:stopped", {
+        error: err instanceof Error ? err.message : "Recording could not be started.",
+      })
     }
   }
 

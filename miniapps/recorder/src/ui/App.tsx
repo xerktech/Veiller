@@ -92,6 +92,17 @@ export function App() {
         </div>
       </div>
 
+      {/* A capture that could not start reports here. Without it the app just
+          stayed on "Recorder ready" as though nothing had been attempted. */}
+      {rec.startError ? (
+        <div
+          role="alert"
+          className="mx-4 mb-2 rounded-xl px-3 py-2 text-[13px]"
+          style={{background: "var(--danger-bg, #fee2e2)", color: "var(--danger-text, #991b1b)"}}>
+          Couldn’t start recording: {rec.startError}
+        </div>
+      ) : null}
+
       {/* List */}
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-4 pb-28">
         {!rec.ready ? (

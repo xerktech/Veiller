@@ -29,11 +29,25 @@ function parseArgs(argv: string[]): CliFlags {
   return flags;
 }
 
-function toKebabCase(str: string): string {
-  return str
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .replace(/[\s_]+/g, '-')
+/**
+ * Turn a project name into one reverse-DNS segment.
+ *
+ * `packageName` must match `^[a-zA-Z][a-zA-Z0-9_]*(\.…)+$` — the pattern in
+ * miniapp.schema.json, which `validateManifest` now enforces too. Kebab-case is
+ * *not* legal there: a dash makes the manifest the scaffolder just wrote fail
+ * its own `$schema`, and `pack`/`dev`/`release` then reject the project on the
+ * developer's first command. Project names accept dashes, spaces and a leading
+ * digit (see validateProjectName), so all three have to be folded away here.
+ */
+function toPackageSegment(str: string): string {
+  const segment = str
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
     .toLowerCase();
+  // A segment must start with a letter; "2048" and "3d-viewer" otherwise
+  // produce an identifier the schema rejects.
+  return /^[a-z]/.test(segment) ? segment : `app_${segment}`;
 }
 
 function validateProjectName(name: string): string | undefined {
@@ -82,15 +96,18 @@ if (!glassesType) {
     await select<GlassesType>({
       message: 'What kind of glasses is this miniapp for?',
       options: [
+        // XERK-206: the Even Realities G2 is the only supported display
+        // device. Naming parked hardware here steers new developers at
+        // targets this fork does not build for.
         {
           value: 'display',
           label: 'Display glasses',
-          hint: 'Even Realities G1/G2, Vuzix Z100',
+          hint: 'Even Realities G2',
         },
         {
           value: 'camera',
           label: 'Camera glasses',
-          hint: 'Mentra Live',
+          hint: 'camera-equipped glasses (no supported device today)',
         },
       ],
     }),
@@ -100,8 +117,7 @@ if (!glassesType) {
 const targetDir = path.resolve(process.cwd(), projectName);
 const templateDir = path.resolve(import.meta.dirname, '..', 'template');
 
-const kebabName = toKebabCase(projectName);
-const packageName = `com.veiller.${kebabName}`;
+const packageName = `com.veiller.${toPackageSegment(projectName)}`;
 const hardwareRequirements =
   glassesType === 'camera'
     ? [
@@ -113,12 +129,21 @@ const hardwareRequirements =
         { type: 'MICROPHONE', level: 'REQUIRED' },
       ];
 
+const BINARY_TEMPLATE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp']);
+
 function renderFile(srcPath: string, destPath: string): void {
   if (path.basename(srcPath) === 'miniapp.json') {
     const raw = fs.readFileSync(srcPath, 'utf-8');
     const manifest = JSON.parse(raw.replace(/\{\{packageName\}\}/g, packageName));
     manifest.hardwareRequirements = hardwareRequirements;
     fs.writeFileSync(destPath, JSON.stringify(manifest, null, 2) + '\n');
+    return;
+  }
+
+  // Binary template assets (icon.png) must be copied byte-for-byte — reading
+  // them as UTF-8 and writing the string back corrupts them.
+  if (BINARY_TEMPLATE_EXTENSIONS.has(path.extname(srcPath).toLowerCase())) {
+    fs.copyFileSync(srcPath, destPath);
     return;
   }
 
@@ -145,8 +170,12 @@ function copyDir(src: string, dest: string): void {
 
 copyDir(templateDir, targetDir);
 
+// Project names may contain spaces, so the copy-pasteable hint has to quote
+// the directory or the very first command it suggests fails.
+const cdTarget = /^[a-zA-Z0-9._-]+$/.test(projectName) ? projectName : `'${projectName.replace(/'/g, `'\\''`)}'`;
+
 note(
-  `cd ${projectName}\nbun install\nbun dev`,
+  `cd ${cdTarget}\nbun install\nbun dev`,
   'Next steps',
 );
 

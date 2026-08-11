@@ -186,8 +186,12 @@ export function Settings({
               </span>
             </div>
 
+            {/* The G2 renders 8 lines (G2_PROFILE.maxLines); offering only
+                2–5 left three lines of the lens unreachable. The controller
+                still clamps to the connected profile's maxLines, so a device
+                with fewer lines is unaffected. */}
             <div className="grid grid-cols-4 gap-2">
-              {[2, 3, 4, 5].map((lines) => (
+              {[2, 3, 4, 5, 6, 7, 8].map((lines) => (
                 <button
                   key={lines}
                   onClick={() => handleDisplayLinesChange(lines)}

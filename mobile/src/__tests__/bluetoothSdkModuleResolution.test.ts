@@ -1,6 +1,8 @@
 import * as fs from "fs"
 import * as path from "path"
 
+import * as ts from "typescript"
+
 // Guards the invariant that `bun run compile` type-checks @veiller/bluetooth-sdk
 // against the same files Metro bundles (src/, via the "react-native" exports
 // condition), never against the gitignored build/ output. build/ is only
@@ -18,13 +20,18 @@ import * as path from "path"
 
 const mobileRoot = path.resolve(__dirname, "../..")
 
+// tsconfig.json is JSONC, not JSON — it legitimately carries `//` comments
+// (mobile/tsconfig.json explains its `exclude` entries that way). Parse through
+// TypeScript's own reader so comments and trailing commas are tolerated here
+// exactly as tsc tolerates them; it handles plain package.json just as well.
 const readJson = (filePath: string) => {
   const raw = fs.readFileSync(filePath, "utf8")
-  try {
-    return JSON.parse(raw)
-  } catch (error) {
-    throw new Error(`Failed to parse ${filePath}: ${error}`)
+  const {config, error} = ts.parseConfigFileTextToJson(filePath, raw)
+  if (error) {
+    const message = ts.flattenDiagnosticMessageText(error.messageText, " ")
+    throw new Error(`Failed to parse ${filePath}: ${message}`)
   }
+  return config
 }
 
 describe("bluetooth-sdk type/runtime surface alignment", () => {

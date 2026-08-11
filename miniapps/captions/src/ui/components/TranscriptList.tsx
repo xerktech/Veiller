@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Trash2 } from "lucide-react"
 import { useRef, useEffect, useState } from "react"
 
 // eslint-disable-next-line no-restricted-imports
@@ -70,6 +70,20 @@ export function TranscriptList({
           ))
         )}
       </div>
+
+      {/* Clear. onClearTranscripts was already plumbed in from App.tsx but
+          nothing ever rendered a control for it, so there was no way to clear
+          the transcript — or the lens — from the phone at all. */}
+      {transcripts.length > 0 && (
+        <button
+          type="button"
+          onClick={onClearTranscripts}
+          aria-label="Clear transcript"
+          className="absolute bottom-6 left-6 px-4 h-12 rounded-full shadow-lg flex items-center gap-2 transition-all z-10 bg-white/90 dark:bg-zinc-800/90 text-gray-900 dark:text-zinc-50 hover:bg-white dark:hover:bg-zinc-700">
+          <Trash2 className="w-4 h-4" />
+          <span className="text-sm font-medium">Clear</span>
+        </button>
+      )}
 
       {/* Scroll to bottom FAB */}
       {!autoScroll && transcripts.length > 0 && (

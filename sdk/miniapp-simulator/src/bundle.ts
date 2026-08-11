@@ -10,7 +10,7 @@
 import {existsSync, statSync} from "node:fs"
 import {readFile, mkdtemp, mkdir, writeFile} from "node:fs/promises"
 import {tmpdir} from "node:os"
-import {dirname, join, resolve} from "node:path"
+import {dirname, join, resolve, sep} from "node:path"
 import JSZip from "jszip"
 
 export interface MiniappManifestPermission {
@@ -36,6 +36,12 @@ export interface LoadedBundle {
   backgroundCode: string
   /** Absolute path to the UI entry HTML, when the miniapp ships one. */
   uiEntry: string | null
+  /**
+   * Temp directory this load created by expanding a .zip, if any. The
+   * Simulator removes it on stop() — otherwise every run of a packed bundle
+   * left a full copy behind in /tmp forever.
+   */
+  tempRoot?: string
 }
 
 /** In order: the path itself, then the two conventional build-output children. */
@@ -47,7 +53,9 @@ export async function loadBundle(path: string): Promise<LoadedBundle> {
   const abs = resolve(path)
   if (!existsSync(abs)) throw new Error(`No such bundle: ${abs}`)
 
-  const start = statSync(abs).isDirectory() ? abs : await unpackZip(abs)
+  const isDirectory = statSync(abs).isDirectory()
+  const tempRoot = isDirectory ? undefined : await unpackZip(abs)
+  const start = tempRoot ?? abs
 
   const manifestDir = candidatesFor(start).find((c) => existsSync(join(c, "miniapp.json")))
   if (!manifestDir) {
@@ -73,7 +81,7 @@ export async function loadBundle(path: string): Promise<LoadedBundle> {
   const uiEntryRel = manifest.entry?.ui
   const uiEntry = uiEntryRel && existsSync(join(root, uiEntryRel)) ? join(root, uiEntryRel) : null
 
-  return {manifest, root: resolve(root), backgroundCode, uiEntry}
+  return {manifest, root: resolve(root), backgroundCode, uiEntry, ...(tempRoot ? {tempRoot} : {})}
 }
 
 /** A packed bundle: expand into a temp dir so the UI can be served from disk. */
@@ -83,6 +91,14 @@ async function unpackZip(zipPath: string): Promise<string> {
   const entries = Object.values(zip.files).filter((f) => !f.dir)
   for (const entry of entries) {
     const target = join(dir, entry.name)
+    // Bundles are third-party input. JSZip normalises traversal segments
+    // today, so this is belt-and-braces — but "an archive cannot write
+    // outside its extraction root" should be enforced here, not inherited
+    // from a dependency's current behaviour.
+    const contained = resolve(target)
+    if (contained !== resolve(dir) && !contained.startsWith(resolve(dir) + sep)) {
+      throw new Error(`${zipPath} contains an entry that escapes the bundle root: ${entry.name}`)
+    }
     await mkdir(dirname(target), {recursive: true})
     await writeFile(target, Buffer.from(await entry.async("arraybuffer")))
   }

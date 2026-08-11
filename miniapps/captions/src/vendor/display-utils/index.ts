@@ -46,6 +46,9 @@ export type {
 
 export { G1_PROFILE, G1_PROFILE_LEGACY, G1_HYPHEN_WIDTH_PX, G1_SPACE_WIDTH_PX } from "./profiles";
 
+// G2 Profile (G1 glyphs, 8 lines, 40px line height)
+export { G2_PROFILE, G2_HYPHEN_WIDTH_PX, G2_SPACE_WIDTH_PX } from "./profiles";
+
 // Z100 Profile
 export { Z100_PROFILE, Z100_HYPHEN_WIDTH_PX, Z100_SPACE_WIDTH_PX } from "./profiles";
 

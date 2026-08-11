@@ -4,6 +4,7 @@
     "create-veiller-miniapp",
     "example-oem-app",
     "miniapp-cli",
+    "miniapp-simulator",
     "../cloud-v2/packages/*",
     "../mobile/modules/miniapp",
     "../mobile/modules/jspolyfill",

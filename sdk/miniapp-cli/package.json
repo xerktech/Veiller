@@ -18,8 +18,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "bun src/index.ts schema regenerate",
-    "prepare": "bun src/index.ts schema regenerate"
+    "build": "bun src/index.ts schema regenerate"
   },
   "dependencies": {
     "@clack/prompts": "^1.2.0",
@@ -29,26 +28,25 @@
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",
-    "@veiller/miniapp-simulator": "file:../miniapp-simulator",
     "bun-types": "^1.3.14"
   },
   "files": [
     "src",
+    "!src/**/*.test.ts",
     "schema"
   ],
   "keywords": [
-    "veiller",
     "veiller",
     "miniapp",
     "cli"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mentra-Community/MentraOS.git",
+    "url": "git+https://github.com/xerktech/Veiller.git",
     "directory": "sdk/miniapp-cli"
   },
-  "homepage": "https://github.com/Mentra-Community/MentraOS/tree/dev/sdk/miniapp-cli#readme",
+  "homepage": "https://github.com/xerktech/Veiller/tree/main/sdk/miniapp-cli#readme",
   "bugs": {
-    "url": "https://github.com/Mentra-Community/MentraOS/issues"
+    "url": "https://github.com/xerktech/Veiller/issues"
   }
 }

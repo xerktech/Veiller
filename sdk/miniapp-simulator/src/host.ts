@@ -72,6 +72,12 @@ export class SimulatorHost {
   public readonly trace: TraceEntry[] = []
   /** Requests the simulator was asked for but does not implement. */
   public readonly unimplemented: string[] = []
+  /**
+   * Requests the simulator answers successfully without simulating anything.
+   * Distinct from `unimplemented`, which is answered with NOT_IMPLEMENTED —
+   * these look like successes to the miniapp, so they need surfacing too.
+   */
+  public readonly stubbed: string[] = []
 
   constructor(opts: SimulatorHostOptions) {
     this.opts = opts
@@ -199,14 +205,22 @@ export class SimulatorHost {
         this.reply(requestId, {auth: this.authState()})
         return
 
+      // ── Acknowledged, but not actually simulated ──────────────────────
+      // These reply ok so a miniapp's happy path keeps running, but the
+      // simulator does nothing: no browser opens, no clipboard is written, no
+      // VAD or IMU exists. The README promises a gap looks like a gap, so
+      // record them as stubs — otherwise a developer reads a green run as
+      // proof the feature works and finds out on hardware.
       case MiniappRequestType.OPEN_URL:
         this.log("request", `system.openUrl(${String(payload.url)})`)
+        this.noteStub(type)
         this.reply(requestId, {ok: true})
         return
       case MiniappRequestType.SHARE:
       case MiniappRequestType.COPY_CLIPBOARD:
       case MiniappRequestType.DOWNLOAD:
         this.log("request", `${type} ${JSON.stringify(payload).slice(0, 120)}`)
+        this.noteStub(type)
         this.reply(requestId, {ok: true})
         return
 
@@ -216,14 +230,19 @@ export class SimulatorHost {
       case MiniappRequestType.TRANSCRIPTION_CONFIG:
       case MiniappRequestType.DASHBOARD_CONTENT_UPDATE:
         this.log("request", `${type} ${JSON.stringify(payload).slice(0, 120)}`)
+        this.noteStub(type)
         this.reply(requestId, {ok: true})
         return
 
       case MiniappRequestType.LOCATION_POLL:
+        // A fixed San Francisco fix. A miniapp cannot tell this from a real
+        // one, so location logic "passes" here and fails in the field.
+        this.noteStub(type)
         this.reply(requestId, {lat: 37.7956, lng: -122.3933, accuracy: 10, timestamp: Date.now()})
         return
 
       case MiniappRequestType.CALENDAR_LIST_EVENTS:
+        this.noteStub(type)
         this.reply(requestId, {events: [], truncated: false})
         return
 
@@ -235,6 +254,12 @@ export class SimulatorHost {
         return
       }
     }
+  }
+
+  /** Record a request that was answered ok without being simulated. */
+  private noteStub(type: string | undefined): void {
+    const name = type ?? "<unknown>"
+    if (!this.stubbed.includes(name)) this.stubbed.push(name)
   }
 
   private handleConnect(): void {
@@ -316,6 +341,21 @@ export class SimulatorHost {
     const specific = this.emit(`touch_event:${kind}`, data)
     const delivered = bare || specific
     this.log("event", `touch ${kind}${delivered ? "" : " (dropped — not subscribed)"}`)
+    return delivered
+  }
+
+  /**
+   * Deliver a temple-bar button press (`session.input.onButtonPress`).
+   *
+   * Distinct from `touch()`: the SDK maps onButtonPress to the `button_press`
+   * stream, not `touch_event`. Without this the simulator could never deliver
+   * the one interaction the scaffolder's template subscribes to, so a new
+   * developer's first scaffold → simulate loop showed a permanently blank lens
+   * with no error anywhere.
+   */
+  buttonPress(buttonId = "temple", pressType: "short" | "long" = "short"): boolean {
+    const delivered = this.emit("button_press", {buttonId, pressType})
+    this.log("event", `button ${buttonId}/${pressType}${delivered ? "" : " (dropped — not subscribed)"}`)
     return delivered
   }
 

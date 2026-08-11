@@ -15,6 +15,7 @@
     "miniapp:build": "cd miniapp && bun run build.ts",
     "miniapp:pack": "cd miniapp && PKG=$(node -p \"require('./miniapp.json').packageName\") && VERSION=$(node -p \"require('./miniapp.json').version\") && rm -f build/$PKG-$VERSION.zip && mkdir -p build && cd dist && zip -qr ../build/$PKG-$VERSION.zip .",
     "build": "bun run miniapp:build",
+    "test": "bun test",
     "pack": "bun run miniapp:build && bun run miniapp:pack"
   },
   "dependencies": {

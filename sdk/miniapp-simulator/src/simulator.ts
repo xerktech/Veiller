@@ -7,6 +7,8 @@
  * into the mic, background the app, open the phone page, look at the lens.
  */
 
+import {rm} from "node:fs/promises"
+
 import {BackgroundRuntime, type BackgroundLog} from "./background"
 import {loadBundle, type LoadedBundle} from "./bundle"
 import {VirtualGlasses, type SceneView} from "./glasses"
@@ -80,6 +82,16 @@ export class Simulator {
     await delay(60)
     this.runtime.stop()
     this.started = false
+    // Loading a packed .zip expands it into a temp dir; without this every
+    // run of a packed bundle left a full copy in /tmp for good.
+    const tempRoot = this.bundle.tempRoot
+    if (tempRoot) {
+      try {
+        await rm(tempRoot, {recursive: true, force: true})
+      } catch {
+        /* a leftover temp dir must never fail a run */
+      }
+    }
   }
 
   // ===========================================================================
@@ -101,6 +113,18 @@ export class Simulator {
   }
   gesture(kind: string): boolean {
     return this.host.touch(kind)
+  }
+
+  /**
+   * Press the temple-bar button (`session.input.onButtonPress`).
+   *
+   * Not the same stream as `tap()`: onButtonPress subscribes to `button_press`
+   * while the tap/swipe helpers emit `touch_event`. An app that only listens
+   * for button presses — which is what the scaffolder's template does — sees
+   * nothing from `tap()`.
+   */
+  buttonPress(buttonId = "temple", pressType: "short" | "long" = "short"): boolean {
+    return this.host.buttonPress(buttonId, pressType)
   }
 
   /**

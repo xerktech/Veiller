@@ -23,7 +23,7 @@
 import { registerMiniapp, type TypedMiniappSession } from "@veiller/miniapp/background";
 
 import { App } from "../core/app.ts";
-import { DEFAULT_POLL_MS, isConfigured, loadConfig, type Config } from "../core/config.ts";
+import { DEFAULT_POLL_MS, isConfigured, loadConfig, normalizeHubUrl, type Config } from "../core/config.ts";
 import { HubClient } from "../core/hub-client.ts";
 import { LiveTail } from "../core/live.ts";
 import { setDefaultMeasure } from "../core/text-wrap.ts";
@@ -159,8 +159,38 @@ class TurmaBackground {
     // fetch is CORS-fragile; the JSContext's fetch has no CORS. The UI's
     // HubClient builds its own auth headers — this proxy is transport only.
     ui.handle("turma:fetch", async (req) => {
+      // Transport only — but not an open proxy. Unrestricted, this handler
+      // would relay any URL the WebView asked for: other origins on the
+      // phone's LAN, link-local metadata addresses, localhost services, and
+      // (off-device) file://. Constrain it to what the hub client actually
+      // needs.
+      const method = req.method ?? "GET";
+      let target: URL;
+      try {
+        target = new URL(req.url);
+      } catch {
+        return { status: 0, ok: false, bodyText: "turma:fetch: malformed URL" };
+      }
+      if (target.protocol !== "http:" && target.protocol !== "https:") {
+        return { status: 0, ok: false, bodyText: `turma:fetch: refused scheme ${target.protocol}` };
+      }
+
+      const configuredHub = normalizeHubUrl((await loadConfig(this.storage)).hubUrl);
+      const hubOrigin = configuredHub ? new URL(configuredHub).origin : null;
+      // phone-login validates credentials against a hub the user has just
+      // typed, before that hub is saved (postLogin runs ahead of saveConfig),
+      // so the sign-in probe is the one call allowed to reach another origin.
+      const isLoginProbe = method.toUpperCase() === "POST" && target.pathname === "/api/login";
+      if (target.origin !== hubOrigin && !isLoginProbe) {
+        return {
+          status: 0,
+          ok: false,
+          bodyText: `turma:fetch: refused ${target.origin} (configured hub is ${hubOrigin ?? "unset"})`,
+        };
+      }
+
       const res = await fetch(req.url, {
-        method: req.method ?? "GET",
+        method,
         headers: req.headers,
         body: req.body,
       });

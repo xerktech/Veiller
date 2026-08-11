@@ -1,10 +1,11 @@
 {
   "name": "teleprompter-miniapp",
   "private": true,
-  "description": "On-glasses teleprompter — your notes, floating in front of you while you speak.",
+  "description": "On-glasses teleprompter \u2014 your notes, floating in front of you while you speak.",
   "scripts": {
     "dev": "veiller-miniapp dev",
     "build": "bun run build.ts",
+    "test": "bun test",
     "pack": "veiller-miniapp pack",
     "release": "veiller-miniapp release"
   },

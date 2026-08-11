@@ -38,10 +38,10 @@
   "sideEffects": false,
   "scripts": {
     "build": "rm -rf dist tsconfig.tsbuildinfo && bun x tsc -p tsconfig.json",
+    "build:module": "bun run build",
     "dev": "bun x tsc --watch",
     "typecheck": "bun x tsc --noEmit",
     "test": "bun test",
-    "prepare": "bun run build",
     "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
@@ -69,17 +69,16 @@
   ],
   "keywords": [
     "veiller",
-    "veiller",
     "miniapp",
     "smart-glasses"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mentra-Community/MentraOS.git",
+    "url": "git+https://github.com/xerktech/Veiller.git",
     "directory": "mobile/modules/miniapp"
   },
-  "homepage": "https://github.com/Mentra-Community/MentraOS/tree/dev/mobile/modules/miniapp#readme",
+  "homepage": "https://github.com/xerktech/Veiller/tree/main/mobile/modules/miniapp#readme",
   "bugs": {
-    "url": "https://github.com/Mentra-Community/MentraOS/issues"
+    "url": "https://github.com/xerktech/Veiller/issues"
   }
 }
