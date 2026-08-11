@@ -1,5 +1,5 @@
 import * as Linking from "expo-linking"
-import {FC, ReactNode, createContext, useContext, useEffect} from "react"
+import {FC, ReactNode, createContext, useContext, useEffect, useRef} from "react"
 
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
 import {BgTimer} from "@veiller/engine"
@@ -127,7 +127,10 @@ const deepLinkRoutes: DeepLinkRoute[] = [
         "prep": "/pairing/select-glasses-model",
         "bluetooth": "/pairing/btclassic",
         "btclassic": "/pairing/btclassic",
-        "scan": "/pairing/scan",
+        // "scan" needs a deviceModel just as much as guide/prep do — without
+        // one it renders "Scanning for " and the native scan throws
+        // "Cannot convert 'undefined' to a Kotlin type".
+        "scan": "/pairing/select-glasses-model",
         "select-glasses": "/pairing/select-glasses-model",
         "wifi-setup": "/wifi/scan",
       }
@@ -333,8 +336,12 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
     return params
   }
 
-  let lastProcessedUrl: string | null = null
-  let lastProcessedTime = 0
+  // Refs, not locals: these were plain `let`s in the provider body, so every
+  // re-render reset them. That made the dedup window simultaneously useless
+  // (real duplicates got through and pushed the same screen twice) and harmful
+  // (a stale record survived long enough to swallow the legitimate replay of a
+  // pending route after boot). XERK-249.
+  const lastProcessed = useRef<{url: string | null; at: number}>({url: null, at: 0})
 
   const processUrl = async (url: string, initial: boolean = false) => {
     try {
@@ -351,12 +358,15 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       // call happens >2s later (1s initial delay + init time + 1s DEEPLINK_DELAY)
       // so it naturally falls outside the dedup window.
       const now = Date.now()
-      if (!initial && url === lastProcessedUrl && now - lastProcessedTime < 3000) {
+      if (!initial && url === lastProcessed.current.url && now - lastProcessed.current.at < 3000) {
         console.log("DEEPLINK: Ignoring duplicate URL")
         return
       }
-      lastProcessedUrl = url
-      lastProcessedTime = now
+      // NB: the URL is claimed at dispatch (below), not here. Claiming it up
+      // front marked as "processed" every call that then bailed out — deferred
+      // for boot, or skipped because the pending route was consumed — so the
+      // one call that actually would have navigated got suppressed as a
+      // duplicate and the deep link was lost on home (XERK-249).
 
       // For initial URLs (cold start), set the pending route BEFORE the delay.
       // This prevents a race condition where index.tsx init completes during the
@@ -386,9 +396,23 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       // handlers because every entry point needs it: cold deep links, the
       // +not-found fallback, and any handler that ends up at home (XERK-249).
       if (!mantle.isInitialized) {
+        // Idempotent: a cold start delivers the same URL through two paths
+        // (+not-found and Linking.getInitialURL). Replacing to "/" twice
+        // remounts the index route, and the second instance's
+        // navigateToDestination() runs clearHistoryAndGoHome *after* the first
+        // has already replayed the deep link — wiping the screen the user
+        // asked for. Defer once and let the boot in flight finish.
+        if (nav.getPendingRoute() === url) {
+          console.log("DEEPLINK: boot already pending for", url)
+          return
+        }
         console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
         nav.setPendingRoute(url)
         nav.replace("/")
+        // Nothing was navigated, so this URL has NOT been handled. Clear the
+        // dedup record or index.tsx's replay after boot is mistaken for a
+        // duplicate and the deep link is silently dropped on home.
+        lastProcessed.current = {url: null, at: 0}
         return
       }
 
@@ -408,6 +432,10 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       }
 
       try {
+        // Claim it now that a route matched and the handler is about to run:
+        // this is the point at which a second delivery really would be a
+        // duplicate.
+        lastProcessed.current = {url, at: Date.now()}
         console.log("@@@@@@@@@@@@@ MATCHED ROUTE @@@@@@@@@@@@@@@", matchedRoute)
         console.log("@@@@@@@@@@@@@ PARAMS @@@@@@@@@@@@@@@", params)
         console.log("@@@@@@@@@@@@@ URL @@@@@@@@@@@@@@@", url)

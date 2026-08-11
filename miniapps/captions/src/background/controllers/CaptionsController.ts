@@ -56,6 +56,7 @@ import type {Channels} from "../../shared/channels"
 import {
   CAPTION_TIMEOUT_OPTIONS_SECONDS,
   DEFAULT_CAPTION_TIMEOUT_SECONDS,
+  isSupportedDisplayLines,
   type CaptionSettings,
   type CaptionsSnapshot,
   type DisplayPreview,
@@ -388,7 +389,7 @@ export class CaptionsController {
   }
 
   private async setDisplayLines(lines: number): Promise<void> {
-    if (lines < 2 || lines > 5) return
+    if (!isSupportedDisplayLines(lines)) return
     this.settings.displayLines = lines
     await this.persist(STORAGE_KEYS.displayLines, lines.toString())
     this.applySettingsToDisplay()

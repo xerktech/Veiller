@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react"
 
-import {CAPTION_TIMEOUT_OPTIONS_SECONDS, DEFAULT_CAPTION_TIMEOUT_SECONDS} from "../../shared/types"
+import {CAPTION_TIMEOUT_OPTIONS_SECONDS, DEFAULT_CAPTION_TIMEOUT_SECONDS, DISPLAY_LINES_OPTIONS} from "../../shared/types"
 import type {CaptionSettings} from "../hooks/useSettings"
 import {DisplayPreview} from "../hooks/useTranscripts"
 
@@ -194,7 +194,7 @@ export function Settings({
                 alone — whether the G2 can really show 8 is a question for real
                 hardware, not the simulator. */}
             <div className="grid grid-cols-4 gap-2">
-              {[2, 3, 4, 5, 6, 7].map((lines) => (
+              {DISPLAY_LINES_OPTIONS.map((lines) => (
                 <button
                   key={lines}
                   onClick={() => handleDisplayLinesChange(lines)}

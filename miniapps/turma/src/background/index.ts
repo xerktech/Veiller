@@ -24,6 +24,7 @@ import { registerMiniapp, type TypedMiniappSession } from "@veiller/miniapp/back
 
 import { App } from "../core/app.ts";
 import { DEFAULT_POLL_MS, isConfigured, loadConfig, normalizeHubUrl, type Config } from "../core/config.ts";
+import { decideFetch, FETCH_TIMEOUT_MS } from "../core/fetch-policy.ts";
 import { HubClient } from "../core/hub-client.ts";
 import { LiveTail } from "../core/live.ts";
 import { setDefaultMeasure } from "../core/text-wrap.ts";
@@ -159,70 +160,59 @@ class TurmaBackground {
     // fetch is CORS-fragile; the JSContext's fetch has no CORS. The UI's
     // HubClient builds its own auth headers — this proxy is transport only.
     ui.handle("turma:fetch", async (req) => {
-      // Transport only — but not an open proxy. Unrestricted, this handler
-      // would relay any URL the WebView asked for: other origins on the
-      // phone's LAN, link-local metadata addresses, localhost services, and
-      // (off-device) file://. Constrain it to what the hub client actually
-      // needs.
+      // Transport only. What may be reached — and whether the body comes back
+      // — is decided by decideFetch (core/fetch-policy.ts), which is unit
+      // tested; this handler must stay a thin shell around it.
       const method = req.method ?? "GET";
-      let target: URL;
-      try {
-        target = new URL(req.url);
-      } catch {
-        return { status: 0, ok: false, bodyText: "turma:fetch: malformed URL" };
-      }
-      if (target.protocol !== "http:" && target.protocol !== "https:") {
-        return { status: 0, ok: false, bodyText: `turma:fetch: refused scheme ${target.protocol}` };
-      }
-
       const configuredHub = normalizeHubUrl((await loadConfig(this.storage)).hubUrl);
       const hubOrigin = configuredHub ? new URL(configuredHub).origin : null;
-      // phone-login validates credentials against a hub the user has just
-      // typed, before that hub is saved (postLogin runs ahead of saveConfig),
-      // so the sign-in probe is the one call allowed to reach another origin.
-      // Exact path, no query and no fragment: phone-login posts precisely
-      // `${hubBase}/api/login`, so anything else is not the sign-in probe.
-      const isLoginProbe =
-        method.toUpperCase() === "POST" &&
-        target.pathname === "/api/login" &&
-        target.search === "" &&
-        target.hash === "";
-      const isConfiguredHub = hubOrigin !== null && target.origin === hubOrigin;
-      if (!isConfiguredHub && !isLoginProbe) {
-        return {
-          status: 0,
-          ok: false,
-          bodyText: `turma:fetch: refused ${target.origin} (configured hub is ${hubOrigin ?? "unset"})`,
-        };
+
+      const decision = decideFetch({ url: req.url, method, hubOrigin });
+      if (!decision.allow) {
+        return { status: 0, ok: false, bodyText: decision.reason };
       }
 
+      // A host that accepts the connection and then answers nothing left this
+      // RPC pending forever, so the phone page waited on a promise that could
+      // never settle.
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), FETCH_TIMEOUT_MS);
       let res: Response;
       try {
         res = await fetch(req.url, {
           method,
           headers: req.headers,
           body: req.body,
+          signal: abort.signal,
         });
       } catch (err) {
-        // A network failure here used to escape as an unhandled rejection and
-        // tear down the caller; the UI expects a value it can branch on.
+        // A network failure used to escape as an unhandled rejection and tear
+        // down the caller; the UI expects a value it can branch on.
+        const aborted = abort.signal.aborted;
         return {
           status: 0,
           ok: false,
-          bodyText: `turma:fetch: request failed: ${err instanceof Error ? err.message : String(err)}`,
+          bodyText: aborted
+            ? `turma:fetch: timed out after ${FETCH_TIMEOUT_MS}ms`
+            : `turma:fetch: request failed: ${err instanceof Error ? err.message : String(err)}`,
         };
+      } finally {
+        clearTimeout(timer);
       }
 
-      // The cross-origin sign-in probe is allowed to report *whether* the
-      // credentials were accepted, not to read the response. phone-login only
-      // branches on ok/status; returning the body would make this handler a
-      // usable read primitive against any host on the phone's network.
-      if (!isConfiguredHub) {
+      if (!decision.withBody) {
         return { status: res.status, ok: res.ok, bodyText: "" };
       }
 
-      const bodyText = await res.text();
-      return { status: res.status, ok: res.ok, bodyText };
+      try {
+        return { status: res.status, ok: res.ok, bodyText: await res.text() };
+      } catch (err) {
+        return {
+          status: res.status,
+          ok: false,
+          bodyText: `turma:fetch: could not read body: ${err instanceof Error ? err.message : String(err)}`,
+        };
+      }
     });
 
     ui.handle("turma:storage-get", async ({ key }) => ({ value: await this.storage.get(key) }));
