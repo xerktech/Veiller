@@ -1,6 +1,6 @@
-import {beforeEach, describe, expect, mock, test} from "bun:test"
+import {afterEach, beforeEach, describe, expect, mock, test} from "bun:test"
 import {useSyncExternalStore} from "react"
-import {act, fireEvent, render, screen, waitFor} from "@testing-library/react"
+import {act, cleanup, fireEvent, render, screen, waitFor} from "@testing-library/react"
 import {MemoryRouter} from "react-router-dom"
 
 import {DEFAULT_WARMUP_DURATION_MS} from "./cameraPageModel"
@@ -57,6 +57,15 @@ mock.module("../../hooks/useChannel", () => ({
 const {default: CameraPage} = await import("./CameraPage")
 
 describe("CameraPage", () => {
+  // React Testing Library only auto-cleans when it detects a supported test
+  // framework's global afterEach. bun 1.2.x — the version CI pins — is not
+  // detected, so mounted trees accumulated in the DOM and every query after
+  // the first test failed with "Found multiple elements". Explicit cleanup
+  // works on every runtime (XERK-249).
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
     cameraInvokeMock.mockClear()
     cameraInvokeMock.mockImplementation(async (method: string) => {

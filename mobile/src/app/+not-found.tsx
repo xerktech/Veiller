@@ -1,40 +1,51 @@
-import {useGlobalSearchParams, usePathname} from "expo-router"
-import {useEffect, useRef} from "react"
+import {useFocusEffect, useGlobalSearchParams, usePathname} from "expo-router"
+import {useCallback, useEffect, useRef} from "react"
 import {ActivityIndicator, View} from "react-native"
 
 import {Screen} from "@/components/ignite"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
 import mantle from "@/services/MantleManager"
 import {useAppTheme} from "@/contexts/ThemeContext"
+import {shouldResetToHomeBeforeHandoff} from "@/services/deeplink/planDeeplink"
 import {useNavigationStore} from "@/stores/navigation"
 
 /**
  * Catch-all for paths expo-router cannot resolve to a file route.
  *
  * The app's deep links are *virtual*: `DeeplinkContext` matches patterns like
- * `/settings`, `/glasses` and `/package/:packageName` and translates them into
- * real routes. But expo-router resolves an incoming URL against the file tree
- * first, so on a **cold start** those paths hit no route and rendered the
- * development "Unmatched Route / Page could not be found" screen — a dead end
- * with a Sitemap link, shipped to users (XERK-249).
+ * `/settings`, `/glasses` and `/pairing/bluetooth` and translates them into real
+ * routes. expo-router resolves an incoming URL against the file tree first, so
+ * on a cold start those paths hit no route and would otherwise render the
+ * development "Unmatched Route / Page could not be found" screen — a dead end,
+ * shipped to users (XERK-249).
  *
- * Rather than show that, hand the path back to the deep-link processor, which
- * knows how to translate it, and fall back to home when it cannot. A spinner
- * covers the handoff so the screen never reads as an error.
+ * This screen is only a shim, and both of its hazards are about *when* it
+ * navigates:
+ *
+ *  - Resetting to home before handing off strands the user whenever the handoff
+ *    then declines to navigate (a repeat delivery), and before boot it produces
+ *    the crippled home — no Settings tile, no Glasses Mirror, no bottom bar —
+ *    that the boot deferral exists to avoid. So it resets only when the plan
+ *    says something will definitely navigate.
+ *  - Left in the back stack it is a bare spinner. Rather than manipulate
+ *    history, it sends the user home if they ever navigate *back* into it.
  */
+
 /**
  * How long to let the deep-link handoff navigate before bailing out to home.
  * Generous: a cold start boots the runtime first, which takes a while.
  */
-const NOT_FOUND_RESCUE_MS = 15_000
+const NOT_FOUND_RESCUE_MS = 20_000
 
 export default function NotFoundScreen() {
   const {theme} = useAppTheme()
   const pathname = usePathname()
   const params = useGlobalSearchParams()
-  const {processUrl} = useDeeplink()
+  const {processUrl, planFor} = useDeeplink()
+
   const handled = useRef(false)
   const mountedRef = useRef(true)
+  const hasBlurred = useRef(false)
 
   useEffect(() => {
     mountedRef.current = true
@@ -43,11 +54,11 @@ export default function NotFoundScreen() {
     }
   }, [])
 
-  // `params` is a fresh object and `processUrl` a fresh function on every
-  // render, so depending on them re-ran this effect, whose cleanup cancelled
-  // the rescue timer while `handled.current` stopped it being re-armed — the
-  // timer therefore never fired. Serialise the params into the dep instead and
-  // hold processUrl in a ref.
+  // `params` is a fresh object and the context functions fresh closures on
+  // every render, so depending on them re-ran the handoff effect, whose cleanup
+  // cancelled the rescue timer while `handled` stopped it being re-armed — the
+  // timer therefore never fired at all. Depend on a serialised string instead,
+  // and hold the context functions in refs.
   const query = Object.entries(params)
     .filter(([, value]) => typeof value === "string")
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
@@ -55,32 +66,53 @@ export default function NotFoundScreen() {
 
   const processUrlRef = useRef(processUrl)
   processUrlRef.current = processUrl
+  const planForRef = useRef(planFor)
+  planForRef.current = planFor
+
+  // If this screen is focused *again* — the user pressed Back into it — it has
+  // already done its job and is nothing but a spinner. Leave.
+  useFocusEffect(
+    useCallback(() => {
+      if (hasBlurred.current && handled.current) {
+        useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
+      }
+      return () => {
+        hasBlurred.current = true
+      }
+    }, []),
+  )
 
   useEffect(() => {
     if (handled.current) return
     handled.current = true
 
     const path = query ? `${pathname}?${query}` : pathname
+    const url = `com.xerktech.veiller://${path.replace(/^\/+/, "")}`
 
-    console.warn("NOT_FOUND: no file route for", path, "— handing back to the deep-link processor")
+    const plan = planForRef.current(url)
+    console.warn("NOT_FOUND: no file route for", path, "— plan:", plan.kind)
 
-    // Once the app has booted, drop this screen from the stack first so the
-    // deep link's push lands on top of home. Otherwise Back returns here — to
-    // a bare spinner whose effect has already run, which reads as a hang.
-    // Before boot we must NOT do this: home without its built-in miniapps is
-    // the crippled state the processUrl guard exists to prevent, and going
-    // through the index route is what boots the app.
-    if (mantle.isInitialized) {
+    if (plan.kind === "duplicate") {
+      // An earlier delivery of this same URL already navigated, and what the
+      // user asked for is on the stack underneath this shim. Pop, rather than
+      // reset — resetting to home threw away the screen they just asked for.
+      useNavigationStore.getState().goBack()
+      return
+    }
+
+    if (shouldResetToHomeBeforeHandoff(plan)) {
+      // Something will navigate on top of this, so drop the shim first: the
+      // push then lands on home and Back reaches home, not a spinner.
       useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
     }
 
-    void processUrlRef.current(`com.xerktech.veiller://${path.replace(/^\/+/, "")}`)
+    void processUrlRef.current(url)
 
-    // Safety net: this screen must never be somewhere a user can be stranded.
-    // If nothing has navigated away by the time boot and the deep-link path
-    // have had their chance, fall back to home.
+    // Safety net: never leave the user staring at a spinner. Only meaningful
+    // once the app has booted — before that a boot is in flight, and going home
+    // would produce the crippled home this path exists to avoid.
     const rescue = setTimeout(() => {
-      if (!mountedRef.current) return
+      if (!mountedRef.current || !mantle.isInitialized) return
       console.warn("NOT_FOUND: nothing navigated away — falling back to home")
       useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
     }, NOT_FOUND_RESCUE_MS)

@@ -4,6 +4,7 @@ import {FC, ReactNode, createContext, useContext, useEffect, useRef} from "react
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
 import {BgTimer} from "@veiller/engine"
 import mantle from "@/services/MantleManager"
+import {planDeeplink, type DeeplinkPlan} from "@/services/deeplink/planDeeplink"
 import {useNavigationStore} from "@/stores/navigation"
 
 export interface DeepLinkRoute {
@@ -35,6 +36,18 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       // processUrl guarantees the app has booted before any handler runs, so
       // the built-in catalog is registered by the time we get here.
       nav.replaceAll("/home")
+    },
+  },
+
+  {
+    // A real file route, but it still needs a pattern here: without one,
+    // processUrl fell through to the fallback handler, which replaces to "/"
+    // and boots the app a second time (~20s of extra splash) before landing on
+    // home instead of the store.
+    pattern: "/miniapps/store",
+    handler: (url: string, params: Record<string, string>) => {
+      const nav = useNavigationStore.getState()
+      nav.push("/miniapps/store")
     },
   },
 
@@ -125,8 +138,13 @@ const deepLinkRoutes: DeepLinkRoute[] = [
         // the URL does not carry — send them to the picker that supplies one.
         "guide": "/pairing/select-glasses-model",
         "prep": "/pairing/select-glasses-model",
-        "bluetooth": "/pairing/btclassic",
-        "btclassic": "/pairing/btclassic",
+        // NOT /pairing/btclassic: that screen calls focusEffectPreventBack()
+        // and its header back button is commented out, so a deep link into it
+        // traps the app — Back does nothing and only a force-stop escapes. It
+        // is a step inside the pairing flow, reachable from it, not an entry
+        // point.
+        "bluetooth": "/pairing/select-glasses-model",
+        "btclassic": "/pairing/select-glasses-model",
         // "scan" needs a deviceModel just as much as guide/prep do — without
         // one it renders "Scanning for " and the native scan throws
         // "Cannot convert 'undefined' to a Kotlin type".
@@ -200,12 +218,13 @@ const deepLinkRoutes: DeepLinkRoute[] = [
   // Universal app link routes (for apps.mentraglass.com). The /applet/webview
   // target for Cloud V1 apps is gone (Cloud V1 app end-of-life); app links
   // land on the installed app's info screen instead.
+  // `/package/:packageName` — the path the manifest autoVerifies — is a real
+  // expo-router file route (mobile/src/app/package/[packageName].tsx), so
+  // expo-router mounts it directly and that screen performs the translation
+  // itself with `replace`. Registering a handler here as well would navigate a
+  // second time on top of it.
   {
-    // The verified App Link declared in app.config.ts is `/package/` — that is
-    // the path the manifest autoVerifies and the only one a browser will hand
-    // us. Only `/apps/` was registered, so every verified link fell through to
-    // the fallback handler and did nothing.
-    pattern: "/package/:packageName",
+    pattern: "/apps/:packageName",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
       const {packageName} = params
@@ -213,25 +232,23 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     },
   },
   {
-    pattern: "/apps/:packageName",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      const {packageName} = params
-      nav.push(`/applet/settings?packageName=${packageName}`)
-    },
-  },
-  {
     pattern: "/apps/:packageName/settings",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
       const {packageName} = params
-      nav.push(`/applet/settings?packageName=${packageName}`)
+      nav.push(`/applet/settings?packageName=${encodeURIComponent(packageName)}`)
     },
   },
 ]
 
 interface DeeplinkContextType {
   processUrl: (url: string) => Promise<void>
+  /**
+   * What processUrl would do with this URL right now, without doing it.
+   * `+not-found` needs this to decide whether resetting to home first is safe:
+   * clearing history and then declining to navigate strands the user.
+   */
+  planFor: (url: string) => DeeplinkPlan
 }
 
 const DeeplinkContext = createContext<DeeplinkContextType>({} as DeeplinkContextType)
@@ -341,7 +358,7 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   // (real duplicates got through and pushed the same screen twice) and harmful
   // (a stale record survived long enough to swallow the legitimate replay of a
   // pending route after boot). XERK-249.
-  const lastProcessed = useRef<{url: string | null; at: number}>({url: null, at: 0})
+  const lastDispatched = useRef<{url: string | null; at: number}>({url: null, at: 0})
   /**
    * The URL we have already deferred pending a boot. Deliberately separate from
    * nav's pendingRoute, which other code (and processUrl's own `initial`
@@ -351,28 +368,38 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
 
   const processUrl = async (url: string, initial: boolean = false) => {
     try {
-      // ignore expo-dev-deeplinks: (this was causing android to restart the app after hot-reloads twice)
-      if (url.includes("expo-development-client")) {
-        console.log("DEEPLINK: Ignoring expo-development-client URL")
+
+      // Every decision about this URL — ignore / defer for boot / duplicate /
+      // dispatch — is made by planDeeplink, which is pure and unit tested. See
+      // services/deeplink/planDeeplink.ts for why.
+      const plan = planDeeplink({
+        url,
+        isInitialized: mantle.isInitialized,
+        bootDeferredFor: bootDeferredFor.current,
+        lastDispatched: lastDispatched.current,
+        now: Date.now(),
+        initial,
+      })
+
+      if (plan.kind === "ignore") {
+        console.log("DEEPLINK: ignoring —", plan.reason)
         return
       }
-
-      // Deduplicate — iOS can fire the same universal link event multiple times,
-      // and on cold start both getInitialURL and addEventListener fire for the
-      // same URL. Initial calls skip the check but claim the URL so that the
-      // duplicate addEventListener call is blocked. The index.tsx re-processing
-      // call happens >2s later (1s initial delay + init time + 1s DEEPLINK_DELAY)
-      // so it naturally falls outside the dedup window.
-      const now = Date.now()
-      if (!initial && url === lastProcessed.current.url && now - lastProcessed.current.at < 3000) {
+      if (plan.kind === "duplicate") {
         console.log("DEEPLINK: Ignoring duplicate URL")
         return
       }
-      // NB: the URL is claimed at dispatch (below), not here. Claiming it up
-      // front marked as "processed" every call that then bailed out — deferred
-      // for boot, or skipped because the pending route was consumed — so the
-      // one call that actually would have navigated got suppressed as a
-      // duplicate and the deep link was lost on home (XERK-249).
+      if (plan.kind === "already-deferred") {
+        console.log("DEEPLINK: boot already pending for", url)
+        return
+      }
+      if (plan.kind === "defer-for-boot") {
+        console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
+        bootDeferredFor.current = url
+        nav.setPendingRoute(url)
+        nav.replace("/")
+        return
+      }
 
       // For initial URLs (cold start), set the pending route BEFORE the delay.
       // This prevents a race condition where index.tsx init completes during the
@@ -394,42 +421,6 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
         url = "https://apps.mentraglass.com" + url
       }
 
-      // Nothing may navigate before the app has booted. mantle.init() — run by
-      // the index route — is what registers the built-in miniapp catalog, so a
-      // handler that lands on /home first produces a home screen with no
-      // Settings tile, no Glasses Mirror and no bottom bar, unrecoverable
-      // without a force-stop. This guard sits here rather than in individual
-      // handlers because every entry point needs it: cold deep links, the
-      // +not-found fallback, and any handler that ends up at home (XERK-249).
-      if (!mantle.isInitialized) {
-        // Idempotent: a cold start can deliver the same URL through two paths
-        // (+not-found and Linking.getInitialURL). Replacing to "/" twice
-        // remounts the index route, and the second instance's
-        // navigateToDestination() runs clearHistoryAndGoHome *after* the first
-        // has already replayed the deep link — wiping the screen the user
-        // asked for. Defer once and let the boot in flight finish.
-        //
-        // The signal has to be our OWN record, not nav.getPendingRoute(): the
-        // `initial` branch above sets that same pending route a few lines
-        // earlier, so reading it made this guard see its own write, skip the
-        // replace("/") below, and never boot the app at all. Paths that
-        // expo-router resolves to a real file route have no other entry point,
-        // so they hung on a dead screen with no way out but a force-stop.
-        if (bootDeferredFor.current === url) {
-          console.log("DEEPLINK: boot already pending for", url)
-          return
-        }
-        console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
-        bootDeferredFor.current = url
-        nav.setPendingRoute(url)
-        nav.replace("/")
-        // Nothing was navigated, so this URL has NOT been handled. Clear the
-        // dedup record or index.tsx's replay after boot is mistaken for a
-        // duplicate and the deep link is silently dropped on home.
-        lastProcessed.current = {url: null, at: 0}
-        return
-      }
-
       const parsedUrl = new URL(url)
       const matchedRoute = findMatchingRoute(parsedUrl)
 
@@ -446,10 +437,11 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       }
 
       try {
-        // Claim it now that a route matched and the handler is about to run:
+        // Recorded now that a route matched and the handler is about to run:
         // this is the point at which a second delivery really would be a
-        // duplicate.
-        lastProcessed.current = {url, at: Date.now()}
+        // repeat. Recording on entry marked calls that then bailed out as
+        // handled, which swallowed the one call that would have navigated.
+        lastDispatched.current = {url, at: Date.now()}
         console.log("@@@@@@@@@@@@@ MATCHED ROUTE @@@@@@@@@@@@@@@", matchedRoute)
         console.log("@@@@@@@@@@@@@ PARAMS @@@@@@@@@@@@@@@", params)
         console.log("@@@@@@@@@@@@@ URL @@@@@@@@@@@@@@@", url)
@@ -469,8 +461,19 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
     }
   }
 
+  const planFor = (url: string): DeeplinkPlan =>
+    planDeeplink({
+      url,
+      isInitialized: mantle.isInitialized,
+      bootDeferredFor: bootDeferredFor.current,
+      lastDispatched: lastDispatched.current,
+      now: Date.now(),
+      initial: false,
+    })
+
   const contextValue: DeeplinkContextType = {
     processUrl,
+    planFor,
   }
 
   return <DeeplinkContext.Provider value={contextValue}>{children}</DeeplinkContext.Provider>

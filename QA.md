@@ -75,10 +75,24 @@ matrix along this line or you will test only half of it:**
   `/apps/<pkg>`, `/pairing/bluetooth`, `/pairing/nonsense`, unknown paths) go
   through `+not-found`, which calls `processUrl` and drives the boot.
 - Paths that **do** have a file route under `mobile/src/app/` are rendered by
-  expo-router directly and never reach `+not-found`. Today those are
-  `/package/[packageName]`, `/miniapps/settings/<section>`, `/miniapps/store`,
+  expo-router directly and never reach `+not-found`. `ls -R mobile/src/app` is
+  the authoritative list; it is longer than it looks and includes **`/home`**
+  (`home.tsx`), `/package/[packageName]`, `/miniapps/store`,
+  `/miniapps/settings/<section>`, `/applet/{settings,text-editor}`,
+  `/onboarding/*`, `/wifi/*`, `/ota/*`, `/mirror/video-player`,
+  `/home/background-apps`, `/glasses/nex-developer-settings`, `/test/mini-app`
   and `/pairing/{prep,scan,btclassic,failure,loading,select-glasses-model,
-  success,unpair-even}`. `ls mobile/src/app/**` is the authoritative list.
+  select-controller,prep-controller,scan-controller,success,unpair-even}`.
+- A file-route path whose deep-link handler pushes a *different* route leaves
+  the file route's own screen in the stack underneath. `/package/<pkg>` is the
+  one that bites: its file route renders nothing at all (every child of
+  `mobile/src/app/package/[packageName].tsx` is commented out), so Back from a
+  warm `://package/...` or the https App Link lands on a black screen.
+- `/miniapps/store` has **no** entry in `DeeplinkContext`'s table, so a deep
+  link to it hits the fallback handler, which does `replaceAll("/")` — a full
+  index remount and a second `INDEX: init()` / version check. Same for any
+  unknown path. Expect `MANTLE: init()` x2 and `INDEX: MOUNTED` x2 there and do
+  not read it as a double boot bug; `mantle.init()` itself is idempotent.
 
 ### Screens and how to reach them
 
@@ -89,7 +103,12 @@ matrix along this line or you will test only half of it:**
   → "Success" dialog → OK.
 - Settings list: `://settings` (the home "Settings" *tile* is a miniapp launcher
   and does not open this screen).
-- Pairing: home → "Pair glasses" → model picker (G2 only, by XERK-206) → prep guide.
+- Pairing: home → "Connect glasses" → model picker (G2 only, by XERK-206) →
+  prep → "Continue to pairing" → `/pairing/scan` ("Scanning for Even Realities
+  G2"). If "Continue to pairing" silently does nothing, a previously-denied
+  Bluetooth permission is raising a "Permission Required" alert: grant them
+  first with `adb shell pm grant com.xerktech.veiller
+  android.permission.{BLUETOOTH_SCAN,BLUETOOTH_CONNECT,BLUETOOTH_ADVERTISE,RECORD_AUDIO,READ_PHONE_STATE}`.
 - Simulated/no-glasses: home → "Setup without glasses" → "Phone mode" → Start.
 
 ### Store install/update paths
@@ -148,10 +167,19 @@ Green baseline for the 9 suites: captions 10, example-miniapp 21, merge 6,
 navigation 78, recorder 18, teleprompter 2, tenir 69, translation 11, turma 341.
 **All nine pass** — verified 3x consecutively on a quiet machine.
 
-If `example-miniapp` (`CameraPage`) or `navigation` (`AudioGuidanceManager`)
-come back red, suspect your environment before your change: both were observed
-failing during a pass where another agent session was driving the same host, and
-both are green in isolation. Re-run them alone before attributing the failure.
+**Those numbers are bun-version dependent, and CI runs the version that
+fails.** With `~/tools/bun122/bun-linux-x64/bun` (1.2.22, the CI pin):
+`example-miniapp` is 15 pass / 6 fail and `navigation` is 73 pass / 5 fail,
+deterministically, in isolation, 3/3. With bun 1.3.14 on PATH both are green
+(21 and 78). Causes:
+- `navigation/src/test/audio-guidance.test.ts:56` calls `jest.isFakeTimers()`,
+  which 1.2.22 does not implement — `TypeError: jest.isFakeTimers is not a
+  function` in `afterEach`.
+- `example-miniapp` `CameraPage.test.tsx` renders accumulate across tests under
+  1.2.22, so `getByLabelText("mode")` hits "Found multiple elements".
+Always reproduce a miniapp suite result with the 1.2.22 binary before deciding
+whether CI is green. An earlier version of this file blamed the host; it was
+wrong.
 
 `miniapps/navigation`'s build prints `WARN: No public Mapbox token is set` — it
 is a warning, not a build failure.
@@ -223,9 +251,11 @@ rather than importing across an absolute path — otherwise bun fails with
   `DISPLAY_LINES_OPTIONS` from `miniapps/captions/src/shared/types.ts`; keep it
   that way, and note the cap is 7 (not `G2_PROFILE.maxLines` of 8) because
   8 x 40px overflows the 288px lens and measurably renders 7.
-- **`CaptionsController.loadSettings()` does not revalidate `displayLines`** the
-  way it revalidates `captionTimeoutSeconds` — any integer already in storage is
-  accepted on boot. Only `setDisplayLines` enforces `DISPLAY_LINES_OPTIONS`.
+- **Captions validates `displayLines` on both edges now** — `setDisplayLines`
+  and `loadSettings` both run `isSupportedDisplayLines`, so a seeded or stale
+  storage value outside 2–7 loads as the default 3. Nothing in the captions
+  suite covers that (removing the `loadSettings` check leaves 10/10 green), so
+  verify it in the simulator, not by reading the tests.
 - **Deep-link delivery has three entry points and is easy to break.** A cold
   start delivers the same URL through `+not-found` *and*
   `Linking.getInitialURL()`, and `index.tsx` replays it again after boot. The
@@ -244,19 +274,40 @@ rather than importing across an absolute path — otherwise bun fails with
   file-route paths, which have no other entry point — the app renders the file
   route with no runtime behind it and never boots. Always include a file-route
   path in a cold deep-link matrix.
-- **`+not-found` stays in the stack under a pushed deep-link screen**, so Back
-  from a warm deep link lands on its bare spinner; a second Back reaches home.
-  Its 15 s rescue timer does not save this: the effect's deps include
-  `useGlobalSearchParams()` and the context's `processUrl`, both of which get a
-  new identity every render, so the cleanup clears the timer and the
-  `handled.current` early-return never re-arms it. Treat the rescue as dead code
-  until that is fixed — do not assume it covers a strand.
-- **`/pairing/scan` exists as a file route**, so a deep link to it mounts the
-  real scan screen and fires the native scan even when the deep-link table
-  redirects elsewhere. You get "Scanning for " with an empty model and a red
-  `[startScan] Cannot convert 'undefined' to a Kotlin type` toast. Mapping the
-  URL to another screen in `DeeplinkContext` does not prevent this; only
-  `scan.tsx` guarding on a missing `deviceModel` would.
+- **`+not-found`'s 15 s rescue timer does fire now** (its deps are a serialised
+  `query` string and `pathname`, not the fresh objects that used to cancel it).
+  To make it fire, keep `mantle.init()` from completing for >15 s and deliver
+  the same URL twice: `adb shell cmd connectivity airplane-mode enable`, then a
+  cold deep link — the boot version check fails, the app parks on "Connection
+  Error", and a second delivery of the same URL takes the
+  `DEEPLINK: boot already pending` early return, so nothing navigates.
+  Watch for `NOT_FOUND: nothing navigated away`.
+- **`+not-found` calls `clearHistoryAndGoHome()` on the booted path before it
+  hands off to `processUrl`.** If `processUrl` then declines to navigate — most
+  easily by hitting the 3 s dedup window — the target screen is wiped and never
+  re-pushed, and the user lands on home. Fire the *same* warm link twice 1 s
+  apart to see it. Count `NAV: push()` **and** check the screen: one push with
+  the wrong screen showing is the failure mode.
+- **`/pairing/scan` is a file route, so a deep link mounts the real scan
+  screen** whatever the deep-link table says. `scan.tsx` now guards on a missing
+  `deviceModel` and `replace()`s to `/pairing/select-glasses-model`; the marker
+  is `PAIRING: /pairing/scan opened without a deviceModel`. If that guard is
+  ever weakened the symptom returns as "Scanning for " with an empty model plus
+  a red `[startScan] Cannot convert 'undefined' to a Kotlin type`. Nothing in
+  `mobile/src/__tests__/app/pairing/scan.test.tsx` covers the missing-model
+  case — every test sets `deviceModel` — so removing the guard keeps jest green.
+- **`/pairing/btclassic` (and `/pairing/bluetooth`, which maps to it) is a
+  one-way screen.** It calls `focusEffectPreventBack()` and its header back
+  button is commented out, so hardware Back does nothing, HOME + relaunch
+  returns to it, and its only control is "Open settings". Reaching it by deep
+  link traps the app until a force-stop. Do not use it as a warm-link fixture
+  unless you are prepared to force-stop afterwards.
+- **Nothing under `mobile/**` tests `DeeplinkContext.tsx` or `+not-found.tsx`.**
+  Reverting the boot-deferral guard, the `+not-found` history clear, the
+  `/pairing/scan` guard, the captions load validation or the turma hub-URL
+  try/catch all leave every suite green. Deep-link behaviour is only ever
+  verified on a device — budget for that, and never accept a green suite as
+  evidence a deep-link change works.
 
 ## Blast radius
 

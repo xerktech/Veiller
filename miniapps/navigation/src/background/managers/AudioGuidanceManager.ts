@@ -90,6 +90,27 @@ export class AudioGuidanceManager {
   constructor(
     private readonly speaker: SpeakerPort,
     private readonly log: (message: string) => void = () => {},
+    /**
+     * Clock, injectable for tests. The grace-period logic here is entirely
+     * time-based, and the tests used to drive it with jest fake timers —
+     * which bun 1.2.x (the version CI pins) does not implement
+     * (`jest.advanceTimersByTime` is undefined), so five tests failed there
+     * while passing on 1.3.x. An injected clock is deterministic on every
+     * runtime (XERK-249).
+     */
+    private readonly now: () => number = () => Date.now(),
+    /**
+     * Timer scheduling, injectable alongside the clock. The deferred-prompt
+     * drain rides a real setTimeout, so advancing the clock alone cannot fire
+     * it — tests need both to move together.
+     */
+    private readonly scheduler: {
+      setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>
+      clearTimeout: (handle: ReturnType<typeof setTimeout>) => void
+    } = {
+      setTimeout: (fn, ms) => setTimeout(fn, ms),
+      clearTimeout: (handle) => clearTimeout(handle),
+    },
   ) {}
 
   setAvailable(available: boolean): void {
@@ -119,14 +140,14 @@ export class AudioGuidanceManager {
   confirmTripStarted(destinationName: string | null): void {
     if (!this.tripActive) return
     this.tripConfirmed = true
-    this.tripStartedAt = Date.now()
+    this.tripStartedAt = this.now()
     if (this.canSpeak()) {
       const destination = cleanSpokenText(destinationName)
       this.enqueue({
         text: destination ? `Navigation started to ${destination}.` : "Navigation started.",
         // Lead the first maneuver cue, but still allow arrival to interrupt.
         priority: 100,
-        expiresAt: Date.now() + 12_000,
+        expiresAt: this.now() + 12_000,
       })
     }
     const latest = this.latestUnconfirmedInput
@@ -177,7 +198,7 @@ export class AudioGuidanceManager {
         this.startupRerouteSuppressed = true
       } else {
         this.startupRerouteSuppressed = false
-        this.enqueue({text: "Off route. Rerouting.", priority: 100, expiresAt: Date.now() + 10_000})
+        this.enqueue({text: "Off route. Rerouting.", priority: 100, expiresAt: this.now() + 10_000})
       }
     } else if (input.status !== "rerouting") {
       this.startupRerouteSuppressed = false
@@ -189,7 +210,7 @@ export class AudioGuidanceManager {
       const phrase = destination ? `You have arrived at ${destination}${side}.` : `You have arrived${side}.`
       this.currentManeuverKey = null
       this.currentRepeatPhrase = phrase
-      this.enqueue({text: phrase, priority: 110, expiresAt: Date.now() + 20_000})
+      this.enqueue({text: phrase, priority: 110, expiresAt: this.now() + 20_000})
       this.tripActive = false
       this.allowImplicitResume = false
       this.lastOffRoute = false
@@ -222,7 +243,7 @@ export class AudioGuidanceManager {
         this.discardStaleManeuverPrompts()
         this.currentManeuverKey = null
         this.currentRepeatPhrase = phrase
-        this.enqueue({text: phrase, priority: 100, expiresAt: Date.now() + 12_000})
+        this.enqueue({text: phrase, priority: 100, expiresAt: this.now() + 12_000})
       }
       this.lastOffRoute = true
       return
@@ -295,7 +316,7 @@ export class AudioGuidanceManager {
         this.enqueue({
           text: approachPhrase,
           priority: 30,
-          expiresAt: Date.now() + 15_000,
+          expiresAt: this.now() + 15_000,
           maneuverKey,
         })
       }
@@ -318,7 +339,7 @@ export class AudioGuidanceManager {
       this.enqueue({
         text: nowPhrase,
         priority: 90,
-        expiresAt: Date.now() + 7_000,
+        expiresAt: this.now() + 7_000,
         maneuverKey,
       })
       return
@@ -337,7 +358,7 @@ export class AudioGuidanceManager {
       this.enqueue({
         text: preparePhrase,
         priority: 30,
-        expiresAt: Date.now() + 15_000,
+        expiresAt: this.now() + 15_000,
         maneuverKey,
       })
     }
@@ -348,7 +369,7 @@ export class AudioGuidanceManager {
     this.enqueue({
       text: this.currentRepeatPhrase,
       priority: 95,
-      expiresAt: Date.now() + 8_000,
+      expiresAt: this.now() + 8_000,
       maneuverKey: this.currentManeuverKey ?? undefined,
     })
     return true
@@ -379,7 +400,7 @@ export class AudioGuidanceManager {
   }
 
   private isStartupOffRouteGraceActive(): boolean {
-    return this.tripStartedAt != null && Date.now() - this.tripStartedAt < STARTUP_OFF_ROUTE_GRACE_MS
+    return this.tripStartedAt != null && this.now() - this.tripStartedAt < STARTUP_OFF_ROUTE_GRACE_MS
   }
 
   private resetManeuverState(): void {
@@ -415,11 +436,11 @@ export class AudioGuidanceManager {
     }
 
     const gap = prompt.priority >= 90 ? 0 : MIN_AUTOMATIC_PROMPT_GAP_MS
-    const wait = Math.max(0, this.lastPromptStartedAt + gap - Date.now())
+    const wait = Math.max(0, this.lastPromptStartedAt + gap - this.now())
     if (wait > 0) {
       if (!this.pending || prompt.priority >= this.pending.priority) this.pending = prompt
       if (!this.pendingTimer) {
-        this.pendingTimer = setTimeout(() => {
+        this.pendingTimer = this.scheduler.setTimeout(() => {
           this.pendingTimer = null
           this.drainPending()
         }, wait)
@@ -435,7 +456,7 @@ export class AudioGuidanceManager {
     this.speaking = true
     this.speakingPriority = prompt.priority
     this.speakingManeuverKey = prompt.maneuverKey ?? null
-    this.lastPromptStartedAt = Date.now()
+    this.lastPromptStartedAt = this.now()
     this.log(`VOICE ${prompt.text}`)
     void this.speaker
       .speak(prompt.text, {
@@ -465,7 +486,7 @@ export class AudioGuidanceManager {
   }
 
   private isPromptValid(prompt: Prompt): boolean {
-    if (!this.canSpeak() || Date.now() > prompt.expiresAt) return false
+    if (!this.canSpeak() || this.now() > prompt.expiresAt) return false
     return !prompt.maneuverKey || prompt.maneuverKey === this.currentManeuverKey
   }
 
@@ -498,7 +519,7 @@ export class AudioGuidanceManager {
 
   private clearPendingTimer(): void {
     if (!this.pendingTimer) return
-    clearTimeout(this.pendingTimer)
+    this.scheduler.clearTimeout(this.pendingTimer)
     this.pendingTimer = null
   }
 }
