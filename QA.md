@@ -9,8 +9,7 @@ if something here fails, fix this file as part of your change.
 - Android SDK at `~/Android/Sdk`; AVD `turma228` (Pixel 6, x86_64, android-35).
 - `adb` needs `export PATH=$HOME/Android/Sdk/platform-tools:$PATH`.
 - **CI pins bun 1.2.22** (`.github/workflows/ci.yml`), and a 1.2.22 binary is at
-  `~/tools/bun122/bun-linux-x64/bun`. Use it for anything that writes a
-  `bun.lock` — see Traps.
+  `~/tools/bun122/bun-linux-x64/bun`. Run every gate with it — see Traps.
 
 ## Mobile app (`mobile/`, Expo React Native + expo-router)
 
@@ -30,11 +29,17 @@ if something here fails, fix this file as part of your change.
 - Debug builds need Metro. `adb reverse tcp:8081 tcp:<metro-port>`.
 - **JS-only changes need no rebuild** — Metro serves the worktree live. Only
   native/manifest changes require `assembleDebug`.
+- Start Metro on a non-default port when another session owns 8081:
+  `cd mobile && nohup bunx expo start --dev-client --port 8082 &`, then
+  `adb reverse tcp:8081 tcp:8082`. It is up when
+  `curl -s http://127.0.0.1:8082/status` prints `packager-status:running`
+  (~30 s). The `libnspr4.so` / "React Native DevTools" error it prints on start
+  is harmless — Metro still serves.
 
 ### First launch
 
 The first launch after an install takes 90–110 s (it extracts a ~263 MB STT
-model). Later cold starts are ~45–60 s to a rendered home. Budget for it.
+model). Later cold starts are ~45–75 s to a rendered home. Budget for it.
 
 ### Driving it
 
@@ -46,12 +51,18 @@ model). Later cold starts are ~45–60 s to a rendered home. Budget for it.
 
 Useful log markers (all `ReactNativeJS`):
 `INDEX: MOUNTED` / `INDEX: init()` / `MANTLE: init()` (boot), `NAV: push()` /
-`NAV: replace()` / `NAV: replaceAll()` (navigation), `DEEPLINK:` /
-`@@@ MATCHED ROUTE @@@` / `@@@ PARAMS @@@` (deep links), `NOT_FOUND:`,
-`PAIRING:`, `APP_REGISTRY:` / `ZIP: unzipping` (miniapp install).
+`NAV: replace()` / `NAV: replaceAll()` / `NAV: goBack()` (navigation),
+`DEEPLINK:` / `@@@ MATCHED ROUTE @@@` / `@@@ PARAMS @@@` (deep links),
+`NOT_FOUND: ... — plan: <kind>`, `PACKAGE:`, `PAIRING:`,
+`APP_REGISTRY:` / `ZIP: unzipping` (miniapp install).
 
 `grep -c 'MANTLE: init()'` is the fastest boot-health assertion there is: 0 means
 the app never booted, whatever is on screen.
+
+A healthy home has the **Settings** tile, the **Glasses Mirror** tile, and the
+bottom bar — assert the bottom bar with
+`grep -c 'Tap an app above to activate it' ui.xml`. A home missing them is the
+"crippled home" that means `mantle.init()` never ran.
 
 ### Deep links
 
@@ -59,11 +70,6 @@ Custom scheme `com.xerktech.veiller://<path>`; the only verified https App Link
 is `https://apps.mentraglass.com/package/...` (see the `autoVerify` filter in
 `mobile/android/app/src/main/AndroidManifest.xml`) — `/apps/...` over https is
 **not** claimed and returns `result code=-91`, by design.
-
-Patterns worth exercising: `://home`, `://settings`, `://glasses`,
-`://package/<pkg>`, `://apps/<pkg>`, `://miniapps/settings/<section>`,
-`://pairing/<step>` (`guide|prep|bluetooth|btclassic|scan|select-glasses|wifi-setup`),
-`://mirror/video/<id>`, and an unknown path (must land on home, not a dead end).
 
 Test each **cold** (force-stop first) *and* **warm** — they take different code
 paths and behave differently.
@@ -83,23 +89,46 @@ matrix along this line or you will test only half of it:**
   `/home/background-apps`, `/glasses/nex-developer-settings`, `/test/mini-app`
   and `/pairing/{prep,scan,btclassic,failure,loading,select-glasses-model,
   select-controller,prep-controller,scan-controller,success,unpair-even}`.
-- A file-route path whose deep-link handler pushes a *different* route leaves
-  the file route's own screen in the stack underneath. `/package/<pkg>` is the
-  one that bites: its file route renders nothing at all (every child of
-  `mobile/src/app/package/[packageName].tsx` is commented out), so Back from a
-  warm `://package/...` or the https App Link lands on a black screen.
-- `/miniapps/store` has **no** entry in `DeeplinkContext`'s table, so a deep
-  link to it hits the fallback handler, which does `replaceAll("/")` — a full
-  index remount and a second `INDEX: init()` / version check. Same for any
-  unknown path. Expect `MANTLE: init()` x2 and `INDEX: MOUNTED` x2 there and do
-  not read it as a double boot bug; `mantle.init()` itself is idempotent.
+
+**The deep-link table cannot override a file route, and the two race.** For a
+file-route path, expo-router mounts the screen *and* `processUrl` runs for the
+same URL. Both then navigate, last write wins, and which one wins is timing.
+This is the single most expensive thing to relearn here:
+
+- Removing a pattern from `deepLinkRoutes` does **not** delegate to the file
+  route. `processUrl` still runs, matches nothing, and the fallback handler
+  fires `replaceAll("/")` ~100 ms later, wiping whatever the file route did.
+  Verify with `grep 'No matching route found for URL' logcat` — that line on a
+  path you expected to work means the pattern is missing.
+- Re-mapping a `/pairing/:step` target does **not** stop expo-router mounting
+  `/pairing/<step>.tsx` when that file exists. `/pairing/btclassic` still mounts
+  the real (back-trapping) screen and is left in the stack underneath.
+- A cold start's pending-route replay goes through `processUrl`, **not** through
+  expo-router, so a file route that translates itself is bypassed entirely on
+  the replay. Any path needing translation needs a pattern in the table.
+
+Patterns worth exercising: `://home`, `://settings`, `://glasses`, `://welcome`,
+`://package/<pkg>`, `://apps/<pkg>`, `://miniapps/store`,
+`://miniapps/settings/<section>`,
+`://pairing/<step>` (`guide|prep|bluetooth|btclassic|scan|select-glasses|wifi-setup`),
+`://mirror/video/<id>`, and an unknown path (must land on home, not a dead end).
+
+Expected shape of a healthy single deep link: `MANTLE: init()` x1,
+`NAV: push()` x1, and Back returns to a full home. `MANTLE: init()` x2 plus
+`NAV: replaceAll()` means it fell through to the fallback handler and rebooted
+into home — correct only for genuinely unknown paths.
+
+On a **warm** `+not-found` path the normal plan is `duplicate` → `goBack()`,
+not `dispatch`: the `Linking` listener dispatches before `+not-found` mounts, so
+the shim's job is to pop itself. `dispatch` on a warm link is the rare case.
+Grep `"plan: '<kind>'"` to see which branch you actually exercised.
 
 ### Screens and how to reach them
 
 - Home bottom bar (1080x2400, Pixel 6): running-apps pill ~`348,2190`,
   **Miniapp Store** ~`723,2190`, **app-drawer** sheet ~`933,2190`. Re-read the
   bounds from a dump if the layout changes.
-- Miniapp info + uninstall: `://package/<packageName>` → "Uninstall" → confirm
+- Miniapp info + uninstall: `://apps/<packageName>` → "Uninstall" → confirm
   → "Success" dialog → OK.
 - Settings list: `://settings` (the home "Settings" *tile* is a miniapp launcher
   and does not open this screen).
@@ -117,21 +146,21 @@ The store's own row states are derived by
 `mobile/src/services/miniapps/storeRowState.ts` (pure, unit-tested).
 To exercise them for real:
 
-- **Install**: uninstall a miniapp, reopen the store, tap Install. Stages show
-  "Checking for the latest version…" → "Downloading…" → "Installed vX ✓".
+- **Install**: uninstall a miniapp, reopen the store, tap Install. Row goes
+  "Not installed / Latest vX / Install" → "Installed vX ✓".
 - **Failure/Retry**: open the store online (so the version resolves and Install
   renders), *then* `adb shell cmd connectivity airplane-mode enable`, then tap
   Install. Row shows the error and a **Retry** button. Turn airplane off and
   Retry to recover.
 - **Offline**: enable airplane mode *before* entering the store — both rows read
   "Couldn't check for updates" and offer no button.
-- **Paused**: toggle a row off — "Updates paused", no button, even when the
-  miniapp is not installed.
+- **Paused**: toggle a row off (the `android.widget.Switch` at x≈914) —
+  "Updates paused", no button, even when the miniapp is not installed.
 
 ### Mobile gates
 
     cd mobile && bun install && bun run compile     # tsc, ~3 min
-    cd mobile && bun run test                       # jest, 82 suites / 644 tests, ~2 min
+    cd mobile && bun run test                       # jest, 83 suites / 657 tests, ~2 min
 
 `mobile/jest.config.js` ignores `modules/engine`, `modules/miniapp`,
 `modules/jspolyfill`, `services/photo`, `services/streaming` and two bun:test
@@ -159,27 +188,19 @@ files. Anything else under `mobile/src/**/*.test.ts(x)` is in the gate.
 
     for d in miniapps/*/; do (cd "$d" && bun run build && bun test); done
 
-All 11 build; 9 have test scripts. Typecheck each with
+All 11 build; 9 have test scripts (captions, example-miniapp, merge, navigation,
+recorder, teleprompter, tenir, translation, turma). Typecheck each with
 `bun x tsc --noEmit -p tsconfig.json` from the miniapp dir — **except `merge`,
 whose tsconfig lives at `miniapps/merge/miniapp/tsconfig.json`**, not its root.
 
 Green baseline for the 9 suites: captions 10, example-miniapp 21, merge 6,
 navigation 78, recorder 18, teleprompter 2, tenir 69, translation 11, turma 341.
-**All nine pass** — verified 3x consecutively on a quiet machine.
-
-**Those numbers are bun-version dependent, and CI runs the version that
-fails.** With `~/tools/bun122/bun-linux-x64/bun` (1.2.22, the CI pin):
-`example-miniapp` is 15 pass / 6 fail and `navigation` is 73 pass / 5 fail,
-deterministically, in isolation, 3/3. With bun 1.3.14 on PATH both are green
-(21 and 78). Causes:
-- `navigation/src/test/audio-guidance.test.ts:56` calls `jest.isFakeTimers()`,
-  which 1.2.22 does not implement — `TypeError: jest.isFakeTimers is not a
-  function` in `afterEach`.
-- `example-miniapp` `CameraPage.test.tsx` renders accumulate across tests under
-  1.2.22, so `getByLabelText("mode")` hits "Found multiple elements".
-Always reproduce a miniapp suite result with the 1.2.22 binary before deciding
-whether CI is green. An earlier version of this file blamed the host; it was
-wrong.
+**Verified identical on bun 1.2.22 (the CI pin) and 1.3.14.** They used to
+diverge — `example-miniapp` 15/6 and `navigation` 73/5 under 1.2.22 — because
+RTL does not auto-`cleanup()` on bun 1.2.x and `jest.isFakeTimers` /
+`jest.advanceTimersByTime` do not exist there. Both were fixed by an explicit
+`afterEach(cleanup)` and an injectable clock, so a divergence between the two
+bun versions is now a real regression, not a known quirk.
 
 `miniapps/navigation`'s build prints `WARN: No public Mapbox token is set` — it
 is a warning, not a build failure.
@@ -208,6 +229,18 @@ restart without touching a device.
 The simulator loads a miniapp's `dist/`, so **`bun run build` in that miniapp
 first** or you are testing yesterday's code.
 
+**The simulator cannot drive `miniapps/navigation`'s guidance**: it answers
+`miniapp_navigation_request_permission` with `NOT_IMPLEMENTED`, so the app boots
+to a blank lens and no route can be started. To exercise `AudioGuidanceManager`
+for real, instantiate it directly from a bun script run **from inside
+`miniapps/navigation`** (so `react`/deps resolve) with the same two-argument
+shape production uses (`NavigationController.ts`), which leaves the injectable
+clock and scheduler on their real defaults. A priority-30 prompt queued right
+after a priority-100 one is deferred by `MIN_AUTOMATIC_PROMPT_GAP_MS` and drains
+on a real timer at ~3500 ms — that is the assertion that proves the injection did
+not break wall-clock behaviour. Note the manager's default mode is `"off"`: call
+`setAvailable(true)` **and** `setMode("full")` or nothing is ever spoken.
+
 ### Rendering a miniapp's phone page headlessly
 
 To assert on what the WebView actually shows (button counts, labels) without a
@@ -216,18 +249,44 @@ miniapp package, so copy `src/` to scratch and symlink its `node_modules`
 rather than importing across an absolute path — otherwise bun fails with
 `Cannot find package 'react'`.
 
+## Mutation testing without touching the repo
+
+To prove a gate actually catches a regression, mutate a **scratch copy** and
+re-run the gate there. Building one that behaves like the real tree:
+
+    M=<scratch>/mut; mkdir -p $M/mobile
+    for f in $(ls -A mobile); do [ "$f" = src ] || ln -s "$PWD/mobile/$f" "$M/mobile/$f"; done
+    cp -r mobile/src $M/mobile/src
+    for f in $(ls -A .); do [ "$f" = mobile ] || ln -sfn "$PWD/$f" "$M/$f"; done   # src escapes to ../../cloud
+    cd $M/mobile && ~/tools/bun122/bun-linux-x64/bun x jest --silent
+
+The sibling symlinks are required: `mobile/src` imports
+`@/../../cloud/packages/types/src`, so without a `$M/cloud` the run dies with
+33 "Could not locate module" config errors. Even then the scratch harness finds
+78 suites (not 83) and 10 unrelated suites fail on timing/native shims, so
+**diff the set of failing suites against a baseline run in the same harness**
+rather than trusting absolute counts. Same recipe works for a miniapp
+(`miniapps/navigation`), where it reproduces 78/78 exactly.
+
 ## Traps that cost time
 
 - **A shared emulator.** Other agent sessions on this host drive `turma228` over
   adb: they launch `com.xerktech.turma` over your app, raise permission dialogs,
   and run `uiautomator` concurrently (which crashes yours with
   "UiAutomationService … already registered"). Always assert the capture is
-  yours — `grep 'package="com.xerktech.veiller"' ui.xml` — and re-run when it is
-  not. `pm disable-user com.xerktech.turma` does not stick.
+  yours — `grep -c 'package="com.xerktech.veiller"' ui.xml` — and re-run when it
+  is not. `pm disable-user com.xerktech.turma` does not stick.
   `export ANDROID_SERIAL=emulator-5554` once a second emulator appears.
 - **A dev-build warning toast sits over the bottom bar** (`[26,2146][1054,2271]`)
   and swallows taps on the store / app-drawer icons. Dismiss it (tap its ✕ at
   ~`996,2209`) before driving the bottom bar.
+- **The RN LogBox overlay silently eats every tap.** Any `console.error` in a
+  debug build (e.g. "Failed to fetch cloud version" on the Connection Error
+  screen) raises a full-screen LogBox whose only marks in a dump are a `!` badge
+  and content-descs `Dismiss` / `Minimize` (~`270,2274` / `810,2274`). Taps land
+  on it, not the app, so buttons look dead and logcat shows nothing. If a tap
+  produces zero `ReactNativeJS` output, dump and look for `Dismiss` before
+  concluding the control is broken.
 - **Gradle silently reuses a stale APK** when the build fails for lack of
   `ANDROID_HOME` (above).
 - **Regenerate lockfiles with the bun CI pins, not the one on your PATH.**
@@ -257,64 +316,61 @@ rather than importing across an absolute path — otherwise bun fails with
   suite covers that (removing the `loadSettings` check leaves 10/10 green), so
   verify it in the simulator, not by reading the tests.
 - **Deep-link delivery has three entry points and is easy to break.** A cold
-  start delivers the same URL through `+not-found` *and*
-  `Linking.getInitialURL()`, and `index.tsx` replays it again after boot. The
-  dedup state is a `useRef` and the URL is claimed **at dispatch**, not on
-  entry — claiming early marked calls that then bailed out (deferred for boot,
-  or superseded) as handled, which swallowed the one call that would have
-  navigated. When touching any of this, count `NAV: push()` **and**
-  `MANTLE: init()` per intent and test cold *and* warm — the UI alone will not
-  tell you.
-- **The boot deferral's idempotence guard and the `initial` branch both write
-  `pendingRoute`.** `processUrl(url, initial=true)` sets the pending route
-  itself before the `mantle.isInitialized` check, so a guard of the form
-  `if (getPendingRoute() === url) return` sees its *own* write and skips the
-  `nav.replace("/")` that would have booted the app. That is invisible for
-  `+not-found` paths (something else already did the replace) and fatal for
-  file-route paths, which have no other entry point — the app renders the file
-  route with no runtime behind it and never boots. Always include a file-route
-  path in a cold deep-link matrix.
-- **`+not-found`'s 15 s rescue timer does fire now** (its deps are a serialised
-  `query` string and `pathname`, not the fresh objects that used to cancel it).
-  To make it fire, keep `mantle.init()` from completing for >15 s and deliver
-  the same URL twice: `adb shell cmd connectivity airplane-mode enable`, then a
-  cold deep link — the boot version check fails, the app parks on "Connection
-  Error", and a second delivery of the same URL takes the
-  `DEEPLINK: boot already pending` early return, so nothing navigates.
-  Watch for `NOT_FOUND: nothing navigated away`.
-- **`+not-found` calls `clearHistoryAndGoHome()` on the booted path before it
-  hands off to `processUrl`.** If `processUrl` then declines to navigate — most
-  easily by hitting the 3 s dedup window — the target screen is wiped and never
-  re-pushed, and the user lands on home. Fire the *same* warm link twice 1 s
-  apart to see it. Count `NAV: push()` **and** check the screen: one push with
-  the wrong screen showing is the failure mode.
+  start delivers the same URL through `+not-found`, through
+  `Linking.getInitialURL()`, *and* through expo-router's own file-route
+  resolution; `index.tsx` then replays the pending route after boot. When
+  touching any of this, count `NAV: push()` **and** `MANTLE: init()` per intent
+  and test cold *and* warm — the UI alone will not tell you.
+- **A second `am start` fired within a few seconds of a cold start never reaches
+  JS.** Android returns `result code=3` (task-to-front) and delivers no new
+  intent, so the URL is dropped before the app sees it. Check
+  `grep 'result code=' start.txt` before blaming the deep-link code; warm
+  deliveries do not have this problem.
 - **`/pairing/scan` is a file route, so a deep link mounts the real scan
-  screen** whatever the deep-link table says. `scan.tsx` now guards on a missing
+  screen** whatever the deep-link table says. `scan.tsx` guards on a missing
   `deviceModel` and `replace()`s to `/pairing/select-glasses-model`; the marker
   is `PAIRING: /pairing/scan opened without a deviceModel`. If that guard is
   ever weakened the symptom returns as "Scanning for " with an empty model plus
   a red `[startScan] Cannot convert 'undefined' to a Kotlin type`. Nothing in
   `mobile/src/__tests__/app/pairing/scan.test.tsx` covers the missing-model
   case — every test sets `deviceModel` — so removing the guard keeps jest green.
-- **`/pairing/btclassic` (and `/pairing/bluetooth`, which maps to it) is a
-  one-way screen.** It calls `focusEffectPreventBack()` and its header back
-  button is commented out, so hardware Back does nothing, HOME + relaunch
-  returns to it, and its only control is "Open settings". Reaching it by deep
-  link traps the app until a force-stop. Do not use it as a warm-link fixture
-  unless you are prepared to force-stop afterwards.
-- **Nothing under `mobile/**` tests `DeeplinkContext.tsx` or `+not-found.tsx`.**
-  Reverting the boot-deferral guard, the `+not-found` history clear, the
-  `/pairing/scan` guard, the captions load validation or the turma hub-URL
-  try/catch all leave every suite green. Deep-link behaviour is only ever
-  verified on a device — budget for that, and never accept a green suite as
-  evidence a deep-link change works.
+- **`/pairing/btclassic` is a one-way screen.** It calls
+  `focusEffectPreventBack()` and its header back button is commented out, so
+  hardware Back does nothing (verified: 5 presses, still on "Pair Audio"), HOME +
+  relaunch returns to it, and its only control is "Open settings". Because it is
+  a **file route**, deep-linking `://pairing/btclassic` mounts it no matter what
+  the deep-link table maps that step to. Force-stop to escape, and do not use it
+  as a warm-link fixture.
+- **Only `planDeeplink.ts` is unit tested; the React layer around it is not.**
+  A mutation audit confirms `mobile/src/services/deeplink/planDeeplink.test.ts`
+  catches a boot guard keyed on the wrong thing, dedup leaking onto the cold
+  `initial` delivery, an always-true `shouldResetToHomeBeforeHandoff`, and the
+  boot guard being deleted outright. It catches **nothing** in
+  `+not-found.tsx`, `package/[packageName].tsx` or `DeeplinkContext.tsx` —
+  deleting `+not-found`'s `duplicate` → `goBack()` branch (the branch every warm
+  deep link actually takes), deleting the rescue timer's `mantle.isInitialized`
+  guard, and flipping the package route's `replace` to `push` all leave jest and
+  tsc fully green. Never accept a green suite as evidence that a change to those
+  three files works; drive it on a device.
+- **`+not-found`'s rescue timer has not been observed to fire.** Across 37
+  instrumented deep-link runs the string `NOT_FOUND: nothing navigated away`
+  never appeared once: post-boot every plan branch navigates away and unmounts
+  the screen before the 20 s timer, and pre-boot the timer returns early on
+  `!mantle.isInitialized`. Treat it as unproven safety net, not as cover.
+- **A failed boot parks on "Connection Error", and that is recoverable.** With
+  airplane mode on, a cold deep link leaves the app on Connection Error with
+  Retry / Continue Anyway (not a crippled home, not a spinner). Dismiss the
+  LogBox first, then Retry boots the app *and* replays the pending deep link.
 
 ## Blast radius
 
-- `mobile/src/contexts/DeeplinkContext.tsx` ↔ `mobile/src/app/index.tsx`
-  (pendingRoute replay) ↔ `mobile/src/app/+not-found.tsx` (second entry point)
-  ↔ every file route under `mobile/src/app/` (the third, silent entry point).
-  A change to any one of these needs cold **and** warm tests of all of them.
+- `mobile/src/services/deeplink/planDeeplink.ts` (pure decision) ↔
+  `mobile/src/contexts/DeeplinkContext.tsx` (carries it out, owns the pattern
+  table) ↔ `mobile/src/app/index.tsx` (pendingRoute replay) ↔
+  `mobile/src/app/+not-found.tsx` (second entry point) ↔ every file route under
+  `mobile/src/app/` (the third, silent entry point). A change to any one of
+  these needs cold **and** warm tests of all of them, including at least one
+  file-route path and one `+not-found` path.
 - `mobile/src/app/miniapps/store.tsx` ↔ `services/miniapps/storeRowState.ts` ↔
   `services/miniapps/veillerMiniappSync.ts` ↔ `config/veillerMiniapps.ts`.
 - `mobile/modules/miniapp/dist` is consumed by `sdk/miniapp-cli`,
@@ -324,3 +380,6 @@ rather than importing across an absolute path — otherwise bun fails with
   `bun sdk/miniapp-cli/src/index.ts schema regenerate`.
 - `miniapps/turma/src/core/fetch-policy.ts` is the whole security boundary for
   `turma:fetch`; `background/index.ts` must stay a thin shell around it.
+- `miniapps/navigation`'s `AudioGuidanceManager` is constructed in
+  `background/NavigationController.ts` with two arguments; its clock/scheduler
+  parameters exist only for tests, so any caller passing more is a red flag.

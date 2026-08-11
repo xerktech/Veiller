@@ -6,7 +6,7 @@ import {Screen} from "@/components/ignite"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
 import mantle from "@/services/MantleManager"
 import {useAppTheme} from "@/contexts/ThemeContext"
-import {shouldResetToHomeBeforeHandoff} from "@/services/deeplink/planDeeplink"
+import {decideNotFoundAction, mayRescueToHome} from "@/services/deeplink/planDeeplink"
 import {useNavigationStore} from "@/stores/navigation"
 
 /**
@@ -90,19 +90,14 @@ export default function NotFoundScreen() {
     const url = `com.xerktech.veiller://${path.replace(/^\/+/, "")}`
 
     const plan = planForRef.current(url)
-    console.warn("NOT_FOUND: no file route for", path, "— plan:", plan.kind)
+    const action = decideNotFoundAction(plan)
+    console.warn("NOT_FOUND: no file route for", path, "— plan:", plan.kind, "action:", action.kind)
 
-    if (plan.kind === "duplicate") {
-      // An earlier delivery of this same URL already navigated, and what the
-      // user asked for is on the stack underneath this shim. Pop, rather than
-      // reset — resetting to home threw away the screen they just asked for.
+    if (action.kind === "pop") {
       useNavigationStore.getState().goBack()
       return
     }
-
-    if (shouldResetToHomeBeforeHandoff(plan)) {
-      // Something will navigate on top of this, so drop the shim first: the
-      // push then lands on home and Back reaches home, not a spinner.
+    if (action.kind === "reset-then-handoff") {
       useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
     }
 
@@ -112,7 +107,7 @@ export default function NotFoundScreen() {
     // once the app has booted — before that a boot is in flight, and going home
     // would produce the crippled home this path exists to avoid.
     const rescue = setTimeout(() => {
-      if (!mountedRef.current || !mantle.isInitialized) return
+      if (!mayRescueToHome({isMounted: mountedRef.current, isInitialized: mantle.isInitialized})) return
       console.warn("NOT_FOUND: nothing navigated away — falling back to home")
       useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
     }, NOT_FOUND_RESCUE_MS)

@@ -4,7 +4,7 @@ import {FC, ReactNode, createContext, useContext, useEffect, useRef} from "react
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
 import {BgTimer} from "@veiller/engine"
 import mantle from "@/services/MantleManager"
-import {planDeeplink, type DeeplinkPlan} from "@/services/deeplink/planDeeplink"
+import {deeplinkKey, planDeeplink, type DeeplinkPlan} from "@/services/deeplink/planDeeplink"
 import {useNavigationStore} from "@/stores/navigation"
 
 export interface DeepLinkRoute {
@@ -218,11 +218,22 @@ const deepLinkRoutes: DeepLinkRoute[] = [
   // Universal app link routes (for apps.mentraglass.com). The /applet/webview
   // target for Cloud V1 apps is gone (Cloud V1 app end-of-life); app links
   // land on the installed app's info screen instead.
-  // `/package/:packageName` — the path the manifest autoVerifies — is a real
-  // expo-router file route (mobile/src/app/package/[packageName].tsx), so
-  // expo-router mounts it directly and that screen performs the translation
-  // itself with `replace`. Registering a handler here as well would navigate a
-  // second time on top of it.
+  {
+    // `/package/:packageName` is the ONLY path the manifest autoVerifies, so it
+    // is what every link from the web arrives on.
+    //
+    // There is deliberately no `app/package/[packageName].tsx` file route. A
+    // file route and this table cannot both own a path: expo-router mounts the
+    // file route, this table's fallback then fires `replaceAll("/")` on top of
+    // it, and the user lands on home. Leaving the path unrouted sends it
+    // through `+not-found`, which hands it here — exactly how `/apps/` works.
+    pattern: "/package/:packageName",
+    handler: async (url: string, params: Record<string, string>) => {
+      const nav = useNavigationStore.getState()
+      const {packageName} = params
+      nav.push(`/applet/settings?packageName=${encodeURIComponent(packageName)}`)
+    },
+  },
   {
     pattern: "/apps/:packageName",
     handler: async (url: string, params: Record<string, string>) => {
@@ -395,7 +406,7 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       }
       if (plan.kind === "defer-for-boot") {
         console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
-        bootDeferredFor.current = url
+        bootDeferredFor.current = deeplinkKey(url)
         nav.setPendingRoute(url)
         nav.replace("/")
         return

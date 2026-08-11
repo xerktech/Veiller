@@ -1,6 +1,6 @@
 import {useRoute} from "@react-navigation/native"
 import {useEffect, useMemo} from "react"
-import {Button, Screen} from "@/components/ignite"
+import {Button, Header, Screen} from "@/components/ignite"
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
@@ -43,8 +43,19 @@ export default function BtClassicPairingScreen() {
     engine.pairing.onOtherBtConnected(onChange),
   )
   const [savedDeviceName] = useSetting(SETTINGS.device_name.key)
+  const [defaultWearable] = useSetting(SETTINGS.default_wearable.key)
   const deviceName = device?.name || savedDeviceName || ""
   const {theme} = useAppTheme()
+
+  // Reached with neither a device to pair nor a saved default to reconnect,
+  // this screen has nothing to do — that only happens on a stray deep link.
+  const hasFlowContext = device !== null || !!defaultWearable
+  useEffect(() => {
+    if (!hasFlowContext) {
+      console.warn("PAIRING: /pairing/btclassic opened with no device and no paired default — leaving")
+      useNavigationStore.getState().replace("/pairing/select-glasses-model")
+    }
+  }, [hasFlowContext])
 
   focusEffectPreventBack()
 
@@ -137,7 +148,13 @@ export default function BtClassicPairingScreen() {
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]} extraAndroidInsets>
-      {/* <Header leftIcon="chevron-left" onLeftPress={handleBack} /> */}
+      {/* The hardware back button is deliberately blocked below
+          (focusEffectPreventBack) so this pairing step is not skipped by
+          accident — which left the screen with no exit whatsoever once the
+          header control here was commented out. A deep link to
+          /pairing/btclassic, and the paired-context recovery entry, both
+          trapped the app until a force-stop (XERK-249). Restored. */}
+      <Header leftIcon="chevron-left" onLeftPress={handleBack} />
       <OnboardingGuide
         steps={steps}
         autoStart={true}
