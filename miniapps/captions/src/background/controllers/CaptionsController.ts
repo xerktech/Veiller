@@ -341,9 +341,13 @@ export class CaptionsController {
         useOfflineSttRaw == null ? DEFAULT_SETTINGS.useOfflineStt : useOfflineSttRaw === "true"
 
       this.settings.displayLines = (() => {
-        if (!linesRaw) return 3
+        if (!linesRaw) return DEFAULT_SETTINGS.displayLines
         const p = parseInt(linesRaw, 10)
-        return isNaN(p) ? 3 : p
+        // Validate on the way in as well as on the way out: storage is not
+        // trusted input (a stale value from an older build, or a seeded one),
+        // and an unsupported count reached the display pipeline unchecked.
+        // Mirrors what captionTimeoutSeconds already does below.
+        return isSupportedDisplayLines(p) ? p : DEFAULT_SETTINGS.displayLines
       })()
 
       this.settings.displayWidth = (() => {

@@ -4,6 +4,7 @@ import {ActivityIndicator, View} from "react-native"
 
 import {Screen} from "@/components/ignite"
 import {useDeeplink} from "@/contexts/DeeplinkContext"
+import mantle from "@/services/MantleManager"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {useNavigationStore} from "@/stores/navigation"
 
@@ -42,28 +43,42 @@ export default function NotFoundScreen() {
     }
   }, [])
 
+  // `params` is a fresh object and `processUrl` a fresh function on every
+  // render, so depending on them re-ran this effect, whose cleanup cancelled
+  // the rescue timer while `handled.current` stopped it being re-armed — the
+  // timer therefore never fired. Serialise the params into the dep instead and
+  // hold processUrl in a ref.
+  const query = Object.entries(params)
+    .filter(([, value]) => typeof value === "string")
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .join("&")
+
+  const processUrlRef = useRef(processUrl)
+  processUrlRef.current = processUrl
+
   useEffect(() => {
     if (handled.current) return
     handled.current = true
 
-    const query = Object.entries(params)
-      .filter(([, value]) => typeof value === "string")
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
-      .join("&")
     const path = query ? `${pathname}?${query}` : pathname
 
     console.warn("NOT_FOUND: no file route for", path, "— handing back to the deep-link processor")
 
-    // Hand straight to the processor: it boots the app first when needed, and
-    // its fallback handler routes an unrecognised path through the index route.
-    // Going home here first was wrong — before boot that renders the home
-    // screen without its built-in miniapps (no Settings, no Glasses Mirror).
-    void processUrl(`com.xerktech.veiller://${path.replace(/^\/+/, "")}`)
+    // Once the app has booted, drop this screen from the stack first so the
+    // deep link's push lands on top of home. Otherwise Back returns here — to
+    // a bare spinner whose effect has already run, which reads as a hang.
+    // Before boot we must NOT do this: home without its built-in miniapps is
+    // the crippled state the processUrl guard exists to prevent, and going
+    // through the index route is what boots the app.
+    if (mantle.isInitialized) {
+      useNavigationStore.getState().clearHistoryAndGoHome({transition: "none"})
+    }
+
+    void processUrlRef.current(`com.xerktech.veiller://${path.replace(/^\/+/, "")}`)
 
     // Safety net: this screen must never be somewhere a user can be stranded.
-    // The handoff is asynchronous and its effect runs once, so if nothing has
-    // navigated away by the time the boot + deep-link path has had its chance,
-    // fall back to home rather than leaving a spinner with no way forward.
+    // If nothing has navigated away by the time boot and the deep-link path
+    // have had their chance, fall back to home.
     const rescue = setTimeout(() => {
       if (!mountedRef.current) return
       console.warn("NOT_FOUND: nothing navigated away — falling back to home")
@@ -71,7 +86,7 @@ export default function NotFoundScreen() {
     }, NOT_FOUND_RESCUE_MS)
 
     return () => clearTimeout(rescue)
-  }, [pathname, params, processUrl])
+  }, [pathname, query])
 
   return (
     <Screen preset="fixed">

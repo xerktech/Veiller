@@ -342,6 +342,12 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   // (a stale record survived long enough to swallow the legitimate replay of a
   // pending route after boot). XERK-249.
   const lastProcessed = useRef<{url: string | null; at: number}>({url: null, at: 0})
+  /**
+   * The URL we have already deferred pending a boot. Deliberately separate from
+   * nav's pendingRoute, which other code (and processUrl's own `initial`
+   * branch) also writes.
+   */
+  const bootDeferredFor = useRef<string | null>(null)
 
   const processUrl = async (url: string, initial: boolean = false) => {
     try {
@@ -396,17 +402,25 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       // handlers because every entry point needs it: cold deep links, the
       // +not-found fallback, and any handler that ends up at home (XERK-249).
       if (!mantle.isInitialized) {
-        // Idempotent: a cold start delivers the same URL through two paths
+        // Idempotent: a cold start can deliver the same URL through two paths
         // (+not-found and Linking.getInitialURL). Replacing to "/" twice
         // remounts the index route, and the second instance's
         // navigateToDestination() runs clearHistoryAndGoHome *after* the first
         // has already replayed the deep link — wiping the screen the user
         // asked for. Defer once and let the boot in flight finish.
-        if (nav.getPendingRoute() === url) {
+        //
+        // The signal has to be our OWN record, not nav.getPendingRoute(): the
+        // `initial` branch above sets that same pending route a few lines
+        // earlier, so reading it made this guard see its own write, skip the
+        // replace("/") below, and never boot the app at all. Paths that
+        // expo-router resolves to a real file route have no other entry point,
+        // so they hung on a dead screen with no way out but a force-stop.
+        if (bootDeferredFor.current === url) {
           console.log("DEEPLINK: boot already pending for", url)
           return
         }
         console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
+        bootDeferredFor.current = url
         nav.setPendingRoute(url)
         nav.replace("/")
         // Nothing was navigated, so this URL has NOT been handled. Clear the

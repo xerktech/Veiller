@@ -28,6 +28,8 @@ if something here fails, fix this file as part of your change.
 - APK is ~220 MB; a warm incremental build is ~35 s, cold ~10 min.
 - Application id: `com.xerktech.veiller`; launcher `com.xerktech.veiller/.MainActivity`.
 - Debug builds need Metro. `adb reverse tcp:8081 tcp:<metro-port>`.
+- **JS-only changes need no rebuild** — Metro serves the worktree live. Only
+  native/manifest changes require `assembleDebug`.
 
 ### First launch
 
@@ -48,6 +50,9 @@ Useful log markers (all `ReactNativeJS`):
 `@@@ MATCHED ROUTE @@@` / `@@@ PARAMS @@@` (deep links), `NOT_FOUND:`,
 `PAIRING:`, `APP_REGISTRY:` / `ZIP: unzipping` (miniapp install).
 
+`grep -c 'MANTLE: init()'` is the fastest boot-health assertion there is: 0 means
+the app never booted, whatever is on screen.
+
 ### Deep links
 
 Custom scheme `com.xerktech.veiller://<path>`; the only verified https App Link
@@ -63,12 +68,25 @@ Patterns worth exercising: `://home`, `://settings`, `://glasses`,
 Test each **cold** (force-stop first) *and* **warm** — they take different code
 paths and behave differently.
 
+**Two classes of path, and they behave completely differently — split your
+matrix along this line or you will test only half of it:**
+
+- Paths with **no** matching file route (`/settings`, `/glasses`, `/welcome`,
+  `/apps/<pkg>`, `/pairing/bluetooth`, `/pairing/nonsense`, unknown paths) go
+  through `+not-found`, which calls `processUrl` and drives the boot.
+- Paths that **do** have a file route under `mobile/src/app/` are rendered by
+  expo-router directly and never reach `+not-found`. Today those are
+  `/package/[packageName]`, `/miniapps/settings/<section>`, `/miniapps/store`,
+  and `/pairing/{prep,scan,btclassic,failure,loading,select-glasses-model,
+  success,unpair-even}`. `ls mobile/src/app/**` is the authoritative list.
+
 ### Screens and how to reach them
 
-- Home bottom bar: left pill = running apps, then an **app-drawer** sheet and the
-  **Miniapp Store**. Their order is not labelled; read `content-desc`/`bounds`
-  from a uiautomator dump rather than hardcoding coordinates.
-- Miniapp info + uninstall: `://package/<packageName>` → "Uninstall" → confirm.
+- Home bottom bar (1080x2400, Pixel 6): running-apps pill ~`348,2190`,
+  **Miniapp Store** ~`723,2190`, **app-drawer** sheet ~`933,2190`. Re-read the
+  bounds from a dump if the layout changes.
+- Miniapp info + uninstall: `://package/<packageName>` → "Uninstall" → confirm
+  → "Success" dialog → OK.
 - Settings list: `://settings` (the home "Settings" *tile* is a miniapp launcher
   and does not open this screen).
 - Pairing: home → "Pair glasses" → model picker (G2 only, by XERK-206) → prep guide.
@@ -110,6 +128,9 @@ files. Anything else under `mobile/src/**/*.test.ts(x)` is in the gate.
 
 - `mobile/modules/miniapp/dist` is gitignored and everything else imports it —
   build it first or the CLI/simulator/miniapp builds fail confusingly.
+- `bun install` inside `sdk/` runs a lifecycle script that does
+  `rm -rf dist && tsc`, so it *rebuilds* the SDK as a side effect. Harmless, but
+  it is why an install there takes a while and why `dist` timestamps move.
 - The full engine suite has pre-existing order-dependent failures
   (`AudioCloudUplink.test.ts`); CI deliberately scopes to `src/utils/display`.
 - `bun sdk/...` must be run from the **repo root**; from a subdirectory it fails
@@ -122,6 +143,18 @@ files. Anything else under `mobile/src/**/*.test.ts(x)` is in the gate.
 All 11 build; 9 have test scripts. Typecheck each with
 `bun x tsc --noEmit -p tsconfig.json` from the miniapp dir — **except `merge`,
 whose tsconfig lives at `miniapps/merge/miniapp/tsconfig.json`**, not its root.
+
+Green baseline for the 9 suites: captions 10, example-miniapp 21, merge 6,
+navigation 78, recorder 18, teleprompter 2, tenir 69, translation 11, turma 341.
+**All nine pass** — verified 3x consecutively on a quiet machine.
+
+If `example-miniapp` (`CameraPage`) or `navigation` (`AudioGuidanceManager`)
+come back red, suspect your environment before your change: both were observed
+failing during a pass where another agent session was driving the same host, and
+both are green in isolation. Re-run them alone before attributing the failure.
+
+`miniapps/navigation`'s build prints `WARN: No public Mapbox token is set` — it
+is a warning, not a build failure.
 
 ### Driving a miniapp off-hardware (the simulator)
 
@@ -140,8 +173,20 @@ Verbs: `sim.phone.open()/send(ch,p)/request(ch,p)` (the phone WebView bus),
 `--storage 'turma.glasses.config={"hubUrl":"http://127.0.0.1:18801",...}'`
 (key `turma.glasses.config`, see `miniapps/turma/src/core/config.ts`).
 
+`sim.host.storageSnapshot()` returns everything the background persisted — feed
+it to a second `new Simulator({storage: ...})` to test that a setting survives a
+restart without touching a device.
+
 The simulator loads a miniapp's `dist/`, so **`bun run build` in that miniapp
 first** or you are testing yesterday's code.
+
+### Rendering a miniapp's phone page headlessly
+
+To assert on what the WebView actually shows (button counts, labels) without a
+browser, `renderToString` the component. It only resolves from **inside** the
+miniapp package, so copy `src/` to scratch and symlink its `node_modules`
+rather than importing across an absolute path — otherwise bun fails with
+`Cannot find package 'react'`.
 
 ## Traps that cost time
 
@@ -162,11 +207,13 @@ first** or you are testing yesterday's code.
   `~/tools/bun122/bun-linux-x64/bun`); CI pins that version because 1.3.x has a
   resolver regression on `file:` deps. Installing with a local bun 1.3.x will
   dirty the locks — `git checkout` them afterwards unless the drift is your
-  change, in which case redo the install with 1.2.22.
+  change, in which case redo the install with 1.2.22. There are three roots that
+  own a lock: repo root, `mobile/`, `sdk/`.
 - **An unbound localhost port is blackholed on this WSL2 host**, not refused —
   `fetch`/`curl` hang for minutes instead of erroring. To test a network-failure
   path deterministically, use a socket that accepts then `end()`s the connection
-  rather than a closed port.
+  rather than a closed port; for a *timeout* path use one that accepts and never
+  writes.
 - **The miniapp startup sync reinstalls every *enabled* miniapp on boot**
   (`MantleManager` → `veillerMiniappSync`). Uninstalling one and restarting the
   app puts it back; pause the row first if you need it to stay uninstalled.
@@ -176,22 +223,47 @@ first** or you are testing yesterday's code.
   `DISPLAY_LINES_OPTIONS` from `miniapps/captions/src/shared/types.ts`; keep it
   that way, and note the cap is 7 (not `G2_PROFILE.maxLines` of 8) because
   8 x 40px overflows the 288px lens and measurably renders 7.
+- **`CaptionsController.loadSettings()` does not revalidate `displayLines`** the
+  way it revalidates `captionTimeoutSeconds` — any integer already in storage is
+  accepted on boot. Only `setDisplayLines` enforces `DISPLAY_LINES_OPTIONS`.
 - **Deep-link delivery has three entry points and is easy to break.** A cold
   start delivers the same URL through `+not-found` *and*
   `Linking.getInitialURL()`, and `index.tsx` replays it again after boot. The
   dedup state is a `useRef` and the URL is claimed **at dispatch**, not on
   entry — claiming early marked calls that then bailed out (deferred for boot,
   or superseded) as handled, which swallowed the one call that would have
-  navigated. The boot deferral is likewise idempotent: replacing to `/` twice
-  remounts the index route and the second instance wipes the first one's
-  replay. When touching any of this, count `NAV: push()` per intent and test
-  cold *and* warm — the UI alone will not tell you.
+  navigated. When touching any of this, count `NAV: push()` **and**
+  `MANTLE: init()` per intent and test cold *and* warm — the UI alone will not
+  tell you.
+- **The boot deferral's idempotence guard and the `initial` branch both write
+  `pendingRoute`.** `processUrl(url, initial=true)` sets the pending route
+  itself before the `mantle.isInitialized` check, so a guard of the form
+  `if (getPendingRoute() === url) return` sees its *own* write and skips the
+  `nav.replace("/")` that would have booted the app. That is invisible for
+  `+not-found` paths (something else already did the replace) and fatal for
+  file-route paths, which have no other entry point — the app renders the file
+  route with no runtime behind it and never boots. Always include a file-route
+  path in a cold deep-link matrix.
+- **`+not-found` stays in the stack under a pushed deep-link screen**, so Back
+  from a warm deep link lands on its bare spinner; a second Back reaches home.
+  Its 15 s rescue timer does not save this: the effect's deps include
+  `useGlobalSearchParams()` and the context's `processUrl`, both of which get a
+  new identity every render, so the cleanup clears the timer and the
+  `handled.current` early-return never re-arms it. Treat the rescue as dead code
+  until that is fixed — do not assume it covers a strand.
+- **`/pairing/scan` exists as a file route**, so a deep link to it mounts the
+  real scan screen and fires the native scan even when the deep-link table
+  redirects elsewhere. You get "Scanning for " with an empty model and a red
+  `[startScan] Cannot convert 'undefined' to a Kotlin type` toast. Mapping the
+  URL to another screen in `DeeplinkContext` does not prevent this; only
+  `scan.tsx` guarding on a missing `deviceModel` would.
 
 ## Blast radius
 
 - `mobile/src/contexts/DeeplinkContext.tsx` ↔ `mobile/src/app/index.tsx`
-  (pendingRoute replay) ↔ `mobile/src/app/+not-found.tsx` (second entry point).
-  A change to any one of the three needs cold **and** warm tests of all of them.
+  (pendingRoute replay) ↔ `mobile/src/app/+not-found.tsx` (second entry point)
+  ↔ every file route under `mobile/src/app/` (the third, silent entry point).
+  A change to any one of these needs cold **and** warm tests of all of them.
 - `mobile/src/app/miniapps/store.tsx` ↔ `services/miniapps/storeRowState.ts` ↔
   `services/miniapps/veillerMiniappSync.ts` ↔ `config/veillerMiniapps.ts`.
 - `mobile/modules/miniapp/dist` is consumed by `sdk/miniapp-cli`,
@@ -199,3 +271,5 @@ first** or you are testing yesterday's code.
 - `sdk/miniapp-cli/schema/miniapp.schema.json` is generated from the CLI's own
   types and gated by CI — regenerate with
   `bun sdk/miniapp-cli/src/index.ts schema regenerate`.
+- `miniapps/turma/src/core/fetch-policy.ts` is the whole security boundary for
+  `turma:fetch`; `background/index.ts` must stay a thin shell around it.

@@ -165,7 +165,17 @@ class TurmaBackground {
       // tested; this handler must stay a thin shell around it.
       const method = req.method ?? "GET";
       const configuredHub = normalizeHubUrl((await loadConfig(this.storage)).hubUrl);
-      const hubOrigin = configuredHub ? new URL(configuredHub).origin : null;
+      // A stored hub that will not parse must not throw out of the handler —
+      // the phone page expects a value it can branch on. Treat it as unset,
+      // which leaves only the sign-in probe permitted.
+      let hubOrigin: string | null = null;
+      if (configuredHub) {
+        try {
+          hubOrigin = new URL(configuredHub).origin;
+        } catch {
+          console.warn("[turma] stored hubUrl is not a valid URL:", configuredHub);
+        }
+      }
 
       const decision = decideFetch({ url: req.url, method, hubOrigin });
       if (!decision.allow) {

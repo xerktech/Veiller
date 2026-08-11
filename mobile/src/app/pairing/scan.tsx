@@ -109,7 +109,21 @@ export default function SelectGlassesBluetoothScreen() {
     }
   }, [searchResults])
 
+  // /pairing/scan is a real expo-router file route, so a deep link to it mounts
+  // this screen directly — remapping the deep-link handler cannot prevent that.
+  // Without a deviceModel the header reads "Scanning for " and the native call
+  // below throws "Cannot convert 'undefined' to a Kotlin type". Send the user
+  // to the picker that supplies one (XERK-249).
+  const hasDeviceModel = typeof deviceModel === "string" && deviceModel.length > 0
   useEffect(() => {
+    if (!hasDeviceModel) {
+      console.warn("PAIRING: /pairing/scan opened without a deviceModel — routing to model selection")
+      replace("/pairing/select-glasses-model")
+    }
+  }, [hasDeviceModel, replace])
+
+  useEffect(() => {
+    if (!hasDeviceModel) return
     const initializeAndSearchForDevices = async () => {
       try {
         await engine.pairing.scan(deviceModel)
@@ -119,7 +133,7 @@ export default function SelectGlassesBluetoothScreen() {
     }
 
     void initializeAndSearchForDevices()
-  }, [deviceModel])
+  }, [deviceModel, hasDeviceModel])
 
   const triggerGlassesPairingGuide = async (device: Device) => {
     if (Platform.OS === "android") {
