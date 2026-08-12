@@ -78,12 +78,18 @@ paths and behave differently.
 matrix along this line or you will test only half of it:**
 
 - Paths with **no** matching file route (`/settings`, `/glasses`, `/welcome`,
-  `/apps/<pkg>`, `/pairing/bluetooth`, `/pairing/nonsense`, unknown paths) go
-  through `+not-found`, which calls `processUrl` and drives the boot.
+  `/package/<pkg>`, `/apps/<pkg>`, `/pairing/bluetooth`, `/pairing/nonsense`,
+  unknown paths) go through `+not-found`, which calls `processUrl` and drives
+  the boot.
+- **`/package/<pkg>` deliberately has no file route** even though it is the only
+  path the manifest autoVerifies. A path cannot be owned by both a file route
+  and `deepLinkRoutes`: expo-router mounts the file route and the table's
+  fallback then `replaceAll("/")`s on top of it. Do not re-add
+  `app/package/[packageName].tsx`.
 - Paths that **do** have a file route under `mobile/src/app/` are rendered by
   expo-router directly and never reach `+not-found`. `ls -R mobile/src/app` is
   the authoritative list; it is longer than it looks and includes **`/home`**
-  (`home.tsx`), `/package/[packageName]`, `/miniapps/store`,
+  (`home.tsx`), `/miniapps/store`,
   `/miniapps/settings/<section>`, `/applet/{settings,text-editor}`,
   `/onboarding/*`, `/wifi/*`, `/ota/*`, `/mirror/video-player`,
   `/home/background-apps`, `/glasses/nex-developer-settings`, `/test/mini-app`
@@ -118,10 +124,25 @@ Expected shape of a healthy single deep link: `MANTLE: init()` x1,
 `NAV: replaceAll()` means it fell through to the fallback handler and rebooted
 into home — correct only for genuinely unknown paths.
 
-On a **warm** `+not-found` path the normal plan is `duplicate` → `goBack()`,
-not `dispatch`: the `Linking` listener dispatches before `+not-found` mounts, so
-the shim's job is to pop itself. `dispatch` on a warm link is the rare case.
-Grep `"plan: '<kind>'"` to see which branch you actually exercised.
+On a **warm** `+not-found` path the normal plan is `duplicate` → `pop`, not
+`dispatch`: the `Linking` listener dispatches before `+not-found` mounts, so the
+shim's job is to pop itself. `dispatch` on a warm link is the rare case. Grep
+`"plan: '<kind>' action: '<kind>'"` to see which branch you actually exercised.
+
+**The shim's `pop` is a no-op when the user was on home.**
+`useNavigationStore.goBack()` returns early when *its own* `history` top is
+`/home` or `/` (`stores/navigation.ts`), and the shim's expo-router mount never
+touches that history. So from home the shim stays buried in the stack and the
+next Back re-focuses it, whereupon its `useFocusEffect` runs
+`clearHistoryAndGoHome` — the user still lands on a full home, just via an extra
+internal hop. From a non-home origin the pop really pops and Back returns to the
+origin screen (verified: store → `://glasses` → Back → store). Do not "fix" the
+extra hop by making the shim manipulate history; that is what stranded users in
+earlier rounds.
+
+**Warm links need ~20 s of settle before you dump.** `processUrl` turns the
+splash on for 2.5 s after the handler runs, so a `uiautomator dump` at 15 s
+captures a blank splash and reads as a dead screen.
 
 ### Screens and how to reach them
 
@@ -160,7 +181,7 @@ To exercise them for real:
 ### Mobile gates
 
     cd mobile && bun install && bun run compile     # tsc, ~3 min
-    cd mobile && bun run test                       # jest, 83 suites / 657 tests, ~2 min
+    cd mobile && bun run test                       # jest, 83 suites / 670 tests, ~2 min
 
 `mobile/jest.config.js` ignores `modules/engine`, `modules/miniapp`,
 `modules/jspolyfill`, `services/photo`, `services/streaming` and two bun:test
@@ -195,7 +216,8 @@ whose tsconfig lives at `miniapps/merge/miniapp/tsconfig.json`**, not its root.
 
 Green baseline for the 9 suites: captions 10, example-miniapp 21, merge 6,
 navigation 78, recorder 18, teleprompter 2, tenir 69, translation 11, turma 341.
-**Verified identical on bun 1.2.22 (the CI pin) and 1.3.14.** They used to
+**Verified identical on bun 1.2.22 (the CI pin) and 1.3.14**, as is the mobile
+jest run (83/670 on both). They used to
 diverge — `example-miniapp` 15/6 and `navigation` 73/5 under 1.2.22 — because
 RTL does not auto-`cleanup()` on bun 1.2.x and `jest.isFakeTimers` /
 `jest.advanceTimersByTime` do not exist there. Both were fixed by an explicit
@@ -334,29 +356,39 @@ rather than trusting absolute counts. Same recipe works for a miniapp
   a red `[startScan] Cannot convert 'undefined' to a Kotlin type`. Nothing in
   `mobile/src/__tests__/app/pairing/scan.test.tsx` covers the missing-model
   case — every test sets `deviceModel` — so removing the guard keeps jest green.
-- **`/pairing/btclassic` is a one-way screen.** It calls
-  `focusEffectPreventBack()` and its header back button is commented out, so
-  hardware Back does nothing (verified: 5 presses, still on "Pair Audio"), HOME +
-  relaunch returns to it, and its only control is "Open settings". Because it is
-  a **file route**, deep-linking `://pairing/btclassic` mounts it no matter what
-  the deep-link table maps that step to. Force-stop to escape, and do not use it
-  as a warm-link fixture.
-- **Only `planDeeplink.ts` is unit tested; the React layer around it is not.**
-  A mutation audit confirms `mobile/src/services/deeplink/planDeeplink.test.ts`
-  catches a boot guard keyed on the wrong thing, dedup leaking onto the cold
-  `initial` delivery, an always-true `shouldResetToHomeBeforeHandoff`, and the
-  boot guard being deleted outright. It catches **nothing** in
-  `+not-found.tsx`, `package/[packageName].tsx` or `DeeplinkContext.tsx` —
-  deleting `+not-found`'s `duplicate` → `goBack()` branch (the branch every warm
-  deep link actually takes), deleting the rescue timer's `mantle.isInitialized`
-  guard, and flipping the package route's `replace` to `push` all leave jest and
-  tsc fully green. Never accept a green suite as evidence that a change to those
-  three files works; drive it on a device.
-- **`+not-found`'s rescue timer has not been observed to fire.** Across 37
-  instrumented deep-link runs the string `NOT_FOUND: nothing navigated away`
-  never appeared once: post-boot every plan branch navigates away and unmounts
-  the screen before the 20 s timer, and pre-boot the timer returns early on
-  `!mantle.isInitialized`. Treat it as unproven safety net, not as cover.
+- **`/pairing/btclassic` blocks hardware Back but has a header back.** It calls
+  `focusEffectPreventBack()`, so hardware Back does nothing (verified: 5
+  presses, still on "Pair Audio") — the chevron in the header is the only exit
+  (clickable ViewGroup at ~`115,191`, content-desc `\uea60`; one tap logs
+  `NAV: goBack()` and lands on a full home). Because it is a **file route**,
+  expo-router mounts it on `://pairing/btclassic` no matter what the table maps
+  that step to; the table's push of `/pairing/select-glasses-model` then covers
+  it, so **pressing Back from the model picker drops you onto it** — that is how
+  to reach it for testing without hardware.
+- **On Android the only legitimate entry to btclassic is `scan.tsx` (which
+  threads a `device`).** `success.tsx` forces `bluetoothClassicConnected = true`
+  on Android so the step is never queued, and `effects/BtClassicPairing.tsx`
+  returns early unless `Platform.OS === "ios"`. Its no-device/no-default guard
+  is therefore iOS-only in practice and cannot be driven from this emulator.
+- **`planDeeplink.ts` is the only tested part of deep-link handling, but it now
+  covers the decisions `+not-found` makes.** A mutation audit
+  (`planDeeplink.test.ts`, 25 tests) catches all of: boot guard keyed on
+  "anything pending", dedup leaking onto the cold `initial` delivery, an
+  always-true `shouldResetToHomeBeforeHandoff`, `decideNotFoundAction`'s
+  `duplicate` → pop branch deleted, `mayRescueToHome`'s boot check deleted, and
+  `deeplinkKey` degraded to the raw URL. `btclassic.test.tsx` catches the header
+  back control being removed.
+- **`DeeplinkContext.tsx`'s pattern table is still covered by nothing.** Point
+  `/package/:packageName` at a bogus pattern and the whole mobile suite stays
+  green — the same escape that shipped the dead App Link. Any change to
+  `deepLinkRoutes` must be driven on a device.
+- **`+not-found`'s rescue timer has still never been observed to fire.** Post-boot
+  every plan branch navigates away (or the shim's re-focus handler goes home)
+  before the 20 s timer; pre-boot it returns early on `!mantle.isInitialized`.
+  Verified in the dangerous direction: with airplane mode on, a cold deep link
+  sits on "Connection Error" for 105 s with `MANTLE: init()` count 0 and the
+  rescue never fires — it cannot manufacture the crippled home. Treat it as an
+  unproven safety net, not as cover.
 - **A failed boot parks on "Connection Error", and that is recoverable.** With
   airplane mode on, a cold deep link leaves the app on Connection Error with
   Retry / Continue Anyway (not a crippled home, not a spinner). Dismiss the

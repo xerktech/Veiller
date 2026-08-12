@@ -43,19 +43,8 @@ export default function BtClassicPairingScreen() {
     engine.pairing.onOtherBtConnected(onChange),
   )
   const [savedDeviceName] = useSetting(SETTINGS.device_name.key)
-  const [defaultWearable] = useSetting(SETTINGS.default_wearable.key)
   const deviceName = device?.name || savedDeviceName || ""
   const {theme} = useAppTheme()
-
-  // Reached with neither a device to pair nor a saved default to reconnect,
-  // this screen has nothing to do — that only happens on a stray deep link.
-  const hasFlowContext = device !== null || !!defaultWearable
-  useEffect(() => {
-    if (!hasFlowContext) {
-      console.warn("PAIRING: /pairing/btclassic opened with no device and no paired default — leaving")
-      useNavigationStore.getState().replace("/pairing/select-glasses-model")
-    }
-  }, [hasFlowContext])
 
   focusEffectPreventBack()
 

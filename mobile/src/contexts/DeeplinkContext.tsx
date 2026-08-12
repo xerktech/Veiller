@@ -19,7 +19,7 @@ export interface DeepLinkRoute {
  * and there are no /auth/* routes. Individual miniapps handle their own auth if
  * they need it.
  */
-const deepLinkRoutes: DeepLinkRoute[] = [
+export const deepLinkRoutes: DeepLinkRoute[] = [
   // Home routes
   {
     pattern: "/",
@@ -93,7 +93,9 @@ const deepLinkRoutes: DeepLinkRoute[] = [
         const fullRoute = qs ? `${route}?${qs}` : route
         nav.push(fullRoute as any)
       } else {
-        nav.push("/settings")
+        // "/settings" is a deep-link pattern, not a route — pushing it landed
+        // on expo-router's "Unmatched Route" screen.
+        nav.push("/miniapps/settings/main")
       }
     },
   },
