@@ -11,7 +11,7 @@ import {translate} from "@/i18n"
 import {showAlert} from "@/utils/AlertUtils"
 import {PermissionFeatures, checkConnectivityRequirementsUI, requestFeaturePermissions} from "@/utils/PermissionsUtils"
 import GlassesDisplayMirror from "@/components/mirror/GlassesDisplayMirror"
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import GlassesTroubleshootingModal from "@/components/glasses/GlassesTroubleshootingModal"
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {CDN_BASE_URL} from "@/constants/appConfig"
@@ -21,12 +21,44 @@ import {ThemedStyle} from "@/theme"
 
 type BluetoothPermission = Permission | "android.permission.BLUETOOTH" | "android.permission.BLUETOOTH_ADMIN"
 
+/**
+ * Models this screen can render a pairing guide for. Kept in step with the
+ * switch in renderPairingGuide() — anything not listed has no guide, so the
+ * screen redirects rather than rendering an empty shell.
+ */
+const SUPPORTED_PAIRING_MODELS = new Set<string>([
+  DeviceTypes.SIMULATED,
+  DeviceTypes.G1,
+  DeviceTypes.G2,
+  DeviceTypes.LIVE,
+  DeviceTypes.MACH1,
+  DeviceTypes.Z100,
+  DeviceTypes.NEX,
+  DeviceTypes.NIMO,
+  DeviceTypes.AR99,
+])
+
 export default function PairingPrepScreen() {
   const route = useRoute()
-  const {deviceModel, ar99ProjectName} = route.params as {deviceModel: string; ar99ProjectName?: string}
+  const {deviceModel, ar99ProjectName} = (route.params ?? {}) as {
+    deviceModel?: string
+    ar99ProjectName?: string
+  }
   const displayName = deviceModel === DeviceTypes.AR99 ? getAr99DisplayName(ar99ProjectName) : deviceModel
-  const {goBack, push, clearHistoryAndGoHome} = useNavigationStore.getState()
+  const {goBack, push, clearHistoryAndGoHome, replace} = useNavigationStore.getState()
   const {themed} = useAppTheme()
+
+  // This screen renders a guide for one specific model. Opened without one —
+  // a deep link, or a restored navigation state — it used to throw
+  // "Unknown model name: undefined" straight into the error boundary. Send the
+  // user to the picker that supplies the model instead.
+  const hasKnownModel = !!deviceModel && SUPPORTED_PAIRING_MODELS.has(deviceModel)
+  useEffect(() => {
+    if (!hasKnownModel) {
+      console.warn(`PAIRING: opened without a usable deviceModel (${String(deviceModel)}) — routing to model selection`)
+      replace("/pairing/select-glasses-model")
+    }
+  }, [hasKnownModel, deviceModel, replace])
 
   const advanceToPairing = async () => {
     if (deviceModel == null || deviceModel == "") {
@@ -44,15 +76,22 @@ export default function PairingPrepScreen() {
     try {
       // Check for Android-specific permissions
       if (Platform.OS === "android") {
-        // Android-specific Phone State permission - request for ALL glasses including simulated
-        console.log("Requesting PHONE_STATE permission...")
-        const phoneStateGranted = await requestFeaturePermissions(PermissionFeatures.PHONE_STATE)
-        console.log("PHONE_STATE permission result:", phoneStateGranted)
+        // PHONE_STATE backs BLE identity handling on real glasses. Simulated
+        // Glasses have no radio at all, so gating them on it made "Allow
+        // Veiller to make and manage phone calls?" the first prompt a new
+        // user sees with no way past it — for a device that cannot use the
+        // permission.
+        const needsPhoneState = !deviceModel.startsWith(DeviceTypes.SIMULATED)
+        if (needsPhoneState) {
+          console.log("Requesting PHONE_STATE permission...")
+          const phoneStateGranted = await requestFeaturePermissions(PermissionFeatures.PHONE_STATE)
+          console.log("PHONE_STATE permission result:", phoneStateGranted)
 
-        if (!phoneStateGranted) {
-          // The specific alert for previously denied permission is already handled in requestFeaturePermissions
-          // We just need to stop the flow here
-          return
+          if (!phoneStateGranted) {
+            // The specific alert for previously denied permission is already handled in requestFeaturePermissions
+            // We just need to stop the flow here
+            return
+          }
         }
 
         // Bluetooth permissions only for physical glasses
@@ -352,7 +391,7 @@ export default function PairingPrepScreen() {
         <GlassesTroubleshootingModal
           isVisible={showTroubleshootingModal}
           onClose={() => setShowTroubleshootingModal(false)}
-          deviceModel={deviceModel}
+          deviceModel={deviceModel ?? ""}
         />
       </>
     )
@@ -400,7 +439,7 @@ export default function PairingPrepScreen() {
         <GlassesTroubleshootingModal
           isVisible={showTroubleshootingModal}
           onClose={() => setShowTroubleshootingModal(false)}
-          deviceModel={deviceModel}
+          deviceModel={deviceModel ?? ""}
         />
       </>
     )
@@ -482,7 +521,11 @@ export default function PairingPrepScreen() {
         return <Ar99PairingGuide />
     }
 
-    throw new Error(`Unknown model name: ${deviceModel}`)
+    // Reached when the screen is opened without a usable deviceModel — a deep
+    // link, or a restored navigation state. Throwing here put a Render Error
+    // boundary in front of the user; send them to the picker instead.
+    console.warn(`PAIRING: no pairing guide for model ${String(deviceModel)} — routing to model selection`)
+    return null
   }
 
   const renderButtons = () => {

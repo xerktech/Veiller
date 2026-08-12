@@ -12,7 +12,7 @@ import {translate} from "@/i18n"
 import mantle from "@/services/MantleManager"
 import {SETTINGS, engine, useSetting, BgTimer} from "@veiller/engine"
 import {SplashVideo} from "@/components/splash/SplashVideo"
-import {APP_STORE_URL, PLAY_STORE_URL} from "@/constants/appConfig"
+import {ANDROID_RELEASES_URL, APP_STORE_URL} from "@/constants/appConfig"
 import {fetchMinimumClientVersion} from "@/utils/cloudVersion"
 
 // Types
@@ -196,7 +196,8 @@ export default function InitScreen() {
   const handleUpdate = async (): Promise<void> => {
     setIsUpdating(true)
     try {
-      const url = Platform.OS === "ios" ? APP_STORE_URL : PLAY_STORE_URL
+      // Android has no store listing — send sideloaded users to Releases.
+      const url = Platform.OS === "ios" ? APP_STORE_URL : ANDROID_RELEASES_URL
       await Linking.openURL(url)
     } catch (error) {
       console.error("Error opening store:", error)

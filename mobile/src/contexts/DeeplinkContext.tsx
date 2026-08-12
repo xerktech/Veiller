@@ -1,8 +1,10 @@
 import * as Linking from "expo-linking"
-import {FC, ReactNode, createContext, useContext, useEffect} from "react"
+import {FC, ReactNode, createContext, useContext, useEffect, useRef} from "react"
 
 import {useSplashLoader} from "@/contexts/SplashLoaderProvider"
 import {BgTimer} from "@veiller/engine"
+import mantle from "@/services/MantleManager"
+import {deeplinkKey, planDeeplink, type DeeplinkPlan} from "@/services/deeplink/planDeeplink"
 import {useNavigationStore} from "@/stores/navigation"
 
 export interface DeepLinkRoute {
@@ -17,7 +19,7 @@ export interface DeepLinkRoute {
  * and there are no /auth/* routes. Individual miniapps handle their own auth if
  * they need it.
  */
-const deepLinkRoutes: DeepLinkRoute[] = [
+export const deepLinkRoutes: DeepLinkRoute[] = [
   // Home routes
   {
     pattern: "/",
@@ -31,7 +33,21 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/home",
     handler: (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
+      // processUrl guarantees the app has booted before any handler runs, so
+      // the built-in catalog is registered by the time we get here.
       nav.replaceAll("/home")
+    },
+  },
+
+  {
+    // A real file route, but it still needs a pattern here: without one,
+    // processUrl fell through to the fallback handler, which replaces to "/"
+    // and boots the app a second time (~20s of extra splash) before landing on
+    // home instead of the store.
+    pattern: "/miniapps/store",
+    handler: (url: string, params: Record<string, string>) => {
+      const nav = useNavigationStore.getState()
+      nav.push("/miniapps/store")
     },
   },
 
@@ -40,7 +56,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/settings",
     handler: (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/miniapps/settings")
+      nav.push("/miniapps/settings/main")
     },
   },
   {
@@ -49,11 +65,19 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {section} = params
       const nav = useNavigationStore.getState()
       // Map section names to actual routes
+      // Every entry must name a route that exists under mobile/src/app —
+      // an unknown target lands the user on expo-router's "Unmatched Route"
+      // screen. "developer" (removed by XERK-214) and "theme" (folded into
+      // appearance) used to be listed here and had no such route.
       const sectionRoutes: Record<string, string> = {
         "privacy": "/miniapps/settings/privacy",
-        "developer": "/miniapps/settings/developer",
-        "theme": "/miniapps/settings/theme",
+        "appearance": "/miniapps/settings/appearance",
         "dashboard": "/miniapps/settings/dashboard",
+        "glasses": "/miniapps/settings/glasses",
+        "microphone": "/miniapps/settings/microphone",
+        "notifications": "/miniapps/settings/notifications",
+        "speech": "/miniapps/settings/speech",
+        "device-info": "/miniapps/settings/device-info",
         // Test/benchmark route — only useful behind Super Mode.
         "stress-test": "/miniapps/settings/stress-test",
       }
@@ -69,7 +93,9 @@ const deepLinkRoutes: DeepLinkRoute[] = [
         const fullRoute = qs ? `${route}?${qs}` : route
         nav.push(fullRoute as any)
       } else {
-        nav.push("/settings")
+        // "/settings" is a deep-link pattern, not a route — pushing it landed
+        // on expo-router's "Unmatched Route" screen.
+        nav.push("/miniapps/settings/main")
       }
     },
   },
@@ -79,7 +105,7 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/glasses",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/glasses")
+      nav.push("/miniapps/settings/glasses")
     },
   },
   // XERK-200/XERK-206: ASG gallery route removed while the camera miniapp is parked.
@@ -96,7 +122,9 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     pattern: "/pairing",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/pairing/guide")
+      // The model picker, not /pairing/prep: prep renders a per-model guide
+      // and has nothing to show without a deviceModel param.
+      nav.push("/pairing/select-glasses-model")
     },
   },
   {
@@ -105,10 +133,24 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       const {step} = params
       const nav = useNavigationStore.getState()
 
+      // "guide" and "bluetooth" had no route; the guide is /pairing/prep and
+      // the Bluetooth-classic step is /pairing/btclassic.
       const pairingRoutes: Record<string, string> = {
-        "guide": "/pairing/guide",
-        "prep": "/pairing/prep",
-        "bluetooth": "/pairing/bluetooth",
+        // "guide"/"prep" render a per-model guide, which needs a deviceModel
+        // the URL does not carry — send them to the picker that supplies one.
+        "guide": "/pairing/select-glasses-model",
+        "prep": "/pairing/select-glasses-model",
+        // NOT /pairing/btclassic: that screen calls focusEffectPreventBack()
+        // and its header back button is commented out, so a deep link into it
+        // traps the app — Back does nothing and only a force-stop escapes. It
+        // is a step inside the pairing flow, reachable from it, not an entry
+        // point.
+        "bluetooth": "/pairing/select-glasses-model",
+        "btclassic": "/pairing/select-glasses-model",
+        // "scan" needs a deviceModel just as much as guide/prep do — without
+        // one it renders "Scanning for " and the native scan throws
+        // "Cannot convert 'undefined' to a Kotlin type".
+        "scan": "/pairing/select-glasses-model",
         "select-glasses": "/pairing/select-glasses-model",
         "wifi-setup": "/wifi/scan",
       }
@@ -117,19 +159,24 @@ const deepLinkRoutes: DeepLinkRoute[] = [
       if (route) {
         nav.push(route as any)
       } else {
-        nav.push("/pairing/guide")
+        nav.push("/pairing/select-glasses-model")
       }
     },
   },
 
   // Mirror/Gallery routes
-  {
-    pattern: "/mirror/gallery",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      nav.push("/mirror/gallery")
-    },
-  },
+  //
+  // XERK-200/XERK-206: the ASG gallery is parked with the camera miniapp, so
+  // there is no /mirror/gallery route. Registering the pattern anyway sent the
+  // user to expo-router's "Unmatched Route" screen; leave it unregistered so
+  // the link falls through to the fallback handler (home) instead.
+  // {
+  //   pattern: "/mirror/gallery",
+  //   handler: async (url: string, params: Record<string, string>) => {
+  //     const nav = useNavigationStore.getState()
+  //     nav.push("/mirror/gallery")
+  //   },
+  // },
   {
     pattern: "/mirror/video/:videoId",
     handler: async (url: string, params: Record<string, string>) => {
@@ -140,22 +187,26 @@ const deepLinkRoutes: DeepLinkRoute[] = [
   },
 
   // Search routes
-  {
-    pattern: "/search",
-    handler: async (url: string, params: Record<string, string>) => {
-      const nav = useNavigationStore.getState()
-      const {q} = params
-      const route = q ? `/search/search?q=${encodeURIComponent(q)}` : "/search/search"
-      nav.push(route as any)
-    },
-  },
+  //
+  // There is no search screen in this fork — /search/search does not exist
+  // under mobile/src/app. Kept commented rather than pointing at a route that
+  // renders "Unmatched Route".
+  // {
+  //   pattern: "/search",
+  //   handler: async (url: string, params: Record<string, string>) => {
+  //     const nav = useNavigationStore.getState()
+  //     const {q} = params
+  //     const route = q ? `/search/search?q=${encodeURIComponent(q)}` : "/search/search"
+  //     nav.push(route as any)
+  //   },
+  // },
 
   // Onboarding routes
   {
     pattern: "/welcome",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
-      nav.push("/welcome")
+      nav.push("/onboarding/welcome")
     },
   },
   {
@@ -170,11 +221,27 @@ const deepLinkRoutes: DeepLinkRoute[] = [
   // target for Cloud V1 apps is gone (Cloud V1 app end-of-life); app links
   // land on the installed app's info screen instead.
   {
+    // `/package/:packageName` is the ONLY path the manifest autoVerifies, so it
+    // is what every link from the web arrives on.
+    //
+    // There is deliberately no `app/package/[packageName].tsx` file route. A
+    // file route and this table cannot both own a path: expo-router mounts the
+    // file route, this table's fallback then fires `replaceAll("/")` on top of
+    // it, and the user lands on home. Leaving the path unrouted sends it
+    // through `+not-found`, which hands it here — exactly how `/apps/` works.
+    pattern: "/package/:packageName",
+    handler: async (url: string, params: Record<string, string>) => {
+      const nav = useNavigationStore.getState()
+      const {packageName} = params
+      nav.push(`/applet/settings?packageName=${encodeURIComponent(packageName)}`)
+    },
+  },
+  {
     pattern: "/apps/:packageName",
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
       const {packageName} = params
-      nav.push(`/applet/settings?packageName=${packageName}`)
+      nav.push(`/applet/settings?packageName=${encodeURIComponent(packageName)}`)
     },
   },
   {
@@ -182,13 +249,19 @@ const deepLinkRoutes: DeepLinkRoute[] = [
     handler: async (url: string, params: Record<string, string>) => {
       const nav = useNavigationStore.getState()
       const {packageName} = params
-      nav.push(`/applet/settings?packageName=${packageName}`)
+      nav.push(`/applet/settings?packageName=${encodeURIComponent(packageName)}`)
     },
   },
 ]
 
 interface DeeplinkContextType {
   processUrl: (url: string) => Promise<void>
+  /**
+   * What processUrl would do with this URL right now, without doing it.
+   * `+not-found` needs this to decide whether resetting to home first is safe:
+   * clearing history and then declining to navigate strands the user.
+   */
+  planFor: (url: string) => DeeplinkPlan
 }
 
 const DeeplinkContext = createContext<DeeplinkContextType>({} as DeeplinkContextType)
@@ -227,13 +300,25 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   /**
    * Find matching route for the given URL
    */
-  const findMatchingRoute = (url: URL): DeepLinkRoute | null => {
+  /**
+   * The path a route pattern is matched against.
+   *
+   * For the custom scheme, `com.xerktech.veiller://pairing/bluetooth` parses
+   * with host "pairing" and pathname "/bluetooth", so the host has to be
+   * folded back in to recover "/pairing/bluetooth". Both matching AND param
+   * extraction must use this — they used to disagree, so every `:param` in an
+   * app-scheme URL came out one segment short (empty), silently disabling
+   * /apps/:packageName, /package/:packageName, /pairing/:step,
+   * /miniapps/settings/:section and /mirror/video/:videoId.
+   */
+  const effectivePathname = (url: URL): string => {
     const host = url.host
-    let pathname = url.pathname
     const isAppScheme = url.protocol === `${config.scheme}:`
-    if (isAppScheme && host) {
-      pathname = `/${host}${pathname}`
-    }
+    return isAppScheme && host ? `/${host}${url.pathname}` : url.pathname
+  }
+
+  const findMatchingRoute = (url: URL): DeepLinkRoute | null => {
+    const pathname = effectivePathname(url)
 
     for (const route of config.routes) {
       if (matchesPattern(pathname, route.pattern)) {
@@ -259,8 +344,8 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
   const extractParams = (url: URL, pattern: string): Record<string, string> => {
     const params: Record<string, string> = {}
 
-    // Extract path parameters
-    const pathParts = url.pathname.split("/").filter(Boolean)
+    // Extract path parameters — against the same path findMatchingRoute used.
+    const pathParts = effectivePathname(url).split("/").filter(Boolean)
     const patternParts = pattern.split("/").filter(Boolean)
 
     for (let i = 0; i < patternParts.length; i++) {
@@ -281,30 +366,53 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
     return params
   }
 
-  let lastProcessedUrl: string | null = null
-  let lastProcessedTime = 0
+  // Refs, not locals: these were plain `let`s in the provider body, so every
+  // re-render reset them. That made the dedup window simultaneously useless
+  // (real duplicates got through and pushed the same screen twice) and harmful
+  // (a stale record survived long enough to swallow the legitimate replay of a
+  // pending route after boot). XERK-249.
+  const lastDispatched = useRef<{url: string | null; at: number}>({url: null, at: 0})
+  /**
+   * The URL we have already deferred pending a boot. Deliberately separate from
+   * nav's pendingRoute, which other code (and processUrl's own `initial`
+   * branch) also writes.
+   */
+  const bootDeferredFor = useRef<string | null>(null)
 
   const processUrl = async (url: string, initial: boolean = false) => {
     try {
-      // ignore expo-dev-deeplinks: (this was causing android to restart the app after hot-reloads twice)
-      if (url.includes("expo-development-client")) {
-        console.log("DEEPLINK: Ignoring expo-development-client URL")
+
+      // Every decision about this URL — ignore / defer for boot / duplicate /
+      // dispatch — is made by planDeeplink, which is pure and unit tested. See
+      // services/deeplink/planDeeplink.ts for why.
+      const plan = planDeeplink({
+        url,
+        isInitialized: mantle.isInitialized,
+        bootDeferredFor: bootDeferredFor.current,
+        lastDispatched: lastDispatched.current,
+        now: Date.now(),
+        initial,
+      })
+
+      if (plan.kind === "ignore") {
+        console.log("DEEPLINK: ignoring —", plan.reason)
         return
       }
-
-      // Deduplicate — iOS can fire the same universal link event multiple times,
-      // and on cold start both getInitialURL and addEventListener fire for the
-      // same URL. Initial calls skip the check but claim the URL so that the
-      // duplicate addEventListener call is blocked. The index.tsx re-processing
-      // call happens >2s later (1s initial delay + init time + 1s DEEPLINK_DELAY)
-      // so it naturally falls outside the dedup window.
-      const now = Date.now()
-      if (!initial && url === lastProcessedUrl && now - lastProcessedTime < 3000) {
+      if (plan.kind === "duplicate") {
         console.log("DEEPLINK: Ignoring duplicate URL")
         return
       }
-      lastProcessedUrl = url
-      lastProcessedTime = now
+      if (plan.kind === "already-deferred") {
+        console.log("DEEPLINK: boot already pending for", url)
+        return
+      }
+      if (plan.kind === "defer-for-boot") {
+        console.log("DEEPLINK: app not initialized yet — booting through / and replaying", url)
+        bootDeferredFor.current = deeplinkKey(url)
+        nav.setPendingRoute(url)
+        nav.replace("/")
+        return
+      }
 
       // For initial URLs (cold start), set the pending route BEFORE the delay.
       // This prevents a race condition where index.tsx init completes during the
@@ -342,6 +450,11 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
       }
 
       try {
+        // Recorded now that a route matched and the handler is about to run:
+        // this is the point at which a second delivery really would be a
+        // repeat. Recording on entry marked calls that then bailed out as
+        // handled, which swallowed the one call that would have navigated.
+        lastDispatched.current = {url, at: Date.now()}
         console.log("@@@@@@@@@@@@@ MATCHED ROUTE @@@@@@@@@@@@@@@", matchedRoute)
         console.log("@@@@@@@@@@@@@ PARAMS @@@@@@@@@@@@@@@", params)
         console.log("@@@@@@@@@@@@@ URL @@@@@@@@@@@@@@@", url)
@@ -361,8 +474,19 @@ export const DeeplinkProvider: FC<{children: ReactNode}> = ({children}) => {
     }
   }
 
+  const planFor = (url: string): DeeplinkPlan =>
+    planDeeplink({
+      url,
+      isInitialized: mantle.isInitialized,
+      bootDeferredFor: bootDeferredFor.current,
+      lastDispatched: lastDispatched.current,
+      now: Date.now(),
+      initial: false,
+    })
+
   const contextValue: DeeplinkContextType = {
     processUrl,
+    planFor,
   }
 
   return <DeeplinkContext.Provider value={contextValue}>{children}</DeeplinkContext.Provider>

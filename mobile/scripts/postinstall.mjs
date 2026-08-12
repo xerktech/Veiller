@@ -11,7 +11,10 @@ await $({ stdio: 'inherit', cwd: 'modules/bluetooth-sdk' })`bun run prepare`;
 // crust declares @veiller/jspolyfill as a dep so this runs before crust.
 await $({ stdio: 'inherit', cwd: 'modules/jspolyfill' })`bun run build`;
 await $({ stdio: 'inherit', cwd: 'modules/crust' })`bun run prepare`;
-await $({ stdio: 'inherit', cwd: 'modules/miniapp' })`bun run prepare`;
+// miniapp's prepare was renamed to build:module for the same reason engine's
+// was (see below) — plus a `prepare` here raced bun's own `bun` package
+// postinstall, so a cold `bun install` from sdk/ died on a placeholder shim.
+await $({ stdio: 'inherit', cwd: 'modules/miniapp' })`bun run build:module`;
 // Engine compiles source imported from ../cloud-v2/packages/*. TypeScript
 // resolves those files' dependencies from cloud-v2/, not mobile/, so provision
 // the cloud-v2 workspace deps before the isolated Expo module build.

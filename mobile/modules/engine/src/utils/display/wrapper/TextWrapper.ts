@@ -4,6 +4,15 @@ import type { WrapOptions, WrapResult, LineMetrics, BreakMode } from "./types";
 import { DEFAULT_WRAP_OPTIONS } from "./types";
 
 /**
+ * One breakable unit from `splitIntoWords`, plus whether the source actually
+ * separated it from the previous unit with whitespace.
+ */
+interface WordToken {
+  text: string;
+  precededBySpace: boolean;
+}
+
+/**
  * Wraps text to fit display constraints.
  *
  * Supports multiple break modes:
@@ -291,9 +300,12 @@ export class TextWrapper {
     let currentLine = "";
     let currentWidth = 0;
 
-    for (const word of words) {
+    for (const token of words) {
+      const word = token.text;
       const wordWidth = this.measurer.measureText(word);
-      const needsSpace = currentLine.length > 0;
+      // Only re-insert a separator where the source actually had one; CJK runs
+      // are tokenised per character and must re-join without spaces.
+      const needsSpace = currentLine.length > 0 && token.precededBySpace;
       const totalWidth = currentWidth + (needsSpace ? spaceWidth : 0) + wordWidth;
 
       if (totalWidth <= maxWidthPx) {
@@ -354,9 +366,12 @@ export class TextWrapper {
     let currentLine = "";
     let currentWidth = 0;
 
-    for (const word of words) {
+    for (const token of words) {
+      const word = token.text;
       const wordWidth = this.measurer.measureText(word);
-      const needsSpace = currentLine.length > 0;
+      // Only re-insert a separator where the source actually had one; CJK runs
+      // are tokenised per character and must re-join without spaces.
+      const needsSpace = currentLine.length > 0 && token.precededBySpace;
       const totalWidth = currentWidth + (needsSpace ? spaceWidth : 0) + wordWidth;
 
       if (totalWidth <= maxWidthPx) {
@@ -393,32 +408,42 @@ export class TextWrapper {
   /**
    * Split text into words, handling CJK characters specially.
    * CJK characters are treated as individual "words" since they can break anywhere.
+   *
+   * Each token records whether whitespace actually separated it from the
+   * previous one. CJK scripts do not put spaces between characters, so a
+   * caller that re-joins tokens with " " unconditionally turns "こんにちは"
+   * into "こ ん に ち は" — legible-looking in a diff, unreadable on the lens.
+   * The flag lets the wrap loops re-join faithfully while still being free to
+   * break between any two CJK characters.
    */
-  private splitIntoWords(text: string): string[] {
-    const words: string[] = [];
+  private splitIntoWords(text: string): WordToken[] {
+    const words: WordToken[] = [];
     let currentWord = "";
+    let pendingSpace = false;
+
+    const flush = (): void => {
+      if (currentWord) {
+        words.push({text: currentWord, precededBySpace: pendingSpace});
+        currentWord = "";
+        pendingSpace = false;
+      }
+    };
 
     for (const char of text) {
       if (char === " " || char === "\t") {
-        if (currentWord) {
-          words.push(currentWord);
-          currentWord = "";
-        }
+        flush();
+        pendingSpace = true;
       } else if (isCJKCharacter(char)) {
         // CJK characters are individual words
-        if (currentWord) {
-          words.push(currentWord);
-          currentWord = "";
-        }
-        words.push(char);
+        flush();
+        words.push({text: char, precededBySpace: pendingSpace});
+        pendingSpace = false;
       } else {
         currentWord += char;
       }
     }
 
-    if (currentWord) {
-      words.push(currentWord);
-    }
+    flush();
 
     return words;
   }

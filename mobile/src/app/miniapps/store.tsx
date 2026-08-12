@@ -15,6 +15,7 @@
  */
 import {useCallback, useEffect, useState} from "react"
 import {ActivityIndicator, ScrollView, View} from "react-native"
+import Toast from "react-native-toast-message"
 
 import {Button, Header, Screen, Switch, Text} from "@/components/ignite"
 import GlassView from "@/components/ui/GlassView"
@@ -23,6 +24,7 @@ import {showAlert} from "@/contexts/ModalContext"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {translate} from "@/i18n"
 import {isVeillerMiniappEnabled, setVeillerMiniappEnabled} from "@/services/miniapps/veillerMiniappPrefs"
+import {deriveStoreRowState} from "@/services/miniapps/storeRowState"
 import {veillerMiniappSync, resolveLatestBundle, type InstallStage} from "@/services/miniapps/veillerMiniappSync"
 import {useNavigationStore} from "@/stores/navigation"
 import {engine, type ClientApp} from "@veiller/engine"
@@ -93,15 +95,18 @@ export default function MiniappStorePage() {
     return engine.miniapps.onChanged(setApps)
   }, [])
 
+  /** Returns true when the check reached the registry, false on failure. */
   const resolveAvailable = useCallback(
-    async (source: VeillerMiniappSource) => {
+    async (source: VeillerMiniappSource): Promise<boolean> => {
       patchRow(source.packageName, {availability: "loading"})
       try {
         const bundle = await resolveLatestBundle(source)
         patchRow(source.packageName, {availableVersion: bundle?.version ?? null, availability: "resolved"})
+        return true
       } catch (error) {
         console.warn("MiniappStore: failed to resolve latest for", source.repo, error)
         patchRow(source.packageName, {availability: "error"})
+        return false
       }
     },
     [patchRow],
@@ -144,13 +149,27 @@ export default function MiniappStorePage() {
     }
   }
 
-  const handleCheckAll = () => {
+  const handleCheckAll = async () => {
     engine.miniapps.refresh()
     // A fresh check supersedes whatever the last install attempt reported.
-    for (const source of VEILLER_MINIAPPS) {
+    const checks = VEILLER_MINIAPPS.map((source) => {
       patchRow(source.packageName, {install: {stage: "idle"}})
-      void resolveAvailable(source)
-    }
+      return resolveAvailable(source)
+    })
+    const results = await Promise.all(checks)
+    // Acknowledge the tap. Without this the refresh button produced no toast,
+    // no spinner and no result — indistinguishable from a dead control,
+    // especially offline where every check fails.
+    const failed = results.filter((ok) => !ok).length
+    Toast.show({
+      type: failed > 0 ? "error" : "success",
+      text1:
+        failed > 0
+          ? translate("miniappStore:checkFailed")
+          : translate("miniappStore:checkComplete"),
+      position: "bottom",
+      visibilityTime: 2000,
+    })
   }
 
   return (
@@ -160,7 +179,7 @@ export default function MiniappStorePage() {
         leftIcon="chevron-left"
         onLeftPress={() => goBack()}
         rightIcon="refresh"
-        onRightPress={handleCheckAll}
+        onRightPress={() => void handleCheckAll()}
       />
       <ScrollView className="pt-6 px-6 -mx-6" contentContainerClassName="gap-4">
         <Text text={translate("miniappStore:description")} className="text-sm text-muted-foreground px-1" />
@@ -172,33 +191,37 @@ export default function MiniappStorePage() {
           const displayName = installed?.name ?? source.name
           const available = row.availableVersion
           const isInstalled = !!installedVersion
-          const updateAvailable =
-            row.availability === "resolved" && available != null && (!isInstalled || available !== installedVersion)
           const install = row.install
           const busy = isBusy(install)
 
-          // An in-flight install owns the status line — the user needs to see
-          // that their tap is doing something, and which step it is on
-          // (XERK-225). Otherwise fall back to the availability summary.
-          let statusText: string
-          let statusColor: string = theme.colors.textDim
-          if (busy) {
-            statusText = translate(STAGE_LABELS[install.stage])
-            statusColor = theme.colors.text
-          } else if (row.availability === "loading") {
-            statusText = translate("miniappStore:checking")
-          } else if (updateAvailable) {
-            statusText = translate("miniappStore:updateAvailable")
-            statusColor = theme.colors.text
-          } else if (isInstalled) {
-            statusText = translate("miniappStore:upToDate")
-          } else if (row.availability === "error") {
-            statusText = translate("miniappStore:checkFailed")
-          } else {
-            statusText = translate("miniappStore:notInstalled")
-          }
+          // Status line and button availability are derived together, and
+          // tested, in storeRowState.ts — see the note there.
+          const rowState = deriveStoreRowState({
+            availability: row.availability,
+            availableVersion: available,
+            installedVersion,
+            busy,
+            failed: install.stage === "failed",
+            enabled: row.enabled,
+          })
+          const updateAvailable = rowState.status === "updateAvailable"
 
-          const actionLabel = isInstalled ? translate("miniappStore:update") : translate("miniappStore:install")
+          const stageLabel =
+            install.stage in STAGE_LABELS
+              ? STAGE_LABELS[install.stage as keyof typeof STAGE_LABELS]
+              : "miniappStore:checking"
+          const statusText =
+            rowState.status === "stage"
+              ? translate(stageLabel)
+              : translate(`miniappStore:${rowState.status}` as Parameters<typeof translate>[0])
+          const statusColor = rowState.emphasise ? theme.colors.text : theme.colors.textDim
+
+          const actionLabel =
+            rowState.action === "retry"
+              ? translate("miniappStore:retry")
+              : rowState.action === "update"
+                ? translate("miniappStore:update")
+                : translate("miniappStore:install")
 
           return (
             <GlassView key={source.packageName} className="rounded-2xl p-4 gap-3">
@@ -253,10 +276,10 @@ export default function MiniappStorePage() {
               {/* Only checked apps offer install/update — an unchecked app is
                   paused, so re-check it to act on it now. A failed attempt keeps
                   the button around (labelled "Retry") so the user can try again. */}
-              {row.enabled && (updateAvailable || busy || install.stage === "failed") && (
+              {rowState.showAction && (
                 <Button
                   preset="primary"
-                  text={busy ? "" : install.stage === "failed" ? translate("miniappStore:retry") : actionLabel}
+                  text={busy ? "" : actionLabel}
                   disabled={busy}
                   onPress={() => handleInstall(source)}>
                   {busy && <ActivityIndicator color={theme.colors.background} />}

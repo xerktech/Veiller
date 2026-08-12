@@ -8,7 +8,7 @@ import {useNavigate} from "react-router-dom"
 import type {DownloadResult} from "@veiller/miniapp"
 import {MiniappHeader} from "@veiller/miniapp/ui"
 
-import type {TesterEventPayload} from "../../shared/types"
+import type {TesterEventPayload} from "../../../shared/types"
 import {useChannel} from "../../hooks/useChannel"
 import {useTester} from "../../hooks/useTester"
 import {Shell} from "../Shell"

@@ -3,6 +3,7 @@
   "packageName": "com.veiller.captions",
   "version": "1.0.15",
   "name": "Captions",
+  "icon": "icon.png",
   "description": "Local (island-runtime) port of the Veiller Live Captions app. Subscribes to transcription, renders captions on the glasses display, and exposes a WebView for language + display settings.",
   "type": "standard",
   "sdkVersion": "0.3.0",

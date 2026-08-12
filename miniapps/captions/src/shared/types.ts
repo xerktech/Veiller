@@ -12,6 +12,24 @@
  * can stay byte-identical.
  */
 
+/**
+ * Display-line counts the user may choose.
+ *
+ * Shared deliberately: the phone UI rendered one range while the background
+ * validated another, so selecting 6 or 7 silently did nothing and the row
+ * reverted on the next settings broadcast (XERK-249).
+ *
+ * Capped at 7, not the G2 profile's maxLines of 8: the scene pipeline
+ * height-clips to the 288px lens and 8 x lineHeightPx (40) is 320, so a
+ * request for 8 measurably renders 7. Whether the G2 can really show 8 is a
+ * question for real hardware.
+ */
+export const DISPLAY_LINES_OPTIONS = [2, 3, 4, 5, 6, 7] as const
+
+export function isSupportedDisplayLines(lines: number): boolean {
+  return (DISPLAY_LINES_OPTIONS as readonly number[]).includes(lines)
+}
+
 export const CAPTION_TIMEOUT_OPTIONS_SECONDS = [3, 5, 10, 30, 40] as const
 export const DEFAULT_CAPTION_TIMEOUT_SECONDS = 40
 

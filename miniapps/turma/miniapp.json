@@ -3,6 +3,7 @@
   "packageName": "com.xerktech.turma",
   "version": "0.6.45",
   "name": "Turma",
+  "icon": "icon.png",
   "description": "Manage your self-hosted Turma fleet of Claude Code sessions from Even Realities G2 glasses: session list, live transcript, question answering, and G2-mic dictation, with a phone companion for Sessions and the ticket Board.",
   "type": "standard",
   "sdkVersion": "0.3.0",

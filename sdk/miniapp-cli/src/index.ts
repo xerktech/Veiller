@@ -12,6 +12,8 @@ import { simulate } from './simulate.js';
 const subcommand = process.argv[2];
 const subcommandArg = process.argv[3];
 
+const HELP_FLAGS = new Set(['-h', '--help', 'help']);
+
 function printUsage(): void {
   console.log('Usage: veiller-miniapp <command>\n');
   console.log('Commands:');
@@ -104,5 +106,6 @@ switch (subcommand) {
     break;
   default:
     printUsage();
-    process.exit(subcommand ? 1 : 0);
+    // Asking for help is not an error; an unrecognised command is.
+    process.exit(subcommand && !HELP_FLAGS.has(subcommand) ? 1 : 0);
 }

@@ -23,7 +23,8 @@
 import { registerMiniapp, type TypedMiniappSession } from "@veiller/miniapp/background";
 
 import { App } from "../core/app.ts";
-import { DEFAULT_POLL_MS, isConfigured, loadConfig, type Config } from "../core/config.ts";
+import { DEFAULT_POLL_MS, isConfigured, loadConfig, normalizeHubUrl, type Config } from "../core/config.ts";
+import { decideFetch, FETCH_TIMEOUT_MS } from "../core/fetch-policy.ts";
 import { HubClient } from "../core/hub-client.ts";
 import { LiveTail } from "../core/live.ts";
 import { setDefaultMeasure } from "../core/text-wrap.ts";
@@ -159,13 +160,69 @@ class TurmaBackground {
     // fetch is CORS-fragile; the JSContext's fetch has no CORS. The UI's
     // HubClient builds its own auth headers — this proxy is transport only.
     ui.handle("turma:fetch", async (req) => {
-      const res = await fetch(req.url, {
-        method: req.method ?? "GET",
-        headers: req.headers,
-        body: req.body,
-      });
-      const bodyText = await res.text();
-      return { status: res.status, ok: res.ok, bodyText };
+      // Transport only. What may be reached — and whether the body comes back
+      // — is decided by decideFetch (core/fetch-policy.ts), which is unit
+      // tested; this handler must stay a thin shell around it.
+      const method = req.method ?? "GET";
+      const configuredHub = normalizeHubUrl((await loadConfig(this.storage)).hubUrl);
+      // A stored hub that will not parse must not throw out of the handler —
+      // the phone page expects a value it can branch on. Treat it as unset,
+      // which leaves only the sign-in probe permitted.
+      let hubOrigin: string | null = null;
+      if (configuredHub) {
+        try {
+          hubOrigin = new URL(configuredHub).origin;
+        } catch {
+          console.warn("[turma] stored hubUrl is not a valid URL:", configuredHub);
+        }
+      }
+
+      const decision = decideFetch({ url: req.url, method, hubOrigin });
+      if (!decision.allow) {
+        return { status: 0, ok: false, bodyText: decision.reason };
+      }
+
+      // A host that accepts the connection and then answers nothing left this
+      // RPC pending forever, so the phone page waited on a promise that could
+      // never settle.
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), FETCH_TIMEOUT_MS);
+      let res: Response;
+      try {
+        res = await fetch(req.url, {
+          method,
+          headers: req.headers,
+          body: req.body,
+          signal: abort.signal,
+        });
+      } catch (err) {
+        // A network failure used to escape as an unhandled rejection and tear
+        // down the caller; the UI expects a value it can branch on.
+        const aborted = abort.signal.aborted;
+        return {
+          status: 0,
+          ok: false,
+          bodyText: aborted
+            ? `turma:fetch: timed out after ${FETCH_TIMEOUT_MS}ms`
+            : `turma:fetch: request failed: ${err instanceof Error ? err.message : String(err)}`,
+        };
+      } finally {
+        clearTimeout(timer);
+      }
+
+      if (!decision.withBody) {
+        return { status: res.status, ok: res.ok, bodyText: "" };
+      }
+
+      try {
+        return { status: res.status, ok: res.ok, bodyText: await res.text() };
+      } catch (err) {
+        return {
+          status: res.status,
+          ok: false,
+          bodyText: `turma:fetch: could not read body: ${err instanceof Error ? err.message : String(err)}`,
+        };
+      }
     });
 
     ui.handle("turma:storage-get", async ({ key }) => ({ value: await this.storage.get(key) }));

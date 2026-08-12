@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker"
 import {useState, useRef} from "react"
 import {Image, Platform, Pressable, ScrollView, TextInput, View, Linking, ActivityIndicator} from "react-native"
 
-import {APP_STORE_REVIEW_URL, PLAY_STORE_URL} from "@/constants/appConfig"
+import {APP_STORE_REVIEW_URL} from "@/constants/appConfig"
 import {Button, Icon, Screen, Text} from "@/components/ignite"
 import {useAppTheme} from "@/contexts/ThemeContext"
 import {translate} from "@/i18n"
@@ -91,7 +91,11 @@ export default function FeedbackPage() {
     }
 
     // Check if user rated 4-5 stars on feature request
-    const shouldPromptAppRating = feedbackType === "feature" && experienceRating !== null && experienceRating >= 4
+    // iOS only: Veiller is sideloaded on Android (XERK-232), so there is no
+    // Play Store listing to rate — PLAY_STORE_URL 404s, and offering "Rate the
+    // app" would open a dead page.
+    const shouldPromptAppRating =
+      Platform.OS === "ios" && feedbackType === "feature" && experienceRating !== null && experienceRating >= 4
     const triggerSource = typeof params.triggerSource === "string" ? params.triggerSource : "feedback_screen"
     const triggerReason = resolveFeedbackTriggerReason(params.triggerReason, feedbackType)
     const sourceAppletPackageName =
@@ -208,11 +212,7 @@ export default function FeedbackPage() {
                 {
                   text: translate("feedback:rateNow"),
                   onPress: () => {
-                    const appStoreUrl =
-                      Platform.OS === "ios"
-                        ? APP_STORE_REVIEW_URL
-                        : PLAY_STORE_URL
-                    Linking.openURL(appStoreUrl)
+                    Linking.openURL(APP_STORE_REVIEW_URL)
                   },
                 },
               ])
@@ -223,9 +223,17 @@ export default function FeedbackPage() {
     ])
   }
 
+  /**
+   * True when the entered contact email is present but not an address.
+   *
+   * Surfaced next to the field: this silently disabled Continue with no
+   * explanation anywhere, so a typo'd email looked like a broken button.
+   */
+  const emailInvalid = !!email.trim() && !email.trim().includes("@")
+
   const isFormValid = (): boolean => {
     // Contact email is optional; only reject an entered value that isn't an email.
-    if (email.trim() && !email.trim().includes("@")) {
+    if (emailInvalid) {
       return false
     }
     if (feedbackType === "bug") {
@@ -281,6 +289,12 @@ export default function FeedbackPage() {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
+              {emailInvalid ? (
+                <Text
+                  className="text-xs text-destructive mt-1.5"
+                  tx="feedback:emailInvalid"
+                />
+              ) : null}
             </View>
 
             {feedbackType === "bug" ? (

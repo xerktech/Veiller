@@ -155,6 +155,11 @@ export class ScriptEngine {
   /** Convert a 0–100 scrub fraction to a word cursor. */
   wordForPercent(percent: number): number {
     if (this.totalWords === 0) return 0
+    // Math.max/Math.min propagate NaN rather than clamping it, so a malformed
+    // `tp:seek` with a missing or non-numeric percent used to put NaN into the
+    // cursor and blank the lens with filler lines. Treat anything that is not
+    // a finite number as 0.
+    if (!Number.isFinite(percent)) return 0
     const p = Math.max(0, Math.min(100, percent)) / 100
     return Math.round(p * this.totalWords)
   }

@@ -5,11 +5,16 @@ SDK for building Veiller local miniapps — static web apps that run inside the 
 > Developing this SDK or running the in-repo example from a fresh clone? Start at the **[SDK developer guide](../../../sdk/README.md)** (setup, build loop, doc map).
 > Per-module deep dives (return shapes, events, error codes): **[`sdk/docs/`](../../../sdk/docs/README.md)**.
 > Companion package: **[`@veiller/miniapp-cli`](../../../sdk/miniapp-cli/README.md)** — `veiller-miniapp` CLI (`dev`, `release`, `pack`, `manifest`, `permission`, `hardware`, `schema`). Per-command docs live there.
-> Scaffolder: `bunx create-veiller-miniapp my-app`.
-> Reference miniapp: [`sdk/example-miniapp/`](../../../sdk/example-miniapp).
+> Scaffolder: `bun sdk/create-veiller-miniapp/bin/index.ts my-app` (not on npm yet — see [`sdk/PUBLISHING.md`](../../../sdk/PUBLISHING.md)).
+> Reference miniapp: [`miniapps/example-miniapp/`](../../../miniapps/example-miniapp).
 > High-level walkthrough: [`agents/miniapp-sdk-overview.md`](../../../agents/miniapp-sdk-overview.md).
 
 ## Install
+
+> **Not published yet.** `@veiller/miniapp` is not on npm — the commands below
+> 404 today. Inside this monorepo the package resolves as a workspace member, so
+> miniapps under `miniapps/*` just import it. See
+> [`sdk/PUBLISHING.md`](../../../sdk/PUBLISHING.md) for what is missing.
 
 ```bash
 bun add @veiller/miniapp
@@ -249,7 +254,7 @@ Smart-glasses miniapps are **always-on services**. The webview is a UI on top of
 
 **Rule:** user-facing glasses logic lives in a session-scoped controller, instantiated once at module init. React pages read controller-driven state via a store (Zustand recommended) and call imperative methods on the controller for user-triggered actions. They do **not** subscribe to `session.*` directly.
 
-See [`sdk/example-miniapp/src/controller/GlassesController.ts`](../../../sdk/example-miniapp/src/background/controllers/GlassesController.ts) for a worked reference.
+See [`sdk/example-miniapp/src/controller/GlassesController.ts`](../../../miniapps/example-miniapp/src/background/controllers/GlassesController.ts) for a worked reference.
 
 **Tester pages exception:** `pages/tester/*` are diagnostic surfaces — by design they inline-subscribe to `session.*` and tear down on unmount. This is the only place where that pattern is acceptable.
 
@@ -258,4 +263,4 @@ See [`sdk/example-miniapp/src/controller/GlassesController.ts`](../../../sdk/exa
 - Runtime: [`src/{session,protocol,envelope,globals}.ts`](./src/), [`src/modules/`](./src/modules/), [`src/transport/`](./src/transport/), [`src/react/`](./src/react/)
 - CLI: [`../miniapp-cli/src/`](../../../sdk/miniapp-cli/src/)
 - Scaffolder: [`../create-veiller-miniapp/`](../../../sdk/create-veiller-miniapp/)
-- Reference miniapp: [`../example-miniapp/`](../../../sdk/example-miniapp/)
+- Reference miniapp: [`../example-miniapp/`](../../../miniapps/example-miniapp/)

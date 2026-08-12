@@ -77,11 +77,25 @@ export class PhoneUi {
   }
 
   /** Wait for the next payload on a channel that satisfies `predicate`. */
+  /**
+   * Resolve with the next payload on `channel` that satisfies `predicate`.
+   *
+   * @param predicate Defaults to accepting the first payload. Passing a
+   *   non-function (e.g. the timeout, positionally) is a programming error and
+   *   throws immediately — the listener's own try/catch used to swallow it and
+   *   report a timeout instead, which reads as "the app never sent anything".
+   */
   waitFor<T = unknown>(
     channel: string,
     predicate: (payload: T) => boolean = () => true,
     timeoutMs = 5000,
   ): Promise<T> {
+    if (typeof predicate !== "function") {
+      throw new TypeError(
+        `PhoneUi.waitFor("${channel}"): predicate must be a function, got ${typeof predicate}. ` +
+          "Signature is waitFor(channel, predicate?, timeoutMs?).",
+      )
+    }
     const existing = this.latest.get(channel) as T | undefined
     if (existing !== undefined && predicate(existing)) return Promise.resolve(existing)
     return new Promise<T>((resolve, reject) => {

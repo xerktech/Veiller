@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "veiller-miniapp dev",
     "build": "bun run build.ts",
+    "test": "bun test",
     "pack": "veiller-miniapp pack"
   },
   "dependencies": {

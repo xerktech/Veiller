@@ -314,6 +314,15 @@ class MantleManager {
     }
   }
 
+  /**
+   * Has init() completed the one-time boot? Deep links use this to decide
+   * whether they can navigate straight to a screen or must first go through
+   * the index route that performs the boot.
+   */
+  public get isInitialized(): boolean {
+    return this.initialized
+  }
+
   // run at app start on the init.tsx screen:
   // should only ever be run once
   // sets up the bridge and initializes app state

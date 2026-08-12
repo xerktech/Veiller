@@ -538,6 +538,5 @@ Pivot events (`onPivot`) are **SDK-local** — derived from `onRoute` +
 
 ## Tests
 
-Integration tests for this module live at
-[sdk/Navigation/src/test/navigation.test.ts](../Navigation/src/test/navigation.test.ts).
-Run with `bun test` from `sdk/Navigation/`.
+This module has no integration test suite in this fork. The `sdk/Navigation/`
+package the tests used to live in is not part of the repository.

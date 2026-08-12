@@ -36,8 +36,11 @@ export function useRecorder() {
   const [transcriptLang, setTranscriptLang] = useState("")
   const [playPosMs, setPlayPosMs] = useState(0)
   const [unavailableId, setUnavailableId] = useState<string | null>(null)
+  /** Set when a capture ended because it could not start, so the UI can say so. */
+  const [startError, setStartError] = useState<string | null>(null)
   const mounted = useRef(true)
   const unavailableTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const startErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Tracks the capture a status belongs to, so we only clear the live transcript
   // + waveform when a genuinely new capture starts — not on a same-capture
   // status (e.g. an early pause that reports ms === 0 before any PCM buffered).
@@ -105,7 +108,7 @@ export function useRecorder() {
       }),
     )
     offs.push(
-      on("rec:stopped", () => {
+      on("rec:stopped", (p) => {
         if (!mounted.current) return
         setStopping(false)
         lastRecId.current = null
@@ -113,6 +116,16 @@ export function useRecorder() {
         setLevels([])
         setTranscript("")
         setTranscriptLang("")
+        // A failed start arrives on this same channel; surface it briefly
+        // instead of looking like an ordinary end-of-recording.
+        const {error} = (p ?? {}) as {error?: string}
+        if (error) {
+          setStartError(error)
+          if (startErrorTimer.current) clearTimeout(startErrorTimer.current)
+          startErrorTimer.current = setTimeout(() => {
+            if (mounted.current) setStartError(null)
+          }, 6000)
+        }
       }),
     )
     offs.push(
@@ -142,6 +155,7 @@ export function useRecorder() {
         const {id} = p as {id: string}
         setUnavailableId(id)
         if (unavailableTimer.current) clearTimeout(unavailableTimer.current)
+      if (startErrorTimer.current) clearTimeout(startErrorTimer.current)
         unavailableTimer.current = setTimeout(() => {
           if (mounted.current) setUnavailableId(null)
         }, 2600)
@@ -200,6 +214,7 @@ export function useRecorder() {
     playingId,
     playPosMs,
     unavailableId,
+    startError,
     hasMic,
     ready,
     isRecording: status !== null,

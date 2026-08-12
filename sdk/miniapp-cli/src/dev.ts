@@ -78,7 +78,7 @@ async function runBuild(cwd: string): Promise<void> {
     throw new Error(
       'build.ts not found at project root. Two-layer miniapps emit ' +
         '`dist/background/index.js` + `dist/ui/index.html` via a build.ts ' +
-        'script — see sdk/example-miniapp/build.ts for the canonical shape.',
+        'script — see miniapps/example-miniapp/build.ts for the canonical shape.',
     );
   }
   const proc = Bun.spawn(['bun', 'run', 'build.ts'], {
@@ -150,24 +150,38 @@ export async function dev(options: DevOptions = {}): Promise<void> {
     process.exit(1);
   }
 
-  // Static HTTP server on `port` serving the project root. The phone hits
-  // `${devUrl}/miniapp.json` (reachability + manifest) and `${devUrl}/icon.png`
-  // (icon preview) before falling through to the sidecar's `bundle.zip`
-  // for the actual install. Range requests aren't supported — files are
-  // small and short-lived.
+  // Static HTTP server on `port`. The phone hits `${devUrl}/miniapp.json`
+  // (reachability + manifest) and `${devUrl}/icon.png` (icon preview) before
+  // falling through to the sidecar's `bundle.zip` for the actual install.
+  // Range requests aren't supported — files are small and short-lived.
+  //
+  // This binds 0.0.0.0 because the phone reaches it over the LAN, so it is
+  // readable by everyone on that network — a coffee shop, a coworking space, a
+  // conference. It therefore serves an ALLOWLIST, not the project root: the
+  // template tells authors to keep their config in `.env` in exactly this
+  // directory, and serving the tree wholesale handed that file (plus source,
+  // git history and node_modules) to any passer-by who guessed the path.
+  const SERVABLE_FILES = new Set(['miniapp.json', 'icon.png']);
   const userServer = Bun.serve({
     hostname: '0.0.0.0',
     port,
     fetch(req) {
       const url = new URL(req.url);
-      // Strip leading slash and prevent ../ traversal. Path joining
-      // against cwd already canonicalises, but we double-check by
-      // refusing absolute paths and any segment starting with `..`.
-      const rel = decodeURIComponent(url.pathname).replace(/^\/+/, '');
-      if (rel.split('/').some((seg) => seg === '..')) {
-        return new Response('forbidden', { status: 403 });
+      let rel: string;
+      try {
+        rel = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+      } catch {
+        // Malformed percent-encoding (e.g. `/%zz`) — decodeURIComponent throws
+        // and would otherwise surface as a 500 from an uncaught exception.
+        return new Response('bad request', { status: 400 });
       }
-      const abs = rel === '' ? join(cwd, 'miniapp.json') : join(cwd, rel);
+      if (rel === '') {
+        rel = 'miniapp.json';
+      }
+      if (!SERVABLE_FILES.has(rel)) {
+        return new Response('not found', { status: 404 });
+      }
+      const abs = join(cwd, rel);
       try {
         const stat = statSync(abs);
         if (stat.isDirectory()) {

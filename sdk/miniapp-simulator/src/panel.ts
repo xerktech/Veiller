@@ -71,6 +71,7 @@ export function startPanel(sim: Simulator, port = 8770): PanelHandle {
     visibility: sim.host.visibility,
     uiOpen: sim.host.isUiOpen(),
     unimplemented: sim.host.unimplemented,
+    stubbed: sim.host.stubbed,
     hasUi: sim.bundle.uiEntry !== null,
     name: sim.bundle.manifest.name,
     version: sim.bundle.manifest.version,
@@ -102,6 +103,13 @@ export function startPanel(sim: Simulator, port = 8770): PanelHandle {
 
   const server = Bun.serve<SocketData, never>({
     port,
+    // Loopback only. The panel's WebSocket takes unauthenticated commands —
+    // storage writes, gestures, arbitrary stream emits — so binding every
+    // interface handed anyone on the developer's network full control of the
+    // running miniapp, while the CLI printed "localhost" as if it were
+    // private. The phone never talks to this server (that is `dev`'s job), so
+    // there is nothing to lose by refusing off-host connections.
+    hostname: "127.0.0.1",
     async fetch(req, srv) {
       const url = new URL(req.url)
 
@@ -235,6 +243,15 @@ function runCommand(sim: Simulator, cmd: string, arg: unknown): void {
     case "gesture":
       sim.gesture(String(arg))
       return
+    case "button": {
+      // session.input.onButtonPress rides `button_press`, a different stream
+      // from the tap/swipe gestures above. The panel sends "short" / "long";
+      // a scripted client may send {buttonId, pressType} instead.
+      const opts = typeof arg === "string" ? {pressType: arg} : ((arg ?? {}) as Record<string, unknown>)
+      const buttonId = typeof opts.buttonId === "string" ? opts.buttonId : "temple"
+      sim.buttonPress(buttonId, opts.pressType === "long" ? "long" : "short")
+      return
+    }
     case "mic":
       sim.speak({ms: Number(arg) || 200})
       return

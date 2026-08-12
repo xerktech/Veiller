@@ -54,8 +54,14 @@ await rm(distDir, {recursive: true, force: true})
 
 const DEFAULT_ELEVENLABS_AGENT_ID = "agent_0301ks3wg64pf9evgxqa6dw34t1f"
 
-/** Prefer LAN IP so a Veiller phone can reach the Mac signing server. */
-const lanIp = getLanIp()
+// `pack` builds with NODE_ENV=production, and that artifact is what gets
+// published. Auto-detecting a LAN IP there bakes whoever ran the build into
+// the shipped bundle — a private address that means nothing to anyone else and
+// leaks the builder's network. Keep the convenience for dev builds only.
+const isProductionBuild = process.env.NODE_ENV === "production"
+
+/** Prefer LAN IP so a Veiller phone can reach the dev signing server. */
+const lanIp = isProductionBuild ? null : getLanIp()
 const signerPort = Number(process.env.ELEVENLABS_SIGNING_SERVER_PORT || 8788)
 const DEFAULT_ELEVENLABS_SIGNED_URL_ENDPOINT = lanIp
   ? `http://${lanIp}:${signerPort}/signed-url`
@@ -79,6 +85,13 @@ if (!define["process.env.VEILLER_PUBLIC_ELEVENLABS_SIGNED_URL_ENDPOINT"]) {
     DEFAULT_ELEVENLABS_SIGNED_URL_ENDPOINT,
   )
   console.log(`[build] ElevenLabs signed-url endpoint → ${DEFAULT_ELEVENLABS_SIGNED_URL_ENDPOINT}`)
+  if (isProductionBuild) {
+    console.warn(
+      "[build] WARNING: no VEILLER_PUBLIC_ELEVENLABS_SIGNED_URL_ENDPOINT set for a production build.\n" +
+        "         Falling back to localhost, which will not resolve on a phone. Set the variable\n" +
+        "         explicitly before packing a bundle you intend to distribute.",
+    )
+  }
 }
 
 // JSC + Zipline/QuickJS both evaluate the background bundle as a classic

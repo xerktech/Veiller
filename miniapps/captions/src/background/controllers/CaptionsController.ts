@@ -45,6 +45,7 @@ import type {
 import {
   CaptionsFormatter,
   G1_PROFILE,
+  G2_PROFILE,
   Z100_PROFILE,
   NEX_PROFILE,
   type DisplayProfile,
@@ -55,6 +56,7 @@ import type {Channels} from "../../shared/channels"
 import {
   CAPTION_TIMEOUT_OPTIONS_SECONDS,
   DEFAULT_CAPTION_TIMEOUT_SECONDS,
+  isSupportedDisplayLines,
   type CaptionSettings,
   type CaptionsSnapshot,
   type DisplayPreview,
@@ -98,10 +100,21 @@ const TRANSCRIPT_TIMING_TELEMETRY = (globalThis as {__DEV__?: boolean}).__DEV__ 
 
 // ── Profile selection (verbatim from DisplayManager) ───────────────────────
 function getProfileForModel(modelName: string | null | undefined): DisplayProfile {
-  if (!modelName) return G1_PROFILE
+  // The G2 is the only supported display device (XERK-206), so it is also the
+  // right default when the model name has not loaded yet.
+  if (!modelName) return G2_PROFILE
   const lower = modelName.toLowerCase()
-  if (lower.includes("g1") || lower.includes("even realities") || lower.includes("even_g1")) {
+  // Must precede the generic "even realities" test below, which would
+  // otherwise claim every Even device for the G1 profile and cost the G2
+  // three of its eight lines and its calibrated 40px line height.
+  if (lower.includes("g2") || lower.includes("even_g2")) {
+    return G2_PROFILE
+  }
+  if (lower.includes("g1") || lower.includes("even_g1")) {
     return G1_PROFILE
+  }
+  if (lower.includes("even realities")) {
+    return G2_PROFILE
   }
   if (lower.includes("z100") || lower.includes("vuzix") || lower.includes("mach1") || lower.includes("mach 1")) {
     return Z100_PROFILE
@@ -109,7 +122,7 @@ function getProfileForModel(modelName: string | null | undefined): DisplayProfil
   if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("veiller_nex")) {
     return NEX_PROFILE
   }
-  return G1_PROFILE
+  return G2_PROFILE
 }
 
 /** Read the glasses model name from capabilities (best-effort). */
@@ -148,9 +161,9 @@ export class CaptionsController {
 
   // ── Display state (DisplayManager) ───────────────────────────────────────
   private formatter!: CaptionsFormatter
-  private currentProfile: DisplayProfile = G1_PROFILE
-  private currentDisplayWidthPx: number = G1_PROFILE.displayWidthPx
-  private currentMaxLines: number = G1_PROFILE.maxLines
+  private currentProfile: DisplayProfile = G2_PROFILE
+  private currentDisplayWidthPx: number = G2_PROFILE.displayWidthPx
+  private currentMaxLines: number = G2_PROFILE.maxLines
   private currentWordBreaking = true
   private currentWidthSetting = 1 // matches default displayWidth (Medium)
   private lastSpeakerId: string | undefined = undefined
@@ -328,9 +341,13 @@ export class CaptionsController {
         useOfflineSttRaw == null ? DEFAULT_SETTINGS.useOfflineStt : useOfflineSttRaw === "true"
 
       this.settings.displayLines = (() => {
-        if (!linesRaw) return 3
+        if (!linesRaw) return DEFAULT_SETTINGS.displayLines
         const p = parseInt(linesRaw, 10)
-        return isNaN(p) ? 3 : p
+        // Validate on the way in as well as on the way out: storage is not
+        // trusted input (a stale value from an older build, or a seeded one),
+        // and an unsupported count reached the display pipeline unchecked.
+        // Mirrors what captionTimeoutSeconds already does below.
+        return isSupportedDisplayLines(p) ? p : DEFAULT_SETTINGS.displayLines
       })()
 
       this.settings.displayWidth = (() => {
@@ -376,7 +393,7 @@ export class CaptionsController {
   }
 
   private async setDisplayLines(lines: number): Promise<void> {
-    if (lines < 2 || lines > 5) return
+    if (!isSupportedDisplayLines(lines)) return
     this.settings.displayLines = lines
     await this.persist(STORAGE_KEYS.displayLines, lines.toString())
     this.applySettingsToDisplay()
@@ -604,6 +621,15 @@ export class CaptionsController {
 
   private clearTranscripts(): void {
     this.transcripts = []
+    // Clearing only the phone-side list left the text on the lens, and the
+    // formatter's retained history meant the "cleared" words reappeared in
+    // front of the next utterance. Clear the same three things the inactivity
+    // timeout does — the user pressed Clear precisely to get that off the
+    // glasses.
+    this.formatter.clear()
+    this.lastSpeakerId = undefined
+    void this.session.display.render([])
+    this.broadcastDisplayPreview("", [""], true)
     this.ui.send("captions:transcripts-update", {transcripts: []})
   }
 

@@ -1,15 +1,33 @@
 # Publishing the Miniapp SDK to npm
 
-The miniapp SDK + Cloud V2 developer packages ship as five npm packages, all from
-one workflow ([`miniapp-sdk-release.yml`](../.github/workflows/miniapp-sdk-release.yml)):
+> **Status: the automation described below does not exist in this fork.**
+>
+> `miniapp-sdk-release.yml` and every `.github/scripts/*.mjs` helper referenced
+> on this page were deleted in `279e65cc86` ("Remove MentraOS CI; restore
+> Foverlay release pipeline"). `.github/workflows/` now contains only
+> `release.yml`, which builds the Android APK. **None of these packages are on
+> npm** — `npm view @veiller/miniapp`, `@veiller/miniapp-cli`,
+> `create-veiller-miniapp` and `@veiller/cli` all 404.
+>
+> Treat the CI sections here as a description of the *upstream* pipeline, kept
+> for whoever restores it. The only path that works today is
+> [Manual publishing](#manual-publishing-fallback) — and read its warning first,
+> because publishing `@veiller/miniapp` as-is ships a broken package.
+>
+> Until then, work against the in-repo packages: `bun install` from `sdk/` wires
+> `@veiller/miniapp` and `@veiller/miniapp-cli` up as workspace members, and
+> `bun sdk/create-veiller-miniapp/bin/index.ts <name>` scaffolds without npm.
+
+The miniapp SDK + Cloud V2 developer packages are intended to ship as five npm
+packages from one workflow (`miniapp-sdk-release.yml`, currently absent):
 
 | Package | Source | What it is |
 | --- | --- | --- |
-| [`@veiller/miniapp`](https://www.npmjs.com/package/@veiller/miniapp) | `mobile/modules/miniapp` | The SDK runtime (`MiniappSession`, modules, `/background`, `/ui`, `/react`). Ships compiled JS + types. |
-| [`@veiller/miniapp-cli`](https://www.npmjs.com/package/@veiller/miniapp-cli) | `sdk/miniapp-cli` | The `veiller-miniapp` author CLI (`dev` / `release` / `pack` / `manifest`). Bun-only. |
-| [`create-veiller-miniapp`](https://www.npmjs.com/package/create-veiller-miniapp) | `sdk/create-veiller-miniapp` | The `bunx create-veiller-miniapp` scaffolder + template. Bun-only. |
-| [`@veiller/auth`](https://www.npmjs.com/package/@veiller/auth) | `cloud-v2/packages/auth` | Cloud V2 auth helper for miniapp backends — verify Local Runtime JWKS tokens. Compiled JS + types (Node-compatible). |
-| [`@veiller/cli`](https://www.npmjs.com/package/@veiller/cli) | `cloud-v2/packages/cli` | The `veiller` developer CLI — build + **publish** to the Cloud V2 console. Wraps `@veiller/miniapp-cli` and adds login/org/miniapps/releases/publish. Bun-only. This is the CLI most developers want. |
+| `@veiller/miniapp` | `mobile/modules/miniapp` | The SDK runtime (`MiniappSession`, modules, `/background`, `/ui`, `/react`). Ships compiled JS + types. |
+| `@veiller/miniapp-cli` | `sdk/miniapp-cli` | The `veiller-miniapp` author CLI (`dev` / `release` / `pack` / `manifest`). Bun-only. |
+| `create-veiller-miniapp` | `sdk/create-veiller-miniapp` | The `bunx create-veiller-miniapp` scaffolder + template. Bun-only. |
+| `@veiller/auth` | `cloud-v2/packages/auth` | Cloud V2 auth helper for miniapp backends — verify Local Runtime JWKS tokens. Compiled JS + types (Node-compatible). |
+| `@veiller/cli` | `cloud-v2/packages/cli` | The `veiller` developer CLI — build + **publish** to the Cloud V2 console. Wraps `@veiller/miniapp-cli` and adds login/org/miniapps/releases/publish. Bun-only. This is the CLI most developers want. |
 
 `@veiller/miniapp`, `@veiller/miniapp-cli`, `create-veiller-miniapp`, and `@veiller/auth`
 are not on npm yet. `@veiller/cli` has a legacy `1.0.3` on the `latest` tag (the
@@ -21,8 +39,8 @@ collision note below. This doc is how they get to npm and stay there.
 
 Git holds **one prerelease base version per package** (`X.Y.Z-dev.N`), only ever
 edited on `dev`. CI derives the published version from the branch at publish
-time ([`npm-channel.mjs`](../.github/scripts/npm-channel.mjs) +
-[`stamp-channel-manifests.mjs`](../.github/scripts/stamp-channel-manifests.mjs)),
+time (`npm-channel.mjs` +
+`stamp-channel-manifests.mjs`),
 so **merging a branch up the chain IS the promotion** — no version edits ride
 `dev → staging → main`:
 
@@ -65,13 +83,13 @@ queue meaningful.
 
 ## How CI publishing works
 
-Workflow: [`.github/workflows/miniapp-sdk-release.yml`](../.github/workflows/miniapp-sdk-release.yml).
+Workflow: `.github/workflows/miniapp-sdk-release.yml`.
 
 - **Trigger:** push to `main` / `staging` / `dev` that touches any of the
   package dirs (or the workflow/scripts themselves). Also `workflow_dispatch`.
 - **Gate:** a package publishes **when its derived version for the branch is
   absent from npm** (decided by
-  [`.github/scripts/miniapp-sdk-release-info.mjs`](../.github/scripts/miniapp-sdk-release-info.mjs)
+  `.github/scripts/miniapp-sdk-release-info.mjs`
   — registry-state detection; a promotion merge doesn't change the version
   field, so git-diffing can't see it). E404 is the only "absent" signal — any
   other npm error fails the run rather than guessing. Extra gates: a package
@@ -81,7 +99,7 @@ Workflow: [`.github/workflows/miniapp-sdk-release.yml`](../.github/workflows/min
   channel.
 - **Idempotent:** the derived version already existing on npm means "nothing to
   do" — re-running a workflow or re-merging a branch is safe.
-- **Version stamp:** before packing, [`stamp-channel-manifests.mjs`](../.github/scripts/stamp-channel-manifests.mjs)
+- **Version stamp:** before packing, `stamp-channel-manifests.mjs`
   rewrites every family manifest in the CI checkout to the branch's derived
   versions, including cross-package ranges (`^0.1.0-dev.0` → `^0.1.0` on main).
   Checkout-only; never committed — the repo keeps the base versions.
@@ -89,14 +107,14 @@ Workflow: [`.github/workflows/miniapp-sdk-release.yml`](../.github/workflows/min
   (`@veiller/miniapp` → `@veiller/miniapp-cli` → `create-veiller-miniapp` →
   `@veiller/auth` → `@veiller/cli`) so downstream pins resolve once their base lands
   (the scaffolder's template pins, and `@veiller/cli`'s dep on `@veiller/miniapp-cli`).
-- **`file:` rewrite:** before packing, [`rewrite-file-deps.mjs`](../.github/scripts/rewrite-file-deps.mjs)
+- **`file:` rewrite:** before packing, `rewrite-file-deps.mjs`
   rewrites any workspace `file:` dependency to the referenced package's **exact**
   version. Today only `@veiller/cli` has one (`@veiller/miniapp-cli`), which is a
   `file:` link in-repo but must be a real version in the published tarball. The
   rewrite touches only the checkout that gets packed — it is never committed, so
   local dev keeps the `file:` link. An exact pin is dist-tag-agnostic; the
   tradeoff is that a base bump needs the wrapper republished to pick it up.
-- **Template stamp:** also before packing, [`stamp-template-versions.mjs`](../.github/scripts/stamp-template-versions.mjs)
+- **Template stamp:** also before packing, `stamp-template-versions.mjs`
   rewrites `create-veiller-miniapp`'s `template/package.json` `@veiller/*` pins to
   the **exact versions being published this run** (prerelease → exact, stable →
   caret). This is why a project scaffolded from *any* channel installs — see
@@ -178,6 +196,27 @@ promotes v2 over the legacy 1.0.3 — reject the staged version if that's not
 intended yet.
 
 ## Manual publishing (fallback)
+
+> **Do not follow the steps below verbatim — they ship a broken package.**
+>
+> The `.github/scripts/*.mjs` helpers they invoke no longer exist (see the status
+> note at the top), and two of them were load-bearing for correctness, not
+> convenience:
+>
+> - `@veiller/miniapp` declares `"@veiller/cloud-protocol": "workspace:*"`.
+>   `workspace:` is a Bun/pnpm/yarn protocol that **no consumer can resolve** off
+>   the workspace, and `@veiller/cloud-protocol` is itself unpublished. `npm pack`
+>   copies the specifier through verbatim, so the tarball is uninstallable.
+>   `rewrite-file-deps.mjs` was what turned those into real versions.
+> - `@veiller/cli`'s `file:` dep on `@veiller/miniapp-cli` has the same problem.
+>
+> Publishing either package therefore needs `@veiller/cloud-protocol` published
+> first (or vendored/inlined), and every `workspace:` / `file:` specifier
+> replaced with a resolvable version **by hand** before `npm publish` — and for a
+> non-`dev` channel, the version stamping that `stamp-channel-manifests.mjs` did.
+> Verify with `npm pack` + `tar -xzOf <tgz> package/package.json` and check that
+> no `workspace:` or `file:` specifier survives, then install the tarball into a
+> scratch project before pushing it to a public dist-tag.
 
 CI is the supported path. If you must publish by hand:
 

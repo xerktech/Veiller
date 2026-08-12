@@ -1,6 +1,6 @@
 # @veiller/miniapp-cli (`veiller-miniapp`)
 
-Author-facing CLI for Veiller miniapps. Pairs with [`@veiller/miniapp`](../miniapp).
+Author-facing CLI for Veiller miniapps. Pairs with [`@veiller/miniapp`](../../mobile/modules/miniapp).
 
 ```
 veiller-miniapp <command>
@@ -17,6 +17,7 @@ veiller-miniapp <command>
 | [`permission list \| add \| remove`](#permission) | Object-verb manifest edits for permissions                                |
 | [`hardware list \| add \| remove`](#hardware)     | Object-verb manifest edits for hardware requirements                      |
 | [`schema print`](#schema)                         | Prints the canonical `miniapp.json` JSON Schema to stdout                 |
+| [`simulate`](#simulate)                           | Runs the miniapp on simulated glasses (Veiller monorepo only)            |
 
 Run with no args to print the same usage table.
 
@@ -104,6 +105,22 @@ Steps:
 `build/` is self-ignoring — the CLI writes a `.gitignore` containing `*` into it on creation, so packed zips stay out of version control in any repo without touching the project's own `.gitignore`.
 
 The resulting ZIP is the artifact you'd upload to the miniapp store.
+
+**Renaming it for a GitHub release.** `pack` names the local build artifact
+`<packageName>-<version>.zip`. The Veiller app does *not* discover bundles by
+that name: `mobile/src/config/veillerMiniapps.ts` scans a repo's release assets
+for `/veiller.*\.zip$/i` and reads the version out of the **filename**, so a
+published asset must be named `<repo>-veiller-v<version>.zip` where `<version>`
+equals `miniapp.json`'s `version` (XERK-225). Rename on upload:
+
+```bash
+veiller-miniapp pack
+cp build/com.example.myapp-1.2.3.zip myapp-veiller-v1.2.3.zip
+gh release upload v1.2.3 myapp-veiller-v1.2.3.zip
+```
+
+A bundle uploaded under `pack`'s own name is invisible to the app unless the
+package id happens to contain "veiller".
 
 > Requires the `zip` binary on `PATH` (preinstalled on macOS and most Linux distros). On Windows, install `zip` via WSL or use a Unix-like shell.
 
@@ -206,6 +223,25 @@ Required: `packageName`, `version`, `name`, `hardwareRequirements`. Everything e
 `port` defaults to `3000` for `dev` and is ignored by `release` (which picks its own free port). For `dev`, this is the starting port; if the port or its sidecar neighbor is busy, the CLI scans upward until it finds a free adjacent pair.
 
 The CLI's allowed-value lists are mirrored by hand from `@mentra/types` to keep the CLI dependency-light so `bunx veiller-miniapp` stays fast. Drift between the two is caught at validation time, not import time.
+
+---
+
+## `simulate`
+
+```bash
+veiller-miniapp simulate                  # current project
+veiller-miniapp simulate ./dist --headless
+```
+
+Runs the miniapp on simulated Even Realities G2 glasses with a simulated phone —
+lens, gestures, mic and phone page, no hardware. Options: `--port <n>`,
+`--headless`, `--model <g1|g2>`, `--scenario <file>`, `--storage k=v`,
+`--verbose`.
+
+**Monorepo only.** The simulator reaches into `mobile/modules/engine` for the
+real display pipeline and device profiles, so it only runs from a Veiller
+checkout — a standalone project installed from npm cannot use it. See
+[`../miniapp-simulator/README.md`](../miniapp-simulator/README.md).
 
 ---
 

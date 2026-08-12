@@ -167,6 +167,9 @@ function validateActionParameters(parameters: unknown, actionIndex: number, erro
   }
 }
 
+/** Kept in lockstep with `packageName.pattern` in schema/miniapp.schema.json. */
+const PACKAGE_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/;
+
 export function validateManifest(manifest: unknown): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -178,6 +181,15 @@ export function validateManifest(manifest: unknown): { valid: boolean; errors: s
 
   if (typeof m.packageName !== 'string' || !m.packageName) {
     errors.push('packageName must be a non-empty string');
+  } else if (!PACKAGE_NAME_PATTERN.test(m.packageName)) {
+    // Enforced here, not just in the JSON Schema, because packageName flows
+    // into a filesystem path in two places — `build/<packageName>-<version>.zip`
+    // on the developer's machine and `lmas/<package>/<version>/` on the phone.
+    // An unvalidated value like `../../escaped` writes outside both.
+    errors.push(
+      `packageName must be reverse-DNS, e.g. com.example.app (got "${m.packageName}"). ` +
+        'Each dot-separated segment must start with a letter and contain only letters, digits, or underscores.',
+    );
   }
 
   if (typeof m.version !== 'string' || !m.version) {

@@ -1,6 +1,6 @@
-import {beforeEach, describe, expect, mock, test} from "bun:test"
+import {afterEach, beforeEach, describe, expect, mock, test} from "bun:test"
 import {useSyncExternalStore} from "react"
-import {act, fireEvent, render, screen, waitFor} from "@testing-library/react"
+import {act, cleanup, fireEvent, render, screen, waitFor} from "@testing-library/react"
 import {MemoryRouter} from "react-router-dom"
 
 import {DEFAULT_WARMUP_DURATION_MS} from "./cameraPageModel"
@@ -11,7 +11,10 @@ const photoResult = {
   mimeType: "image/jpeg",
   size: 2048,
 }
-const cameraInvokeMock = mock(async () => photoResult)
+// Declared with the signature the tests actually install below —
+// `warmUp` resolves undefined, everything else resolves a photo — so
+// mockImplementation type-checks against it.
+const cameraInvokeMock = mock(async (_method: string): Promise<typeof photoResult | undefined> => photoResult)
 const systemInvokeMock = mock(async () => ({success: true}))
 
 // Tiny external store so tests can push tester:event payloads (button
@@ -54,6 +57,15 @@ mock.module("../../hooks/useChannel", () => ({
 const {default: CameraPage} = await import("./CameraPage")
 
 describe("CameraPage", () => {
+  // React Testing Library only auto-cleans when it detects a supported test
+  // framework's global afterEach. bun 1.2.x — the version CI pins — is not
+  // detected, so mounted trees accumulated in the DOM and every query after
+  // the first test failed with "Found multiple elements". Explicit cleanup
+  // works on every runtime (XERK-249).
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
     cameraInvokeMock.mockClear()
     cameraInvokeMock.mockImplementation(async (method: string) => {
@@ -229,7 +241,7 @@ describe("CameraPage", () => {
         {
           url: photoResult.photoUrl,
           mimeType: photoResult.mimeType,
-          filename: "mentra-photo-photo-1.jpg",
+          filename: "veiller-photo-photo-1.jpg",
         },
       ])
     })

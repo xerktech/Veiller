@@ -111,8 +111,8 @@ runtime registry to violate.
 
 ## See also
 
-- [transport architecture](../agents/veillerjs-two-layer-miniapp-architecture.md)
+- [transport architecture](../../agents/veillerjs-two-layer-miniapp-architecture.md)
   — full design, including the underlying envelope shapes (`UI_OPEN`,
   `UI_MESSAGE`, `UI_SEND`).
-- [`@veiller/miniapp/ui` types](../mobile/modules/miniapp/src/ui/index.ts)
+- [`@veiller/miniapp/ui` types](../../mobile/modules/miniapp/src/ui/index.ts)
   for the `veiller` global declaration.

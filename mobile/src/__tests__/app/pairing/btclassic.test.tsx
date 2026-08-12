@@ -43,7 +43,16 @@ jest.mock("@/components/ignite", () => {
       </TouchableOpacity>
     )
   }
-  return {Screen: MockScreen, Button: MockButton}
+  // The screen renders a header back control — the only way off it, since the
+  // hardware back button is deliberately blocked (XERK-249).
+  function MockHeader({onLeftPress}: {onLeftPress?: () => void}) {
+    return (
+      <TouchableOpacity accessibilityLabel="header-back" onPress={onLeftPress}>
+        <RNText>back</RNText>
+      </TouchableOpacity>
+    )
+  }
+  return {Screen: MockScreen, Button: MockButton, Header: MockHeader}
 })
 
 jest.mock("@/components/onboarding/OnboardingGuide", () => {
@@ -54,7 +63,7 @@ jest.mock("@/components/onboarding/OnboardingGuide", () => {
   return {OnboardingGuide: MockOnboardingGuide}
 })
 
-import {act, render, waitFor} from "@testing-library/react-native"
+import {act, fireEvent, render, waitFor} from "@testing-library/react-native"
 import type {ReactNode} from "react"
 
 import {engine} from "@veiller/engine"
@@ -150,5 +159,20 @@ describe("btclassic pairing screen", () => {
         deviceModel: "Mentra Live",
       })
     })
+  })
+
+  it("offers a way off the screen, because the hardware back button is blocked", async () => {
+    // focusEffectPreventBack() blocks the hardware back so this pairing step is
+    // not skipped by accident. With the header control also removed there was
+    // no exit at all, and a deep link to /pairing/btclassic trapped the app
+    // until a force-stop — five Back presses and a relaunch could not escape
+    // it (XERK-249).
+    const {getByLabelText} = render(<BtClassicPairingScreen />)
+
+    await act(async () => {
+      fireEvent.press(getByLabelText("header-back"))
+    })
+
+    expect(goBack).toHaveBeenCalled()
   })
 })

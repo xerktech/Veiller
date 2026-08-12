@@ -2,8 +2,21 @@
 
 This is the workspace for building **and developing** the Veiller miniapp SDK.
 If you just want to *use* the SDK to write a miniapp, you don't need this folder —
-run `bunx create-veiller-miniapp` and read [`docs/`](./docs/README.md). This guide
-is for engineers working **on** the SDK itself or running the in-repo example.
+scaffold a project and read [`docs/`](./docs/README.md). This guide is for
+engineers working **on** the SDK itself or running the in-repo example.
+
+> **None of the SDK packages are published to npm yet**, so `bunx
+> create-veiller-miniapp` / `bun add @veiller/miniapp` will 404. Until
+> [`PUBLISHING.md`](./PUBLISHING.md)'s pipeline is restored, scaffold from the
+> checkout instead:
+>
+> ```bash
+> bun sdk/create-veiller-miniapp/bin/index.ts my-app
+> ```
+>
+> A project scaffolded this way cannot `bun install` on its own either — its
+> `@veiller/*` pins are unresolvable. Develop inside the monorepo (`miniapps/*`
+> are workspace members and resolve against the source) until the packages ship.
 
 ## Documentation map
 
@@ -25,8 +38,9 @@ This `sdk/` folder is a standalone [Bun workspace](https://bun.sh/docs/install/w
 | --- | --- |
 | `../mobile/modules/miniapp` | **The actual `@veiller/miniapp` SDK source** (a workspace member, despite living outside `sdk/`). |
 | `sdk/miniapp-cli` | `@veiller/miniapp-cli` — the `veiller-miniapp` author CLI (`dev`, `release`, `pack`, …). |
-| `sdk/example-miniapp` | Reference miniapp that consumes both via `workspace:*`. The thing you run to see the SDK work. |
+| `../miniapps/example-miniapp` | Reference miniapp that consumes both via `workspace:*`. The thing you run to see the SDK work. |
 | `sdk/create-veiller-miniapp` | The `bunx create-veiller-miniapp` scaffolder + template. The template pins published versions, **not** `workspace:*`. |
+| `sdk/example-oem-app` | Expo app showing how an OEM host embeds the miniapp runtime. Workspace member; needs a device to run. |
 | `sdk/docs` | Per-module SDK reference (`session.<module>`). |
 
 Because `example-miniapp` depends on `@veiller/miniapp` via `workspace:*`, it
@@ -48,7 +62,7 @@ bun install
 ## Running the example
 
 ```bash
-cd sdk/example-miniapp
+cd miniapps/example-miniapp
 bun run dev
 ```
 
@@ -61,7 +75,7 @@ be on the same Wi-Fi). See [`miniapp-cli/README.md`](./miniapp-cli/README.md) fo
 ## Developing the SDK itself
 
 The example bundles `@veiller/miniapp` from the SDK's compiled `dist/` (it is
-bundled *in*, not externalised — see `example-miniapp/build.ts`). So when you
+bundled *in*, not externalised — see `miniapps/example-miniapp/build.ts`). So when you
 change SDK source, you must recompile `dist/` for the example to pick it up.
 
 **The normal loop — rebuild after a change:**
@@ -126,7 +140,7 @@ was edited/cleaned and not rebuilt.
 
 **`workspace:*` won't resolve / `@veiller/miniapp` not found at install time.**
 Run `bun install` from `sdk/` (the workspace root where `bun.lock` lives), not
-from inside `example-miniapp/`. The workspace includes `../mobile/modules/miniapp`,
+from inside `miniapps/example-miniapp/`. The workspace includes `../mobile/modules/miniapp`,
 so that path must be present in your checkout (no sparse clone).
 
 **Using `npm` instead of Bun.** This workspace is Bun-only: `workspace:*` is a

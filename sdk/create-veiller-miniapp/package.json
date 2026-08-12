@@ -25,18 +25,17 @@
   ],
   "keywords": [
     "veiller",
-    "veiller",
     "miniapp",
     "create",
     "scaffold"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mentra-Community/MentraOS.git",
+    "url": "git+https://github.com/xerktech/Veiller.git",
     "directory": "sdk/create-veiller-miniapp"
   },
-  "homepage": "https://github.com/Mentra-Community/MentraOS/tree/dev/sdk/create-veiller-miniapp#readme",
+  "homepage": "https://github.com/xerktech/Veiller/tree/main/sdk/create-veiller-miniapp#readme",
   "bugs": {
-    "url": "https://github.com/Mentra-Community/MentraOS/issues"
+    "url": "https://github.com/xerktech/Veiller/issues"
   }
 }

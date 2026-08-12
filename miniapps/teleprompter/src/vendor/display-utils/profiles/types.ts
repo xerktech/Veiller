@@ -27,6 +27,12 @@ export interface DisplayProfile {
   /** Font metrics for text measurement */
   fontMetrics: FontMetrics
 
+  /**
+   * Rendered line height in pixels, when hardware-calibrated. Optional —
+   * added for the G2 profile (40px lines); older profiles omit it.
+   */
+  lineHeightPx?: number
+
   /** Optional constraints */
   constraints?: DisplayConstraints
 }

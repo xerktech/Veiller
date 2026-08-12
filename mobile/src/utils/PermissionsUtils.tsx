@@ -325,7 +325,11 @@ export interface PermissionRequestResult {
 }
 
 // Request permissions for a specific feature - the main entry point
-export const requestFeaturePermissions = async (featureKey: string): Promise<boolean> => {
+export const requestFeaturePermissions = async (
+  featureKey: string,
+  opts: {allowRetry?: boolean} = {},
+): Promise<boolean> => {
+  const {allowRetry = true} = opts
   const config = PERMISSION_CONFIG[featureKey]
   if (!config) {
     console.error(`Unknown permission feature: ${featureKey}`)
@@ -437,8 +441,15 @@ export const requestFeaturePermissions = async (featureKey: string): Promise<boo
       }
 
       if (allDenied && config.critical) {
-        // Show critical permission denied message for essential features
-        await displayCriticalPermissionDeniedWarning(config.name)
+        // Show critical permission denied message for essential features.
+        // "Try Again" means try again — re-request once. Bounded by
+        // `allowRetry` so a user who keeps denying cannot loop forever, and
+        // Android suppresses the system dialog after "Don't allow" twice
+        // anyway (that path is handled by anyNeverAskAgain above).
+        const retry = await displayCriticalPermissionDeniedWarning(config.name)
+        if (retry && allowRetry) {
+          return requestFeaturePermissions(featureKey, {allowRetry: false})
+        }
         return false
       }
 
@@ -526,12 +537,24 @@ export const displayPermissionDeniedWarning = (permissionName: string): Promise<
   })
 }
 
+/**
+ * Resolves true when the user asks to retry, false when they dismiss.
+ *
+ * The caller must act on that answer — it used to be awaited and thrown away,
+ * so "Try Again" dismissed the dialog and did nothing. It was also the only
+ * button, leaving no way to decline.
+ */
 export const displayCriticalPermissionDeniedWarning = (permissionName: string): Promise<boolean> => {
   return new Promise((resolve) => {
     showAlert(
       `${permissionName} Required`,
       `Veiller needs ${permissionName.toLowerCase()} permissions to function properly. Please grant these permissions to continue.`,
       [
+        {
+          text: "Not Now",
+          style: "cancel",
+          onPress: () => resolve(false),
+        },
         {
           text: "Try Again",
           style: "default",

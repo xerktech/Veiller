@@ -8,7 +8,49 @@ import {
   type AudioGuidanceInput,
 } from "../background/managers/AudioGuidanceManager"
 
-function createHarness() {
+/**
+ * A clock the tests move by hand.
+ *
+ * These tests used to drive the manager's grace periods with jest fake timers,
+ * but bun 1.2.x — the version CI pins — does not implement
+ * `jest.advanceTimersByTime`, so five of them failed there and passed on
+ * 1.3.x. The manager now takes an injectable clock, which behaves identically
+ * on every runtime (XERK-249).
+ */
+function createClock(start = 100_000) {
+  let current = start
+  let nextHandle = 1
+  const timers = new Map<number, {due: number; fn: () => void}>()
+
+  const scheduler = {
+    setTimeout: (fn: () => void, ms: number) => {
+      const handle = nextHandle++
+      timers.set(handle, {due: current + ms, fn})
+      return handle as unknown as ReturnType<typeof setTimeout>
+    },
+    clearTimeout: (handle: ReturnType<typeof setTimeout>) => {
+      timers.delete(handle as unknown as number)
+    },
+  }
+
+  return {
+    now: () => current,
+    scheduler,
+    /** Move time forward and fire anything that came due, in order. */
+    advance: (ms: number) => {
+      current += ms
+      const due = [...timers.entries()]
+        .filter(([, t]) => t.due <= current)
+        .sort((a, b) => a[1].due - b[1].due)
+      for (const [handle, timer] of due) {
+        timers.delete(handle)
+        timer.fn()
+      }
+    },
+  }
+}
+
+function createHarness(clock = createClock()) {
   const spoken: string[] = []
   let stops = 0
   const manager = new AudioGuidanceManager({
@@ -19,11 +61,12 @@ function createHarness() {
     stop: () => {
       stops += 1
     },
-  })
+  }, () => {}, clock.now, clock.scheduler)
   manager.setAvailable(true)
   return {
     manager,
     spoken,
+    clock,
     get stops() {
       return stops
     },
@@ -51,10 +94,6 @@ function input(partial: Partial<AudioGuidanceInput> = {}): AudioGuidanceInput {
 async function settleSpeech(): Promise<void> {
   for (let i = 0; i < 6; i += 1) await Promise.resolve()
 }
-
-afterEach(() => {
-  if (jest.isFakeTimers()) jest.useRealTimers()
-})
 
 describe("AudioGuidanceManager", () => {
   test("full guidance speaks at most one preparation and one now prompt per turn", async () => {
@@ -192,7 +231,6 @@ describe("AudioGuidanceManager", () => {
   })
 
   test("startup grace resumes maneuver guidance when an off-route fix stabilizes", async () => {
-    jest.useFakeTimers({now: 100_000})
     const {manager, spoken} = createHarness()
     manager.setMode("essential")
     manager.beginTrip()
@@ -211,8 +249,7 @@ describe("AudioGuidanceManager", () => {
   })
 
   test("startup off-route warning becomes eligible if the condition outlasts the grace period", async () => {
-    jest.useFakeTimers({now: 100_000})
-    const {manager, spoken} = createHarness()
+    const {manager, spoken, clock} = createHarness()
     manager.setMode("essential")
     manager.beginTrip()
     manager.confirmTripStarted("Blue Bottle")
@@ -220,7 +257,7 @@ describe("AudioGuidanceManager", () => {
 
     manager.observe(input({distanceMeters: 9, offRoute: true}))
     await settleSpeech()
-    jest.advanceTimersByTime(15_000)
+    clock.advance(15_000)
     manager.observe(input({distanceMeters: 7, offRoute: true}))
     await settleSpeech()
 
@@ -228,8 +265,7 @@ describe("AudioGuidanceManager", () => {
   })
 
   test("startup reroute becomes eligible if it is still active after the grace period", async () => {
-    jest.useFakeTimers({now: 100_000})
-    const {manager, spoken} = createHarness()
+    const {manager, spoken, clock} = createHarness()
     manager.setMode("essential")
     manager.beginTrip()
     manager.confirmTripStarted("Blue Bottle")
@@ -237,13 +273,13 @@ describe("AudioGuidanceManager", () => {
 
     manager.observe(input({status: "rerouting", maneuverType: null, instruction: null, distanceMeters: null}))
     await settleSpeech()
-    jest.advanceTimersByTime(14_999)
+    clock.advance(14_999)
     manager.observe(input({status: "rerouting", maneuverType: null, instruction: null, distanceMeters: null}))
     await settleSpeech()
 
     expect(spoken).toEqual(["Navigation started to Blue Bottle."])
 
-    jest.advanceTimersByTime(1)
+    clock.advance(1)
     manager.observe(input({status: "rerouting", maneuverType: null, instruction: null, distanceMeters: null}))
     await settleSpeech()
     manager.observe(input({status: "rerouting", maneuverType: null, instruction: null, distanceMeters: null}))
@@ -253,7 +289,6 @@ describe("AudioGuidanceManager", () => {
   })
 
   test("a suppressed startup reroute cancels stale maneuver speech", async () => {
-    jest.useFakeTimers({now: 100_000})
     const spoken: string[] = []
     let stops = 0
     const manager = new AudioGuidanceManager({
@@ -317,8 +352,7 @@ describe("AudioGuidanceManager", () => {
   })
 
   test("start confirmation leads a maneuver received during startup", async () => {
-    jest.useFakeTimers({now: 100_000})
-    const {manager, spoken} = createHarness()
+    const {manager, spoken, clock} = createHarness()
     manager.setMode("full")
     manager.beginTrip()
 
@@ -326,20 +360,19 @@ describe("AudioGuidanceManager", () => {
     expect(spoken).toEqual([])
     manager.confirmTripStarted(null)
     await settleSpeech()
-    jest.advanceTimersByTime(4_000)
+    clock.advance(4_000)
     await settleSpeech()
 
     expect(spoken).toEqual(["Navigation started.", "In 50 meters, turn left onto Market Street."])
   })
 
   test("rerouting and arrival are each announced once", async () => {
-    jest.useFakeTimers({now: 100_000})
-    const {manager, spoken} = createHarness()
+    const {manager, spoken, clock} = createHarness()
     manager.setMode("essential")
     manager.beginTrip()
     manager.confirmTripStarted("Blue Bottle")
     await settleSpeech()
-    jest.advanceTimersByTime(15_000)
+    clock.advance(15_000)
 
     manager.observe(input({status: "rerouting", maneuverType: null, instruction: null, distanceMeters: null}))
     await settleSpeech()
@@ -381,8 +414,7 @@ describe("AudioGuidanceManager", () => {
   })
 
   test("urgent turn cue cancels deferred advance notice", async () => {
-    jest.useFakeTimers({now: 100_000})
-    const {manager, spoken} = createHarness()
+    const {manager, spoken, clock} = createHarness()
     manager.setMode("full")
     manager.beginTrip()
     manager.confirmTripStarted(null)
@@ -393,7 +425,7 @@ describe("AudioGuidanceManager", () => {
     manager.observe(input({distanceMeters: 50}))
     manager.observe(input({distanceMeters: 9}))
     await settleSpeech()
-    jest.advanceTimersByTime(4_000)
+    clock.advance(4_000)
     await settleSpeech()
 
     expect(spoken).toEqual(["Navigation started.", "Turn left onto Market Street now."])

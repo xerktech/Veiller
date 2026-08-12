@@ -18,13 +18,22 @@ export const VersionInfo = () => {
 
   const isChina = process.env.EXPO_PUBLIC_DEPLOYMENT_REGION === "china"
 
+  // These three are stamped only by a build pipeline that sets them. Nothing
+  // in this repo does — not .env, not .env.example, not release.yml — so
+  // interpolating them bare printed the literal string "undefined" three times
+  // in the Settings footer of every build, including releases. Render them
+  // only when a build actually provides them.
+  const buildBranch = process.env.EXPO_PUBLIC_BUILD_BRANCH || null
+  const buildTime = process.env.EXPO_PUBLIC_BUILD_TIME || null
+  const buildCommit = process.env.EXPO_PUBLIC_BUILD_COMMIT || null
+
   const copyVersionInfo = async () => {
     // Veiller has no user account (XERK-198), so there is no id/email to include.
     const info = [
       `version: ${process.env.EXPO_PUBLIC_VEILLER_VERSION}`,
-      `branch: ${process.env.EXPO_PUBLIC_BUILD_BRANCH}`,
-      `time: ${process.env.EXPO_PUBLIC_BUILD_TIME}`,
-      `commit: ${process.env.EXPO_PUBLIC_BUILD_COMMIT}`,
+      `branch: ${buildBranch ?? "(unset)"}`,
+      `time: ${buildTime ?? "(unset)"}`,
+      `commit: ${buildCommit ?? "(unset)"}`,
       `cloud_core_url: ${coreUrl || "(default)"}`,
       `audio: ${audioTransport}`,
     ]
@@ -47,12 +56,14 @@ export const VersionInfo = () => {
             style={themed($buildInfo)}
             text={translate("common:version", {number: process.env.EXPO_PUBLIC_VEILLER_VERSION})}
           />
-          <Text style={themed($buildInfo)} text={`${process.env.EXPO_PUBLIC_BUILD_BRANCH}`} />
+          {buildBranch ? <Text style={themed($buildInfo)} text={buildBranch} /> : null}
         </View>
-        <View className="flex-row gap-2">
-          <Text style={themed($buildInfo)} text={`${process.env.EXPO_PUBLIC_BUILD_TIME}`} />
-          <Text style={themed($buildInfo)} text={`${process.env.EXPO_PUBLIC_BUILD_COMMIT}`} />
-        </View>
+        {buildTime || buildCommit ? (
+          <View className="flex-row gap-2">
+            {buildTime ? <Text style={themed($buildInfo)} text={buildTime} /> : null}
+            {buildCommit ? <Text style={themed($buildInfo)} text={buildCommit} /> : null}
+          </View>
+        ) : null}
         <View className="flex-row gap-2">
           <Text style={themed($buildInfo)} text={`${coreUrl || "(default cloud)"}`} />
         </View>

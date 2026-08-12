@@ -1,10 +1,11 @@
 {
   "name": "recorder-miniapp",
   "private": true,
-  "description": "Capture the glasses microphone to a real audio file on your phone — record, play back, export WAV.",
+  "description": "Capture the glasses microphone to a real audio file on your phone \u2014 record, play back, export WAV.",
   "scripts": {
     "dev": "veiller-miniapp dev",
     "build": "bun run build.ts",
+    "test": "bun test",
     "pack": "veiller-miniapp pack",
     "release": "veiller-miniapp release"
   },

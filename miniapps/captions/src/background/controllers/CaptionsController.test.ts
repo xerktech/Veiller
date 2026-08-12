@@ -1,6 +1,10 @@
 import {afterEach, describe, expect, mock, test} from "bun:test"
 
-import {DEFAULT_CAPTION_TIMEOUT_SECONDS} from "../../shared/types"
+import {
+  DEFAULT_CAPTION_TIMEOUT_SECONDS,
+  DISPLAY_LINES_OPTIONS,
+  isSupportedDisplayLines,
+} from "../../shared/types"
 import {CaptionsController, isSupportedCaptionTimeoutSeconds} from "./CaptionsController"
 
 describe("CaptionsController caption timeout", () => {
@@ -153,5 +157,30 @@ describe("CaptionsController offline speech to text", () => {
     expect(forLanguage).toHaveBeenCalledTimes(1)
     expect(forLanguage.mock.calls[0]?.[0]).toBe("fr-FR")
     expect(forLanguage.mock.calls[0]?.[2]).toEqual({forceLocal: true})
+  })
+})
+
+describe("CaptionsController display lines", () => {
+  // The phone UI offered a range the background then rejected, so choosing 6
+  // or 7 silently did nothing and the row reverted on the next settings
+  // broadcast. Both halves now read DISPLAY_LINES_OPTIONS; this is what keeps
+  // them from drifting apart again (XERK-249).
+  test("accepts every option the phone UI offers", () => {
+    expect(DISPLAY_LINES_OPTIONS.every(isSupportedDisplayLines)).toBe(true)
+  })
+
+  test("rejects values outside the offered range", () => {
+    expect(isSupportedDisplayLines(1)).toBe(false)
+    expect(isSupportedDisplayLines(0)).toBe(false)
+    expect(isSupportedDisplayLines(-1)).toBe(false)
+    // 8 is G2_PROFILE.maxLines, but 8 x 40px overflows the 288px lens and
+    // measurably renders 7 — so it is deliberately not offered.
+    expect(isSupportedDisplayLines(8)).toBe(false)
+    expect(isSupportedDisplayLines(2.5)).toBe(false)
+  })
+
+  test("covers the range the G2 can actually show", () => {
+    expect(Math.min(...DISPLAY_LINES_OPTIONS)).toBe(2)
+    expect(Math.max(...DISPLAY_LINES_OPTIONS)).toBe(7)
   })
 })

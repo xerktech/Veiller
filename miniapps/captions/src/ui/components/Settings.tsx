@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react"
 
-import {CAPTION_TIMEOUT_OPTIONS_SECONDS, DEFAULT_CAPTION_TIMEOUT_SECONDS} from "../../shared/types"
+import {CAPTION_TIMEOUT_OPTIONS_SECONDS, DEFAULT_CAPTION_TIMEOUT_SECONDS, DISPLAY_LINES_OPTIONS} from "../../shared/types"
 import type {CaptionSettings} from "../hooks/useSettings"
 import {DisplayPreview} from "../hooks/useTranscripts"
 
@@ -186,8 +186,15 @@ export function Settings({
               </span>
             </div>
 
+            {/* Offering only 2–5 left most of the G2 lens unreachable.
+                Capped at 7, not G2_PROFILE.maxLines (8): the scene pipeline
+                height-clips to the 288px lens, and 8 x lineHeightPx (40) is
+                320, so a request for 8 measurably renders 7. Listing 8 would
+                be a control that does nothing. The profile's maxLines is left
+                alone — whether the G2 can really show 8 is a question for real
+                hardware, not the simulator. */}
             <div className="grid grid-cols-4 gap-2">
-              {[2, 3, 4, 5].map((lines) => (
+              {DISPLAY_LINES_OPTIONS.map((lines) => (
                 <button
                   key={lines}
                   onClick={() => handleDisplayLinesChange(lines)}

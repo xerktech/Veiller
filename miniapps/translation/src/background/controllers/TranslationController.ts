@@ -19,11 +19,18 @@
  * full snapshot on every session.ui.onOpen.
  */
 
-import type {CloudClientStatus, MiniappSession, TranslationData, UnsubscribeFn} from "@veiller/miniapp/background"
+import type {
+  CloudClientStatus,
+  MiniappSession,
+  TranscriptionLanguage,
+  TranslationData,
+  UnsubscribeFn,
+} from "@veiller/miniapp/background"
 
 import {
   CaptionsFormatter,
   G1_PROFILE,
+  G2_PROFILE,
   Z100_PROFILE,
   NEX_PROFILE,
   type DisplayProfile,
@@ -107,10 +114,21 @@ const STORAGE_KEYS = {
 
 // ── Profile selection (verbatim from DisplayManager) ───────────────────────
 function getProfileForModel(modelName: string | null | undefined): DisplayProfile {
-  if (!modelName) return G1_PROFILE
+  // The G2 is the only supported display device (XERK-206), so it is also the
+  // right default when the model name has not loaded yet.
+  if (!modelName) return G2_PROFILE
   const lower = modelName.toLowerCase()
-  if (lower.includes("g1") || lower.includes("even realities") || lower.includes("even_g1")) {
+  // Must precede the generic "even realities" test below, which would
+  // otherwise claim every Even device for the G1 profile and cost the G2
+  // three of its eight lines and its calibrated 40px line height.
+  if (lower.includes("g2") || lower.includes("even_g2")) {
+    return G2_PROFILE
+  }
+  if (lower.includes("g1") || lower.includes("even_g1")) {
     return G1_PROFILE
+  }
+  if (lower.includes("even realities")) {
+    return G2_PROFILE
   }
   if (lower.includes("z100") || lower.includes("vuzix") || lower.includes("mach1") || lower.includes("mach 1")) {
     return Z100_PROFILE
@@ -118,7 +136,7 @@ function getProfileForModel(modelName: string | null | undefined): DisplayProfil
   if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("veiller_nex")) {
     return NEX_PROFILE
   }
-  return G1_PROFILE
+  return G2_PROFILE
 }
 
 /** Read the glasses model name from capabilities (best-effort). */
@@ -158,9 +176,9 @@ export class TranslationController {
 
   // ── Display state (DisplayManager) ───────────────────────────────────────
   private formatter!: CaptionsFormatter
-  private currentProfile: DisplayProfile = G1_PROFILE
-  private currentDisplayWidthPx: number = G1_PROFILE.displayWidthPx
-  private currentMaxLines: number = G1_PROFILE.maxLines
+  private currentProfile: DisplayProfile = G2_PROFILE
+  private currentDisplayWidthPx: number = G2_PROFILE.displayWidthPx
+  private currentMaxLines: number = G2_PROFILE.maxLines
   private currentWordBreaking = true
   private currentWidthSetting = 1 // matches default displayWidth (Medium)
   private lastSpeakerId: string | undefined = undefined
@@ -500,7 +518,11 @@ export class TranslationController {
       // keeps the microphone/cloud translation union live while settings are
       // changed and preserves the working subscription if replacement fails.
       const previousCleanup = this.translationCleanup
-      const nextCleanup = this.session.translation.to(targetLanguage, handler)
+      // targetLanguage comes from user settings / storage, so it is a bare
+      // string here. translation.to() validates it at runtime and throws
+      // MiniappValidationError for an unknown tag — which the catch below now
+      // recovers from — so the cast is the honest description of the contract.
+      const nextCleanup = this.session.translation.to(targetLanguage as TranscriptionLanguage, handler)
       this.translationCleanup = nextCleanup
       this.translationTarget = targetLanguage
       if (previousCleanup) {
@@ -512,6 +534,17 @@ export class TranslationController {
       }
     } catch (err) {
       console.log(`LocalTranslation: translation subscribe failed for target=${targetLanguage}`, err)
+      // A rejected target used to leave the app with zero subscriptions — no
+      // mic, no lens, no error — and the bad value stayed in storage, so it
+      // survived every restart. Fall back to the default the way captions
+      // falls back to "auto", and drop the value that cannot work.
+      if (targetLanguage !== DEFAULT_SETTINGS.targetLanguage) {
+        this.settings.targetLanguage = DEFAULT_SETTINGS.targetLanguage
+        void this.persist(STORAGE_KEYS.targetLanguage, DEFAULT_SETTINGS.targetLanguage)
+        console.log(`LocalTranslation: falling back to target=${DEFAULT_SETTINGS.targetLanguage}`)
+        this.subscribeTranslation()
+        this.broadcastSettings()
+      }
     }
   }
 
@@ -635,6 +668,14 @@ export class TranslationController {
 
   private clearTranscripts(): void {
     this.translations = []
+    // Clearing only the phone-side list left the text on the lens, and the
+    // formatter's retained history put the "cleared" words back in front of
+    // the next utterance. Clear the same three things the inactivity timeout
+    // does.
+    this.formatter.clear()
+    this.lastSpeakerId = undefined
+    void this.session.display.render([])
+    this.broadcastDisplayPreview("", [""], true)
     this.ui.send("translation:translations-update", {translations: []})
   }
 

@@ -1,4 +1,4 @@
-import {ChevronDown} from "lucide-react"
+import {ChevronDown, Trash2} from "lucide-react"
 import {useEffect, useRef, useState} from "react"
 
 import {TranslationEntry} from "../hooks/useTranslations"
@@ -17,6 +17,7 @@ interface TranslationListProps {
 
 export function TranslationList({
   translations,
+  onClearTranslations,
   accentColor = "#2089F3",
   showOriginalText = true,
 }: TranslationListProps) {
@@ -64,6 +65,20 @@ export function TranslationList({
           ))
         )}
       </div>
+
+      {/* Clear. onClearTranslations was declared in the props but never even
+          destructured, so the phone had no way to clear the translation list
+          or the lens. */}
+      {translations.length > 0 && (
+        <button
+          type="button"
+          onClick={onClearTranslations}
+          aria-label="Clear translations"
+          className="absolute bottom-6 left-6 px-4 h-12 rounded-full shadow-lg flex items-center gap-2 transition-all z-10 bg-white/90 dark:bg-zinc-800/90 text-gray-900 dark:text-zinc-50 hover:bg-white dark:hover:bg-zinc-700">
+          <Trash2 className="w-4 h-4" />
+          <span className="text-sm font-medium">Clear</span>
+        </button>
+      )}
 
       {!autoScroll && translations.length > 0 && (
         <button

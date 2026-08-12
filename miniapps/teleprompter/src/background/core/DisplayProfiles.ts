@@ -3,15 +3,26 @@
  * the captions miniapp uses, kept small and dependency-free.
  */
 
-import {G1_PROFILE, NEX_PROFILE, Z100_PROFILE} from "../../vendor/display-utils/profiles"
+import {G1_PROFILE, G2_PROFILE, NEX_PROFILE, Z100_PROFILE} from "../../vendor/display-utils/profiles"
 import type {DisplayProfile} from "../../vendor/display-utils/profiles"
 import type {MiniappSession} from "@veiller/miniapp/background"
 
 export function getProfileForModel(modelName: string | null | undefined): DisplayProfile {
-  if (!modelName) return G1_PROFILE
+  // The G2 is the only supported display device (XERK-206), so it is also the
+  // right default when the model name has not loaded yet.
+  if (!modelName) return G2_PROFILE
   const lower = modelName.toLowerCase()
-  if (lower.includes("g1") || lower.includes("even realities") || lower.includes("even_g1")) {
+  // Must precede the generic "even realities" test below, which would
+  // otherwise claim every Even device for the G1 profile and cost the G2
+  // three of its eight lines and its calibrated 40px line height.
+  if (lower.includes("g2") || lower.includes("even_g2")) {
+    return G2_PROFILE
+  }
+  if (lower.includes("g1") || lower.includes("even_g1")) {
     return G1_PROFILE
+  }
+  if (lower.includes("even realities")) {
+    return G2_PROFILE
   }
   if (lower.includes("z100") || lower.includes("vuzix") || lower.includes("mach1") || lower.includes("mach 1")) {
     return Z100_PROFILE
@@ -19,7 +30,7 @@ export function getProfileForModel(modelName: string | null | undefined): Displa
   if (lower.includes("nex") || lower.includes("mentra display") || lower.includes("veiller_nex")) {
     return NEX_PROFILE
   }
-  return G1_PROFILE
+  return G2_PROFILE
 }
 
 /** Read the glasses model name from capabilities (best-effort). */

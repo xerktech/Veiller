@@ -7,7 +7,7 @@ import * as SplashScreen from "expo-splash-screen"
 import {useEffect, useState} from "react"
 import {Platform} from "react-native"
 
-import {SentryNavigationIntegration, SentrySetup} from "@/effects/SentrySetup"
+import {SentryNavigationIntegration, SentrySetup, sentryInitialized} from "@/effects/SentrySetup"
 import {initI18n} from "@/i18n"
 import {useNavigationStore} from "@/stores/navigation"
 import {engine} from "@veiller/engine"
@@ -108,4 +108,6 @@ function Root() {
   )
 }
 
-export default Sentry.wrap(Root)
+// Only wrap when SentrySetup() actually initialized Sentry — wrapping an
+// uninitialized client warns on every navigation and records nothing.
+export default sentryInitialized ? Sentry.wrap(Root) : Root

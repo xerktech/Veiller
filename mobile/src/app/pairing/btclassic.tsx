@@ -1,6 +1,6 @@
 import {useRoute} from "@react-navigation/native"
 import {useEffect, useMemo} from "react"
-import {Button, Screen} from "@/components/ignite"
+import {Button, Header, Screen} from "@/components/ignite"
 import {OnboardingGuide, OnboardingStep} from "@/components/onboarding/OnboardingGuide"
 import {useEngineSnapshot} from "@/hooks/useEngineSnapshot"
 import {translate} from "@/i18n"
@@ -137,7 +137,13 @@ export default function BtClassicPairingScreen() {
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]} extraAndroidInsets>
-      {/* <Header leftIcon="chevron-left" onLeftPress={handleBack} /> */}
+      {/* The hardware back button is deliberately blocked below
+          (focusEffectPreventBack) so this pairing step is not skipped by
+          accident — which left the screen with no exit whatsoever once the
+          header control here was commented out. A deep link to
+          /pairing/btclassic, and the paired-context recovery entry, both
+          trapped the app until a force-stop (XERK-249). Restored. */}
+      <Header leftIcon="chevron-left" onLeftPress={handleBack} />
       <OnboardingGuide
         steps={steps}
         autoStart={true}

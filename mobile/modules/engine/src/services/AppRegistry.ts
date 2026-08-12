@@ -31,6 +31,19 @@ import {checkManifestVersions} from "./manifestVersionGate"
 import {normalizeManifestActions} from "./manifestActions"
 import {miniappRunningRegistry} from "./MiniappRunningRegistry"
 
+/**
+ * Reverse-DNS package id, matching `packageName.pattern` in the CLI's
+ * schema/miniapp.schema.json. Enforced here because the value is used as a
+ * filesystem path segment for the install directory.
+ */
+const MINIAPP_PACKAGE_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/
+
+/**
+ * Version strings also become a path segment. Deliberately permissive about
+ * prerelease/build suffixes, but no separators, no traversal, no whitespace.
+ */
+const MINIAPP_VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9.+-]*$/
+
 export {normalizeManifestActions} from "./manifestActions"
 
 const ALLOWED_PERMISSION_TYPES: ReadonlySet<AppPermissionType> = new Set<AppPermissionType>([
@@ -238,6 +251,17 @@ async function unpackMiniApp(
     const manifest = JSON.parse(miniappJsonFile.textSync())
     if (!manifest.packageName) throw new Error("miniapp.json missing packageName")
     if (!manifest.version) throw new Error("miniapp.json missing version")
+    // Both values come from a third-party bundle's own manifest and are used
+    // verbatim as path segments below (`lmas/<packageName>/<version>/`). A
+    // value like "../../shared_prefs" would write outside the install root, so
+    // constrain them to the shapes the CLI's schema already requires before
+    // they reach the filesystem.
+    if (!MINIAPP_PACKAGE_NAME_PATTERN.test(manifest.packageName)) {
+      throw new Error(`miniapp.json packageName is not a valid reverse-DNS id: ${manifest.packageName}`)
+    }
+    if (!MINIAPP_VERSION_PATTERN.test(manifest.version)) {
+      throw new Error(`miniapp.json version is not a valid version string: ${manifest.version}`)
+    }
     packageName = manifest.packageName
     manifestVersion = manifest.version
   } catch (error) {
