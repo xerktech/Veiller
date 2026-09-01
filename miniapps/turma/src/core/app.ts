@@ -181,6 +181,12 @@ export interface AppState {
   // Only for the focused session; cleared on completion, session change, and
   // background. Rendered as the newest transcript entry (LIVE_TURN_ID).
   liveTurn: { sessionId: string; text: string } | null;
+  // A terminal live-tail refusal for the focused session (XERK-335): the hub
+  // refused the ws-token (e.g. a wrong hub password 401), so live tail is off
+  // and the reason is pinned as a sticky top line of the transcript rather than
+  // strobed as a flash on every reconnect. Cleared on session change/background
+  // like liveTurn; the poll keeps the transcript current underneath it.
+  liveRefusal: { sessionId: string; message: string } | null;
   pending: Record<string, PendingEntry>;
   loadingHistory: Record<string, boolean>;
 
@@ -211,6 +217,7 @@ export function createInitialState(now: number): AppState {
     transcripts: {},
     reveal: emptyReveal(),
     liveTurn: null,
+    liveRefusal: null,
     pending: {},
     loadingHistory: {},
     home: { cursor: 0 },
@@ -357,7 +364,8 @@ export class App {
     // the agent tailing a transcript nobody's watching.
     this.liveTail.stop();
     this.clearRevealTimer();
-    if (this.state.liveTurn) this.state = { ...this.state, liveTurn: null };
+    if (this.state.liveTurn || this.state.liveRefusal)
+      this.state = { ...this.state, liveTurn: null, liveRefusal: null };
     // Backgrounding stops the poll loop above, but history-fetch retry
     // timers are independent `setTimeout`s keyed by sessionId — without
     // this they keep firing every HISTORY_RETRY_MS while backgrounded.
@@ -519,21 +527,38 @@ export class App {
       this.state = {
         ...this.state,
         liveTurn: null,
+        // Any stale refusal from a previous session is dropped — this session's
+        // own tail hasn't been refused yet (the new socket decides that async).
+        liveRefusal: null,
         reveal: fullReveal(last?.id ?? null, last?.text.length ?? 0),
       };
       this.lastRevealAt = this.now();
     } else if (wasSession) {
       this.liveTail.stop();
       this.clearRevealTimer();
-      this.state = { ...this.state, liveTurn: null, reveal: emptyReveal() };
+      this.state = { ...this.state, liveTurn: null, liveRefusal: null, reveal: emptyReveal() };
     }
   }
 
   private startLiveTail(hostKey: string, sessionId: string): void {
     this.liveTail.start(hostKey, sessionId, (ev) => {
       if (ev.type === "tail") this.onLiveTail(hostKey, sessionId, ev.entries);
-      else this.onLiveTurn(hostKey, sessionId, ev.text);
+      else if (ev.type === "turn") this.onLiveTurn(hostKey, sessionId, ev.text);
+      else this.onLiveRefused(sessionId, ev.message);
     });
+  }
+
+  // A terminal ws-token refusal for the focused session (XERK-335). LiveTail has
+  // already stopped retrying; pin the hub's own words as a sticky line so the
+  // wearer sees WHY the tail never went live (a wrong hub password, say) instead
+  // of an endless silent reconnect. Clamped to the same 300-char ceiling the
+  // hub-client applies at the edge so render's wrapText can't be handed a
+  // pathological refusal string.
+  private onLiveRefused(sessionId: string, message: string): void {
+    if (this.state.screen !== "session" || this.state.session?.sessionId !== sessionId) return;
+    const clamped = message.length > 300 ? message.slice(0, 300) : message;
+    this.state = { ...this.state, now: this.now(), liveRefusal: { sessionId, message: clamped } };
+    this.repaint();
   }
 
   // A committed transcript delta for the focused session: merge it into the
