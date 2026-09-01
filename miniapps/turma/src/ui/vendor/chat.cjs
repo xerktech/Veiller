@@ -3,26 +3,36 @@
 // terminal" as the default running-session view: it opens the hub's live
 // transcript WebSocket (/live/<host>/<id>), renders the session as chat bubbles
 // (user right, agent left) plus collapsible tool-action cards + thinking traces,
-// and streams the in-progress turn with a typewriter reveal. A three-way
+// and shows the in-progress turn as a trailing bubble that updates in place
+// (text appears as it arrives — no typewriter, XERK-251). A three-way
 // verbosity preset (Concise hides thinking + tool actions entirely; Normal adds
 // tool cards with collapsed output; Verbose expands everything) picks how much
 // of each turn is shown. Ported in spirit from the glasses client (glasses/src/live.ts,
-// transcript.ts, reveal.ts) into framework-free, build-free browser JS.
+// transcript.ts) into framework-free, build-free browser JS.
 //
 // Reads a few shared helpers from the page's inline script (same classic-script
 // global scope): esc(), enc(), cache, sessTitle(), sessMeta(), fastPoll().
 (function () {
   // ---- constants ------------------------------------------------------------
-  const REVEAL_RATE_CPS = 150;      // typewriter speed for the in-progress turn
-  const REVEAL_SNAP_CHARS = 200;    // a bigger backlog than this snaps, not types
   const BACKOFF_MS = [1000, 2000, 4000, 8000, 15000];
   const TOKEN_SKEW_MS = 30000;      // refetch a ws-token this long before expiry
   const LIVE_TURN_ID = "__live";
   const POLL_MS = 6000;             // /history fallback cadence when the WS is down
   const HISTORY_RETRY_MS = 1200;    // poll cadence while /history returns 202
-  const HISTORY_MAX_RETRIES = 12;
+  // The retry window must outlast a HEARTBEAT, not just a fetch (XERK-347). A
+  // 202 means "the agent hasn't delivered it yet", and a delivery can be shed —
+  // by the agent's own body ceiling, or after two failed beats — in which case
+  // the NEXT beat is the earliest it can arrive, and the beat interval is 20s.
+  // At 12 retries this gave up after 14.4s and the scrollback then never came:
+  // the poll fallback only re-asks while the socket is DOWN, so a session with a
+  // healthy live tail sat on an empty history until it was reopened.
+  const HISTORY_MAX_RETRIES = 40;   // ~48s
   const STOP_SUPPRESS_MS = 4000;    // how long a clicked Stop overrides the busy read
   const ACTION_FAIL_MS = 2000;      // how long the compose button shows a failure
+  // Files one message may carry (XERK-234). Mirrors the hub's
+  // UPLOAD_MAX_PER_MESSAGE, which refuses past it — this only keeps the composer
+  // from staging a message the hub was always going to reject.
+  const MAX_ATTACHMENTS = 10;
 
   const PRESETS = {
     concise: { thinking: false, tools: false, outputs: false },
@@ -108,33 +118,74 @@
   }
   function enc(s) { return encodeURIComponent(s); }
 
-  // Turn plain transcript text into HTML with clickable links. Bare http(s)
-  // URLs and markdown [text](url) links (http/https only) become <a> tags that
-  // open in a new tab; every other run of text is HTML-escaped exactly like
-  // esc(). Only http/https is ever linkified (no javascript:/data: hrefs), and
-  // both the label and the href are escaped, so this is as injection-safe as
-  // esc() — a bare esc() and linkify() produce identical output for link-free
-  // text. Used for prose surfaces (message bubbles, thinking traces); tool
-  // input/output <pre> blocks stay raw esc().
+  // Turn plain transcript text into HTML with clickable links and inline images.
+  // A markdown image ![alt](url) becomes an <img> (XERK-221); bare http(s) URLs
+  // and markdown [text](url) links (http/https only) become <a> tags that open
+  // in a new tab; every other run of text is HTML-escaped exactly like esc().
+  // Only http/https is ever linkified (no javascript:/data: hrefs), and both the
+  // label and the href are escaped, so this is as injection-safe as esc() — a
+  // bare esc() and linkify() produce identical output for link/image-free text.
+  // Used for prose surfaces (message bubbles, thinking traces); tool input/output
+  // <pre> blocks stay raw esc().
+  // Only http(s)/mailto reaches an href; anything else becomes "#". The linkify
+  // pass already restricts what it matches, but `anchor` is ALSO called directly
+  // for a pr_link entry (buildItems), whose URL comes off the wire — and
+  // `target="_blank"` is not a defence, it just happens to make Chrome refuse
+  // the navigation. Mirrors safeUrl in index.html/sessions.html (XERK-235).
+  function safeUrl(u) {
+    // Tab/CR/LF are REMOVED by the URL parser before it parses, so they must be
+    // removed here too or the checks below see a different string than the
+    // browser will (`/<tab>/evil` parses as `//evil`).
+    const s = String(u ?? "").replace(/[\t\r\n]/g, "").trim();
+    if (/^(https?:|mailto:)/i.test(s)) return esc(s);
+    // Root-relative is allowed — the ticket chip points at Turma's OWN board
+    // (/board?ticket=…), not out to the tracker. But only when the second
+    // character cannot begin an authority: a leading `//` is protocol-relative,
+    // and in a special scheme the parser treats `\` exactly as `/`, so `/\evil`
+    // resolves to http://evil just as `//evil` does.
+    if (/^\/(?![/\\])/.test(s)) return esc(s);
+    return "#";
+  }
   function anchor(url, label) {
-    return '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + "</a>";
+    return '<a href="' + safeUrl(url) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + "</a>";
+  }
+  // An inline image (a markdown ![alt](url), or a raw SVG turned into a data URI
+  // by svgToImg). The src is restricted to http(s) and data:image/* at the call
+  // site, so this never emits a script-bearing scheme; a data:image/svg+xml is
+  // safe here because SVG loaded through <img> runs in the browser's secure
+  // static mode (no scripts, no external fetches). Both attrs are esc()'d.
+  function imgTag(url, alt, cls) {
+    return '<img class="md-img' + (cls ? " " + cls : "") + '" src="' + esc(url) +
+      '" alt="' + esc(alt || "") + '" loading="lazy">';
+  }
+  // Render raw SVG source as an image (XERK-221). The markup is URL-encoded into a
+  // data:image/svg+xml URI and shown through <img>, NOT injected into the DOM: an
+  // <img>-embedded SVG runs in secure static mode, so a <script>/onload/foreignObject
+  // in agent- or tool-emitted SVG can never execute or fetch. encodeURIComponent
+  // leaves the result free of <, >, ", & (all percent-encoded), so it's inert in
+  // the attribute; esc() is applied for uniformity with every other src above.
+  function svgToImg(svg) {
+    return imgTag("data:image/svg+xml," + encodeURIComponent(String(svg).trim()), "", "md-svg");
   }
   function linkify(text) {
     const s = String(text == null ? "" : text);
-    // Markdown link, OR a bare http(s) URL.
-    const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s<]+)/g;
+    // Markdown image (http(s) or data:image/* src), a markdown link, OR a bare
+    // http(s) URL — image tried first so its leading `!` isn't left as stray text.
+    const re = /!\[([^\]]*)\]\((https?:\/\/[^)\s]+|data:image\/[^)\s]+)\)|\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s<]+)/g;
     let out = "", last = 0, m;
     while ((m = re.exec(s))) {
       out += esc(s.slice(last, m.index));
-      if (m[2]) {
-        out += anchor(m[2], m[1]);            // [label](url)
+      if (m[2] != null) {
+        out += imgTag(m[2], m[1]);            // ![alt](url)
+      } else if (m[4]) {
+        out += anchor(m[4], m[3]);            // [label](url)
       } else {
         // Bare URL: peel trailing sentence punctuation, markdown emphasis
         // markers (e.g. a URL wrapped in **bold**), and typographic quotes
         // (Claude often emits curly ‘’ “” around URLs) back out of the link,
         // and a trailing ')' only when it isn't part of the URL (e.g. a URL
         // wrapped in parens) — keep it for balanced ones like /wiki/Foo_(bar).
-        let url = m[3], trail = "";
+        let url = m[5], trail = "";
         const tp = /[.,;:!?'"*_‘’“”]+$/.exec(url);
         if (tp) { trail = tp[0]; url = url.slice(0, -tp[0].length); }
         if (url.endsWith(")") && !url.includes("(")) { trail = ")" + trail; url = url.slice(0, -1); }
@@ -261,11 +312,34 @@
     return out;
   }
 
+  // ---- raw (non-fenced) SVG blocks ------------------------------------------
+  // Lift a standalone <svg>…</svg> block out of prose and render it as an image
+  // (XERK-221), passing the surrounding text through renderTables() unchanged. A
+  // block only qualifies when its <svg> opens at the START of a line — so a
+  // `<svg>` mentioned inside an inline `code` span or mid-sentence stays text —
+  // and it must reach a </svg>; an unterminated one (a live turn captured
+  // mid-block) falls through as escaped text until its closer lands.
+  // renderProse() lifts fenced code out first, so a fenced SVG is handled
+  // there, never here.
+  function renderSvgAndText(text) {
+    const s = String(text == null ? "" : text);
+    if (!/<svg[\s>]/i.test(s)) return renderTables(s); // no <svg → nothing to lift out
+    const re = /(^|\n)[ \t]*(<svg[\s>][\s\S]*?<\/svg\s*>)/gi;
+    let out = "", last = 0, m;
+    while ((m = re.exec(s))) {
+      out += renderTables(s.slice(last, m.index) + m[1]); // keep the boundary newline
+      out += svgToImg(m[2]);
+      last = m.index + m[0].length;
+    }
+    out += renderTables(s.slice(last));
+    return out;
+  }
+
   // ---- fenced code blocks ---------------------------------------------------
   // A ``` fence opens a code block that runs to the next fence of at least the
   // same length (or, unterminated, to the end of the text — which is the normal
-  // case mid-stream, while the typewriter is still revealing the block, and is
-  // why an open fence renders as code rather than waiting for its closer).
+  // case for a live turn captured mid-block, and is why an open fence renders
+  // as code rather than waiting for its closer).
   //
   // The opening line must be the fence plus at most a one-word info string
   // (```hcl), so an inline run of backticks in prose can't open a block. The
@@ -339,12 +413,17 @@
     writeClipboard(text).then(function () { flash("copied"); }, function () { flash("failed"); });
     return true;
   }
+  // A fenced block whose entire body is one <svg>…</svg> document renders as an
+  // image, not code (XERK-221) — catches ```svg, ```xml/```html-wrapped SVG, and a
+  // bare ``` fence around SVG alike, without disturbing a fence that merely
+  // contains an <svg> among other content.
+  const SVG_FENCE = /^\s*<svg[\s>][\s\S]*<\/svg\s*>\s*$/i;
   function renderProse(text) {
     const s = String(text == null ? "" : text);
-    if (s.indexOf("```") < 0) return renderTables(s); // no fence → nothing to lift out
+    if (s.indexOf("```") < 0) return renderSvgAndText(s); // no fence → still scan for raw SVG
     const lines = s.split("\n");
     let out = "", i = 0, buf = [];
-    const flush = () => { if (buf.length) { out += renderTables(buf.join("\n")); buf = []; } };
+    const flush = () => { if (buf.length) { out += renderSvgAndText(buf.join("\n")); buf = []; } };
     while (i < lines.length) {
       const open = FENCE_OPEN.exec(lines[i]);
       if (open) {
@@ -353,7 +432,8 @@
         const body = [];
         while (i < lines.length && !fenceCloses(lines[i], open[1])) { body.push(lines[i]); i++; }
         i++; // consume the closer; past the end already for an unterminated block
-        out += renderCode(open[2], body.join("\n"));
+        const bodyStr = body.join("\n");
+        out += SVG_FENCE.test(bodyStr) ? svgToImg(bodyStr) : renderCode(open[2], bodyStr);
         continue;
       }
       buf.push(lines[i]); i++;
@@ -365,6 +445,8 @@
   // ---- state ----------------------------------------------------------------
   let gen = 0;                      // bumped on every open/close; stale async work checks it
   let hostKey = null, sessionId = null, sess = null, agent = null;
+  // In-flight model-source switch (XERK-246); cleared once the heartbeat agrees.
+  let modelSourcePending = null;
   let buffer = [];                  // merged rich entries {id, role, text, blocks}
   // Prompts typed mid-turn, still waiting in Claude Code's queue (the agent
   // folds queue-operation transcript entries — see foldQueueOp in
@@ -374,7 +456,17 @@
   let queuedPrompts = [];
   let liveTurn = "";                // in-progress assistant text (pane scrape), "" when idle
   let liveStatus = null;            // {verb,up,down,elapsed} working indicator, null when idle
+  // The session's live agent list, kept SEPARATE from liveStatus because the two
+  // stop being true at different moments (XERK-245): liveStatus clears the
+  // instant the turn ends (it is what shows Stop), while a background agent
+  // keeps running past that — the exact stretch where the operator most needs to
+  // see what is still going, and where the list used to blink out.
+  let liveAgents = [];
   let ws = null, backoffIdx = 0, wsRetryTimer = null;
+  // The generation a startWs() is currently mid-connect for (null = none). See
+  // startWs — it is keyed by generation, not a bare flag, so opening a DIFFERENT
+  // session always gets its socket.
+  let wsStarting = null;
   let pollTimer = null;
   // Whether the reader is following the tail. True on open (so we land at the
   // bottom even after the async /history load grows the transcript below the
@@ -398,11 +490,6 @@
   let stopPendingAt = 0;
   // Until when the compose button is showing a transient failure message.
   let actionFailUntil = 0;
-
-  // reveal (only the live turn types in; committed messages render whole)
-  let reveal = { shown: 0 };
-  let revealFull = "";
-  let rafId = null, lastTs = 0;
 
   // The HTML currently in the scroll, and whether a changed paint was held back
   // because the reader was selecting text. See repaint()/selectionInScroll().
@@ -435,7 +522,24 @@
     return base + "/live/" + enc(hostKey) + "/" + enc(sessionId) + "?auth=" + enc(token);
   }
 
+  // Single-flight PER GENERATION, because connecting is ASYNC: `ws` is only
+  // assigned after the ws-token round trip, so two callers landing in that
+  // window for the same view (open() and the page's reconnect nudge, a retry
+  // timer and a nudge) would each build a socket, and `close()` — which only
+  // knows the last one assigned — could never close the other. It would sit
+  // open, and the hub, still seeing a live client, would never unwatch the
+  // session.
+  //
+  // Keyed by generation rather than a bare flag: opening a DIFFERENT session
+  // must always connect, and the older connect then discards itself at its own
+  // generation check below rather than being suppressed here.
   async function startWs(myGen) {
+    if (wsStarting === myGen) return;
+    wsStarting = myGen;
+    try { await openWs(myGen); } finally { if (wsStarting === myGen) wsStarting = null; }
+  }
+
+  async function openWs(myGen) {
     let token;
     try { token = await getToken(); }
     catch { scheduleReconnect(myGen); return; }
@@ -462,6 +566,11 @@
         // pinned below the scroll, not woven into the streamed text — so it stops
         // flickering in and out of the message as the TUI spinner animates.
         liveStatus = frame.status || null;
+        // Prefer the frame's own list; an agent/hub predating it carries the
+        // list only on `status`, where it lives just for the running turn.
+        liveAgents = Array.isArray(frame.agents)
+          ? frame.agents
+          : (frame.status && Array.isArray(frame.status.agents) ? frame.status.agents : []);
         repaint();
       }
     };
@@ -476,6 +585,19 @@
     sock.onerror = () => { try { sock.close(); } catch {} };
   }
 
+  // Reconnect the live socket NOW instead of waiting out the backoff — the page
+  // calls this the moment the staged session's host gets its tunnel back
+  // (XERK-252), so a flap costs the operator a second rather than up to a whole
+  // BACKOFF_MS step. A socket that's still open (the hub holds it across a flap
+  // and re-arms the agent's watch on control reconnect) needs nothing.
+  function reconnectNow() {
+    if (!hostKey || !sessionId || wsStarting === gen) return;
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+    if (wsRetryTimer) { clearTimeout(wsRetryTimer); wsRetryTimer = null; }
+    backoffIdx = 0;
+    startWs(gen);
+  }
+
   function scheduleReconnect(myGen) {
     if (myGen !== gen || wsRetryTimer) return;
     const delay = BACKOFF_MS[Math.min(backoffIdx, BACKOFF_MS.length - 1)];
@@ -487,24 +609,42 @@
   }
 
   // ---- /history fallback (initial scrollback + WS-down updates) -------------
+  // One 202-retry chain at a time. The poll fallback ticks every POLL_MS while
+  // the socket is down and each tick used to start its own chain, which the
+  // longer window above turns from 12 overlapping requests into 40 (measured:
+  // 156 GETs in 45s against 86). The chain that is already waiting is the one
+  // that will deliver.
+  let historyChain = false;
   async function loadHistory(myGen, retries) {
     retries = retries || 0;
+    if (retries === 0) {
+      if (historyChain) return;
+      historyChain = true;
+    }
+    // A closed view has no URL to fetch: close() nulls hostKey/sessionId, and a
+    // 202-retry timer already in flight would otherwise build (and 404 on)
+    // `/api/agents/null/sessions/null/history`. The gen check downstream only
+    // discards the RESULT — this is what stops the request.
+    if (myGen !== gen || !hostKey || !sessionId) { historyChain = false; return; }
     let r;
     try { r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/history"); }
-    catch { return; }
-    if (myGen !== gen) return;
+    catch { historyChain = false; return; }
+    if (myGen !== gen) { historyChain = false; return; }
     if (r.status === 202) {
       if (retries < HISTORY_MAX_RETRIES) setTimeout(() => loadHistory(myGen, retries + 1), HISTORY_RETRY_MS);
+      else historyChain = false;   // gave up — the next tick may start over
       return;
     }
+    historyChain = false;
     if (!r.ok) return;
     let j;
     try { j = await r.json(); } catch { return; }
     if (myGen !== gen || !j || !Array.isArray(j.entries)) return;
     // History is the authoritative chronological scrollback (bigger byte window,
-    // looser per-block caps). Seed order from it, then re-merge any newer live
-    // entries already in the buffer on top.
-    buffer = mergeTail(j.entries, buffer);
+    // looser per-block caps). Fold it in preserving transcript order — never
+    // seed-then-append, which drops the grow-only buffer's pre-window entries
+    // below history out of order on every reload (foldHistory).
+    buffer = foldHistory(j.entries, buffer);
     if (Array.isArray(j.queued)) queuedPrompts = j.queued;
     repaint();
   }
@@ -521,9 +661,10 @@
 
   // ---- merge (transcript.ts mergeTail port) ---------------------------------
   // Weight = total displayable chars; a richer/longer copy of an entry wins, so
-  // the text-only heartbeat seed is replaced by the rich live tail, and the live
-  // tail (tight caps) is replaced by /history (looser caps). Grow-only, so a
-  // truncated preview never clobbers a fuller copy.
+  // the text-only heartbeat seed (a 500-char preview) is replaced by the rich
+  // live tail or /history — which read at the SAME block caps as each other
+  // (XERK-347), so neither can shrink the other. Grow-only, so a truncated
+  // preview never clobbers a fuller copy.
   //
   // EVERY block payload field counts, not just text/input: a command block
   // carries its content in name/args (a task_notification in summary/result),
@@ -536,8 +677,12 @@
       w += (b.text || "").length + (b.input || "").length + (b.name || "").length +
         (b.args || "").length + (b.summary || "").length + (b.result || "").length +
         (b.desc || "").length + (b.content || "").length + (b.plan || "").length +
-        (b.url || "").length +
-        (b.edit ? (b.edit.old || "").length + (b.edit.new || "").length : 0);
+        (b.url || "").length + (b.caption || "").length +
+        (b.edit ? (b.edit.old || "").length + (b.edit.new || "").length : 0) +
+        // Embedded SendUserFile previews (XERK-221): count them so an image-bearing
+        // copy outweighs a degraded reload (file since deleted → a name-only chip).
+        (Array.isArray(b.files) ? b.files.reduce((s, f) =>
+          s + (f ? (f.src || "").length + (f.html || "").length + (f.name || "").length : 0), 0) : 0);
     }
     return w;
   }
@@ -556,6 +701,58 @@
       if (weight(inc) >= weight(cur) || (incHasBlocks && !curHasBlocks)) byId.set(inc.id, inc);
     }
     return order.map((id) => byId.get(id));
+  }
+
+  // Fold a /history WINDOW into the live buffer, preserving transcript order.
+  //
+  // Both `history` (the /history response) and `buffer` (the grow-only live
+  // buffer) are individually oldest-to-newest and share a common run of ids.
+  // The old code did `mergeTail(history, buffer)` — seed order from history,
+  // append every buffer id history didn't know at the END. That is wrong: the
+  // live buffer accumulates from the moment the chat opened and is never
+  // trimmed, so once it reaches further back than the (bounded) /history
+  // window, a reload — which the poll fallback fires on every socket drop, far
+  // more often on a flaky mobile link — appended all those PRE-window entries
+  // BELOW history, dropping older text to the bottom out of order.
+  //
+  // Instead do a two-pointer merge that syncs on the shared ids and keeps each
+  // side's own order: history is authoritative (looser caps) where they
+  // overlap, its older head leads, and only the buffer entries strictly newer
+  // than history's newest shared id — the live tail past the snapshot — trail
+  // it. pickHeavier mirrors mergeTail's tie-break (the buffer/live copy wins an
+  // equal-weight tie, a blocks copy beats a text-only one).
+  function foldHistory(history, buffer) {
+    history = history || [];
+    buffer = buffer || [];
+    const inHist = new Set();
+    for (const h of history) if (h && h.id != null) inHist.add(h.id);
+    const inBuf = new Set();
+    for (const b of buffer) if (b && b.id != null) inBuf.add(b.id);
+    const pickHeavier = (h, b) => {
+      const bBlocks = b.blocks && b.blocks.length;
+      const hBlocks = h.blocks && h.blocks.length;
+      return (weight(b) >= weight(h) || (bBlocks && !hBlocks)) ? b : h;
+    };
+    const out = [];
+    const seen = new Set();
+    let i = 0, j = 0;
+    const pushOnce = (e) => { if (e && e.id != null && !seen.has(e.id)) { seen.add(e.id); out.push(e); } };
+    while (i < history.length && j < buffer.length) {
+      const h = history[i], b = buffer[j];
+      if (!h || h.id == null || seen.has(h.id)) { i++; continue; }
+      if (!b || b.id == null || seen.has(b.id)) { j++; continue; }
+      if (h.id === b.id) { pushOnce(pickHeavier(h, b)); i++; j++; continue; }
+      // Emit whichever entry sits before the next shared anchor. A buffer-unique
+      // entry (history never has it) that precedes a shared id goes now; a
+      // history-unique entry likewise. When neither is shared, history — the
+      // authoritative scrollback — leads.
+      if (inHist.has(b.id) && !inBuf.has(h.id)) { pushOnce(h); i++; }
+      else if (inBuf.has(h.id) && !inHist.has(b.id)) { pushOnce(b); j++; }
+      else { pushOnce(h); i++; }
+    }
+    for (; i < history.length; i++) pushOnce(history[i]);
+    for (; j < buffer.length; j++) pushOnce(buffer[j]);
+    return out;
   }
 
   // ---- build display items from rich entries --------------------------------
@@ -622,6 +819,13 @@
           if (b.edit) act.edit = { old: b.edit.old || "", new: b.edit.new || "", replaceAll: !!b.edit.replaceAll };
           if (b.content) act.content = b.content;
           if (b.plan) act.plan = b.plan;
+          // TodoWrite / dsh todo_write: the checklist snapshot the agent
+          // attached (hub-agent _todo_items / tunnel-agent todoItems).
+          if (Array.isArray(b.todos) && b.todos.length) act.todos = b.todos;
+          // SendUserFile inline preview (XERK-221): rendered images/SVG/HTML the
+          // session delivered, embedded on the block by the agent.
+          if (Array.isArray(b.files) && b.files.length) act.files = b.files;
+          if (b.caption) act.caption = b.caption;
           items.push(act);
         } else if (b.t === "tool_result") {
           if (b.forId && toolUseIds.has(b.forId)) continue; // folded into its tool_use card
@@ -639,8 +843,9 @@
           items.push(openCmd);
         } else if (b.t === "command_output") {
           flush();
-          // resultId, not the card's id: the output is its OWN transcript entry,
-          // so that's the entry "Show more" has to re-fetch a fuller copy of.
+          // resultId, not the card's id: the output is its OWN transcript
+          // entry, so that is the entry a hit scrolls to, not the card it is
+          // drawn in.
           const result = {
             text: b.text || "", isError: !!b.isError, truncated: !!b.truncated, entryId: eid,
           };
@@ -714,18 +919,20 @@
   }
 
   // ---- rendering ------------------------------------------------------------
-  // Static (archived) renders have no /history to expand into — the stored
-  // transcript is already the fullest copy — so the "Show more…" affordance is
-  // suppressed there; the live view keeps it.
-  let noExpand = false;
-  function truncBtn(entryId, truncated) {
-    return (truncated && !noExpand) ? '<button class="trunc" data-eid="' + esc(entryId) + '">Show more…</button>' : "";
+  // A block the agent had to clip to its cap: a build log, a whole-file Read —
+  // never an ordinary message, whose cap is the operator's own input ceiling
+  // (agent BLOCK_CAPS). A static mark, never a control: the live tail and
+  // /history read at the SAME fidelity now (XERK-347), so there is no fuller
+  // copy to fetch and a "Show more…" button could only be a dead end. Don't put
+  // one back — that is the ticket.
+  function clipMark(truncated) {
+    return truncated ? '<span class="clipped">… clipped to fit</span>' : "";
   }
 
   function renderMsg(it) {
     const cls = it.role === "user" ? "user" : "assistant";
     return '<div class="tr-msg ' + cls + '" data-uuid="' + esc(it.id) + '"><span class="role">' + cls + "</span>" +
-      renderProse(it.text) + truncBtn(it.id, it.truncated) + "</div>";
+      renderProse(it.text) + clipMark(it.truncated) + "</div>";
   }
 
   function renderThought(it) {
@@ -733,7 +940,7 @@
     const key = "th:" + it.id;
     return '<details class="thought" data-dkey="' + esc(key) + '" data-uuid="' + esc(it.id) + '"' + openAttr(key, true) +
       "><summary>💭 Thought</summary>" +
-      '<div class="thought-body">' + renderProse(it.text) + truncBtn(it.id, it.truncated) + "</div></details>";
+      '<div class="thought-body">' + renderProse(it.text) + clipMark(it.truncated) + "</div></details>";
   }
 
   // ` open` when this card should be expanded: the user's explicit toggle wins,
@@ -743,17 +950,117 @@
   }
   function actionKey(a, gk, idx) { return a.id ? ("act:" + a.id) : ("act:" + gk + ":" + idx); }
 
+  // SendUserFile inline previews (XERK-221): the image/SVG/HTML files a session
+  // delivered, embedded on the block by the agent. An image renders through the
+  // same <img> path as prose images (a data:image/svg+xml SVG in secure static
+  // mode); an HTML page renders in a FULLY sandboxed iframe — `sandbox` with no
+  // tokens forbids scripts, same-origin, forms and navigation, so an agent- or
+  // tool-authored page can't run code or reach the hub, and srcdoc is esc()'d so
+  // it can't break out of the attribute. A non-renderable/oversize file (kind
+  // "file") shows as a name chip. The src scheme is re-checked here (defence in
+  // depth) so only data:image/* and http(s) ever reach an <img>.
+  function renderToolFiles(files, caption) {
+    let out = '<div class="tool-files">';
+    for (const f of files) {
+      if (!f || typeof f !== "object") continue;
+      const name = esc(f.name || "file");
+      if (f.kind === "image" && typeof f.src === "string" && /^(data:image\/|https?:)/i.test(f.src)) {
+        const svg = /^data:image\/svg\+xml/i.test(f.src);
+        out += '<figure class="tool-file"><img class="md-img' + (svg ? " md-svg" : "") +
+          '" src="' + esc(f.src) + '" alt="' + name + '" loading="lazy">' +
+          '<figcaption>' + name + "</figcaption></figure>";
+      } else if (f.kind === "html" && typeof f.html === "string") {
+        out += '<figure class="tool-file"><iframe class="md-embed" sandbox referrerpolicy="no-referrer"' +
+          ' loading="lazy" title="' + name + '" srcdoc="' + esc(f.html) + '"></iframe>' +
+          '<figcaption>' + name + "</figcaption></figure>";
+      } else {
+        // `shed` distinguishes "dropped to fit the reply" (agent
+        // _shed_row_previews / _shed_block_payloads) from a file that was never
+        // renderable in the first place — without it the operator sees a bare
+        // chip and no reason why their screenshot isn't there.
+        out += '<div class="tool-file file"><span class="tool-file-name">📎 ' + name + "</span>" +
+          (f.shed ? '<span class="clipped">… preview dropped to fit</span>' : "") + "</div>";
+      }
+    }
+    out += "</div>";
+    if (caption) out += '<div class="tool-caption">' + renderInline(caption) + "</div>";
+    return out;
+  }
+
+  // A TodoWrite / dsh todo_write snapshot, rendered as a checklist rather than
+  // a raw-JSON tool card — one glyph per state, and a one-line count on the
+  // summary so the card reads at a glance even collapsed. Claude and dsh share
+  // the {content, status, activeForm?} shape the agent attaches (see
+  // hub-agent _todo_items / tunnel-agent todoItems).
+  var TODO_STATUS = {
+    completed:   { glyph: "✓", cls: "done" },   // ✓
+    in_progress: { glyph: "◐", cls: "prog" },   // ◐
+    pending:     { glyph: "○", cls: "todo" },   // ○
+  };
+  function todoCounts(todos) {
+    var c = { in_progress: 0, pending: 0, completed: 0 };
+    for (var i = 0; i < todos.length; i++) {
+      var s = todos[i] && todos[i].status;
+      // Only ever index one of the three literal keys — never the raw status,
+      // so an Object.prototype key ("toString", "__proto__") in unsanitized
+      // input can't touch an inherited property instead of coercing to pending.
+      c[s === "in_progress" || s === "completed" ? s : "pending"]++;
+    }
+    return c;
+  }
+  function todoSummaryText(c) {
+    var parts = [];
+    if (c.in_progress) parts.push(c.in_progress + " in progress");
+    if (c.pending) parts.push(c.pending + " pending");
+    if (c.completed) parts.push(c.completed + " done");
+    return parts.length ? parts.join(" · ") : "empty";
+  }
+  function renderTodoCard(it, key) {
+    var todos = it.todos;
+    var summary = todoSummaryText(todoCounts(todos));
+    var rows = "";
+    for (var i = 0; i < todos.length; i++) {
+      var t = todos[i] || {};
+      // Normalize to one of the three literal keys first, so TODO_STATUS is only
+      // ever indexed by an own-key — an Object.prototype key ("toString") in
+      // unsanitized input would otherwise resolve to an inherited value and
+      // render an "undefined" glyph/class (same guard as todoCounts).
+      var status = (t.status === "in_progress" || t.status === "completed") ? t.status : "pending";
+      var meta = TODO_STATUS[status];
+      // In progress prefers the present-tense activeForm when the agent sent it
+      // (Claude does; dsh does not), else the imperative content.
+      var text = (status === "in_progress" && t.activeForm) ? t.activeForm : (t.content || "");
+      rows += '<li class="todo-item ' + meta.cls + '"><span class="todo-glyph">' +
+        meta.glyph + '</span><span class="todo-text">' + esc(text) + "</span></li>";
+    }
+    var body = '<ul class="todo-list">' + rows + "</ul>";
+    return '<details class="action-card todo-card" data-dkey="' + esc(key) +
+      '" data-uuid="' + esc(it.entryId) + '"' + openAttr(key, verbosity.show.outputs) + ">" +
+      "<summary><span class=\"tool-glyph todo-head\">☑</span>" +
+      '<span class="tool-name">To-dos</span>' +
+      '<span class="tool-arg">' + esc(summary) + "</span></summary>" +
+      '<div class="tool-body">' + body + "</div></details>";
+  }
+
   function renderActionCard(it, key) {
+    if (Array.isArray(it.todos) && it.todos.length) return renderTodoCard(it, key);
     const statusCls = it.result ? (it.result.isError ? "err" : "ok") : "";
-    // A plan card's salient line is the plan itself, not the raw input JSON the
-    // summary would otherwise fall back to.
-    const argSrc = it.plan || it.input;
-    const argOne = argSrc ? esc(argSrc.split("\n")[0]) : "";
+    // A plan card's salient line is the plan itself; a SendUserFile card's is its
+    // caption or a file count — not the raw input JSON either would fall back to.
+    const argSrc = it.plan || (it.files ? "" : it.input);
+    let argOne = argSrc ? esc(argSrc.split("\n")[0]) : "";
+    if (it.files && !argOne) {
+      argOne = esc(it.caption ? it.caption.split("\n")[0]
+        : it.files.length + (it.files.length === 1 ? " file" : " files"));
+    }
     const descOne = it.desc ? '<span class="tool-desc">' + esc(it.desc.split("\n")[0]) + "</span>" : "";
     let body = "";
-    if (it.input && !it.plan) {
+    // A SendUserFile delivery renders its files (the point of the card); its raw
+    // input JSON would just be the same paths, so it's suppressed when files show.
+    if (it.files) body += renderToolFiles(it.files, it.caption);
+    if (it.input && !it.plan && !it.files) {
       body += '<div class="tool-block"><div class="tool-label">input</div><pre>' +
-        esc(it.input) + "</pre>" + truncBtn(it.entryId, it.inputTrunc) + "</div>";
+        esc(it.input) + "</pre>" + clipMark(it.inputTrunc) + "</div>";
     }
     // The reviewable payloads (agent _tool_use_detail): an Edit's actual old →
     // new change as a −/+ diff, a Write's file body, an ExitPlanMode plan as
@@ -772,20 +1079,21 @@
     if (it.plan) {
       body += '<div class="tool-block"><div class="tool-label">plan</div>' +
         '<div class="tool-plan">' + renderProse(it.plan) + "</div>" +
-        truncBtn(it.entryId, it.inputTrunc) + "</div>";
+        clipMark(it.inputTrunc) + "</div>";
     }
     if (it.result) {
       body += '<div class="tool-block"><div class="tool-label">' + (it.result.isError ? "error" : "output") +
         '</div><pre class="tool-result">' + esc(it.result.text || "(no output)") + "</pre>" +
-        truncBtn(it.entryId, it.result.truncated) + "</div>";
+        clipMark(it.result.truncated) + "</div>";
     }
     if (!body) body = '<div class="tool-block"><div class="tool-label">running…</div></div>';
     const taskCls = it.task ? " task" : "";
     const icon = it.task ? '<span class="tool-glyph">◆</span>' : '<span class="tool-dot"></span>';
-    // A plan is the thing the operator is asked to approve: open by default.
+    // A plan (approval) and a SendUserFile delivery (its files ARE the point) are
+    // open by default; other tool cards follow the verbosity preset.
     return '<details class="action-card' + (statusCls ? " " + statusCls : "") + taskCls + '" data-dkey="' + esc(key) +
       '" data-uuid="' + esc(it.entryId) + '"' +
-      openAttr(key, it.plan ? true : verbosity.show.outputs) + ">" +
+      openAttr(key, (it.plan || it.files) ? true : verbosity.show.outputs) + ">" +
       "<summary>" + icon + '<span class="tool-name">' + esc(it.name) + "</span>" +
       '<span class="tool-arg">' + argOne + "</span>" + descOne + "</summary>" +
       '<div class="tool-body">' + body + "</div></details>";
@@ -801,12 +1109,12 @@
       (it.args ? '<span class="cmd-args">' + esc(it.args.split("\n")[0]) + "</span>" : "");
     if (!it.result) {
       return '<div class="cmd-card" data-uuid="' + esc(it.id) + '">' + head +
-        truncBtn(it.id, it.argsTrunc) + "</div>";
+        clipMark(it.argsTrunc) + "</div>";
     }
     return '<details class="cmd-card' + (it.result.isError ? " err" : "") + '" data-dkey="' + esc(key) +
       '" data-uuid="' + esc(it.id) + '"' + openAttr(key, false) + "><summary>" + head + "</summary>" +
       '<div class="cmd-body"><pre>' + esc(it.result.text || "(no output)") + "</pre>" +
-      truncBtn(it.result.entryId || it.id, it.result.truncated) + "</div></details>";
+      clipMark(it.result.truncated) + "</div></details>";
   }
 
   // The summary Claude writes when the context is compacted. The transcript
@@ -817,7 +1125,7 @@
     const key = "cmp:" + it.id;
     return '<details class="compact-card" data-dkey="' + esc(key) + '" data-uuid="' + esc(it.id) + '"' +
       openAttr(key, false) + "><summary>↺ Context compacted — summary of the conversation so far</summary>" +
-      '<div class="compact-body">' + renderProse(it.text) + truncBtn(it.id, it.truncated) + "</div></details>";
+      '<div class="compact-body">' + renderProse(it.text) + clipMark(it.truncated) + "</div></details>";
   }
 
   // "[Request interrupted by user…]" as a centred, muted status marker — the
@@ -855,7 +1163,7 @@
     const key = "away:" + it.id;
     return '<details class="away-card" data-dkey="' + esc(key) + '" data-uuid="' + esc(it.id) + '"' +
       openAttr(key, false) + "><summary>☾ While you were away — recap</summary>" +
-      '<div class="away-body">' + renderProse(it.text) + truncBtn(it.id, it.truncated) + "</div></details>";
+      '<div class="away-body">' + renderProse(it.text) + clipMark(it.truncated) + "</div></details>";
   }
 
   function itemsToHtml(items) {
@@ -876,9 +1184,13 @@
       while (j < items.length && items[j].kind === "action") j++;
       const run = items.slice(i, j);
       const gk = "grp:" + (run[0].id || g++);
-      // Concise mode (tools hidden) omits tool actions entirely — no card, no
-      // collapsed box. Otherwise render each action as its own card.
-      if (verbosity.show.tools) out.push(run.map((a, idx) => renderActionCard(a, actionKey(a, gk, idx))).join(""));
+      // Concise mode (tools hidden) omits tool mechanics — but a SendUserFile
+      // DELIVERY (a card carrying rendered files) is user-facing content, not a
+      // tool detail, so it renders in every verbosity (XERK-221). Otherwise show
+      // each action as its own card.
+      out.push(run.map((a, idx) =>
+        (verbosity.show.tools || (a.files && a.files.length))
+          ? renderActionCard(a, actionKey(a, gk, idx)) : "").join(""));
       i = j;
     }
     return out.join("");
@@ -913,23 +1225,14 @@
     const items = buildItems(buffer);
     let html = itemsToHtml(items);
     if (!html && !liveTurn && !queuedPrompts.length) html = '<div class="chat-empty">No messages yet. Say something below to get the agent going.</div>';
-    // The in-progress assistant turn (streaming, text-only) as the trailing
-    // bubble; its text is revealed by the typewriter loop.
+    // The in-progress assistant turn (text-only) as the trailing bubble, shown
+    // in full the moment it arrives (XERK-251 — it used to type in). liveTurn is
+    // already classified by applyTurn (block swaps / tool bullets / shorter
+    // re-captures handled there, see XERK-19), so what lands here is the block
+    // the pane is actually generating.
     if (liveTurn) {
-      // liveTurn is already classified by applyTurn (block swaps / tool bullets /
-      // shrinks handled there — see XERK-19), so by here it only grows within a
-      // block or was reset to shown=0 for a new one. This prefix check is a
-      // defensive clamp for any other path that sets liveTurn directly: if the
-      // new text doesn't continue the revealed slice, snap `shown` to it rather
-      // than typewriting the tail of an unrelated block from a stale offset.
-      if (!liveTurn.startsWith(revealFull.slice(0, reveal.shown))) reveal.shown = liveTurn.length;
-      revealFull = liveTurn;
-      const shownText = liveTurn.slice(0, Math.max(0, reveal.shown));
       html += '<div class="tr-msg assistant streaming" id="chatLiveBubble"><span class="role">assistant</span>' +
-        esc(shownText) + "</div>";
-    } else {
-      revealFull = "";
-      reveal.shown = 0;
+        esc(liveTurn) + "</div>";
     }
     // Still-queued prompts (typed mid-turn) trail the live turn, where they'll
     // actually run — the TUI shows the same list under its input box. Each is a
@@ -945,7 +1248,6 @@
     if (html === lastHtml) {
       updateJump();
       updateLiveStatus();
-      if (liveTurn) startReveal();
       return;
     }
     // Something DID change, but the reader is mid-selection — hold the paint and
@@ -965,7 +1267,6 @@
     scroll.scrollTop = pin ? scroll.scrollHeight : prevTop;
     updateJump();
     updateLiveStatus();
-    if (liveTurn) startReveal();
   }
 
   // The floating "jump to latest" pill hovering just above the compose box: shown
@@ -996,7 +1297,26 @@
     const bar = $("chatStatus");
     if (!bar) return;
     const st = liveStatus;
-    if (!st) { bar.hidden = true; bar.innerHTML = ""; return; }
+    // The bar survives the end of the turn when background agents are still
+    // running (XERK-245) — it then carries just the agent list under a spinner
+    // saying so, rather than vanishing and leaving the page looking idle while
+    // work continues. `st` stays the turn's own indicator, so Stop is unaffected.
+    const agents = agentsHtml(liveAgents);
+    if (!st) {
+      // Only BACKGROUND agents keep the bar up. `main` is the conversation
+      // already on screen, so a list carrying only it means nothing is
+      // delegated — raising a "Background agents…" bar for it would claim work
+      // that isn't running. Same carve-out the heartbeat makes (live_subagents).
+      if (!agents || !hasBackgroundAgents(liveAgents)) {
+        bar.hidden = true; bar.innerHTML = ""; return;
+      }
+      bar.hidden = false;
+      bar.innerHTML =
+        '<div class="cc-row"><span class="cc-spin"></span>' +
+        '<span class="verb">Background agents…</span></div>' + agents;
+      wireAgentDelegation(bar);
+      return;
+    }
     const verb = esc(st.verb || "Working");
     const toks =
       (st.up ? '<span class="tok up">↑ ' + esc(st.up) + "</span>" : "") +
@@ -1014,7 +1334,7 @@
       '<span class="verb">' + verb + "…</span>" +
       '<span class="toks">' + elapsed + toks + "</span></div>" +
       hint +
-      agentsHtml(st.agents);
+      agents;
     wireAgentDelegation(bar);
   }
 
@@ -1046,6 +1366,11 @@
     // and a Stop there would cancel the decision rather than a running turn.
     if (panePromptActive) { stopPendingAt = 0; return false; }
     if (!liveStatus) { stopPendingAt = 0; return false; }
+    // A dsh session's working status carries `noStop` — its turn has no
+    // pane-Escape interrupt (kill would end the whole session), so Stop stays
+    // hidden even though the bar shows the "Deep diving…" verb. See
+    // tunnel-agent dshStatus / .claude/rules/turma-sessions.md.
+    if (liveStatus.noStop) { stopPendingAt = 0; return false; }
     // A clicked Stop only lands on the agent's next beat, so the pane keeps
     // reporting the turn for a second or two afterwards. Hide Stop immediately
     // anyway — the operator asked for the turn to end and shouldn't watch a
@@ -1105,7 +1430,7 @@
     try {
       const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/interrupt",
         { method: "POST" });
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) { await hubRefused("Stop", r); throw new Error(String(r.status)); }
       if (typeof fastPoll === "function") fastPoll();
     } catch {
       stopPendingAt = 0; // the turn is still running — give Stop back right away
@@ -1118,8 +1443,18 @@
   // tunnel-agent.js). Each subagent row is a button that opens that background
   // agent's transcript (see openSubagentView); "main" is the session itself —
   // already on screen — so it's a plain marker, not a link. Absent/empty -> "".
+  // Is anything actually delegated? `main` is the session's own conversation,
+  // so it never counts. Rows arrive from a pane scrape via the hub, so a
+  // non-object element is possible on a buggy agent and must not throw here.
+  function hasBackgroundAgents(agents) {
+    return Array.isArray(agents)
+      && agents.some((a) => a && typeof a === "object" && a.type && a.type !== "main");
+  }
+
   function agentsHtml(agents) {
-    if (!Array.isArray(agents) || !agents.length) return "";
+    if (!Array.isArray(agents)) return "";
+    agents = agents.filter((a) => a && typeof a === "object" && a.type);
+    if (!agents.length) return "";
     const rows = agents.map((a) => {
       const dot = '<span class="dot' + (a.sel ? " sel" : "") + '"></span>';
       const type = '<span class="atype">' + esc(a.type) + "</span>";
@@ -1160,24 +1495,21 @@
   // flicker back, so the test deliberately leans toward matching.
   function isToolBullet(t) { return /^[\w-]+\(/.test(t); }
 
-  // Fold a pane-scrape `turn` frame into the streaming bubble. The pane's
+  // Fold a pane-scrape `turn` frame into the live bubble. The pane's
   // "last ● bullet" is NOT a growing stream: within one generating turn it
   // SWAPS between blocks — assistant prose, then a tool-use bullet (Bash(…),
   // Read(…)), then the next prose. Feeding every swap straight to the bubble is
   // what makes "the final line delete and re-appear over and over" (XERK-19):
   // the tool bullet swaps in (the line deletes) and prose swaps back (it
   // reappears). So classify the frame instead of trusting it verbatim:
-  //  - empty, or a tool-use bullet -> the streaming block is over (or is a tool
-  //    that renders as a committed card, not raw text here). Clear the bubble;
-  //    the committed transcript owns what just finished.
+  //  - empty, or a tool-use bullet -> the in-progress block is over (or is a
+  //    tool that renders as a committed card, not raw text here). Clear the
+  //    bubble; the committed transcript owns what just finished.
   //  - the SAME prose block, grown or re-captured shorter -> keep the LONGER
   //    text and never shrink. A shorter partial re-capture of the same block is
-  //    what re-typed the tail from a stale offset; holding it keeps the reveal's
-  //    place so only genuine new characters type in.
-  //  - a genuinely different prose block -> retype it from 0, not from the
-  //    previous block's offset.
-  // This stands in for glasses/src/reveal.ts advanceReveal's entryId-change
-  // snap; the pane scrape has no id, so the revealed prose stands in for it.
+  //    the TUI redrawing mid-frame, and letting it through shrinks the bubble
+  //    only to re-grow it a frame later — the char-level flicker.
+  //  - a genuinely different prose block -> replace the bubble's text with it.
   function applyTurn(text) {
     const t = typeof text === "string" ? text : "";
     if (!t || isToolBullet(t)) { liveTurn = ""; return; }
@@ -1187,36 +1519,6 @@
       return;
     }
     liveTurn = t;
-    reveal.shown = 0;
-  }
-
-  // ---- typewriter reveal loop (live turn only) ------------------------------
-  function startReveal() {
-    if (rafId != null) return;
-    lastTs = 0;
-    rafId = requestAnimationFrame(tick);
-  }
-  function tick(ts) {
-    rafId = null;
-    const dt = lastTs ? ts - lastTs : 0;
-    lastTs = ts;
-    const bubble = $("chatLiveBubble");
-    if (!bubble || !revealFull) return; // nothing to animate
-    // The reveal rewrites the live bubble in place, so it clobbers a selection
-    // anchored inside it just like a repaint does. Idle the loop (holding the
-    // revealed text where it is) until the reader is done selecting.
-    if (selectionInScroll()) { rafId = requestAnimationFrame(tick); return; }
-    const target = revealFull.length;
-    if (reveal.shown < target) {
-      const backlog = target - reveal.shown;
-      if (backlog > REVEAL_SNAP_CHARS) reveal.shown = target;
-      else reveal.shown = Math.min(target, reveal.shown + Math.max(1, Math.floor(REVEAL_RATE_CPS * dt / 1000)));
-      const scroll = $("chatScroll");
-      // Rebuild the bubble text: role span + revealed slice.
-      bubble.innerHTML = '<span class="role">assistant</span>' + esc(revealFull.slice(0, reveal.shown));
-      if (stickBottom && scroll) scroll.scrollTop = scroll.scrollHeight;
-    }
-    if (reveal.shown < target) { rafId = requestAnimationFrame(tick); }
   }
 
   // ---- header + verbosity control ------------------------------------------
@@ -1387,15 +1689,18 @@
   // One PR badge (state colour + #number + merge-readiness mark), linked to the PR.
   function prBadge(pr) {
     const url = pr.url || "";
-    const m = url.match(/\/pull\/(\d+)|\/-\/merge_requests\/(\d+)/);
-    const num = pr.number ? "#" + pr.number : (m ? "#" + (m[1] || m[2]) : "PR");
+    const m = url.match(/\/pull\/(\d+)|\/-\/merge_requests\/(\d+)|\/pullrequest\/(\d+)/i);
+    // GitLab and Azure DevOps number their requests !n, not #n (in ADO #n is a
+    // WORK ITEM) — the sigil follows the URL's platform, mirroring _pr_ref.
+    const sigil = m && !m[1] ? "!" : "#";
+    const num = pr.number ? sigil + pr.number : (m ? sigil + (m[1] || m[2] || m[3]) : "PR");
     const state = String(pr.state || "").toUpperCase();
     const cls = { OPEN: "pr-open", DRAFT: "pr-draft", MERGED: "pr-merged", CLOSED: "pr-closed" }[state] || "";
     const label = state ? state[0] + state.slice(1).toLowerCase() : "";
     const ready = prReady(pr);
     const mark = ready === "ready" ? "✓" : ready === "blocked" ? "✗" : ready === "pending" ? "●" : "";
     const chk = mark ? ' <span class="pr-ready ' + ready + '" title="' + esc(prReadyTitle(pr)) + '">' + mark + "</span>" : "";
-    return '<a class="pr-badge ' + cls + '" href="' + esc(url) +
+    return '<a class="pr-badge ' + cls + '" href="' + safeUrl(url) +
       '" target="_blank" rel="noopener" title="' + esc(pr.title || url) + '">' +
       '<span class="pr-dot"></span>' + esc(num) + (label ? " " + esc(label) : "") + chk + "</a>";
   }
@@ -1424,7 +1729,7 @@
     const href = "/board?ticket=" + encodeURIComponent(t.key) +
       (t.siteKey ? "&site=" + encodeURIComponent(t.siteKey) : "");
     return '<span class="cc-opt cc-ticket">' +
-      '<a class="jira-chip" href="' + esc(href) + '"' +
+      '<a class="jira-chip" href="' + safeUrl(href) + '"' +
       ' title="' + esc(tip || t.key) + '">' + esc(t.key) + "</a></span>";
   }
   // fromPoll: a background heartbeat repaint — don't yank an open menu shut.
@@ -1432,38 +1737,378 @@
     const host = $("chatComposeOpts");
     if (!host) return;
     if (fromPoll && host.querySelector(".cc-menu.open")) return;
+    const dsh = isDshSession();
+    const qwen = isQwenSession();
     const mode = modeChipValue(), model = currentModelValue();
     const modeOpts = availableModeOpts();
     const mOpts = availableModelOpts();
     const mTitle = "Model for this session — switched live, session-only" +
       (sess && sess.pendingModel ? " (switching after the current turn)"
         : sess && sess.modelActual ? " (now: " + sess.modelActual + ")" : "");
-    host.innerHTML =
+    // The permission-mode chip is Claude-only: a dsh session manages its own
+    // approvals (ask/never + sandbox), not Claude's modes (XERK-504).
+    const modeChip = dsh ? "" :
       '<span class="cc-opt cc-mode">' +
         '<button class="cc-btn" id="ccModeBtn" title="Agent (permission) mode — switched live, best-effort">' +
         '🛡 <span class="cc-val">' + esc(optLabel(MODE_OPTS, mode)) + '</span><span class="cc-caret">▾</span></button>' +
         '<span class="cc-menu" id="ccModeMenu"><span class="cc-hint">Agent mode</span>' +
-        menuHtml(modeOpts, mode, "data-mode") + "</span></span>" +
-      '<span class="cc-right">' + ticketFooterChip(sess) + prFooterChip(sess) +
-        '<span class="cc-opt cc-model">' +
-          '<button class="cc-btn" id="ccModelBtn" title="' + esc(mTitle) + '">' +
-          '<span class="cc-val">' + esc(modelChipLabel()) + '</span><span class="cc-caret">▾</span> 🧠</button>' +
-          '<span class="cc-menu" id="ccModelMenu"><span class="cc-hint">Model</span>' +
-          menuHtml(mOpts, model, "data-model") + "</span></span>" +
-      "</span>";
+        menuHtml(modeOpts, mode, "data-mode") + "</span></span>";
+    // The runtime chip: a read-only "⚙ dsh" for a dsh session, else the Claude
+    // subscription/local switch (shown when the host offers a local endpoint).
+    const runtimeChip = dsh ? dshRuntimeChipHtml()
+      : qwen ? qwenRuntimeChipHtml()
+      : (localModelOffered()
+          ? '<span class="cc-opt cc-source' + (currentModelSource() === "local" ? " cc-source-local" : "") + '">' +
+            '<button class="cc-btn" id="ccSourceBtn" title="' +
+            esc("Which runtime this session runs on. Switching keeps the conversation" +
+                (localModelInfo().model ? " — self-hosted: " + localModelInfo().model : "")) + '">' +
+            (currentModelSource() === "local" ? "🏠" : "☁") +
+            ' <span class="cc-val">' + esc(modelSourceLabel()) + '</span><span class="cc-caret">▾</span></button>' +
+            '<span class="cc-menu" id="ccSourceMenu"><span class="cc-hint">Runtime</span>' +
+            menuHtml(modelSourceOpts(), currentModelSource(), "data-source") + "</span></span>"
+          : "");
+    // The model chip: the discovered dsh list for a dsh session, a fixed
+    // label for a qwen session (no discovered list, host-configured model),
+    // the discovered local list for a local session, else the Claude alias picker.
+    const modelChip = dsh ? dshModelChipHtml()
+      : qwen ? qwenModelChipHtml()
+      : (currentModelSource() === "local"
+          ? localModelChipHtml()
+          : '<span class="cc-opt cc-model">' +
+            '<button class="cc-btn" id="ccModelBtn" title="' + esc(mTitle) + '">' +
+            '<span class="cc-val">' + esc(modelChipLabel()) + '</span><span class="cc-caret">▾</span> 🧠</button>' +
+            '<span class="cc-menu" id="ccModelMenu"><span class="cc-hint">Model</span>' +
+            menuHtml(mOpts, model, "data-model") + "</span></span>");
+    host.innerHTML = modeChip +
+      '<span class="cc-right">' + contextMeterChip() + ticketFooterChip(sess) + prFooterChip(sess) +
+        runtimeChip + modelChip + "</span>";
     wireComposeMenu("ccModeBtn", "ccModeMenu", "data-mode", setSessionMode);
     wireComposeMenu("ccModelBtn", "ccModelMenu", "data-model", setSessionModel);
+    wireComposeMenu("ccSourceBtn", "ccSourceMenu", "data-source", setSessionModelSource);
+    wireComposeMenu("ccLocalModelBtn", "ccLocalModelMenu", "data-lmodel",
+      (v) => setSessionLocalModel(v));
+    wireComposeMenu("ccDshModelBtn", "ccDshModelMenu", "data-dmodel",
+      (v) => setSessionDshModel(v));
+    wireLocalContext();
   }
+  // ---- context-fullness meter (XERK-489 Phase 4) ----------------------------
+  // How full the model's context window is right now, warning before the ~95%
+  // auto-compaction. EXACT for a local session (its selected model's window); a
+  // subscription session's window is derived from the model it runs (agent-side)
+  // and marked "~" — the transcript can't tell a family's 1M variant from its
+  // 200k one. Both figures come off the heartbeat (agent transcript-sum), never a
+  // pane statusLine — that text needs a statusLine Turma refuses to wire because
+  // it breaks busy detection (XERK-130). Returns "" until a turn is measured.
+  function contextMeterChip() {
+    if (!sess) return "";
+    const num = sess.lastTurnContextTokens, den = sess.contextWindowTokens;
+    if (!(typeof num === "number" && num > 0 && typeof den === "number" && den > 0)) return "";
+    const pct = Math.min(100, Math.round((num / den) * 100));
+    const cls = pct >= 95 ? " ctx-danger" : pct >= 85 ? " ctx-warn" : "";
+    const approx = currentModelSource() !== "local";
+    const title = "Context " + fmtCtx(num) + " / " + fmtCtx(den) +
+      (approx ? " (subscription — window from model)" : " (exact)") +
+      " — the session auto-compacts near 95%";
+    return '<span class="cc-opt cc-ctx-meter' + cls + '" title="' + esc(title) + '">' +
+      '<span class="cc-ctx-track"><span class="cc-ctx-fill" style="width:' + pct + '%"></span></span>' +
+      '<span class="cc-ctx-cap">' + pct + "%" + (approx ? " ~" : "") + "</span></span>";
+  }
+
+  // ---- local-model failover (XERK-246) --------------------------------------
+  // Running out of Claude usage stops every session on a host at once. A session
+  // can be moved onto that host's self-hosted model and carry on in the SAME
+  // conversation. The control follows the HOST's reported capability, exactly
+  // like the 📎 follows uploadMaxBytes: an agent that reports no `localModel`
+  // cannot do it, so offering the switch would queue a command it silently drops.
+  function localModelInfo(a) { return (a || agent || {}).localModel || {}; }
+  function localModelOffered() {
+    // Also shown when the session is ALREADY local, so a session whose host
+    // later lost its configuration still has a visible way back.
+    return Boolean(localModelInfo().available) || currentModelSource() === "local";
+  }
+  function currentModelSource() {
+    // A memo belongs to the session it was made on. Honouring another session's
+    // memo paints a subscription session as local (the exact confusion the mark
+    // exists to prevent) and swallows its own switch click via the
+    // `value === currentModelSource()` early-return in setSessionModelSource.
+    // A memo must prove WHICH session it belongs to. Tolerating a session-less
+    // one re-opens the leak this guard exists to close (and let a regression
+    // that stopped recording the id ship green).
+    const mine = modelSourcePending && modelSourcePending.sessionId === sessionId;
+    if (mine && Date.now() - modelSourcePending.at < 60000) return modelSourcePending.value;
+    return (sess && sess.modelSource) || "subscription";
+  }
+  // The runtime selector for a Claude session: the mounted subscription vs the
+  // host's OWN endpoint — the same two "Claude Code" / "Claude Code Local"
+  // runtimes the spawn composer offers (XERK-504), so the footer reads like the
+  // initial selector. It does NOT name the model — the adjacent model dropdown
+  // does, and the raw discovered id (e.g. "bedrock/us.anthropic.claude-opus-4-5-…")
+  // is noise here. (A dsh session is a different runtime that cannot be switched
+  // to a Claude one live — its conversation is a dsh event log, not Claude JSONL
+  // — so it shows a read-only runtime chip instead; see dshRuntimeChipHtml.)
+  function modelSourceLabel() {
+    return currentModelSource() === "local" ? "Claude Code Local" : "Claude Code";
+  }
+  function modelSourceOpts() {
+    return [
+      { value: "subscription", label: "Claude Code" },
+      { value: "local", label: "Claude Code Local" },
+    ];
+  }
+  async function setSessionModelSource(value) {
+    if (!hostKey || !sessionId || !sess || value === currentModelSource()) return;
+    // Memo-only, like the mode switch: the relaunch takes a moment and the
+    // heartbeat is the thing that confirms it actually happened.
+    modelSourcePending = { value, at: Date.now(), sessionId };
+    renderComposeOpts();
+    try {
+      const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/model-source", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ modelSource: value }) });
+      // A refusal (a host with no local model, an agent too old) must take the
+      // memo back with it: left up, the chip shows the model the session is NOT
+      // running on until the memo ages out (XERK-264).
+      if (!r.ok) { await hubRefused("Model switch", r); modelSourcePending = null; renderComposeOpts(); return; }
+      if (typeof fastPoll === "function") fastPoll();
+    } catch { modelSourcePending = null; renderComposeOpts(); }
+  }
+
+  // ---- endpoint model dropdown + context override (XERK-489) ---------------
+  // A local session is no longer pinned to one model: it picks from the ids the
+  // endpoint SERVES (localModel.models), switched live like the subscription
+  // model. Selecting one applies that model's served context window; an advanced
+  // field can only SHRINK it (an overstated CLAUDE_CODE_MAX_CONTEXT_TOKENS makes
+  // claude compact too late and the tail truncate).
+  const MAX_LOCAL_MODEL_CONTEXT = 2000000;   // mirrors the agent's cap
+  function localModels() {
+    const l = localModelInfo();
+    return Array.isArray(l.models) ? l.models : [];
+  }
+  function fmtCtx(n) {
+    if (!(typeof n === "number" && n > 0)) return "";
+    return n >= 1000 ? Math.round(n / 1000) + "k" : String(n);
+  }
+  // A just-picked local-model switch, held across the relaunch like the source
+  // memo — cleared once the heartbeat's localModelName agrees or it times out.
+  let localModelPending = null; // {value, at, sessionId}
+  const LOCAL_MODEL_SETTLE_MS = 60000;
+  function localModelMemoActive() {
+    return localModelPending && localModelPending.sessionId === sessionId &&
+      Date.now() - localModelPending.at < LOCAL_MODEL_SETTLE_MS;
+  }
+  function currentLocalModel() {
+    if (localModelMemoActive()) return localModelPending.value;
+    const l = localModelInfo();
+    return (sess && sess.localModelName) || l.defaultModel || l.model || "";
+  }
+  // The endpoint's served window for a model id, or null when it reports none
+  // (a bare OpenAI-compatible endpoint — the override field is then free-form).
+  function servedContextFor(id) {
+    const m = localModels().find((x) => x && x.id === id);
+    return m && typeof m.contextTokens === "number" ? m.contextTokens : null;
+  }
+  function currentLocalContext() {
+    const stored = sess && sess.localModelContext;
+    if (typeof stored === "number" && stored > 0) return stored;
+    return servedContextFor(currentLocalModel());
+  }
+  function localModelOpts() {
+    return localModels().map((m) => {
+      const k = fmtCtx(m && m.contextTokens);
+      return { value: m.id, label: (m && m.id) + (k ? " · " + k : "") };
+    });
+  }
+  // The whole local-model chip: a dropdown of the discovered models (each
+  // "id · 128k") plus an advanced context override. Degrades to a fixed label
+  // when the host reports local but no discovered list (an older agent, or the
+  // discovery worker's first pass not yet landed).
+  function localModelChipHtml() {
+    const models = localModels();
+    const cur = currentLocalModel();
+    if (!models.length) {
+      return '<span class="cc-opt cc-model cc-model-fixed">' +
+        '<span class="cc-btn" title="' +
+        esc("This host's self-hosted model. Its list has not been discovered yet.") + '">' +
+        '<span class="cc-val">' + esc(cur || "local model") + "</span> 🧠</span></span>";
+    }
+    const ctx = currentLocalContext();
+    const served = servedContextFor(cur);
+    const kLabel = fmtCtx(ctx);
+    const val = esc(cur || "local model") +
+      (kLabel ? ' <span class="cc-ctx">· ' + esc(kLabel) + "</span>" : "") +
+      (localModelMemoActive() ? "…" : "");
+    const cap = served || MAX_LOCAL_MODEL_CONTEXT;
+    const ctxRow =
+      '<div class="cc-ctx-adv"><label for="ccLocalCtx">Context ' +
+      (served ? "(max " + esc(fmtCtx(served)) + ")" : "(tokens)") + "</label>" +
+      '<span class="cc-ctx-in"><input type="number" id="ccLocalCtx" min="1" max="' + cap +
+      '" step="1024" value="' + (typeof ctx === "number" && ctx > 0 ? ctx : "") + '">' +
+      '<button id="ccLocalCtxApply" class="cc-apply">Apply</button></span></div>';
+    return '<span class="cc-opt cc-model cc-model-local">' +
+      '<button class="cc-btn" id="ccLocalModelBtn" title="' +
+      esc("Self-hosted model for this session — switched live, session-only. " +
+          "Selecting a model applies its context window; Advanced can shrink it.") + '">' +
+      '<span class="cc-val">' + val + '</span><span class="cc-caret">▾</span> 🧠</button>' +
+      '<span class="cc-menu" id="ccLocalModelMenu"><span class="cc-hint">Self-hosted model</span>' +
+      menuHtml(localModelOpts(), cur, "data-lmodel") +
+      '<span class="cc-sep"></span>' + ctxRow + "</span></span>";
+  }
+  // The context input lives INSIDE the menu popover, so its own clicks/keys must
+  // not bubble to the document listener that closes every menu.
+  function wireLocalContext() {
+    const input = $("ccLocalCtx"), apply = $("ccLocalCtxApply");
+    if (!input || !apply) return;
+    input.addEventListener("click", (e) => e.stopPropagation());
+    input.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+      if (e.key === "Enter") { e.preventDefault(); apply.click(); }
+    });
+    apply.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const v = parseInt(input.value, 10);
+      closeComposeMenus();
+      if (v > 0) setSessionLocalModel(currentLocalModel(), v);
+    });
+  }
+  async function setSessionLocalModel(value, context) {
+    if (!hostKey || !sessionId || !sess) return;
+    const sameModel = value === currentLocalModel();
+    const sameCtx = context == null || context === currentLocalContext();
+    if (sameModel && sameCtx) return;         // re-picking the showing value
+    localModelPending = { value, at: Date.now(), sessionId };
+    renderComposeOpts();
+    const body = { model: value };
+    if (typeof context === "number" && context > 0) body.context = context;
+    try {
+      const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/model", {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      // A refusal (an unserved model, an agent too old) takes the memo back —
+      // left up, the chip names a model the session is NOT running (XERK-264).
+      if (!r.ok) { await hubRefused("Model switch", r); localModelPending = null; renderComposeOpts(); return; }
+      if (typeof fastPoll === "function") fastPoll();
+    } catch { localModelPending = null; renderComposeOpts(); }
+  }
+
+  // ---- dsh runtime footer (XERK-504) ----------------------------------------
+  // A dsh session runs a DIFFERENT runtime (the DeepSeek Harness), not the
+  // Claude subscription/local split — so its footer shows a read-only "⚙ dsh"
+  // runtime chip (a dsh conversation cannot be moved to a Claude runtime live)
+  // and a live dropdown of the host's DISCOVERED dsh models, mirroring the local
+  // one minus the context override (dsh has no per-session window override). The
+  // mode chip is hidden for dsh — dsh manages approvals itself (ask/never +
+  // sandbox), not Claude's permission modes.
+  function isDshSession() { return Boolean(sess && sess.agentType === "dsh"); }
+  function isQwenSession() { return Boolean(sess && sess.agentType === "qwen"); }
+  function dshInfo(a) { return (a || agent || {}).dsh || {}; }
+  function dshModels() {
+    const d = dshInfo();
+    return Array.isArray(d.models) ? d.models : [];
+  }
+  let dshModelPending = null; // {value, at, sessionId}
+  function dshModelMemoActive() {
+    return dshModelPending && dshModelPending.sessionId === sessionId &&
+      Date.now() - dshModelPending.at < LOCAL_MODEL_SETTLE_MS;
+  }
+  function currentDshModel() {
+    if (dshModelMemoActive()) return dshModelPending.value;
+    const d = dshInfo();
+    return (sess && sess.model) || d.defaultModel || "";
+  }
+  function dshModelOpts() {
+    return dshModels().map((m) => {
+      const k = fmtCtx(m && m.contextTokens);
+      return { value: m.id, label: (m && m.id) + (k ? " · " + k : "") };
+    });
+  }
+  // A read-only runtime marker matching the session card's "⚙ dsh" badge — it is
+  // NOT a picker: a running dsh session cannot switch to a Claude runtime live
+  // (the conversation formats differ), so offering the change would only queue a
+  // command the host refuses.
+  function dshRuntimeChipHtml() {
+    return '<span class="cc-opt cc-source cc-source-local">' +
+      '<span class="cc-btn" title="' +
+      esc("Runs on the dsh (DeepSeek Harness) runtime, not Claude Code") + '">' +
+      '⚙ <span class="cc-val">dsh</span></span></span>';
+  }
+  // Read-only runtime marker for a qwen session: a running Qwen Code session
+  // cannot switch to a Claude runtime live (the conversation formats differ),
+  // so it is shown as a fixed chip, not a picker.
+  function qwenRuntimeChipHtml() {
+    return '<span class="cc-opt cc-source cc-source-local">' +
+      '<span class="cc-btn" title="' +
+      esc("Runs on the Qwen Code runtime, not Claude Code") + '">' +
+      '⚙ <span class="cc-val">Qwen Code</span></span></span>';
+  }
+  // The qwen model chip: a fixed, read-only label. The qwen heartbeat reports
+  // only {available} — no discovered model list (model plumbing is a later
+  // child, XERK-504) — so there is nothing to offer in a dropdown; the session
+  // runs on the host's configured qwen model. Show the actual model (the same
+  // value the Claude picker's label already reads off sess.modelActual) as a
+  // fixed chip, mirroring the dsh/local "no discovered list" fallback. This is
+  // what stops the qwen session's model chip from offering Claude's aliases.
+  function qwenModelChipHtml() {
+    return '<span class="cc-opt cc-model cc-model-fixed">' +
+      '<span class="cc-btn" title="' +
+      esc("The Qwen Code model this session runs on. It is set by the host and cannot be switched live.") + '">' +
+      '<span class="cc-val">' + esc(modelChipLabel() || "qwen model") + "</span> 🧠</span></span>";
+  }
+  function dshModelChipHtml() {
+    const models = dshModels();
+    const cur = currentDshModel();
+    if (!models.length) {
+      return '<span class="cc-opt cc-model cc-model-fixed">' +
+        '<span class="cc-btn" title="' +
+        esc("This host's dsh model. Its list has not been discovered yet.") + '">' +
+        '<span class="cc-val">' + esc(cur || "dsh model") + "</span> 🧠</span></span>";
+    }
+    const k = fmtCtx((models.find((m) => m && m.id === cur) || {}).contextTokens);
+    const val = esc(cur || "dsh model") +
+      (k ? ' <span class="cc-ctx">· ' + esc(k) + "</span>" : "") +
+      (dshModelMemoActive() ? "…" : "");
+    return '<span class="cc-opt cc-model cc-model-local">' +
+      '<button class="cc-btn" id="ccDshModelBtn" title="' +
+      esc("dsh model for this session — switched live; the session resumes its " +
+          "conversation on the new model.") + '">' +
+      '<span class="cc-val">' + val + '</span><span class="cc-caret">▾</span> 🧠</button>' +
+      '<span class="cc-menu" id="ccDshModelMenu"><span class="cc-hint">dsh model</span>' +
+      menuHtml(dshModelOpts(), cur, "data-dmodel") + "</span></span>";
+  }
+  async function setSessionDshModel(value) {
+    if (!hostKey || !sessionId || !sess || value === currentDshModel()) return;
+    dshModelPending = { value, at: Date.now(), sessionId };
+    renderComposeOpts();
+    try {
+      const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/model", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ model: value }) });
+      if (!r.ok) { await hubRefused("Model switch", r); dshModelPending = null; renderComposeOpts(); return; }
+      if (typeof fastPoll === "function") fastPoll();
+    } catch { dshModelPending = null; renderComposeOpts(); }
+  }
+
   async function setSessionModel(value) {
     if (!hostKey || !sessionId || !sess || value === currentModelValue()) return;
+    // The subscription-model picker path only; a LOCAL session uses the endpoint
+    // dropdown above (setSessionLocalModel), which posts an endpoint model id.
+    if (currentModelSource() === "local") return;
+    const prevModel = sess.model;
     modelSwitchPending = { value, prevActual: sess.modelActual || null, at: Date.now() };
     sess.model = value === "default" ? null : value; // optimistic; heartbeat confirms
     renderComposeOpts();
+    // A refused switch (an invalid model, a session since gone) takes BOTH the
+    // memo and that optimistic write back — the chip would otherwise name a
+    // model the session never moved to (XERK-264).
+    const undo = () => {
+      modelSwitchPending = null;
+      sess.model = prevModel;
+      renderComposeOpts();
+    };
     try {
-      await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/model", {
+      const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/model", {
         method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ model: value }) });
+      if (!r.ok) { await hubRefused("Model switch", r); undo(); return; }
       if (typeof fastPoll === "function") fastPoll();
-    } catch {}
+    } catch { undo(); }
   }
   async function setSessionMode(value) {
     if (!hostKey || !sessionId || !sess || value === currentModeValue()) return;
@@ -1475,10 +2120,12 @@
     modeSwitchPending = { value, at: Date.now() };
     renderComposeOpts();
     try {
-      await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/mode", {
+      const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/mode", {
         method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ permissionMode: value }) });
+      // Same as the model chip: a refused mode must not keep painting itself.
+      if (!r.ok) { await hubRefused("Mode switch", r); modeSwitchPending = null; renderComposeOpts(); return; }
       if (typeof fastPoll === "function") fastPoll();
-    } catch {}
+    } catch { modeSwitchPending = null; renderComposeOpts(); }
   }
 
   if (typeof document !== "undefined") {
@@ -1623,7 +2270,7 @@
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ optionNumber }),
       });
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) { await hubRefused("Answer", r); throw new Error(String(r.status)); }
     } catch {
       answeredPanePrompt = null;   // let the next beat re-surface it
       actionFailed("Couldn't answer");
@@ -1647,7 +2294,7 @@
       const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/answer", {
         method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
       });
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) { await hubRefused("Answer", r); throw new Error(String(r.status)); }
       if (typeof fastPoll === "function") fastPoll();
     } catch {
       answeredQuestion = null; // send failed — let the pending question show again
@@ -1655,20 +2302,184 @@
     }
   }
 
-  // ---- expand a truncated block via /history --------------------------------
-  let expandInFlight = false;
-  async function expandEntry(entryId) {
-    if (expandInFlight) return;
-    expandInFlight = true;
-    const myGen = gen;
+  // ---- file attachments (XERK-234) ------------------------------------------
+  // Files the operator staged for the NEXT message. Each is uploaded to the hub
+  // the moment it is picked — so Send is instant, and a file too big or a host
+  // too old is refused while there is still something to look at rather than at
+  // the end of a message the operator thought they'd sent.
+  //
+  // Shape: {key, name, size, status:"uploading"|"ready"|"error", uploadId, error}
+  let attachments = [];
+  let attachSeq = 0;
+
+  function fmtBytes(n) {
+    const b = Number(n) || 0;
+    if (b < 1024) return b + " B";
+    if (b < 1024 * 1024) return Math.round(b / 1024) + " KB";
+    return (b / (1024 * 1024)).toFixed(b < 10 * 1024 * 1024 ? 1 : 0) + " MB";
+  }
+
+  // The largest file the OPEN session's host will take, 0 when it can't take one
+  // (an agent that predates attachments reports no `uploadMaxBytes` — see the
+  // hub's uploadCapFor). 0 is what hides the 📎 rather than letting the operator
+  // attach into a void.
+  function attachCap(a) {
+    const n = Number((a || agent || {}).uploadMaxBytes);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+  function attachEnabled() { return attachCap() > 0; }
+
+  function attachmentsHtml(list) {
+    return (list || []).map((f) => {
+      const cls = f.status === "error" ? " att-error"
+        : f.status === "uploading" ? " att-uploading" : "";
+      const meta = f.status === "error" ? esc(f.error || "failed")
+        : f.status === "uploading" ? "uploading…" : fmtBytes(f.size);
+      return `<span class="att-chip${cls}" title="${esc(f.name)}">` +
+        `<span class="att-name">${esc(f.name)}</span>` +
+        `<span class="att-size">${meta}</span>` +
+        `<button class="att-x" title="Remove" data-att="${esc(f.key)}">✕</button></span>`;
+    }).join("");
+  }
+
+  // Paint every strip on the page (chat's and the terminal's), the same way
+  // updateComposeAction paints every Send — the two bars send through one
+  // endpoint and must never disagree about what is attached.
+  function renderAttachments() {
+    const html = attachmentsHtml(attachments);
+    for (const el of document.querySelectorAll(".compose-attach")) {
+      if (el.innerHTML !== html) el.innerHTML = html;
+    }
+    const clip = $("chatClip");
+    if (clip) {
+      clip.hidden = !attachEnabled();
+      // A pending question is answered THROUGH the compose box (POST .../answer,
+      // which carries no attachments), so attaching is off while one is up.
+      clip.disabled = questionActive;
+      clip.title = questionActive
+        ? "Answer the question first — an answer can't carry a file"
+        : "Attach images or documents";
+    }
+  }
+
+  function removeAttachment(key) {
+    attachments = attachments.filter((f) => f.key !== key);
+    renderAttachments();
+  }
+
+  function clearAttachments() { attachments = []; renderAttachments(); }
+
+  // Stage files and start their uploads. Called by the 📎 picker, a drop on the
+  // transcript, and a paste carrying files (a screenshot off the clipboard).
+  function attachFiles(files) {
+    const list = Array.from(files || []).filter(Boolean);
+    if (!list.length || !hostKey || !sessionId) return;
+    const cap = attachCap();
+    if (!cap) { actionFailed("Host too old for files"); return; }
+    for (const file of list) {
+      if (attachments.length >= MAX_ATTACHMENTS) {
+        actionFailed(`Max ${MAX_ATTACHMENTS} files`);
+        break;
+      }
+      const rec = {
+        key: "a" + (++attachSeq),
+        name: file.name || "upload",
+        size: file.size || 0,
+        status: file.size > cap ? "error" : "uploading",
+        error: file.size > cap ? `too big — max ${fmtBytes(cap)}` : "",
+        uploadId: "",
+      };
+      attachments.push(rec);
+      if (rec.status !== "error") uploadOne(rec, file);
+    }
+    renderAttachments();
+  }
+
+  async function uploadOne(rec, file) {
+    // The session this upload belongs to: if the operator walks to another
+    // session mid-upload the reply is stale, and its chip is already gone.
+    const forSession = sessionId, forHost = hostKey;
     try {
-      const r = await fetch("/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/history");
-      if (myGen !== gen || !r.ok) return;
-      const j = await r.json();
-      if (myGen !== gen || !j || !Array.isArray(j.entries)) return;
-      buffer = mergeTail(buffer, j.entries); // looser caps -> the block grows
-      repaint();
-    } catch {} finally { expandInFlight = false; }
+      const url = "/api/agents/" + enc(forHost) + "/sessions/" + enc(forSession) +
+        "/uploads?name=" + encodeURIComponent(rec.name);
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/octet-stream" },
+        body: file,
+      });
+      const reply = await r.json().catch(() => null);
+      if (!r.ok) throw new Error((reply && reply.error) || ("upload failed (" + r.status + ")"));
+      if (forSession !== sessionId || !attachments.includes(rec)) return;
+      rec.uploadId = reply.uploadId;
+      rec.name = reply.name || rec.name;   // the name it will land under
+      rec.size = reply.size || rec.size;
+      rec.status = "ready";
+    } catch (e) {
+      if (forSession !== sessionId || !attachments.includes(rec)) return;
+      rec.status = "error";
+      rec.error = (e && e.message) || "upload failed";
+    }
+    renderAttachments();
+  }
+
+  // Wire the picker/drop/paste entry points once. The picker is one <input> for
+  // the page (sessions.html), reset after every pick so re-choosing the same
+  // file still fires `change`.
+  function openFilePicker() {
+    const inp = $("chatFilePicker");
+    if (!inp || !attachEnabled() || questionActive) return;
+    inp.value = "";
+    inp.click();
+  }
+
+  function wireAttachDrop() {
+    const wrap = document.querySelector(".chat-scroll-wrap");
+    if (!wrap || wrap.dataset.attWired) return;
+    wrap.dataset.attWired = "1";
+    const has = (e) => Array.from((e.dataTransfer && e.dataTransfer.types) || [])
+      .includes("Files");
+    wrap.addEventListener("dragover", (e) => {
+      if (!has(e) || !attachEnabled()) return;
+      e.preventDefault();
+      wrap.classList.add("att-drop");
+    });
+    wrap.addEventListener("dragleave", (e) => {
+      if (e.target === wrap) wrap.classList.remove("att-drop");
+    });
+    wrap.addEventListener("drop", (e) => {
+      wrap.classList.remove("att-drop");
+      if (!has(e) || !attachEnabled()) return;
+      e.preventDefault();
+      attachFiles(e.dataTransfer.files);
+    });
+    // One delegated handler for every chip's ✕, on both strips.
+    document.addEventListener("click", (e) => {
+      const x = e.target.closest && e.target.closest(".att-x[data-att]");
+      if (!x) return;
+      e.preventDefault();
+      removeAttachment(x.getAttribute("data-att"));
+    });
+  }
+
+  // A paste carrying files (a screenshot, a dragged-in doc) attaches them; a
+  // paste of plain text is left alone so the textarea handles it normally.
+  function composePaste(e) {
+    const files = (e && e.clipboardData && e.clipboardData.files) || null;
+    if (!files || !files.length || !attachEnabled() || questionActive) return;
+    e.preventDefault();
+    attachFiles(files);
+  }
+
+  /**
+   * The staged uploadIds for the message about to be sent, or null when one is
+   * still uploading / failed — the caller then holds the message rather than
+   * sending it with a file silently missing. `[]` means simply nothing attached.
+   */
+  function readyUploadIds() {
+    if (!attachments.length) return [];
+    if (attachments.some((f) => f.status === "uploading")) return null;
+    if (attachments.some((f) => f.status === "error")) return null;
+    return attachments.map((f) => f.uploadId).filter(Boolean);
   }
 
   // ---- compose (typed prompt, or custom question answer) --------------------
@@ -1686,13 +2497,73 @@
     inp.style.height = "auto";
     inp.style.height = Math.min(inp.scrollHeight, 160) + "px";
   }
+  // The hub rejects a message past the receiving host's character cap with a 413
+  // (XERK-227). That is the one send failure the operator can act on — the text
+  // is still in the box, it just has to be split — so it gets its own label
+  // instead of the generic "Send failed", which reads as "the hub is down".
+  // The cap is per host (an agent too old to paste takes far less), so the
+  // label carries the hub's `limit` when it sent one: "too long" without a
+  // number leaves the operator guessing how much to cut.
+  const TOO_LONG = "Message too long";
+  // A staged attachment aged out of the hub's relay (XERK-234). Like "too long"
+  // this is a refusal the operator can act on — re-attach and send again — so it
+  // gets its own wording rather than the generic "Send failed".
+  const ATT_GONE = "Attachment expired — re-attach";
+  // Everything else the hub refuses — a 409, a 503, a full command queue — has
+  // already gone to the toast in the hub's own words (see hubRefused), so the
+  // button just says the send didn't happen. It used to read the bare status
+  // number, which told the operator nothing (XERK-264).
+  const SEND_FAILED = "Send failed";
+  function sendFailure(status, limit, error) {
+    if (status === 404 && /attachment/i.test(error || "")) return ATT_GONE;
+    if (status !== 413) return SEND_FAILED;
+    const n = Number(limit);
+    return n > 0 ? `Too long — max ${n.toLocaleString()}` : TOO_LONG;
+  }
+  // "Is this message one WE worded?" — the gate both compose bars put a thrown
+  // message through before showing it, so a transport error's own text can't
+  // land on the button.
+  function isTooLong(msg) {
+    return msg === TOO_LONG || msg === ATT_GONE || /^Too long — max /.test(msg || "");
+  }
+  // ---- a refusal the hub explained ------------------------------------------
+  // The hub refuses a command with a status and a JSON `{error}` body — an org
+  // mismatch, an agent too old to run it, an offline host, an expired
+  // attachment, a command queue too full to take another. Chat dropped all of
+  // that on the floor (XERK-264): a send read as a bare status number, an
+  // answer vanished, a model switch kept the label it optimistically painted.
+  //
+  // The compose button has room for a label, not a sentence, so the hub's own
+  // words go to the page's shared toast — the one surface every refused command
+  // on the page raises — and the button keeps its short wording. Returns the
+  // parsed body so the caller can read `limit`/`error` for that wording.
+  //
+  // Guarded on TurmaNav: the vendored copy of this engine (glasses)
+  // renders transcripts with none of the site chrome loaded.
+  async function hubRefused(what, res) {
+    const body = await res.json().catch(() => null);
+    const nav = typeof window !== "undefined" && window.TurmaNav;
+    if (nav && nav.toast && nav.refusalText) nav.toast(nav.refusalText(what, res.status, body));
+    return body;
+  }
   async function send() {
     const inp = $("chatInput");
     if (!inp || !hostKey || !sessionId) return;
     const text = inp.value;
-    if (!text.trim()) return;
-    inp.value = ""; autoGrow(); inp.focus();
     const wasAnswer = questionActive;
+    // Attachments ride a plain message only (an /answer carries no files), and
+    // a message can be attachments alone — but never one that is still on its
+    // way up, which would arrive with the file missing and nothing said.
+    const uploadIds = wasAnswer ? [] : readyUploadIds();
+    if (!wasAnswer && uploadIds === null) {
+      actionFailed(attachments.some((f) => f.status === "error")
+        ? "Remove the failed file" : "Files still uploading");
+      return;
+    }
+    if (!text.trim() && !(uploadIds && uploadIds.length)) return;
+    inp.value = ""; autoGrow(); inp.focus();
+    const sentAttachments = wasAnswer ? [] : attachments.slice();
+    if (!wasAnswer) clearAttachments();
     try {
       let url, body;
       if (wasAnswer) {
@@ -1706,27 +2577,34 @@
       } else {
         url = "/api/agents/" + enc(hostKey) + "/sessions/" + enc(sessionId) + "/input";
         body = { text };
+        if (uploadIds.length) body.uploadIds = uploadIds;
       }
       const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) {
+        const err = await hubRefused(wasAnswer ? "Answer" : "Send", r);
+        throw new Error(sendFailure(r.status, err && err.limit, err && err.error));
+      }
       if (typeof fastPoll === "function") fastPoll();
-    } catch {
+    } catch (e) {
       if (wasAnswer) { answeredQuestion = null; if (sess) updateQuestion(sess); }
       if (!inp.value.trim()) { inp.value = text; autoGrow(); }
-      actionFailed("Send failed");
+      // Put the chips back with the text: the operator is going to press Send
+      // again, and re-picking the files by hand is not something a failed POST
+      // should cost them. The staged uploads live on the hub for 20 minutes.
+      if (sentAttachments.length && !attachments.length) {
+        attachments = sentAttachments;
+        renderAttachments();
+      }
+      actionFailed(isTooLong(e && e.message) ? e.message : "Send failed");
     }
   }
 
-  // Delegated clicks for expand-more buttons inside the scroll.
+  // Delegated clicks inside the scroll (code-block copy buttons).
   function wireScrollDelegation() {
     const scroll = $("chatScroll");
     if (!scroll || scroll.dataset.wired) return;
     scroll.dataset.wired = "1";
-    scroll.addEventListener("click", (e) => {
-      if (copyCodeClick(e)) return;
-      const b = e.target.closest && e.target.closest(".trunc[data-eid]");
-      if (b) { e.preventDefault(); expandEntry(b.getAttribute("data-eid")); }
-    });
+    scroll.addEventListener("click", copyCodeClick);
     // Follow the reader: parked at the bottom → keep auto-scrolling (and hide the
     // jump pill); scrolled up → stop pinning and reveal it. Scroll events are
     // coalesced to the settled position, so a programmatic scroll-to-bottom in
@@ -1803,7 +2681,6 @@
     stVerbHost = opts.verbHost || null;
     stTranscriptId = opts.transcriptId || null;
     stEntries = Array.isArray(opts.entries) ? opts.entries : [];
-    noExpand = true;  // no /history to expand into
     detailsOpen.clear();
     loadStaticVerbosity(stTranscriptId);
     renderStaticVerbosity();
@@ -1835,19 +2712,37 @@
     closeStatic();
     gen++;
     const myGen = gen;
+    // A switch memo belongs to the session it was made on. Opening a DIFFERENT
+    // session must drop it, or that session is painted with the previous one's
+    // pending source (🏠 on a subscription session) and its own switch click is
+    // swallowed by the `value === currentModelSource()` early-return.
+    if (!modelSourcePending || modelSourcePending.sessionId !== id) modelSourcePending = null;
+    // Same for the endpoint-model memo (XERK-489): drop a foreign session's, and
+    // retire ours once the heartbeat's localModelName agrees.
+    if (!localModelPending || localModelPending.sessionId !== id) localModelPending = null;
+    // Same for the dsh endpoint-model memo (XERK-504): drop a foreign session's,
+    // and retire ours once the heartbeat's `model` agrees.
+    if (!dshModelPending || dshModelPending.sessionId !== id) dshModelPending = null;
     hostKey = hk; sessionId = id; sess = s; agent = a;
-    buffer = []; queuedPrompts = []; liveTurn = ""; liveStatus = null; reveal.shown = 0; revealFull = ""; backoffIdx = 0;
+    // The switch has landed once the host reports the source we asked for.
+    if (modelSourcePending && s && s.modelSource === modelSourcePending.value) modelSourcePending = null;
+    if (localModelPending && s && s.localModelName === localModelPending.value) localModelPending = null;
+    if (dshModelPending && s && s.model === dshModelPending.value) dshModelPending = null;
+    historyChain = false;   // a chain from the PREVIOUS session must not block this one
+    buffer = []; queuedPrompts = []; liveTurn = ""; liveStatus = null; liveAgents = [];
+    backoffIdx = 0;
     stopPendingAt = 0; actionFailUntil = 0; // the compose button starts at Send
     modelSwitchPending = null; modeSwitchPending = null;
     lastHtml = null; repaintDeferred = false; // this session's paint memo starts empty
     stickBottom = true; // land at the tail on open, past the seed→history race
-    noExpand = false;
     detailsOpen.clear();
     loadVerbosity(id);
     setHeader(s, a);
     renderVerbosityControl();
     renderComposeOpts();
     wireScrollDelegation();
+    wireAttachDrop();
+    clearAttachments();  // files are staged per session, never carried across
     updateQuestion(s);
     // Instant paint from the heartbeat's cached (text-only) tail, then upgrade.
     const seed = (s && s.session && s.session.tail) || [];
@@ -1863,12 +2758,14 @@
     if (wsRetryTimer) { clearTimeout(wsRetryTimer); wsRetryTimer = null; }
     stopPollFallback();
     if (ws) { try { ws.onclose = null; ws.close(); } catch {} ws = null; }
-    if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
     hostKey = null; sessionId = null; sess = null; agent = null;
-    buffer = []; queuedPrompts = []; liveTurn = ""; liveStatus = null; questionActive = false; answeredQuestion = null;
+    modelSourcePending = null;
+    buffer = []; queuedPrompts = []; liveTurn = ""; liveStatus = null; liveAgents = [];
+    questionActive = false; answeredQuestion = null;
     panePromptActive = false; answeredPanePrompt = null;
     stopPendingAt = 0; actionFailUntil = 0; modelSwitchPending = null; modeSwitchPending = null;
     lastHtml = null; repaintDeferred = false;
+    clearAttachments();
     updateLiveStatus(); // hide the pinned bar when the view closes
   }
 
@@ -1883,11 +2780,24 @@
     setHeader(s, agent);
     updateQuestion(s);
     renderComposeOpts(true);
+    // The host payload carries `uploadMaxBytes`, so the 📎 can only appear once
+    // a beat has been seen — repaint the strip on every one.
+    renderAttachments();
   }
 
   if (typeof window !== "undefined") {
     window.TurmaChat = { open, close, repaint: repaintPublic, onPoll, renderStatic: openStatic, closeStatic,
-      isBusy, stop, actionFailed };
+      // sendFailure/isTooLong are shared with the terminal composer so the two
+      // compose bars word a refusal identically (XERK-227).
+      isBusy, stop, actionFailed, sendFailure, isTooLong,
+      // The page calls this when the host's tunnel comes back (XERK-252).
+      reconnectNow,
+      // The terminal composer sends through the same /input, so it reads the
+      // staged attachments from here rather than keeping a second list
+      // (XERK-234).
+      readyUploadIds, clearAttachments, hasAttachments: () => attachments.length > 0,
+      attachError: () => (attachments.some((f) => f.status === "error")
+        ? "Remove the failed file" : "Files still uploading") };
     // Global handlers referenced by the chat pane's inline HTML attributes.
     window.autoGrowChatInput = autoGrow;
     // Enter always sends, exactly like the button: a queued message is a
@@ -1900,40 +2810,64 @@
     window.chatComposeAction = function () { send(); };
     window.chatComposeStop = function () { stop(); };
     window.chatJumpBottom = jumpToBottom;
+    // File attachments (XERK-234): the composer's 📎, the picker's change, and
+    // a paste that carries files.
+    window.chatComposeAttach = openFilePicker;
+    window.chatFilesPicked = function (e) { attachFiles(e && e.target && e.target.files); };
+    window.chatComposePaste = composePaste;
   }
 
   // Expose the pure core (merge + item building) for Node unit tests. Harmless
   // in the browser (no `module`); the browser path uses window.TurmaChat above.
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
-      mergeTail, weight, buildItems, itemsToHtml, esc, linkify, renderInline, renderProse, copyCodeClick, prFooterChip,
+      mergeTail, foldHistory, weight, buildItems, itemsToHtml, esc, linkify, renderInline, renderProse, copyCodeClick, prFooterChip,
       ticketFooterChip, modelOpts, prettyModel, MODEL_OPTS,
-      agentsHtml, optionCardHtml, panePromptHtml, filterModeOpts, MODE_OPTS, repaint, selectionInScroll, tick,
-      isBusy, updateComposeAction, isToolBullet,
+      agentsHtml, hasBackgroundAgents, optionCardHtml, panePromptHtml, filterModeOpts, MODE_OPTS, repaint, selectionInScroll,
+      isBusy, updateComposeAction, updateLiveStatus, isToolBullet, sendFailure, isTooLong, TOO_LONG,
+      loadHistory, reconnectNow, startWs,
+      __setSessionRef: (hk, id) => { hostKey = hk; sessionId = id; },
+      __gen: () => gen,
+      // What open()/close() do between two sessions: everything in flight for
+      // the old view is invalidated by the bump alone.
+      __nextGen: () => { gen++; },
+      attachmentsHtml, fmtBytes, readyUploadIds, renderAttachments, attachFiles,
+      clearAttachments, MAX_ATTACHMENTS,
+      __setAttachments: (a) => { attachments = a; },
+      __attachments: () => attachments,
       // Drive the real `turn`-frame classifier (see applyTurn): the ws onmessage
       // hands it frame.text verbatim, so the flicker tests exercise it directly.
       __applyTurn: (t) => { applyTurn(t); },
       __setLiveStatus: (st) => { liveStatus = st; },
+      __setLiveAgents: (a) => { liveAgents = Array.isArray(a) ? a : []; },
       __stopPending: (t) => { stopPendingAt = t; },
       modelChipLabel, modeChipValue,
-      __setSess: (s) => { sess = s; },
+      __setSess: (s) => { sess = s; sessionId = s && s.id; },
+      __setHostKey: (k) => { hostKey = k; },
       __setAgent: (a) => { agent = a; },
       __setModelSwitchPending: (p) => { modelSwitchPending = p; },
+      localModelOffered, currentModelSource, modelSourceLabel, modelSourceOpts,
+      setSessionModelSource,
+      // XERK-489 endpoint model dropdown + context override
+      localModels, localModelOpts, currentLocalModel, currentLocalContext,
+      servedContextFor, fmtCtx, localModelChipHtml, setSessionLocalModel,
+      contextMeterChip,   // Phase 4 context-fullness meter
+      // XERK-504 dsh runtime footer (read-only runtime chip + live model dropdown)
+      isDshSession, dshModels, currentDshModel, dshModelOpts, dshModelChipHtml,
+      dshRuntimeChipHtml, setSessionDshModel,
+      isQwenSession, qwenRuntimeChipHtml, qwenModelChipHtml,
+      renderComposeOpts,
+      __setDshModelPending: (p) => { dshModelPending = p; },
+      __setLocalModelPending: (p) => { localModelPending = p; },
+      __setModelSourcePending: (p) => { modelSourcePending = p; },
       __setModeSwitchPending: (p) => { modeSwitchPending = p; },
       __setQuestionActive: (v) => { questionActive = v; },
       __setPanePromptActive: (v) => { panePromptActive = v; },
       __setVerbosity: (v) => { verbosity = v; },
-      __setNoExpand: (v) => { noExpand = v; },
       __setBuffer: (b) => { buffer = b; },
       __setQueued: (q) => { queuedPrompts = q; },
-      __setLiveTurn: (t) => { liveTurn = t; reveal.shown = 0; },
-      // Set the live turn WITHOUT resetting the reveal — the real ws `turn`
-      // frame does exactly this (liveTurn = frame.text), and testing the
-      // swap-vs-continuation snap needs `shown` to carry across the change.
-      __setLiveTurnRaw: (t) => { liveTurn = t; },
-      __setRevealShown: (n) => { reveal.shown = n; },
+      __setLiveTurn: (t) => { liveTurn = t; },
       __resetPaint: () => { lastHtml = null; repaintDeferred = false; },
-      __revealShown: () => reveal.shown,
       __liveTurn: () => liveTurn,
     };
   }

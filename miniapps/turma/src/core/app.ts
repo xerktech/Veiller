@@ -166,6 +166,10 @@ export interface AppState {
   // org menu's "auto" toggle. Flipped optimistically by setAutoStartOrg, then
   // reconciled from the next poll. Empty until the first poll carries it.
   autoStartOrgs: Record<string, boolean>;
+  // The hub's per-ticket triage verdicts (XERK-486 [F]): "<siteKey>/<issueKey>"
+  // -> {action, at}. Passive read for the board's Triage lane + verdict chips;
+  // the phone does not set verdicts (web/Android do, via POST /api/jira/.../triage).
+  ticketTriageActions: Record<string, { action: string; at: number }>;
   sessionRefs: SessionRef[];
   transcripts: Record<string, TranscriptBuffer>;
   // Typewriter state for the focused session's newest transcript entry (see
@@ -202,6 +206,7 @@ export function createInitialState(now: number): AppState {
     orgFilter: "",
     orgColors: {},
     autoStartOrgs: {},
+    ticketTriageActions: {},
     sessionRefs: [],
     transcripts: {},
     reveal: emptyReveal(),
@@ -719,6 +724,7 @@ export class App {
         agents: res.agents,
         orgColors: res.orgColors ?? {},
         autoStartOrgs: res.autoStartOrgs ?? {},
+        ticketTriageActions: res.ticketTriageActions ?? {},
         sessionRefs,
         transcripts,
         pending,

@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { Board, Chat, renderTranscript } from "./engines.ts";
 
 // The vendored engines must stay byte-identical to the web source of truth
-// (turma/public/chat.js and board.js @ Turma main 24437fc / v0.6.45), so the
+// (turma/public/chat.js and board.js @ Turma main 6f25acf / v1.1.67), so the
 // phone renders exactly what the web/Android show and never silently drifts.
 //
 // Veiller-port adaptation of upstream vendor.test.ts: the Turma repo isn't
@@ -14,8 +14,8 @@ import { Board, Chat, renderTranscript } from "./engines.ts";
 // baked in. Re-copy from turma/public/ AND update the hash when upstream
 // changes.
 const pinned: [string, string][] = [
-  ["chat.cjs", "0f4ce3e96016784b81884d25c0a54d1a7dace27bc302ce67a035ef6715633226"],
-  ["board.cjs", "b7a587f405ec5f2eb0a080fb716b8da721edef086bd9948195944570e34636a1"],
+  ["chat.cjs", "a39ddd1656f58bb5fe61862079b0082c2f172a392f7ffca88d4aa75b494a75e8"],
+  ["board.cjs", "5dcf3a39962d892ef0a05e720d3b3b46db5138975e966c3f2931d3dd4f7a5ea6"],
 ];
 
 describe("vendored engines", () => {

@@ -6,6 +6,7 @@
 // testable without a browser.
 (() => {
   const CATEGORIES = [
+    ["triage", "Triage"],
     ["todo", "To Do"],
     ["inprogress", "In Progress"],
     ["review", "In Review"],
@@ -19,13 +20,32 @@
     })[c]);
   }
 
+  // A URL for an `href`, or "#" if it is not one we will navigate to.
+  //
+  // esc() escapes the TEXT but says nothing about the SCHEME, so a ticket URL
+  // of `javascript:...` — which the agent derives from JIRA_SITE/AZDO_URL, so
+  // a compromised tracker supplies it — was rendered into a real anchor.
+  // Chrome happens to block javascript: into a new browsing context, so
+  // `target="_blank"` was the only thing between this and a second XSS. That
+  // is a coincidence, not a defence (XERK-235). http(s) and mailto only.
+  function safeUrl(u) {
+    const s = String(u ?? "").trim();
+    return /^(https?:|mailto:)/i.test(s) ? esc(s) : "#";
+  }
+
   // "In Review"/"Testing" statuses live in Jira's `indeterminate` category
   // (which the agent maps to `inprogress`) — there is no fourth cross-org
   // category for them. So the In Review column is carved out of `inprogress`
   // by matching the org-specific status NAME rather than the category. Matched
   // on word boundaries so "Attestation" or "Contest" can't leak in, but "In
   // Review", "Code Review", "Testing", "In Test", "QA" all land here.
-  const REVIEW_STATUS_RE = /\b(review|reviewing|testing|test|qa)\b/i;
+  //
+  // "Resolved" is here for Azure DevOps (XERK-250), whose fixed state set is
+  // New / Active / Resolved / Closed / Removed: its `Resolved` metastate means
+  // "fixed, not yet verified" — this board's In Review — and reaches the client
+  // as `inprogress`, so the name is the only thing that can place it. A Jira
+  // "Resolved" is normally in the `done` category, which this can't pull from.
+  const REVIEW_STATUS_RE = /\b(review|reviewing|testing|test|qa|resolved)\b/i;
 
   function isReviewStatus(t) {
     return REVIEW_STATUS_RE.test(String((t && t.status) || ""));
@@ -71,6 +91,50 @@
     return move && (move.pending || move.settled) && !move.error ? move.category : categoryOf(t);
   }
 
+  // XERK-486 [F]: the operator's per-ticket triage verdict, off the hub's
+  // ticketTriageActions map (the /api/agents payload key of the same name).
+  // Mirrors the agent/model/runtime pin readers: key "<siteKey>/<issueKey>",
+  // value {action, at}; anything malformed or unknown reads as "no verdict",
+  // so a bad entry degrades to the default (model + org policy decide) rather
+  // than blocking a ticket.
+  function triageActionOf(ticketTriageActions, siteKey, issueKey) {
+    const v = (ticketTriageActions || {})[`${siteKey || ""}/${issueKey || ""}`];
+    const a = v && v.action;
+    return a === "approve" || a === "hold" || a === "reject" ? a : null;
+  }
+
+  // XERK-486 [F]: the Triage lane — a board column of its own for To Do tickets
+  // that need an operator's eye: UNTRIAGED (no triage assessment yet, so the
+  // auto stream can't touch them) or HELD by the operator's verdict. It is a
+  // view over the To Do column, not a tracker category: nothing about it is
+  // written back to the tracker, which is why categoryOf and its mirrors are
+  // untouched. A card here is still a todo ticket (a session can be started on
+  // it, and dragging it to a real column works); board.html just refuses drops
+  // ON the lane, since it maps to no tracker status.
+  function triageLaneOf(t, action) {
+    if (!t || categoryOf(t) !== "todo") return null;
+    if (action === "hold") return "triage";
+    if (!t.triage || typeof t.triage !== "object") return "triage";
+    return null;
+  }
+
+  // The operator's verdict on the card (XERK-486 [F]). It outranks everything
+  // the model said, so it gets a chip of its own: approve reads green (it
+  // forces auto-start), hold amber (it parks the card in the Triage lane),
+  // reject red.
+  function triageChipHtml(action) {
+    if (!action) return "";
+    const tip = action === "approve"
+      ? "Approved — auto-starts even if the triage model or the org policy say no"
+      : action === "hold"
+        ? "Held — never auto-starts until you release it (shown in the Triage lane)"
+        : "Rejected — dropped from the auto stream; start it by hand if you want it";
+    const text = action === "approve" ? "✓ approved"
+      : action === "hold" ? "⏸ held"
+      : "✕ rejected";
+    return `<span class="kc-triage kc-triage-${action}" title="${esc(tip)}">${text}</span>`;
+  }
+
   // Whether a drag override should still be held, be dropped, or has settled —
   // the board's per-beat sweep verdict, kept pure so it can be unit-tested.
   //   pending  -> "hold"  (the POST/poll loop owns the transition to settled/error)
@@ -110,10 +174,18 @@
       if (!rep) {
         reporters.set(site, rep = {
           hosts: new Set(), online: false, repos: new Map(), hostOpts: new Map(),
-          modelAvail: new Set(), modelAt: "", modelDefaultLabel: "" });
+          modelAvail: new Set(), modelAt: "", modelDefaultLabel: "",
+          dshAvailable: false, qwenAvailable: false });
       }
       rep.hosts.add(a.device || a.key || "?");
       if (a.online) rep.online = true;
+      // Whether the org can run the dsh runtime (XERK-473): any reporting host
+      // offering it, online or not — matching orgOffersDsh hub-side, so the
+      // Runtime picker offers "dsh" exactly when a dsh pin would be accepted.
+      if (a.dsh && a.dsh.available) rep.dshAvailable = true;
+      // The qwen twin (XERK-515), matching orgOffersQwen hub-side — the Runtime
+      // picker offers "qwen" exactly when a qwen pin would be accepted.
+      if (a.qwen && a.qwen.available) rep.qwenAvailable = true;
       // The per-ticket model picker's choices (XERK-123): the aliases this org's
       // hosts probed available, unioned over EVERY reporting host (same reason as
       // the repo/host options — the freshest-block winners loop below sees only
@@ -154,15 +226,36 @@
       }
       const key = site + "\x00" + (j.user || "");
       const prev = byUser.get(key);
-      if (!prev || String(j.fetchedAt || "") > String(prev.block.fetchedAt || "")) {
-        byUser.set(key, { block: j, agent: a });
+      // An ONLINE host's block outranks any offline one, freshness deciding only
+      // within a tier — the same rule `ticketRepo` applies hub-side, and it has
+      // to be the same or the card and the hub disagree (XERK-325). The hub can
+      // only route a ticket to an online host that agrees with the repo it
+      // resolved, so an offline host winning on freshness put a repo on the chip
+      // that Start would never spawn against, with nothing on screen to say so.
+      // Hosts poll the tracker independently, so an offline host holding the
+      // newest block is ordinary rather than an edge case.
+      const online = !!(a && a.online);
+      if (!prev || (online && !prev.online) ||
+          (online === prev.online &&
+           String(j.fetchedAt || "") > String(prev.block.fetchedAt || ""))) {
+        byUser.set(key, { block: j, agent: a, online });
       }
     }
 
     const bySite = new Map(); // siteKey -> merged entry
-    // Fresher blocks first so a collision keeps the fresher copy by default.
-    const winners = [...byUser.values()].sort((x, y) =>
-      String(y.block.fetchedAt || "").localeCompare(String(x.block.fetchedAt || "")));
+    // Online blocks first, then fresher ones, so a collision keeps the copy the
+    // hub would actually act on. Ticket dedupe below is by the ticket's own
+    // `updated`, which two hosts polling one tracker report IDENTICALLY — so
+    // ties are the norm and this order is what really decides a card's fields.
+    // `>`/`<`, matching the group pick above and every other mirror. This sort
+    // used localeCompare while the pick used `>`, so board.js disagreed with
+    // ITSELF on a `fetchedAt` differing only by case or separator — and any port
+    // that copied one half inherited a divergence from the other.
+    const winners = [...byUser.values()].sort((x, y) => {
+      if (x.online !== y.online) return x.online ? -1 : 1;
+      const xa = String(x.block.fetchedAt || ""), ya = String(y.block.fetchedAt || "");
+      return xa > ya ? -1 : xa < ya ? 1 : 0;
+    });
     for (const { block } of winners) {
       const site = block.siteKey;
       let entry = bySite.get(site);
@@ -203,6 +296,11 @@
             available: [...rep.modelAvail].sort(),
             defaultLabel: rep.modelDefaultLabel || "",
           },
+          // Whether the org offers the dsh runtime (XERK-473) — the Runtime
+          // picker's "dsh" option is gated on this, as orgOffersDsh gates the pin.
+          dshAvailable: !!rep.dshAvailable,
+          // The qwen twin (XERK-515) — gates the picker's "qwen" option.
+          qwenAvailable: !!rep.qwenAvailable,
           _byKey: new Map(),
         });
       }
@@ -385,6 +483,28 @@
     return `<span class="${cls}" title="${esc(tip || g.repo)}">${esc(g.repo)}</span>`;
   }
 
+  // A likely-duplicate chip (XERK-484): shown when the classifier flagged this
+  // ticket as a duplicate of another (triage.dedupeOf). Links to the twin so the
+  // operator can jump to the other ticket. No triage.dedupeOf -> no chip.
+  // The twin's URL comes from its own board row when it is on this board; when
+  // the twin isn't polled (or left the board) the tracker URL is rebuilt from
+  // the site's source and siteKey, exactly the way the agent builds ticket URLs.
+  function dedupeTwinUrl(t, site) {
+    const twin = t && t.triage && t.triage.dedupeOf;
+    if (!twin) return "";
+    const tw = (site && site.tickets || []).find((x) => x && x.key === twin);
+    if (tw && tw.url) return tw.url;
+    if (!site || !site.siteKey) return "";
+    return site.source === "azure"
+      ? `https://${site.siteKey}/_workitems/edit/${twin}`
+      : `https://${site.siteKey}/browse/${twin}`;
+  }
+  function dedupeChipHtml(t, site) {
+    const twin = t && t.triage && t.triage.dedupeOf;
+    if (!twin) return "";
+    return `<span class="kc-dup"><a href="${safeUrl(dedupeTwinUrl(t, site))}" target="_blank" rel="noopener" title="Flagged as a duplicate of ${esc(twin)}">dup of ${esc(twin)}</a></span>`;
+  }
+
   // --- ticket -> session link ----------------------------------------------
   // The agent stamps the ticket onto the session record it spawns (session.ticket
   // = {key, siteKey, url, summary, branch}); this indexes the fleet payload the
@@ -534,11 +654,81 @@
   // Once a ticket has sessions the button stays, compacted to a "+": a second
   // session on one ticket is supported (it gets the -1/-2 branch), just not the
   // common case, so it stops competing with the chips for the card's width.
-  function ticketStartHtml(t, sessions, start) {
+  // This ticket's entry in the hub's ticket queue (XERK-296), or null. The queue
+  // is hub-owned and rides /api/agents as `ticketQueue`, exactly like the agent
+  // pins — a waiting ticket has no host and no session, so this payload is the
+  // only place it exists.
+  function queuedTicketOf(ticketQueue, siteKey, issueKey) {
+    return (ticketQueue || []).find(
+      (q) => q && q.siteKey === siteKey && q.issueKey === issueKey) || null;
+  }
+
+  // How a waiting ticket reads on its card. `position` is its place in its own
+  // org's line, so it is only worth printing past the first. A "blocked" hold
+  // means the queue can't route it for a reason the operator has to clear (no
+  // triaged repo, a pinned agent that's offline) rather than one that clears
+  // itself — same text either way, but it says which.
+  function queuedLabel(q) {
+    if (!q) return "";
+    // Terminal: it waited as long as the hub allows and gave up. Said out loud,
+    // because a queued click that simply vanished reads like someone cancelling
+    // it — the ✕ beside this dismisses the note.
+    if (q.reason === "expired") return "⌛ gave up waiting";
+    if (q.reason === "blocked") return "⏳ queued · blocked";
+    if (q.reason === "rate") return "⏳ queued · rate-limited";
+    return "⏳ queued" + (q.position > 1 ? " · #" + q.position : "");
+  }
+
+  function queuedTip(q, issueKey) {
+    if (!q) return "";
+    if (q.reason === "expired") {
+      return `${issueKey} ${q.error || "waited too long for a free slot and stopped waiting"}`;
+    }
+    if (q.reason === "blocked") {
+      return `${issueKey} is waiting: ${q.error || "the hub can't route it right now"}`;
+    }
+    if (q.reason === "rate") {
+      return `${issueKey} is waiting: the org's auto-start rate limit is full — it starts when the window frees a slot`;
+    }
+    // "the org's agents" was true before XERK-325 and is not now: only a host
+    // that has triaged this ticket to this repo can take it, so a free host that
+    // answered a different repo will never pick it up. Promising the whole org
+    // sent the reader looking at capacity they don't have a problem with.
+    return `${issueKey} is waiting for a free session slot on an agent that can `
+      + `run it — whichever of those frees up first takes it`
+      + (q.position > 1 ? ` (#${q.position} in line)` : "");
+  }
+
+  function ticketStartHtml(t, sessions, start, queued) {
     const g = t && t.repoGuess;
     const chips = (sessions || []).map(sessionChipHtml).join("");
     if (!g || !g.repo) return chips;
     const st = start || {};
+    // Waiting in the hub queue: no host has been chosen and no session exists, so
+    // the card offers the one thing that applies — take it back out of the line.
+    // The start button is replaced rather than kept beside it: a second press
+    // would only re-queue the ticket it is already queued for.
+    if (queued) {
+      const tip = queuedTip(queued, t.key);
+      // A failed CANCEL parks its reason here (the entry rolled back, so the card
+      // is still the queued one) — same inline convention as a failed start.
+      const qerr = st.error
+        ? `<span class="kc-start-err" title="${esc(st.error)}">⚠ ${esc(st.error)}</span>`
+        : "";
+      const gone = queued.reason === "expired";
+      const cls = gone ? " kc-queued-blocked"
+        : queued.reason === "blocked" ? " kc-queued-blocked" : "";
+      // A terminal note is dismissed, not cancelled — and it keeps a LIVE start
+      // button beside it, because "it gave up" is only useful next to the way to
+      // ask again.
+      const act = gone ? "Dismiss" : "Take";
+      return chips + qerr + `<span class="kc-queued${cls}"
+        title="${esc(tip)}">${esc(queuedLabel(queued))}</span><button class="kc-unqueue" type="button"
+        data-unqueue="${esc(t.key)}" title="${act} ${esc(t.key)} ${gone ? "note" : "out of the queue"}"
+        aria-label="${act} ${esc(t.key)} ${gone ? "note" : "out of the queue"}">✕</button>`
+        + (gone ? `<button class="kc-start" type="button" data-start="${esc(t.key)}"
+             title="Start a session on ${esc(t.key)} again">☐ Start session</button>` : "");
+    }
     if (st.pending) {
       return chips + `<span class="kc-start kc-start-busy"
         title="Starting a session for ${esc(t.key)}…">⏳ starting…</span>`;
@@ -575,7 +765,16 @@
     }
     const repo = repoChipHtml(t);
     if (repo) bits.push(repo);
-    const start = ticketStartHtml(t, o.sessions, o.start);
+    // A likely duplicate (XERK-484) links to its twin — the card's one pointer
+    // at the other ticket; the detail view spells it out as a field.
+    const dup = dedupeChipHtml(t, site);
+    if (dup) bits.push(dup);
+    // The operator's triage verdict (XERK-486 [F]) rides in as opts.triageAction
+    // (boardHtml reads it off the payload's ticketTriageActions); absent means
+    // no chip — "no verdict" is the default and not worth a chip.
+    const triageChip = triageChipHtml(o.triageAction);
+    if (triageChip) bits.push(triageChip);
+    const start = ticketStartHtml(t, o.sessions, o.start, o.queued);
     if (start) bits.push(start);
     // A drag in flight / just landed (XERK-141) shows a "moving…" chip; a failed
     // one shows why on the card (same inline convention as the start-error note).
@@ -599,7 +798,7 @@
       data-key="${esc(t.key)}" data-site="${esc(site && site.siteKey || "")}"
       aria-label="${esc(t.key + ": " + (t.summary || ""))}">
       <div class="kc-top">
-        <a class="kc-key" href="${esc(t.url || "#")}" target="_blank" rel="noopener">${esc(t.key)}</a>
+        <a class="kc-key" href="${safeUrl(t.url)}" target="_blank" rel="noopener">${esc(t.key)}</a>
         <span class="kc-type">${esc(t.type || "")}</span>
         <span class="kc-age" title="${esc(t.updated || "")}">${esc(ageStr(t.updated, now))}</span>
       </div>
@@ -931,6 +1130,112 @@
     </div>`;
   }
 
+  // ---- ticket runtime pin (XERK-473) ----------------------------------------
+  // Which RUNTIME a ticket's session runs on — "claude" (the default) or "dsh"
+  // (XERK-460). Panel-only like the Agent/Model rows; hub-owned durable state
+  // (the ticketRuntimes map), delivered on the spawnTicket command as agentType.
+
+  // The ticket's pinned runtime out of the hub's ticketRuntimes map; null when
+  // it runs the default (claude).
+  function runtimePinOf(ticketRuntimes, siteKey, issueKey) {
+    const p = (ticketRuntimes || {})[`${siteKey}/${issueKey}`];
+    return p && p.runtime && p.runtime !== "claude" ? p : null;
+  }
+  function prettyRuntime(v) {
+    return v === "dsh" ? "dsh (DeepSeek Harness)"
+      : v === "qwen" ? "Qwen Code"
+      : "Claude Code";
+  }
+  // The Runtime row. Editable only when the org offers a non-default runtime OR
+  // a pin already exists (so an existing pin can always be released even if the
+  // last capable host went away) — mirroring how the hub still lets a pin clear.
+  function runtimeFieldHtml(pin, opts) {
+    const o = opts || {};
+    const bits = [];
+    if (!pin) {
+      bits.push(`<span class="td-dim">Claude Code — the default runtime</span>`);
+    } else {
+      bits.push(`<span class="kc-repo">${esc(prettyRuntime(pin.runtime))}</span>`);
+      bits.push(`<span class="td-dim">— set by you</span>`);
+    }
+    if (o.editable) {
+      bits.push(`<button type="button" class="td-edit" data-runtime-edit="1">Change</button>`);
+    }
+    if (o.error) bits.push(`<span class="td-err-inline">Couldn't save — ${esc(o.error)}</span>`);
+    return bits.join(" ");
+  }
+  // The picker's current answer — the change handler compares a pick against
+  // this, so it must derive the way runtimePickerHtml preselects.
+  function runtimePickerValue(pin) {
+    return pin ? pin.runtime : "claude";
+  }
+  // The runtime picker. "Claude Code" is the release (drops the pin); "dsh"/"qwen"
+  // pin it, each offered only when the org offers that runtime (else a pin the hub
+  // would refuse). An existing non-default pin is always carried so it can be
+  // released even after the last capable host went away.
+  function runtimePickerHtml(pin, opts) {
+    const o = opts || {};
+    const cur = pin ? pin.runtime : "claude";
+    const dshOffered = !!o.dshAvailable || cur === "dsh";
+    const qwenOffered = !!o.qwenAvailable || cur === "qwen";
+    const sel = `<select class="td-repo-select" data-runtime-select="1">
+      <option value="claude"${cur === "claude" ? " selected" : ""}>Claude Code (default)</option>
+      ${dshOffered ? `<option value="dsh"${cur === "dsh" ? " selected" : ""}>dsh (DeepSeek Harness)</option>` : ""}
+      ${qwenOffered ? `<option value="qwen"${cur === "qwen" ? " selected" : ""}>Qwen Code</option>` : ""}
+    </select>`;
+    return `<div class="td-repo-edit">${sel}
+      <button type="button" class="td-edit" data-runtime-cancel="1">Cancel</button>
+    </div>`;
+  }
+
+  // ---- ticket triage verdict (XERK-486 [F]) ----------------------------------
+  // The operator's per-ticket call on the auto stream: approve (force
+  // eligibility past the triage gate and the org policy), hold (never auto-
+  // start until released), reject (drop from the auto stream). Hub-owned
+  // durable state (the ticketTriageActions map, the /triage route) — like the
+  // agent/model/runtime pins, changing it needs no online host, and the
+  // sweep/drain read it, not the tracker.
+
+  // The Triage row: the verdict, or what "no verdict" means (the triage model
+  // and the org's policy decide), plus the Change control and an inline error.
+  function triageFieldHtml(action, opts) {
+    const o = opts || {};
+    const bits = [];
+    if (!action) {
+      bits.push(`<span class="td-dim">Auto — the triage model + the org's policy decide</span>`);
+    } else {
+      bits.push(triageChipHtml(action));
+      bits.push(`<span class="td-dim">— set by you</span>`);
+    }
+    if (o.editable) {
+      bits.push(`<button type="button" class="td-edit" data-triage-edit="1">Change</button>`);
+    }
+    if (o.error) bits.push(`<span class="td-err-inline">Couldn't save — ${esc(o.error)}</span>`);
+    return bits.join(" ");
+  }
+
+  // The picker's current answer — the change handler compares a pick against
+  // this, so it must derive exactly the way triagePickerHtml preselects.
+  function triagePickerValue(action) {
+    return action || "__auto__";
+  }
+
+  // The verdict picker, swapped in for the row on "Change". Choosing an option
+  // IS the save, like the repo/agent pickers; "Auto" is the release (drops the
+  // verdict back to the model + policy).
+  function triagePickerHtml(action) {
+    const cur = action || "__auto__";
+    const sel = `<select class="td-repo-select" data-triage-select="1">
+      <option value="__auto__"${cur === "__auto__" ? " selected" : ""}>Auto — triage model + org policy</option>
+      <option value="approve"${cur === "approve" ? " selected" : ""}>Approve — auto-start even if triage/policy say no</option>
+      <option value="hold"${cur === "hold" ? " selected" : ""}>Hold — never auto-start until released</option>
+      <option value="reject"${cur === "reject" ? " selected" : ""}>Reject — drop from the auto stream</option>
+    </select>`;
+    return `<div class="td-repo-edit">${sel}
+      <button type="button" class="td-edit" data-triage-cancel="1">Cancel</button>
+    </div>`;
+  }
+
   // ---- ticket status change (XERK-138) --------------------------------------
   // The board's one write-back: the operator picks a status the ticket can move
   // to and it's pushed to Jira/Azure. The changeable statuses are the fetched
@@ -1045,6 +1350,27 @@
             editable: true,
             error: o.modelError,
           })),
+      // Which RUNTIME this ticket's session runs on (XERK-473 dsh, XERK-515 qwen).
+      // Hub-owned like the agent/model pins (o.runtimePin, from ticketRuntimes),
+      // so it needs no online host to edit — but "dsh"/"qwen" are each offered
+      // only when the org offers that runtime (o.dshAvailable/o.qwenAvailable),
+      // with an existing pin always releasable.
+      fieldRow("Runtime", o.runtimeEditing
+        ? runtimePickerHtml(o.runtimePin, { dshAvailable: o.dshAvailable, qwenAvailable: o.qwenAvailable })
+        : runtimeFieldHtml(o.runtimePin, {
+            editable: !!(o.runtimePin || o.dshAvailable || o.qwenAvailable),
+            error: o.runtimeError,
+          })),
+      // The operator's per-ticket triage verdict (XERK-486 [F]). Hub-owned like
+      // the agent/model pins (o.triageAction, off the payload's
+      // ticketTriageActions), so it needs no online host to change — the
+      // verdict rides a hub POST that the sweep and the drain read.
+      fieldRow("Triage", o.triageEditing
+        ? triagePickerHtml(o.triageAction)
+        : triageFieldHtml(o.triageAction, {
+            editable: true,
+            error: o.triageError,
+          })),
       fieldRow("Assignee", d.assignee ? esc(d.assignee) : ""),
       fieldRow("Reporter", d.reporter ? esc(d.reporter) : ""),
       fieldRow("Project", v("projectName")
@@ -1053,6 +1379,15 @@
       fieldRow("Parent", v("parentKey")
         ? esc(v("parentKey")) + (d.parentSummary ? ` <span class="td-dim">${esc(d.parentSummary)}</span>` : "")
         : ""),
+      // Likely duplicate (XERK-484): triage.dedupeOf rides the heartbeat ticket
+      // only (the on-demand fetch comes straight from the tracker, which knows
+      // nothing of triage), so read `t` directly like Repo does. Links to the
+      // twin; the classifier's rationale rides dimmed, as it does on the chip.
+      fieldRow("Duplicate of",
+        t.triage && t.triage.dedupeOf
+          ? `<a href="${safeUrl(dedupeTwinUrl(t, o.site))}" target="_blank" rel="noopener">${esc(t.triage.dedupeOf)}</a>`
+              + (t.triage.reason ? ` <span class="td-dim">${esc(t.triage.reason)}</span>` : "")
+          : ""),
       fieldRow("Created", v("created") ? esc(fmtDate(v("created"))) : ""),
       fieldRow("Updated", v("updated") ? esc(fmtDate(v("updated"))) : ""),
       fieldRow("Due", v("dueDate")
@@ -1065,13 +1400,13 @@
     // section carries the loading or error state rather than an empty void.
     let body;
     if (o.error) {
-      body = `<div class="td-note td-err">Couldn't load the full ticket — ${esc(o.error)}. <a href="${esc(v("url") || "#")}" target="_blank" rel="noopener">Open in ${srcName}</a> instead.</div>`;
+      body = `<div class="td-note td-err">Couldn't load the full ticket — ${esc(o.error)}. <a href="${safeUrl(v("url"))}" target="_blank" rel="noopener">Open in ${srcName}</a> instead.</div>`;
     } else if (!detail) {
       body = `<div class="td-note">Loading description and comments…</div>`;
     } else {
       const desc = d.description
         ? textHtml(d.description) +
-          (d.descriptionTruncated ? `<div class="td-note">Description truncated — <a href="${esc(v("url") || "#")}" target="_blank" rel="noopener">read the rest in ${srcName}</a>.</div>` : "")
+          (d.descriptionTruncated ? `<div class="td-note">Description truncated — <a href="${safeUrl(v("url"))}" target="_blank" rel="noopener">read the rest in ${srcName}</a>.</div>` : "")
         : `<div class="td-none">No description.</div>`;
       const comments = d.comments || [];
       const dropped = Math.max(0, (d.commentTotal || comments.length) - comments.length);
@@ -1087,7 +1422,7 @@
         </section>
         <section class="td-section">
           <h3>Comments <span class="td-dim">${d.commentTotal || comments.length}</span></h3>
-          ${dropped ? `<div class="td-note">Showing the ${comments.length} newest — <a href="${esc(v("url") || "#")}" target="_blank" rel="noopener">${dropped} older in ${srcName}</a>.</div>` : ""}
+          ${dropped ? `<div class="td-note">Showing the ${comments.length} newest — <a href="${safeUrl(v("url"))}" target="_blank" rel="noopener">${dropped} older in ${srcName}</a>.</div>` : ""}
           ${cHtml}
         </section>`;
     }
@@ -1096,7 +1431,7 @@
     return `<div class="td-head">
         <div class="td-crumbs">
           <span class="kc-org" style="--org:${esc(color)}" title="${esc(o.siteKey || "")}">${esc(v("project") || "")}</span>
-          <a class="kc-key" href="${esc(v("url") || "#")}" target="_blank" rel="noopener">${esc(t.key)}</a>
+          <a class="kc-key" href="${safeUrl(v("url"))}" target="_blank" rel="noopener">${esc(t.key)}</a>
           <span class="kc-type">${esc(v("type") || "")}</span>
         </div>
         <button class="td-close" type="button" aria-label="Close">✕</button>
@@ -1104,27 +1439,38 @@
       <h2 class="td-summary">${esc(v("summary") || "")}</h2>
       <dl class="td-fields">${fields}</dl>
       ${body}
-      <div class="td-foot"><a href="${esc(v("url") || "#")}" target="_blank" rel="noopener">Open in ${srcName} ↗</a></div>`;
+      <div class="td-foot"><a href="${safeUrl(v("url"))}" target="_blank" rel="noopener">Open in ${srcName} ↗</a></div>`;
   }
 
-  // The three-column board for the selected sites (filter = a siteKey, or
-  // null/"" for all). Sites are the mergeSites() output; org colors come from
+  // The five-column board for the selected sites (filter = a siteKey, an
+  // array/Set of siteKeys — the header's multi-select (XERK-222) — or null/""
+  // for all). Sites are the mergeSites() output; org colors come from
   // orgColorMap over the FULL org set (opts.allKeys) — computed once here, not
-  // per site — so each org's unique color is the same whether or not it's the
+  // per site — so each org's unique color is the same whether or not it's a
   // filtered-to one.
   function boardHtml(sites, filter, opts) {
     const o = opts || {};
     const colorMap = orgColorMap(o.allKeys || sites.map(s => s.siteKey), o.orgColors);
-    const shown = sites.filter(s => !filter || s.siteKey === filter);
+    const fkeys = filter instanceof Set ? [...filter]
+      : Array.isArray(filter) ? filter
+      : filter ? [filter] : [];
+    const shown = sites.filter(s => !fkeys.length || fkeys.includes(s.siteKey));
     const moves = o.moves || null;
-    const cards = { todo: [], inprogress: [], review: [], done: [] };
+    const cards = { triage: [], todo: [], inprogress: [], review: [], done: [] };
     for (const site of shown) {
       const color = colorMap.get(site.siteKey) || orgColor(site.siteKey);
       for (const t of site.tickets) {
         // A live drag override (XERK-141) lands the card in the dropped column
         // meanwhile; boardColumnOf falls back to the real category otherwise.
         const mv = moves && moves.get((site.siteKey || "") + "\x00" + t.key);
-        cards[boardColumnOf(t, mv)].push({ t, site, color, mv });
+        // XERK-486 [F]: the operator's verdict for this ticket, and whether it
+        // parks in the Triage lane (untriaged or held To Do). The lane is a
+        // board-only view — categoryOf and its mirrors never know it — and a
+        // live drag override always wins: a card mid-move shows where it's
+        // going, and board.html keeps the lane itself a non-drop-target.
+        const triageAction = triageActionOf(o.triageActions, site.siteKey, t.key);
+        const lane = mv ? null : triageLaneOf(t, triageAction);
+        cards[lane || boardColumnOf(t, mv)].push({ t, site, color, mv, triageAction });
       }
     }
     const cols = CATEGORIES.map(([cat, label]) => {
@@ -1134,12 +1480,16 @@
             color: c.color, now: o.now,
             sessions: ticketSessionsOf(o.sessionIndex, c.site.siteKey, c.t.key),
             start: o.starts && o.starts.get((c.site.siteKey || "") + "\x00" + c.t.key),
+            queued: queuedTicketOf(o.ticketQueue, c.site.siteKey, c.t.key),
             moving: !!(c.mv && c.mv.pending && !c.mv.error),
             moveError: c.mv && c.mv.error,
+            triageAction: c.triageAction,
           })).join("")
         : `<div class="kc-none">none</div>`;
       // data-cat lets the drag handler read which column a card was dropped on.
-      return `<div class="kanban-col${cat === "done" ? " kanban-done" : ""}" data-cat="${cat}">
+      // The Triage lane is board-only (XERK-486 [F]): kanban-triage marks it for
+      // styling, and the drag handler refuses it as a drop target.
+      return `<div class="kanban-col${cat === "done" ? " kanban-done" : ""}${cat === "triage" ? " kanban-triage" : ""}" data-cat="${cat}">
         <div class="kc-head">${label} <span class="kc-count">${list.length}</span></div>
         <div class="kc-list">${body}</div>
       </div>`;
@@ -1151,7 +1501,11 @@
     for (const s of shown) {
       if (s.error) notes.push(`<div class="kc-note kc-err">${esc(s.siteKey)}: last poll failed — ${esc(s.error)} (showing last good data)</div>`);
     }
-    return notes.join("") + `<div class="kanban-cols">${cols.join("")}</div>`;
+    // The id is `preserveScroll`'s stable anchor for the strip's SIDEWAYS scroll
+    // (XERK-253): the notes above it come and go with a poll error, which moves
+    // the strip's child index and would otherwise throw the scroll back to the
+    // first column on the beat a note appears or clears.
+    return notes.join("") + `<div class="kanban-cols" id="kanbanCols">${cols.join("")}</div>`;
   }
 
   // Newest `fetchedAt` across every agent's jira block ("" when none report
@@ -1205,11 +1559,13 @@
   //
   // `p` is {cmdId, host, sawCmd, ageMs}; `sessions` are the ticket's sessions,
   // `cmd` whether the host's queue still holds this cmdId right now, `known`
-  // whether the host is in the fleet payload at all.
-  //   - "hold"  keep showing ⏳ (also mutates p.sawCmd once the command appears)
-  //   - "clear" drop it: a session reported this cmdId (landed), or the command
-  //             we WATCHED land has since drained (the agent ran or refused it)
-  //   - "error" the backstop for a host that stopped beating mid-spawn
+  // whether the host is in the fleet payload at all, `refusal` this cmdId's entry
+  // in the host's `spawnRefusals` (XERK-265), if the agent declined it.
+  //   - "hold"    keep showing ⏳ (also mutates p.sawCmd once the command appears)
+  //   - "clear"   drop it: a session reported this cmdId (landed), or the command
+  //               we WATCHED land has since drained with nothing else to say
+  //   - "refused" the agent declined it and said why — the caller shows the reason
+  //   - "error"   the backstop for a host that stopped beating mid-spawn
   //
   // The load-bearing subtlety is `sawCmd`: "command absent" only means "acked"
   // once we've actually seen it PRESENT. A cache too stale to have seen it land
@@ -1217,9 +1573,18 @@
   // too, and treating that as acked sweeps the pending the instant it's set —
   // the bug where the ⏳ never appeared at all. A cmdId-less pending (POST not
   // back yet) always holds; its own fetch resolves it.
-  function startSweepVerdict(p, sessions, cmd, known, timeoutMs) {
+  //
+  // `refusal` is checked AFTER the landed-session test, so a spawn that actually
+  // came up always wins the tie — the same ordering the hub applies on the
+  // migration side and sessions.html applies on its own follow. It is checked
+  // BEFORE the sawCmd/timeout heuristics because those only ever guess at what a
+  // drained command meant, and this is the agent saying it outright: without it a
+  // refused ticket start cleared silently, which is indistinguishable from the
+  // session having started and is what left the operator clicking Start again.
+  function startSweepVerdict(p, sessions, cmd, known, timeoutMs, refusal) {
     if (!p || !p.cmdId) return "hold";
     if ((sessions || []).some(s => s.spawnCmdId === p.cmdId)) return "clear";
+    if (refusal) return "refused";
     if (!known) return (p.ageMs > timeoutMs) ? "error" : "hold";  // host gone: only time out
     if (cmd) { p.sawCmd = true; return "hold"; }                  // command still queued
     if (p.sawCmd) return "clear";                                 // watched it land, now drained
@@ -1262,7 +1627,8 @@
   }
 
   // The whole New-ticket modal body. `st` is the page's create state:
-  //   { sites, siteKey, source, meta, types, values, busy, error, created }
+  //   { sites, siteKey, source, meta, types, values, busy, error, created,
+  //     confirmDiscard }
   // where meta = {loading|error|projects,labels}, types = {loading|error|types}.
   function createFormHtml(st) {
     const s = st || {};
@@ -1273,7 +1639,7 @@
     // operator sees where the ticket landed and can open it or make another.
     if (s.created && s.created.key) {
       const link = s.created.url
-        ? `<a href="${esc(s.created.url)}" target="_blank" rel="noopener">${esc(s.created.key)} ↗</a>`
+        ? `<a href="${safeUrl(s.created.url)}" target="_blank" rel="noopener">${esc(s.created.key)} ↗</a>`
         : esc(s.created.key);
       return `<div class="cf-head">
           <h2>Ticket created</h2>
@@ -1343,11 +1709,20 @@
           <datalist id="cf-label-suggestions">${suggestions}</datalist></label>
       </div>
       ${s.error ? `<div class="cf-note cf-err">Couldn't create — ${esc(s.error)}</div>` : ""}
-      <div class="cf-actions">
+      ${s.confirmDiscard
+        // A dirty close was requested (XERK-218): the actions row becomes the
+        // confirmation, so the typed form can't be thrown away by one stray
+        // click — Discard is the only button that closes it.
+        ? `<div class="cf-actions">
+        <span class="cf-note cf-discard-q">Discard this ticket? It hasn't been created yet.</span>
+        <button type="button" class="cf-btn" data-cf-keep="1">Keep editing</button>
+        <button type="button" class="cf-btn cf-danger" data-cf-discard="1">Discard</button>
+      </div>`
+        : `<div class="cf-actions">
         <button type="button" class="cf-btn" data-cf-cancel="1">Cancel</button>
         <button type="button" class="cf-btn cf-primary" data-cf-submit="1"${canSubmit ? "" : " disabled"}>${
           s.busy ? "Creating…" : "Create ticket"}</button>
-      </div>`;
+      </div>`}`;
   }
 
   const api = {
@@ -1355,11 +1730,15 @@
     createFormHtml, createOrgOptions, createProjectOptions, createTypeOptions, createLabelWord,
     prioClass, cardHtml, boardHtml, detailHtml, textHtml, linkify, fmtDate, esc,
     repoChipHtml, repoFieldHtml, repoPickerHtml, repoPickerValue,
+    dedupeChipHtml, dedupeTwinUrl,
     agentPinOf, agentFieldHtml, agentPickerHtml, agentPickerValue,
     modelPinOf, modelFieldHtml, modelPickerHtml, modelPickerValue, modelChoices, prettyModel,
+    runtimePinOf, runtimeFieldHtml, runtimePickerHtml, runtimePickerValue, prettyRuntime,
     statusFieldHtml, statusPickerHtml, statusPickerValue,
+    triageActionOf, triageLaneOf, triageChipHtml, triageFieldHtml, triagePickerHtml, triagePickerValue,
     boardColumnOf, moveSweepVerdict,
     ticketSessionIndex, ticketSessionsOf, sessionChipHtml, ticketStartHtml,
+    queuedTicketOf, queuedLabel, queuedTip,
     newestFetchedAt, jiraRefreshPending, jiraRefreshFailed, startSweepVerdict,
   };
   if (typeof window !== "undefined") window.TurmaBoard = api;
