@@ -25,6 +25,7 @@ import { registerMiniapp, type TypedMiniappSession } from "@veiller/miniapp/back
 import { App } from "../core/app.ts";
 import { DEFAULT_POLL_MS, isConfigured, loadConfig, normalizeHubUrl, type Config } from "../core/config.ts";
 import { decideFetch, FETCH_TIMEOUT_MS } from "../core/fetch-policy.ts";
+import { proxyFetchWithDeadline } from "../core/proxy-transport.ts";
 import { HubClient } from "../core/hub-client.ts";
 import { LiveTail } from "../core/live.ts";
 import { setDefaultMeasure } from "../core/text-wrap.ts";
@@ -184,45 +185,14 @@ class TurmaBackground {
 
       // A host that accepts the connection and then answers nothing left this
       // RPC pending forever, so the phone page waited on a promise that could
-      // never settle.
-      const abort = new AbortController();
-      const timer = setTimeout(() => abort.abort(), FETCH_TIMEOUT_MS);
-      let res: Response;
-      try {
-        res = await fetch(req.url, {
-          method,
-          headers: req.headers,
-          body: req.body,
-          signal: abort.signal,
-        });
-      } catch (err) {
-        // A network failure used to escape as an unhandled rejection and tear
-        // down the caller; the UI expects a value it can branch on.
-        const aborted = abort.signal.aborted;
-        return {
-          status: 0,
-          ok: false,
-          bodyText: aborted
-            ? `turma:fetch: timed out after ${FETCH_TIMEOUT_MS}ms`
-            : `turma:fetch: request failed: ${err instanceof Error ? err.message : String(err)}`,
-        };
-      } finally {
-        clearTimeout(timer);
-      }
-
-      if (!decision.withBody) {
-        return { status: res.status, ok: res.ok, bodyText: "" };
-      }
-
-      try {
-        return { status: res.status, ok: res.ok, bodyText: await res.text() };
-      } catch (err) {
-        return {
-          status: res.status,
-          ok: false,
-          bodyText: `turma:fetch: could not read body: ${err instanceof Error ? err.message : String(err)}`,
-        };
-      }
+      // never settle. proxyFetchWithDeadline bounds the WHOLE response — headers
+      // AND body — under one abort deadline and always resolves to a value the
+      // page can branch on. The mid-body stall it also closes is XERK-336.
+      return proxyFetchWithDeadline(
+        fetch,
+        { url: req.url, method, headers: req.headers, body: req.body },
+        { timeoutMs: FETCH_TIMEOUT_MS, withBody: decision.withBody },
+      );
     });
 
     ui.handle("turma:storage-get", async ({ key }) => ({ value: await this.storage.get(key) }));
