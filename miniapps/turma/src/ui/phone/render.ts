@@ -324,7 +324,7 @@ function orgMenuHtml(state: AppState, open: boolean): string {
 
   const row = (key: string, label: string, count: number, online: boolean): string => {
     const color = key ? colorMap.get(key) || "" : "";
-    const autoOn = !!(key && state.autoStartOrgs[key]);
+    const autoOn = !!(key && Object.hasOwn(state.autoStartOrgs, key) && state.autoStartOrgs[key]);
     return (
       `<div class="ph-org-row${key === cur ? " cur" : ""}"${key ? ` style="--org:${color}"` : ""}>` +
       `<button class="ph-org-item" data-org="${esc(key)}">` +

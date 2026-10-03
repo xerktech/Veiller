@@ -248,6 +248,19 @@ describe("phone render", () => {
     expect(html).toMatch(/class="ph-org-auto" data-org-auto="beta\.atlassian\.net" aria-pressed="false"/);
   });
 
+  it("an org named after an Object.prototype member reads auto-start OFF unless opted in (XERK-1490)", () => {
+    const st = state({
+      autoStartOrgs: {},
+      agents: [
+        agent({ key: "a", jira: { siteKey: "constructor" } }),
+        agent({ key: "b", jira: { siteKey: "toString" } }),
+      ],
+    });
+    const html = phoneHtml(st, VIEW(), true);
+    expect(html).toMatch(/class="ph-org-auto" data-org-auto="constructor" aria-pressed="false"/);
+    expect(html).toMatch(/class="ph-org-auto" data-org-auto="toString" aria-pressed="false"/);
+  });
+
   it("phoneHtml overlays the session view (no shell) when inSession and a session is focused", () => {
     const st = state({
       screen: "session",

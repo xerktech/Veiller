@@ -433,7 +433,7 @@ export function mountPhone({ root, app, client, onSignOut }: MountPhoneOpts): Ph
     if (orgAuto) {
       const site = orgAuto.dataset.orgAuto || "";
       if (site) {
-        const enabled = !last.autoStartOrgs[site];
+        const enabled = !(Object.hasOwn(last.autoStartOrgs, site) && last.autoStartOrgs[site]);
         app.setAutoStartOrg(site, enabled);
         void client.setAutoStart(site, enabled).catch(() => app.setAutoStartOrg(site, !enabled));
       }
