@@ -12,7 +12,7 @@ import type { AppState } from "../../core/app.ts";
 import type { HubClient } from "../../core/hub-client.ts";
 import type { TailEntry } from "../../core/types.ts";
 import { siteKeyOf } from "../../core/sessions.ts";
-import { phoneHtml, transcriptEntries, type PhoneTab, type PhoneView, type VerbosityPreset } from "./render.ts";
+import { autoStartOn, phoneHtml, transcriptEntries, type PhoneTab, type PhoneView, type VerbosityPreset } from "./render.ts";
 import { Board, Chat, renderTranscript, splitLabels, type BoardSite, type RichEntry, type Verbosity } from "../vendor/engines.ts";
 
 export interface PhoneHandle {
@@ -433,7 +433,7 @@ export function mountPhone({ root, app, client, onSignOut }: MountPhoneOpts): Ph
     if (orgAuto) {
       const site = orgAuto.dataset.orgAuto || "";
       if (site) {
-        const enabled = !(Object.hasOwn(last.autoStartOrgs, site) && last.autoStartOrgs[site]);
+        const enabled = !autoStartOn(last.autoStartOrgs, site);
         app.setAutoStartOrg(site, enabled);
         void client.setAutoStart(site, enabled).catch(() => app.setAutoStartOrg(site, !enabled));
       }
