@@ -43,6 +43,13 @@ export function esc(s: unknown): string {
   );
 }
 
+// Whether an org is opted in to auto-start. An own-key read, so a siteKey that
+// names an Object.prototype member ("constructor", "toString") is not read as
+// ON from an empty map (XERK-1490).
+export function autoStartOn(autoStartOrgs: Record<string, boolean>, siteKey: string): boolean {
+  return Object.prototype.hasOwnProperty.call(autoStartOrgs, siteKey) && !!autoStartOrgs[siteKey];
+}
+
 // The org label for a siteKey, via board.js's own orgName: the manual override
 // (BOARD_ORG_NAME) wins, else the site host minus the Jira suffix / the last path
 // segment of an Azure collection key. Value routed on stays the full siteKey.
@@ -324,7 +331,7 @@ function orgMenuHtml(state: AppState, open: boolean): string {
 
   const row = (key: string, label: string, count: number, online: boolean): string => {
     const color = key ? colorMap.get(key) || "" : "";
-    const autoOn = !!(key && state.autoStartOrgs[key]);
+    const autoOn = !!key && autoStartOn(state.autoStartOrgs, key);
     return (
       `<div class="ph-org-row${key === cur ? " cur" : ""}"${key ? ` style="--org:${color}"` : ""}>` +
       `<button class="ph-org-item" data-org="${esc(key)}">` +

@@ -65,7 +65,9 @@ const appAdapter: PhoneAppLike = {
     void veiller.request("turma:cmd", { kind: "setOrgFilter", siteKey }).catch(() => {});
   },
   setAutoStartOrg: (siteKey, enabled) => {
-    const next = { ...lastState.autoStartOrgs };
+    // Null-prototype copy: on a {...spread} copy, next["__proto__"] = true sets
+    // the prototype instead of adding the key (XERK-1490).
+    const next: Record<string, boolean> = Object.assign(Object.create(null), lastState.autoStartOrgs);
     if (enabled) next[siteKey] = true;
     else delete next[siteKey];
     lastState = { ...lastState, autoStartOrgs: next };

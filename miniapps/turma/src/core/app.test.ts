@@ -1665,6 +1665,20 @@ describe("session screen: transcript-focus gestures (Task 4)", () => {
       return agent({ key, device: key, jira: { siteKey }, sessions });
     }
 
+    it("setAutoStartOrg treats prototype-member siteKeys as plain keys (XERK-1490)", () => {
+      const app = makeApp(fakeClient());
+      // "constructor" is inherited by a {} map: a plain read would see it as ON.
+      expect(app.setAutoStartOrg("constructor", true)).toBe(false);
+      expect(Object.hasOwn(app.getState().autoStartOrgs, "constructor")).toBe(true);
+      expect(app.setAutoStartOrg("constructor", false)).toBe(true);
+      expect(Object.hasOwn(app.getState().autoStartOrgs, "constructor")).toBe(false);
+      // "__proto__" on a {...spread} copy would set the prototype, not a key.
+      expect(app.setAutoStartOrg("__proto__", true)).toBe(false);
+      expect(Object.hasOwn(app.getState().autoStartOrgs, "__proto__")).toBe(true);
+      expect(app.setAutoStartOrg("__proto__", false)).toBe(true);
+      expect(Object.keys(app.getState().autoStartOrgs)).toEqual([]);
+    });
+
     it("setOrgFilter scopes the home session list to one org", async () => {
       const client = fakeClient({
         listAgents: vi.fn(async () => ({

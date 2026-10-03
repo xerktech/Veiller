@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { createInitialState, newSessionState, type AppState } from "../../core/app.ts";
 import type { AgentInfo, LiveSignals, SessionInfo } from "../../core/types.ts";
 import {
+  autoStartOn,
   boardBodyHtml,
   orgLabel,
   orgOptions,
@@ -246,6 +247,31 @@ describe("phone render", () => {
     // acme is ON, beta is OFF.
     expect(html).toMatch(/class="ph-org-auto on" data-org-auto="acme\.atlassian\.net" aria-pressed="true"/);
     expect(html).toMatch(/class="ph-org-auto" data-org-auto="beta\.atlassian\.net" aria-pressed="false"/);
+  });
+
+  it("autoStartOn reads only own keys, so prototype-member siteKeys are OFF unless opted in (XERK-1490)", () => {
+    for (const k of ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"]) {
+      expect(autoStartOn({}, k)).toBe(false);
+    }
+    // An own "__proto__" key, as JSON.parse produces from the hub, reads ON.
+    const fromHub = JSON.parse('{"__proto__": true, "constructor": true, "acme.atlassian.net": false}');
+    expect(autoStartOn(fromHub, "__proto__")).toBe(true);
+    expect(autoStartOn(fromHub, "constructor")).toBe(true);
+    expect(autoStartOn(fromHub, "acme.atlassian.net")).toBe(false);
+    expect(autoStartOn(fromHub, "toString")).toBe(false);
+  });
+
+  it("an org named after an Object.prototype member reads auto-start OFF unless opted in (XERK-1490)", () => {
+    const st = state({
+      autoStartOrgs: {},
+      agents: [
+        agent({ key: "a", jira: { siteKey: "constructor" } }),
+        agent({ key: "b", jira: { siteKey: "toString" } }),
+      ],
+    });
+    const html = phoneHtml(st, VIEW(), true);
+    expect(html).toMatch(/class="ph-org-auto" data-org-auto="constructor" aria-pressed="false"/);
+    expect(html).toMatch(/class="ph-org-auto" data-org-auto="toString" aria-pressed="false"/);
   });
 
   it("phoneHtml overlays the session view (no shell) when inSession and a session is focused", () => {
