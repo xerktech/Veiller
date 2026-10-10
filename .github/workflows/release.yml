@@ -274,7 +274,7 @@ jobs:
           name: asset-apk
           path: release-assets/veiller-v*
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 3
 
   # --------------------------------------------------------------- publish ----
   # Creates the tag + GitHub Release with the APK attached and GitHub's
